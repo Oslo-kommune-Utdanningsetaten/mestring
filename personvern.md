@@ -1,6 +1,6 @@
-# Programvare med innebygd personver
+# Programvare med innebygd personvern
 
-En sjekkliste til praktisk bruk i prosjekter som dette. [Originaldokumentet hos Datatilsynet](https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/programvareutvikling-med-innebygd-personvern/).
+Inspirert av [originaldokumentet hos Datatilsynet](https://www.datatilsynet.no/rettigheter-og-plikter/virksomhetenes-plikter/programvareutvikling-med-innebygd-personvern/) og reformatert for praktisk bruk - som en sjekkliste.
 
 1. **Opplæring**  
   - Dørge for at alle som jobber på prosjektet har nødvendig kunnskap og GDPR og personvern, inkludert forståelse av innsynsrett, dataminimering og lagringsbegrensning.
