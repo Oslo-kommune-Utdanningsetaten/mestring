@@ -8,8 +8,8 @@ body {
   margin: 20px;
   background-color: #f9f9f9;
   color: #333;
+  font-size: clamp(14px, 4vw, 18px); /* Min, Preferred, Max */
 }
-
 
 h1, h2 {
   margin-top: 25px;
@@ -19,6 +19,8 @@ h1, h2 {
 ul {
   list-style: none;
   padding: 0;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 li {
@@ -27,49 +29,39 @@ li {
   padding: 8px 12px;
   border-radius: 4px;
   border: 1px solid #ccc;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 3fr 5fr 2fr auto;
+  grid-row-gap: 100px; 
 }
-
-li > span:first-child {
-  width: 25%;
-  margin-right: 0;
-}
-
-li > span {
-  font-size: 1.1em;
-  margin-right: auto;
-}
-
 
 .tag {
-  margin-left: 15px;  
   background-color: #eee;
   color: #999;
+  text-align: center;
   font-size: 0.9em;
   padding: 3px 6px;
 }
 
-
-li > a {
-  border-radius: 2px;
-  margin-left: 15px;
-  color: #fff;
-  background-color: #2196F3;
-  padding: 8px 12px;
-  text-decoration: none;
+a {
+  color: #333;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  transition: text-decoration-thickness 200ms, text-underline-offset 200ms;
 }
 
-li > a.danger {
-  background-color: rgb(188, 11, 11);
-  color: #fff;
+a:hover {
+  text-underline-offset: 5px;
+  text-decoration-thickness: 3px;
 }
 
+a:visited {
+  color: #333;
+}
 
 button {
-  margin: 5px 0;
-  padding: 8px 12px;
+  font-size: 0.8em;
+  padding: 6px 10px;
   background-color: #2196F3;
   color: #fff;
   border: none;
@@ -79,6 +71,16 @@ button {
 
 button:hover {
   background-color: #1976D2;
+}
+
+.danger-button {
+  background-color: rgb(188, 11, 11);
+  color: #fff;
+}
+
+.danger-button:hover {
+  background-color: rgb(127, 7, 7);
+  color: #fff;
 }
 
 .progress-container {
