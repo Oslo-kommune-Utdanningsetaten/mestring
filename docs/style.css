@@ -103,6 +103,7 @@ button:hover {
   background-color: rgba(255, 255, 255, 0.4);
   -webkit-backdrop-filter: saturate(250%);
   backdrop-filter: saturate(250%);
+  transition: width 0.2s ease-out;
 }
 
 .stairs-container {

@@ -1,0 +1,39 @@
+/* Custom Bootstrap overrides */
+:root {
+  --bs-primary: #2a2859;
+  --bs-success: #034b45;
+  --bs-danger: #ff8274;
+  --bs-warning: #f9c66b;
+  --bs-info: #6fe9ff;
+  --bs-light: #f9f9f9;
+  --bs-primary-rgb: #4a6fa5;
+  --bs-primary-hover: #3a5985;
+}
+
+/* Override specific Bootstrap classes */
+.nav-link {
+  color: var(--bs-primary);
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+}
+
+.nav-link:hover {
+  color: var(--bs-primary-hover);
+}
+
+.nav-link.active {
+  color: var(--bs-primary);
+  font-weight: 700;
+}
+
+a,
+.btn-primary,
+.link-primary {
+  color: var(--bs-primary) !important;
+}
+
+a:hover,
+.btn-primary:hover,
+.link-primary:hover {
+  color: var(--bs-primary-hover);
+}

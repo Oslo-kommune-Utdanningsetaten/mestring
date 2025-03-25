@@ -1,5 +1,16 @@
 # Checklist
 
+## Clickable prototype
+
+- students
+  - filters
+  - naming
+  - sparkline
+  - expand each student
+  - drill into each student
+
+## The actual app
+
 - [ ] Dockerization
 - [ ] Sette opp en database (mariadb?)
 - [ ] Sette opp en backend m/gunicorn og django
@@ -17,5 +28,3 @@
 - [ ] Finne ut av sikkerhet/ACL
 - [ ] Finne ut av datamodell
 - [ ] Konfigurere .env og prosjektet for lokal utvikling og deployment
-
-

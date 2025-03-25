@@ -1,0 +1,125 @@
+@font-face {
+  font-family: 'OsloSans';
+  src: url('/fonts/OsloSans-WOFF/OsloSans-Light.woff');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'OsloSans';
+  src: url('/fonts/OsloSans-WOFF/OsloSans-Regular.woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'OsloSans';
+  src: url('/fonts/OsloSans-WOFF/OsloSans-Medium.woff');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'OsloSans';
+  src: url('/fonts/OsloSans-WOFF/OsloSans-Bold.woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'OsloSans';
+  src: url('/fonts/OsloSans-WOFF/OsloSans-LightItalic.woff');
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'OsloSans';
+  src: url('/fonts/OsloSans-WOFF/OsloSans-RegularItalic.woff');
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'OsloSans';
+  src: url('/fonts/OsloSans-WOFF/OsloSans-MediumItalic.woff');
+  font-weight: 500;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'OsloSans';
+  src: url('/fonts/OsloSans-WOFF/OsloSans-BoldItalic.woff');
+  font-weight: 700;
+  font-style: italic;
+}
+
+* {
+  font-family: 'OsloSans', Helvetica, Arial, sans-serif;
+}
+
+:root {
+  line-height: 1.5;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+a {
+  cursor: pointer;
+  text-decoration-line: none;
+  text-decoration-thickness: 0px;
+  text-underline-offset: 0px;
+  text-decoration-color: from-font;
+  transition:
+    text-decoration-thickness 0.2s ease-in,
+    text-underline-offset 0.2s ease-in,
+    text-decoration-color 0.8s ease-in;
+}
+
+a:hover {
+  text-decoration-line: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--bs-primary-hover);
+}
+
+#app {
+  max-width: none;
+  padding: 0;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: var(--bs-primary);
+    background-color: #ffffff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+/* Custom container class to match Navbar padding at all breakpoints */
+@media (min-width: 1400px) {
+  .container-md {
+    max-width: 1140px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
