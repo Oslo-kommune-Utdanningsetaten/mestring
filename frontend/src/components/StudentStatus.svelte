@@ -8,12 +8,9 @@
     Goal as GoalType,
   } from '../types/models'
 
-  const { student } = $props<{ student: StudentType }>()
+  const { studentGoals } = $props<{ studentGoals: GoalType }>()
   const masteryLevels = $derived($dataStore.masteryLevels)
-  const studentGoalIds = $derived(student.goalIds)
-  const studentGoals = $derived(
-    studentGoalIds.map((goalId: string) => $dataStore.goals.find(g => g.id === goalId))
-  )
+
   const studentGoalsWithLatestObservation = $derived(
     studentGoals.map((goal: GoalType): object => {
       const result: any = { ...goal }
@@ -46,8 +43,8 @@
 <style>
   .master-level-badge {
     display: inline-block;
-    width: 25px;
-    height: 25px;
+    width: 22px;
+    height: 22px;
     cursor: pointer;
   }
 </style>

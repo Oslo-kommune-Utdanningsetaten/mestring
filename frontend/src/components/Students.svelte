@@ -107,8 +107,8 @@
     <div class="card shadow-sm">
       <!-- Header row -->
       <div class="row fw-bold bg-light border-bottom py-3 mx-0">
-        <div class="col-4">Navn</div>
-        <div class="col-2 text-center">Status</div>
+        <div class="col-3">Navn</div>
+        <div class="col-3 text-center">Status</div>
         <div class="col-2 text-center">Gruppe</div>
         <div class="col-2 text-center">Mål</div>
         <div class="col-2 text-center">🔎</div>
