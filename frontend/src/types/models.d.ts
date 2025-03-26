@@ -27,7 +27,6 @@ export interface Goal {
   title: string
   description: string
   subjectId: string
-  masteryLevel: number
   studentId: string
   observationIds: string[]
 }
@@ -35,7 +34,7 @@ export interface Goal {
 export interface Observation {
   id: string
   date: string
-  masteryText: string
+  masteryValue: number
   subjectId: string
   goalId: string
   studentId: string

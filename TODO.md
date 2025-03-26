@@ -2,9 +2,8 @@
 
 ## Clickable prototype
 
-- students
-  - filters
-  - naming
+- ## students
+  - at a glance
   - sparkline
   - expand each student
   - drill into each student
@@ -18,11 +17,11 @@
 - [ ] Migrasjon som oppretter en tabell og legger inn en rad
 - [ ] API: Eksponere innhold fra den ene tabellen via http
 - [ ] En test som sjekker at APIet leverer noe og gir 200
-- [ ] Sette opp en frontend m/svelte
-- [ ] svelte-routing
+- [x] Sette opp en frontend m/svelte
+- [x] svelte-routing
 - [ ] Fetcher noe fra APIet og rendrer
 - [ ] En test som sjekker hva som helst
-- [ ] Bootstrap
+- [x] Bootstrap
 - [ ] Finne et rikt, enkelt og vedlikeholdt komponentbibliotek (feks. https://sveltestrap.js.org ?)
 - [ ] Sette opp auth mot Feide
 - [ ] Finne ut av sikkerhet/ACL

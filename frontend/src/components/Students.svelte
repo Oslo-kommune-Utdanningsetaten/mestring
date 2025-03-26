@@ -1,8 +1,7 @@
 <script lang="ts">
+  import StudentRow from './StudentRow.svelte'
   import { useTinyRouter } from 'svelte-tiny-router'
-  import { dataStore, getSubjectById } from '../stores/data'
-  import Student from './Student.svelte'
-  import Link from './Link.svelte'
+  import { dataStore } from '../stores/data'
 
   import type {
     Student as StudentType,
@@ -12,29 +11,27 @@
   import { urlStringFrom } from '../utils/functions'
   const router = useTinyRouter()
 
-  // Get parameters from routes if they exist
-  export let subjectId: string | undefined = undefined
-  export let groupId: string | undefined = undefined
-
-  $: students = $dataStore.students
-  $: subjects = $dataStore.subjects
-  $: groups = $dataStore.groups || []
-  $: activeSubjectId = subjectId || router.getQueryParam('subjectId')
-  $: activeGroupId = groupId || router.getQueryParam('groupId')
-  $: activeGroup = groups.find(g => g.id === activeGroupId)
-  $: activeSubject = subjects.find(s => s.id === activeSubjectId)
+  const students = $derived($dataStore.students)
+  const subjects = $derived($dataStore.subjects)
+  const groups = $derived($dataStore.groups)
+  const activeSubjectId = $derived(router.getQueryParam('subjectId'))
+  const activeGroupId = $derived(router.getQueryParam('groupId'))
+  const activeGroup = $derived(groups.find(g => g.id === activeGroupId))
+  const activeSubject = $derived(subjects.find(s => s.id === activeSubjectId))
 
   // Filter students by group and subject
-  $: filteredStudents = students
-    .filter((student: StudentType) => {
-      return activeGroupId ? student.groupId === activeGroupId : true
-    })
-    .filter((student: StudentType) => {
-      return activeSubjectId ? student.subjectIds.includes(activeSubjectId) : true
-    })
+  const filteredStudents = $derived(
+    students
+      .filter((student: StudentType) => {
+        return activeGroupId ? student.groupId === activeGroupId : true
+      })
+      .filter((student: StudentType) => {
+        return activeSubjectId ? student.subjectIds.includes(activeSubjectId) : true
+      })
+  )
 </script>
 
-<section class="py-4">
+<section class="py-3">
   <h2>Elever</h2>
   <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">
@@ -103,40 +100,23 @@
   </div>
 </section>
 
-<section class="py-4">
+<section class="py-3">
   {#if filteredStudents.length === 0}
-    <div class="alert alert-info">Ingen elever funnet</div>
+    <div class="alert alert-info">Ingen elever matcher det filteret</div>
   {:else}
     <div class="card shadow-sm">
       <!-- Header row -->
       <div class="row fw-bold bg-light border-bottom py-3 mx-0">
         <div class="col-4">Navn</div>
-        <div class="col-3">Gruppe</div>
+        <div class="col-2 text-center">Status</div>
+        <div class="col-2 text-center">Gruppe</div>
         <div class="col-2 text-center">Mål</div>
-        <div class="col-3 text-center">🔎</div>
+        <div class="col-2 text-center">🔎</div>
       </div>
 
       <!-- Student rows -->
-      {#each filteredStudents as student (student.id)}
-        <div class="row border-bottom py-2 mx-0 align-items-center">
-          <div class="col-4 fw-bold">
-            <Link to={''}>
-              {student.name}
-            </Link>
-          </div>
-          <div class="col-3">
-            {groups.find(g => g.id === student.groupId)?.name || ''}
-          </div>
-          <div class="col-2 text-center">
-            {$dataStore.goals.filter(g => g.studentId === student.id).length}
-          </div>
-          <div class="col-3">
-            <div class="d-flex gap-2 justify-content-center">
-              <a href={`/students/${student.id}`} class="link-button">Profil</a>
-              <a href={`/goals/?studentId=${student.id}`} class="link-button">Mål</a>
-            </div>
-          </div>
-        </div>
+      {#each filteredStudents as student}
+        <StudentRow {student} />
       {/each}
     </div>
   {/if}

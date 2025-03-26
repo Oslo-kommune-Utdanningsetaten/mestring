@@ -18,7 +18,6 @@ export function urlStringFrom(
   // merge: we keep the current query params and add new ones
   // replace: we discard the current query params and use new ones
 
-  // finalParams equals queryParams, minus any null values
   let finalParams = { ...queryParams }
 
   if (mode === 'merge') {
@@ -29,6 +28,7 @@ export function urlStringFrom(
     })
     finalParams = { ...currentParams, ...queryParams }
   }
+  // if a key is null, remove it
   finalParams = removeNullValueKeys(finalParams)
 
   return (

@@ -79,7 +79,6 @@ export const data = {
       "title": "Telle til 10",
       "description": "Eleven kan telle til 10.",
       "subjectId": "math",
-      "masteryLevel": 25,
       "studentId": "pia-eriksen",
       "observationIds": ["obs-pia-01", "obs-pia-02"]
     },
@@ -88,7 +87,6 @@ export const data = {
       "title": "Kan skrive navnet sitt",
       "description": "Eleven kan skrive navnet sitt med blyant og papir.",
       "subjectId": "norwegian",
-      "masteryLevel": 0,
       "studentId": "pia-eriksen",
       "observationIds": ["obs-pia-03", "obs-pia-04"]
     }
@@ -97,7 +95,7 @@ export const data = {
     {
       "id": "obs-pia-01",
       "date": "2024-06-02",
-      "masteryText": "Mestrer litt",
+      "masteryValue": 35,
       "subjectId": "math",
       "goalId": "goal-01",
       "studentId": "pia-eriksen"
@@ -105,7 +103,7 @@ export const data = {
     {
       "id": "obs-pia-02",
       "date": "2025-01-19",
-      "masteryText": "Mestrer av og til",
+      "masteryValue": 44,
       "subjectId": "math",
       "goalId": "goal-01",
       "studentId": "pia-eriksen"
@@ -113,7 +111,7 @@ export const data = {
     {
       "id": "obs-pia-03",
       "date": "2024-06-02",
-      "masteryText": "Mestrer ikke",
+      "masteryValue": 5,
       "subjectId": "norwegian",
       "goalId": "goal-02",
       "studentId": "pia-eriksen"
@@ -121,7 +119,7 @@ export const data = {
     {
       "id": "obs-pia-04",
       "date": "2025-01-20",
-      "masteryText": "Mestrer av og til",
+      "masteryValue": 38,
       "subjectId": "norwegian",
       "goalId": "goal-02",
       "studentId": "pia-eriksen"
