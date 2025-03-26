@@ -2,6 +2,7 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import StudentStatus from './StudentStatus.svelte'
   import SparklineChart from './SparklineChart.svelte'
+  import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import { dataStore } from '../stores/data'
   import type {
     Student as StudentType,
@@ -28,6 +29,7 @@
         .sort((a, b) => {
           return new Date(a.date).getTime() - new Date(b.date).getTime()
         })
+      result.latestObservation = result.observations[result.observations.length - 1]
       return result
     })
   )
@@ -35,15 +37,16 @@
 
 <div class="row py-2 align-items-center mx-0 border-top {isOpen ? '' : 'border-bottom'} ">
   <div class="col-3 fw-bold">
-    <a onclick={() => (isOpen = !isOpen)}>
-      {student.name}
-    </a>
+    {student.name}
+    <button class="btn border-none" onclick={() => (isOpen = !isOpen)}>
+      <span class="ms-2 caret-icon {isOpen ? 'rotated' : ''}">&#9656;</span>
+    </button>
   </div>
-  <div class="col-3 text-center"><StudentStatus {studentGoals} /></div>
-  <div class="col-2 text-center">
+  <div class="col-3"><StudentStatus {studentGoals} /></div>
+  <div class="col-2">
     {groups.find(g => g.id === student.groupId)?.name || ''}
   </div>
-  <div class="col-2 text-center">
+  <div class="col-2">
     {$dataStore.goals.filter(g => g.studentId === student.id).length}
   </div>
   <div class="col-2">
@@ -54,20 +57,32 @@
 </div>
 
 {#if isOpen}
-  {#each studentGoalsWithObservations as goal}
+  {#each studentGoalsWithObservations as studentGoal}
     <div class="row align-items-center border-top py-1 mx-0 expanded-student-row">
-      <div class="col-4">
-        <span class="fw-medium">{goal.title}</span>
+      <div class="col-3">
+        <span class="fw-medium">{studentGoal.title}</span>
       </div>
-      <div class="col-2 chart-container">
-        {#if goal.observations.length > 0}
-          <SparklineChart
-            data={goal.observations.map((o: ObservationType) => o.masteryValue)}
-            lineColor="rgb(75, 192, 192)"
-            label={goal.title}
-          />
+      <div
+        class="col-3"
+        title={studentGoal.title +
+          ': \n' +
+          studentGoal.observations.map((o: ObservationType) => o.masteryValue).join(', ')}
+      >
+        {#if studentGoal.latestObservation}
+          <div class="d-flex align-items-center">
+            <MasteryLevelBadge {studentGoal} />
+            {#if studentGoal.observations.length > 1}
+              <div class="chart-container ms-2">
+                <SparklineChart
+                  data={studentGoal.observations.map((o: ObservationType) => o.masteryValue)}
+                  lineColor="rgb(100, 100, 100)"
+                  label={studentGoal.title}
+                />
+              </div>
+            {/if}
+          </div>
         {:else}
-          <div class="text-muted small">Ingen data</div>
+          <div class="text-muted small">Ikke nok data</div>
         {/if}
       </div>
       <div class="col-2"></div>
@@ -85,9 +100,18 @@
   .chart-container {
     padding-top: 5px;
     height: 40px;
-    width: 80px;
+    width: 40px;
   }
   .expanded-student-row {
     background-color: #f8f9fa;
+  }
+
+  .caret-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+
+  .rotated {
+    transform: rotate(90deg);
   }
 </style>

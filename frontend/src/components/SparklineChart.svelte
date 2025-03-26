@@ -6,7 +6,8 @@
   import { onMount } from 'svelte'
 
   export let data = []
-  export let lineColor = 'rgb(75, 192, 192)'
+  // export let lineColor = 'rgb(75, 192, 192)'
+  export let lineColor = 'rgb(200, 200, 192)'
   export let label = 'Data'
   let chartContainer
   let chart

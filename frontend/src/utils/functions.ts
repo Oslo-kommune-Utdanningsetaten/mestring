@@ -6,6 +6,11 @@ function removeNullValueKeys(obj: { [key: string]: string | null }): {
   }
 }
 
+export function getMasteryColorByValue(value: number, masteryLevels): string {
+  const masteryLevel = masteryLevels.find(ml => ml.minValue <= value && ml.maxValue >= value)
+  return masteryLevel ? masteryLevel.color : 'black'
+}
+
 export function urlStringFrom(
   queryParams: { [key: string]: string | null },
   options?: { path?: string; mode?: string }
