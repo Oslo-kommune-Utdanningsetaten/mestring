@@ -5,48 +5,52 @@ export const data = {
       "name": "Pia Eriksen",
       "age": 10,
       "groupId": "5A",
-      "goalIds": ["goal-01", "goal-02"]
+      "goalIds": ["goal-01", "goal-02"],
+      "subjectIds": ["norwegian", "math", "english"]
     },
     {
       "id": "camilla-hovberg",
       "name": "Camilla Hovberg",
       "age": 10,
       "groupId": "5A",
-      "goalIds": []
+      "goalIds": [],
+      "subjectIds": ["norwegian", "math"]
     },
     {
       "id": "tony-lupin",
       "name": "Tony Lupin",
       "age": 9,
       "groupId": "3D",
-      "goalIds": []
+      "goalIds": [],
+      "subjectIds": ["norwegian"]
     },
     {
       "id": "frank-larsen",
       "name": "Frank Larsen",
       "age": 13,
       "groupId": "8C",
-      "goalIds": []
+      "goalIds": [],
+      "subjectIds": ["norwegian", "math", "english"]
     }
   ],
   "groups": [
     {
       "id": "5A",
-      "name": "Klasse 5A",
+      "name": "5A",
       "grade": 5,
       "section": "A",
       "teacherId": "teacher-01"
     },
     {
       "id": "3D",
-      "name": "Klasse 3D",
+      "name": "3D",
       "grade": 3,
       "section": "D",
       "teacherId": "teacher-02"
     },
     {
       "id": "8C",
-      "name": "Klasse 8C",
+      "name": "8C",
       "grade": 8,
       "section": "C",
       "teacherId": "teacher-03"
@@ -163,6 +167,10 @@ export const data = {
     {
       "id": "math",
       "name": "Matte"
+    },
+    {
+      "id": "english",
+      "name": "Engelsk"
     }
   ]
 }

@@ -16,28 +16,92 @@
   export let subjectId: string | undefined = undefined
   export let groupId: string | undefined = undefined
 
-  // Convert to nullable types for reactive filters
-  $: subject = subjectId || router.getQueryParam('subjectId')
-  $: group = groupId || router.getQueryParam('groupId')
-
-  // Reactive declarations for data
   $: students = $dataStore.students
   $: subjects = $dataStore.subjects
   $: groups = $dataStore.groups || []
+  $: activeSubjectId = subjectId || router.getQueryParam('subjectId')
+  $: activeGroupId = groupId || router.getQueryParam('groupId')
+  $: activeGroup = groups.find(g => g.id === activeGroupId)
+  $: activeSubject = subjects.find(s => s.id === activeSubjectId)
 
-  // Get the subject name for display if a subject is selected
-  $: currentSubject = subject ? subjects.find((s: SubjectType) => s.id === subject) : null
-
-  // Get the group name for display if a group is selected
-  $: currentGroup = group ? groups.find((g: GroupType) => g.id === group) : null
-
-  // Filter students by both group and subject if provided
-  $: filteredStudents = students.filter((student: StudentType) => {
-    // Filter by group if a group is specified
-    if (group && student.groupId !== group) return false
-    return true
-  })
+  // Filter students by group and subject
+  $: filteredStudents = students
+    .filter((student: StudentType) => {
+      return activeGroupId ? student.groupId === activeGroupId : true
+    })
+    .filter((student: StudentType) => {
+      return activeSubjectId ? student.subjectIds.includes(activeSubjectId) : true
+    })
 </script>
+
+<section class="py-4">
+  <h2>Elever</h2>
+  <!-- Filter groups -->
+  <div class="d-flex align-items-center gap-2">
+    <div class="dropdown">
+      <button
+        class="btn btn-outline-secondary dropdown-toggle link-button"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        {activeGroup ? activeGroup.name : 'Velg gruppe'}
+      </button>
+      <ul class="dropdown-menu">
+        <li>
+          <a
+            class="dropdown-item dropdown-link"
+            href={urlStringFrom({ groupId: null }, { mode: 'merge' })}
+          >
+            Alle grupper
+          </a>
+        </li>
+        {#each groups as group}
+          <li>
+            <a
+              class="dropdown-item dropdown-link"
+              href={urlStringFrom({ groupId: group.id }, { mode: 'merge' })}
+            >
+              {group.name}
+            </a>
+          </li>
+        {/each}
+      </ul>
+    </div>
+    <!-- Filter subjects -->
+    <div class="dropdown">
+      <button
+        class="btn btn-outline-secondary dropdown-toggle link-button"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        {activeSubject ? activeSubject.name : 'Velg fag'}
+      </button>
+      <ul class="dropdown-menu">
+        <li>
+          <a
+            class="dropdown-item dropdown-link"
+            href={urlStringFrom({ subjectId: null }, { mode: 'merge' })}
+          >
+            Alle fag
+          </a>
+        </li>
+        {#each subjects as subject}
+          <li>
+            <a
+              class="dropdown-item dropdown-link"
+              href={urlStringFrom({ subjectId: subject.id }, { mode: 'merge' })}
+            >
+              {subject.name}
+            </a>
+          </li>
+        {/each}
+      </ul>
+    </div>
+    <a class="link-button" href={urlStringFrom({}, { mode: 'replace' })}>Nullstill</a>
+  </div>
+</section>
 
 <section class="py-4">
   {#if filteredStudents.length === 0}
@@ -54,9 +118,9 @@
 
       <!-- Student rows -->
       {#each filteredStudents as student (student.id)}
-        <div class="row border-bottom py-3 mx-0 align-items-center">
+        <div class="row border-bottom py-2 mx-0 align-items-center">
           <div class="col-4 fw-bold">
-            <Link to={urlStringFrom({ studentId: student.id })}>
+            <Link to={''}>
               {student.name}
             </Link>
           </div>
@@ -68,10 +132,8 @@
           </div>
           <div class="col-3">
             <div class="d-flex gap-2 justify-content-center">
-              <a href={`/students/${student.id}`} class="btn btn-primary btn-sm">Profil</a>
-              <a href={`/goals/?studentId=${student.id}`} class="btn btn-outline-secondary btn-sm">
-                Mål
-              </a>
+              <a href={`/students/${student.id}`} class="link-button">Profil</a>
+              <a href={`/goals/?studentId=${student.id}`} class="link-button">Mål</a>
             </div>
           </div>
         </div>
@@ -79,3 +141,12 @@
     </div>
   {/if}
 </section>
+
+<style>
+  .dropdown-link {
+    font-size: 1em !important;
+  }
+  .dropdown-link:hover {
+    text-decoration: none;
+  }
+</style>

@@ -7,10 +7,10 @@
   import Navigation from './components/Navigation.svelte'
   import { loadData } from './stores/data'
   import 'bootstrap/dist/css/bootstrap.min.css'
+  import 'bootstrap/dist/js/bootstrap.min.js'
   import './styles/bootstrap-overrides.css'
   import './styles/app.css'
 
-  // Ensure data is loaded
   loadData()
 </script>
 

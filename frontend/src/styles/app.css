@@ -105,6 +105,23 @@ a:hover {
   padding: 0;
 }
 
+.link-button {
+  background-color: transparent;
+  border: 1px solid var(--bs-primary);
+  cursor: pointer;
+  padding: 4px 8px 3px 8px;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 1em;
+}
+
+.link-button:hover {
+  text-decoration: none;
+  background-color: var(--bs-primary-hover);
+  color: var(--bs-light) !important;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: var(--bs-primary);

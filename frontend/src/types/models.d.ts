@@ -5,6 +5,7 @@ export interface Student {
   age: number
   groupId: string
   goalIds: string[]
+  subjectIds: string[]
 }
 
 export interface Group {
