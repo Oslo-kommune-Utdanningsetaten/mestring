@@ -3,13 +3,13 @@
   import StudentStatus from './StudentStatus.svelte'
   import SparklineChart from './SparklineChart.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
+  import ObservationEdit from './ObservationEdit.svelte'
   import { dataStore } from '../stores/data'
   import type {
     Student as StudentType,
     Goal as GoalType,
     Observation as ObservationType,
   } from '../types/models'
-  const router = useTinyRouter()
 
   const { student } = $props<{ student: StudentType }>()
   let isOpen = $state(false)
@@ -85,11 +85,58 @@
           <div class="text-muted small">Ikke nok data</div>
         {/if}
       </div>
-      <div class="col-2"></div>
+      <div class="col-2">
+        <button
+          class="link-button"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#offcanvasWithBothOptions"
+          aria-controls="offcanvasWithBothOptions"
+        >
+          Ny observasjon
+        </button>
+
+        <div
+          class="offcanvas offcanvas-end offcanvas-wide"
+          data-bs-scroll="true"
+          tabindex="-1"
+          id="offcanvasWithBothOptions"
+          aria-labelledby="offcanvasWithBothOptionsLabel"
+        >
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">
+              Ny observasjon: {studentGoal.title}
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="offcanvas"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="offcanvas-body">
+            <p><ObservationEdit {student} goal={studentGoal} observation={null} /></p>
+          </div>
+        </div>
+      </div>
+
       <div class="col-2"></div>
       <div class="col-2"></div>
     </div>
   {/each}
+  <div class="row align-items-center border-top py-1 mx-0 expanded-student-row">
+    <div class="col-3">
+      <button
+        class="link-button"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#offcanvasWithBothOptions"
+        aria-controls="offcanvasWithBothOptions"
+      >
+        Nytt mål
+      </button>
+    </div>
+  </div>
 
   {#if studentGoalsWithObservations.length === 0}
     <div class="text-center text-muted py-2">Ingen mål registrert</div>
@@ -113,5 +160,9 @@
 
   .rotated {
     transform: rotate(90deg);
+  }
+
+  .offcanvas-wide {
+    width: 55vw !important;
   }
 </style>

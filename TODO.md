@@ -3,10 +3,8 @@
 ## Clickable prototype
 
 - ## students
-  - at a glance
-  - sparkline
-  - expand each student
   - drill into each student
+  - ui for setting mastery level
 
 ## The actual app
 

@@ -2,6 +2,7 @@
   import { Router, Route } from 'svelte-tiny-router'
   import Home from './components/Home.svelte'
   import About from './components/About.svelte'
+  import Student from './components/Student.svelte'
   import Students from './components/Students.svelte'
   import Subjects from './components/Subjects.svelte'
   import Navigation from './components/Navigation.svelte'
@@ -22,6 +23,7 @@
   <Router>
     <Route path="/" component={Home} />
     <Route path="/about" component={About} />
+    <Route path="/students/:studentId" component={Student} />
     <Route path="/students" component={Students} />
     <Route path="/subjects" component={Subjects} />
 
