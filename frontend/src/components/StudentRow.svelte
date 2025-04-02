@@ -12,6 +12,7 @@
 
   const { student } = $props<{ student: StudentType }>()
   let isOpen = $state(false)
+  let selectedGoal = $state<GoalType | null>(null)
 
   const teachingGroups = $derived($dataStore.groups.filter(s => s.type === 'teaching'))
   const basisGroups = $derived($dataStore.groups.filter(s => s.type === 'basis'))
@@ -32,6 +33,10 @@
       return result
     })
   )
+
+  function openObservationModal(goal: GoalType) {
+    selectedGoal = goal
+  }
 </script>
 
 <div class="row py-2 align-items-center mx-0 border-top {isOpen ? '' : 'border-bottom'} ">
@@ -89,58 +94,49 @@
           class="link-button"
           type="button"
           data-bs-toggle="offcanvas"
-          data-bs-target="#offcanvasWithBothOptions"
-          aria-controls="offcanvasWithBothOptions"
+          data-bs-target="#observationOffcanvas"
+          aria-controls="observationOffcanvas"
+          onclick={() => openObservationModal(studentGoal)}
         >
           Ny observasjon
         </button>
-
-        <div
-          class="offcanvas offcanvas-end offcanvas-wide"
-          data-bs-scroll="true"
-          tabindex="-1"
-          id="offcanvasWithBothOptions"
-          aria-labelledby="offcanvasWithBothOptionsLabel"
-        >
-          <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">
-              Ny observasjon: {studentGoal.title}
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="offcanvas"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="offcanvas-body">
-            <p><ObservationEdit {student} goal={studentGoal} observation={null} /></p>
-          </div>
-        </div>
       </div>
 
       <div class="col-2"></div>
       <div class="col-2"></div>
     </div>
   {/each}
-  <div class="row align-items-center border-top py-1 mx-0 expanded-student-row">
-    <div class="col-3">
-      <button
-        class="link-button"
-        type="button"
-        data-bs-toggle="offcanvas"
-        data-bs-target="#offcanvasWithBothOptions"
-        aria-controls="offcanvasWithBothOptions"
-      >
-        Nytt mål
-      </button>
-    </div>
-  </div>
 
   {#if studentGoalsWithObservations.length === 0}
     <div class="text-center text-muted py-2">Ingen mål registrert</div>
   {/if}
 {/if}
+
+<!-- Single offcanvas for observations that gets reused -->
+<div
+  class="offcanvas offcanvas-end offcanvas-wide"
+  data-bs-scroll="true"
+  tabindex="-1"
+  id="observationOffcanvas"
+  aria-labelledby="observationOffcanvasLabel"
+>
+  {#if selectedGoal}
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="observationOffcanvasLabel">
+        Ny observasjon: {selectedGoal.title}
+      </h5>
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="offcanvas"
+        aria-label="Close"
+      ></button>
+    </div>
+    <div class="offcanvas-body">
+      <ObservationEdit {student} goal={selectedGoal} observation={null} />
+    </div>
+  {/if}
+</div>
 
 <style>
   .chart-container {

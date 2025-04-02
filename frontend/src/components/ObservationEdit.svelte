@@ -46,10 +46,8 @@
     error = ''
 
     try {
-      // Generate a unique ID for the new observation
       const newObservationId = `obs-${student.id}-${Date.now()}`
 
-      // Create the new observation object
       const newObservation: ObservationType = {
         id: newObservationId,
         createdAt: formatISO(new Date(), { format: 'extended' }),
@@ -63,7 +61,7 @@
       dataStore.update(state => {
         // Add the new observation
         const observations = [...state.observations, newObservation]
-        console.log('New observation:', newObservation)
+
         // Update the goal's observationIds array
         const goals = state.goals.map(g => {
           if (g.id === goal.id) {
