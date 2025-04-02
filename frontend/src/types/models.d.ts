@@ -19,7 +19,6 @@ export interface Group {
 export interface Teacher {
   id: string
   name: string
-  groupIds: string[]
 }
 
 export interface Goal {
@@ -28,7 +27,6 @@ export interface Goal {
   description: string
   groupId: string
   studentId: string
-  observationIds: string[]
 }
 
 export interface Observation {

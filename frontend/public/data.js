@@ -5,7 +5,7 @@ export const data = {
       "name": "Pia Eriksen",
       "age": 10,
       "groupIds": ["5A", "norwegian", "math", "english"],
-      "goalIds": ["goal-01", "goal-02"]
+      "goalIds": ["goal-01", "goal-02", "goal-03"]
     },
     {
       "id": "camilla-hovberg",
@@ -36,7 +36,7 @@ export const data = {
       "type": "basis",
       "grade": 5,
       "section": "A",
-      "teacherId": "teacher-01"
+      "teacherIds": ["teacher-01"]
     },
     {
       "id": "3D",
@@ -44,7 +44,7 @@ export const data = {
       "type": "basis",
       "grade": 3,
       "section": "D",
-      "teacherId": "teacher-02"
+      "teacherIds": ["teacher-02"]
     },
     {
       "id": "8C",
@@ -52,39 +52,39 @@ export const data = {
       "type": "basis",
       "grade": 8,
       "section": "C",
-      "teacherId": "teacher-03"
+      "teacherIds": ["teacher-03"]
     },
     {
       "id": "norwegian",
       "name": "Norsk",
-      "type": "teaching"
+      "type": "teaching",
+      "teacherIds": []
     },
     {
       "id": "math",
       "name": "Matte",
-      "type": "teaching"
+      "type": "teaching",
+      "teacherIds": []
     },
     {
       "id": "english",
       "name": "Engelsk",
-      "type": "teaching"
+      "type": "teaching",
+      "teacherIds": []
     }
   ],
   "teachers": [
     {
       "id": "teacher-01",
       "name": "Lars Hansen",
-      "groupIds": ["5A"]
     },
     {
       "id": "teacher-02",
       "name": "Maria Olsen",
-      "groupIds": ["3D"]
     },
     {
       "id": "teacher-03",
       "name": "Jens Pedersen",
-      "groupIds": ["8C"]
     }
   ],
   "goals": [
@@ -94,7 +94,6 @@ export const data = {
       "description": "Eleven kan telle til 10.",
       "groupId": "math",
       "studentId": "pia-eriksen",
-      "observationIds": ["obs-pia-01", "obs-pia-02"]
     },
     {
       "id": "goal-02",
@@ -102,7 +101,13 @@ export const data = {
       "description": "Eleven kan skrive navnet sitt med blyant og papir.",
       "groupId": "norwegian",
       "studentId": "pia-eriksen",
-      "observationIds": ["obs-pia-03", "obs-pia-04"]
+    },
+    {
+      "id": "goal-03",
+      "title": "Bidrar i samtaler",
+      "description": "Eleven birdrar i samtaler med læreren og medelever.",
+      "groupId": "5A",
+      "studentId": "pia-eriksen",
     }
   ],
   "observations": [
@@ -136,6 +141,22 @@ export const data = {
       "masteryValue": 38,
       "groupId": "norwegian",
       "goalId": "goal-02",
+      "studentId": "pia-eriksen"
+    },
+    {
+      "id": "obs-pia-05",
+      "createdAt": "2024-06-14T13:00:00+02:00",
+      "masteryValue": 58,
+      "groupId": "5A",
+      "goalId": "goal-03",
+      "studentId": "pia-eriksen"
+    },
+    {
+      "id": "obs-pia-06",
+      "createdAt": "2025-01-20T13:45:00+01:00",
+      "masteryValue": 89,
+      "groupId": "5A",
+      "goalId": "goal-03",
       "studentId": "pia-eriksen"
     }
   ],

@@ -62,21 +62,9 @@
         // Add the new observation
         const observations = [...state.observations, newObservation]
 
-        // Update the goal's observationIds array
-        const goals = state.goals.map(g => {
-          if (g.id === goal.id) {
-            return {
-              ...g,
-              observationIds: [...g.observationIds, newObservationId],
-            }
-          }
-          return g
-        })
-
         return {
           ...state,
           observations,
-          goals,
         }
       })
     } catch (err) {

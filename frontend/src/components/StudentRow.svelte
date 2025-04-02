@@ -17,9 +17,7 @@
   const teachingGroups = $derived($dataStore.groups.filter(s => s.type === 'teaching'))
   const basisGroups = $derived($dataStore.groups.filter(s => s.type === 'basis'))
 
-  const studentGoals = $derived(
-    student.goalIds.map((goalId: string) => $dataStore.goals.find(g => g.id === goalId))
-  )
+  const studentGoals = $derived($dataStore.goals.filter(g => g.studentId === student.id))
 
   const studentGoalsWithObservations = $derived(
     studentGoals.map((goal: GoalType): object => {
