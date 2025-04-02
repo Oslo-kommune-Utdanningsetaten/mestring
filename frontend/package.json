@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
+    "date-fns": "^4.1.0",
     "svelte-tiny-router": "^1.0.3"
   }
 }

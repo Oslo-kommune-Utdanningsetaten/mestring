@@ -10,7 +10,6 @@ export const dataStore: Writable<AppData> = writable({
   goals: [],
   observations: [],
   masteryLevels: [],
-  subjects: [],
 })
 
 // Function to load data from public/data.js

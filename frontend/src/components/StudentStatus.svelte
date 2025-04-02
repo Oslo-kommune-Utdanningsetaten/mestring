@@ -11,7 +11,7 @@
       const observations = $dataStore.observations
         .filter(o => o.goalId === goal.id)
         .sort((a, b) => {
-          return new Date(b.date).getTime() - new Date(a.date).getTime()
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         })
       result.latestObservation = observations[0]
       return result

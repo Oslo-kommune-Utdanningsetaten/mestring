@@ -1,9 +1,6 @@
 <script lang="ts">
   import Link from './Link.svelte'
   import { dataStore } from '../stores/data'
-
-  // Access subjects from the store
-  $: subjects = $dataStore.subjects || []
 </script>
 
 <div class="container py-4">

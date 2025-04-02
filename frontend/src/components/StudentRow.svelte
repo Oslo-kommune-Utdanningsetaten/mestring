@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { useTinyRouter } from 'svelte-tiny-router'
   import StudentStatus from './StudentStatus.svelte'
   import SparklineChart from './SparklineChart.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
@@ -14,8 +13,8 @@
   const { student } = $props<{ student: StudentType }>()
   let isOpen = $state(false)
 
-  const subjects = $derived($dataStore.subjects)
-  const groups = $derived($dataStore.groups)
+  const teachingGroups = $derived($dataStore.groups.filter(s => s.type === 'teaching'))
+  const basisGroups = $derived($dataStore.groups.filter(s => s.type === 'basis'))
 
   const studentGoals = $derived(
     student.goalIds.map((goalId: string) => $dataStore.goals.find(g => g.id === goalId))
@@ -27,7 +26,7 @@
       result.observations = $dataStore.observations
         .filter(o => o.goalId === goal.id)
         .sort((a, b) => {
-          return new Date(a.date).getTime() - new Date(b.date).getTime()
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         })
       result.latestObservation = result.observations[result.observations.length - 1]
       return result
@@ -44,7 +43,7 @@
   </div>
   <div class="col-3"><StudentStatus {studentGoals} /></div>
   <div class="col-2">
-    {groups.find(g => g.id === student.groupId)?.name || ''}
+    {basisGroups.find(g => g.id === student.groupId)?.name || ''}
   </div>
   <div class="col-2">
     {$dataStore.goals.filter(g => g.studentId === student.id).length}

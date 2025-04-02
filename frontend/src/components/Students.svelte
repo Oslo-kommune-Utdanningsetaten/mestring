@@ -3,37 +3,33 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import { dataStore } from '../stores/data'
 
-  import type {
-    Student as StudentType,
-    Subject as SubjectType,
-    Group as GroupType,
-  } from '../types/models'
+  import type { Student as StudentType, Group as GroupType } from '../types/models'
   import { urlStringFrom } from '../utils/functions'
   const router = useTinyRouter()
 
   const students = $derived($dataStore.students)
-  const subjects = $derived($dataStore.subjects)
-  const groups = $derived($dataStore.groups)
-  const activeSubjectId = $derived(router.getQueryParam('subjectId'))
-  const activeGroupId = $derived(router.getQueryParam('groupId'))
-  const activeGroup = $derived(groups.find(g => g.id === activeGroupId))
-  const activeSubject = $derived(subjects.find(s => s.id === activeSubjectId))
+  const teachingGroups = $derived($dataStore.groups.filter(s => s.type === 'teaching'))
+  const basisGroups = $derived($dataStore.groups.filter(s => s.type === 'basis'))
+  const activeTeachingGroupId = $derived(router.getQueryParam('teachingGroupId'))
+  const activeTeachingGroup = $derived(teachingGroups.find(tg => tg.id === activeTeachingGroupId))
+  const activeBasisGroupId = $derived(router.getQueryParam('basisGroupId'))
+  const activeBasisGroup = $derived(basisGroups.find(bg => bg.id === activeBasisGroupId))
 
   // Filter students by group and subject
   const filteredStudents = $derived(
     students
       .filter((student: StudentType) => {
-        return activeGroupId ? student.groupId === activeGroupId : true
+        return activeTeachingGroupId ? student.groupIds.includes(activeTeachingGroupId) : true
       })
       .filter((student: StudentType) => {
-        return activeSubjectId ? student.subjectIds.includes(activeSubjectId) : true
+        return activeBasisGroupId ? student.groupIds.includes(activeBasisGroupId) : true
       })
   )
 </script>
 
 <section class="py-3">
   <h2>Elever</h2>
-  <!-- Filter groups -->
+  <!-- Filter basis groups -->
   <div class="d-flex align-items-center gap-2">
     <div class="dropdown">
       <button
@@ -42,22 +38,22 @@
         data-bs-toggle="dropdown"
         aria-expanded="false"
       >
-        {activeGroup ? activeGroup.name : 'Velg gruppe'}
+        {activeBasisGroup?.name || 'Velg gruppe'}
       </button>
       <ul class="dropdown-menu">
         <li>
           <a
             class="dropdown-item dropdown-link"
-            href={urlStringFrom({ groupId: null }, { mode: 'merge' })}
+            href={urlStringFrom({ basisGroupId: null }, { mode: 'merge' })}
           >
             Alle grupper
           </a>
         </li>
-        {#each groups as group}
+        {#each basisGroups as group}
           <li>
             <a
               class="dropdown-item dropdown-link"
-              href={urlStringFrom({ groupId: group.id }, { mode: 'merge' })}
+              href={urlStringFrom({ basisGroupId: group.id }, { mode: 'merge' })}
             >
               {group.name}
             </a>
@@ -73,22 +69,22 @@
         data-bs-toggle="dropdown"
         aria-expanded="false"
       >
-        {activeSubject ? activeSubject.name : 'Velg fag'}
+        {activeTeachingGroup?.name || 'Velg fag'}
       </button>
       <ul class="dropdown-menu">
         <li>
           <a
             class="dropdown-item dropdown-link"
-            href={urlStringFrom({ subjectId: null }, { mode: 'merge' })}
+            href={urlStringFrom({ teachingGroupId: null }, { mode: 'merge' })}
           >
             Alle fag
           </a>
         </li>
-        {#each subjects as subject}
+        {#each teachingGroups as subject}
           <li>
             <a
               class="dropdown-item dropdown-link"
-              href={urlStringFrom({ subjectId: subject.id }, { mode: 'merge' })}
+              href={urlStringFrom({ teachingGroupId: subject.id }, { mode: 'merge' })}
             >
               {subject.name}
             </a>

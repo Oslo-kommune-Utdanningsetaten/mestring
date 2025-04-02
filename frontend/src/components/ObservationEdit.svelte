@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import { formatISO } from 'date-fns'
+
   import { dataStore } from '../stores/data'
   import type {
     Student as StudentType,
@@ -19,11 +21,6 @@
   let value = $state(observation ? observation.masteryValue : 50)
   let submitting = $state(false)
   let error = $state('')
-
-  // Create a date input with today's date as default
-  let observationDate = $state(
-    observation ? observation.date : new Date().toISOString().split('T')[0]
-  )
 
   $effect(() => {
     if (masteryIndicator) {
@@ -55,9 +52,9 @@
       // Create the new observation object
       const newObservation: ObservationType = {
         id: newObservationId,
-        date: observationDate,
+        createdAt: formatISO(new Date(), { format: 'extended' }),
         masteryValue: value,
-        subjectId: goal.subjectId,
+        groupId: goal.groupId,
         goalId: goal.id,
         studentId: student.id,
       }
@@ -66,7 +63,7 @@
       dataStore.update(state => {
         // Add the new observation
         const observations = [...state.observations, newObservation]
-
+        console.log('New observation:', newObservation)
         // Update the goal's observationIds array
         const goals = state.goals.map(g => {
           if (g.id === goal.id) {
@@ -104,11 +101,6 @@
   {#if error}
     <div class="alert alert-danger">{error}</div>
   {/if}
-
-  <div class="mb-3">
-    <label for="observation-date" class="form-label">Dato</label>
-    <input type="date" class="form-control" id="observation-date" bind:value={observationDate} />
-  </div>
 
   <div class="mb-4">
     <label class="form-label">Mestringsnivå</label>

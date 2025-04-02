@@ -2,9 +2,13 @@
 
 ## Clickable prototype
 
-- ## students
-  - drill into each student
-  - ui for setting mastery level
+## /students
+
+- [ ] list of all students, filterable by group and subject
+  - [ ] fix dataset
+  - [ ] if subject selected, each StatusTrend is ag
+- [ ] drill into each student
+- [ ] ui for setting mastery level
 
 ## The actual app
 
@@ -20,7 +24,6 @@
 - [ ] Fetcher noe fra APIet og rendrer
 - [ ] En test som sjekker hva som helst
 - [x] Bootstrap
-- [ ] Finne et rikt, enkelt og vedlikeholdt komponentbibliotek (feks. https://sveltestrap.js.org ?)
 - [ ] Sette opp auth mot Feide
 - [ ] Finne ut av sikkerhet/ACL
 - [ ] Finne ut av datamodell

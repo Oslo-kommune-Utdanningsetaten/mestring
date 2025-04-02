@@ -3,17 +3,17 @@ export interface Student {
   id: string
   name: string
   age: number
-  groupId: string
   goalIds: string[]
-  subjectIds: string[]
+  groupIds: string[]
 }
 
 export interface Group {
   id: string
   name: string
-  grade: number
-  section: string
-  teacherId: string
+  type: string
+  grade?: number
+  section?: string
+  teacherIds?: string[]
 }
 
 export interface Teacher {
@@ -26,16 +26,16 @@ export interface Goal {
   id: string
   title: string
   description: string
-  subjectId: string
+  groupId: string
   studentId: string
   observationIds: string[]
 }
 
 export interface Observation {
   id: string
-  date: string
+  createdAt: string
   masteryValue: number
-  subjectId: string
+  groupId: string
   goalId: string
   studentId: string
 }
@@ -47,11 +47,6 @@ export interface MasteryLevel {
   color: string
 }
 
-export interface Subject {
-  id: string
-  name: string
-}
-
 export interface AppData {
   students: Student[]
   groups: Group[]
@@ -59,5 +54,4 @@ export interface AppData {
   goals: Goal[]
   observations: Observation[]
   masteryLevels: MasteryLevel[]
-  subjects: Subject[]
 }

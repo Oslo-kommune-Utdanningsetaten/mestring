@@ -4,39 +4,36 @@ export const data = {
       "id": "pia-eriksen",
       "name": "Pia Eriksen",
       "age": 10,
-      "groupId": "5A",
-      "goalIds": ["goal-01", "goal-02"],
-      "subjectIds": ["norwegian", "math", "english"]
+      "groupIds": ["5A", "norwegian", "math", "english"],
+      "goalIds": ["goal-01", "goal-02"]
     },
     {
       "id": "camilla-hovberg",
       "name": "Camilla Hovberg",
       "age": 10,
-      "groupId": "5A",
-      "goalIds": [],
-      "subjectIds": ["norwegian", "math"]
+      "groupIds": ["5A", "norwegian", "math"],
+      "goalIds": []
     },
     {
       "id": "tony-lupin",
       "name": "Tony Lupin",
       "age": 9,
-      "groupId": "3D",
-      "goalIds": [],
-      "subjectIds": ["norwegian"]
+      "groupIds": ["3D", "norwegian"],
+      "goalIds": []
     },
     {
       "id": "frank-larsen",
       "name": "Frank Larsen",
       "age": 13,
-      "groupId": "8C",
-      "goalIds": [],
-      "subjectIds": ["norwegian", "math", "english"]
+      "groupIds": ["8C", "norwegian", "math", "english"],
+      "goalIds": []
     }
   ],
   "groups": [
     {
       "id": "5A",
       "name": "5A",
+      "type": "basis",
       "grade": 5,
       "section": "A",
       "teacherId": "teacher-01"
@@ -44,6 +41,7 @@ export const data = {
     {
       "id": "3D",
       "name": "3D",
+      "type": "basis",
       "grade": 3,
       "section": "D",
       "teacherId": "teacher-02"
@@ -51,9 +49,25 @@ export const data = {
     {
       "id": "8C",
       "name": "8C",
+      "type": "basis",
       "grade": 8,
       "section": "C",
       "teacherId": "teacher-03"
+    },
+    {
+      "id": "norwegian",
+      "name": "Norsk",
+      "type": "teaching"
+    },
+    {
+      "id": "math",
+      "name": "Matte",
+      "type": "teaching"
+    },
+    {
+      "id": "english",
+      "name": "Engelsk",
+      "type": "teaching"
     }
   ],
   "teachers": [
@@ -78,7 +92,7 @@ export const data = {
       "id": "goal-01",
       "title": "Telle til 10",
       "description": "Eleven kan telle til 10.",
-      "subjectId": "math",
+      "groupId": "math",
       "studentId": "pia-eriksen",
       "observationIds": ["obs-pia-01", "obs-pia-02"]
     },
@@ -86,7 +100,7 @@ export const data = {
       "id": "goal-02",
       "title": "Kan skrive navnet sitt",
       "description": "Eleven kan skrive navnet sitt med blyant og papir.",
-      "subjectId": "norwegian",
+      "groupId": "norwegian",
       "studentId": "pia-eriksen",
       "observationIds": ["obs-pia-03", "obs-pia-04"]
     }
@@ -94,33 +108,33 @@ export const data = {
   "observations": [
     {
       "id": "obs-pia-01",
-      "date": "2024-06-02",
+      "createdAt": "2024-06-02T14:25:00+02:00",
       "masteryValue": 35,
-      "subjectId": "math",
+      "groupId": "math",
       "goalId": "goal-01",
       "studentId": "pia-eriksen"
     },
     {
       "id": "obs-pia-02",
-      "date": "2025-01-19",
+      "createdAt": "2025-01-19T09:15:00+01:00",
       "masteryValue": 44,
-      "subjectId": "math",
+      "groupId": "math",
       "goalId": "goal-01",
       "studentId": "pia-eriksen"
     },
     {
       "id": "obs-pia-03",
-      "date": "2024-06-02",
+      "createdAt": "2024-06-02T10:30:00+02:00",
       "masteryValue": 5,
-      "subjectId": "norwegian",
+      "groupId": "norwegian",
       "goalId": "goal-02",
       "studentId": "pia-eriksen"
     },
     {
       "id": "obs-pia-04",
-      "date": "2025-01-20",
+      "createdAt": "2025-01-20T13:45:00+01:00",
       "masteryValue": 38,
-      "subjectId": "norwegian",
+      "groupId": "norwegian",
       "goalId": "goal-02",
       "studentId": "pia-eriksen"
     }
@@ -155,20 +169,6 @@ export const data = {
       "minValue": 81,
       "maxValue": 100,
       "color": "rgb(160, 207, 106)"
-    }
-  ],
-  "subjects": [
-    {
-      "id": "norwegian",
-      "name": "Norsk"
-    },
-    {
-      "id": "math",
-      "name": "Matte"
-    },
-    {
-      "id": "english",
-      "name": "Engelsk"
     }
   ]
 }
