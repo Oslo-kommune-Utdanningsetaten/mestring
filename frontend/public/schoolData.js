@@ -93,21 +93,18 @@ export const data = {
       "title": "Telle til 10",
       "description": "Eleven kan telle til 10.",
       "groupId": "math",
-      "studentId": "pia-eriksen",
     },
     {
       "id": "goal-02",
       "title": "Kan skrive navnet sitt",
       "description": "Eleven kan skrive navnet sitt med blyant og papir.",
       "groupId": "norwegian",
-      "studentId": "pia-eriksen",
     },
     {
       "id": "goal-03",
       "title": "Bidrar i samtaler",
       "description": "Eleven birdrar i samtaler med læreren og medelever.",
       "groupId": "5A",
-      "studentId": "pia-eriksen",
     }
   ],
   "observations": [

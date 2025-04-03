@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.3",
+    "chart.js": "^4.4.8",
     "date-fns": "^4.1.0",
     "svelte-tiny-router": "^1.0.3"
   }

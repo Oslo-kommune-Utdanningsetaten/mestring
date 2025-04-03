@@ -105,8 +105,8 @@
       <div class="row fw-bold bg-light border-bottom py-3 mx-0">
         <div class="col-3">Navn</div>
         <div class="col-3">Status</div>
-        <div class="col-2">Gruppe</div>
-        <div class="col-2">Mål</div>
+        <div class="col-2"></div>
+        <div class="col-2"></div>
         <div class="col-2"></div>
       </div>
 

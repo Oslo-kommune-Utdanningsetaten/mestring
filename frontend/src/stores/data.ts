@@ -16,7 +16,7 @@ export const dataStore: Writable<AppData> = writable({
 export async function loadData(): Promise<void> {
   try {
     // Dynamic import of the data.js file
-    const module = await import('../../public/data.js')
+    const module = await import('../../public/schoolData.js')
     dataStore.set(module.data)
   } catch (error) {
     console.error('Failed to load data:', error)

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import StudentStatus from './StudentStatus.svelte'
   import SparklineChart from './SparklineChart.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import ObservationEdit from './ObservationEdit.svelte'
@@ -14,13 +13,17 @@
   let isOpen = $state(false)
   let selectedGoal = $state<GoalType | null>(null)
 
-  const teachingGroups = $derived($dataStore.groups.filter(s => s.type === 'teaching'))
-  const basisGroups = $derived($dataStore.groups.filter(s => s.type === 'basis'))
+  const teachingGroups = $derived(
+    $dataStore.groups.filter(s => s.type === 'teaching' && student.groupIds.includes(s.id))
+  )
+  const basisGroups = $derived(
+    $dataStore.groups.filter(s => s.type === 'basis' && student.groupIds.includes(s.id))
+  )
+  const goals = $derived($dataStore.goals)
 
-  const studentGoals = $derived($dataStore.goals.filter(g => g.studentId === student.id))
-
-  const studentGoalsWithObservations = $derived(
-    studentGoals.map((goal: GoalType): object => {
+  const studentGoalsWithObservations = goals
+    .filter((goal: GoalType) => student.goalIds.includes(goal.id))
+    .map((goal: GoalType) => {
       const result: any = { ...goal }
       result.observations = $dataStore.observations
         .filter(o => o.goalId === goal.id)
@@ -30,7 +33,6 @@
       result.latestObservation = result.observations[result.observations.length - 1]
       return result
     })
-  )
 
   function openObservationModal(goal: GoalType) {
     selectedGoal = goal
@@ -40,16 +42,22 @@
 <div class="row py-2 align-items-center mx-0 border-top {isOpen ? '' : 'border-bottom'} ">
   <div class="col-3 fw-bold">
     {student.name}
-    <button class="btn border-none" onclick={() => (isOpen = !isOpen)}>
+    <button class="btn border expand-student-button" onclick={() => (isOpen = !isOpen)}>
       <span class="ms-2 caret-icon {isOpen ? 'rotated' : ''}">&#9656;</span>
     </button>
   </div>
-  <div class="col-3"><StudentStatus {studentGoals} /></div>
-  <div class="col-2">
-    {basisGroups.find(g => g.id === student.groupId)?.name || ''}
+  <div class="col-3">
+    <div class="d-flex gap-1 justify-content-start">
+      {#each studentGoalsWithObservations as studentGoal}
+        <MasteryLevelBadge {studentGoal} />
+      {/each}
+    </div>
   </div>
   <div class="col-2">
-    {$dataStore.goals.filter(g => g.studentId === student.id).length}
+    {basisGroups.map(g => g.name).join(', ')}
+  </div>
+  <div class="col-2">
+    {studentGoalsWithObservations.length} mål
   </div>
   <div class="col-2">
     <div class="d-flex gap-2 justify-content-center">
@@ -142,7 +150,16 @@
     height: 40px;
     width: 40px;
   }
+
   .expanded-student-row {
+    background-color: #f8f9fa;
+  }
+
+  .expand-student-button {
+    padding: 2px 8px 2px 1px;
+  }
+
+  .expand-student-button:hover {
     background-color: #f8f9fa;
   }
 
