@@ -40,7 +40,7 @@
 </script>
 
 <div class="row py-2 align-items-center mx-0 border-top {isOpen ? '' : 'border-bottom'} ">
-  <div class="col-3 fw-bold">
+  <div class="col-3">
     {student.name}
     <button class="btn border expand-student-button" onclick={() => (isOpen = !isOpen)}>
       <span class="ms-2 caret-icon {isOpen ? 'rotated' : ''}">&#9656;</span>

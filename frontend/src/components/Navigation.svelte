@@ -2,11 +2,28 @@
   import Link from './Link.svelte'
   import osloLogo from '../assets/oslo_logo_sort.svg'
   import { currentPath } from '../stores/navigation'
+  import { dataStore, setCurrentUser } from '../stores/data'
 
   let isHomeActive = $derived($currentPath === '/')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
   let isSubjectsActive = $derived($currentPath.startsWith('/subjects'))
   let isAboutActive = $derived($currentPath.startsWith('/about'))
+
+  const teachers = $derived($dataStore.teachers)
+
+  function handleSetCurrentUser(teacherId: string) {
+    const selectedTeacher = teachers.find(t => t.id === teacherId)
+    if (!selectedTeacher) {
+      console.error('Selected teacher not found')
+      return
+    }
+    const currentUser = {
+      id: selectedTeacher.id,
+      name: selectedTeacher.name,
+      teacherId: selectedTeacher.id,
+    }
+    setCurrentUser(currentUser)
+  }
 
   $effect(() => {
     console.log('Current path changed:', $currentPath)
@@ -45,8 +62,13 @@
           Options
         </a>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-          <li><a class="dropdown-item" href="#">Option 1</a></li>
-          <li><a class="dropdown-item" href="#">Option 2</a></li>
+          {#each teachers as teacher}
+            <li>
+              <a class="dropdown-item" href="#" onclick={() => handleSetCurrentUser(teacher.id)}>
+                {teacher.name}
+              </a>
+            </li>
+          {/each}
           <li><hr class="dropdown-divider" /></li>
           <li><a class="dropdown-item" href="#">Option 3</a></li>
         </ul>

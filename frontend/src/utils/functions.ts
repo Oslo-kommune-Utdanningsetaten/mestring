@@ -1,3 +1,5 @@
+import type { MasteryLevel } from '../types/models'
+
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
   [key: string]: string
 } {
@@ -6,7 +8,7 @@ function removeNullValueKeys(obj: { [key: string]: string | null }): {
   }
 }
 
-export function getMasteryColorByValue(value: number, masteryLevels): string {
+export function getMasteryColorByValue(value: number, masteryLevels: MasteryLevel[]): string {
   const masteryLevel = masteryLevels.find(ml => ml.minValue <= value && ml.maxValue >= value)
   return masteryLevel ? masteryLevel.color : 'black'
 }

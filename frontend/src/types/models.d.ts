@@ -7,6 +7,18 @@ export interface Student {
   groupIds: string[]
 }
 
+export interface Teacher {
+  id: string
+  name: string
+}
+
+export interface User {
+  id: string
+  name: string
+  studentId?: string
+  teacherId?: string
+}
+
 export interface Group {
   id: string
   name: string
@@ -16,17 +28,11 @@ export interface Group {
   teacherIds?: string[]
 }
 
-export interface Teacher {
-  id: string
-  name: string
-}
-
 export interface Goal {
   id: string
   title: string
   description: string
   groupId: string
-  studentId: string
 }
 
 export interface Observation {
@@ -52,4 +58,5 @@ export interface AppData {
   goals: Goal[]
   observations: Observation[]
   masteryLevels: MasteryLevel[]
+  currentUser: User | null
 }

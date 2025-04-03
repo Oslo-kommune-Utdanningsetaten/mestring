@@ -36,7 +36,7 @@ export const data = {
       "type": "basis",
       "grade": 5,
       "section": "A",
-      "teacherIds": ["teacher-01"]
+      "teacherIds": ["teacher-01", "teacher-02", "teacher-04"]
     },
     {
       "id": "3D",
@@ -58,19 +58,19 @@ export const data = {
       "id": "norwegian",
       "name": "Norsk",
       "type": "teaching",
-      "teacherIds": []
+      "teacherIds": ["teacher-02", "teacher-03"]
     },
     {
       "id": "math",
       "name": "Matte",
       "type": "teaching",
-      "teacherIds": []
+      "teacherIds": ["teacher-02", "teacher-04"]
     },
     {
       "id": "english",
       "name": "Engelsk",
       "type": "teaching",
-      "teacherIds": []
+      "teacherIds": ["teacher-02"]
     }
   ],
   "teachers": [
@@ -80,11 +80,15 @@ export const data = {
     },
     {
       "id": "teacher-02",
-      "name": "Maria Olsen",
+      "name": "Maria Kemp",
     },
     {
       "id": "teacher-03",
-      "name": "Jens Pedersen",
+      "name": "Jens Giovanni",
+    },
+    {
+      "id": "teacher-04",
+      "name": "Ilhan Berisha",
     }
   ],
   "goals": [
