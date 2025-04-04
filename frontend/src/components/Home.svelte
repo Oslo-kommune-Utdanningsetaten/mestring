@@ -25,15 +25,15 @@
       <div class="card shadow-sm">
         <!-- Header row -->
         <div class="row fw-bold bg-light border-bottom py-3 mx-0">
-          <div class="col-2">Gruppe</div>
-          <div class="col-2">Elever</div>
-          <div class="col-8">Lærere</div>
+          <div class="col-3">Gruppe</div>
+          <div class="col-3">Elever</div>
+          <div class="col-6">Lærere</div>
         </div>
 
         <!-- Student rows -->
         {#each groups as group}
           <div class="row py-2 align-items-center mx-0 border">
-            <div class="col-2 fw-bold">
+            <div class="col-3">
               <a
                 href={urlStringFrom(
                   group.type === 'basis'
@@ -48,10 +48,10 @@
                 {group.name}
               </a>
             </div>
-            <div class="col-2">
+            <div class="col-3">
               {students.filter(s => s.groupIds.includes(group.id)).length}
             </div>
-            <div class="col-8">
+            <div class="col-6">
               {teachers
                 .filter(t => group.teacherIds?.includes(t.id))
                 .map(t => t.name)

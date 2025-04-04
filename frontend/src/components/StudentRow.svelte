@@ -1,6 +1,6 @@
 <script lang="ts">
   import SparklineChart from './SparklineChart.svelte'
-  import MasteryLevelBadge from './MasteryLevelBadge.svelte'
+  import MasteryLevelBadge from './MasteryLevelBadge-v2.svelte'
   import ObservationEdit from './ObservationEdit.svelte'
   import { dataStore } from '../stores/data'
   import type {
@@ -12,10 +12,6 @@
   const { student } = $props<{ student: StudentType }>()
   let isOpen = $state(false)
   let selectedGoal = $state<GoalType | null>(null)
-
-  const teachingGroups = $derived(
-    $dataStore.groups.filter(s => s.type === 'teaching' && student.groupIds.includes(s.id))
-  )
   const basisGroups = $derived(
     $dataStore.groups.filter(s => s.type === 'basis' && student.groupIds.includes(s.id))
   )
@@ -26,7 +22,7 @@
     .map((goal: GoalType) => {
       const result: any = { ...goal }
       result.observations = $dataStore.observations
-        .filter(o => o.goalId === goal.id)
+        .filter(o => o.goalId === goal.id && o.studentId === student.id)
         .sort((a, b) => {
           return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         })

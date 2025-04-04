@@ -32,7 +32,7 @@ export const dataStore: Writable<AppData> = writable({
 export async function loadData(): Promise<void> {
   try {
     // Dynamic import of the data.js file
-    const module = await import('../../public/schoolData.js')
+    const module = await import('../../public/schoolData_v2.js')
     dataStore.set({
       ...module.data,
       currentUser: defaultUser,

@@ -50,7 +50,7 @@
 
       const newObservation: ObservationType = {
         id: newObservationId,
-        createdAt: formatISO(new Date(), { format: 'extended' }),
+        createdAt: formatISO(new Date()),
         masteryValue: value,
         groupId: goal.groupId,
         goalId: goal.id,

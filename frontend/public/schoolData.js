@@ -4,73 +4,73 @@ export const data = {
       "id": "pia-eriksen",
       "name": "Pia Eriksen",
       "age": 10,
-      "groupIds": ["5A", "norwegian", "math", "english"],
+      "groupIds": ["4A", "norwegian", "math", "english"],
       "goalIds": ["goal-01", "goal-02", "goal-03"]
     },
     {
       "id": "camilla-hovberg",
       "name": "Camilla Hovberg",
       "age": 10,
-      "groupIds": ["5A", "norwegian", "math"],
+      "groupIds": ["4A", "norwegian", "math"],
       "goalIds": []
     },
     {
       "id": "tony-lupin",
       "name": "Tony Lupin",
-      "age": 9,
-      "groupIds": ["3D", "norwegian"],
+      "age": 11,
+      "groupIds": ["5A", "norwegian"],
       "goalIds": []
     },
     {
-      "id": "frank-larsen",
-      "name": "Frank Larsen",
-      "age": 13,
-      "groupIds": ["8C", "norwegian", "math", "english"],
+      "id": "sara-kahn",
+      "name": "Sara Kahn",
+      "age": 12,
+      "groupIds": ["5A", "norwegian", "math", "english"],
       "goalIds": []
     }
   ],
   "groups": [
     {
+      "id": "4A",
+      "name": "4A",
+      "type": "basis",
+      "grade": 4,
+      "teacherIds": []
+    },
+    {
       "id": "5A",
       "name": "5A",
       "type": "basis",
       "grade": 5,
-      "section": "A",
       "teacherIds": ["teacher-01", "teacher-02", "teacher-04"]
-    },
-    {
-      "id": "3D",
-      "name": "3D",
-      "type": "basis",
-      "grade": 3,
-      "section": "D",
-      "teacherIds": ["teacher-02"]
-    },
-    {
-      "id": "8C",
-      "name": "8C",
-      "type": "basis",
-      "grade": 8,
-      "section": "C",
-      "teacherIds": ["teacher-03"]
     },
     {
       "id": "norwegian",
       "name": "Norsk",
       "type": "teaching",
-      "teacherIds": ["teacher-02", "teacher-03"]
+      "grade": 1,
+      "teacherIds": []
     },
     {
       "id": "math",
       "name": "Matte",
       "type": "teaching",
-      "teacherIds": ["teacher-02", "teacher-04"]
+      "grade": 1,
+      "teacherIds": []
     },
     {
       "id": "english",
       "name": "Engelsk",
       "type": "teaching",
-      "teacherIds": ["teacher-02"]
+      "grade": 1,
+      "teacherIds": []
+    },
+    {
+      "id": "science",
+      "name": "Naturfag",
+      "type": "teaching",
+      "grade": 1,
+      "teacherIds": []
     }
   ],
   "teachers": [
@@ -108,13 +108,25 @@ export const data = {
       "id": "goal-03",
       "title": "Bidrar i samtaler",
       "description": "Eleven birdrar i samtaler med læreren og medelever.",
-      "groupId": "5A",
+      "groupId": "4A",
+    },
+    {
+      "id": "goal-04",
+      "title": "Vaske hendene",
+      "description": "Eleven skal kunne vaske hendene selvstendig.",
+      "groupId": "4A",
+    },
+    {
+      "id": "goal-05",
+      "title": "Gi uttrykk for behov",
+      "description": "Eleven skal kunne gi uttrykk for behov og basale følelser ved bruk av riktige ord.",
+      "groupId": "4A",
     }
   ],
   "observations": [
     {
       "id": "obs-pia-01",
-      "createdAt": "2024-06-02T14:25:00+02:00",
+      "createdAt": "2024-06-02T14:25:00Z",
       "masteryValue": 35,
       "groupId": "math",
       "goalId": "goal-01",
@@ -122,7 +134,7 @@ export const data = {
     },
     {
       "id": "obs-pia-02",
-      "createdAt": "2025-01-19T09:15:00+01:00",
+      "createdAt": "2025-01-19T09:15:00Z",
       "masteryValue": 44,
       "groupId": "math",
       "goalId": "goal-01",
@@ -130,7 +142,7 @@ export const data = {
     },
     {
       "id": "obs-pia-03",
-      "createdAt": "2024-06-02T10:30:00+02:00",
+      "createdAt": "2024-06-02T10:30:00Z",
       "masteryValue": 5,
       "groupId": "norwegian",
       "goalId": "goal-02",
@@ -138,7 +150,7 @@ export const data = {
     },
     {
       "id": "obs-pia-04",
-      "createdAt": "2025-01-20T13:45:00+01:00",
+      "createdAt": "2025-01-20T13:45:00Z",
       "masteryValue": 38,
       "groupId": "norwegian",
       "goalId": "goal-02",
@@ -146,17 +158,17 @@ export const data = {
     },
     {
       "id": "obs-pia-05",
-      "createdAt": "2024-06-14T13:00:00+02:00",
+      "createdAt": "2024-06-14T13:00:00Z",
       "masteryValue": 58,
-      "groupId": "5A",
+      "groupId": "4A",
       "goalId": "goal-03",
       "studentId": "pia-eriksen"
     },
     {
       "id": "obs-pia-06",
-      "createdAt": "2025-01-20T13:45:00+01:00",
+      "createdAt": "2025-01-20T13:45:00Z",
       "masteryValue": 89,
-      "groupId": "5A",
+      "groupId": "4A",
       "goalId": "goal-03",
       "studentId": "pia-eriksen"
     }
