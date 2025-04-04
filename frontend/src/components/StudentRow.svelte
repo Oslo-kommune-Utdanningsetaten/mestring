@@ -10,28 +10,38 @@
   } from '../types/models'
 
   const { student } = $props<{ student: StudentType }>()
-  let isOpen = $state(false)
   let selectedGoal = $state<GoalType | null>(null)
+  let isOpen = $state(false)
   const basisGroups = $derived(
     $dataStore.groups.filter(s => s.type === 'basis' && student.groupIds.includes(s.id))
   )
-  const goals = $derived($dataStore.goals)
+  const teachingGroups = $derived(
+    $dataStore.groups.filter(s => s.type === 'teaching' && student.groupIds.includes(s.id))
+  )
 
-  const studentGoalsWithObservations = goals
-    .filter((goal: GoalType) => student.goalIds.includes(goal.id))
-    .map((goal: GoalType) => {
-      const result: any = { ...goal }
-      result.observations = $dataStore.observations
-        .filter(o => o.goalId === goal.id && o.studentId === student.id)
-        .sort((a, b) => {
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        })
-      result.latestObservation = result.observations[result.observations.length - 1]
-      return result
-    })
+  const studentGoalsWithObservations = $derived(
+    $dataStore.goals
+      .filter((goal: GoalType) => student.goalIds.includes(goal.id))
+      .map((goal: GoalType) => {
+        const result: any = { ...goal }
+        result.observations = $dataStore.observations
+          .filter(o => o.goalId === goal.id && o.studentId === student.id)
+          .sort((a, b) => {
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          })
+        result.latestObservation = result.observations[result.observations.length - 1]
+        return result
+      })
+  )
 
   function openObservationModal(goal: GoalType) {
     selectedGoal = goal
+  }
+
+  function getGoalDescription(goal: GoalType) {
+    const group = $dataStore.groups.find(g => g.id === goal.groupId)
+    if (!group) return null
+    return group.type === 'basis' ? 'Sosialt' : group.name
   }
 </script>
 
@@ -42,20 +52,22 @@
       <span class="ms-2 caret-icon {isOpen ? 'rotated' : ''}">&#9656;</span>
     </button>
   </div>
-  <div class="col-3">
-    <div class="d-flex gap-1 justify-content-start">
+  <div class="col-6">
+    <div class="d-flex gap-2 justify-content-start">
       {#each studentGoalsWithObservations as studentGoal}
-        <MasteryLevelBadge {studentGoal} />
+        {#if studentGoal.observations.length}
+          <MasteryLevelBadge {studentGoal} />
+        {/if}
       {/each}
     </div>
   </div>
-  <div class="col-2">
+  <div class="col-1">
     {basisGroups.map(g => g.name).join(', ')}
   </div>
-  <div class="col-2">
+  <div class="col-1">
     {studentGoalsWithObservations.length} mål
   </div>
-  <div class="col-2">
+  <div class="col-1">
     <div class="d-flex gap-2 justify-content-center">
       <a href={`/students/${student.id}`} class="link-button">Detaljer</a>
     </div>
@@ -66,15 +78,18 @@
   {#each studentGoalsWithObservations as studentGoal}
     <div class="row align-items-center border-top py-1 mx-0 expanded-student-row">
       <div class="col-3">
-        <span class="fw-medium">{studentGoal.title}</span>
+        <span class="fw-medium" title={studentGoal.description}>
+          {studentGoal.title} |
+          {getGoalDescription(studentGoal)}
+        </span>
       </div>
       <div
-        class="col-3"
+        class="col-6"
         title={studentGoal.title +
           ': \n' +
           studentGoal.observations.map((o: ObservationType) => o.masteryValue).join(', ')}
       >
-        {#if studentGoal.latestObservation}
+        {#if studentGoal.observations.length}
           <div class="d-flex align-items-center">
             <MasteryLevelBadge {studentGoal} />
             {#if studentGoal.observations.length > 1}
@@ -91,21 +106,21 @@
           <div class="text-muted small">Ikke nok data</div>
         {/if}
       </div>
-      <div class="col-2">
+      <div class="col-1">
         <button
-          class="link-button"
+          class="link-button px-3"
           type="button"
           data-bs-toggle="offcanvas"
           data-bs-target="#observationOffcanvas"
           aria-controls="observationOffcanvas"
           onclick={() => openObservationModal(studentGoal)}
         >
-          Ny observasjon
+          +
         </button>
       </div>
 
-      <div class="col-2"></div>
-      <div class="col-2"></div>
+      <div class="col-1"></div>
+      <div class="col-1"></div>
     </div>
   {/each}
 

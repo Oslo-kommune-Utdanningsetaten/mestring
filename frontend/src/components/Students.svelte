@@ -14,6 +14,9 @@
   const activeTeachingGroup = $derived(teachingGroups.find(tg => tg.id === activeTeachingGroupId))
   const activeBasisGroupId = $derived(router.getQueryParam('basisGroupId'))
   const activeBasisGroup = $derived(basisGroups.find(bg => bg.id === activeBasisGroupId))
+  const teachingGroupFilter = $state(null)
+
+  // TODO: use teachingGroupFilter to enable a checkbox to filter goals by activeTeachingGroupId
 
   // Filter students by group and subject
   const filteredStudents = $derived(
@@ -69,7 +72,9 @@
         data-bs-toggle="dropdown"
         aria-expanded="false"
       >
-        {activeTeachingGroup?.name || 'Velg fag'}
+        {activeTeachingGroup
+          ? activeTeachingGroup.name + ' | ' + activeTeachingGroup.grade
+          : 'Velg fag'}
       </button>
       <ul class="dropdown-menu">
         <li>
@@ -86,7 +91,7 @@
               class="dropdown-item dropdown-link"
               href={urlStringFrom({ teachingGroupId: subject.id }, { mode: 'merge' })}
             >
-              {subject.name}
+              {subject.name} | {subject.grade}
             </a>
           </li>
         {/each}
@@ -104,10 +109,10 @@
       <!-- Header row -->
       <div class="row fw-bold bg-light border-bottom py-3 mx-0">
         <div class="col-3">Navn</div>
-        <div class="col-3">Status</div>
-        <div class="col-2"></div>
-        <div class="col-2"></div>
-        <div class="col-2"></div>
+        <div class="col-6">Status</div>
+        <div class="col-1"></div>
+        <div class="col-1"></div>
+        <div class="col-1"></div>
       </div>
 
       <!-- Student rows -->

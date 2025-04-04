@@ -45,16 +45,15 @@
     width: 22px;
     height: 22px;
     cursor: pointer;
-    overflow: hidden;
   }
 
   .valueIndicator {
-    border-width: 1px 0px 1px 0px;
+    border-width: 1px 1px 1px 1px;
     border-style: solid;
     position: absolute;
     background-color: white;
-    left: 0px;
-    width: 100%;
+    left: -2px;
+    width: 26px;
     height: 4px;
   }
 </style>
