@@ -68,6 +68,9 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --grid-template-student-columns: minmax(180px, 25%) minmax(80px, 15%) minmax(250px, 45%) 100px
+    auto;
 }
 
 body {
@@ -123,6 +126,30 @@ a:hover {
   text-decoration: none;
   background-color: var(--bs-primary-hover);
   color: var(--bs-light) !important;
+}
+
+.student-grid-row {
+  display: grid;
+  grid-template-columns: var(--grid-template-student-columns);
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  align-items: center;
+  justify-items: start;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.student-grid-row.header {
+  background-color: var(--bs-light);
+}
+
+.student-grid-row.expanded {
+  background-color: var(--bs-light);
+  padding: 0rem 1rem 0rem 3rem;
+}
+
+.student-grid-row.is-open {
+  background-color: var(--bs-light);
+  border-left: 3px solid var(--bs-primary);
 }
 
 @media (prefers-color-scheme: light) {

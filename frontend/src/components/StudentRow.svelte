@@ -8,8 +8,15 @@
     Goal as GoalType,
     Observation as ObservationType,
   } from '../types/models'
+  import { useTinyRouter } from 'svelte-tiny-router'
+  const router = useTinyRouter()
 
-  const { student } = $props<{ student: StudentType }>()
+  const { student, isTeachingGroupFilterEnabled } = $props<{
+    student: StudentType
+    isTeachingGroupFilterEnabled: boolean
+  }>()
+  const activeTeachingGroupId = $derived(router.getQueryParam('teachingGroupId'))
+
   let selectedGoal = $state<GoalType | null>(null)
   let isOpen = $state(false)
   const basisGroups = $derived(
@@ -22,6 +29,12 @@
   const studentGoalsWithObservations = $derived(
     $dataStore.goals
       .filter((goal: GoalType) => student.goalIds.includes(goal.id))
+      .filter((goal: GoalType) => {
+        if (isTeachingGroupFilterEnabled) {
+          return goal.groupId === activeTeachingGroupId
+        }
+        return true
+      })
       .map((goal: GoalType) => {
         const result: any = { ...goal }
         result.observations = $dataStore.observations
@@ -45,50 +58,37 @@
   }
 </script>
 
-<div class="row py-2 align-items-center mx-0 border-top {isOpen ? '' : 'border-bottom'} ">
-  <div class="col-3">
+<div class="student-grid-row {isOpen ? 'is-open' : ''}">
+  <div class="fw-bold">
     {student.name}
     <button class="btn border expand-student-button" onclick={() => (isOpen = !isOpen)}>
       <span class="ms-2 caret-icon {isOpen ? 'rotated' : ''}">&#9656;</span>
     </button>
   </div>
-  <div class="col-6">
-    <div class="d-flex gap-2 justify-content-start">
-      {#each studentGoalsWithObservations as studentGoal}
-        {#if studentGoal.observations.length}
-          <MasteryLevelBadge {studentGoal} />
-        {/if}
-      {/each}
-    </div>
-  </div>
-  <div class="col-1">
+  <div>
     {basisGroups.map(g => g.name).join(', ')}
   </div>
-  <div class="col-1">
-    {studentGoalsWithObservations.length} mål
+  <div class="d-flex gap-2 justify-content-start">
+    {#each studentGoalsWithObservations as studentGoal}
+      {#if studentGoal.observations.length}
+        <MasteryLevelBadge {studentGoal} />
+      {/if}
+    {/each}
   </div>
-  <div class="col-1">
-    <div class="d-flex gap-2 justify-content-center">
-      <a href={`/students/${student.id}`} class="link-button">Detaljer</a>
-    </div>
-  </div>
+  <a href={`/students/${student.id}`} class="link-button">Detaljer</a>
 </div>
 
 {#if isOpen}
   {#each studentGoalsWithObservations as studentGoal}
-    <div class="row align-items-center border-top py-1 mx-0 expanded-student-row">
-      <div class="col-3">
+    <div class="student-grid-row expanded {isOpen ? 'is-open ' : ''}">
+      <div>
         <span class="fw-medium" title={studentGoal.description}>
           {studentGoal.title} |
           {getGoalDescription(studentGoal)}
         </span>
       </div>
-      <div
-        class="col-6"
-        title={studentGoal.title +
-          ': \n' +
-          studentGoal.observations.map((o: ObservationType) => o.masteryValue).join(', ')}
-      >
+      <div>&nbsp;</div>
+      <div>
         {#if studentGoal.observations.length}
           <div class="d-flex align-items-center">
             <MasteryLevelBadge {studentGoal} />
@@ -106,7 +106,7 @@
           <div class="text-muted small">Ikke nok data</div>
         {/if}
       </div>
-      <div class="col-1">
+      <div>
         <button
           class="link-button px-3"
           type="button"
@@ -118,9 +118,6 @@
           +
         </button>
       </div>
-
-      <div class="col-1"></div>
-      <div class="col-1"></div>
     </div>
   {/each}
 
@@ -160,10 +157,6 @@
     padding-top: 5px;
     height: 40px;
     width: 40px;
-  }
-
-  .expanded-student-row {
-    background-color: #f8f9fa;
   }
 
   .expand-student-button {

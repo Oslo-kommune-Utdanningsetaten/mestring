@@ -441,8 +441,8 @@ export const data = {
     // Goals for English-4
     {
       "id": "goal-31",
-      "title": "Hilsninger",
-      "description": "Eleven kan enkle hilsninger på engelsk.",
+      "title": "Hilsener",
+      "description": "Eleven kan enkle måter å hilse på engelsk.",
       "groupId": "english-4",
     },
     {

@@ -14,9 +14,7 @@
   const activeTeachingGroup = $derived(teachingGroups.find(tg => tg.id === activeTeachingGroupId))
   const activeBasisGroupId = $derived(router.getQueryParam('basisGroupId'))
   const activeBasisGroup = $derived(basisGroups.find(bg => bg.id === activeBasisGroupId))
-  const teachingGroupFilter = $state(null)
-
-  // TODO: use teachingGroupFilter to enable a checkbox to filter goals by activeTeachingGroupId
+  let isTeachingGroupFilterEnabled = $state(false)
 
   // Filter students by group and subject
   const filteredStudents = $derived(
@@ -107,17 +105,24 @@
   {:else}
     <div class="card shadow-sm">
       <!-- Header row -->
-      <div class="row fw-bold bg-light border-bottom py-3 mx-0">
-        <div class="col-3">Navn</div>
-        <div class="col-6">Status</div>
-        <div class="col-1"></div>
-        <div class="col-1"></div>
-        <div class="col-1"></div>
+      <div class="student-grid-row fw-bold header">
+        <div>Navn</div>
+        <div>Klasse</div>
+        <div>
+          Mål
+          {#if activeTeachingGroupId}
+            <label class="fw-normal ms-2">
+              <input type="checkbox" bind:checked={isTeachingGroupFilterEnabled} />
+              Vis bare mål i {activeTeachingGroup?.name || 'fag'}
+            </label>
+          {/if}
+        </div>
+        <div>&nbsp;</div>
       </div>
 
       <!-- Student rows -->
       {#each filteredStudents as student}
-        <StudentRow {student} />
+        <StudentRow {student} {isTeachingGroupFilterEnabled} />
       {/each}
     </div>
   {/if}
@@ -127,6 +132,7 @@
   .dropdown-link {
     font-size: 1em !important;
   }
+
   .dropdown-link:hover {
     text-decoration: none;
   }
