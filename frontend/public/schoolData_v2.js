@@ -6,7 +6,7 @@ export const data = {
       "name": "Pia Eriksen",
       "age": 10,
       "groupIds": ["4A", "norwegian-4", "math-4", "english-4"],
-      "goalIds": ["goal-01", "goal-02", "goal-03", "goal-11", "goal-21", "goal-31"]
+      "goalIds": ["goal-01", "goal-02", "goal-03", "goal-11", "goal-21", "goal-31", "goal-97"]
     },
     {
       "id": "camilla-hovberg",
@@ -714,6 +714,12 @@ export const data = {
       "title": "Klimasoner",
       "description": "Eleven kan beskrive ulike klimasoner på jorden.",
       "groupId": "science-5",
+    },
+    {
+      "id": "goal-97",
+      "title": "Bruke spørreord",
+      "description": "Eleven kan stille spørsmål med korrekt bruk av spørreord.",
+      "groupId": "norwegian-4",
     }
   ],
   "observations": [
@@ -780,6 +786,30 @@ export const data = {
       "masteryValue": 15,
       "groupId": "4A",
       "goalId": "goal-01",
+      "studentId": "pia-eriksen"
+    },
+    {
+      "id": "obs-pia-g97-1",
+      "createdAt": "2021-06-15T10:00:00Z",
+      "masteryValue": 22,
+      "groupId": "norwegian-4",
+      "goalId": "goal-97",
+      "studentId": "pia-eriksen"
+    },
+    {
+      "id": "obs-pia-g97-2",
+      "createdAt": "2022-01-15T10:00:00Z",
+      "masteryValue": 39,
+      "groupId": "norwegian-4",
+      "goalId": "goal-97",
+      "studentId": "pia-eriksen"
+    },
+    {
+      "id": "obs-pia-g97-3",
+      "createdAt": "2022-06-15T10:00:00Z",
+      "masteryValue": 25,
+      "groupId": "norwegian-4",
+      "goalId": "goal-97",
       "studentId": "pia-eriksen"
     },
     // 4th grade student - 7 obs per goal - flat mastery

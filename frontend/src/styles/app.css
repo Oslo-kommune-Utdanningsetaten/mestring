@@ -140,11 +140,18 @@ a:hover {
 
 .student-grid-row.header {
   background-color: var(--bs-light);
+  border-top-right-radius: inherit;
+  border-top-left-radius: inherit;
 }
 
 .student-grid-row.expanded {
   background-color: var(--bs-light);
-  padding: 0rem 1rem 0rem 3rem;
+  padding: 0rem 1rem;
+  font-size: 0.9rem;
+}
+
+.student-grid-row.expanded .indented {
+  padding-left: 1.2rem;
 }
 
 .student-grid-row.is-open {

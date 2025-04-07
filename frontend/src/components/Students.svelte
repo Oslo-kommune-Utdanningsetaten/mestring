@@ -62,7 +62,7 @@
         {/each}
       </ul>
     </div>
-    <!-- Filter subjects -->
+    <!-- Filter teaching groups -->
     <div class="dropdown">
       <button
         class="btn btn-outline-secondary dropdown-toggle link-button"

@@ -35,6 +35,13 @@
         }
         return true
       })
+      .sort((a, b) => {
+        // sort by groupId
+        if (a.groupId === b.groupId) {
+          return a.title.localeCompare(b.title)
+        }
+        return a.groupId.localeCompare(b.groupId)
+      })
       .map((goal: GoalType) => {
         const result: any = { ...goal }
         result.observations = $dataStore.observations
@@ -81,29 +88,25 @@
 {#if isOpen}
   {#each studentGoalsWithObservations as studentGoal}
     <div class="student-grid-row expanded {isOpen ? 'is-open ' : ''}">
-      <div>
-        <span class="fw-medium" title={studentGoal.description}>
-          {studentGoal.title} |
-          {getGoalDescription(studentGoal)}
-        </span>
-      </div>
+      <span class="fw-medium indented" title={studentGoal.description}>
+        {studentGoal.title}
+        <span class="text-muted small">[{getGoalDescription(studentGoal)}]</span>
+      </span>
       <div>&nbsp;</div>
-      <div>
+      <div class="d-flex align-items-center justify-content-start">
         {#if studentGoal.observations.length}
-          <div class="d-flex align-items-center">
-            <MasteryLevelBadge {studentGoal} />
-            {#if studentGoal.observations.length > 1}
-              <div class="chart-container ms-2">
-                <SparklineChart
-                  data={studentGoal.observations.map((o: ObservationType) => o.masteryValue)}
-                  lineColor="rgb(100, 100, 100)"
-                  label={studentGoal.title}
-                />
-              </div>
-            {/if}
-          </div>
+          <MasteryLevelBadge {studentGoal} />
+          {#if studentGoal.observations.length > 1}
+            <div class="chart-container ms-2">
+              <SparklineChart
+                data={studentGoal.observations.map((o: ObservationType) => o.masteryValue)}
+                lineColor="rgb(100, 100, 100)"
+                label={studentGoal.title}
+              />
+            </div>
+          {/if}
         {:else}
-          <div class="text-muted small">Ikke nok data</div>
+          <span class="text-muted small">Ikke nok data</span>
         {/if}
       </div>
       <div>
