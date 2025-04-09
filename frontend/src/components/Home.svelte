@@ -15,7 +15,8 @@
 <section class="py-3">
   <h2 class="mb-4">Mine grupper</h2>
   <p class="d-flex align-items-center gap-2">
-    Hei, {currentUser?.name}! Dette er gruppene du har tilgang til.
+    Hei, <span class="fw-bold">{currentUser?.name}!</span>
+    Dette er gruppene du har tilgang til.
   </p>
 
   <section class="py-3">
@@ -45,7 +46,7 @@
                   }
                 )}
               >
-                {group.name}
+                {group.name}{group.type === 'basis' ? '' : ', ' + group.grade + '. trinn'}
               </a>
             </div>
             <div class="col-3">

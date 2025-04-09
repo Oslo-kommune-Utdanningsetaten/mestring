@@ -6,7 +6,6 @@
 
   let isHomeActive = $derived($currentPath === '/')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
-  let isSubjectsActive = $derived($currentPath.startsWith('/subjects'))
   let isAboutActive = $derived($currentPath.startsWith('/about'))
 
   const teachers = $derived($dataStore.teachers)
@@ -43,9 +42,6 @@
         </Link>
       </li>
       <li class="nav-item">
-        <Link to="/subjects" className={`nav-link ${isSubjectsActive ? 'active' : ''}`}>Fag</Link>
-      </li>
-      <li class="nav-item">
         <Link to="/about" className={`nav-link ${isAboutActive ? 'active' : ''}`}>
           Om tjenesten
         </Link>
@@ -59,7 +55,7 @@
           data-bs-toggle="dropdown"
           aria-expanded="false"
         >
-          Options
+          {$dataStore.currentUser?.name || 'options'}
         </a>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
           {#each teachers as teacher}

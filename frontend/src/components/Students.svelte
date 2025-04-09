@@ -14,7 +14,6 @@
   const activeTeachingGroup = $derived(teachingGroups.find(tg => tg.id === activeTeachingGroupId))
   const activeBasisGroupId = $derived(router.getQueryParam('basisGroupId'))
   const activeBasisGroup = $derived(basisGroups.find(bg => bg.id === activeBasisGroupId))
-  let isTeachingGroupFilterEnabled = $state(false)
 
   // Filter students by group and subject
   const filteredStudents = $derived(
@@ -26,10 +25,22 @@
         return activeBasisGroupId ? student.groupIds.includes(activeBasisGroupId) : true
       })
   )
+
+  // a derived map of groups by id, i.e. the superset of all student groups, by group id
+  const groupsById = $derived(
+    filteredStudents
+      .map((student: StudentType) => student.groupIds)
+      .flat()
+      .reduce((acc: { [key: string]: GroupType | undefined }, groupId: string) => {
+        acc[groupId] = $dataStore.groups.find(g => g.id === groupId)
+        return acc
+      }, {})
+  )
 </script>
 
 <section class="py-3">
   <h2>Elever</h2>
+
   <!-- Filter basis groups -->
   <div class="d-flex align-items-center gap-2">
     <div class="dropdown">
@@ -109,20 +120,21 @@
         <div>Navn</div>
         <div>Klasse</div>
         <div>
-          Mål
-          {#if activeTeachingGroupId}
-            <label class="fw-normal ms-2">
-              <input type="checkbox" bind:checked={isTeachingGroupFilterEnabled} />
-              Vis bare mål i {activeTeachingGroup?.name || 'fag'}
-            </label>
-          {/if}
+          <span>Mål</span>
+          <div class="group-grid-columns">
+            {#each Object.values(groupsById) as group}
+              <span class="group-grid-column">
+                {group?.id.includes('-') ? group.name : 'Sosialt'}
+              </span>
+            {/each}
+          </div>
         </div>
         <div>&nbsp;</div>
       </div>
 
       <!-- Student rows -->
       {#each filteredStudents as student}
-        <StudentRow {student} {isTeachingGroupFilterEnabled} />
+        <StudentRow {student} groupIds={Object.keys(groupsById)} />
       {/each}
     </div>
   {/if}

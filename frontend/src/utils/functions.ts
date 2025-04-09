@@ -1,4 +1,4 @@
-import type { MasteryLevel } from '../types/models'
+import type { MasteryLevel, Goal } from '../types/models'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
   [key: string]: string
@@ -44,4 +44,25 @@ export function urlStringFrom(
       .map(key => `${key}=${finalParams[key] ?? ''}`)
       .join('&')
   )
+}
+
+export function inferMastery(goal: any): {
+  status: number
+  trend: number
+  title: string
+  groupName: string
+} {
+  const firstValue = goal.observations[0]?.masteryValue
+  const lastValue = goal.observations[goal.observations.length - 1]?.masteryValue
+
+  return {
+    status: goal.latestObservation?.masteryValue || 0,
+    trend: lastValue - firstValue,
+    title: `${goal.title}: ${goal.latestObservation?.masteryValue}`,
+    groupName: goal.groupId.includes('-') ? goal.groupId : 'sosialt',
+  }
+}
+
+export function findAverage(numbers: number[]): number {
+  return numbers.reduce((sum, currentValue) => sum + currentValue, 0) / numbers.length
 }

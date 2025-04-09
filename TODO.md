@@ -4,9 +4,11 @@
 
 ## /students
 
-- [ ] list of all students, filterable by group and subject
-  - [ ] fix dataset
-  - [ ] if subject selected, each StatusTrend is ag
+- [x] aggregere bikuben hvis ikke fag er valgt
+- [ ] ??El add obser vation er knthet
+- [ ] StudentRow → vis tom bikube for manglende fag, groupId som kolonnetittel
+- [ ] StudentRow → Expended → Anonymiser navn på mål
+- [ ] Farge-palett (success)
 - [ ] drill into each student
 - [ ] ui for setting mastery level
 

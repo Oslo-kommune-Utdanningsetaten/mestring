@@ -71,6 +71,7 @@
 
   --grid-template-student-columns: minmax(180px, 25%) minmax(80px, 15%) minmax(250px, 45%) 100px
     auto;
+  --grid-template-group-columns: repeat(auto-fit, minmax(50px, 1fr));
 }
 
 body {
@@ -142,6 +143,7 @@ a:hover {
   background-color: var(--bs-light);
   border-top-right-radius: inherit;
   border-top-left-radius: inherit;
+  align-items: start;
 }
 
 .student-grid-row.expanded {
@@ -157,6 +159,25 @@ a:hover {
 .student-grid-row.is-open {
   background-color: var(--bs-light);
   border-left: 3px solid var(--bs-primary);
+}
+
+.student-grid-row > div:nth-child(3) {
+  width: 100%;
+}
+
+.group-grid-columns {
+  display: grid;
+  grid-template-columns: var(--grid-template-group-columns);
+  width: 100%;
+  gap: 0.5rem;
+  margin-top: 8px;
+  font-weight: normal;
+}
+
+.group-grid-column {
+  padding: 0px;
+  text-align: left;
+  font-size: 0.7em;
 }
 
 @media (prefers-color-scheme: light) {

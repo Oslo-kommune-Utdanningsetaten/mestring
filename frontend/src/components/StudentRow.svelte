@@ -1,19 +1,21 @@
 <script lang="ts">
   import SparklineChart from './SparklineChart.svelte'
-  import MasteryLevelBadge from './MasteryLevelBadge-v2.svelte'
+  import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import ObservationEdit from './ObservationEdit.svelte'
   import { dataStore } from '../stores/data'
+  import { inferMastery, findAverage } from '../utils/functions'
   import type {
     Student as StudentType,
     Goal as GoalType,
+    Group as GroupType,
     Observation as ObservationType,
   } from '../types/models'
   import { useTinyRouter } from 'svelte-tiny-router'
   const router = useTinyRouter()
 
-  const { student, isTeachingGroupFilterEnabled } = $props<{
+  const { student, groupIds } = $props<{
     student: StudentType
-    isTeachingGroupFilterEnabled: boolean
+    groupIds: string[]
   }>()
   const activeTeachingGroupId = $derived(router.getQueryParam('teachingGroupId'))
 
@@ -22,21 +24,12 @@
   const basisGroups = $derived(
     $dataStore.groups.filter(s => s.type === 'basis' && student.groupIds.includes(s.id))
   )
-  const teachingGroups = $derived(
-    $dataStore.groups.filter(s => s.type === 'teaching' && student.groupIds.includes(s.id))
-  )
 
   const studentGoalsWithObservations = $derived(
     $dataStore.goals
       .filter((goal: GoalType) => student.goalIds.includes(goal.id))
-      .filter((goal: GoalType) => {
-        if (isTeachingGroupFilterEnabled) {
-          return goal.groupId === activeTeachingGroupId
-        }
-        return true
-      })
       .sort((a, b) => {
-        // sort by groupId
+        // sort goals by group
         if (a.groupId === b.groupId) {
           return a.title.localeCompare(b.title)
         }
@@ -47,18 +40,45 @@
         result.observations = $dataStore.observations
           .filter(o => o.goalId === goal.id && o.studentId === student.id)
           .sort((a, b) => {
+            // sort observations by createdAt
             return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
           })
         result.latestObservation = result.observations[result.observations.length - 1]
+        result.mastery = inferMastery(result)
         return result
       })
   )
+
+  const masteryElements = $derived(aggregateMasteryByGroup(studentGoalsWithObservations))
+
+  function aggregateMasteryByGroup(goals: any[]): any[] {
+    const goalsByGroupId: { [key: string]: any[] } = {}
+    goals.forEach(goal => {
+      const { groupId } = goal
+      if (!goalsByGroupId[groupId]) {
+        goalsByGroupId[groupId] = []
+      }
+      goalsByGroupId[groupId].push(goal)
+    })
+
+    return Object.entries(goalsByGroupId).map(([groupId, goalsInGroup]) => {
+      const statusValues = goalsInGroup.map((goal: any) => goal.mastery.status)
+      const trendValues = goalsInGroup.map((goal: any) => goal.mastery.trend)
+      return {
+        groupId,
+        status: findAverage(statusValues),
+        trend: findAverage(trendValues),
+        title: `${groupId} - aggregert`,
+        groupName: goalsInGroup[0].groupId.includes('-') ? goalsInGroup[0].groupId : 'sosialt',
+      }
+    })
+  }
 
   function openObservationModal(goal: GoalType) {
     selectedGoal = goal
   }
 
-  function getGoalDescription(goal: GoalType) {
+  function getGroupDescription(goal: GoalType) {
     const group = $dataStore.groups.find(g => g.id === goal.groupId)
     if (!group) return null
     return group.type === 'basis' ? 'Sosialt' : group.name
@@ -75,11 +95,11 @@
   <div>
     {basisGroups.map(g => g.name).join(', ')}
   </div>
-  <div class="d-flex gap-2 justify-content-start">
-    {#each studentGoalsWithObservations as studentGoal}
-      {#if studentGoal.observations.length}
-        <MasteryLevelBadge {studentGoal} />
-      {/if}
+  <div class="group-grid-columns">
+    {#each groupIds.map((gid: string) => masteryElements.find(me => me.groupId === gid)) as mastery}
+      <span class="group-grid-column">
+        <MasteryLevelBadge {mastery} />
+      </span>
     {/each}
   </div>
   <a href={`/students/${student.id}`} class="link-button">Detaljer</a>
@@ -90,21 +110,22 @@
     <div class="student-grid-row expanded {isOpen ? 'is-open ' : ''}">
       <span class="fw-medium indented" title={studentGoal.description}>
         {studentGoal.title}
-        <span class="text-muted small">[{getGoalDescription(studentGoal)}]</span>
+        <span class="text-muted small">[{getGroupDescription(studentGoal)}]</span>
       </span>
       <div>&nbsp;</div>
       <div class="d-flex align-items-center justify-content-start">
-        {#if studentGoal.observations.length}
-          <MasteryLevelBadge {studentGoal} />
-          {#if studentGoal.observations.length > 1}
-            <div class="chart-container ms-2">
-              <SparklineChart
-                data={studentGoal.observations.map((o: ObservationType) => o.masteryValue)}
-                lineColor="rgb(100, 100, 100)"
-                label={studentGoal.title}
-              />
-            </div>
-          {/if}
+        <MasteryLevelBadge mastery={studentGoal.mastery} />
+        {#if studentGoal.observations.length > 1}
+          <div
+            class="chart-container ms-2"
+            title={studentGoal.observations.map((o: ObservationType) => o.masteryValue).join(', ')}
+          >
+            <SparklineChart
+              data={studentGoal.observations.map((o: ObservationType) => o.masteryValue)}
+              lineColor="rgb(100, 100, 100)"
+              label={studentGoal.title}
+            />
+          </div>
         {:else}
           <span class="text-muted small">Ikke nok data</span>
         {/if}
