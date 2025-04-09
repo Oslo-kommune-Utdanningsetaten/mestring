@@ -43,7 +43,7 @@
     </span>
   {:else}
     <span
-      class="trend-box null-mastery"
+      class="trend-box missing-mastery"
       style="width: {trendBoxSize}px; height: {trendBoxSize}px;"
       title="Ingen mål registrert"
     >
@@ -63,7 +63,6 @@
   .trend-box {
     display: inline-block;
     position: relative;
-    cursor: pointer;
   }
 
   .status-indicator {
@@ -73,7 +72,7 @@
     background-color: white;
   }
 
-  .null-mastery {
+  .missing-mastery {
     background-color: white;
     border: 1px solid #ccc;
     position: relative;

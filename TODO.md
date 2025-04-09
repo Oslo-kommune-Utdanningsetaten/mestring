@@ -5,10 +5,9 @@
 ## /students
 
 - [x] aggregere bikuben hvis ikke fag er valgt
-- [ ] ??El add obser vation er knthet
-- [ ] StudentRow → vis tom bikube for manglende fag, groupId som kolonnetittel
-- [ ] StudentRow → Expended → Anonymiser navn på mål
-- [ ] Farge-palett (success)
+- [x] StudentRow → vis tom bikube for manglende fag, groupId som kolonnetittel
+- [x] StudentRow → Expended → Anonymiser navn på mål
+- [x] Farge-palett (success)
 - [ ] drill into each student
 - [ ] ui for setting mastery level
 

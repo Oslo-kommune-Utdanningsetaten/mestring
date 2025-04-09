@@ -177,7 +177,7 @@ a:hover {
 .group-grid-column {
   padding: 0px;
   text-align: left;
-  font-size: 0.7em;
+  font-size: 0.8em;
 }
 
 @media (prefers-color-scheme: light) {

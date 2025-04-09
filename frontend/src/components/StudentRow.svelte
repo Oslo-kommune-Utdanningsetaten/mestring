@@ -1,4 +1,5 @@
 <script lang="ts">
+  import StudentGoalDisplayName from './StudentGoalDisplayName.svelte'
   import SparklineChart from './SparklineChart.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import ObservationEdit from './ObservationEdit.svelte'
@@ -7,7 +8,6 @@
   import type {
     Student as StudentType,
     Goal as GoalType,
-    Group as GroupType,
     Observation as ObservationType,
   } from '../types/models'
   import { useTinyRouter } from 'svelte-tiny-router'
@@ -77,12 +77,6 @@
   function openObservationModal(goal: GoalType) {
     selectedGoal = goal
   }
-
-  function getGroupDescription(goal: GoalType) {
-    const group = $dataStore.groups.find(g => g.id === goal.groupId)
-    if (!group) return null
-    return group.type === 'basis' ? 'Sosialt' : group.name
-  }
 </script>
 
 <div class="student-grid-row {isOpen ? 'is-open' : ''}">
@@ -106,12 +100,9 @@
 </div>
 
 {#if isOpen}
-  {#each studentGoalsWithObservations as studentGoal}
+  {#each studentGoalsWithObservations as studentGoal, index}
     <div class="student-grid-row expanded {isOpen ? 'is-open ' : ''}">
-      <span class="fw-medium indented" title={studentGoal.description}>
-        {studentGoal.title}
-        <span class="text-muted small">[{getGroupDescription(studentGoal)}]</span>
-      </span>
+      <StudentGoalDisplayName {studentGoal} {index} />
       <div>&nbsp;</div>
       <div class="d-flex align-items-center justify-content-start">
         <MasteryLevelBadge mastery={studentGoal.mastery} />
