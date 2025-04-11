@@ -7,7 +7,7 @@
     index: number
   }>()
 
-  const anonymized = true
+  const isAnonymous = true
 
   function getGroupDescription(goal: GoalType) {
     const group = $dataStore.groups.find(g => g.id === goal.groupId)
@@ -16,7 +16,7 @@
   }
 </script>
 
-{#if anonymized}
+{#if isAnonymous}
   <span class="fw-medium indented">
     {index + 1}
     <span class="text-muted small">[{getGroupDescription(studentGoal)}]</span>
