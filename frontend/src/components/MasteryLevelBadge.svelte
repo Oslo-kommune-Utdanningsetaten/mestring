@@ -4,7 +4,7 @@
   }>()
 
   const { status, trend, title } = mastery || {}
-  const similarityRange = 5 // +/- 5 similarity threshold
+  const similarityRange = 6 // +/- 5 similarity threshold
   const isFlat = Math.abs(trend) < similarityRange
   const isDecreasing = trend < 0 && !isFlat
 
