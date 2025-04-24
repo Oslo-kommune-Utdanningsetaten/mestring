@@ -1,0 +1,46 @@
+[tool.poetry]
+name = "mestring"
+version = "0.0.1"
+description = ""
+authors = []
+readme = "../README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.13"
+python-dotenv = "^1.0.1"
+oauthlib = "^3.2.2"
+requests = "^2.31.0"
+pyopenssl = "^24.0.0"
+pymysql = "^1.1.0"
+gunicorn = "^23.0.0"
+uvicorn = "^0.27.1"
+django = "^5.2"
+djangorestframework = "^3.16.0"
+mysqlclient = "^2.2.4"
+django-cors-headers = "^4.7.0"
+nanoid = "^2.0.0"
+pytest-django = "^4.11.1"
+djangorestframework-camel-case = "^1.4.2"
+
+[tool.poetry.group.dev.dependencies]
+daphne = "^4.1.0"
+drf-spectacular = "^0.28.0"
+pytest = "^8.3.5"
+pytest-django = "^4.10.0"
+poethepoet = "^0.32.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "settings"
+python_files = ["test_*.py"]
+testpaths = ["mastery/tests"]
+django_find_project = true
+pythonpath = ["."]
+
+[tool.poe.tasks]
+run-tests = "pytest --verbose --nomigrations -s"
+run-server = "python manage.py runserver 5000"

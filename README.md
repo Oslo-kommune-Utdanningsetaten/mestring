@@ -1,8 +1,11 @@
-# vv2
-Vurdering Versjon 2 - prototyping what an assessment app could be
+# Mestring
+
+Prototyping what a keep-track-of-student-mastery app could be
 
 ## Some terms to keep in mind
+
 - Goal
+
   - observation
   - remark
   - opinion

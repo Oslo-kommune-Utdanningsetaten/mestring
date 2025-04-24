@@ -1,0 +1,84 @@
+services:
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - 3306:3306 # For dev (make sure port is not exposed on prod host)
+    volumes:
+      - ./db:/var/lib/mysql
+    profiles:
+      - dev
+      - prod
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      ADMINER_DESIGN: 'dracula'
+    extra_hosts:
+      - 'db:host-gateway'
+    volumes:
+      - /var/run/mysqld/mysqld.sock:/var/run/mysqld/mysqld.sock:ro
+    profiles:
+      - dev
+      - prod
+    command:
+      [
+        'php',
+        '-d',
+        'post_max_size=500M',
+        '-d',
+        'upload_max_filesize=500M',
+        '-S',
+        '0.0.0.0:8080',
+        '-t',
+        '/var/www/html',
+      ]
+
+  backend:
+    build: ./backend
+    command:
+      - bash
+      - -c
+      - |
+        python manage.py migrate
+        python manage.py collectstatic --noinput
+        cp -r ./public/ /var/www/static/
+        gunicorn asgi -b :8000 -w 9
+    volumes:
+      - ./backend:/code
+      - /var/www/:/var/www/
+      - /var/run/mysqld/mysqld.sock:/var/run/mysqld/mysqld.sock:ro
+    ports:
+      - 8001:8000
+    env_file:
+      - ./backend/.env
+    environment:
+      DJANGO_DEBUG: 'False'
+      DB_HOST: 'db'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    profiles:
+      - prod
+    restart: always
+
+  frontend:
+    build: ./frontend
+    ports:
+      - 5000:80 # For local testing
+      - 80:80
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/nginx:/etc/nginx/conf.d
+      - /var/www/:/var/www/
+    restart: always
+    profiles:
+      - prod

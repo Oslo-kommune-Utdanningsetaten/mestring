@@ -13,19 +13,21 @@
 
 ## The actual app
 
-- [ ] Skissere en datamodell
-- [ ] Modellfiler
-- [ ] Sette opp en database, mariadb
-- [ ] Koble django til databasen
-- [ ] Generere og kjøre migrasjoner
-- [ ] API: Eksponere innhold fra den ene tabellen via http
+- [ ] openapi: kode + typings
 - [ ] En test som sjekker at APIet leverer noe og gir 200
-- [ ] Fetch noe fra APIet og rendrere
+- [ ] Fetch noe fra APIet og rendre
 - [ ] En unit-test som sjekker noe som helst
 - [ ] Auth mot Feide
-- [ ] Konfigurere .env og prosjektet for lokal utvikling og deployment
 - [ ] Finne ut av sikkerhet/ACL
-- [ ] Dockerization m/gunicorn
+- [x] API with camelCase
+- [x] Skissere en datamodell
+- [x] models.py
+- [x] Sette opp en database, mariadb
+- [x] Koble django til databasen
+- [x] Generere og kjøre migrasjoner
+- [x] API: Eksponere innhold fra den ene tabellen via http
+- [x] Konfigurere .env og prosjektet for lokal utvikling og deployment
+- [x] Dockerization m/gunicorn
 - [x] Sette opp en frontend m/svelte
 - [x] svelte-routing
 - [x] Bootstrap
@@ -35,3 +37,5 @@
 https://www.django-rest-framework.org/api-guide/parsers/#camelcase-json
 https://github.com/Utdanningsdirektoratet/KL06-LK20-public/wiki/Swagger
 https://docs.feide.no/reference/apis/groups_api/group_types/pse_teaching.html
+
+This project now have Swagger endpoints with describe the available APIs. I would like to automatically generate frontend code - both request/fetch code and TS typings - using a tool akin to openapi-generator. However, that specific tool requires Java installed locally to run. Which is just ridiculous. Is there another solid tool to achieve the same goals?
