@@ -47,12 +47,12 @@ INSTALLED_APPS = [
     'mastery'
 ]
 
-
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -76,6 +76,23 @@ TEMPLATES = [
 ]
 WSGI_APPLICATION = 'wsgi.application'
 
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'mestring.osloskolen.no', 'mestring-dev.osloskolen.no', 'iz-mestring-ap01t.oslo.int']
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5000',
+    'https://mestring-dev.osloskolen.no',
+    'https://mestring.osloskolen.no',
+    'http://localhost:5173',
+    'http://iz-mestring-ap01t.oslo.int'
+]
+                        
+CORS_ALLOWED_ORIGINS = [
+    'https://mestring.osloskolen.no',
+    'https://mestring-dev.osloskolen.no',
+    'http://127.0.0.1:5173',
+    'http://localhost:5173',
+    'http://iz-mestring-ap01t.oslo.int'
+]
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
