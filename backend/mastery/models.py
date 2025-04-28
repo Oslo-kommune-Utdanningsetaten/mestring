@@ -99,7 +99,7 @@ class Goal(BaseModel):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=models.Q(group__isnull=False) | models.Q(student__isnull=False),
+                condition=models.Q(group__isnull=False) | models.Q(student__isnull=False),
                 name='goal_group_or_student'
             ),
         ]

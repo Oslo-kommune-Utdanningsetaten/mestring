@@ -26,8 +26,6 @@ djangorestframework-camel-case = "^1.4.2"
 [tool.poetry.group.dev.dependencies]
 daphne = "^4.1.0"
 drf-spectacular = "^0.28.0"
-pytest = "^8.3.5"
-pytest-django = "^4.10.0"
 poethepoet = "^0.32.2"
 
 [build-system]
@@ -35,11 +33,17 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "settings"
+DJANGO_SETTINGS_MODULE = "mastery.tests.settings_in_memory"
 python_files = ["test_*.py"]
 testpaths = ["mastery/tests"]
 django_find_project = true
 pythonpath = ["."]
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.3.5"
+pytest-django = "^4.11.1"
+pytest-cov = "^6.1.1"
+freezegun = "^1.5.1"
 
 [tool.poe.tasks]
 run-tests = "pytest --verbose --nomigrations -s"
