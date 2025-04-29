@@ -129,9 +129,16 @@ class Status(BaseModel):
     """
     A status represents a students current standing at a point in time, typically in a subject, e.g. how is Lois doing in math (all math Goals are then considered)
     """
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=False, blank=False)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True)
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
     estimated_at = models.DateTimeField(null=True, blank=True)
     mastery_value = models.IntegerField()
     mastery_description = models.TextField(null=True, blank=True)
+
+class StatusGoal(BaseModel):
+    """
+    A StatusGoal represents a goal that is part of a Status. This is used to track the status of a specific goal for a student
+    """
+    status = models.ForeignKey(Status, on_delete=models.CASCADE, null=False, blank=False)
+    goal = models.ForeignKey(Goal, on_delete=models.CASCADE, null=False, blank=False)
 
