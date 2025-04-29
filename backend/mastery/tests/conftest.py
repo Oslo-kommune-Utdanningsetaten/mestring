@@ -23,6 +23,6 @@ def school(db):
     return School.objects.create(
         feide_id="fc:org:kakrafoon.kommune.no:unit:NO987654321",
         display_name="Kakrafoon vgs",
-        org_number="U87654321",
+        org_number="987654321",
         owner="kakrafoon.kommune.no",
     )

@@ -98,12 +98,12 @@ CORS_ALLOWED_ORIGINS = [
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT'),
+        'ENGINE': 'mssql',
+        'NAME': os.environ.get('MSSQL_DB_NAME'),
+        'USER': os.environ.get('MSSQL_USER'),
+        'PASSWORD': os.environ.get('MSSQL_PASSWORD'),
+        'HOST': os.environ.get('MSSQL_DB_HOST'),
+        'PORT': os.environ.get('MSSQL_DB_PORT'),
         'CONN_MAX_AGE': 0,
         'CONN_HEALTH_CHECKS': True,
         'OPTIONS': {

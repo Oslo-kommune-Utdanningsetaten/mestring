@@ -99,7 +99,7 @@ class Goal(BaseModel):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                condition=models.Q(group__isnull=False) | models.Q(student__isnull=False),
+                check=models.Q(group__isnull=False) | models.Q(student__isnull=False),
                 name='goal_group_or_student'
             ),
         ]
@@ -122,6 +122,16 @@ class Observation(BaseModel):
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False, related_name='observations_received')
     observer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='observations_performed')
     situation = models.ForeignKey(Situation, on_delete=models.SET_NULL, null=True, blank=True)
+    mastery_value = models.IntegerField()
+    mastery_description = models.TextField(null=True, blank=True)
+
+class Status(BaseModel):
+    """
+    A status represents a students current standing at a point in time, typically in a subject, e.g. how is Lois doing in math (all math Goals are then considered)
+    """
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=False, blank=False)
+    student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
+    estimated_at = models.DateTimeField(null=True, blank=True)
     mastery_value = models.IntegerField()
     mastery_description = models.TextField(null=True, blank=True)
 

@@ -4,9 +4,9 @@ services:
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MARIADB_DB_NAME}
+      MYSQL_USER: ${MARIADB_USER}
+      MYSQL_PASSWORD: ${MARIADB_PASSWORD}
     ports:
       - 3306:3306 # For dev (make sure port is not exposed on prod host)
     volumes:
@@ -14,6 +14,21 @@ services:
     profiles:
       - dev
       - prod
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: always
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: ${MSSQL_PASSWORD}
+      MSSQL_PID: Developer
+      MSSQL_DB: ${MSSQL_DB_NAME}
+    ports:
+      - 1433:1433
+    volumes:
+      - mssql-data:/var/opt/mssql
+    profiles:
+      - dev
 
   adminer:
     image: adminer
@@ -82,3 +97,7 @@ services:
     restart: always
     profiles:
       - prod
+
+volumes:
+  mssql-data:
+    driver: local
