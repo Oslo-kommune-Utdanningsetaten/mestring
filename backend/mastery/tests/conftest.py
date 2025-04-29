@@ -1,5 +1,6 @@
 import pytest
 from django.test import Client
+from mastery.models import School
 
 # Basic fixture for Django client
 @pytest.fixture
@@ -17,13 +18,11 @@ def auth_client(db, client):
     # client.force_login(user)
     return client
 
-# Fixture to provide a test School object
 @pytest.fixture
 def school(db):
-    from mastery.models import School
     return School.objects.create(
-        feide_id="fc:org:test.school.no:unit:NO123456789",
-        display_name="Test School",
-        org_number="U12345678",
-        owner="test.kommune.no"
+        feide_id="fc:org:kakrafoon.kommune.no:unit:NO987654321",
+        display_name="Kakrafoon vgs",
+        org_number="U87654321",
+        owner="kakrafoon.kommune.no",
     )

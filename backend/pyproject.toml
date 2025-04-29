@@ -46,5 +46,5 @@ pytest-cov = "^6.1.1"
 freezegun = "^1.5.1"
 
 [tool.poe.tasks]
-run-tests = "pytest --verbose --nomigrations -s"
+run-tests = "pytest --verbose -s"
 run-server = "python manage.py runserver 5000"

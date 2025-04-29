@@ -1,11 +1,11 @@
 # Checklist
 
-- [ ] En test som sjekker at APIet leverer noe og gir 200
+- [ ] Dataimport fra Excel
+- [ ] App funker like bra som prototypen
 - [ ] En unit-test som sjekker noe som helst
 - [ ] Auth mot Feide
 - [ ] Finne ut av sikkerhet/ACL
-- [ ] Dataimport fra Excel
-- [ ] App funker like bra som prototypen
+- [x] En test som sjekker at APIet leverer noe og gir 200
 - [x] openapi: kode + typings
 - [x] Fetch noe fra APIet og rendre
 - [x] API with camelCase
@@ -23,6 +23,5 @@
 
 ## linker
 
-https://www.django-rest-framework.org/api-guide/parsers/#camelcase-json
 https://github.com/Utdanningsdirektoratet/KL06-LK20-public/wiki/Swagger
 https://docs.feide.no/reference/apis/groups_api/group_types/pse_teaching.html
