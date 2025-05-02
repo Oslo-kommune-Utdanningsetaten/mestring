@@ -1,6 +1,8 @@
 # Checklist
 
-- [ ] Urls, view, serializers for hele databasen
+- [x] Urls, view, serializers for hele databasen
+- [x] Teste relasjoner user/group
+- [ ] Teste relasjoner status/goal
 - [ ] Dataimport fra Excel
 
 I need import data from an Excel file and write rows in the database. This requires several steps:

@@ -51,6 +51,21 @@ class User(BaseModel):
     email = models.CharField(max_length=200)
     last_activity_at = models.DateTimeField(null=True, blank=True)
     disabled_at = models.DateTimeField(null=True, blank=True)
+    groups = models.ManyToManyField('Group', through='UserGroup', related_name='members')
+    
+    def role_groups(self, role_name):
+        """Get all groups where user has a specific role"""
+        return self.groups.filter(user_groups__role__name=role_name)
+    
+    @property
+    def student_groups(self):
+        """Get all groups where user is a student"""
+        return self.role_groups('student')
+    
+    @property
+    def teacher_groups(self):
+        """Get all groups where user is a teacher"""
+        return self.role_groups('teacher')
 
 
 class Role(BaseModel):
@@ -71,14 +86,59 @@ class Group(BaseModel):
     school = models.ForeignKey(School, on_delete=models.RESTRICT, null=False, blank=False)
     valid_from = models.DateTimeField(null=True, blank=True)
     valid_to = models.DateTimeField(null=True, blank=True)
+    # members attribute added via User.groups reverse relation
+    
+    def get_members(self, role=None):
+        """
+        Get all users in this group, optionally filtered by role
+        
+        Args:
+            role: Role name or Role object to filter by. If None, returns all members.
+        
+        Returns:
+            QuerySet of User objects
+        """
+        if role is None:
+            return self.members.all()
+        
+        if isinstance(role, str):
+            return self.members.filter(user_groups__role__name=role)
+        else:
+            return self.members.filter(user_groups__role=role)
+    
+
+    def get_students(self):
+        """Get all students in this group"""
+        return self.get_members(role='student')
+    
+    def get_teachers(self):
+        """Get all teachers in this group"""
+        return self.get_members(role='teacher')
+    
+    def add_member(self, user, role):
+        """
+        Add a user to this group with the specified role
+        
+        Args:
+            user: User object to add to the group
+            role: Role object or string role name
+            
+        Returns:
+            UserGroup object that was created
+        """
+        if isinstance(role, str):
+            from mastery.models import Role
+            role, created = Role.objects.get_or_create(name=role)
+            
+        return UserGroup.objects.create(user=user, group=self, role=role)
 
 
 class UserGroup(BaseModel):
     """
     A UserGroup represents a User in a Group with a specific Role. Teacher status in a group will be modeled as a UserGroup with the role of teacher
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=False, blank=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False, related_name='user_groups')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=False, blank=False, related_name='user_groups')
     role = models.ForeignKey(Role, on_delete=models.CASCADE, null=False, blank=False)
 
     class Meta:

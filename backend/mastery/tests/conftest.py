@@ -1,6 +1,6 @@
 import pytest
 from django.test import Client
-from mastery.models import School
+from mastery.models import School, User, Group, Role, UserGroup
 
 # Basic fixture for Django client
 @pytest.fixture
@@ -26,3 +26,46 @@ def school(db):
         org_number="987654321",
         owner="kakrafoon.kommune.no",
     )
+
+@pytest.fixture
+def roles(db):
+    # Create a student role
+    student_role = Role.objects.create(name="student")
+    # Create a teacher role
+    teacher_role = Role.objects.create(name="teacher")
+    return student_role, teacher_role
+
+@pytest.fixture
+def group_with_members(db, school, roles):
+    # Create a group
+    group = Group.objects.create(
+        feide_id="fc:group:test",
+        display_name="Test Group",
+        type="basis",
+        school=school
+    )
+    
+    # Create users
+    student_1 = User.objects.create(
+        name="Student 1", 
+        feide_id="user-id-1@example.com",
+        email="user1@example.com"
+    )
+    student_2 = User.objects.create(
+        name="Student 2", 
+        feide_id="user-id-2@example.com",
+        email="user2@example.com"
+    )
+    teacher_1 = User.objects.create(
+        name="Teacher 1", 
+        feide_id="user-id-3@example.com",
+        email="user3@example.com"
+    )
+    student_role, teacher_role = roles
+    
+    # Add members to the group
+    group.add_member(student_1, student_role)
+    group.add_member(student_2, student_role)
+    group.add_member(teacher_1, teacher_role)
+    
+    return group
