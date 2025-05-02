@@ -83,7 +83,7 @@ class Group(BaseModel):
     display_name = models.CharField(max_length=200)
     type = models.CharField(max_length=200)
     subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True, blank=True)
-    school = models.ForeignKey(School, on_delete=models.RESTRICT, null=False, blank=False)
+    school = models.ForeignKey(School, on_delete=models.RESTRICT, null=False, blank=False, related_name='groups')
     valid_from = models.DateTimeField(null=True, blank=True)
     valid_to = models.DateTimeField(null=True, blank=True)
     # members attribute added via User.groups reverse relation
