@@ -1,23 +1,17 @@
 # Checklist
 
-- [x] Urls, view, serializers for hele databasen
-- [x] Teste relasjoner user/group
 - [ ] Teste relasjoner status/goal
 - [ ] Dataimport fra Excel
-
-I need import data from an Excel file and write rows in the database. This requires several steps:
-
-- The models.py file dictates the target shape of the data should have
-- Figure out how to structure data in the excel file (available either as a file or on a URL, read access)
-- Apply some samples from the schoolData_v2.js file to the Excel file, establishing a pattern how users will be entering data
-- A script which reads the excel file, builds an internal data structure and writes rows to the database, in the appropriate tables
-- The script should be able to run repeatedly, without creating duplicates
-- I have a preference for node.js (above python) so this should be a JS file which resides in the /scripts folder
-
+- [ ] prettier i frontend
 - [ ] App funker like bra som prototypen
-- [ ] En unit-test som sjekker noe som helst
-- [ ] Auth mot Feide
+- [ ] Feide
+  - [ ] Auth
+  - [ ] Skoler
+  - [ ] Grupper pr. skole
 - [ ] Finne ut av sikkerhet/ACL
+- [ ] En unit-test som sjekker noe som helst
+- [x] Urls, view, serializers for hele databasen
+- [x] Teste relasjoner user/group
 - [x] En test som sjekker at APIet leverer noe og gir 200
 - [x] openapi: kode + typings
 - [x] Fetch noe fra APIet og rendre

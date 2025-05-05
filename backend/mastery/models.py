@@ -27,6 +27,7 @@ class School(BaseModel):
     display_name = models.CharField(max_length=200)
     org_number = models.CharField(max_length=50)
     owner = models.CharField(max_length=200)
+    is_service_enabled = models.BooleanField(default=False)
 
 
 class Subject(BaseModel):
@@ -176,7 +177,7 @@ class Situation(BaseModel):
 
 class Observation(BaseModel):
     """
-    An Observation represents an observation of a student by a teacher or student
+    An Observation represents an observation of a student, performed by a teacher or student
     """
     goal = models.ForeignKey(Goal, on_delete=models.RESTRICT, null=False, blank=False)
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False, related_name='observations_received')
@@ -184,6 +185,7 @@ class Observation(BaseModel):
     situation = models.ForeignKey(Situation, on_delete=models.SET_NULL, null=True, blank=True)
     mastery_value = models.IntegerField()
     mastery_description = models.TextField(null=True, blank=True)
+    feedforward = models.TextField(null=True, blank=True)
 
 class Status(BaseModel):
     """
@@ -194,10 +196,11 @@ class Status(BaseModel):
     estimated_at = models.DateTimeField(null=True, blank=True)
     mastery_value = models.IntegerField()
     mastery_description = models.TextField(null=True, blank=True)
+    feedforward = models.TextField(null=True, blank=True)
 
 class StatusGoal(BaseModel):
     """
-    A StatusGoal represents a goal that is part of a Status. This is used to track the status of a specific goal for a student
+    A StatusGoal represents a goal that is part of a Status. This enables Status to encompass multiple Goals
     """
     status = models.ForeignKey(Status, on_delete=models.CASCADE, null=False, blank=False)
     goal = models.ForeignKey(Goal, on_delete=models.CASCADE, null=False, blank=False)
