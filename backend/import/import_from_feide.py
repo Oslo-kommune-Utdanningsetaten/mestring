@@ -40,7 +40,7 @@ def _get_type_type_key(type):
         case 'fc:org':
             return 'orgType'
         
-def get_groups(url, token, result):
+def _get_groups(url, token, result):
     # Fetch groups from the API
     groups_response = requests.get(url, headers={"Authorization": "Bearer " + token})
     groups = groups_response.json()
@@ -60,12 +60,11 @@ def get_groups(url, token, result):
 
         result[type][str(group[type_type_key])].append(group)
 
+    next_url = None
     # Check for pagination
     if 'Link' in groups_response.headers:
-        next_url = None
         link_header = CaseInsensitiveDict(groups_response.headers)['Link']
         links = requests.utils.parse_header_links(link_header)
-
         for link in links:
             if 'rel' in link and link['rel'] == 'next':
                 next_url = link['url']
@@ -75,8 +74,6 @@ def get_groups(url, token, result):
 
 
 def fetch_groups_helper():
-    print("fetch_groups called")
-
     # Check if credentials are set
     if not FEIDE_PUBLIC_KEY or not FEIDE_PRIVATE_KEY:
         print("Error: FEIDE_PUBLIC_KEY or FEIDE_PRIVATE_KEY environment variables not set")
@@ -94,16 +91,16 @@ def fetch_groups_helper():
     next_url = GROUPS_ENDPOINT
 
     i = 0
-    while next_url and i < 10:
+    while next_url:
         i += 1
-        print("Fetch:", i, next_url)
-        result, next_url = get_groups(next_url, token, result)
+        print("Fetch:", i, next_url, '\n')
+        result, next_url = _get_groups(next_url, token, result)
 
-    output_file = os.path.join(script_dir, 'groups.json')
+    output_file = os.path.join(script_dir, 'data', 'groups.json')
     with open(output_file, "w") as file:
         json.dump(result, file, indent=2)
 
-    print("Done!")
+    print("Done!", i)
 
 
 if __name__ == "__main__":

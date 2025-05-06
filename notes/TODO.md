@@ -28,7 +28,33 @@
 - [x] svelte-routing
 - [x] Bootstrap
 
-## linker
+# Scratchpad
+
+I need to read data from an Excel file and write rows in the database. This requires several steps:
+
+- The models.py file dictates the target shape of the data should have
+- Figure out how to structure data in the excel file (available either as a file or on a URL, read access)
+- Apply some samples from the schoolData_v2.js file to the Excel file, establishing a pattern how users will be entering data
+- A script which reads the excel file, builds an internal data structure and writes rows to the database, in the appropriate tables
+- The script should be able to run repeatedly, without creating duplicates
+- This should be a python script, and should rely on the ORM supplied by Django on the backend. I'm thinking ./backend/scripts/import_from_excel.py is a good place to put it
+- The script should be able to run from the command line
+
+Here's the pattern for feide_id:
+
+feide_id pattern for School:
+fc:org:kakrafoon.kommune.no:unit:NO987654321
+
+feide_id pattern for teaching group (the "u" is for "undervisningsgruppe"):
+fc:org:kakrafoon.kommune.no:<u>:NO987654321:<3a-matte>:2000-07-01:2100-06-30"
+
+feide_id for basis group (the "b" is for "basissgruppe"):
+fc:org:kakrafoon.kommune.no:<b>:NO987654321:<3a>:2000-07-01:2100-06-30"
+
+Feide_id for User:
+feide:<username>@feide.osloskolen.no
+
+# Links
 
 https://github.com/Utdanningsdirektoratet/KL06-LK20-public/wiki/Swagger
 https://docs.feide.no/reference/apis/groups_api/group_types/pse_teaching.html

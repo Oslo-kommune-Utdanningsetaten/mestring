@@ -6,7 +6,7 @@ log/
 *.log*
 __pycache__/
 .vscode/launch.json
-*.xlsx
+backend/import/data/
 
 # macos
 .DS_Store

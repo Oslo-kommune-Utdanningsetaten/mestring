@@ -16,6 +16,13 @@ brew update
 brew install msodbcsql17 mssql-tools
 ```
 
+## Importing data
+
+```
+cd backend
+python import/import_from_feide.py
+```
+
 ## Some terms to keep in mind
 
 - Goal
