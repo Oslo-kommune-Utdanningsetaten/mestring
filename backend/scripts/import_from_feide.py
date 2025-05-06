@@ -82,13 +82,8 @@ def fetch_groups_helper():
         print("Error: FEIDE_PUBLIC_KEY or FEIDE_PRIVATE_KEY environment variables not set")
         return
 
-    # Add debug print to see what's being sent
-    print(f"Requesting token from {TOKEN_ENDPOINT}")
-
     token_response = requests.post(TOKEN_ENDPOINT, auth=(FEIDE_PUBLIC_KEY, FEIDE_PRIVATE_KEY), data={'grant_type': 'client_credentials'})
 
-    print(f"Response status code: {token_response.status_code}")
-    
     if token_response.status_code == 200 and token_response.text:
         token = token_response.json()['access_token']
     else:
@@ -101,63 +96,14 @@ def fetch_groups_helper():
     i = 0
     while next_url and i < 10:
         i += 1
-        print("Fetching groups:", i)
-        print("  --> ", next_url)
+        print("Fetch:", i, next_url)
         result, next_url = get_groups(next_url, token, result)
-    print("  ZAAAAA ", result)
 
-    output_file = os.path.join(project_root, 'groups.json')
-    print(f"Writing results to: {output_file}")
+    output_file = os.path.join(script_dir, 'groups.json')
     with open(output_file, "w") as file:
         json.dump(result, file, indent=2)
 
-    print("len of groups_result", len(result))
-
-
-
-# Loop through schools, add missing info from udir national schoolregister
-def handle_schools_helper():
-    with open("./groups.json") as file:
-        groups = json.load(file)
-
-    count = 0
-    schools = (groups['fc:org'].get("['primary_and_lower_secondary', 'upper_secondary']", []) +
-               groups['fc:org'].get("['upper_secondary', 'primary_and_lower_secondary']", []))
-
-    for school in schools:
-        school_org_number = school["id"].rsplit(':', 1)[-1]
-        try:
-            django.db.close_old_connections()   
-            existing_school = models.School.objects.get(org_number__exact=school_org_number)
-        except ObjectDoesNotExist:
-            existing_school = False
-            count += 1
-
-            try:
-                school_search_response = requests.get("https://nsr.udir.no/api/enheter/underenhetStandard/" + school["id"].rsplit(':NO', 1)[-1])
-                school_search_json = school_search_response.json()
-                school_search_name = school_search_json['navn']
-            except:
-                school_search_name = None
-                print("error fetching school name from udir for school:", school['displayName'])
-
-        if existing_school:
-            if len(school['displayName']) == 3:
-                existing_school.short_name = school['displayName']
-            existing_school.save()
-        
-        elif school_search_name is not None:
-            new_school = models.School.objects.create(name=school_search_name, org_number=school_org_number)
-            if len(school['displayName']) == 3:
-                new_school.short_name = school['displayName']
-                new_school.save()
-        else:
-            new_school_no_name = models.School.objects.create(name=school['displayName'], org_number=school_org_number)
-            if len(school['displayName']) == 3:
-                new_school_no_name.short_name = school['displayName']
-                new_school_no_name.save()
-
-    print("schools added:", count)
+    print("Done!")
 
 
 if __name__ == "__main__":
