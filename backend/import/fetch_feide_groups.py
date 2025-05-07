@@ -2,8 +2,6 @@ import os
 import sys
 import json
 import requests
-from requests.structures import CaseInsensitiveDict
-from requests.auth import HTTPBasicAuth
 from dotenv import load_dotenv
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -18,48 +16,6 @@ FEIDE_PUBLIC_KEY = os.environ.get('FEIDE_PUBLIC_KEY')
 FEIDE_PRIVATE_KEY = os.environ.get('FEIDE_PRIVATE_KEY')
 
 
-def _get_type_type_key(type):
-    match type:
-        case 'fc:gogroup':
-            return 'go_type'
-        case 'fc:grep2':
-            return 'grep_type'
-        case 'fc:org':
-            return 'orgType'
-
-
-def _fetch_groups_old(url, token, result):
-    groups_response = requests.get(url, headers={"Authorization": "Bearer " + token})
-    groups = groups_response.json()
-
-    # Append groups to accumulated result
-    for group in groups:
-        type = group['type']
-        type_type_key = _get_type_type_key(type)
-
-        g = result.get(type, None)
-        if g is None:
-            result[type] = {}
-
-        gg = result[type].get(str(group[type_type_key]), None)
-        if gg is None:
-            result[type][str(group[type_type_key])] = []
-
-        result[type][str(group[type_type_key])].append(group)
-
-    # Check for pagination
-    next_url = None
-    if 'Link' in groups_response.headers:
-        link_header = CaseInsensitiveDict(groups_response.headers)['Link']
-        links = requests.utils.parse_header_links(link_header)
-        for link in links:
-            if 'rel' in link and link['rel'] == 'next':
-                next_url = link['url']
-                break
-
-    return result, next_url
-
-
 def _fetch_groups(url, token, result):
     groups_response = requests.get(url, headers={"Authorization": "Bearer " + token})
     groups = groups_response.json()
@@ -69,8 +25,14 @@ def _fetch_groups(url, token, result):
         group_type = group['type']
         group_go_type = group.get('go_type', None)
         group_grep_type = group.get('grep_type', None)
+
+        # by definition, only schools have the parent key
+        # https://docs.feide.no/reference/apis/groups_api/group_types/pse_school_owner.html
         if group_type == 'fc:org':
-            result['schools'].append(group)
+            if 'parent' in group:
+                result['schools'].append(group)
+            else:
+                result['owners'].append(group)            
         elif group_type == 'fc:gogroup' and group_go_type == 'u':
             result['teaching'].append(group)
         elif group_type == 'fc:gogroup' and group_go_type == 'b':
@@ -82,12 +44,12 @@ def _fetch_groups(url, token, result):
         elif group_type == 'fc:grep2' and group_grep_type == 'aarstrinn':
             result['levels'].append(group)
         else:
-            result['unknown'].append(group)
+            result['other'].append(group)
 
     # Check for pagination
     next_url = None
     if 'Link' in groups_response.headers:
-        link_header = CaseInsensitiveDict(groups_response.headers)['Link']
+        link_header = requests.structures.CaseInsensitiveDict(groups_response.headers)['Link']
         links = requests.utils.parse_header_links(link_header)
         for link in links:
             if 'rel' in link and link['rel'] == 'next':
@@ -98,7 +60,7 @@ def _fetch_groups(url, token, result):
 
 
 def fetch_and_store_feide_groups():
-    print("👉 fetch_and_store_feide_groups: BEGIN")
+    print("BEGIN: fetch_and_store_feide_groups")
     # Check if credentials are set
     if not FEIDE_PUBLIC_KEY or not FEIDE_PRIVATE_KEY:
         print("Error: FEIDE_PUBLIC_KEY or FEIDE_PRIVATE_KEY environment variables not set")
@@ -114,24 +76,30 @@ def fetch_and_store_feide_groups():
         return
 
     result = {
-        "schools": [],
-        "teaching": [],
-        "basis": [],
-        "subjects": [],
-        "programs": [],
-        "levels": [],
-        "unknown": [],
+        "owners": [],   # skoleeiere
+        "schools": [],  # skoler
+        "teaching": [], # undervisningsgrupper
+        "basis": [],    # basisgrupper  
+        "subjects": [], # fag
+        "programs": [], # utdanningsprogrammer
+        "levels": [],   # årstrinn
+        "other": [],    # andre grupper vi kan ha interesse av?
     }
     next_url = GROUPS_ENDPOINT
-
+    page = 0
     while next_url:
+        page += 1
+        # overwrite same line:
+        sys.stdout.write(f"\rFetching page {page} - total groups so far: "f"{sum(len(v) for v in result.values())}")
+        sys.stdout.flush()
         result, next_url = _fetch_groups(next_url, token, result)
 
+    sys.stdout.write("\n")
+    
     output_file = os.path.join(script_dir, 'data', 'groups.json')
     with open(output_file, "w") as file:
         json.dump(result, file, indent=2, ensure_ascii=False)
-
-    print("✅ fetch_and_store_feide_groups: DONE")
+    print("END: fetch_and_store_feide_groups")
 
 
 if __name__ == "__main__":
