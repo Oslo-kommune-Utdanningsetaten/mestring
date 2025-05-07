@@ -86,16 +86,9 @@ def fetch_and_store_feide_groups():
         "other": [],    # andre grupper vi kan ha interesse av?
     }
     next_url = GROUPS_ENDPOINT
-    page = 0
     while next_url:
-        page += 1
-        # overwrite same line:
-        sys.stdout.write(f"\rFetching page {page} - total groups so far: "f"{sum(len(v) for v in result.values())}")
-        sys.stdout.flush()
         result, next_url = _fetch_groups(next_url, token, result)
 
-    sys.stdout.write("\n")
-    
     output_file = os.path.join(script_dir, 'data', 'groups.json')
     with open(output_file, "w") as file:
         json.dump(result, file, indent=2, ensure_ascii=False)
