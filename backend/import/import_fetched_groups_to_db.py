@@ -42,6 +42,10 @@ def import_groups_to_db():
             new_school.save()
             count += 1
 
+    # non-school groups (groups minus schools)
+    
+
+
     print("✅ import_groups_to_db: DONE", count)
 
 if __name__ == "__main__":

@@ -1,15 +1,17 @@
 # Checklist
 
-- [ ] Teste relasjoner status/goal
 - [ ] Dataimport fra Excel
+  - [ ] Observation, Goal
 - [ ] prettier i frontend
 - [ ] App funker like bra som prototypen
 - [ ] Feide
-  - [ ] Auth
-  - [ ] Skoler
-  - [ ] Grupper pr. skole
+  - [ ] Auth for bruker
+  - [x] Importere skoler
+  - [ ] Importere grupper pr. skole
+  - [ ] Importere subjects fra UDIR/grep (som matcher teaching-groups)
 - [ ] Finne ut av sikkerhet/ACL
-- [ ] En unit-test som sjekker noe som helst
+- [ ] Teste relasjoner status/goal
+- [x] En unit-test som sjekker noe som helst
 - [x] Urls, view, serializers for hele databasen
 - [x] Teste relasjoner user/group
 - [x] En test som sjekker at APIet leverer noe og gir 200
@@ -28,19 +30,7 @@
 - [x] svelte-routing
 - [x] Bootstrap
 
-# Scratchpad
-
-I need to read data from an Excel file and write rows in the database. This requires several steps:
-
-- The models.py file dictates the target shape of the data should have
-- Figure out how to structure data in the excel file (available either as a file or on a URL, read access)
-- Apply some samples from the schoolData_v2.js file to the Excel file, establishing a pattern how users will be entering data
-- A script which reads the excel file, builds an internal data structure and writes rows to the database, in the appropriate tables
-- The script should be able to run repeatedly, without creating duplicates
-- This should be a python script, and should rely on the ORM supplied by Django on the backend. I'm thinking ./backend/scripts/import_from_excel.py is a good place to put it
-- The script should be able to run from the command line
-
-Here's the pattern for feide_id:
+# Pattern for feide_id:
 
 feide_id pattern for School:
 fc:org:kakrafoon.kommune.no:unit:NO987654321
@@ -56,5 +46,6 @@ feide:<username>@feide.osloskolen.no
 
 # Links
 
+https://www.udir.no/om-udir/data/kl06-grep/
 https://github.com/Utdanningsdirektoratet/KL06-LK20-public/wiki/Swagger
 https://docs.feide.no/reference/apis/groups_api/group_types/pse_teaching.html
