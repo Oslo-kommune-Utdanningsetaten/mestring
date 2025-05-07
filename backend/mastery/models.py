@@ -30,17 +30,21 @@ class School(BaseModel):
     owner = models.CharField(max_length=200)
     is_service_enabled = models.BooleanField(default=False)
 
+    def ensure_short_name(self, short_name):
+        """Update short_name (used by import)"""
+        if not self.short_name == short_name:
+            self.short_name = short_name
+            self.save()
 
 class Subject(BaseModel):
     """
     A Subject represents something taught in a Feide teaching group
-    https://docs.feide.no/reference/apis/groups_api/group_types/pse_teaching.html
-    Refer to UDIR GREP for list of possible subjects
+    Refer to UDIR grep for list of possible subjects
     """
-    feide_id = models.CharField(max_length=200)
     display_name = models.CharField(max_length=200)
-    subject_code = models.CharField(max_length=200)
-    group_subject_code = models.CharField(max_length=200)
+    short_name = models.CharField(max_length=200)
+    code = models.CharField(max_length=200) # UDIR grep code
+    group_code = models.CharField(max_length=200, null=True, blank=True) # UDIR grep opplæringsfag
 
 
 class User(BaseModel):

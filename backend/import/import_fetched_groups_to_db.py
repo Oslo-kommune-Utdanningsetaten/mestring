@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import requests
 from dotenv import load_dotenv
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,6 +15,29 @@ django.setup()
 
 from mastery import models
 import django.db
+UDIR_GREP_URL = "https://data.udir.no/kl06/v201906/fagkoder/"
+
+# Create a new subject if it doesn't exist
+def ensure_subject(code):
+    subject = models.Subject.objects.filter(code__exact=code).first()
+    if not subject:
+        udir_response = requests.get(UDIR_GREP_URL + code)
+        if udir_response.status_code == 200 and udir_response.text:
+            udir_subject = udir_response.json()
+            print("Creating subject:", code, udir_subject['tittel'][0]['verdi'])
+            diplay_name = udir_subject['tittel'][0]['verdi']
+            short_name = udir_subject['kortform'][0]['verdi']
+            group_code = udir_subject['opplaeringsfag'][0]['kode'] if udir_subject.get('opplaeringsfag') and len(udir_subject['opplaeringsfag']) > 0 else None
+            subject = models.Subject.objects.create(
+                code=code,
+                display_name=diplay_name,
+                short_name=short_name,
+                group_code=group_code,
+            )
+        else:
+            print("Failed to fetch subject from UDIR:", code)
+            subject = None
+    return subject
 
 
 def import_groups_to_db():
@@ -22,16 +46,16 @@ def import_groups_to_db():
     with open(groups_file) as file:
         groups = json.load(file)
 
-    count = 0
-    schools = (groups['fc:org'].get("['primary_and_lower_secondary', 'upper_secondary']", []) +
-               groups['fc:org'].get("['upper_secondary', 'primary_and_lower_secondary']", []))
+    django.db.close_old_connections()
 
+    # Import schools
+    schools = groups.get('schools', [])
+    print("Schools:", len(schools))
     for school in schools:
         org_number = school["id"].rsplit(':', 1)[-1]
-        django.db.close_old_connections()
         existing_school = models.School.objects.filter(org_number__exact=org_number).first()
         if existing_school:
-            print("School already exists in DB:", existing_school)
+            print("School exists:", existing_school.display_name)
         else:
             new_school = models.School.objects.create(
                 display_name=school['displayName'],
@@ -40,13 +64,61 @@ def import_groups_to_db():
                 feide_id=school['id'],
             )
             new_school.save()
-            count += 1
+            print("School created!", new_school.display_name)
 
-    # non-school groups (groups minus schools)
-    
+    # Import basis groups
+    basis_groups = groups.get('basis', [])
+    print("Basis groups:", len(basis_groups))
+    for group in basis_groups:
+        feide_id = group["id"]
+        existing_group = models.Group.objects.filter(feide_id__exact=feide_id).first()
+        if existing_group:
+            print("Group exists:", existing_group.display_name)
+        else:
+            school = models.School.objects.filter(feide_id__exact=group['parent']).first()
+            if school:
+                school_short_name = feide_id.split(':')[5].split('-')[0] # gotcha!
+                school.ensure_short_name(school_short_name)
+                new_group = models.Group.objects.create(
+                    display_name=group['displayName'],
+                    type='basis',
+                    school=school,
+                    feide_id=feide_id,
+                    valid_from=group['notBefore'],
+                    valid_to=group['notAfter'],
+                )
+                new_group.save()
+                print("Basis group created!", new_group.display_name)
+            else:
+                print("School not found for basis group:", feide_id)
 
+    # Import teaching groups
+    teaching_groups = groups.get('teaching', [])
+    print("Teaching groups:", len(teaching_groups))
+    for group in teaching_groups:
+        feide_id = group["id"]
+        existing_group = models.Group.objects.filter(feide_id__exact=feide_id).first()
+        if existing_group:
+            print("Group exists:", existing_group.display_name)
+        else:
+            school = models.School.objects.filter(feide_id__exact=group['parent']).first()
+            if school:
+                subject = ensure_subject(group['grep']['code'])
+                new_group = models.Group.objects.create(
+                    display_name=group['displayName'],
+                    type='undervisning',
+                    school=school,
+                    subject=subject,
+                    feide_id=feide_id,
+                    valid_from=group['notBefore'],
+                    valid_to=group['notAfter'],
+                )
+                new_group.save()
+                print("Teaching group created!", new_group.display_name)
+            else:
+                print("School not found for teaching group:", feide_id)
 
-    print("✅ import_groups_to_db: DONE", count)
+    print("✅ import_groups_to_db")
 
 if __name__ == "__main__":
     import_groups_to_db()

@@ -87,6 +87,7 @@ def fetch_and_store_feide_groups():
     }
     next_url = GROUPS_ENDPOINT
     while next_url:
+        # keep fetching until there are no more pages
         result, next_url = _fetch_groups(next_url, token, result)
 
     output_file = os.path.join(script_dir, 'data', 'groups.json')
