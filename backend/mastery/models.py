@@ -25,6 +25,7 @@ class School(BaseModel):
     """
     feide_id = models.CharField(max_length=200)
     display_name = models.CharField(max_length=200)
+    short_name = models.CharField(max_length=10)
     org_number = models.CharField(max_length=50)
     owner = models.CharField(max_length=200)
     is_service_enabled = models.BooleanField(default=False)
@@ -136,7 +137,7 @@ class Group(BaseModel):
 
 class UserGroup(BaseModel):
     """
-    A UserGroup represents a User in a Group with a specific Role. Teacher status in a group will be modeled as a UserGroup with the role of teacher
+    A UserGroup represents a User in a Group with a specific Role. Teacher/Student roles are stored on UserGroup
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False, related_name='user_groups')
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=False, blank=False, related_name='user_groups')

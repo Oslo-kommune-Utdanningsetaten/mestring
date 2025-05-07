@@ -1,29 +1,16 @@
 import os
 import sys
-import django
-
-# Set up Django environment using relative paths
-# Get the absolute path of the directory containing this script
-script_dir = os.path.dirname(os.path.abspath(__file__))
-# Get the parent directory (the Django project root)
-project_root = os.path.abspath(os.path.join(script_dir, '..'))
-# Add the project root to Python path
-sys.path.append(project_root)
-# Set Django settings module
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
-
-from dotenv import load_dotenv
-# Load from .env in project root
-load_dotenv(os.path.join(project_root, '.env'))
-django.setup()
-
 import json
 import requests
-from django.db.models.base import ObjectDoesNotExist
-from mastery import models, serializers
 from requests.structures import CaseInsensitiveDict
-import django.db
 from requests.auth import HTTPBasicAuth
+from dotenv import load_dotenv
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, '..'))
+sys.path.append(project_root)
+load_dotenv(os.path.join(project_root, '.env'))
+
 
 TOKEN_ENDPOINT = "https://auth.dataporten.no/oauth/token"
 GROUPS_ENDPOINT = "https://groups-api.dataporten.no/groups/orgs/feide.osloskolen.no/groups"
@@ -39,13 +26,13 @@ def _get_type_type_key(type):
             return 'grep_type'
         case 'fc:org':
             return 'orgType'
-        
-def _get_groups(url, token, result):
-    # Fetch groups from the API
+
+
+def _fetch_groups(url, token, result):
     groups_response = requests.get(url, headers={"Authorization": "Bearer " + token})
     groups = groups_response.json()
 
-    # Append groups to result
+    # Append groups to accumulated result
     for group in groups:
         type = group['type']
         type_type_key = _get_type_type_key(type)
@@ -60,8 +47,8 @@ def _get_groups(url, token, result):
 
         result[type][str(group[type_type_key])].append(group)
 
-    next_url = None
     # Check for pagination
+    next_url = None
     if 'Link' in groups_response.headers:
         link_header = CaseInsensitiveDict(groups_response.headers)['Link']
         links = requests.utils.parse_header_links(link_header)
@@ -73,12 +60,14 @@ def _get_groups(url, token, result):
     return result, next_url
 
 
-def fetch_groups_helper():
+def fetch_and_store_feide_groups():
+    print("👉 fetch_and_store_feide_groups: BEGIN")
     # Check if credentials are set
     if not FEIDE_PUBLIC_KEY or not FEIDE_PRIVATE_KEY:
         print("Error: FEIDE_PUBLIC_KEY or FEIDE_PRIVATE_KEY environment variables not set")
         return
 
+    # Get token
     token_response = requests.post(TOKEN_ENDPOINT, auth=(FEIDE_PUBLIC_KEY, FEIDE_PRIVATE_KEY), data={'grant_type': 'client_credentials'})
 
     if token_response.status_code == 200 and token_response.text:
@@ -90,20 +79,15 @@ def fetch_groups_helper():
     result = {}
     next_url = GROUPS_ENDPOINT
 
-    i = 0
     while next_url:
-        i += 1
-        print("Fetch:", i, next_url, '\n')
-        result, next_url = _get_groups(next_url, token, result)
+        result, next_url = _fetch_groups(next_url, token, result)
 
     output_file = os.path.join(script_dir, 'data', 'groups.json')
     with open(output_file, "w") as file:
-        json.dump(result, file, indent=2)
+        json.dump(result, file, indent=2, ensure_ascii=False)
 
-    print("Done!", i)
+    print("✅ fetch_and_store_feide_groups: DONE")
 
 
 if __name__ == "__main__":
-    # Parse command line arguments or control which functions run
-    fetch_groups_helper()
-    # handle_schools_helper()
+    fetch_and_store_feide_groups()

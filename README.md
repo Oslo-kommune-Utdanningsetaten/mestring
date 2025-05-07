@@ -20,7 +20,8 @@ brew install msodbcsql17 mssql-tools
 
 ```
 cd backend
-python import/import_from_feide.py
+python import/fetch_feide_groups.py
+python import/import_fetched_groups_to_db.py
 ```
 
 ## Some terms to keep in mind
