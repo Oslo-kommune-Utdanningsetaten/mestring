@@ -26,7 +26,7 @@ def _fetch_groups(url, token, result):
         group_go_type = group.get('go_type', None)
         group_grep_type = group.get('grep_type', None)
 
-        # by definition, only schools have the parent key
+        # by definition, school owners do not have the parent key
         # https://docs.feide.no/reference/apis/groups_api/group_types/pse_school_owner.html
         if group_type == 'fc:org':
             if 'parent' in group:

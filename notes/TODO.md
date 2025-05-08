@@ -7,7 +7,7 @@
 - [ ] Feide
   - [ ] Auth for bruker
   - [x] Importere skoler
-  - [ ] Importere grupper pr. skole
+  - [x] Importere grupper pr. skole
   - [ ] Importere subjects fra UDIR/grep (som matcher teaching-groups)
 - [ ] Finne ut av sikkerhet/ACL
 - [ ] Teste relasjoner status/goal
