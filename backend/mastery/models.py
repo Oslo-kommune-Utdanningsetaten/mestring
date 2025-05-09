@@ -25,9 +25,9 @@ class School(BaseModel):
     """
     feide_id = models.CharField(max_length=200)
     display_name = models.CharField(max_length=200)
-    short_name = models.CharField(max_length=10)
+    short_name = models.CharField(max_length=10, null=True)
     org_number = models.CharField(max_length=50)
-    owner = models.CharField(max_length=200)
+    owner = models.CharField(max_length=200, null=True)
     is_service_enabled = models.BooleanField(default=False)
 
     def ensure_short_name(self, short_name):
@@ -44,7 +44,7 @@ class Subject(BaseModel):
     display_name = models.CharField(max_length=200)
     short_name = models.CharField(max_length=200)
     code = models.CharField(max_length=200) # UDIR grep code
-    group_code = models.CharField(max_length=200, null=True, blank=True) # UDIR grep opplæringsfag
+    group_code = models.CharField(max_length=200, null=True) # UDIR grep opplæringsfag
 
 
 class User(BaseModel):
@@ -55,9 +55,9 @@ class User(BaseModel):
     name = models.CharField(max_length=200)
     feide_id = models.CharField(max_length=200)
     email = models.CharField(max_length=200)
-    last_activity_at = models.DateTimeField(null=True, blank=True)
-    disabled_at = models.DateTimeField(null=True, blank=True)
-    groups = models.ManyToManyField('Group', through='UserGroup', related_name='members')
+    last_activity_at = models.DateTimeField(null=True)
+    disabled_at = models.DateTimeField(null=True)
+    groups = models.ManyToManyField('Group', through='UserGroup', related_name='members', null=True)
     
     def role_groups(self, role_name):
         """Get all groups where user has a specific role"""
@@ -88,10 +88,10 @@ class Group(BaseModel):
     feide_id = models.CharField(max_length=200)
     display_name = models.CharField(max_length=200)
     type = models.CharField(max_length=200)
-    subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True, blank=True)
-    school = models.ForeignKey(School, on_delete=models.RESTRICT, null=False, blank=False, related_name='groups')
-    valid_from = models.DateTimeField(null=True, blank=True)
-    valid_to = models.DateTimeField(null=True, blank=True)
+    subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True)
+    school = models.ForeignKey(School, on_delete=models.RESTRICT, null=False, related_name='groups')
+    valid_from = models.DateTimeField(null=True)
+    valid_to = models.DateTimeField(null=True)
     # members attribute added via User.groups reverse relation
     
     def get_members(self, role=None):
@@ -155,12 +155,12 @@ class Goal(BaseModel):
     """
     A Goal represents something a studen should strive towards. A Goal is either for all students in a Group (if goal.group is set), or personal for a specific student (if goal.student is set)
     """
-    title = models.CharField(max_length=200)
-    description = models.TextField(null=True, blank=True)
-    group = models.ForeignKey(Group, on_delete=models.RESTRICT, null=True, blank=True)
-    student = models.ForeignKey(User, on_delete=models.RESTRICT, null=True, blank=True)
-    previous_goal = models.ForeignKey('Goal', on_delete=models.RESTRICT, null=True, blank=True)
-    mastery_schema = models.JSONField(null=True, blank=True)
+    title = models.CharField(max_length=200, null=False)
+    description = models.TextField(null=True)
+    group = models.ForeignKey(Group, on_delete=models.RESTRICT, null=True)
+    student = models.ForeignKey(User, on_delete=models.RESTRICT, null=True)
+    previous_goal = models.ForeignKey('Goal', on_delete=models.RESTRICT, null=True)
+    mastery_schema = models.JSONField(null=True)
 
     class Meta:
         constraints = [
@@ -175,9 +175,9 @@ class Situation(BaseModel):
     """
     A Situation represents a case wherein student mastery is observed. This can be a lesson, a test, conversation, or any other situation where a student demonstrates mastery
     """
-    title = models.CharField(max_length=200)
-    description = models.TextField(null=True, blank=True)
-    happens_at = models.DateTimeField(null=True, blank=True)
+    title = models.CharField(max_length=200, null=False)
+    description = models.TextField(null=True)
+    happens_at = models.DateTimeField(null=True)
 
 
 class Observation(BaseModel):
@@ -186,22 +186,24 @@ class Observation(BaseModel):
     """
     goal = models.ForeignKey(Goal, on_delete=models.RESTRICT, null=False, blank=False)
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False, related_name='observations_received')
-    observer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='observations_performed')
-    situation = models.ForeignKey(Situation, on_delete=models.SET_NULL, null=True, blank=True)
-    mastery_value = models.IntegerField()
-    mastery_description = models.TextField(null=True, blank=True)
-    feedforward = models.TextField(null=True, blank=True)
+    observer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='observations_performed')
+    situation = models.ForeignKey(Situation, on_delete=models.SET_NULL, null=True)
+    mastery_value = models.IntegerField(null=True)
+    mastery_description = models.TextField(null=True)
+    feedforward = models.TextField(null=True)
 
 class Status(BaseModel):
     """
-    A status represents a students current standing at a point in time, typically in a subject, e.g. how is Lois doing in math (all math Goals are then considered)
+    A status represents a snapshot of a students mastery at a point in time, typically in a subject, e.g. how is Lois doing in math (all math Goals are then considered)
     """
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
-    estimated_at = models.DateTimeField(null=True, blank=True)
-    mastery_value = models.IntegerField()
-    mastery_description = models.TextField(null=True, blank=True)
-    feedforward = models.TextField(null=True, blank=True)
+    estimated_at = models.DateTimeField(null=True)
+    mastery_value = models.IntegerField(null=True)
+    mastery_description = models.TextField(null=True)
+    feedforward = models.TextField(null=True)
+    goals = models.ManyToManyField('Goal', through='StatusGoal', related_name='statuses', null=True)
+
 
 class StatusGoal(BaseModel):
     """

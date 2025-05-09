@@ -20,13 +20,12 @@ FEIDE_PUBLIC_KEY = os.environ.get('FEIDE_PUBLIC_KEY')
 FEIDE_PRIVATE_KEY = os.environ.get('FEIDE_PRIVATE_KEY')
 
 def create_user_item(member):
-    user_type, feide_id = member['userid_sec'][0].split(':')
-    if user_type != 'feide':
-        return None
+    feide_id = member['userid_sec'][0]
+    email = feide_id.split(':')[1].replace('@feide.', '@')
     return {
         "feide_id": feide_id,
         "name": member['name'],
-        "email": feide_id.replace('@feide.', '@'),
+        "email": email,
         "affiliation": member['membership'].get('affiliation', None)
     }
 
@@ -50,7 +49,7 @@ def fetch_and_store_feide_users():
     result = {}
 
     for known_group in known_groups:
-        print(f"👉Fetching members of group: {known_group.feide_id}")
+        print(f"Fetching members of group: {known_group.feide_id}")
         members_response = requests.get(GROUPS_ENDPOINT + known_group.feide_id.replace('%', '%25') + "/members", headers={"Authorization": "Bearer " + token})
         if members_response.status_code != 200:
             print(f"Failed 🚷{members_response.status_code} to fetch members of : {known_group.feide_id}")

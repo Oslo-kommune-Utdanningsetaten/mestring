@@ -4,13 +4,14 @@
   - [ ] Observation, Goal
 - [ ] prettier i frontend
 - [ ] App funker like bra som prototypen
+- [ ] Finne ut av sikkerhet/ACL
+- [ ] Teste relasjoner status/goal
 - [ ] Feide
   - [ ] Auth for bruker
   - [x] Importere skoler
   - [x] Importere grupper pr. skole
-  - [ ] Importere subjects fra UDIR/grep (som matcher teaching-groups)
-- [ ] Finne ut av sikkerhet/ACL
-- [ ] Teste relasjoner status/goal
+  - [x] Importere subjects fra UDIR/grep (som matcher teaching-groups)
+- [ ] Vanntett import med god logging
 - [x] En unit-test som sjekker noe som helst
 - [x] Urls, view, serializers for hele databasen
 - [x] Teste relasjoner user/group

@@ -20,8 +20,14 @@ brew install msodbcsql17 mssql-tools
 
 ```
 cd backend
+poetry shell
+poetry install
+python manage.py makemigrations
+python manage.py migrate
 python import/fetch_feide_groups.py
 python import/import_fetched_groups_to_db.py
+python import/fetch_feide_users.py
+python import/import_fetched_users_to_db.py
 ```
 
 ## Some terms to keep in mind

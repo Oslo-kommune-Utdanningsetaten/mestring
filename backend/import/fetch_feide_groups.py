@@ -93,6 +93,9 @@ def fetch_and_store_feide_groups():
     output_file = os.path.join(script_dir, 'data', 'groups.json')
     with open(output_file, "w") as file:
         json.dump(result, file, indent=2, ensure_ascii=False)
+
+    for group_type in result:
+        print(f"{group_type}: {len(result[group_type])}")
     print("END: fetch_and_store_feide_groups")
 
 
