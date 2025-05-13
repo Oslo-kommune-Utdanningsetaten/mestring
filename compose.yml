@@ -55,6 +55,7 @@ services:
         '-t',
         '/var/www/html',
       ]
+
   backend:
     build: ./backend
     command:
