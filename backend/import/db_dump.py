@@ -17,11 +17,28 @@ from mastery import models
 
 def output_something():
     print("👉 output_something: BEGIN")
-    students = models.User.objects.filter(user_groups__role__name='student')
-    students_json_str = serializers.serialize('json', students)
     result = {
-        "students": json.loads(students_json_str),
+        "groups": []
     }
+    groups = models.Group.objects.all()
+    for group in groups:
+        students = group.get_students()
+        teachers = group.get_teachers()
+        if len(students) == 0 or len(teachers) == 0:
+            print(f"🚷Group {group.feide_id} has no students or teachers")
+            continue
+        students_json_str = serializers.serialize('json', students)
+        teachers_json_str = serializers.serialize('json', teachers)
+        group_data = {
+            "id": group.id,
+            "feide_id": group.feide_id,
+            "display_name": group.display_name,
+            "students": json.loads(students_json_str),
+            "teachers": json.loads(teachers_json_str)
+        }
+        # add group data to result
+        result["groups"].append(group_data)
+    # Write the result to a JSON file
 
     output_file = os.path.join(script_dir, 'data', 'temp_dump.json')
     with open(output_file, "w") as file:

@@ -21,8 +21,6 @@ def ensure_roles_exist():
     """
     teacher_role, _ = models.Role.objects.get_or_create(name='teacher')
     student_role, _ = models.Role.objects.get_or_create(name='student')
-    print("  Role TEACHER created!", teacher_role.id)
-    print("  Role STUDENT created!", student_role.id)
     return teacher_role, student_role
 
 # Create a new subject if it doesn't exist
@@ -54,7 +52,9 @@ def import_users_to_db():
         print("\n" + group_feide_id)
         print("------------------------------------------------")
         group = models.Group.objects.filter(feide_id__exact=group_feide_id).first()
-
+        if not group:
+            print("  🚷Group not found in database")
+            continue
         # Import teachers
         teachers = feide_group_memberships.get('teachers', [])
         print("Teachers:", len(teachers))

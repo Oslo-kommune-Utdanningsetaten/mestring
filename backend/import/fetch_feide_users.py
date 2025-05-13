@@ -53,7 +53,7 @@ def fetch_and_store_feide_users():
         members_response = requests.get(GROUPS_ENDPOINT + known_group.feide_id.replace('%', '%25') + "/members", headers={"Authorization": "Bearer " + token})
         if members_response.status_code != 200:
             print(f"Failed 🚷{members_response.status_code} to fetch members of : {known_group.feide_id}")
-            pass
+            continue
         if known_group.feide_id not in result:
             result[known_group.feide_id] = {
                 "teachers": [],

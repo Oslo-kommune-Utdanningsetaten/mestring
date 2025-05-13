@@ -153,7 +153,7 @@ class UserGroup(BaseModel):
 
 class Goal(BaseModel):
     """
-    A Goal represents something a studen should strive towards. A Goal is either for all students in a Group (if goal.group is set), or personal for a specific student (if goal.student is set)
+    A Goal represents something a student should strive towards. A Goal is either for all students in a Group (if goal.group is set), or personal for a specific student (if goal.student is set)
     """
     title = models.CharField(max_length=200, null=False)
     description = models.TextField(null=True)
