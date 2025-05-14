@@ -1,17 +1,17 @@
 # Checklist
 
-- [ ] Dataimport fra Excel
-  - [ ] Observation, Goal
-- [ ] prettier i frontend
 - [ ] App funker like bra som prototypen
+- [ ] prettier i frontend
 - [ ] Finne ut av sikkerhet/ACL
 - [ ] Teste relasjoner status/goal
+- [ ] Vanntett import med god logging
 - [ ] Feide
   - [ ] Auth for bruker
   - [x] Importere skoler
   - [x] Importere grupper pr. skole
   - [x] Importere subjects fra UDIR/grep (som matcher teaching-groups)
-- [ ] Vanntett import med god logging
+- [x] Dataimport fra Excel
+  - [x] Observation, Goal
 - [x] En unit-test som sjekker noe som helst
 - [x] Urls, view, serializers for hele databasen
 - [x] Teste relasjoner user/group
