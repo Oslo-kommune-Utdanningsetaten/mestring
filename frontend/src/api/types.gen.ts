@@ -143,6 +143,7 @@ export type ObservationReadable = {
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
+    isPrivate?: boolean;
     goal: string;
     student: string;
     observer?: string | null;
@@ -154,6 +155,7 @@ export type ObservationWritable = {
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
+    isPrivate?: boolean;
     goal: string;
     student: string;
     observer?: string | null;
@@ -213,6 +215,7 @@ export type PatchedObservationReadable = {
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
+    isPrivate?: boolean;
     goal?: string;
     student?: string;
     observer?: string | null;
@@ -224,6 +227,7 @@ export type PatchedObservationWritable = {
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
+    isPrivate?: boolean;
     goal?: string;
     student?: string;
     observer?: string | null;
