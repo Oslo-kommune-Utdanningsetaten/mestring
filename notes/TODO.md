@@ -3,6 +3,7 @@
 - [ ] App funker like bra som prototypen
 - [ ] prettier i frontend
 - [ ] Finne ut av sikkerhet/ACL
+- [ ] Svelte-kompatibel, datastore-aktig localstorage
 - [ ] Teste relasjoner status/goal
 - [ ] Vanntett import med god logging
 - [ ] Feide

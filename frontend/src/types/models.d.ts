@@ -58,5 +58,6 @@ export interface AppData {
   goals: Goal[]
   observations: Observation[]
   masteryLevels: MasteryLevel[]
+  currentSchool: School | null
   currentUser: User | null
 }

@@ -2,37 +2,53 @@
   import Link from './Link.svelte'
   import osloLogo from '../assets/oslo_logo_sort.svg'
   import { currentPath } from '../stores/navigation'
-  import { dataStore, setCurrentUser } from '../stores/data'
+  import { dataStore, setCurrentSchool } from '../stores/data'
+  import { type SchoolReadable } from '../api/types.gen'
+  import { schoolsList, schoolsPartialUpdate } from '../api/sdk.gen'
 
   let isHomeActive = $derived($currentPath === '/')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
   let isAboutActive = $derived($currentPath.startsWith('/about'))
   let isSchoolsActive = $derived($currentPath.startsWith('/schools'))
 
-  const teachers = $derived($dataStore.teachers)
+  let schools = $state<SchoolReadable[]>([])
 
-  function handleSetCurrentUser(teacherId: string) {
-    const selectedTeacher = teachers.find(t => t.id === teacherId)
-    if (!selectedTeacher) {
-      console.error('Selected teacher not found')
+  async function fetchSchools() {
+    try {
+      const result = await schoolsList({
+        query: {
+          isServiceEnabled: true,
+        },
+      })
+      schools = result.data || []
+    } catch (error) {
+      console.error('Error fetching schools:', error)
+      schools = []
+    }
+  }
+
+  function handleSetCurrentSchool(schoolId: string) {
+    const selectedSchool = schools.find(s => s.id === schoolId)
+    if (!selectedSchool) {
+      console.error('Selected school not found')
       return
     }
-    const currentUser = {
-      id: selectedTeacher.id,
-      name: selectedTeacher.name,
-      teacherId: selectedTeacher.id,
-    }
-    setCurrentUser(currentUser)
+    setCurrentSchool(selectedSchool)
   }
 
   $effect(() => {
     console.log('Current path changed:', $currentPath)
+    fetchSchools()
   })
 </script>
 
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   <div class="container-md">
-    <a class="navbar-brand" href="/">Vurdering på Haukåsen</a>
+    <a class="navbar-brand" href="/">
+      Mestring: {$dataStore.currentSchool
+        ? $dataStore.currentSchool.displayName
+        : 'INGEN SKOLE VALGT'}
+    </a>
     <ul class="navbar-nav ms-auto">
       <li class="nav-item">
         <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
@@ -53,19 +69,18 @@
       <li class="nav-item dropdown">
         <a
           class="nav-link dropdown-toggle"
-          href="#"
           id="navbarDropdown"
           role="button"
           data-bs-toggle="dropdown"
-          aria-expanded="false"
         >
-          {$dataStore.currentUser?.name || 'options'}
+          Admin
         </a>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-          {#each teachers as teacher}
+          {#each schools as school}
             <li>
-              <a class="dropdown-item" href="#" onclick={() => handleSetCurrentUser(teacher.id)}>
-                {teacher.name}
+              <a class="dropdown-item" href="#" onclick={() => handleSetCurrentSchool(school.id)}>
+                {$dataStore.currentSchool?.id === school.id ? '✅' : ''}
+                {school.displayName}
               </a>
             </li>
           {/each}

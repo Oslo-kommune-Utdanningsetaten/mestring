@@ -48,9 +48,6 @@
           <li class="list-group-item d-flex justify-content-between align-items-center">
             <div>
               {school.displayName}
-              {#if school.shortName}
-                <span class="text-muted small ms-2">{school.shortName}</span>
-              {/if}
             </div>
 
             <div class="form-check form-switch">

@@ -26,6 +26,7 @@ djangorestframework-camel-case = "^1.4.2"
 mssql-django = "^1.5"
 pyodbc = "^5.2.0"
 pyexcel-xlsx = "^0.6.1"
+django-filter = "^25.1"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -46,8 +47,6 @@ python_files = ["test_*.py"]
 testpaths = ["mastery/tests"]
 django_find_project = true
 pythonpath = ["."]
-
-
 
 
 [tool.poetry.group.test.dependencies]

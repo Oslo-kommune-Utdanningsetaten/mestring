@@ -927,7 +927,9 @@ export type RolesUpdateResponse = RolesUpdateResponses[keyof RolesUpdateResponse
 export type SchoolsListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        isServiceEnabled?: boolean;
+    };
     url: '/schools/';
 };
 

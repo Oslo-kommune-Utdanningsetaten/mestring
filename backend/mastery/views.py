@@ -3,9 +3,13 @@ from rest_framework import viewsets, status, views, filters
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 
+# More about filtering in Django REST Framework:
+# https://www.django-rest-framework.org/api-guide/filtering/
+
 class SchoolViewSet(viewsets.ModelViewSet):
     queryset = models.School.objects.all()
     serializer_class = serializers.SchoolSerializer
+    filterset_fields = ['is_service_enabled']
 
 class SubjectViewSet(viewsets.ModelViewSet):
     queryset = models.Subject.objects.all()

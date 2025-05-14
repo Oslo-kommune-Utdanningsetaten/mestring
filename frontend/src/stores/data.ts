@@ -2,6 +2,7 @@ import { writable } from 'svelte/store'
 import type { Writable } from 'svelte/store'
 import type { AppData } from '../types/models'
 import type { User } from '../types/models'
+import { type SchoolReadable } from '../api/types.gen'
 
 const defaultUser = {
   id: 'user-01',
@@ -10,10 +11,17 @@ const defaultUser = {
   teacherId: 'teacher-02',
 }
 
-// function for updateting the current user
+// function for updating the current user
 export function setCurrentUser(user: User) {
   dataStore.update(data => {
     return { ...data, currentUser: user }
+  })
+}
+
+// function for updating the current user
+export function setCurrentSchool(school: SchoolReadable) {
+  dataStore.update(data => {
+    return { ...data, currentSchool: school }
   })
 }
 
@@ -25,6 +33,7 @@ export const dataStore: Writable<AppData> = writable({
   goals: [],
   observations: [],
   masteryLevels: [],
+  currentSchool: null,
   currentUser: null,
 })
 
@@ -35,6 +44,7 @@ export async function loadData(): Promise<void> {
     const module = await import('../../public/schoolData_v2.js')
     dataStore.set({
       ...module.data,
+      currentSchool: null,
       currentUser: defaultUser,
     })
   } catch (error) {
