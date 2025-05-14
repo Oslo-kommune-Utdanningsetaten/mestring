@@ -182,7 +182,7 @@ class Situation(BaseModel):
 
 class Observation(BaseModel):
     """
-    An Observation represents an observation of a student, performed by a teacher or student
+    An Observation represents an observation of a student, performed by a teacher or student. Only the observer can access the observation if it is private.
     """
     goal = models.ForeignKey(Goal, on_delete=models.RESTRICT, null=False, blank=False)
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False, related_name='observations_received')
@@ -192,6 +192,7 @@ class Observation(BaseModel):
     mastery_description = models.TextField(null=True)
     feedforward = models.TextField(null=True)
     observed_at = models.DateTimeField(null=True)
+    is_private = models.BooleanField(default=True)
 
 
 class Status(BaseModel):
