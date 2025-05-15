@@ -1,8 +1,9 @@
-import { writable } from 'svelte/store'
-import type { Writable } from 'svelte/store'
-import type { AppData } from '../types/models'
-import type { User } from '../types/models'
+import { get, writable } from 'svelte/store'
+import type { Writable as WritableType } from 'svelte/store'
+import type { AppData, User } from '../types/models'
 import { type SchoolReadable } from '../api/types.gen'
+import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage'
+import { set } from 'date-fns'
 
 const defaultUser = {
   id: 'user-01',
@@ -20,13 +21,14 @@ export function setCurrentUser(user: User) {
 
 // function for updating the current user
 export function setCurrentSchool(school: SchoolReadable) {
+  setLocalStorageItem('currentSchool', school)
   dataStore.update(data => {
     return { ...data, currentSchool: school }
   })
 }
 
 // Create a writable store with initial empty values
-export const dataStore: Writable<AppData> = writable({
+export const dataStore: WritableType<AppData> = writable({
   students: [],
   groups: [],
   teachers: [],
@@ -44,7 +46,7 @@ export async function loadData(): Promise<void> {
     const module = await import('../../public/schoolData_v2.js')
     dataStore.set({
       ...module.data,
-      currentSchool: null,
+      currentSchool: getLocalStorageItem('currentSchool'),
       currentUser: defaultUser,
     })
   } catch (error) {
