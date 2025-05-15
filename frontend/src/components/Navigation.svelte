@@ -78,8 +78,13 @@
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
           {#each schools as school}
             <li>
-              <a class="dropdown-item" href="#" onclick={() => handleSetCurrentSchool(school.id)}>
-                {$dataStore.currentSchool?.id === school.id ? '✅' : ''}
+              <a
+                class="dropdown-item {$dataStore.currentSchool?.id === school.id
+                  ? 'selected-school'
+                  : ''}"
+                href="#"
+                onclick={() => handleSetCurrentSchool(school.id)}
+              >
                 {school.displayName}
               </a>
             </li>
@@ -99,5 +104,11 @@
   .logo-image {
     width: 100px;
     padding-left: 30px;
+  }
+
+  .selected-school {
+    background-color: #f8f9fa;
+    color: #000;
+    font-weight: bold;
   }
 </style>
