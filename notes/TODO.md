@@ -1,6 +1,9 @@
 # Checklist
 
 - [ ] App funker like bra som prototypen
+  - [ ] /home (my groups)
+  - [ ] /students
+  - [x] /schools
 - [ ] prettier i frontend
 - [ ] Finne ut av sikkerhet/ACL
 - [ ] Svelte-kompatibel, datastore-aktig localstorage

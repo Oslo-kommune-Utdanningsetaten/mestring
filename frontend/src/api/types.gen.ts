@@ -606,7 +606,9 @@ export type GoalsUpdateResponse = GoalsUpdateResponses[keyof GoalsUpdateResponse
 export type GroupsListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        school?: string;
+    };
     url: '/groups/';
 };
 

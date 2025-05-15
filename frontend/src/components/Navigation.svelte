@@ -4,7 +4,7 @@
   import { currentPath } from '../stores/navigation'
   import { dataStore, setCurrentSchool } from '../stores/data'
   import { type SchoolReadable } from '../api/types.gen'
-  import { schoolsList, schoolsPartialUpdate } from '../api/sdk.gen'
+  import { schoolsList } from '../api/sdk.gen'
 
   let isHomeActive = $derived($currentPath === '/')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
@@ -37,7 +37,6 @@
   }
 
   $effect(() => {
-    console.log('Current path changed:', $currentPath)
     fetchSchools()
   })
 </script>
@@ -45,9 +44,9 @@
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   <div class="container-md">
     <a class="navbar-brand" href="/">
-      Mestring: {$dataStore.currentSchool
-        ? $dataStore.currentSchool.displayName
-        : 'INGEN SKOLE VALGT'}
+      Mestring: <span class="fw-bold">
+        {$dataStore.currentSchool ? $dataStore.currentSchool.displayName : 'INGEN SKOLE VALGT'}
+      </span>
     </a>
     <ul class="navbar-nav ms-auto">
       <li class="nav-item">
