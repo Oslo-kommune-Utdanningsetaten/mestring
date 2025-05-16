@@ -2,17 +2,11 @@ from rest_framework import serializers
 from mastery import models
 
 # This file contains the serializers for the models in the mastery app.
-# Except UserGroup and StatusGoal, how do we deal with these?
 
 # Base serializers for UserGroup and StatusGoal
 class UserGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserGroup
-        fields = '__all__'
-
-class StatusGoalSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.StatusGoal
         fields = '__all__'
 
 # Basic serializers (without nested relationships)
@@ -56,6 +50,12 @@ class BasicStatusSerializer(serializers.ModelSerializer):
         model = models.Status
         fields = '__all__'
 
+class BasicSituationSerializer(serializers.ModelSerializer):
+    """Basic situation serializer without nested relationships to avoid circular references"""
+    class Meta:
+        model = models.Situation
+        fields = '__all__'
+
 # Nested UserGroup serializer for use in User and Group serializers
 class NestedUserGroupSerializer(serializers.ModelSerializer):
     role = RoleSerializer(read_only=True)
@@ -71,14 +71,6 @@ class NestedGroupUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserGroup
         exclude = ('group',)  # Exclude group when used within Group serializer
-
-# Nested StatusGoal serializer for use in Status serializer
-class NestedStatusGoalSerializer(serializers.ModelSerializer):
-    goal = BasicGoalSerializer(read_only=True)
-    
-    class Meta:
-        model = models.StatusGoal
-        exclude = ('status',)  # Exclude status when used within Status serializer
 
 # Main serializers with relationships
 class UserSerializer(serializers.ModelSerializer):
@@ -106,13 +98,17 @@ class SituationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ObservationSerializer(serializers.ModelSerializer):
+    # nest all FK relations for read
+    goal = BasicGoalSerializer(read_only=True)
+    student = BasicUserSerializer(read_only=True)
+    observer = BasicUserSerializer(read_only=True)
+    situation = BasicSituationSerializer(read_only=True)
+
     class Meta:
         model = models.Observation
         fields = '__all__'
 
-class StatusSerializer(serializers.ModelSerializer):
-    goals = NestedStatusGoalSerializer(source='statusgoal_set', many=True, read_only=True)
-    
+class StatusSerializer(serializers.ModelSerializer):    
     class Meta:
         model = models.Status
         fields = '__all__'

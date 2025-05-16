@@ -13,7 +13,6 @@ router.register(r'situations', views.SituationViewSet, basename="situation")
 router.register(r'observations', views.ObservationViewSet, basename="observation")
 router.register(r'status', views.StatusViewSet, basename="status")
 router.register(r'user-groups', views.UserGroupViewSet, basename="user-group")
-router.register(r'status-goals', views.StatusGoalViewSet, basename="status-goal")
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -12,6 +12,7 @@ export type BasicGoalReadable = {
     masterySchema?: unknown;
     group?: string | null;
     student?: string | null;
+    subject?: string | null;
     previousGoal?: string | null;
 };
 
@@ -24,7 +25,29 @@ export type BasicGoalWritable = {
     masterySchema?: unknown;
     group?: string | null;
     student?: string | null;
+    subject?: string | null;
     previousGoal?: string | null;
+};
+
+/**
+ * Basic situation serializer without nested relationships to avoid circular references
+ */
+export type BasicSituationReadable = {
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    title: string;
+    description?: string | null;
+    happensAt?: string | null;
+};
+
+/**
+ * Basic situation serializer without nested relationships to avoid circular references
+ */
+export type BasicSituationWritable = {
+    title: string;
+    description?: string | null;
+    happensAt?: string | null;
 };
 
 /**
@@ -62,6 +85,7 @@ export type GoalReadable = {
     masterySchema?: unknown;
     group?: string | null;
     student?: string | null;
+    subject?: string | null;
     previousGoal?: string | null;
 };
 
@@ -71,6 +95,7 @@ export type GoalWritable = {
     masterySchema?: unknown;
     group?: string | null;
     student?: string | null;
+    subject?: string | null;
     previousGoal?: string | null;
 };
 
@@ -111,17 +136,6 @@ export type NestedGroupUserWritable = {
     user: BasicUserWritable;
 };
 
-export type NestedStatusGoalReadable = {
-    readonly id: string;
-    goal: BasicGoalReadable;
-    readonly createdAt: string;
-    readonly updatedAt: string;
-};
-
-export type NestedStatusGoalWritable = {
-    goal: BasicGoalWritable;
-};
-
 export type NestedUserGroupReadable = {
     readonly id: string;
     role: RoleReadable;
@@ -137,6 +151,10 @@ export type NestedUserGroupWritable = {
 
 export type ObservationReadable = {
     readonly id: string;
+    goal: BasicGoalReadable;
+    student: BasicUserReadable;
+    observer: BasicUserReadable;
+    situation: BasicSituationReadable;
     readonly createdAt: string;
     readonly updatedAt: string;
     masteryValue?: number | null;
@@ -144,22 +162,18 @@ export type ObservationReadable = {
     feedforward?: string | null;
     observedAt?: string | null;
     isPrivate?: boolean;
-    goal: string;
-    student: string;
-    observer?: string | null;
-    situation?: string | null;
 };
 
 export type ObservationWritable = {
+    goal: BasicGoalWritable;
+    student: BasicUserWritable;
+    observer: BasicUserWritable;
+    situation: BasicSituationWritable;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
     isPrivate?: boolean;
-    goal: string;
-    student: string;
-    observer?: string | null;
-    situation?: string | null;
 };
 
 export type PatchedGoalReadable = {
@@ -171,6 +185,7 @@ export type PatchedGoalReadable = {
     masterySchema?: unknown;
     group?: string | null;
     student?: string | null;
+    subject?: string | null;
     previousGoal?: string | null;
 };
 
@@ -180,6 +195,7 @@ export type PatchedGoalWritable = {
     masterySchema?: unknown;
     group?: string | null;
     student?: string | null;
+    subject?: string | null;
     previousGoal?: string | null;
 };
 
@@ -209,6 +225,10 @@ export type PatchedGroupWritable = {
 
 export type PatchedObservationReadable = {
     readonly id?: string;
+    goal?: BasicGoalReadable;
+    student?: BasicUserReadable;
+    observer?: BasicUserReadable;
+    situation?: BasicSituationReadable;
     readonly createdAt?: string;
     readonly updatedAt?: string;
     masteryValue?: number | null;
@@ -216,22 +236,18 @@ export type PatchedObservationReadable = {
     feedforward?: string | null;
     observedAt?: string | null;
     isPrivate?: boolean;
-    goal?: string;
-    student?: string;
-    observer?: string | null;
-    situation?: string | null;
 };
 
 export type PatchedObservationWritable = {
+    goal?: BasicGoalWritable;
+    student?: BasicUserWritable;
+    observer?: BasicUserWritable;
+    situation?: BasicSituationWritable;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
     isPrivate?: boolean;
-    goal?: string;
-    student?: string;
-    observer?: string | null;
-    situation?: string | null;
 };
 
 export type PatchedRoleReadable = {
@@ -283,15 +299,14 @@ export type PatchedSituationWritable = {
 
 export type PatchedStatusReadable = {
     readonly id?: string;
-    readonly goals?: Array<NestedStatusGoalReadable>;
     readonly createdAt?: string;
     readonly updatedAt?: string;
     estimatedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
-    group?: string | null;
     student?: string;
+    subject?: string;
 };
 
 export type PatchedStatusWritable = {
@@ -299,21 +314,8 @@ export type PatchedStatusWritable = {
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
-    group?: string | null;
     student?: string;
-};
-
-export type PatchedStatusGoalReadable = {
-    readonly id?: string;
-    readonly createdAt?: string;
-    readonly updatedAt?: string;
-    status?: string;
-    goal?: string;
-};
-
-export type PatchedStatusGoalWritable = {
-    status?: string;
-    goal?: string;
+    subject?: string;
 };
 
 export type PatchedSubjectReadable = {
@@ -417,15 +419,14 @@ export type SituationWritable = {
 
 export type StatusReadable = {
     readonly id: string;
-    readonly goals: Array<NestedStatusGoalReadable>;
     readonly createdAt: string;
     readonly updatedAt: string;
     estimatedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
-    group?: string | null;
     student: string;
+    subject: string;
 };
 
 export type StatusWritable = {
@@ -433,21 +434,8 @@ export type StatusWritable = {
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
-    group?: string | null;
     student: string;
-};
-
-export type StatusGoalReadable = {
-    readonly id: string;
-    readonly createdAt: string;
-    readonly updatedAt: string;
-    status: string;
-    goal: string;
-};
-
-export type StatusGoalWritable = {
-    status: string;
-    goal: string;
+    subject: string;
 };
 
 export type SubjectReadable = {
@@ -738,7 +726,7 @@ export type ObservationsListResponses = {
 export type ObservationsListResponse = ObservationsListResponses[keyof ObservationsListResponses];
 
 export type ObservationsCreateData = {
-    body: ObservationWritable;
+    body?: ObservationWritable;
     path?: never;
     query?: never;
     url: '/observations/';
@@ -808,7 +796,7 @@ export type ObservationsPartialUpdateResponses = {
 export type ObservationsPartialUpdateResponse = ObservationsPartialUpdateResponses[keyof ObservationsPartialUpdateResponses];
 
 export type ObservationsUpdateData = {
-    body: ObservationWritable;
+    body?: ObservationWritable;
     path: {
         /**
          * A unique value identifying this observation.
@@ -1156,107 +1144,6 @@ export type StatusCreateResponses = {
 
 export type StatusCreateResponse = StatusCreateResponses[keyof StatusCreateResponses];
 
-export type StatusGoalsListData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/status-goals/';
-};
-
-export type StatusGoalsListResponses = {
-    200: Array<StatusGoalReadable>;
-};
-
-export type StatusGoalsListResponse = StatusGoalsListResponses[keyof StatusGoalsListResponses];
-
-export type StatusGoalsCreateData = {
-    body: StatusGoalWritable;
-    path?: never;
-    query?: never;
-    url: '/status-goals/';
-};
-
-export type StatusGoalsCreateResponses = {
-    201: StatusGoalReadable;
-};
-
-export type StatusGoalsCreateResponse = StatusGoalsCreateResponses[keyof StatusGoalsCreateResponses];
-
-export type StatusGoalsDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique value identifying this status goal.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/status-goals/{id}/';
-};
-
-export type StatusGoalsDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type StatusGoalsDestroyResponse = StatusGoalsDestroyResponses[keyof StatusGoalsDestroyResponses];
-
-export type StatusGoalsRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique value identifying this status goal.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/status-goals/{id}/';
-};
-
-export type StatusGoalsRetrieveResponses = {
-    200: StatusGoalReadable;
-};
-
-export type StatusGoalsRetrieveResponse = StatusGoalsRetrieveResponses[keyof StatusGoalsRetrieveResponses];
-
-export type StatusGoalsPartialUpdateData = {
-    body?: PatchedStatusGoalWritable;
-    path: {
-        /**
-         * A unique value identifying this status goal.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/status-goals/{id}/';
-};
-
-export type StatusGoalsPartialUpdateResponses = {
-    200: StatusGoalReadable;
-};
-
-export type StatusGoalsPartialUpdateResponse = StatusGoalsPartialUpdateResponses[keyof StatusGoalsPartialUpdateResponses];
-
-export type StatusGoalsUpdateData = {
-    body: StatusGoalWritable;
-    path: {
-        /**
-         * A unique value identifying this status goal.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/status-goals/{id}/';
-};
-
-export type StatusGoalsUpdateResponses = {
-    200: StatusGoalReadable;
-};
-
-export type StatusGoalsUpdateResponse = StatusGoalsUpdateResponses[keyof StatusGoalsUpdateResponses];
-
 export type StatusDestroyData = {
     body?: never;
     path: {
@@ -1331,24 +1218,6 @@ export type StatusUpdateResponses = {
 };
 
 export type StatusUpdateResponse = StatusUpdateResponses[keyof StatusUpdateResponses];
-
-export type StatusGoalsRetrieve2Data = {
-    body?: never;
-    path: {
-        /**
-         * A unique value identifying this status.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/status/{id}/goals/';
-};
-
-export type StatusGoalsRetrieve2Responses = {
-    200: StatusReadable;
-};
-
-export type StatusGoalsRetrieve2Response = StatusGoalsRetrieve2Responses[keyof StatusGoalsRetrieve2Responses];
 
 export type SubjectsListData = {
     body?: never;

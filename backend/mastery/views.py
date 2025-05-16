@@ -59,19 +59,8 @@ class ObservationViewSet(viewsets.ModelViewSet):
 class StatusViewSet(viewsets.ModelViewSet):
     queryset = models.Status.objects.all()
     serializer_class = serializers.StatusSerializer
-    
-    @action(detail=True, methods=['get'])
-    def goals(self, request, pk=None):
-        """Retrieve all goals associated with a status"""
-        status_obj = self.get_object()
-        status_goals = models.StatusGoal.objects.filter(status=status_obj)
-        serializer = serializers.NestedStatusGoalSerializer(status_goals, many=True)
-        return Response(serializer.data)
 
 class UserGroupViewSet(viewsets.ModelViewSet):
     queryset = models.UserGroup.objects.all()
     serializer_class = serializers.UserGroupSerializer
 
-class StatusGoalViewSet(viewsets.ModelViewSet):
-    queryset = models.StatusGoal.objects.all()
-    serializer_class = serializers.StatusGoalSerializer

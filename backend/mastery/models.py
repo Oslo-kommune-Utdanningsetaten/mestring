@@ -159,6 +159,7 @@ class Goal(BaseModel):
     description = models.TextField(null=True)
     group = models.ForeignKey(Group, on_delete=models.RESTRICT, null=True)
     student = models.ForeignKey(User, on_delete=models.RESTRICT, null=True)
+    subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True)
     previous_goal = models.ForeignKey('Goal', on_delete=models.RESTRICT, null=True)
     mastery_schema = models.JSONField(null=True)
 
@@ -170,6 +171,16 @@ class Goal(BaseModel):
             ),
         ]
 
+    @property
+    def is_personal(self):
+        """Check if the goal is personal (i.e. for a specific student)"""
+        return self.student is not None
+
+    @property
+    def is_group(self):
+        """Check if the goal is for a group"""
+        return self.group is not None
+    
 
 class Situation(BaseModel):
     """
@@ -199,19 +210,11 @@ class Status(BaseModel):
     """
     A status represents a snapshot of a students mastery at a point in time, typically in a subject, e.g. how is Lois doing in math (all math Goals are then considered)
     """
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=False, blank=False)
     estimated_at = models.DateTimeField(null=True)
     mastery_value = models.IntegerField(null=True)
     mastery_description = models.TextField(null=True)
     feedforward = models.TextField(null=True)
-    goals = models.ManyToManyField('Goal', through='StatusGoal', related_name='statuses', null=True)
 
-
-class StatusGoal(BaseModel):
-    """
-    A StatusGoal represents a goal that is part of a Status. This enables Status to encompass multiple Goals
-    """
-    status = models.ForeignKey(Status, on_delete=models.CASCADE, null=False, blank=False)
-    goal = models.ForeignKey(Goal, on_delete=models.CASCADE, null=False, blank=False)
 
