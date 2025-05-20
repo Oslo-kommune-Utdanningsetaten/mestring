@@ -1,118 +1,134 @@
 <script lang="ts">
-  import StudentRow from './StudentRow.svelte'
+  import '@oslokommune/punkt-elements/dist/pkt-select.js'
+  import { onMount } from 'svelte'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { dataStore } from '../stores/data'
-
-  import type { Student as StudentType, Group as GroupType } from '../types/models'
   import { urlStringFrom } from '../utils/functions'
+  import StudentRow from './StudentRow.svelte'
+
+  import { groupsList, groupsMembersRetrieve } from '../api/sdk.gen'
+  import {
+    type GroupReadable,
+    type NestedGroupUserReadable,
+    type BasicUserReadable,
+  } from '../api/types.gen'
+
   const router = useTinyRouter()
+  const currentSchool = $derived($dataStore.currentSchool)
 
-  const students = $derived($dataStore.students)
-  const teachingGroups = $derived($dataStore.groups.filter(s => s.type === 'teaching'))
-  const basisGroups = $derived($dataStore.groups.filter(s => s.type === 'basis'))
-  const activeTeachingGroupId = $derived(router.getQueryParam('teachingGroupId'))
-  const activeTeachingGroup = $derived(teachingGroups.find(tg => tg.id === activeTeachingGroupId))
-  const activeBasisGroupId = $derived(router.getQueryParam('basisGroupId'))
-  const activeBasisGroup = $derived(basisGroups.find(bg => bg.id === activeBasisGroupId))
+  let selectedGroupId = $derived(router.getQueryParam('groupId'))
+  let selectedGroup = $state<GroupReadable | null>(null)
+  let allGroups = $state<GroupReadable[]>([])
+  let teachingGroups = $state<GroupReadable[]>([])
+  let basisGroups = $state<GroupReadable[]>([])
 
-  // Filter students by group and subject
-  const filteredStudents = $derived(
-    students
-      .filter((student: StudentType) => {
-        return activeTeachingGroupId ? student.groupIds.includes(activeTeachingGroupId) : true
+  async function fetchGroups() {
+    try {
+      const result = await groupsList({
+        query: {
+          school: currentSchool?.id,
+        },
       })
-      .filter((student: StudentType) => {
-        return activeBasisGroupId ? student.groupIds.includes(activeBasisGroupId) : true
-      })
-  )
+      allGroups = result.data || []
+      teachingGroups = allGroups.filter(group => group.type === 'undervisning')
+      basisGroups = allGroups.filter(group => group.type === 'basis')
+    } catch (error) {
+      console.error('Error fetching groups:', error)
+      allGroups = []
+      teachingGroups = []
+      basisGroups = []
+    }
+  }
 
-  // a derived map of groups by id, i.e. the superset of all student groups, by group id
-  const groupsById = $derived(
-    filteredStudents
-      .map((student: StudentType) => student.groupIds)
-      .flat()
-      .reduce((acc: { [key: string]: GroupType | undefined }, groupId: string) => {
-        acc[groupId] = $dataStore.groups.find(g => g.id === groupId)
-        return acc
-      }, {})
-  )
+  async function fetchGroupMembers(groupId: string): Promise<{
+    teachers: BasicUserReadable[]
+    students: BasicUserReadable[]
+  }> {
+    console.log('Fetching members:', groupId)
+
+    try {
+      const result = await groupsMembersRetrieve({
+        path: {
+          id: groupId,
+        },
+      })
+      const members: any = result.data || []
+
+      const teachers: BasicUserReadable[] =
+        members
+          .filter((member: NestedGroupUserReadable) => member.role.name === 'teacher')
+          .map((member: NestedGroupUserReadable) => member.user) || []
+      const students: BasicUserReadable[] =
+        members
+          .filter((member: NestedGroupUserReadable) => member.role.name === 'student')
+          .map((member: NestedGroupUserReadable) => member.user) || []
+
+      return { teachers, students }
+    } catch (error) {
+      console.error(`Error fetching members for group ${groupId}:`, error)
+      return { teachers: [], students: [] }
+    }
+  }
+
+  async function handleGroupSelect(groupId: string): Promise<void> {
+    if (!groupId) {
+      // clear selection and URL
+      selectedGroup = null
+      history.replaceState(null, '', urlStringFrom({}, { mode: 'replace' }))
+      return
+    }
+
+    history.replaceState(null, '', urlStringFrom({ groupId }, { mode: 'merge' }))
+
+    // 2) fetch & show the new group
+    const { students, teachers } = await fetchGroupMembers(groupId)
+    selectedGroup = {
+      ...selectedGroup,
+      students,
+      teachers,
+      displayName: allGroups.find(g => g.id === groupId)?.displayName || '',
+    }
+  }
+
+  onMount(async () => {
+    await fetchGroups()
+    console.log('Selected groupId:', selectedGroupId)
+    if (selectedGroupId) {
+      handleGroupSelect(selectedGroupId)
+    }
+  })
 </script>
 
 <section class="py-3">
   <h2>Elever</h2>
 
-  <!-- Filter basis groups -->
+  <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">
-    <div class="dropdown">
-      <button
-        class="btn btn-outline-secondary dropdown-toggle link-button"
-        type="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
+    <div class="pkt-inputwrapper">
+      <label class="pkt-inputwrapper__label" for="exampleSelect1">
+        <span>Velg gruppe</span>
+      </label>
+      <select
+        class="pkt-input"
+        id="exampleSelect1"
+        onchange={() => handleGroupSelect(event.target.value)}
       >
-        {activeBasisGroup?.name || 'Velg gruppe'}
-      </button>
-      <ul class="dropdown-menu">
-        <li>
-          <a
-            class="dropdown-item dropdown-link"
-            href={urlStringFrom({ basisGroupId: null }, { mode: 'merge' })}
-          >
-            Alle grupper
-          </a>
-        </li>
-        {#each basisGroups as group}
-          <li>
-            <a
-              class="dropdown-item dropdown-link"
-              href={urlStringFrom({ basisGroupId: group.id }, { mode: 'merge' })}
-            >
-              {group.name}
-            </a>
-          </li>
+        <option value="0" selected={!selectedGroupId}>Alle</option>
+        {#each allGroups as group}
+          <option value={group.id} selected={group.id === selectedGroupId}>
+            {group.displayName}
+          </option>
         {/each}
-      </ul>
+      </select>
     </div>
-    <!-- Filter teaching groups -->
-    <div class="dropdown">
-      <button
-        class="btn btn-outline-secondary dropdown-toggle link-button"
-        type="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-      >
-        {activeTeachingGroup
-          ? activeTeachingGroup.name + ' | ' + activeTeachingGroup.grade
-          : 'Velg fag'}
-      </button>
-      <ul class="dropdown-menu">
-        <li>
-          <a
-            class="dropdown-item dropdown-link"
-            href={urlStringFrom({ teachingGroupId: null }, { mode: 'merge' })}
-          >
-            Alle fag
-          </a>
-        </li>
-        {#each teachingGroups as subject}
-          <li>
-            <a
-              class="dropdown-item dropdown-link"
-              href={urlStringFrom({ teachingGroupId: subject.id }, { mode: 'merge' })}
-            >
-              {subject.name} | {subject.grade}
-            </a>
-          </li>
-        {/each}
-      </ul>
-    </div>
+
     <a class="link-button" href={urlStringFrom({}, { mode: 'replace' })}>Nullstill</a>
   </div>
 </section>
 
 <section class="py-3">
-  {#if filteredStudents.length === 0}
-    <div class="alert alert-info">Ingen elever matcher det filteret</div>
+  {#if !selectedGroup}
+    <div class="alert alert-info">Ingen gruppe valgt</div>
   {:else}
     <div class="card shadow-sm">
       <!-- Header row -->
@@ -121,20 +137,14 @@
         <div>Klasse</div>
         <div>
           <span>Mål</span>
-          <div class="group-grid-columns">
-            {#each Object.values(groupsById) as group}
-              <span class="group-grid-column">
-                {group?.id.includes('-') ? group.name : 'Sosialt'}
-              </span>
-            {/each}
-          </div>
+          <div class="group-grid-columns">5 :)</div>
         </div>
         <div>&nbsp;</div>
       </div>
 
       <!-- Student rows -->
-      {#each filteredStudents as student}
-        <StudentRow {student} groupIds={Object.keys(groupsById)} />
+      {#each selectedGroup.students as student}
+        <StudentRow {student} />
       {/each}
     </div>
   {/if}
@@ -147,5 +157,9 @@
 
   .dropdown-link:hover {
     text-decoration: none;
+  }
+
+  .selected {
+    font-weight: bold;
   }
 </style>

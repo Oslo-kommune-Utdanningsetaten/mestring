@@ -2,11 +2,7 @@
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
   import { groupsList, groupsMembersRetrieve } from '../api/sdk.gen'
-  import {
-    type GroupReadable,
-    type UserReadable,
-    type NestedGroupUserReadable,
-  } from '../api/types.gen'
+  import { type GroupReadable, type NestedGroupUserReadable } from '../api/types.gen'
 
   const currentSchool = $derived($dataStore.currentSchool)
   const currentUser = $derived($dataStore.currentUser)
@@ -81,9 +77,7 @@
             <div class="col-3">
               <a
                 href={urlStringFrom(
-                  group.type === 'basis'
-                    ? { basisGroupId: group.id }
-                    : { teachingGroupId: group.id },
+                  group.type === 'basis' ? { basisGroupId: group.id } : { groupId: group.id },
                   {
                     path: '/students',
                     mode: 'replace',
@@ -98,7 +92,7 @@
                 {groupMembers[group.id].students.length}
               {:else}
                 <div class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Loading...</span>
+                  <span class="visually-hidden">Henter data...</span>
                 </div>
               {/if}
             </div>
@@ -107,7 +101,7 @@
                 {groupMembers[group.id].teachers.map(m => m.user.name).join(', ')}
               {:else}
                 <div class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Loading...</span>
+                  <span class="visually-hidden">Henter data...</span>
                 </div>
               {/if}
             </div>

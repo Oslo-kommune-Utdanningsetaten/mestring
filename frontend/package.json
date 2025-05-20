@@ -15,6 +15,7 @@
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@tsconfig/svelte": "^5.0.4",
     "prettier": "^3.5.3",
+    "sass": "^1.89.0",
     "svelte": "^5.20.2",
     "svelte-check": "^4.1.4",
     "svelte-preprocess": "^6.0.3",
@@ -23,6 +24,9 @@
   },
   "dependencies": {
     "@hey-api/client-fetch": "^0.10.0",
+    "@oslokommune/punkt-assets": "^12.39.2",
+    "@oslokommune/punkt-css": "^12.40.0",
+    "@oslokommune/punkt-elements": "^12.40.0",
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.8",
     "date-fns": "^4.1.0",

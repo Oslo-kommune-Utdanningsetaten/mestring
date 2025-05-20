@@ -1,6 +1,8 @@
 <script lang="ts">
   import Link from './Link.svelte'
-  import osloLogo from '../assets/oslo_logo_sort.svg'
+
+  import oslologoUrl from '@oslokommune/punkt-assets/dist/logos/oslologo.svg?url'
+
   import { currentPath } from '../stores/navigation'
   import { dataStore, setCurrentSchool } from '../stores/data'
   import { type SchoolReadable } from '../api/types.gen'
@@ -94,7 +96,7 @@
       </li>
     </ul>
     <a href="https://www.oslo.kommune.no" class="logo-image" target="_blank">
-      <img alt="Oslo Kommune logo" src={osloLogo} />
+      <img class="oslologo" alt="Oslo kommune logo" src={oslologoUrl} />
     </a>
   </div>
 </nav>

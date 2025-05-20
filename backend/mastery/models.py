@@ -173,13 +173,11 @@ class Goal(BaseModel):
 
     @property
     def is_personal(self):
-        """Check if the goal is personal (i.e. for a specific student)"""
-        return self.student is not None
+        return self.group is None and self.student is not None
 
     @property
     def is_group(self):
-        """Check if the goal is for a group"""
-        return self.group is not None
+        return self.student is None and self.group is not None
     
 
 class Situation(BaseModel):
