@@ -1,3 +1,9 @@
+# Ideer
+
+- Kompetanse bygges stein på stein, nye temaer øker kompetansen selv om man har lav score. Hvordan visualiserer vi kumulativ kompetanse?
+  - UI med stein på stein?
+  - Achievments?
+
 # Checklist
 
 - [ ] App funker like bra som prototypen
@@ -5,15 +11,16 @@
   - [ ] /students
   - [x] /schools
 - [ ] prettier i frontend
-- [ ] Finne ut av sikkerhet/ACL
-- [ ] Svelte-kompatibel, datastore-aktig localstorage
+- [ ] revamp Subject model
 - [ ] Teste relasjoner status/goal
-- [ ] Vanntett import med god logging
+- [ ] Import med options og logging
+- [ ] Finne ut av sikkerhet/ACL
 - [ ] Feide
   - [ ] Auth for bruker
   - [x] Importere skoler
   - [x] Importere grupper pr. skole
   - [x] Importere subjects fra UDIR/grep (som matcher teaching-groups)
+- [x] Svelte-kompatibel, datastore-aktig localstorage
 - [x] Dataimport fra Excel
   - [x] Observation, Goal
 - [x] En unit-test som sjekker noe som helst

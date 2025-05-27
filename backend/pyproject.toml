@@ -13,27 +13,23 @@ python-dotenv = "^1.0.1"
 oauthlib = "^3.2.2"
 requests = "^2.31.0"
 pyopenssl = "^24.0.0"
-pymysql = "^1.1.0"
 gunicorn = "^23.0.0"
 uvicorn = "^0.27.1"
 django = "4.2.20"
 djangorestframework = "^3.16.0"
-mysqlclient = "^2.2.4"
+pytest-django = "^4.11.1"
 django-cors-headers = "^4.7.0"
 nanoid = "^2.0.0"
-pytest-django = "^4.11.1"
 djangorestframework-camel-case = "^1.4.2"
-mssql-django = "^1.5"
-pyodbc = "^5.2.0"
 pyexcel-xlsx = "^0.6.1"
 django-filter = "^25.1"
+psycopg2-binary = "^2.9.9"
 
 
 [tool.poetry.group.dev.dependencies]
 daphne = "^4.1.0"
 drf-spectacular = "^0.28.0"
 poethepoet = "^0.32.2"
-pyexcel-xlsx = "^0.6.1"
 
 
 [build-system]

@@ -1,5 +1,6 @@
 {
   "prettier.configPath": "./frontend/.prettierrc.json",
   "prettier.prettierPath": "./frontend/node_modules/prettier",
-  "prettier.ignorePath": "./frontend/.prettierignore"
+  "prettier.ignorePath": "./frontend/.prettierignore",
+  "sqltools.connections": []
 }

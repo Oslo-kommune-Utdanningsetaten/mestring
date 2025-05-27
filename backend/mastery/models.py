@@ -38,13 +38,14 @@ class School(BaseModel):
 
 class Subject(BaseModel):
     """
-    A Subject represents something taught in a Feide teaching group
+    A Subject represents something taught
     Refer to UDIR grep for list of possible subjects
     """
     display_name = models.CharField(max_length=200)
     short_name = models.CharField(max_length=200)
-    code = models.CharField(max_length=200) # UDIR grep code
-    group_code = models.CharField(max_length=200, null=True) # UDIR grep opplæringsfag
+    is_feide_synchronized = models.BooleanField(default=True) # if true, overwritten by Feide data
+    grep_code = models.CharField(max_length=200) # UDIR grep code
+    grep_group_code = models.CharField(max_length=200, null=True) # UDIR grep code opplæringsfag
 
 
 class User(BaseModel):

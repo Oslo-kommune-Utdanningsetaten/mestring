@@ -16,24 +16,25 @@ from mastery import models
 UDIR_GREP_URL = "https://data.udir.no/kl06/v201906/fagkoder/"
 
 # Create a new subject if it doesn't exist
-def ensure_subject(code):
-    subject = models.Subject.objects.filter(code__exact=code).first()
+def ensure_subject(grep_code):
+    subject = models.Subject.objects.filter(grep_code__exact=grep_code).first()
     if not subject:
-        udir_response = requests.get(UDIR_GREP_URL + code)
+        udir_response = requests.get(UDIR_GREP_URL + grep_code)
         if udir_response.status_code == 200 and udir_response.text:
             udir_subject = udir_response.json()
-            print("  Creating subject:", code, udir_subject['tittel'][0]['verdi'])
+            print("  Creating subject:", grep_code, udir_subject['tittel'][0]['verdi'])
             diplay_name = udir_subject['tittel'][0]['verdi']
             short_name = udir_subject['kortform'][0]['verdi']
-            group_code = udir_subject['opplaeringsfag'][0]['kode'] if udir_subject.get('opplaeringsfag') and len(udir_subject['opplaeringsfag']) > 0 else None
+            grep_group_code = udir_subject['opplaeringsfag'][0]['kode'] if udir_subject.get('opplaeringsfag') and len(udir_subject['opplaeringsfag']) > 0 else None
             subject = models.Subject.objects.create(
-                code=code,
                 display_name=diplay_name,
+                is_feide_synchronized=True,
                 short_name=short_name,
-                group_code=group_code,
+                grep_code=grep_code,
+                grep_group_code=grep_group_code,
             )
         else:
-            print("🚷Failed to fetch subject from UDIR:", code)
+            print("🚷Failed to fetch subject from UDIR:", grep_code)
             subject = None
     return subject
 

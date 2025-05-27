@@ -21,6 +21,8 @@
   let allGroups = $state<GroupReadable[]>([])
   let teachingGroups = $state<GroupReadable[]>([])
   let basisGroups = $state<GroupReadable[]>([])
+  let students = $state<BasicUserReadable[]>([])
+  let teachers = $state<BasicUserReadable[]>([])
 
   async function fetchGroups() {
     try {
@@ -40,12 +42,7 @@
     }
   }
 
-  async function fetchGroupMembers(groupId: string): Promise<{
-    teachers: BasicUserReadable[]
-    students: BasicUserReadable[]
-  }> {
-    console.log('Fetching members:', groupId)
-
+  async function fetchGroupMembers(groupId: string) {
     try {
       const result = await groupsMembersRetrieve({
         path: {
@@ -54,47 +51,34 @@
       })
       const members: any = result.data || []
 
-      const teachers: BasicUserReadable[] =
+      teachers =
         members
           .filter((member: NestedGroupUserReadable) => member.role.name === 'teacher')
           .map((member: NestedGroupUserReadable) => member.user) || []
-      const students: BasicUserReadable[] =
+      students =
         members
           .filter((member: NestedGroupUserReadable) => member.role.name === 'student')
           .map((member: NestedGroupUserReadable) => member.user) || []
-
-      return { teachers, students }
     } catch (error) {
       console.error(`Error fetching members for group ${groupId}:`, error)
-      return { teachers: [], students: [] }
+      teachers = []
+      students = []
     }
   }
 
   async function handleGroupSelect(groupId: string): Promise<void> {
-    if (!groupId) {
-      // clear selection and URL
-      selectedGroup = null
-      history.replaceState(null, '', urlStringFrom({}, { mode: 'replace' }))
-      return
-    }
-
-    history.replaceState(null, '', urlStringFrom({ groupId }, { mode: 'merge' }))
-
-    // 2) fetch & show the new group
-    const { students, teachers } = await fetchGroupMembers(groupId)
-    selectedGroup = {
-      ...selectedGroup,
-      students,
-      teachers,
-      displayName: allGroups.find(g => g.id === groupId)?.displayName || '',
+    if (groupId) {
+      window.location.href = urlStringFrom({ groupId }, { mode: 'merge' })
+    } else {
+      window.location.href = urlStringFrom({}, { mode: 'replace' })
     }
   }
 
   onMount(async () => {
     await fetchGroups()
-    console.log('Selected groupId:', selectedGroupId)
     if (selectedGroupId) {
-      handleGroupSelect(selectedGroupId)
+      await fetchGroupMembers(selectedGroupId)
+      selectedGroup = allGroups.find(group => group.id === selectedGroupId) || null
     }
   })
 </script>
@@ -143,7 +127,7 @@
       </div>
 
       <!-- Student rows -->
-      {#each selectedGroup.students as student}
+      {#each students as student}
         <StudentRow {student} />
       {/each}
     </div>

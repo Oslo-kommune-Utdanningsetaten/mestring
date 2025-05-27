@@ -1,45 +1,30 @@
 services:
-  db:
-    image: mariadb
+  postgres:
+    image: postgres:15.3
     restart: always
     environment:
-      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MARIADB_DB_NAME}
-      MYSQL_USER: ${MARIADB_USER}
-      MYSQL_PASSWORD: ${MARIADB_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
     ports:
-      - 3306:3306 # For dev (make sure port is not exposed on prod host)
+      - 5432:5432
     volumes:
-      - ./db:/var/lib/mysql
+      - postgres-data:/var/lib/postgresql/data
     profiles:
       - dev
       - prod
-
-  mssql:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    restart: always
-    environment:
-      ACCEPT_EULA: Y
-      MSSQL_SA_PASSWORD: ${MSSQL_PASSWORD}
-      MSSQL_PID: Developer
-      MSSQL_DB: ${MSSQL_DB_NAME}
-    ports:
-      - 1433:1433
-    volumes:
-      - mssql-data:/var/opt/mssql
-    profiles:
-      - dev
 
   adminer:
     image: adminer
     restart: always
     ports:
       - 8080:8080
-    extra_hosts:
-      - 'db:host-gateway'
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
     volumes:
-      - /var/run/mysqld/mysqld.sock:/var/run/mysqld/mysqld.sock:ro
-      - ./adminer/css/dracula.css:/var/www/html/adminer-dark.css:ro
+      - ./adminer/dracula.css:/var/www/html/adminer-dark.css:ro
+    depends_on:
+      - postgres
     profiles:
       - dev
       - prod
@@ -69,14 +54,13 @@ services:
     volumes:
       - ./backend:/code
       - /var/www/:/var/www/
-      - /var/run/mysqld/mysqld.sock:/var/run/mysqld/mysqld.sock:ro
     ports:
       - 8001:8000
     env_file:
       - ./backend/.env
     environment:
       DJANGO_DEBUG: 'False'
-      DB_HOST: 'db'
+      DB_HOST: 'postgres'
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     profiles:
@@ -98,5 +82,5 @@ services:
       - prod
 
 volumes:
-  mssql-data:
+  postgres-data:
     driver: local

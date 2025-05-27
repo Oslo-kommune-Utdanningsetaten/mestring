@@ -19,6 +19,7 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+DB_HOST = os.environ.get('DB_HOST', 'localhost')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -97,18 +98,17 @@ CORS_ALLOWED_ORIGINS = [
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
-        'NAME': os.environ.get('MSSQL_DB_NAME'),
-        'USER': os.environ.get('MSSQL_USER'),
-        'PASSWORD': os.environ.get('MSSQL_PASSWORD'),
-        'HOST': os.environ.get('MSSQL_DB_HOST'),
-        'PORT': os.environ.get('MSSQL_DB_PORT'),
-        'CONN_MAX_AGE': 0,
-        'CONN_HEALTH_CHECKS': True,
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB_NAME'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': DB_HOST,
+        'PORT': '5432',
         'OPTIONS': {
-            'connect_timeout': 60,
+            'client_encoding': 'UTF8'
         },
     }
 }
