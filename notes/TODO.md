@@ -6,12 +6,17 @@
 
 # Checklist
 
+- [x] Dataimport fra Excel
+  - [x] Observation, Goal
+  - [ ] User
+  - [ ] Group
+  - [ ] Subject
 - [ ] App funker like bra som prototypen
   - [ ] /home (my groups)
   - [ ] /students
   - [x] /schools
+- [ ] implementer: punkt web components https://punkt.oslo.kommune.no/latest/komponenter/om-komponenter/
 - [ ] prettier i frontend
-- [ ] revamp Subject model
 - [ ] Teste relasjoner status/goal
 - [ ] Import med options og logging
 - [ ] Finne ut av sikkerhet/ACL
@@ -20,9 +25,8 @@
   - [x] Importere skoler
   - [x] Importere grupper pr. skole
   - [x] Importere subjects fra UDIR/grep (som matcher teaching-groups)
+- [x] revamp Subject model
 - [x] Svelte-kompatibel, datastore-aktig localstorage
-- [x] Dataimport fra Excel
-  - [x] Observation, Goal
 - [x] En unit-test som sjekker noe som helst
 - [x] Urls, view, serializers for hele databasen
 - [x] Teste relasjoner user/group

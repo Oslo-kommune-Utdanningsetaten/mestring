@@ -45,10 +45,8 @@
 
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   <div class="container-md">
-    <a class="navbar-brand" href="/">
-      Mestring: <span class="fw-bold">
-        {$dataStore.currentSchool ? $dataStore.currentSchool.displayName : 'INGEN SKOLE VALGT'}
-      </span>
+    <a class="navbar-brand fw-bold" href="/">
+      {$dataStore.currentSchool ? $dataStore.currentSchool.displayName : 'INGEN SKOLE VALGT'}
     </a>
     <ul class="navbar-nav ms-auto">
       <li class="nav-item">

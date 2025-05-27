@@ -28,7 +28,6 @@ def ensure_subject(grep_code):
             grep_group_code = udir_subject['opplaeringsfag'][0]['kode'] if udir_subject.get('opplaeringsfag') and len(udir_subject['opplaeringsfag']) > 0 else None
             subject = models.Subject.objects.create(
                 display_name=diplay_name,
-                is_feide_synchronized=True,
                 short_name=short_name,
                 grep_code=grep_code,
                 grep_group_code=grep_group_code,

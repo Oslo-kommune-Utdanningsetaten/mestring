@@ -23,7 +23,7 @@ class School(BaseModel):
     School matches a Feide school 1:1 
     https://docs.feide.no/reference/apis/groups_api/group_types/pse_school.html
     """
-    feide_id = models.CharField(max_length=200)
+    feide_id = models.CharField(max_length=200, unique=True)
     display_name = models.CharField(max_length=200)
     short_name = models.CharField(max_length=10, null=True)
     org_number = models.CharField(max_length=50)
@@ -38,14 +38,19 @@ class School(BaseModel):
 
 class Subject(BaseModel):
     """
-    A Subject represents something taught
+    A Subject represents something taught. If maintened_by_school is unset, the row is Feide synchronized and can be overwritten by import scripts.
     Refer to UDIR grep for list of possible subjects
     """
     display_name = models.CharField(max_length=200)
     short_name = models.CharField(max_length=200)
-    is_feide_synchronized = models.BooleanField(default=True) # if true, overwritten by Feide data
-    grep_code = models.CharField(max_length=200) # UDIR grep code
+    maintened_by_school = models.ForeignKey(School, on_delete=models.RESTRICT, null=True, related_name='subjects')
+    grep_code = models.CharField(max_length=200, null=True) # UDIR grep code
     grep_group_code = models.CharField(max_length=200, null=True) # UDIR grep code opplæringsfag
+
+    @property
+    def is_feide_synchronized(self):
+        """Convenience property to check if subject is Feide synchronized"""
+        return self.maintened_by_school is None
 
 
 class User(BaseModel):
@@ -54,7 +59,7 @@ class User(BaseModel):
     A User belongs to a School via Group
     """
     name = models.CharField(max_length=200)
-    feide_id = models.CharField(max_length=200)
+    feide_id = models.CharField(max_length=200, unique=True)
     email = models.CharField(max_length=200)
     last_activity_at = models.DateTimeField(null=True)
     disabled_at = models.DateTimeField(null=True)
@@ -86,9 +91,9 @@ class Group(BaseModel):
     """
     A Group represents a collection of Users in the system. Basis and teaching groups will be the most common, but School will also be modeled as a Group
     """
-    feide_id = models.CharField(max_length=200)
+    feide_id = models.CharField(max_length=200, unique=True)
     display_name = models.CharField(max_length=200)
-    type = models.CharField(max_length=200)
+    type = models.CharField(max_length=200) # either 'basis' or 'teaching' for now
     subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True)
     school = models.ForeignKey(School, on_delete=models.RESTRICT, null=False, related_name='groups')
     valid_from = models.DateTimeField(null=True)

@@ -16,16 +16,30 @@ django.setup()
 from mastery import models
 
 
-def objects_from_sheet(sheet, field_map):
+def ensure_roles_exist():
+    """
+    Ensure that the roles 'teacher' and 'student' exist in the database.
+    If they do not exist, create them.
+    """
+    teacher_role, _ = models.Role.objects.get_or_create(name='teacher')
+    student_role, _ = models.Role.objects.get_or_create(name='student')
+    return teacher_role, student_role
+
+
+def objects_from_sheet(sheet, field_names):
     objects = []
-    field_names = sheet[0]
+    sheet_field_names = sheet[0]
     for row in sheet[1:]:
         obj = {}
         for index, field_value in enumerate(row):
-            field_name = field_names[index]
-            if field_name in field_map:
-                mapped_field = field_map[field_name]
-                obj[mapped_field] = field_value
+            field_name = sheet_field_names[index]
+            if field_name in field_names:
+                if field_value is None or field_value == '':
+                    field_value = None
+                obj[field_name] = field_value
+            else:
+                print(f"🚫Warning: Field '{field_name}' not in field_names, skipping.")
+                continue
         if bool(obj):
             objects.append(obj)
     return objects
@@ -34,18 +48,90 @@ def objects_from_sheet(sheet, field_map):
 def run_import():
     excel_file_path = os.path.join(script_dir, 'data', 'data_for_import.xlsx')
     excel_file_sheets = get_data(excel_file_path)
+    teacher_role, student_role = ensure_roles_exist()
 
-    # Sheet "Goal"
-    if 'Goal' in excel_file_sheets:
-        sheet = excel_file_sheets['Goal']
-        field_map = {
-            'id': 'id',
-            'title': 'title',
-            'student_feide_id': 'student_feide_id',
-        }
-        goal_dicts = objects_from_sheet(sheet, field_map=field_map)
+    # import subjects from kakrafoon.subject sheet
+    if 'kakrafoon.subject' in excel_file_sheets:
+        print("Importing subjects...")
+        sheet = excel_file_sheets['kakrafoon.subject']
+        field_names = ['id', 'display_name', 'maintened_by_school_id']
+        subject_dicts = objects_from_sheet(sheet, field_names)
+        results = []
+        for subject_dict in subject_dicts:
+            school = models.School.objects.filter(id__exact=subject_dict['maintened_by_school_id']).first()
+            defaults = {}
+            for k, v in subject_dict.items():
+                if k == 'id':
+                    continue
+                elif k == 'maintened_by_school_id':
+                    defaults['maintened_by_school'] = school
+                else:
+                    defaults[k] = v
+            subject, created = models.Subject.objects.get_or_create(id=subject_dict['id'], defaults=defaults)
+            results.append({'object': subject, 'created': created})
+        print("Subjects imported:", len(results))
+
+    # import groups from kakrafoon.group sheet
+    if 'kakrafoon.group' in excel_file_sheets:
+        print("Importing groups...")
+        sheet = excel_file_sheets['kakrafoon.group']
+        field_names = ['id', 'feide_id', 'display_name', 'type', 'subject_id', 'school_id', 'valid_from', 'valid_to']
+        group_dicts = objects_from_sheet(sheet, field_names)
+        results = []
+        for group_dict in group_dicts:
+            school = models.School.objects.filter(id__exact=group_dict['school_id']).first()
+            subject = models.Subject.objects.filter(id__exact=group_dict['subject_id']).first() if group_dict['subject_id'] is not None else None
+            defaults = {}
+            for k, v in group_dict.items():
+                if k == 'id':
+                    continue
+                elif k == 'school_id' and school:
+                    defaults['school'] = school
+                elif k == 'subject_id' and subject is not None:
+                    defaults['subject'] = subject
+                else:
+                    defaults[k] = v
+            group, created = models.Group.objects.get_or_create(id=group_dict['id'], defaults=defaults)
+            results.append({'object': group, 'created': created})
+        print("Groups imported:", len(results))
+
+    # import group members from kakrafoon.member sheet
+    if 'kakrafoon.member' in excel_file_sheets:
+        print("Importing members...")
+        sheet = excel_file_sheets['kakrafoon.member']
+        field_names = ['id', 'user_feide_id', 'role', 'group_feide_id', 'name']
+        member_dicts = objects_from_sheet(sheet, field_names)
+        results = []
+        for member_dict in member_dicts:
+            # maybe create the user
+            user_email = member_dict['user_feide_id'].split(':')[1].replace('@feide.', '@')
+            user, created = models.User.objects.get_or_create(feide_id=member_dict['user_feide_id'], defaults={'name': member_dict['name'], 'email': user_email})
+            group = models.Group.objects.filter(feide_id__exact=member_dict['group_feide_id']).first()
+            role = teacher_role if member_dict['role'] == 'teacher' else student_role
+            defaults = {}
+            for k, v in member_dict.items():
+                if k == 'id':
+                    continue
+                elif k == 'user_feide_id' and user:
+                    defaults['user'] = user
+                elif k == 'group_feide_id' and group:
+                    defaults['group'] = group
+                elif k == 'role':
+                    defaults['role'] = role
+            user_group, created = models.UserGroup.objects.get_or_create(id=member_dict['id'], defaults=defaults)
+            results.append({'object': user_group, 'created': created})
+        print("UserGroups imported:", len(results))
+
+
+    # import goals from kakrafoon.goal sheet
+    if 'kakrafoon.goal' in excel_file_sheets:
+        print("Importing goals...")
+        sheet = excel_file_sheets['kakrafoon.goal']
+        field_names = ['id', 'title', 'subject_id', 'student_feide_id'] # ONLY IMPORTING STUDENT GOALS!
+        goal_dicts = objects_from_sheet(sheet, field_names)
         results = []
         for goal_dict in goal_dicts:
+            subject = models.Subject.objects.filter(id__exact=goal_dict['subject_id']).first()
             student = models.User.objects.filter(feide_id__exact=goal_dict['student_feide_id']).first()
             defaults = {}
             for k, v in goal_dict.items():
@@ -53,27 +139,20 @@ def run_import():
                     continue
                 elif k == 'student_feide_id':
                     defaults['student'] = student
+                elif k == 'subject_id':
+                    defaults['subject'] = subject
                 else:
                     defaults[k] = v
             goal, created = models.Goal.objects.get_or_create(id=goal_dict['id'], defaults=defaults)
             results.append({'object': goal, 'created': created})
         print("Goals imported:", len(results))
 
-
-    # Sheet "Observation"
-    if 'Observation' in excel_file_sheets:
-        sheet = excel_file_sheets['Observation']
-        field_map = {
-            'id': 'id',
-            'mastery_value': 'mastery_value',
-            'mastery_description': 'mastery_description',
-            'feedforward': 'feedforward',
-            'student_feide_id': 'student_feide_id',
-            'observed_at': 'observed_at',
-            'goal_id': 'goal_id',
-            'observer_feide_id': 'observer_feide_id',
-        }
-        observation_dicts = objects_from_sheet(sheet, field_map=field_map)
+    # import observations from kakrafoon.observation sheet
+    if 'kakrafoon.observation' in excel_file_sheets:
+        print("Importing observations...")
+        sheet = excel_file_sheets['kakrafoon.observation']
+        field_names = ['id', 'observed_at', 'mastery_value', 'mastery_description', 'feedforward', 'goal_id', 'student_feide_id', 'observer_feide_id']
+        observation_dicts = objects_from_sheet(sheet, field_names)
         results = []
         for observation_dict in observation_dicts:
             student = models.User.objects.filter(feide_id__exact=observation_dict['student_feide_id']).first()
