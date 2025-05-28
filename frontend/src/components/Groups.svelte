@@ -19,7 +19,6 @@
         },
       })
       groups = result.data || []
-      fetchAllGroupMembers()
     } catch (error) {
       console.error('Error fetching groups:', error)
       groups = []
@@ -48,7 +47,11 @@
   }
 
   $effect(() => {
-    fetchGroups()
+    if (currentSchool) {
+      fetchGroups().then(() => {
+        fetchAllGroupMembers()
+      })
+    }
   })
 </script>
 
@@ -74,7 +77,7 @@
             <div class="col-3">
               <a
                 href={urlStringFrom(
-                  group.type === 'basis' ? { basisGroupId: group.id } : { groupId: group.id },
+                  { groupId: group.id },
                   {
                     path: '/students',
                     mode: 'replace',

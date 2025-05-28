@@ -67,18 +67,21 @@
   }
 
   async function handleGroupSelect(groupId: string): Promise<void> {
-    if (groupId) {
+    if (groupId && groupId !== '0') {
       window.location.href = urlStringFrom({ groupId }, { mode: 'merge' })
     } else {
       window.location.href = urlStringFrom({}, { mode: 'replace' })
     }
   }
 
-  onMount(async () => {
-    await fetchGroups()
-    if (selectedGroupId) {
-      await fetchGroupMembers(selectedGroupId)
-      selectedGroup = allGroups.find(group => group.id === selectedGroupId) || null
+  $effect(() => {
+    if (currentSchool) {
+      fetchGroups().then(() => {
+        if (selectedGroupId) {
+          fetchGroupMembers(selectedGroupId)
+          selectedGroup = allGroups.find(group => group.id === selectedGroupId) || null
+        }
+      })
     }
   })
 </script>
@@ -89,15 +92,15 @@
   <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">
     <div class="pkt-inputwrapper">
-      <label class="pkt-inputwrapper__label" for="exampleSelect1">
+      <label class="pkt-inputwrapper__label" for="groupSelect">
         <span>Velg gruppe</span>
       </label>
       <select
         class="pkt-input"
-        id="exampleSelect1"
-        onchange={() => handleGroupSelect(event.target.value)}
+        id="groupSelect"
+        onchange={(e: Event) => handleGroupSelect((e.target as HTMLSelectElement).value)}
       >
-        <option value="0" selected={!selectedGroupId}>Alle</option>
+        <option value="0" selected={!selectedGroupId}>Ikke valgt</option>
         {#each allGroups as group}
           <option value={group.id} selected={group.id === selectedGroupId}>
             {group.displayName}
