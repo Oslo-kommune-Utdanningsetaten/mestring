@@ -34,7 +34,7 @@ class RoleViewSet(viewsets.ModelViewSet):
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = models.Group.objects.all()
     serializer_class = serializers.GroupSerializer
-    filterset_fields = ['school']
+    filterset_fields = ['school', 'type']
     
     @action(detail=True, methods=['get'])
     def members(self, request, pk=None):

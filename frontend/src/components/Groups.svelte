@@ -7,16 +7,18 @@
   const currentSchool = $derived($dataStore.currentSchool)
   const currentUser = $derived($dataStore.currentUser)
   let groups = $state<GroupReadable[]>([])
+  let isAllGroupsTypesEnabled = $state<boolean>(false)
   let groupMembers = $state<
     Record<string, { teachers: NestedGroupUserReadable[]; students: NestedGroupUserReadable[] }>
   >({})
 
   async function fetchGroups() {
+    const options = isAllGroupsTypesEnabled
+      ? { school: currentSchool?.id }
+      : { school: currentSchool?.id, type: 'basis' }
     try {
       const result = await groupsList({
-        query: {
-          school: currentSchool?.id,
-        },
+        query: options,
       })
       groups = result.data || []
     } catch (error) {
@@ -57,8 +59,25 @@
 
 <section class="py-3">
   <h2 class="mb-4">Mine grupper</h2>
-  <p class="d-flex align-items-center gap-2">Dette er gruppene du har tilgang til.</p>
-
+  <p class="d-flex align-items-center gap-2">
+    Dette er <span class="fw-bold">
+      {#if isAllGroupsTypesEnabled}alle gruppene{:else}
+        basisgruppene{/if}
+    </span>
+     du har tilgang til.
+  </p>
+  <div class="pkt-input-check">
+    <div class="pkt-input-check__input">
+      <input
+        class="pkt-input-check__input-checkbox"
+        type="checkbox"
+        role="switch"
+        id="groupTypeSwitch"
+        bind:checked={isAllGroupsTypesEnabled}
+      />
+      <label class="pkt-input-check__input-label" for="groupTypeSwitch">Vis alle grupper</label>
+    </div>
+  </div>
   <section class="py-3">
     {#if groups.length === 0}
       <div class="alert alert-info">Du har visst ikke tilgang til noen grupper</div>

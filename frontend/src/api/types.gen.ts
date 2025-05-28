@@ -600,6 +600,7 @@ export type GroupsListData = {
     path?: never;
     query?: {
         school?: string;
+        type?: string;
     };
     url: '/groups/';
 };

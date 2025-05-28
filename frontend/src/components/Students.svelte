@@ -1,6 +1,5 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-select.js'
-  import { onMount } from 'svelte'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
