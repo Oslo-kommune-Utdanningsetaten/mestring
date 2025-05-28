@@ -43,6 +43,7 @@
         },
       })
       const members: any = result.data || []
+      console.log(`Fetched members for group ${groupId}:`, members)
       students =
         members
           .filter((member: NestedGroupUserReadable) => member.role.name === 'student')

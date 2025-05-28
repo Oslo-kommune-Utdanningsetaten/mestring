@@ -6,6 +6,8 @@
 
 # Checklist
 
+- [ ] /students should show subjects
+  - subjects are derived from Goals
 - [x] Dataimport fra Excel
   - [x] Observation, Goal
   - [ ] User
