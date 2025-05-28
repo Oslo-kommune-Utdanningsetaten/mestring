@@ -1269,9 +1269,6 @@ export const usersUpdate = <ThrowOnError extends boolean = false>(options: Optio
     });
 };
 
-/**
- * Retrieve all groups a user belongs to
- */
 export const usersGroupsRetrieve = <ThrowOnError extends boolean = false>(options: Options<UsersGroupsRetrieveData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<UsersGroupsRetrieveResponse, unknown, ThrowOnError>({
         security: [

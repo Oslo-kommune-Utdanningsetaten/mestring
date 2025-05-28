@@ -5,7 +5,7 @@
   import { urlStringFrom } from '../utils/functions'
   import StudentRow from './StudentRow.svelte'
 
-  import { groupsList, groupsMembersRetrieve } from '../api/sdk.gen'
+  import { groupsList, groupsMembersRetrieve, usersGroupsRetrieve } from '../api/sdk.gen'
   import {
     type GroupReadable,
     type NestedGroupUserReadable,
@@ -18,10 +18,8 @@
   let selectedGroupId = $derived(router.getQueryParam('groupId'))
   let selectedGroup = $state<GroupReadable | null>(null)
   let allGroups = $state<GroupReadable[]>([])
-  let teachingGroups = $state<GroupReadable[]>([])
-  let basisGroups = $state<GroupReadable[]>([])
   let students = $state<BasicUserReadable[]>([])
-  let teachers = $state<BasicUserReadable[]>([])
+  let groupsByStudentId = $state({})
 
   async function fetchGroups() {
     try {
@@ -31,13 +29,9 @@
         },
       })
       allGroups = result.data || []
-      teachingGroups = allGroups.filter(group => group.type === 'undervisning')
-      basisGroups = allGroups.filter(group => group.type === 'basis')
     } catch (error) {
       console.error('Error fetching groups:', error)
       allGroups = []
-      teachingGroups = []
-      basisGroups = []
     }
   }
 
@@ -49,23 +43,41 @@
         },
       })
       const members: any = result.data || []
-
-      teachers =
-        members
-          .filter((member: NestedGroupUserReadable) => member.role.name === 'teacher')
-          .map((member: NestedGroupUserReadable) => member.user) || []
       students =
         members
           .filter((member: NestedGroupUserReadable) => member.role.name === 'student')
           .map((member: NestedGroupUserReadable) => member.user) || []
+      students.forEach((student: BasicUserReadable) => {
+        fetchGroupsForStudent(student.id)
+      })
     } catch (error) {
       console.error(`Error fetching members for group ${groupId}:`, error)
-      teachers = []
       students = []
     }
   }
 
-  async function handleGroupSelect(groupId: string): Promise<void> {
+  async function fetchGroupsForStudent(studentId: string) {
+    try {
+      const result = await usersGroupsRetrieve({
+        path: { id: studentId },
+        // only return the groups where this user is a student
+        query: { roles: 'student' },
+      })
+      const studentGroups: GroupReadable[] = result.data || []
+      groupsByStudentId = {
+        ...groupsByStudentId,
+        [studentId]: studentGroups,
+      }
+    } catch (err) {
+      console.error(`Could not load groups for ${studentId}`, err)
+      groupsByStudentId = {
+        ...groupsByStudentId,
+        [studentId]: [],
+      }
+    }
+  }
+
+  function handleGroupSelect(groupId: string): void {
     if (groupId && groupId !== '0') {
       window.location.href = urlStringFrom({ groupId }, { mode: 'merge' })
     } else {
@@ -77,8 +89,8 @@
     if (currentSchool) {
       fetchGroups().then(() => {
         if (selectedGroupId) {
-          fetchGroupMembers(selectedGroupId)
           selectedGroup = allGroups.find(group => group.id === selectedGroupId) || null
+          fetchGroupMembers(selectedGroupId)
         }
       })
     }
@@ -86,20 +98,17 @@
 </script>
 
 <section class="py-3">
-  <h2>Elever</h2>
+  <h2 class="pb-2">Elever</h2>
 
   <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">
     <div class="pkt-inputwrapper">
-      <label class="pkt-inputwrapper__label" for="groupSelect">
-        <span>Velg gruppe</span>
-      </label>
       <select
         class="pkt-input"
         id="groupSelect"
         onchange={(e: Event) => handleGroupSelect((e.target as HTMLSelectElement).value)}
       >
-        <option value="0" selected={!selectedGroupId}>Ikke valgt</option>
+        <option value="0" selected={!selectedGroupId}>Velg gruppe</option>
         {#each allGroups as group}
           <option value={group.id} selected={group.id === selectedGroupId}>
             {group.displayName}
@@ -116,16 +125,21 @@
   {#if !selectedGroup}
     <div class="alert alert-info">Ingen gruppe valgt</div>
   {:else}
+    <pre>{JSON.stringify(groupsByStudentId, null, 2)}</pre>
     <div class="card shadow-sm">
       <!-- Header row -->
       <div class="student-grid-row fw-bold header">
         <div>Navn</div>
         <div>Klasse</div>
         <div>
-          <span>Mål</span>
-          <div class="group-grid-columns">5 :)</div>
+          Fag
+          <div class="group-grid-columns">
+            <span>as</span>
+            <span>as</span>
+            <span>as</span>
+            <span>as</span>
+          </div>
         </div>
-        <div>&nbsp;</div>
       </div>
 
       <!-- Student rows -->
@@ -137,15 +151,4 @@
 </section>
 
 <style>
-  .dropdown-link {
-    font-size: 1em !important;
-  }
-
-  .dropdown-link:hover {
-    text-decoration: none;
-  }
-
-  .selected {
-    font-weight: bold;
-  }
 </style>

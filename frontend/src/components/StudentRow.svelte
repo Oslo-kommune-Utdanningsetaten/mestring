@@ -1,9 +1,4 @@
 <script lang="ts">
-  import {
-    type GroupReadable,
-    type NestedGroupUserReadable,
-    type BasicUserReadable,
-  } from '../api/types.gen'
   import { useTinyRouter } from 'svelte-tiny-router'
   const router = useTinyRouter()
 
@@ -11,13 +6,16 @@
 </script>
 
 <div class="student-grid-row">
-  <div class="fw-bold">
-    {student.name}
-  </div>
-  <a href={`/students/${student.id}`} class="link-button">Detaljer</a>
-</div>
+  <a href={`/students/${student.id}`} class="fw-bold">{student.name}</a>
 
-<div class="text-center text-muted py-2">Ingen mål registrert</div>
+  <div class="text-center text-muted py-2">basisgroupname</div>
+  <div class="group-grid-columns">
+    <span>as</span>
+    <span>as</span>
+    <span>as</span>
+    <span>as</span>
+  </div>
+</div>
 
 <style>
 </style>

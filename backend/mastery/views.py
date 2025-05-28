@@ -11,25 +11,45 @@ class SchoolViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.SchoolSerializer
     filterset_fields = ['is_service_enabled']
 
+
 class SubjectViewSet(viewsets.ModelViewSet):
     queryset = models.Subject.objects.all()
     serializer_class = serializers.SubjectSerializer
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
     
-    @action(detail=True, methods=['get'])
+    @action(
+            detail=True,
+            methods=['get'],
+            url_path='groups',
+            description="List all groups for this user, optional ?roles=role1,role2 filter"
+        )
     def groups(self, request, pk=None):
-        """Retrieve all groups a user belongs to"""
         user = self.get_object()
-        user_groups = models.UserGroup.objects.filter(user=user)
-        serializer = serializers.NestedUserGroupSerializer(user_groups, many=True)
+        roles_param = request.query_params.get('roles')
+
+        qs = models.Group.objects.filter(
+            user_groups__user=user
+        )
+
+        if roles_param:
+            role_names = [r.strip() for r in roles_param.split(',') if r.strip()]
+            qs = qs.filter(
+                user_groups__role__name__in=role_names
+            )
+
+        qs = qs.distinct()
+        serializer = serializers.GroupSerializer(qs, many=True, context={'request': request})
         return Response(serializer.data)
+
 
 class RoleViewSet(viewsets.ModelViewSet):
     queryset = models.Role.objects.all()
     serializer_class = serializers.RoleSerializer
+
 
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = models.Group.objects.all()
@@ -44,21 +64,26 @@ class GroupViewSet(viewsets.ModelViewSet):
         serializer = serializers.NestedGroupUserSerializer(group_members, many=True)
         return Response(serializer.data)
 
+
 class GoalViewSet(viewsets.ModelViewSet):
     queryset = models.Goal.objects.all()
     serializer_class = serializers.GoalSerializer
+
 
 class SituationViewSet(viewsets.ModelViewSet):
     queryset = models.Situation.objects.all()
     serializer_class = serializers.SituationSerializer
 
+
 class ObservationViewSet(viewsets.ModelViewSet):
     queryset = models.Observation.objects.all()
     serializer_class = serializers.ObservationSerializer
 
+
 class StatusViewSet(viewsets.ModelViewSet):
     queryset = models.Status.objects.all()
     serializer_class = serializers.StatusSerializer
+
 
 class UserGroupViewSet(viewsets.ModelViewSet):
     queryset = models.UserGroup.objects.all()
