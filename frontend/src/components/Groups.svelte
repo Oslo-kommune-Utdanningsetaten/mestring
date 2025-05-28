@@ -54,10 +54,7 @@
 
 <section class="py-3">
   <h2 class="mb-4">Mine grupper</h2>
-  <p class="d-flex align-items-center gap-2">
-    Hei, <span class="fw-bold">{currentUser?.name}!</span>
-    Dette er gruppene du har tilgang til.
-  </p>
+  <p class="d-flex align-items-center gap-2">Dette er gruppene du har tilgang til.</p>
 
   <section class="py-3">
     {#if groups.length === 0}

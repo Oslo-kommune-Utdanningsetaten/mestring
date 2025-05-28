@@ -4,6 +4,14 @@
 
   let schools = $state<SchoolReadable[]>([])
 
+  const dateFormat = Intl.DateTimeFormat('nb', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
   async function fetchSchools() {
     try {
       const result = await schoolsList()
@@ -47,7 +55,9 @@
         {#each schools as school}
           <li class="list-group-item d-flex justify-content-between align-items-center">
             <div>
-              {school.displayName}
+              {school.displayName}, sist oppdatert {new Date(school.updatedAt).toLocaleString(
+                'no-NO'
+              )}
             </div>
 
             <div class="form-check form-switch">

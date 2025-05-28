@@ -4,1562 +4,1546 @@
  * Basic goal serializer without nested relationships to avoid circular references
  */
 export type BasicGoalReadable = {
-  readonly id: string
-  readonly createdAt: string
-  readonly updatedAt: string
-  title: string
-  description?: string | null
-  masterySchema?: unknown
-  group?: string | null
-  student?: string | null
-  subject?: string | null
-  previousGoal?: string | null
-}
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    title: string;
+    description?: string | null;
+    masterySchema?: unknown;
+    group?: string | null;
+    student?: string | null;
+    subject?: string | null;
+    previousGoal?: string | null;
+};
 
 /**
  * Basic goal serializer without nested relationships to avoid circular references
  */
 export type BasicGoalWritable = {
-  title: string
-  description?: string | null
-  masterySchema?: unknown
-  group?: string | null
-  student?: string | null
-  subject?: string | null
-  previousGoal?: string | null
-}
+    title: string;
+    description?: string | null;
+    masterySchema?: unknown;
+    group?: string | null;
+    student?: string | null;
+    subject?: string | null;
+    previousGoal?: string | null;
+};
 
 /**
  * Basic situation serializer without nested relationships to avoid circular references
  */
 export type BasicSituationReadable = {
-  readonly id: string
-  readonly createdAt: string
-  readonly updatedAt: string
-  title: string
-  description?: string | null
-  happensAt?: string | null
-}
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    title: string;
+    description?: string | null;
+    happensAt?: string | null;
+};
 
 /**
  * Basic situation serializer without nested relationships to avoid circular references
  */
 export type BasicSituationWritable = {
-  title: string
-  description?: string | null
-  happensAt?: string | null
-}
+    title: string;
+    description?: string | null;
+    happensAt?: string | null;
+};
 
 /**
  * Basic user serializer without nested relationships to avoid circular references
  */
 export type BasicUserReadable = {
-  readonly id: string
-  readonly createdAt: string
-  readonly updatedAt: string
-  name: string
-  feideId: string
-  email: string
-  lastActivityAt?: string | null
-  disabledAt?: string | null
-  readonly groups: Array<string | null>
-}
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    name: string;
+    feideId: string;
+    email: string;
+    lastActivityAt?: string | null;
+    disabledAt?: string | null;
+    readonly groups: Array<string | null>;
+};
 
 /**
  * Basic user serializer without nested relationships to avoid circular references
  */
 export type BasicUserWritable = {
-  name: string
-  feideId: string
-  email: string
-  lastActivityAt?: string | null
-  disabledAt?: string | null
-}
+    name: string;
+    feideId: string;
+    email: string;
+    lastActivityAt?: string | null;
+    disabledAt?: string | null;
+};
 
 export type GoalReadable = {
-  readonly id: string
-  readonly createdAt: string
-  readonly updatedAt: string
-  title: string
-  description?: string | null
-  masterySchema?: unknown
-  group?: string | null
-  student?: string | null
-  subject?: string | null
-  previousGoal?: string | null
-}
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    title: string;
+    description?: string | null;
+    masterySchema?: unknown;
+    group?: string | null;
+    student?: string | null;
+    subject?: string | null;
+    previousGoal?: string | null;
+};
 
 export type GoalWritable = {
-  title: string
-  description?: string | null
-  masterySchema?: unknown
-  group?: string | null
-  student?: string | null
-  subject?: string | null
-  previousGoal?: string | null
-}
+    title: string;
+    description?: string | null;
+    masterySchema?: unknown;
+    group?: string | null;
+    student?: string | null;
+    subject?: string | null;
+    previousGoal?: string | null;
+};
 
 export type GroupReadable = {
-  readonly id: string
-  readonly members: Array<NestedGroupUserReadable>
-  readonly createdAt: string
-  readonly updatedAt: string
-  feideId: string
-  displayName: string
-  type: string
-  validFrom?: string | null
-  validTo?: string | null
-  subject?: string | null
-  school: string
-  readonly teachers?: Array<BasicUserReadable>
-  readonly students?: Array<BasicUserReadable>
-}
+    readonly id: string;
+    readonly members: Array<NestedGroupUserReadable>;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    feideId: string;
+    displayName: string;
+    type: string;
+    validFrom?: string | null;
+    validTo?: string | null;
+    subject?: string | null;
+    school: string;
+};
 
 export type GroupWritable = {
-  feideId: string
-  displayName: string
-  type: string
-  validFrom?: string | null
-  validTo?: string | null
-  subject?: string | null
-  school: string
-}
+    feideId: string;
+    displayName: string;
+    type: string;
+    validFrom?: string | null;
+    validTo?: string | null;
+    subject?: string | null;
+    school: string;
+};
 
 export type NestedGroupUserReadable = {
-  readonly id: string
-  role: RoleReadable
-  user: BasicUserReadable
-  readonly createdAt: string
-  readonly updatedAt: string
-}
+    readonly id: string;
+    role: RoleReadable;
+    user: BasicUserReadable;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+};
 
 export type NestedGroupUserWritable = {
-  role: RoleWritable
-  user: BasicUserWritable
-}
+    role: RoleWritable;
+    user: BasicUserWritable;
+};
 
 export type NestedUserGroupReadable = {
-  readonly id: string
-  role: RoleReadable
-  readonly createdAt: string
-  readonly updatedAt: string
-  group: string
-}
+    readonly id: string;
+    role: RoleReadable;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    group: string;
+};
 
 export type NestedUserGroupWritable = {
-  role: RoleWritable
-  group: string
-}
+    role: RoleWritable;
+    group: string;
+};
 
 export type ObservationReadable = {
-  readonly id: string
-  goal: BasicGoalReadable
-  student: BasicUserReadable
-  observer: BasicUserReadable
-  situation: BasicSituationReadable
-  readonly createdAt: string
-  readonly updatedAt: string
-  masteryValue?: number | null
-  masteryDescription?: string | null
-  feedforward?: string | null
-  observedAt?: string | null
-  isPrivate?: boolean
-}
+    readonly id: string;
+    goal: BasicGoalReadable;
+    student: BasicUserReadable;
+    observer: BasicUserReadable;
+    situation: BasicSituationReadable;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    masteryValue?: number | null;
+    masteryDescription?: string | null;
+    feedforward?: string | null;
+    observedAt?: string | null;
+    isPrivate?: boolean;
+};
 
 export type ObservationWritable = {
-  goal: BasicGoalWritable
-  student: BasicUserWritable
-  observer: BasicUserWritable
-  situation: BasicSituationWritable
-  masteryValue?: number | null
-  masteryDescription?: string | null
-  feedforward?: string | null
-  observedAt?: string | null
-  isPrivate?: boolean
-}
+    goal: BasicGoalWritable;
+    student: BasicUserWritable;
+    observer: BasicUserWritable;
+    situation: BasicSituationWritable;
+    masteryValue?: number | null;
+    masteryDescription?: string | null;
+    feedforward?: string | null;
+    observedAt?: string | null;
+    isPrivate?: boolean;
+};
 
 export type PatchedGoalReadable = {
-  readonly id?: string
-  readonly createdAt?: string
-  readonly updatedAt?: string
-  title?: string
-  description?: string | null
-  masterySchema?: unknown
-  group?: string | null
-  student?: string | null
-  subject?: string | null
-  previousGoal?: string | null
-}
+    readonly id?: string;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    title?: string;
+    description?: string | null;
+    masterySchema?: unknown;
+    group?: string | null;
+    student?: string | null;
+    subject?: string | null;
+    previousGoal?: string | null;
+};
 
 export type PatchedGoalWritable = {
-  title?: string
-  description?: string | null
-  masterySchema?: unknown
-  group?: string | null
-  student?: string | null
-  subject?: string | null
-  previousGoal?: string | null
-}
+    title?: string;
+    description?: string | null;
+    masterySchema?: unknown;
+    group?: string | null;
+    student?: string | null;
+    subject?: string | null;
+    previousGoal?: string | null;
+};
 
 export type PatchedGroupReadable = {
-  readonly id?: string
-  readonly members?: Array<NestedGroupUserReadable>
-  readonly createdAt?: string
-  readonly updatedAt?: string
-  feideId?: string
-  displayName?: string
-  type?: string
-  validFrom?: string | null
-  validTo?: string | null
-  subject?: string | null
-  school?: string
-}
+    readonly id?: string;
+    readonly members?: Array<NestedGroupUserReadable>;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    feideId?: string;
+    displayName?: string;
+    type?: string;
+    validFrom?: string | null;
+    validTo?: string | null;
+    subject?: string | null;
+    school?: string;
+};
 
 export type PatchedGroupWritable = {
-  feideId?: string
-  displayName?: string
-  type?: string
-  validFrom?: string | null
-  validTo?: string | null
-  subject?: string | null
-  school?: string
-}
+    feideId?: string;
+    displayName?: string;
+    type?: string;
+    validFrom?: string | null;
+    validTo?: string | null;
+    subject?: string | null;
+    school?: string;
+};
 
 export type PatchedObservationReadable = {
-  readonly id?: string
-  goal?: BasicGoalReadable
-  student?: BasicUserReadable
-  observer?: BasicUserReadable
-  situation?: BasicSituationReadable
-  readonly createdAt?: string
-  readonly updatedAt?: string
-  masteryValue?: number | null
-  masteryDescription?: string | null
-  feedforward?: string | null
-  observedAt?: string | null
-  isPrivate?: boolean
-}
+    readonly id?: string;
+    goal?: BasicGoalReadable;
+    student?: BasicUserReadable;
+    observer?: BasicUserReadable;
+    situation?: BasicSituationReadable;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    masteryValue?: number | null;
+    masteryDescription?: string | null;
+    feedforward?: string | null;
+    observedAt?: string | null;
+    isPrivate?: boolean;
+};
 
 export type PatchedObservationWritable = {
-  goal?: BasicGoalWritable
-  student?: BasicUserWritable
-  observer?: BasicUserWritable
-  situation?: BasicSituationWritable
-  masteryValue?: number | null
-  masteryDescription?: string | null
-  feedforward?: string | null
-  observedAt?: string | null
-  isPrivate?: boolean
-}
+    goal?: BasicGoalWritable;
+    student?: BasicUserWritable;
+    observer?: BasicUserWritable;
+    situation?: BasicSituationWritable;
+    masteryValue?: number | null;
+    masteryDescription?: string | null;
+    feedforward?: string | null;
+    observedAt?: string | null;
+    isPrivate?: boolean;
+};
 
 export type PatchedRoleReadable = {
-  readonly id?: string
-  readonly createdAt?: string
-  readonly updatedAt?: string
-  name?: string
-}
+    readonly id?: string;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    name?: string;
+};
 
 export type PatchedRoleWritable = {
-  name?: string
-}
+    name?: string;
+};
 
 export type PatchedSchoolReadable = {
-  readonly id?: string
-  readonly createdAt?: string
-  readonly updatedAt?: string
-  feideId?: string
-  displayName?: string
-  shortName?: string | null
-  orgNumber?: string
-  owner?: string | null
-  isServiceEnabled?: boolean
-}
+    readonly id?: string;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    feideId?: string;
+    displayName?: string;
+    shortName?: string | null;
+    orgNumber?: string;
+    owner?: string | null;
+    isServiceEnabled?: boolean;
+};
 
 export type PatchedSchoolWritable = {
-  feideId?: string
-  displayName?: string
-  shortName?: string | null
-  orgNumber?: string
-  owner?: string | null
-  isServiceEnabled?: boolean
-}
+    feideId?: string;
+    displayName?: string;
+    shortName?: string | null;
+    orgNumber?: string;
+    owner?: string | null;
+    isServiceEnabled?: boolean;
+};
 
 export type PatchedSituationReadable = {
-  readonly id?: string
-  readonly createdAt?: string
-  readonly updatedAt?: string
-  title?: string
-  description?: string | null
-  happensAt?: string | null
-}
+    readonly id?: string;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    title?: string;
+    description?: string | null;
+    happensAt?: string | null;
+};
 
 export type PatchedSituationWritable = {
-  title?: string
-  description?: string | null
-  happensAt?: string | null
-}
+    title?: string;
+    description?: string | null;
+    happensAt?: string | null;
+};
 
 export type PatchedStatusReadable = {
-  readonly id?: string
-  readonly createdAt?: string
-  readonly updatedAt?: string
-  estimatedAt?: string | null
-  masteryValue?: number | null
-  masteryDescription?: string | null
-  feedforward?: string | null
-  student?: string
-  subject?: string
-}
+    readonly id?: string;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    estimatedAt?: string | null;
+    masteryValue?: number | null;
+    masteryDescription?: string | null;
+    feedforward?: string | null;
+    student?: string;
+    subject?: string;
+};
 
 export type PatchedStatusWritable = {
-  estimatedAt?: string | null
-  masteryValue?: number | null
-  masteryDescription?: string | null
-  feedforward?: string | null
-  student?: string
-  subject?: string
-}
+    estimatedAt?: string | null;
+    masteryValue?: number | null;
+    masteryDescription?: string | null;
+    feedforward?: string | null;
+    student?: string;
+    subject?: string;
+};
 
 export type PatchedSubjectReadable = {
-  readonly id?: string
-  readonly createdAt?: string
-  readonly updatedAt?: string
-  displayName?: string
-  shortName?: string
-  code?: string
-  groupCode?: string | null
-}
+    readonly id?: string;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    displayName?: string;
+    shortName?: string;
+    grepCode?: string | null;
+    grepGroupCode?: string | null;
+    maintenedBySchool?: string | null;
+};
 
 export type PatchedSubjectWritable = {
-  displayName?: string
-  shortName?: string
-  code?: string
-  groupCode?: string | null
-}
+    displayName?: string;
+    shortName?: string;
+    grepCode?: string | null;
+    grepGroupCode?: string | null;
+    maintenedBySchool?: string | null;
+};
 
 export type PatchedUserReadable = {
-  readonly id?: string
-  readonly groups?: Array<NestedUserGroupReadable>
-  readonly createdAt?: string
-  readonly updatedAt?: string
-  name?: string
-  feideId?: string
-  email?: string
-  lastActivityAt?: string | null
-  disabledAt?: string | null
-}
+    readonly id?: string;
+    readonly groups?: Array<NestedUserGroupReadable>;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    name?: string;
+    feideId?: string;
+    email?: string;
+    lastActivityAt?: string | null;
+    disabledAt?: string | null;
+};
 
 export type PatchedUserWritable = {
-  name?: string
-  feideId?: string
-  email?: string
-  lastActivityAt?: string | null
-  disabledAt?: string | null
-}
+    name?: string;
+    feideId?: string;
+    email?: string;
+    lastActivityAt?: string | null;
+    disabledAt?: string | null;
+};
 
 export type PatchedUserGroupReadable = {
-  readonly id?: string
-  readonly createdAt?: string
-  readonly updatedAt?: string
-  user?: string
-  group?: string
-  role?: string
-}
+    readonly id?: string;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    user?: string;
+    group?: string;
+    role?: string;
+};
 
 export type PatchedUserGroupWritable = {
-  user?: string
-  group?: string
-  role?: string
-}
+    user?: string;
+    group?: string;
+    role?: string;
+};
 
 export type RoleReadable = {
-  readonly id: string
-  readonly createdAt: string
-  readonly updatedAt: string
-  name: string
-}
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    name: string;
+};
 
 export type RoleWritable = {
-  name: string
-}
+    name: string;
+};
 
 export type SchoolReadable = {
-  readonly id: string
-  readonly createdAt: string
-  readonly updatedAt: string
-  feideId: string
-  displayName: string
-  shortName?: string | null
-  orgNumber: string
-  owner?: string | null
-  isServiceEnabled?: boolean
-}
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    feideId: string;
+    displayName: string;
+    shortName?: string | null;
+    orgNumber: string;
+    owner?: string | null;
+    isServiceEnabled?: boolean;
+};
 
 export type SchoolWritable = {
-  feideId: string
-  displayName: string
-  shortName?: string | null
-  orgNumber: string
-  owner?: string | null
-  isServiceEnabled?: boolean
-}
+    feideId: string;
+    displayName: string;
+    shortName?: string | null;
+    orgNumber: string;
+    owner?: string | null;
+    isServiceEnabled?: boolean;
+};
 
 export type SituationReadable = {
-  readonly id: string
-  readonly createdAt: string
-  readonly updatedAt: string
-  title: string
-  description?: string | null
-  happensAt?: string | null
-}
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    title: string;
+    description?: string | null;
+    happensAt?: string | null;
+};
 
 export type SituationWritable = {
-  title: string
-  description?: string | null
-  happensAt?: string | null
-}
+    title: string;
+    description?: string | null;
+    happensAt?: string | null;
+};
 
 export type StatusReadable = {
-  readonly id: string
-  readonly createdAt: string
-  readonly updatedAt: string
-  estimatedAt?: string | null
-  masteryValue?: number | null
-  masteryDescription?: string | null
-  feedforward?: string | null
-  student: string
-  subject: string
-}
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    estimatedAt?: string | null;
+    masteryValue?: number | null;
+    masteryDescription?: string | null;
+    feedforward?: string | null;
+    student: string;
+    subject: string;
+};
 
 export type StatusWritable = {
-  estimatedAt?: string | null
-  masteryValue?: number | null
-  masteryDescription?: string | null
-  feedforward?: string | null
-  student: string
-  subject: string
-}
+    estimatedAt?: string | null;
+    masteryValue?: number | null;
+    masteryDescription?: string | null;
+    feedforward?: string | null;
+    student: string;
+    subject: string;
+};
 
 export type SubjectReadable = {
-  readonly id: string
-  readonly createdAt: string
-  readonly updatedAt: string
-  displayName: string
-  shortName: string
-  code: string
-  groupCode?: string | null
-}
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    displayName: string;
+    shortName: string;
+    grepCode?: string | null;
+    grepGroupCode?: string | null;
+    maintenedBySchool?: string | null;
+};
 
 export type SubjectWritable = {
-  displayName: string
-  shortName: string
-  code: string
-  groupCode?: string | null
-}
+    displayName: string;
+    shortName: string;
+    grepCode?: string | null;
+    grepGroupCode?: string | null;
+    maintenedBySchool?: string | null;
+};
 
 export type UserReadable = {
-  readonly id: string
-  readonly groups: Array<NestedUserGroupReadable>
-  readonly createdAt: string
-  readonly updatedAt: string
-  name: string
-  feideId: string
-  email: string
-  lastActivityAt?: string | null
-  disabledAt?: string | null
-}
+    readonly id: string;
+    readonly groups: Array<NestedUserGroupReadable>;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    name: string;
+    feideId: string;
+    email: string;
+    lastActivityAt?: string | null;
+    disabledAt?: string | null;
+};
 
 export type UserWritable = {
-  name: string
-  feideId: string
-  email: string
-  lastActivityAt?: string | null
-  disabledAt?: string | null
-}
+    name: string;
+    feideId: string;
+    email: string;
+    lastActivityAt?: string | null;
+    disabledAt?: string | null;
+};
 
 export type UserGroupReadable = {
-  readonly id: string
-  readonly createdAt: string
-  readonly updatedAt: string
-  user: string
-  group: string
-  role: string
-}
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    user: string;
+    group: string;
+    role: string;
+};
 
 export type UserGroupWritable = {
-  user: string
-  group: string
-  role: string
-}
+    user: string;
+    group: string;
+    role: string;
+};
 
 export type GoalsListData = {
-  body?: never
-  path?: never
-  query?: never
-  url: '/goals/'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/goals/';
+};
 
 export type GoalsListResponses = {
-  200: Array<GoalReadable>
-}
+    200: Array<GoalReadable>;
+};
 
-export type GoalsListResponse = GoalsListResponses[keyof GoalsListResponses]
+export type GoalsListResponse = GoalsListResponses[keyof GoalsListResponses];
 
 export type GoalsCreateData = {
-  body: GoalWritable
-  path?: never
-  query?: never
-  url: '/goals/'
-}
+    body: GoalWritable;
+    path?: never;
+    query?: never;
+    url: '/goals/';
+};
 
 export type GoalsCreateResponses = {
-  201: GoalReadable
-}
+    201: GoalReadable;
+};
 
-export type GoalsCreateResponse = GoalsCreateResponses[keyof GoalsCreateResponses]
+export type GoalsCreateResponse = GoalsCreateResponses[keyof GoalsCreateResponses];
 
 export type GoalsDestroyData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this goal.
-     */
-    id: string
-  }
-  query?: never
-  url: '/goals/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this goal.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/goals/{id}/';
+};
 
 export type GoalsDestroyResponses = {
-  /**
-   * No response body
-   */
-  204: void
-}
+    /**
+     * No response body
+     */
+    204: void;
+};
 
-export type GoalsDestroyResponse = GoalsDestroyResponses[keyof GoalsDestroyResponses]
+export type GoalsDestroyResponse = GoalsDestroyResponses[keyof GoalsDestroyResponses];
 
 export type GoalsRetrieveData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this goal.
-     */
-    id: string
-  }
-  query?: never
-  url: '/goals/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this goal.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/goals/{id}/';
+};
 
 export type GoalsRetrieveResponses = {
-  200: GoalReadable
-}
+    200: GoalReadable;
+};
 
-export type GoalsRetrieveResponse = GoalsRetrieveResponses[keyof GoalsRetrieveResponses]
+export type GoalsRetrieveResponse = GoalsRetrieveResponses[keyof GoalsRetrieveResponses];
 
 export type GoalsPartialUpdateData = {
-  body?: PatchedGoalWritable
-  path: {
-    /**
-     * A unique value identifying this goal.
-     */
-    id: string
-  }
-  query?: never
-  url: '/goals/{id}/'
-}
+    body?: PatchedGoalWritable;
+    path: {
+        /**
+         * A unique value identifying this goal.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/goals/{id}/';
+};
 
 export type GoalsPartialUpdateResponses = {
-  200: GoalReadable
-}
+    200: GoalReadable;
+};
 
-export type GoalsPartialUpdateResponse =
-  GoalsPartialUpdateResponses[keyof GoalsPartialUpdateResponses]
+export type GoalsPartialUpdateResponse = GoalsPartialUpdateResponses[keyof GoalsPartialUpdateResponses];
 
 export type GoalsUpdateData = {
-  body: GoalWritable
-  path: {
-    /**
-     * A unique value identifying this goal.
-     */
-    id: string
-  }
-  query?: never
-  url: '/goals/{id}/'
-}
+    body: GoalWritable;
+    path: {
+        /**
+         * A unique value identifying this goal.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/goals/{id}/';
+};
 
 export type GoalsUpdateResponses = {
-  200: GoalReadable
-}
+    200: GoalReadable;
+};
 
-export type GoalsUpdateResponse = GoalsUpdateResponses[keyof GoalsUpdateResponses]
+export type GoalsUpdateResponse = GoalsUpdateResponses[keyof GoalsUpdateResponses];
 
 export type GroupsListData = {
-  body?: never
-  path?: never
-  query?: {
-    school?: string
-  }
-  url: '/groups/'
-}
+    body?: never;
+    path?: never;
+    query?: {
+        school?: string;
+    };
+    url: '/groups/';
+};
 
 export type GroupsListResponses = {
-  200: Array<GroupReadable>
-}
+    200: Array<GroupReadable>;
+};
 
-export type GroupsListResponse = GroupsListResponses[keyof GroupsListResponses]
+export type GroupsListResponse = GroupsListResponses[keyof GroupsListResponses];
 
 export type GroupsCreateData = {
-  body: GroupWritable
-  path?: never
-  query?: never
-  url: '/groups/'
-}
+    body: GroupWritable;
+    path?: never;
+    query?: never;
+    url: '/groups/';
+};
 
 export type GroupsCreateResponses = {
-  201: GroupReadable
-}
+    201: GroupReadable;
+};
 
-export type GroupsCreateResponse = GroupsCreateResponses[keyof GroupsCreateResponses]
+export type GroupsCreateResponse = GroupsCreateResponses[keyof GroupsCreateResponses];
 
 export type GroupsDestroyData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this group.
-     */
-    id: string
-  }
-  query?: never
-  url: '/groups/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this group.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/groups/{id}/';
+};
 
 export type GroupsDestroyResponses = {
-  /**
-   * No response body
-   */
-  204: void
-}
+    /**
+     * No response body
+     */
+    204: void;
+};
 
-export type GroupsDestroyResponse = GroupsDestroyResponses[keyof GroupsDestroyResponses]
+export type GroupsDestroyResponse = GroupsDestroyResponses[keyof GroupsDestroyResponses];
 
 export type GroupsRetrieveData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this group.
-     */
-    id: string
-  }
-  query?: never
-  url: '/groups/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this group.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/groups/{id}/';
+};
 
 export type GroupsRetrieveResponses = {
-  200: GroupReadable
-}
+    200: GroupReadable;
+};
 
-export type GroupsRetrieveResponse = GroupsRetrieveResponses[keyof GroupsRetrieveResponses]
+export type GroupsRetrieveResponse = GroupsRetrieveResponses[keyof GroupsRetrieveResponses];
 
 export type GroupsPartialUpdateData = {
-  body?: PatchedGroupWritable
-  path: {
-    /**
-     * A unique value identifying this group.
-     */
-    id: string
-  }
-  query?: never
-  url: '/groups/{id}/'
-}
+    body?: PatchedGroupWritable;
+    path: {
+        /**
+         * A unique value identifying this group.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/groups/{id}/';
+};
 
 export type GroupsPartialUpdateResponses = {
-  200: GroupReadable
-}
+    200: GroupReadable;
+};
 
-export type GroupsPartialUpdateResponse =
-  GroupsPartialUpdateResponses[keyof GroupsPartialUpdateResponses]
+export type GroupsPartialUpdateResponse = GroupsPartialUpdateResponses[keyof GroupsPartialUpdateResponses];
 
 export type GroupsUpdateData = {
-  body: GroupWritable
-  path: {
-    /**
-     * A unique value identifying this group.
-     */
-    id: string
-  }
-  query?: never
-  url: '/groups/{id}/'
-}
+    body: GroupWritable;
+    path: {
+        /**
+         * A unique value identifying this group.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/groups/{id}/';
+};
 
 export type GroupsUpdateResponses = {
-  200: GroupReadable
-}
+    200: GroupReadable;
+};
 
-export type GroupsUpdateResponse = GroupsUpdateResponses[keyof GroupsUpdateResponses]
+export type GroupsUpdateResponse = GroupsUpdateResponses[keyof GroupsUpdateResponses];
 
 export type GroupsMembersRetrieveData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this group.
-     */
-    id: string
-  }
-  query?: never
-  url: '/groups/{id}/members/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this group.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/groups/{id}/members/';
+};
 
 export type GroupsMembersRetrieveResponses = {
-  200: GroupReadable
-}
+    200: GroupReadable;
+};
 
-export type GroupsMembersRetrieveResponse =
-  GroupsMembersRetrieveResponses[keyof GroupsMembersRetrieveResponses]
+export type GroupsMembersRetrieveResponse = GroupsMembersRetrieveResponses[keyof GroupsMembersRetrieveResponses];
 
 export type ObservationsListData = {
-  body?: never
-  path?: never
-  query?: never
-  url: '/observations/'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/observations/';
+};
 
 export type ObservationsListResponses = {
-  200: Array<ObservationReadable>
-}
+    200: Array<ObservationReadable>;
+};
 
-export type ObservationsListResponse = ObservationsListResponses[keyof ObservationsListResponses]
+export type ObservationsListResponse = ObservationsListResponses[keyof ObservationsListResponses];
 
 export type ObservationsCreateData = {
-  body?: ObservationWritable
-  path?: never
-  query?: never
-  url: '/observations/'
-}
+    body?: ObservationWritable;
+    path?: never;
+    query?: never;
+    url: '/observations/';
+};
 
 export type ObservationsCreateResponses = {
-  201: ObservationReadable
-}
+    201: ObservationReadable;
+};
 
-export type ObservationsCreateResponse =
-  ObservationsCreateResponses[keyof ObservationsCreateResponses]
+export type ObservationsCreateResponse = ObservationsCreateResponses[keyof ObservationsCreateResponses];
 
 export type ObservationsDestroyData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this observation.
-     */
-    id: string
-  }
-  query?: never
-  url: '/observations/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this observation.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/observations/{id}/';
+};
 
 export type ObservationsDestroyResponses = {
-  /**
-   * No response body
-   */
-  204: void
-}
+    /**
+     * No response body
+     */
+    204: void;
+};
 
-export type ObservationsDestroyResponse =
-  ObservationsDestroyResponses[keyof ObservationsDestroyResponses]
+export type ObservationsDestroyResponse = ObservationsDestroyResponses[keyof ObservationsDestroyResponses];
 
 export type ObservationsRetrieveData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this observation.
-     */
-    id: string
-  }
-  query?: never
-  url: '/observations/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this observation.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/observations/{id}/';
+};
 
 export type ObservationsRetrieveResponses = {
-  200: ObservationReadable
-}
+    200: ObservationReadable;
+};
 
-export type ObservationsRetrieveResponse =
-  ObservationsRetrieveResponses[keyof ObservationsRetrieveResponses]
+export type ObservationsRetrieveResponse = ObservationsRetrieveResponses[keyof ObservationsRetrieveResponses];
 
 export type ObservationsPartialUpdateData = {
-  body?: PatchedObservationWritable
-  path: {
-    /**
-     * A unique value identifying this observation.
-     */
-    id: string
-  }
-  query?: never
-  url: '/observations/{id}/'
-}
+    body?: PatchedObservationWritable;
+    path: {
+        /**
+         * A unique value identifying this observation.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/observations/{id}/';
+};
 
 export type ObservationsPartialUpdateResponses = {
-  200: ObservationReadable
-}
+    200: ObservationReadable;
+};
 
-export type ObservationsPartialUpdateResponse =
-  ObservationsPartialUpdateResponses[keyof ObservationsPartialUpdateResponses]
+export type ObservationsPartialUpdateResponse = ObservationsPartialUpdateResponses[keyof ObservationsPartialUpdateResponses];
 
 export type ObservationsUpdateData = {
-  body?: ObservationWritable
-  path: {
-    /**
-     * A unique value identifying this observation.
-     */
-    id: string
-  }
-  query?: never
-  url: '/observations/{id}/'
-}
+    body?: ObservationWritable;
+    path: {
+        /**
+         * A unique value identifying this observation.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/observations/{id}/';
+};
 
 export type ObservationsUpdateResponses = {
-  200: ObservationReadable
-}
+    200: ObservationReadable;
+};
 
-export type ObservationsUpdateResponse =
-  ObservationsUpdateResponses[keyof ObservationsUpdateResponses]
+export type ObservationsUpdateResponse = ObservationsUpdateResponses[keyof ObservationsUpdateResponses];
 
 export type RolesListData = {
-  body?: never
-  path?: never
-  query?: never
-  url: '/roles/'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/roles/';
+};
 
 export type RolesListResponses = {
-  200: Array<RoleReadable>
-}
+    200: Array<RoleReadable>;
+};
 
-export type RolesListResponse = RolesListResponses[keyof RolesListResponses]
+export type RolesListResponse = RolesListResponses[keyof RolesListResponses];
 
 export type RolesCreateData = {
-  body: RoleWritable
-  path?: never
-  query?: never
-  url: '/roles/'
-}
+    body: RoleWritable;
+    path?: never;
+    query?: never;
+    url: '/roles/';
+};
 
 export type RolesCreateResponses = {
-  201: RoleReadable
-}
+    201: RoleReadable;
+};
 
-export type RolesCreateResponse = RolesCreateResponses[keyof RolesCreateResponses]
+export type RolesCreateResponse = RolesCreateResponses[keyof RolesCreateResponses];
 
 export type RolesDestroyData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this role.
-     */
-    id: string
-  }
-  query?: never
-  url: '/roles/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this role.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/roles/{id}/';
+};
 
 export type RolesDestroyResponses = {
-  /**
-   * No response body
-   */
-  204: void
-}
+    /**
+     * No response body
+     */
+    204: void;
+};
 
-export type RolesDestroyResponse = RolesDestroyResponses[keyof RolesDestroyResponses]
+export type RolesDestroyResponse = RolesDestroyResponses[keyof RolesDestroyResponses];
 
 export type RolesRetrieveData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this role.
-     */
-    id: string
-  }
-  query?: never
-  url: '/roles/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this role.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/roles/{id}/';
+};
 
 export type RolesRetrieveResponses = {
-  200: RoleReadable
-}
+    200: RoleReadable;
+};
 
-export type RolesRetrieveResponse = RolesRetrieveResponses[keyof RolesRetrieveResponses]
+export type RolesRetrieveResponse = RolesRetrieveResponses[keyof RolesRetrieveResponses];
 
 export type RolesPartialUpdateData = {
-  body?: PatchedRoleWritable
-  path: {
-    /**
-     * A unique value identifying this role.
-     */
-    id: string
-  }
-  query?: never
-  url: '/roles/{id}/'
-}
+    body?: PatchedRoleWritable;
+    path: {
+        /**
+         * A unique value identifying this role.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/roles/{id}/';
+};
 
 export type RolesPartialUpdateResponses = {
-  200: RoleReadable
-}
+    200: RoleReadable;
+};
 
-export type RolesPartialUpdateResponse =
-  RolesPartialUpdateResponses[keyof RolesPartialUpdateResponses]
+export type RolesPartialUpdateResponse = RolesPartialUpdateResponses[keyof RolesPartialUpdateResponses];
 
 export type RolesUpdateData = {
-  body: RoleWritable
-  path: {
-    /**
-     * A unique value identifying this role.
-     */
-    id: string
-  }
-  query?: never
-  url: '/roles/{id}/'
-}
+    body: RoleWritable;
+    path: {
+        /**
+         * A unique value identifying this role.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/roles/{id}/';
+};
 
 export type RolesUpdateResponses = {
-  200: RoleReadable
-}
+    200: RoleReadable;
+};
 
-export type RolesUpdateResponse = RolesUpdateResponses[keyof RolesUpdateResponses]
+export type RolesUpdateResponse = RolesUpdateResponses[keyof RolesUpdateResponses];
 
 export type SchoolsListData = {
-  body?: never
-  path?: never
-  query?: {
-    isServiceEnabled?: boolean
-  }
-  url: '/schools/'
-}
+    body?: never;
+    path?: never;
+    query?: {
+        isServiceEnabled?: boolean;
+    };
+    url: '/schools/';
+};
 
 export type SchoolsListResponses = {
-  200: Array<SchoolReadable>
-}
+    200: Array<SchoolReadable>;
+};
 
-export type SchoolsListResponse = SchoolsListResponses[keyof SchoolsListResponses]
+export type SchoolsListResponse = SchoolsListResponses[keyof SchoolsListResponses];
 
 export type SchoolsCreateData = {
-  body: SchoolWritable
-  path?: never
-  query?: never
-  url: '/schools/'
-}
+    body: SchoolWritable;
+    path?: never;
+    query?: never;
+    url: '/schools/';
+};
 
 export type SchoolsCreateResponses = {
-  201: SchoolReadable
-}
+    201: SchoolReadable;
+};
 
-export type SchoolsCreateResponse = SchoolsCreateResponses[keyof SchoolsCreateResponses]
+export type SchoolsCreateResponse = SchoolsCreateResponses[keyof SchoolsCreateResponses];
 
 export type SchoolsDestroyData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this school.
-     */
-    id: string
-  }
-  query?: never
-  url: '/schools/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this school.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/schools/{id}/';
+};
 
 export type SchoolsDestroyResponses = {
-  /**
-   * No response body
-   */
-  204: void
-}
+    /**
+     * No response body
+     */
+    204: void;
+};
 
-export type SchoolsDestroyResponse = SchoolsDestroyResponses[keyof SchoolsDestroyResponses]
+export type SchoolsDestroyResponse = SchoolsDestroyResponses[keyof SchoolsDestroyResponses];
 
 export type SchoolsRetrieveData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this school.
-     */
-    id: string
-  }
-  query?: never
-  url: '/schools/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this school.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/schools/{id}/';
+};
 
 export type SchoolsRetrieveResponses = {
-  200: SchoolReadable
-}
+    200: SchoolReadable;
+};
 
-export type SchoolsRetrieveResponse = SchoolsRetrieveResponses[keyof SchoolsRetrieveResponses]
+export type SchoolsRetrieveResponse = SchoolsRetrieveResponses[keyof SchoolsRetrieveResponses];
 
 export type SchoolsPartialUpdateData = {
-  body?: PatchedSchoolWritable
-  path: {
-    /**
-     * A unique value identifying this school.
-     */
-    id: string
-  }
-  query?: never
-  url: '/schools/{id}/'
-}
+    body?: PatchedSchoolWritable;
+    path: {
+        /**
+         * A unique value identifying this school.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/schools/{id}/';
+};
 
 export type SchoolsPartialUpdateResponses = {
-  200: SchoolReadable
-}
+    200: SchoolReadable;
+};
 
-export type SchoolsPartialUpdateResponse =
-  SchoolsPartialUpdateResponses[keyof SchoolsPartialUpdateResponses]
+export type SchoolsPartialUpdateResponse = SchoolsPartialUpdateResponses[keyof SchoolsPartialUpdateResponses];
 
 export type SchoolsUpdateData = {
-  body: SchoolWritable
-  path: {
-    /**
-     * A unique value identifying this school.
-     */
-    id: string
-  }
-  query?: never
-  url: '/schools/{id}/'
-}
+    body: SchoolWritable;
+    path: {
+        /**
+         * A unique value identifying this school.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/schools/{id}/';
+};
 
 export type SchoolsUpdateResponses = {
-  200: SchoolReadable
-}
+    200: SchoolReadable;
+};
 
-export type SchoolsUpdateResponse = SchoolsUpdateResponses[keyof SchoolsUpdateResponses]
+export type SchoolsUpdateResponse = SchoolsUpdateResponses[keyof SchoolsUpdateResponses];
 
 export type SituationsListData = {
-  body?: never
-  path?: never
-  query?: never
-  url: '/situations/'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/situations/';
+};
 
 export type SituationsListResponses = {
-  200: Array<SituationReadable>
-}
+    200: Array<SituationReadable>;
+};
 
-export type SituationsListResponse = SituationsListResponses[keyof SituationsListResponses]
+export type SituationsListResponse = SituationsListResponses[keyof SituationsListResponses];
 
 export type SituationsCreateData = {
-  body: SituationWritable
-  path?: never
-  query?: never
-  url: '/situations/'
-}
+    body: SituationWritable;
+    path?: never;
+    query?: never;
+    url: '/situations/';
+};
 
 export type SituationsCreateResponses = {
-  201: SituationReadable
-}
+    201: SituationReadable;
+};
 
-export type SituationsCreateResponse = SituationsCreateResponses[keyof SituationsCreateResponses]
+export type SituationsCreateResponse = SituationsCreateResponses[keyof SituationsCreateResponses];
 
 export type SituationsDestroyData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this situation.
-     */
-    id: string
-  }
-  query?: never
-  url: '/situations/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this situation.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/situations/{id}/';
+};
 
 export type SituationsDestroyResponses = {
-  /**
-   * No response body
-   */
-  204: void
-}
+    /**
+     * No response body
+     */
+    204: void;
+};
 
-export type SituationsDestroyResponse = SituationsDestroyResponses[keyof SituationsDestroyResponses]
+export type SituationsDestroyResponse = SituationsDestroyResponses[keyof SituationsDestroyResponses];
 
 export type SituationsRetrieveData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this situation.
-     */
-    id: string
-  }
-  query?: never
-  url: '/situations/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this situation.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/situations/{id}/';
+};
 
 export type SituationsRetrieveResponses = {
-  200: SituationReadable
-}
+    200: SituationReadable;
+};
 
-export type SituationsRetrieveResponse =
-  SituationsRetrieveResponses[keyof SituationsRetrieveResponses]
+export type SituationsRetrieveResponse = SituationsRetrieveResponses[keyof SituationsRetrieveResponses];
 
 export type SituationsPartialUpdateData = {
-  body?: PatchedSituationWritable
-  path: {
-    /**
-     * A unique value identifying this situation.
-     */
-    id: string
-  }
-  query?: never
-  url: '/situations/{id}/'
-}
+    body?: PatchedSituationWritable;
+    path: {
+        /**
+         * A unique value identifying this situation.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/situations/{id}/';
+};
 
 export type SituationsPartialUpdateResponses = {
-  200: SituationReadable
-}
+    200: SituationReadable;
+};
 
-export type SituationsPartialUpdateResponse =
-  SituationsPartialUpdateResponses[keyof SituationsPartialUpdateResponses]
+export type SituationsPartialUpdateResponse = SituationsPartialUpdateResponses[keyof SituationsPartialUpdateResponses];
 
 export type SituationsUpdateData = {
-  body: SituationWritable
-  path: {
-    /**
-     * A unique value identifying this situation.
-     */
-    id: string
-  }
-  query?: never
-  url: '/situations/{id}/'
-}
+    body: SituationWritable;
+    path: {
+        /**
+         * A unique value identifying this situation.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/situations/{id}/';
+};
 
 export type SituationsUpdateResponses = {
-  200: SituationReadable
-}
+    200: SituationReadable;
+};
 
-export type SituationsUpdateResponse = SituationsUpdateResponses[keyof SituationsUpdateResponses]
+export type SituationsUpdateResponse = SituationsUpdateResponses[keyof SituationsUpdateResponses];
 
 export type StatusListData = {
-  body?: never
-  path?: never
-  query?: never
-  url: '/status/'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/status/';
+};
 
 export type StatusListResponses = {
-  200: Array<StatusReadable>
-}
+    200: Array<StatusReadable>;
+};
 
-export type StatusListResponse = StatusListResponses[keyof StatusListResponses]
+export type StatusListResponse = StatusListResponses[keyof StatusListResponses];
 
 export type StatusCreateData = {
-  body: StatusWritable
-  path?: never
-  query?: never
-  url: '/status/'
-}
+    body: StatusWritable;
+    path?: never;
+    query?: never;
+    url: '/status/';
+};
 
 export type StatusCreateResponses = {
-  201: StatusReadable
-}
+    201: StatusReadable;
+};
 
-export type StatusCreateResponse = StatusCreateResponses[keyof StatusCreateResponses]
+export type StatusCreateResponse = StatusCreateResponses[keyof StatusCreateResponses];
 
 export type StatusDestroyData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this status.
-     */
-    id: string
-  }
-  query?: never
-  url: '/status/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this status.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/status/{id}/';
+};
 
 export type StatusDestroyResponses = {
-  /**
-   * No response body
-   */
-  204: void
-}
+    /**
+     * No response body
+     */
+    204: void;
+};
 
-export type StatusDestroyResponse = StatusDestroyResponses[keyof StatusDestroyResponses]
+export type StatusDestroyResponse = StatusDestroyResponses[keyof StatusDestroyResponses];
 
 export type StatusRetrieveData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this status.
-     */
-    id: string
-  }
-  query?: never
-  url: '/status/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this status.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/status/{id}/';
+};
 
 export type StatusRetrieveResponses = {
-  200: StatusReadable
-}
+    200: StatusReadable;
+};
 
-export type StatusRetrieveResponse = StatusRetrieveResponses[keyof StatusRetrieveResponses]
+export type StatusRetrieveResponse = StatusRetrieveResponses[keyof StatusRetrieveResponses];
 
 export type StatusPartialUpdateData = {
-  body?: PatchedStatusWritable
-  path: {
-    /**
-     * A unique value identifying this status.
-     */
-    id: string
-  }
-  query?: never
-  url: '/status/{id}/'
-}
+    body?: PatchedStatusWritable;
+    path: {
+        /**
+         * A unique value identifying this status.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/status/{id}/';
+};
 
 export type StatusPartialUpdateResponses = {
-  200: StatusReadable
-}
+    200: StatusReadable;
+};
 
-export type StatusPartialUpdateResponse =
-  StatusPartialUpdateResponses[keyof StatusPartialUpdateResponses]
+export type StatusPartialUpdateResponse = StatusPartialUpdateResponses[keyof StatusPartialUpdateResponses];
 
 export type StatusUpdateData = {
-  body: StatusWritable
-  path: {
-    /**
-     * A unique value identifying this status.
-     */
-    id: string
-  }
-  query?: never
-  url: '/status/{id}/'
-}
+    body: StatusWritable;
+    path: {
+        /**
+         * A unique value identifying this status.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/status/{id}/';
+};
 
 export type StatusUpdateResponses = {
-  200: StatusReadable
-}
+    200: StatusReadable;
+};
 
-export type StatusUpdateResponse = StatusUpdateResponses[keyof StatusUpdateResponses]
+export type StatusUpdateResponse = StatusUpdateResponses[keyof StatusUpdateResponses];
 
 export type SubjectsListData = {
-  body?: never
-  path?: never
-  query?: never
-  url: '/subjects/'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/subjects/';
+};
 
 export type SubjectsListResponses = {
-  200: Array<SubjectReadable>
-}
+    200: Array<SubjectReadable>;
+};
 
-export type SubjectsListResponse = SubjectsListResponses[keyof SubjectsListResponses]
+export type SubjectsListResponse = SubjectsListResponses[keyof SubjectsListResponses];
 
 export type SubjectsCreateData = {
-  body: SubjectWritable
-  path?: never
-  query?: never
-  url: '/subjects/'
-}
+    body: SubjectWritable;
+    path?: never;
+    query?: never;
+    url: '/subjects/';
+};
 
 export type SubjectsCreateResponses = {
-  201: SubjectReadable
-}
+    201: SubjectReadable;
+};
 
-export type SubjectsCreateResponse = SubjectsCreateResponses[keyof SubjectsCreateResponses]
+export type SubjectsCreateResponse = SubjectsCreateResponses[keyof SubjectsCreateResponses];
 
 export type SubjectsDestroyData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this subject.
-     */
-    id: string
-  }
-  query?: never
-  url: '/subjects/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this subject.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/subjects/{id}/';
+};
 
 export type SubjectsDestroyResponses = {
-  /**
-   * No response body
-   */
-  204: void
-}
+    /**
+     * No response body
+     */
+    204: void;
+};
 
-export type SubjectsDestroyResponse = SubjectsDestroyResponses[keyof SubjectsDestroyResponses]
+export type SubjectsDestroyResponse = SubjectsDestroyResponses[keyof SubjectsDestroyResponses];
 
 export type SubjectsRetrieveData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this subject.
-     */
-    id: string
-  }
-  query?: never
-  url: '/subjects/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this subject.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/subjects/{id}/';
+};
 
 export type SubjectsRetrieveResponses = {
-  200: SubjectReadable
-}
+    200: SubjectReadable;
+};
 
-export type SubjectsRetrieveResponse = SubjectsRetrieveResponses[keyof SubjectsRetrieveResponses]
+export type SubjectsRetrieveResponse = SubjectsRetrieveResponses[keyof SubjectsRetrieveResponses];
 
 export type SubjectsPartialUpdateData = {
-  body?: PatchedSubjectWritable
-  path: {
-    /**
-     * A unique value identifying this subject.
-     */
-    id: string
-  }
-  query?: never
-  url: '/subjects/{id}/'
-}
+    body?: PatchedSubjectWritable;
+    path: {
+        /**
+         * A unique value identifying this subject.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/subjects/{id}/';
+};
 
 export type SubjectsPartialUpdateResponses = {
-  200: SubjectReadable
-}
+    200: SubjectReadable;
+};
 
-export type SubjectsPartialUpdateResponse =
-  SubjectsPartialUpdateResponses[keyof SubjectsPartialUpdateResponses]
+export type SubjectsPartialUpdateResponse = SubjectsPartialUpdateResponses[keyof SubjectsPartialUpdateResponses];
 
 export type SubjectsUpdateData = {
-  body: SubjectWritable
-  path: {
-    /**
-     * A unique value identifying this subject.
-     */
-    id: string
-  }
-  query?: never
-  url: '/subjects/{id}/'
-}
+    body: SubjectWritable;
+    path: {
+        /**
+         * A unique value identifying this subject.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/subjects/{id}/';
+};
 
 export type SubjectsUpdateResponses = {
-  200: SubjectReadable
-}
+    200: SubjectReadable;
+};
 
-export type SubjectsUpdateResponse = SubjectsUpdateResponses[keyof SubjectsUpdateResponses]
+export type SubjectsUpdateResponse = SubjectsUpdateResponses[keyof SubjectsUpdateResponses];
 
 export type UserGroupsListData = {
-  body?: never
-  path?: never
-  query?: never
-  url: '/user-groups/'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user-groups/';
+};
 
 export type UserGroupsListResponses = {
-  200: Array<UserGroupReadable>
-}
+    200: Array<UserGroupReadable>;
+};
 
-export type UserGroupsListResponse = UserGroupsListResponses[keyof UserGroupsListResponses]
+export type UserGroupsListResponse = UserGroupsListResponses[keyof UserGroupsListResponses];
 
 export type UserGroupsCreateData = {
-  body: UserGroupWritable
-  path?: never
-  query?: never
-  url: '/user-groups/'
-}
+    body: UserGroupWritable;
+    path?: never;
+    query?: never;
+    url: '/user-groups/';
+};
 
 export type UserGroupsCreateResponses = {
-  201: UserGroupReadable
-}
+    201: UserGroupReadable;
+};
 
-export type UserGroupsCreateResponse = UserGroupsCreateResponses[keyof UserGroupsCreateResponses]
+export type UserGroupsCreateResponse = UserGroupsCreateResponses[keyof UserGroupsCreateResponses];
 
 export type UserGroupsDestroyData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this user group.
-     */
-    id: string
-  }
-  query?: never
-  url: '/user-groups/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this user group.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/user-groups/{id}/';
+};
 
 export type UserGroupsDestroyResponses = {
-  /**
-   * No response body
-   */
-  204: void
-}
+    /**
+     * No response body
+     */
+    204: void;
+};
 
-export type UserGroupsDestroyResponse = UserGroupsDestroyResponses[keyof UserGroupsDestroyResponses]
+export type UserGroupsDestroyResponse = UserGroupsDestroyResponses[keyof UserGroupsDestroyResponses];
 
 export type UserGroupsRetrieveData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this user group.
-     */
-    id: string
-  }
-  query?: never
-  url: '/user-groups/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this user group.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/user-groups/{id}/';
+};
 
 export type UserGroupsRetrieveResponses = {
-  200: UserGroupReadable
-}
+    200: UserGroupReadable;
+};
 
-export type UserGroupsRetrieveResponse =
-  UserGroupsRetrieveResponses[keyof UserGroupsRetrieveResponses]
+export type UserGroupsRetrieveResponse = UserGroupsRetrieveResponses[keyof UserGroupsRetrieveResponses];
 
 export type UserGroupsPartialUpdateData = {
-  body?: PatchedUserGroupWritable
-  path: {
-    /**
-     * A unique value identifying this user group.
-     */
-    id: string
-  }
-  query?: never
-  url: '/user-groups/{id}/'
-}
+    body?: PatchedUserGroupWritable;
+    path: {
+        /**
+         * A unique value identifying this user group.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/user-groups/{id}/';
+};
 
 export type UserGroupsPartialUpdateResponses = {
-  200: UserGroupReadable
-}
+    200: UserGroupReadable;
+};
 
-export type UserGroupsPartialUpdateResponse =
-  UserGroupsPartialUpdateResponses[keyof UserGroupsPartialUpdateResponses]
+export type UserGroupsPartialUpdateResponse = UserGroupsPartialUpdateResponses[keyof UserGroupsPartialUpdateResponses];
 
 export type UserGroupsUpdateData = {
-  body: UserGroupWritable
-  path: {
-    /**
-     * A unique value identifying this user group.
-     */
-    id: string
-  }
-  query?: never
-  url: '/user-groups/{id}/'
-}
+    body: UserGroupWritable;
+    path: {
+        /**
+         * A unique value identifying this user group.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/user-groups/{id}/';
+};
 
 export type UserGroupsUpdateResponses = {
-  200: UserGroupReadable
-}
+    200: UserGroupReadable;
+};
 
-export type UserGroupsUpdateResponse = UserGroupsUpdateResponses[keyof UserGroupsUpdateResponses]
+export type UserGroupsUpdateResponse = UserGroupsUpdateResponses[keyof UserGroupsUpdateResponses];
 
 export type UsersListData = {
-  body?: never
-  path?: never
-  query?: never
-  url: '/users/'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/users/';
+};
 
 export type UsersListResponses = {
-  200: Array<UserReadable>
-}
+    200: Array<UserReadable>;
+};
 
-export type UsersListResponse = UsersListResponses[keyof UsersListResponses]
+export type UsersListResponse = UsersListResponses[keyof UsersListResponses];
 
 export type UsersCreateData = {
-  body: UserWritable
-  path?: never
-  query?: never
-  url: '/users/'
-}
+    body: UserWritable;
+    path?: never;
+    query?: never;
+    url: '/users/';
+};
 
 export type UsersCreateResponses = {
-  201: UserReadable
-}
+    201: UserReadable;
+};
 
-export type UsersCreateResponse = UsersCreateResponses[keyof UsersCreateResponses]
+export type UsersCreateResponse = UsersCreateResponses[keyof UsersCreateResponses];
 
 export type UsersDestroyData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this user.
-     */
-    id: string
-  }
-  query?: never
-  url: '/users/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this user.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/{id}/';
+};
 
 export type UsersDestroyResponses = {
-  /**
-   * No response body
-   */
-  204: void
-}
+    /**
+     * No response body
+     */
+    204: void;
+};
 
-export type UsersDestroyResponse = UsersDestroyResponses[keyof UsersDestroyResponses]
+export type UsersDestroyResponse = UsersDestroyResponses[keyof UsersDestroyResponses];
 
 export type UsersRetrieveData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this user.
-     */
-    id: string
-  }
-  query?: never
-  url: '/users/{id}/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this user.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/{id}/';
+};
 
 export type UsersRetrieveResponses = {
-  200: UserReadable
-}
+    200: UserReadable;
+};
 
-export type UsersRetrieveResponse = UsersRetrieveResponses[keyof UsersRetrieveResponses]
+export type UsersRetrieveResponse = UsersRetrieveResponses[keyof UsersRetrieveResponses];
 
 export type UsersPartialUpdateData = {
-  body?: PatchedUserWritable
-  path: {
-    /**
-     * A unique value identifying this user.
-     */
-    id: string
-  }
-  query?: never
-  url: '/users/{id}/'
-}
+    body?: PatchedUserWritable;
+    path: {
+        /**
+         * A unique value identifying this user.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/{id}/';
+};
 
 export type UsersPartialUpdateResponses = {
-  200: UserReadable
-}
+    200: UserReadable;
+};
 
-export type UsersPartialUpdateResponse =
-  UsersPartialUpdateResponses[keyof UsersPartialUpdateResponses]
+export type UsersPartialUpdateResponse = UsersPartialUpdateResponses[keyof UsersPartialUpdateResponses];
 
 export type UsersUpdateData = {
-  body: UserWritable
-  path: {
-    /**
-     * A unique value identifying this user.
-     */
-    id: string
-  }
-  query?: never
-  url: '/users/{id}/'
-}
+    body: UserWritable;
+    path: {
+        /**
+         * A unique value identifying this user.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/{id}/';
+};
 
 export type UsersUpdateResponses = {
-  200: UserReadable
-}
+    200: UserReadable;
+};
 
-export type UsersUpdateResponse = UsersUpdateResponses[keyof UsersUpdateResponses]
+export type UsersUpdateResponse = UsersUpdateResponses[keyof UsersUpdateResponses];
 
 export type UsersGroupsRetrieveData = {
-  body?: never
-  path: {
-    /**
-     * A unique value identifying this user.
-     */
-    id: string
-  }
-  query?: never
-  url: '/users/{id}/groups/'
-}
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this user.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/{id}/groups/';
+};
 
 export type UsersGroupsRetrieveResponses = {
-  200: UserReadable
-}
+    200: UserReadable;
+};
 
-export type UsersGroupsRetrieveResponse =
-  UsersGroupsRetrieveResponses[keyof UsersGroupsRetrieveResponses]
+export type UsersGroupsRetrieveResponse = UsersGroupsRetrieveResponses[keyof UsersGroupsRetrieveResponses];
 
 export type ClientOptions = {
-  baseUrl: 'http://localhost:5000' | (string & {})
-}
+    baseUrl: 'http://localhost:5000' | (string & {});
+};
