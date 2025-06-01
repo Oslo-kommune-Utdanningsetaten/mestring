@@ -43,38 +43,13 @@
         },
       })
       const members: any = result.data || []
-      console.log(`Fetched members for group ${groupId}:`, members)
       students =
         members
           .filter((member: NestedGroupUserReadable) => member.role.name === 'student')
           .map((member: NestedGroupUserReadable) => member.user) || []
-      students.forEach((student: BasicUserReadable) => {
-        fetchGroupsForStudent(student.id)
-      })
     } catch (error) {
       console.error(`Error fetching members for group ${groupId}:`, error)
       students = []
-    }
-  }
-
-  async function fetchGroupsForStudent(studentId: string) {
-    try {
-      const result = await usersGroupsRetrieve({
-        path: { id: studentId },
-        // only return the groups where this user is a student
-        query: { roles: 'student' },
-      })
-      const studentGroups: GroupReadable[] = result.data || []
-      groupsByStudentId = {
-        ...groupsByStudentId,
-        [studentId]: studentGroups,
-      }
-    } catch (err) {
-      console.error(`Could not load groups for ${studentId}`, err)
-      groupsByStudentId = {
-        ...groupsByStudentId,
-        [studentId]: [],
-      }
     }
   }
 

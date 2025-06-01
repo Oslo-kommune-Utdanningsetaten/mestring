@@ -6,13 +6,10 @@
 
 # Checklist
 
+- [ ] /students/id
+  - goals from groups
 - [ ] /students should show subjects
   - subjects are derived from Goals
-- [x] Dataimport fra Excel
-  - [x] Observation, Goal
-  - [ ] User
-  - [ ] Group
-  - [ ] Subject
 - [ ] App funker like bra som prototypen
   - [ ] /home (my groups)
   - [ ] /students
@@ -27,6 +24,11 @@
   - [x] Importere skoler
   - [x] Importere grupper pr. skole
   - [x] Importere subjects fra UDIR/grep (som matcher teaching-groups)
+- [x] Dataimport fra Excel
+  - [x] Observation, Goal
+  - [x] User
+  - [x] Group
+  - [x] Subject
 - [x] revamp Subject model
 - [x] Svelte-kompatibel, datastore-aktig localstorage
 - [x] En unit-test som sjekker noe som helst

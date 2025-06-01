@@ -27,6 +27,10 @@ export type BasicGoalWritable = {
     student?: string | null;
     subject?: string | null;
     previousGoal?: string | null;
+    groupId?: string;
+    studentId?: string;
+    subjectId?: string;
+    previousGoalId?: string;
 };
 
 /**
@@ -97,6 +101,10 @@ export type GoalWritable = {
     student?: string | null;
     subject?: string | null;
     previousGoal?: string | null;
+    groupId?: string;
+    studentId?: string;
+    subjectId?: string;
+    previousGoalId?: string;
 };
 
 export type GroupReadable = {
@@ -121,6 +129,8 @@ export type GroupWritable = {
     validTo?: string | null;
     subject?: string | null;
     school: string;
+    subjectId?: string;
+    schoolId: string;
 };
 
 export type NestedGroupUserReadable = {
@@ -134,6 +144,9 @@ export type NestedGroupUserReadable = {
 export type NestedGroupUserWritable = {
     role: RoleWritable;
     user: BasicUserWritable;
+    userId: string;
+    groupId: string;
+    roleId: string;
 };
 
 export type NestedUserGroupReadable = {
@@ -147,6 +160,9 @@ export type NestedUserGroupReadable = {
 export type NestedUserGroupWritable = {
     role: RoleWritable;
     group: string;
+    userId: string;
+    groupId: string;
+    roleId: string;
 };
 
 export type ObservationReadable = {
@@ -174,6 +190,10 @@ export type ObservationWritable = {
     feedforward?: string | null;
     observedAt?: string | null;
     isPrivate?: boolean;
+    goalId: string;
+    studentId: string;
+    observerId?: string;
+    situationId?: string;
 };
 
 export type PatchedGoalReadable = {
@@ -197,6 +217,10 @@ export type PatchedGoalWritable = {
     student?: string | null;
     subject?: string | null;
     previousGoal?: string | null;
+    groupId?: string;
+    studentId?: string;
+    subjectId?: string;
+    previousGoalId?: string;
 };
 
 export type PatchedGroupReadable = {
@@ -221,6 +245,8 @@ export type PatchedGroupWritable = {
     validTo?: string | null;
     subject?: string | null;
     school?: string;
+    subjectId?: string;
+    schoolId?: string;
 };
 
 export type PatchedObservationReadable = {
@@ -248,6 +274,10 @@ export type PatchedObservationWritable = {
     feedforward?: string | null;
     observedAt?: string | null;
     isPrivate?: boolean;
+    goalId?: string;
+    studentId?: string;
+    observerId?: string;
+    situationId?: string;
 };
 
 export type PatchedRoleReadable = {
@@ -316,6 +346,8 @@ export type PatchedStatusWritable = {
     feedforward?: string | null;
     student?: string;
     subject?: string;
+    studentId?: string;
+    subjectId?: string;
 };
 
 export type PatchedSubjectReadable = {
@@ -335,6 +367,7 @@ export type PatchedSubjectWritable = {
     grepCode?: string | null;
     grepGroupCode?: string | null;
     maintenedBySchool?: string | null;
+    maintenedBySchoolId?: string;
 };
 
 export type PatchedUserReadable = {
@@ -370,6 +403,9 @@ export type PatchedUserGroupWritable = {
     user?: string;
     group?: string;
     role?: string;
+    userId?: string;
+    groupId?: string;
+    roleId?: string;
 };
 
 export type RoleReadable = {
@@ -438,6 +474,8 @@ export type StatusWritable = {
     feedforward?: string | null;
     student: string;
     subject: string;
+    studentId: string;
+    subjectId: string;
 };
 
 export type SubjectReadable = {
@@ -457,6 +495,7 @@ export type SubjectWritable = {
     grepCode?: string | null;
     grepGroupCode?: string | null;
     maintenedBySchool?: string | null;
+    maintenedBySchoolId?: string;
 };
 
 export type UserReadable = {
@@ -492,6 +531,9 @@ export type UserGroupWritable = {
     user: string;
     group: string;
     role: string;
+    userId: string;
+    groupId: string;
+    roleId: string;
 };
 
 export type GoalsListData = {
@@ -731,7 +773,7 @@ export type ObservationsListResponses = {
 export type ObservationsListResponse = ObservationsListResponses[keyof ObservationsListResponses];
 
 export type ObservationsCreateData = {
-    body?: ObservationWritable;
+    body: ObservationWritable;
     path?: never;
     query?: never;
     url: '/observations/';
@@ -801,7 +843,7 @@ export type ObservationsPartialUpdateResponses = {
 export type ObservationsPartialUpdateResponse = ObservationsPartialUpdateResponses[keyof ObservationsPartialUpdateResponses];
 
 export type ObservationsUpdateData = {
-    body?: ObservationWritable;
+    body: ObservationWritable;
     path: {
         /**
          * A unique value identifying this observation.
@@ -1535,12 +1577,17 @@ export type UsersGroupsRetrieveData = {
          */
         id: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Comma-separated list of role names to filter groups by
+         */
+        roles?: string;
+    };
     url: '/users/{id}/groups/';
 };
 
 export type UsersGroupsRetrieveResponses = {
-    200: UserReadable;
+    200: GroupReadable;
 };
 
 export type UsersGroupsRetrieveResponse = UsersGroupsRetrieveResponses[keyof UsersGroupsRetrieveResponses];

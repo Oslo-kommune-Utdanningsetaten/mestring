@@ -303,8 +303,8 @@ export const observationsList = <ThrowOnError extends boolean = false>(options?:
     });
 };
 
-export const observationsCreate = <ThrowOnError extends boolean = false>(options?: Options<ObservationsCreateData, ThrowOnError>) => {
-    return (options?.client ?? _heyApiClient).post<ObservationsCreateResponse, unknown, ThrowOnError>({
+export const observationsCreate = <ThrowOnError extends boolean = false>(options: Options<ObservationsCreateData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).post<ObservationsCreateResponse, unknown, ThrowOnError>({
         ...urlSearchParamsBodySerializer,
         security: [
             {

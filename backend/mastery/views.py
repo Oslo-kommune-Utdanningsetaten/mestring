@@ -2,6 +2,8 @@ from mastery import models, serializers
 from rest_framework import viewsets, status, views, filters
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+
 
 # More about filtering in Django REST Framework:
 # https://www.django-rest-framework.org/api-guide/filtering/
@@ -20,29 +22,37 @@ class SubjectViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
-    
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='roles',
+                description='Comma-separated list of role names to filter groups by',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            )
+        ]
+    )
     @action(
-            detail=True,
-            methods=['get'],
-            url_path='groups',
-            description="List all groups for this user, optional ?roles=role1,role2 filter"
-        )
+        detail=True,
+        methods=['get'],
+        url_path='groups',
+        description="List all groups for this user, optional ?roles=role1,role2 filter",
+        serializer_class=serializers.GroupSerializer
+    )
     def groups(self, request, pk=None):
         user = self.get_object()
+        qs = models.Group.objects.filter(user_groups__user=user)
         roles_param = request.query_params.get('roles')
-
-        qs = models.Group.objects.filter(
-            user_groups__user=user
-        )
 
         if roles_param:
             role_names = [r.strip() for r in roles_param.split(',') if r.strip()]
-            qs = qs.filter(
-                user_groups__role__name__in=role_names
-            )
+            qs = qs.filter(user_groups__role__name__in=role_names)
 
         qs = qs.distinct()
-        serializer = serializers.GroupSerializer(qs, many=True, context={'request': request})
+        # this will use the GroupSerializer defined above
+        serializer = self.get_serializer(qs, many=True, context={'request': request})
         return Response(serializer.data)
 
 
