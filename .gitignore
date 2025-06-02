@@ -10,6 +10,8 @@ backend/import/data/
 
 # ai agent tooling
 .goose
+.gooseignore
 
 # macos
 .DS_Store
+
