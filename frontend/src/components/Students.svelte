@@ -21,7 +21,7 @@
   let selectedGroup = $state<GroupReadable | null>(null)
   let allGroups = $state<GroupReadable[]>([])
   let students = $state<BasicUserReadable[]>([])
-  let groupsByStudentId = $state({})
+  let uniqueSubjects = $state<string[]>([])
 
   async function fetchAllGroups() {
     try {
@@ -55,7 +55,7 @@
     }
   }
 
-  async function getUniqueSubjectsForStudents(students: BasicUserReadable[]): Promise<string[]> {
+  async function fetchUniqueSubjectsForStudents(students: BasicUserReadable[]) {
     const goalsArrays = await Promise.all(
       students.map(async (student): Promise<GoalReadable[]> => {
         const result = await usersGoalsRetrieve({
@@ -66,18 +66,18 @@
         return Array.isArray(result.data) ? result.data : []
       })
     )
-    const uniqueSubjects = new Set<string>()
+    const result = new Set<string>()
     goalsArrays.forEach(goals => {
       if (goals) {
         goals.forEach(goal => {
           const subject = $dataStore.subjects.find(s => s.id === goal.subjectId)
           if (subject) {
-            uniqueSubjects.add(subject.displayName)
+            result.add(subject.displayName)
           }
         })
       }
     })
-    return Array.from(uniqueSubjects)
+    uniqueSubjects = Array.from(result)
   }
 
   function handleGroupSelect(groupId: string): void {
@@ -94,11 +94,7 @@
         if (selectedGroupId) {
           selectedGroup = allGroups.find(group => group.id === selectedGroupId) || null
           fetchMembersOfSelectedGroup(selectedGroupId).then(() => {
-            groupsByStudentId = {}
-            getUniqueSubjectsForStudents(students).then(uniqueSubjects => {
-              // TODO: pick up here, this is where we can use uniqueSubjects
-              console.log('Unique subjects:', uniqueSubjects)
-            })
+            fetchUniqueSubjectsForStudents(students)
           })
         }
       })
@@ -132,16 +128,14 @@
   {#if !selectedGroup}
     <div class="alert alert-info">Ingen gruppe valgt</div>
   {:else}
-    <pre>{JSON.stringify(groupsByStudentId, null, 2)}</pre>
     <div class="card shadow-sm">
       <!-- Header row -->
       <div class="student-grid-row fw-bold header">
         <div>Navn</div>
         <div class="group-grid-columns">
-          <span>as</span>
-          <span>as</span>
-          <span>as</span>
-          <span>as</span>
+          {#each uniqueSubjects as subject}
+            <span>{subject}</span>
+          {/each}
         </div>
       </div>
 

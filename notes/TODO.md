@@ -8,6 +8,8 @@
 
 - [ ] /students/id
   - goals from groups
+- [ ] /ping endpoint
+  - warning in frontend with not pong
 - [ ] /students should show subjects
   - subjects are derived from Goals
 - [ ] App funker like bra som prototypen
