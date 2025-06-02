@@ -1,27 +1,20 @@
 <script lang="ts">
-  import { dataStore } from '../stores/data'
   import { groupsRetrieve, groupsMembersRetrieve } from '../api/sdk.gen'
   import { type GroupReadable, type NestedGroupUserReadable } from '../api/types.gen'
-  import Link from './Link.svelte'
 
-  interface Props {
-    groupId: string
-  }
+  const { groupId } = $props<{ groupId: string }>()
 
-  let { groupId }: Props = $props()
-
-  const currentSchool = $derived($dataStore.currentSchool)
   let group = $state<GroupReadable | null>(null)
   let teachers = $state<NestedGroupUserReadable[]>([])
   let students = $state<NestedGroupUserReadable[]>([])
-  let loading = $state(true)
+  let isLoading = $state(true)
   let error = $state<string | null>(null)
 
   async function fetchGroup() {
     if (!groupId) return
 
     try {
-      loading = true
+      isLoading = true
       error = null
 
       // Fetch group details
@@ -41,7 +34,7 @@
       console.error('Error fetching group:', error)
       error = 'Kunne ikke hente gruppeinformasjon'
     } finally {
-      loading = false
+      isLoading = false
     }
   }
 
@@ -53,11 +46,9 @@
 </script>
 
 <section class="py-3">
-  {#if loading}
-    <div class="d-flex justify-content-center align-items-center py-5">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Henter data...</span>
-      </div>
+  {#if isLoading}
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Henter data...</span>
     </div>
   {:else if error}
     <div class="alert alert-danger">
@@ -98,7 +89,7 @@
     </div>
 
     <!-- Teachers Section -->
-    {#if teachers.length > 0}
+    {#if teachers}
       <div class="card mb-4">
         <div class="card-header">
           <h3 class="mb-0">Lærere</h3>
@@ -114,7 +105,7 @@
     {/if}
 
     <!-- Students Section -->
-    {#if students.length > 0}
+    {#if students}
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h3 class="mb-0">Elever</h3>

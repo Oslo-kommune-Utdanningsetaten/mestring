@@ -17,6 +17,7 @@ class SchoolViewSet(viewsets.ModelViewSet):
 class SubjectViewSet(viewsets.ModelViewSet):
     queryset = models.Subject.objects.all()
     serializer_class = serializers.SubjectSerializer
+    filterset_fields = ['maintened_by_school']
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -53,6 +54,30 @@ class UserViewSet(viewsets.ModelViewSet):
         qs = qs.distinct()
         # this will use the GroupSerializer defined above
         serializer = self.get_serializer(qs, many=True, context={'request': request})
+        return Response(serializer.data)
+    
+    @action(
+        detail=True,
+        methods=['get'],
+        url_path='goals',
+        description="List all goals for this user (both personal and group goals)",
+        serializer_class=serializers.GoalSerializer
+    )
+    def goals(self, request, pk=None):
+        """Get all goals for a student - both personal goals and group goals"""
+        user = self.get_object()
+        
+        # Get personal goals where student is directly assigned
+        personal_goals = models.Goal.objects.filter(student=user)
+        
+        # Get group goals from all groups the user belongs to as a student
+        student_groups = user.role_groups('student')
+        group_goals = models.Goal.objects.filter(group__in=student_groups)
+        
+        # Combine both querysets
+        all_goals = personal_goals.union(group_goals).order_by('-created_at')
+        
+        serializer = self.get_serializer(all_goals, many=True, context={'request': request})
         return Response(serializer.data)
 
 

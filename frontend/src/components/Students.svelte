@@ -5,15 +5,17 @@
   import { urlStringFrom } from '../utils/functions'
   import StudentRow from './StudentRow.svelte'
 
-  import { groupsList, groupsMembersRetrieve, usersGroupsRetrieve } from '../api/sdk.gen'
+  import { groupsList, groupsMembersRetrieve, usersGoalsRetrieve } from '../api/sdk.gen'
   import {
     type GroupReadable,
+    type GoalReadable,
     type NestedGroupUserReadable,
     type BasicUserReadable,
   } from '../api/types.gen'
 
   const router = useTinyRouter()
-  const currentSchool = $derived($dataStore.currentSchool)
+  const currentSchool = $state($dataStore.currentSchool)
+  const subjects = $state($dataStore.subjects)
 
   let selectedGroupId = $derived(router.getQueryParam('groupId'))
   let selectedGroup = $state<GroupReadable | null>(null)
@@ -21,7 +23,7 @@
   let students = $state<BasicUserReadable[]>([])
   let groupsByStudentId = $state({})
 
-  async function fetchGroups() {
+  async function fetchAllGroups() {
     try {
       const result = await groupsList({
         query: {
@@ -35,7 +37,7 @@
     }
   }
 
-  async function fetchGroupMembers(groupId: string) {
+  async function fetchMembersOfSelectedGroup(groupId: string) {
     try {
       const result = await groupsMembersRetrieve({
         path: {
@@ -53,6 +55,31 @@
     }
   }
 
+  async function getUniqueSubjectsForStudents(students: BasicUserReadable[]): Promise<string[]> {
+    const goalsArrays = await Promise.all(
+      students.map(async (student): Promise<GoalReadable[]> => {
+        const result = await usersGoalsRetrieve({
+          path: {
+            id: student.id,
+          },
+        })
+        return Array.isArray(result.data) ? result.data : []
+      })
+    )
+    const uniqueSubjects = new Set<string>()
+    goalsArrays.forEach(goals => {
+      if (goals) {
+        goals.forEach(goal => {
+          const subject = $dataStore.subjects.find(s => s.id === goal.subjectId)
+          if (subject) {
+            uniqueSubjects.add(subject.displayName)
+          }
+        })
+      }
+    })
+    return Array.from(uniqueSubjects)
+  }
+
   function handleGroupSelect(groupId: string): void {
     if (groupId && groupId !== '0') {
       window.location.href = urlStringFrom({ groupId }, { mode: 'merge' })
@@ -63,10 +90,16 @@
 
   $effect(() => {
     if (currentSchool) {
-      fetchGroups().then(() => {
+      fetchAllGroups().then(() => {
         if (selectedGroupId) {
           selectedGroup = allGroups.find(group => group.id === selectedGroupId) || null
-          fetchGroupMembers(selectedGroupId)
+          fetchMembersOfSelectedGroup(selectedGroupId).then(() => {
+            groupsByStudentId = {}
+            getUniqueSubjectsForStudents(students).then(uniqueSubjects => {
+              // TODO: pick up here, this is where we can use uniqueSubjects
+              console.log('Unique subjects:', uniqueSubjects)
+            })
+          })
         }
       })
     }
@@ -104,15 +137,11 @@
       <!-- Header row -->
       <div class="student-grid-row fw-bold header">
         <div>Navn</div>
-        <div>Klasse</div>
-        <div>
-          Fag
-          <div class="group-grid-columns">
-            <span>as</span>
-            <span>as</span>
-            <span>as</span>
-            <span>as</span>
-          </div>
+        <div class="group-grid-columns">
+          <span>as</span>
+          <span>as</span>
+          <span>as</span>
+          <span>as</span>
         </div>
       </div>
 

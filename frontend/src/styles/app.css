@@ -69,8 +69,8 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --grid-template-student-columns: minmax(180px, 25%) minmax(80px, 15%) minmax(250px, 45%);
-  --grid-template-group-columns: repeat(auto-fit, minmax(50px, 1fr));
+  --grid-template-student-columns: minmax(180px, 25%) auto;
+  --grid-template-group-columns: repeat(auto-fit, minmax(50px, 150px));
 }
 
 body {

@@ -8,7 +8,6 @@
 <div class="student-grid-row">
   <a href={`/students/${student.id}`} class="fw-bold">{student.name}</a>
 
-  <div class="text-center text-muted py-2">basisgroupname</div>
   <div class="group-grid-columns">
     <span>as</span>
     <span>as</span>

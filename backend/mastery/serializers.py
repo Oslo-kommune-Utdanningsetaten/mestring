@@ -4,19 +4,39 @@ from django.db.models import ForeignKey
 
 # Base serializer that rewrites foreign key fields
 class BaseModelSerializer(serializers.ModelSerializer):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # On incoming data, for every FK on this model, `<fk_name>_id`
+    def get_fields(self):
+        fields = super().get_fields()
+        
+        # Get explicitly declared fields from the serializer class
+        declared_fields = getattr(self.Meta, 'fields', [])
+        explicitly_nested_fields = set()
+        
+        # Check for explicitly declared nested serializers
+        for field_name, field_instance in self._declared_fields.items():
+            if isinstance(field_instance, serializers.ModelSerializer):
+                explicitly_nested_fields.add(field_name)
+        
+        # Add FK ID fields and remove original FK fields
         for field in self.Meta.model._meta.get_fields():
             if isinstance(field, ForeignKey):
                 name = field.name
-                qs   = field.remote_field.model.objects.all()
-                self.fields[f"{name}_id"] = serializers.PrimaryKeyRelatedField(
+                
+                # Skip conversion if this field is explicitly declared as nested
+                if name in explicitly_nested_fields:
+                    continue
+                    
+                qs = field.remote_field.model.objects.all()
+                # Add the ID field
+                fields[f"{name}_id"] = serializers.PrimaryKeyRelatedField(
                     source=name,
                     queryset=qs,
-                    write_only=True,
-                    required= not field.null
+                    required=not field.null
                 )
+                # Remove the original field to avoid duplication
+                if name in fields:
+                    del fields[name]
+        return fields
+    
     
     def to_representation(self, instance):
         data = super().to_representation(instance)

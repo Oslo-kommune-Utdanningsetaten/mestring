@@ -1,9 +1,14 @@
 import { get, writable } from 'svelte/store'
 import type { Writable as WritableType } from 'svelte/store'
-import type { AppData, User } from '../types/models'
-import { type SchoolReadable } from '../api/types.gen'
+import { subjectsList } from '../api/sdk.gen'
+import type { SubjectReadable, SchoolReadable, BasicUserReadable } from '../api/types.gen'
 import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage'
-import { set } from 'date-fns'
+
+type AppData = {
+  subjects: SubjectReadable[]
+  currentSchool: SchoolReadable | null
+  currentUser: BasicUserReadable | null
+}
 
 const defaultUser = {
   id: 'user-01',
@@ -13,7 +18,7 @@ const defaultUser = {
 }
 
 // function for updating the current user
-export function setCurrentUser(user: User) {
+export function setCurrentUser(user: BasicUserReadable) {
   dataStore.update(data => {
     return { ...data, currentUser: user }
   })
@@ -25,30 +30,55 @@ export function setCurrentSchool(school: SchoolReadable) {
   dataStore.update(data => {
     return { ...data, currentSchool: school }
   })
+
+  // Load subjects for this school
+  if (school?.id) {
+    loadSubjectsForSchool(school.id)
+  }
 }
 
 // Create a writable store with initial empty values
 export const dataStore: WritableType<AppData> = writable({
-  students: [],
-  groups: [],
-  teachers: [],
-  goals: [],
-  observations: [],
-  masteryLevels: [],
+  subjects: [],
   currentSchool: null,
   currentUser: null,
 })
 
-// Function to load data from public/data.js
+async function loadSubjectsForSchool(schoolId: string): Promise<void> {
+  try {
+    const result = await subjectsList({
+      query: {
+        maintenedBySchool: schoolId,
+      },
+    })
+
+    const subjects = result.data || []
+
+    dataStore.update(data => {
+      return { ...data, subjects }
+    })
+  } catch (error) {
+    console.error('Failed to load subjects for school:', error)
+    dataStore.update(data => {
+      return { ...data, subjects: [] }
+    })
+  }
+}
+
 export async function loadData(): Promise<void> {
   try {
-    // Dynamic import of the data.js file
-    const module = await import('../../public/schoolData_v2.js')
+    const currentSchool = getLocalStorageItem('currentSchool')
+
     dataStore.set({
-      ...module.data,
-      currentSchool: getLocalStorageItem('currentSchool'),
+      currentSchool,
       currentUser: defaultUser,
+      subjects: [],
     })
+
+    // Load subjects if we have a current school
+    if (currentSchool?.id) {
+      await loadSubjectsForSchool(currentSchool.id)
+    }
   } catch (error) {
     console.error('Failed to load data:', error)
   }

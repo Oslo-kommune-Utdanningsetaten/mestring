@@ -1,4 +1,5 @@
 import type { MasteryLevel, Goal } from '../types/models'
+import { type GoalReadable, type SubjectReadable } from '../api/types.gen'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
   [key: string]: string
@@ -44,6 +45,20 @@ export function urlStringFrom(
       .map(key => `${key}=${finalParams[key] ?? ''}`)
       .join('&')
   )
+}
+
+export function subjectNamesFromStudentGoals(
+  goals: GoalReadable[],
+  allSubjects: SubjectReadable[]
+): string[] {
+  const result = new Set<string>()
+  goals.forEach((goal: GoalReadable) => {
+    const subject = allSubjects.find((subject: SubjectReadable) => subject.id === goal.subjectId)
+    if (subject) {
+      result.add(subject.displayName)
+    }
+  })
+  return Array.from(result)
 }
 
 export function inferMastery(goal: any): {
