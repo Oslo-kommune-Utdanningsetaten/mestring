@@ -61,10 +61,13 @@
   <h2 class="mb-4">Mine grupper</h2>
   <p class="d-flex align-items-center gap-2">
     Dette er <span class="fw-bold">
-      {#if isAllGroupsTypesEnabled}alle gruppene{:else}
-        basisgruppene{/if}
+      {#if isAllGroupsTypesEnabled}
+        alle gruppene
+      {:else}
+        basisgruppene
+      {/if}
     </span>
-     du har tilgang til.
+    du har tilgang til.
   </p>
   <div class="pkt-input-check">
     <div class="pkt-input-check__input">
@@ -92,23 +95,26 @@
 
         <!-- Student rows -->
         {#each groups as group}
-          <div class="row py-2 align-items-center mx-0 border">
+          <div class="row py-2 align-items-center mx-0">
             <div class="col-3">
-              <a
-                href={urlStringFrom(
-                  { groupId: group.id },
-                  {
-                    path: '/students',
-                    mode: 'replace',
-                  }
-                )}
-              >
+              <a href="/groups/{group.id}">
                 {group.displayName}
               </a>
             </div>
             <div class="col-3">
               {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
-                {groupMembers[group.id].students.length}
+                <a
+                  href={urlStringFrom(
+                    { groupId: group.id },
+                    {
+                      path: '/students',
+                      mode: 'replace',
+                    }
+                  )}
+                >
+                  {groupMembers[group.id].students.length}
+                  {groupMembers[group.id].students.length === 1 ? 'elev' : 'elever'}
+                </a>
               {:else}
                 <div class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Henter data...</span>

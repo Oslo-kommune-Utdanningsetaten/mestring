@@ -92,8 +92,6 @@
         {/each}
       </select>
     </div>
-
-    <a class="link-button" href={urlStringFrom({}, { mode: 'replace' })}>Nullstill</a>
   </div>
 </section>
 
