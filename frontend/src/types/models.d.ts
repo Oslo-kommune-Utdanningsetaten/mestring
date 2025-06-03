@@ -4,7 +4,6 @@ export interface Mastery {
   mastery: number
   trend: number
   title: string
-  groupName: string
 }
 
 export interface AppData {

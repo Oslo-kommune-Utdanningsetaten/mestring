@@ -1,9 +1,9 @@
 <script lang="ts">
-  const { mastery } = $props<{
-    mastery: { status: number; trend: number; title: string; groupName: string } | null
-  }>()
+  import type { Mastery } from '../types/models'
 
-  const { status, trend, title } = mastery || {}
+  const { masteryData } = $props<{ masteryData: Mastery }>()
+
+  const { mastery, trend, title } = masteryData || {}
   const similarityRange = 6 // +/- 5 similarity threshold
   const isFlat = Math.abs(trend) < similarityRange
   const isDecreasing = trend < 0 && !isFlat
@@ -14,13 +14,13 @@
   const trendColor = isDecreasing ? decreasingColor : isFlat ? flatColor : increasingColor
 
   const trendBoxSize = 22
-  const statusIndicatorHeight = 4
-  const statusIndicatorOutcrop = 2
-  const statusIndicatorWidth = trendBoxSize + statusIndicatorOutcrop * 2
+  const masteryIndicatorHeight = 4
+  const masteryIndicatorOutcrop = 2
+  const masteryIndicatorWidth = trendBoxSize + masteryIndicatorOutcrop * 2
 
-  // Calculate status indicator position based on available space
+  // Calculate mastery indicator position based on available space
   function indicatorPosition(masteryValue: number) {
-    const maxY = trendBoxSize - statusIndicatorHeight
+    const maxY = trendBoxSize - masteryIndicatorHeight
     if (masteryValue < 0) return 0
     if (masteryValue > 100) return maxY
     return Math.round((masteryValue / 100) * maxY)
@@ -28,17 +28,18 @@
 </script>
 
 <span class="badge-container">
-  {#if mastery}
+  {#if masteryData}
+    <pre>{JSON.stringify(masteryData)}</pre>
     <span
       class="trend-box"
       style="background-color: {trendColor}; width: {trendBoxSize}px; height: {trendBoxSize}px;"
       title={`${title}`}
     >
       <span
-        class="status-indicator"
+        class="mastery-indicator"
         style="bottom: {indicatorPosition(
-          status
-        )}px; border-color: {trendColor}; height: {statusIndicatorHeight}px; width: {statusIndicatorWidth}px; left: {-statusIndicatorOutcrop}px;"
+          mastery
+        )}px; border-color: {trendColor}; height: {masteryIndicatorHeight}px; width: {masteryIndicatorWidth}px; left: {-masteryIndicatorOutcrop}px;"
       ></span>
     </span>
   {:else}
@@ -65,7 +66,7 @@
     position: relative;
   }
 
-  .status-indicator {
+  .mastery-indicator {
     border-width: 1px 1px 1px 1px;
     border-style: solid;
     position: absolute;

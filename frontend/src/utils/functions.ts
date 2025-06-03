@@ -64,12 +64,10 @@ export function subjectNamesFromStudentGoals(
 export function inferMastery(goal: any): Mastery {
   const firstValue = goal.observations[0]?.masteryValue
   const lastValue = goal.observations[goal.observations.length - 1]?.masteryValue
-
   return {
-    mastery: goal.latestObservation?.masteryValue || 0,
+    mastery: lastValue || 0,
     trend: lastValue - firstValue,
-    title: `${goal.title}: ${goal.latestObservation?.masteryValue}`,
-    groupName: goal.groupId.includes('-') ? goal.groupId : 'sosialt',
+    title: `${goal.title}: ${lastValue}`,
   }
 }
 

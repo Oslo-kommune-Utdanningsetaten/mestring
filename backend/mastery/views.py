@@ -143,7 +143,6 @@ class ObservationViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ObservationSerializer
     filterset_fields = ['student_id', 'goal_id']
 
-
 class StatusViewSet(viewsets.ModelViewSet):
     queryset = models.Status.objects.all()
     serializer_class = serializers.StatusSerializer

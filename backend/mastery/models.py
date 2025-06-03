@@ -209,6 +209,9 @@ class Observation(BaseModel):
     observed_at = models.DateTimeField(null=True)
     is_private = models.BooleanField(default=True)
 
+    class Meta:
+        ordering = ["observed_at"]
+
 
 class Status(BaseModel):
     """
