@@ -724,7 +724,10 @@ export type GroupsMembersRetrieveResponse = GroupsMembersRetrieveResponses[keyof
 export type ObservationsListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        goalId?: string;
+        studentId?: string;
+    };
     url: '/observations/';
 };
 
@@ -1541,7 +1544,16 @@ export type UsersGoalsRetrieveData = {
          */
         id: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Filter goals by group ID
+         */
+        groupId?: string;
+        /**
+         * Filter goals by subject ID
+         */
+        subjectId?: string;
+    };
     url: '/users/{id}/goals/';
 };
 

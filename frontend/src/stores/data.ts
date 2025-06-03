@@ -3,12 +3,7 @@ import type { Writable as WritableType } from 'svelte/store'
 import { subjectsList } from '../api/sdk.gen'
 import type { SubjectReadable, SchoolReadable, BasicUserReadable } from '../api/types.gen'
 import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage'
-
-type AppData = {
-  subjects: SubjectReadable[]
-  currentSchool: SchoolReadable | null
-  currentUser: BasicUserReadable | null
-}
+import type { AppData } from '../types/models'
 
 const defaultUser = {
   id: 'user-01',
@@ -67,7 +62,9 @@ async function loadSubjectsForSchool(schoolId: string): Promise<void> {
 
 export async function loadData(): Promise<void> {
   try {
-    const currentSchool = getLocalStorageItem('currentSchool')
+    const currentSchool: SchoolReadable | null = getLocalStorageItem(
+      'currentSchool'
+    ) as SchoolReadable | null
 
     dataStore.set({
       currentSchool,

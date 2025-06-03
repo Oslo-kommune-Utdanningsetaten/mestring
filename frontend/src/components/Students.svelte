@@ -11,6 +11,7 @@
     type GoalReadable,
     type NestedGroupUserReadable,
     type BasicUserReadable,
+    type SubjectReadable,
   } from '../api/types.gen'
 
   const router = useTinyRouter()
@@ -21,7 +22,7 @@
   let selectedGroup = $state<GroupReadable | null>(null)
   let allGroups = $state<GroupReadable[]>([])
   let students = $state<BasicUserReadable[]>([])
-  let uniqueSubjects = $state<string[]>([])
+  let subjectsById = $state<Record<string, SubjectReadable>>({})
 
   async function fetchAllGroups() {
     try {
@@ -37,7 +38,7 @@
     }
   }
 
-  async function fetchMembersOfSelectedGroup(groupId: string) {
+  async function fetchGroupMembers(groupId: string) {
     try {
       const result = await groupsMembersRetrieve({
         path: {
@@ -55,7 +56,7 @@
     }
   }
 
-  async function fetchUniqueSubjectsForStudents(students: BasicUserReadable[]) {
+  async function fetchSubjectsForStudents(students: BasicUserReadable[]) {
     const goalsArrays = await Promise.all(
       students.map(async (student): Promise<GoalReadable[]> => {
         const result = await usersGoalsRetrieve({
@@ -66,18 +67,20 @@
         return Array.isArray(result.data) ? result.data : []
       })
     )
-    const result = new Set<string>()
+    subjectsById = {}
     goalsArrays.forEach(goals => {
       if (goals) {
         goals.forEach(goal => {
           const subject = $dataStore.subjects.find(s => s.id === goal.subjectId)
           if (subject) {
-            result.add(subject.displayName)
+            subjectsById = {
+              ...subjectsById,
+              [subject.id]: subject,
+            }
           }
         })
       }
     })
-    uniqueSubjects = Array.from(result)
   }
 
   function handleGroupSelect(groupId: string): void {
@@ -93,8 +96,8 @@
       fetchAllGroups().then(() => {
         if (selectedGroupId) {
           selectedGroup = allGroups.find(group => group.id === selectedGroupId) || null
-          fetchMembersOfSelectedGroup(selectedGroupId).then(() => {
-            fetchUniqueSubjectsForStudents(students)
+          fetchGroupMembers(selectedGroupId).then(() => {
+            fetchSubjectsForStudents(students)
           })
         }
       })
@@ -103,7 +106,7 @@
 </script>
 
 <section class="py-3">
-  <h2 class="pb-2">Elever</h2>
+  <h2 class="pb-2">Elever i gruppe</h2>
 
   <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">
@@ -133,15 +136,15 @@
       <div class="student-grid-row fw-bold header">
         <div>Navn</div>
         <div class="group-grid-columns">
-          {#each uniqueSubjects as subject}
-            <span>{subject}</span>
+          {#each Object.keys(subjectsById) as subjectId}
+            <span>{subjectsById[subjectId].displayName}</span>
           {/each}
         </div>
       </div>
 
       <!-- Student rows -->
       {#each students as student}
-        <StudentRow {student} />
+        <StudentRow {student} {subjectsById} />
       {/each}
     </div>
   {/if}

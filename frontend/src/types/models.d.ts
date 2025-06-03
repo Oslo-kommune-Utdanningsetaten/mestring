@@ -1,63 +1,14 @@
-// Data structure types
-export interface Student {
-  id: string
-  name: string
-  age: number
-  goalIds: string[]
-  groupIds: string[]
-}
+// Data structure types which only exist in the frontend
 
-export interface Teacher {
-  id: string
-  name: string
-}
-
-export interface User {
-  id: string
-  name: string
-  studentId?: string
-  teacherId?: string
-}
-
-export interface Group {
-  id: string
-  name: string
-  type: string
-  grade?: number
-  section?: string
-  teacherIds?: string[]
-}
-
-export interface Goal {
-  id: string
+export interface Mastery {
+  mastery: number
+  trend: number
   title: string
-  description: string
-  groupId: string
-}
-
-export interface Observation {
-  id: string
-  createdAt: string
-  masteryValue: number
-  groupId: string
-  goalId: string
-  studentId: string
-}
-
-export interface MasteryLevel {
-  text: string
-  minValue: number
-  maxValue: number
-  color: string
+  groupName: string
 }
 
 export interface AppData {
-  students: Student[]
-  groups: Group[]
-  teachers: Teacher[]
-  goals: Goal[]
-  observations: Observation[]
-  masteryLevels: MasteryLevel[]
-  currentSchool: School | null
-  currentUser: User | null
+  subjects: SubjectReadable[]
+  currentSchool: SchoolReadable | null
+  currentUser: BasicUserReadable | null
 }

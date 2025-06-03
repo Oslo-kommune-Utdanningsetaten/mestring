@@ -1,4 +1,4 @@
-import type { MasteryLevel, Goal } from '../types/models'
+import type { Mastery } from '../types/models'
 import { type GoalReadable, type SubjectReadable } from '../api/types.gen'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
@@ -9,7 +9,7 @@ function removeNullValueKeys(obj: { [key: string]: string | null }): {
   }
 }
 
-export function getMasteryColorByValue(value: number, masteryLevels: MasteryLevel[]): string {
+export function getMasteryColorByValue(value: number, masteryLevels: any[]): string {
   const masteryLevel = masteryLevels.find(ml => ml.minValue <= value && ml.maxValue >= value)
   return masteryLevel ? masteryLevel.color : 'black'
 }
@@ -61,17 +61,12 @@ export function subjectNamesFromStudentGoals(
   return Array.from(result)
 }
 
-export function inferMastery(goal: any): {
-  status: number
-  trend: number
-  title: string
-  groupName: string
-} {
+export function inferMastery(goal: any): Mastery {
   const firstValue = goal.observations[0]?.masteryValue
   const lastValue = goal.observations[goal.observations.length - 1]?.masteryValue
 
   return {
-    status: goal.latestObservation?.masteryValue || 0,
+    mastery: goal.latestObservation?.masteryValue || 0,
     trend: lastValue - firstValue,
     title: `${goal.title}: ${goal.latestObservation?.masteryValue}`,
     groupName: goal.groupId.includes('-') ? goal.groupId : 'sosialt',

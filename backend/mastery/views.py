@@ -56,6 +56,24 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(qs, many=True, context={'request': request})
         return Response(serializer.data)
     
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='subjectId',
+                description='Filter goals by subject ID',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='groupId',
+                description='Filter goals by group ID',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            )
+        ]
+    )
     @action(
         detail=True,
         methods=['get'],
@@ -76,6 +94,16 @@ class UserViewSet(viewsets.ModelViewSet):
         
         # Combine both querysets
         all_goals = personal_goals.union(group_goals).order_by('-created_at')
+        
+        # Apply filters based on query parameters
+        subject_id = request.query_params.get('subjectId')
+        group_id = request.query_params.get('groupId')
+        
+        if subject_id:
+            all_goals = all_goals.filter(subject_id=subject_id)
+        
+        if group_id:
+            all_goals = all_goals.filter(group_id=group_id)
         
         serializer = self.get_serializer(all_goals, many=True, context={'request': request})
         return Response(serializer.data)
@@ -113,6 +141,7 @@ class SituationViewSet(viewsets.ModelViewSet):
 class ObservationViewSet(viewsets.ModelViewSet):
     queryset = models.Observation.objects.all()
     serializer_class = serializers.ObservationSerializer
+    filterset_fields = ['student_id', 'goal_id']
 
 
 class StatusViewSet(viewsets.ModelViewSet):

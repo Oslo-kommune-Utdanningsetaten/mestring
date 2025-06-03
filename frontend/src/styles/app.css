@@ -145,17 +145,11 @@ a:hover {
   align-items: start;
 }
 
-.student-grid-row > div:nth-child(3) {
-  width: 100%;
-}
-
 .group-grid-columns {
   display: grid;
   grid-template-columns: var(--grid-template-group-columns);
   width: 100%;
   gap: 0.5rem;
-  margin-top: 8px;
-  font-weight: normal;
 }
 
 .group-grid-column {
