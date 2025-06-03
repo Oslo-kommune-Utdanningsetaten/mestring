@@ -17,7 +17,7 @@
   let studentGroups = $state<GroupReadable[] | []>([])
 
   let goalsBySubjectId = $state<Record<string, GoalReadable[]>>({})
-  let masterysBySubjectId = $state<Record<string, Mastery[]>>({})
+  let masteryByGoalId = $state<Record<string, Mastery>>({})
 
   async function fetchUser(userId: string) {
     try {
@@ -60,12 +60,6 @@
           console.error(`Goal ${goal.id} has no subjectId!`)
           return
         }
-        const goalsOnThisSubject = goalsBySubjectId[subjectId] || []
-        goalsOnThisSubject.push(goal)
-        goalsBySubjectId = {
-          ...goalsBySubjectId,
-          [subjectId]: goalsOnThisSubject,
-        }
         // Fetch existing observations for each goal
         const { data: observations, error: observationFetchError } = await observationsList({
           query: { goalId: goal.id, studentId: studentId },
@@ -78,21 +72,24 @@
           return
         }
         // Create a mastery object for the goal
-        let goalMastery = null
         if (Array.isArray(observations) && observations.length > 0) {
           goal.observations = observations
-          goalMastery = inferMastery(goal)
+          masteryByGoalId[goal.id] = inferMastery(goal)
         }
-        const items = masterysBySubjectId[subjectId] || []
-        if (goalMastery !== null) {
-          items.push(goalMastery)
-          masterysBySubjectId = {
-            ...masterysBySubjectId,
-            [subjectId]: items,
-          }
+
+        const goalsOnThisSubject = goalsBySubjectId[subjectId] || []
+        goalsOnThisSubject.push(goal)
+        goalsBySubjectId = {
+          ...goalsBySubjectId,
+          [subjectId]: goalsOnThisSubject,
         }
       })
     }
+  }
+
+  function getSubjectName(subjectId: string): string {
+    const subject = $dataStore.subjects.find(s => s.id === subjectId)
+    return subject ? subject.displayName : 'ukjent'
   }
 
   $effect(() => {
@@ -138,17 +135,17 @@
     <div class="card shadow-sm">
       <div class="card-header">Mål</div>
       <div class="card-body">
-        {#if masterysBySubjectId && Object.keys(masterysBySubjectId).length > 0}
+        {#if goalsBySubjectId && Object.keys(goalsBySubjectId).length > 0}
           <ul class="student-info">
-            {#each Object.keys(masterysBySubjectId) as subjectId}
-              <li>
-                <strong>{subjectId}</strong>
-                {#each masterysBySubjectId[subjectId] as masteryData}
+            {#each Object.keys(goalsBySubjectId) as subjectId}
+              Fag: {getSubjectName(subjectId)}
+              {#each goalsBySubjectId[subjectId] as goal}
+                <li>
                   <span class="badge-container">
-                    <MasteryLevelBadge {masteryData} />
+                    <MasteryLevelBadge masteryData={masteryByGoalId[goal.id]} />
                   </span>
-                {/each}
-              </li>
+                </li>
+              {/each}
             {/each}
           </ul>
         {:else}
