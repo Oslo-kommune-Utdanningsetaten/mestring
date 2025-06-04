@@ -1,5 +1,6 @@
-import type { Mastery } from '../types/models'
+import type { Mastery, GoalDecorated } from '../types/models'
 import { type GoalReadable, type SubjectReadable } from '../api/types.gen'
+import { usersGoalsRetrieve, observationsList } from '../api/sdk.gen'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
   [key: string]: string
@@ -59,6 +60,59 @@ export function subjectNamesFromStudentGoals(
     }
   })
   return Array.from(result)
+}
+
+export async function calculateMasterysForStudent(studentId: string) {
+  const { data: goals, error: goalsFetchError } = await usersGoalsRetrieve({
+    path: { id: studentId },
+  })
+  if (goalsFetchError) {
+    console.error(`Error fetching goals for student ${studentId}:`, goalsFetchError)
+    return {}
+  }
+
+  let goalsBySubjectId: Record<string, GoalDecorated[]> = {}
+
+  if (Array.isArray(goals) && goals.length > 0) {
+    await Promise.all(
+      goals.map(async goal => {
+        const subjectId = goal.subjectId
+        if (!subjectId) {
+          console.error(`Goal ${goal.id} has no subjectId!`)
+          return
+        }
+
+        // Fetch existing observations for each goal
+        const { data: observations, error: observationFetchError } = await observationsList({
+          query: { goalId: goal.id, studentId: studentId },
+        })
+        if (observationFetchError) {
+          console.error(
+            `Error fetching goals for student ${studentId} and goal ${goal.id}:`,
+            observationFetchError
+          )
+          return
+        }
+
+        // Create a decorated goal first
+        const decoratedGoal: GoalDecorated = { ...goal }
+        // Add observations and mastery if they exist
+        if (Array.isArray(observations) && observations.length > 0) {
+          decoratedGoal.observations = observations
+          decoratedGoal.mastery = inferMastery(decoratedGoal)
+        }
+
+        // Always add the goal, even without observations
+        const goalsOnThisSubject = goalsBySubjectId[subjectId] || []
+        goalsOnThisSubject.push(decoratedGoal)
+        goalsBySubjectId = {
+          ...goalsBySubjectId,
+          [subjectId]: goalsOnThisSubject,
+        }
+      })
+    )
+  }
+  return goalsBySubjectId
 }
 
 export function inferMastery(goal: any): Mastery {

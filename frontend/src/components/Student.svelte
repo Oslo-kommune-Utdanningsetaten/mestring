@@ -1,19 +1,9 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
-  import type {
-    GroupReadable,
-    UserReadable,
-    GoalReadable,
-    ObservationReadable,
-  } from '../api/types.gen'
-  import type { Mastery } from '../types/models'
-  import {
-    usersRetrieve,
-    usersGroupsRetrieve,
-    usersGoalsRetrieve,
-    observationsList,
-  } from '../api/sdk.gen'
-  import { urlStringFrom, inferMastery } from '../utils/functions'
+  import type { GroupReadable, UserReadable, ObservationReadable } from '../api/types.gen'
+  import type { GoalDecorated } from '../types/models'
+  import { usersRetrieve, usersGroupsRetrieve } from '../api/sdk.gen'
+  import { urlStringFrom, calculateMasterysForStudent } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparklineChart from './SparklineChart.svelte'
 
@@ -21,8 +11,7 @@
   let student = $state<UserReadable | null>(null)
   let studentGroups = $state<GroupReadable[] | []>([])
 
-  let goalsBySubjectId = $state<Record<string, GoalReadable[]>>({})
-  let masteryByGoalId = $state<Record<string, Mastery>>({})
+  let goalsBySubjectId = $state<Record<string, GoalDecorated[]>>({})
   let isShowGoalTitleEnabled = $state<boolean>(false)
   let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 5 : 1)
 
@@ -49,51 +38,6 @@
     }
   }
 
-  async function calculateMasterysForStudent(studentId: string) {
-    const { data: goals, error: goalsFetchError } = await usersGoalsRetrieve({
-      path: { id: studentId },
-    })
-    if (goalsFetchError) {
-      console.error(`Error fetching goals for student ${studentId}:`, goalsFetchError)
-      return
-    }
-
-    goalsBySubjectId = {}
-    if (Array.isArray(goals) && goals.length > 0) {
-      // We've got all goals for the student, now categorize them by subject
-      goals.forEach(async goal => {
-        const subjectId = goal.subjectId
-        if (!subjectId) {
-          console.error(`Goal ${goal.id} has no subjectId!`)
-          return
-        }
-        // Fetch existing observations for each goal
-        const { data: observations, error: observationFetchError } = await observationsList({
-          query: { goalId: goal.id, studentId: studentId },
-        })
-        if (observationFetchError) {
-          console.error(
-            `Error fetching goals for student ${studentId} and goal ${goal.id}:`,
-            observationFetchError
-          )
-          return
-        }
-        // Create a mastery object for the goal
-        if (Array.isArray(observations) && observations.length > 0) {
-          goal.observations = observations
-          masteryByGoalId[goal.id] = inferMastery(goal)
-        }
-
-        const goalsOnThisSubject = goalsBySubjectId[subjectId] || []
-        goalsOnThisSubject.push(goal)
-        goalsBySubjectId = {
-          ...goalsBySubjectId,
-          [subjectId]: goalsOnThisSubject,
-        }
-      })
-    }
-  }
-
   function getSubjectName(subjectId: string): string {
     const subject = $dataStore.subjects.find(s => s.id === subjectId)
     return subject ? subject.displayName : 'ukjent'
@@ -102,7 +46,10 @@
   $effect(() => {
     if (studentId) {
       fetchUser(studentId)
-      calculateMasterysForStudent(studentId)
+      calculateMasterysForStudent(studentId).then(result => {
+        goalsBySubjectId = result
+        console.log('goalsBySubjectId', goalsBySubjectId)
+      })
     }
   })
 </script>
@@ -171,13 +118,13 @@
                       {/if}
                     </div>
                     <div class="col-md-{12 - goalTitleColumns}">
-                      {#if masteryByGoalId[goal.id]}
+                      {#if goal.mastery}
                         <div class="d-flex align-items-center gap-2">
-                          <MasteryLevelBadge masteryData={masteryByGoalId[goal.id]} />
+                          <MasteryLevelBadge masteryData={goal.mastery} />
                           <SparklineChart
-                            data={(
-                              goal as GoalReadable & { observations: ObservationReadable[] }
-                            ).observations.map((o: ObservationReadable) => o.masteryValue)}
+                            data={goal.observations?.map(
+                              (o: ObservationReadable) => o.masteryValue
+                            )}
                             lineColor="rgb(100, 100, 100)"
                             label={goal.title}
                           />

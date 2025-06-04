@@ -11,3 +11,9 @@ export interface AppData {
   currentSchool: SchoolReadable | null
   currentUser: BasicUserReadable | null
 }
+
+export interface GoalDecorated extends GoalReadable {
+  mastery?: Mastery
+  observations?: ObservationReadable[]
+  title: string // whey do i need to specify this again?
+}
