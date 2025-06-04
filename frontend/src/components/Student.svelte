@@ -13,7 +13,7 @@
 
   let goalsBySubjectId = $state<Record<string, GoalDecorated[]>>({})
   let isShowGoalTitleEnabled = $state<boolean>(false)
-  let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 5 : 1)
+  let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 5 : 2)
 
   async function fetchUser(userId: string) {
     try {
@@ -48,7 +48,6 @@
       fetchUser(studentId)
       calculateMasterysForStudent(studentId).then(result => {
         goalsBySubjectId = result
-        console.log('goalsBySubjectId', goalsBySubjectId)
       })
     }
   })
@@ -56,7 +55,7 @@
 
 <section class="py-3">
   {#if student}
-    <h2>{student.name}</h2>
+    <h2>Elev: {student.name}</h2>
     <!-- Groups -->
     <div class="card shadow-sm">
       <div class="card-header">Grupper</div>
@@ -118,9 +117,9 @@
                       {/if}
                     </div>
                     <div class="col-md-{12 - goalTitleColumns}">
-                      {#if goal.mastery}
+                      {#if goal.masteryData}
                         <div class="d-flex align-items-center gap-2">
-                          <MasteryLevelBadge masteryData={goal.mastery} />
+                          <MasteryLevelBadge masteryData={goal.masteryData} />
                           <SparklineChart
                             data={goal.observations?.map(
                               (o: ObservationReadable) => o.masteryValue

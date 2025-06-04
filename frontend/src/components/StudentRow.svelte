@@ -1,76 +1,48 @@
 <script lang="ts">
-  import { useTinyRouter } from 'svelte-tiny-router'
-  import { usersGoalsRetrieve, observationsList } from '../api/sdk.gen'
-  import type { Mastery } from '../types/models'
-  import type { GoalReadable, SubjectReadable } from '../api/types.gen'
-  import { inferMastery } from '../utils/functions'
+  import type { Mastery, GoalDecorated } from '../types/models'
+  import type { UserReadable, SubjectReadable } from '../api/types.gen'
+  import { calculateMasterysForStudent, findAverage } from '../utils/functions'
+  import MasteryLevelBadge from './MasteryLevelBadge.svelte'
 
-  const router = useTinyRouter()
+  let { student, subjects } = $props<{ student: UserReadable; subjects: SubjectReadable[] }>()
+  let goalsBySubjectId = $state<Record<string, GoalDecorated[]>>({})
+  let masteryBySubjectId = $state<Record<string, Mastery>>({})
 
-  let { student, subjectsById } = $props()
-  let goalsBySubjectId = $state<Record<string, GoalReadable[]>>({})
-  let masterysBySubjectId = $state<Record<string, Mastery[] | null>>({})
-
-  async function calculateMasteryForSubjects(subjectsById: Record<string, SubjectReadable>) {
-    const result = {}
-    Object.keys(subjectsById).forEach(async subjectId => {
-      // fetch all goals for the student in the current subject
-      const { data: goals, error: goalsFetchError } = await usersGoalsRetrieve({
-        path: { id: student.id },
-        query: { subjectId: subjectId },
-      })
-      if (goalsFetchError) {
-        console.error(
-          `Error fetching goals for student ${student.id} in subject ${subjectId}:`,
-          goalsFetchError
-        )
-        return
-      }
-      if (Array.isArray(goals) && goals.length > 0) {
-        goalsBySubjectId = {
-          ...goalsBySubjectId,
-          [subjectId]: goals,
-        }
-        goals.forEach(async goal => {
-          const { data: observations, error: observationFetchError } = await observationsList({
-            query: { goalId: goal.id, studentId: student.id },
-          })
-          if (observationFetchError) {
-            console.error(
-              `Error fetching observations for goal ${goal.id} in subject ${subjectId}:`,
-              observationFetchError
-            )
-            return
-          }
-          let goalMastery = null
-          if (Array.isArray(observations) && observations.length > 0) {
-            goal.observations = observations
-            goalMastery = inferMastery(goal)
-          }
-          const masteryElements = masterysBySubjectId[subjectId] || []
-          if (goalMastery !== null) {
-            masteryElements.push(goalMastery)
-            masterysBySubjectId = {
-              ...masterysBySubjectId,
-              [subjectId]: masteryElements,
-            }
-          }
-        })
-      }
-    })
+  function aggregateMasterys(goals: GoalDecorated[]): Mastery {
+    console.log('Aggggggg --->', goals)
+    const masteryValues = goals.map((goal: any) => goal.masteryData.mastery)
+    const trendValues = goals.map((goal: any) => goal.masteryData.trend)
+    return {
+      mastery: findAverage(masteryValues),
+      trend: findAverage(trendValues),
+      title: `Aggregert for ${goals.length} mål`,
+    }
   }
 
   $effect(() => {
-    calculateMasteryForSubjects(subjectsById)
+    calculateMasterysForStudent(student.id).then(result => {
+      console.log(`Calculating - student ${student.id}`)
+      goalsBySubjectId = result
+      console.log(`Calculating - goals`, goalsBySubjectId)
+      subjects.forEach((subject: SubjectReadable) => {
+        const goals = goalsBySubjectId[subject.id] || []
+        console.log(`Found ${goals.length} goals for subject ${subject.id}`)
+        // The problem is that if there is no mastery data, the aggregateMasterys function crashes. Maybe not call it at all?
+        if (goals.length > 0) {
+          masteryBySubjectId[subject.id] = aggregateMasterys(goals)
+        }
+      })
+    })
   })
 </script>
 
 <div class="student-grid-row">
   <a href={`/students/${student.id}`} class="fw-bold">{student.name}</a>
-
   <div class="group-grid-columns">
-    {#each Object.entries(subjectsById) as [subjectId, subject]}
-      <span class="group-grid-column">{subjectId}</span>
+    {#each subjects as subject}
+      {#if masteryBySubjectId[subject.id]}
+        <MasteryLevelBadge masteryData={masteryBySubjectId[subject.id]} />
+      {/if}
     {/each}
   </div>
 </div>

@@ -63,55 +63,47 @@ export function subjectNamesFromStudentGoals(
 }
 
 export async function calculateMasterysForStudent(studentId: string) {
-  const { data: goals, error: goalsFetchError } = await usersGoalsRetrieve({
+  const result = await usersGoalsRetrieve({
     path: { id: studentId },
   })
-  if (goalsFetchError) {
-    console.error(`Error fetching goals for student ${studentId}:`, goalsFetchError)
+
+  if (!result.data || !Array.isArray(result.data)) {
     return {}
   }
+  const goals = result.data
 
+  const observationsPromises = goals.map(goal =>
+    observationsList({
+      query: { goalId: goal.id, studentId: studentId },
+    })
+  )
+  const observationsResults = await Promise.all(observationsPromises)
   let goalsBySubjectId: Record<string, GoalDecorated[]> = {}
 
-  if (Array.isArray(goals) && goals.length > 0) {
-    await Promise.all(
-      goals.map(async goal => {
-        const subjectId = goal.subjectId
-        if (!subjectId) {
-          console.error(`Goal ${goal.id} has no subjectId!`)
-          return
-        }
+  for (let i = 0; i < goals.length; i++) {
+    const goal = goals[i]
+    const observations = observationsResults[i]?.data || []
+    const subjectId = goal.subjectId
+    if (!subjectId) {
+      console.error(`Goal ${goal.id} has no subjectId!`)
+      return
+    }
 
-        // Fetch existing observations for each goal
-        const { data: observations, error: observationFetchError } = await observationsList({
-          query: { goalId: goal.id, studentId: studentId },
-        })
-        if (observationFetchError) {
-          console.error(
-            `Error fetching goals for student ${studentId} and goal ${goal.id}:`,
-            observationFetchError
-          )
-          return
-        }
+    const decoratedGoal: GoalDecorated = { ...goal }
+    // Add observations and mastery if they exist
+    if (Array.isArray(observations) && observations.length > 0) {
+      console.log(`Goal ${goal.id} has ${observations.length} observations.`)
+      // Ensure observations are sorted by date
+      decoratedGoal.observations = observations
+      decoratedGoal.masteryData = inferMastery(decoratedGoal)
+    }
 
-        // Create a decorated goal first
-        const decoratedGoal: GoalDecorated = { ...goal }
-        // Add observations and mastery if they exist
-        if (Array.isArray(observations) && observations.length > 0) {
-          decoratedGoal.observations = observations
-          decoratedGoal.mastery = inferMastery(decoratedGoal)
-        }
-
-        // Always add the goal, even without observations
-        const goalsOnThisSubject = goalsBySubjectId[subjectId] || []
-        goalsOnThisSubject.push(decoratedGoal)
-        goalsBySubjectId = {
-          ...goalsBySubjectId,
-          [subjectId]: goalsOnThisSubject,
-        }
-      })
-    )
+    // Always add the goal, even without observations
+    const goalsOnThisSubject = goalsBySubjectId[subjectId] || []
+    goalsOnThisSubject.push(decoratedGoal)
+    goalsBySubjectId[subjectId] = goalsOnThisSubject
   }
+
   return goalsBySubjectId
 }
 

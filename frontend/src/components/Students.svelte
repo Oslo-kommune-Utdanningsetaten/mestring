@@ -10,19 +10,18 @@
     type GroupReadable,
     type GoalReadable,
     type NestedGroupUserReadable,
-    type BasicUserReadable,
+    type UserReadable,
     type SubjectReadable,
   } from '../api/types.gen'
 
   const router = useTinyRouter()
   const currentSchool = $state($dataStore.currentSchool)
-  const subjects = $state($dataStore.subjects)
 
   let selectedGroupId = $derived(router.getQueryParam('groupId'))
   let selectedGroup = $state<GroupReadable | null>(null)
   let allGroups = $state<GroupReadable[]>([])
-  let students = $state<BasicUserReadable[]>([])
-  let subjectsById = $state<Record<string, SubjectReadable>>({})
+  let students = $state<UserReadable[]>([])
+  let subjects = $state<SubjectReadable[]>([])
 
   async function fetchAllGroups() {
     try {
@@ -56,7 +55,7 @@
     }
   }
 
-  async function fetchSubjectsForStudents(students: BasicUserReadable[]) {
+  async function fetchSubjectsForStudents(students: UserReadable[]) {
     const goalsArrays = await Promise.all(
       students.map(async (student): Promise<GoalReadable[]> => {
         const result = await usersGoalsRetrieve({
@@ -67,16 +66,12 @@
         return Array.isArray(result.data) ? result.data : []
       })
     )
-    subjectsById = {}
     goalsArrays.forEach(goals => {
       if (goals) {
         goals.forEach(goal => {
           const subject = $dataStore.subjects.find(s => s.id === goal.subjectId)
-          if (subject) {
-            subjectsById = {
-              ...subjectsById,
-              [subject.id]: subject,
-            }
+          if (subject && !subjects.some(s => s.id === subject.id)) {
+            subjects.push(subject)
           }
         })
       }
@@ -136,15 +131,15 @@
       <div class="student-grid-row fw-bold header">
         <div>Navn</div>
         <div class="group-grid-columns">
-          {#each Object.keys(subjectsById) as subjectId}
-            <span>{subjectsById[subjectId].displayName}</span>
+          {#each subjects as subject}
+            <span>{subject.displayName}</span>
           {/each}
         </div>
       </div>
 
       <!-- Student rows -->
       {#each students as student}
-        <StudentRow {student} {subjectsById} />
+        <StudentRow {student} {subjects} />
       {/each}
     </div>
   {/if}
