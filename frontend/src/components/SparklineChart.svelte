@@ -95,14 +95,14 @@
   })
 </script>
 
-<div class="chart-container">
+<div class="chart-container" title={data}>
   <canvas bind:this={chartContainer}></canvas>
 </div>
 
 <style>
   .chart-container {
-    width: 100%;
-    height: 100%;
+    width: 35px;
+    height: 30px;
     margin-left: -5px;
     margin-bottom: -5px;
   }

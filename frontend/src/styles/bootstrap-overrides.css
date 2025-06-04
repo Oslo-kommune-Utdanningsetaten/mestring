@@ -46,3 +46,11 @@ a:hover,
   color: var(--bs-primary-hover);
   background-color: var(--bs-light);
 }
+
+.card {
+  margin-top: 2rem;
+}
+
+.card-header {
+  font-weight: bold;
+}

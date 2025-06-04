@@ -13,7 +13,7 @@
   const decreasingColor = 'var(--bs-danger)'
   const trendColor = isDecreasing ? decreasingColor : isFlat ? flatColor : increasingColor
 
-  const trendBoxSize = 22
+  const trendBoxSize = 25
   const masteryIndicatorHeight = 4
   const masteryIndicatorOutcrop = 2
   const masteryIndicatorWidth = trendBoxSize + masteryIndicatorOutcrop * 2
@@ -29,7 +29,6 @@
 
 <span class="badge-container">
   {#if masteryData}
-    <pre>{JSON.stringify(masteryData)}</pre>
     <span
       class="trend-box"
       style="background-color: {trendColor}; width: {trendBoxSize}px; height: {trendBoxSize}px;"
@@ -46,7 +45,7 @@
     <span
       class="trend-box missing-mastery"
       style="width: {trendBoxSize}px; height: {trendBoxSize}px;"
-      title="Ingen mål registrert"
+      title="Ingen observasjoner"
     >
       &nbsp;
     </span>
@@ -57,7 +56,7 @@
   .badge-container {
     position: relative;
     display: inline-block;
-    height: 30px;
+    height: 28px;
     margin-right: 5px;
   }
 

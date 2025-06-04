@@ -1,6 +1,11 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
-  import { type GroupReadable, type UserReadable, type GoalReadable } from '../api/types.gen'
+  import type {
+    GroupReadable,
+    UserReadable,
+    GoalReadable,
+    ObservationReadable,
+  } from '../api/types.gen'
   import type { Mastery } from '../types/models'
   import {
     usersRetrieve,
@@ -8,9 +13,9 @@
     usersGoalsRetrieve,
     observationsList,
   } from '../api/sdk.gen'
-  import { urlStringFrom } from '../utils/functions'
+  import { urlStringFrom, inferMastery } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
-  import { inferMastery } from '../utils/functions'
+  import SparklineChart from './SparklineChart.svelte'
 
   const { studentId } = $props<{ studentId: string }>()
   let student = $state<UserReadable | null>(null)
@@ -18,6 +23,8 @@
 
   let goalsBySubjectId = $state<Record<string, GoalReadable[]>>({})
   let masteryByGoalId = $state<Record<string, Mastery>>({})
+  let isShowGoalTitleEnabled = $state<boolean>(false)
+  let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 5 : 1)
 
   async function fetchUser(userId: string) {
     try {
@@ -108,7 +115,7 @@
       <div class="card-header">Grupper</div>
       <div class="card-body">
         {#if studentGroups}
-          <ul class="student-info">
+          <ul class="mb-0">
             {#each studentGroups as group}
               <li>
                 <a
@@ -133,27 +140,66 @@
 
     <!-- Goals and mastery -->
     <div class="card shadow-sm">
-      <div class="card-header">Mål</div>
-      <div class="card-body">
-        {#if goalsBySubjectId && Object.keys(goalsBySubjectId).length > 0}
-          <ul class="student-info">
-            {#each Object.keys(goalsBySubjectId) as subjectId}
-              Fag: {getSubjectName(subjectId)}
-              {#each goalsBySubjectId[subjectId] as goal}
-                <li>
-                  <span class="badge-container">
-                    <MasteryLevelBadge masteryData={masteryByGoalId[goal.id]} />
-                  </span>
-                </li>
-              {/each}
-            {/each}
-          </ul>
-        {:else}
-          <div class="alert alert-danger">Ingen fag/mål/observasjoner</div>
-        {/if}
+      <div class="card-header">
+        Mål <div class="pkt-input-check">
+          <div class="pkt-input-check__input">
+            <input
+              class="pkt-input-check__input-checkbox"
+              type="checkbox"
+              role="switch"
+              id="goalTitleSwitch"
+              bind:checked={isShowGoalTitleEnabled}
+              style="transform: scale(0.8);"
+            />
+            <label class="pkt-input-check__input-label" for="goalTitleSwitch">Vis tittel</label>
+          </div>
+        </div>
       </div>
+      {#if goalsBySubjectId && Object.keys(goalsBySubjectId).length > 0}
+        <ul class="list-group list-group-flush">
+          {#each Object.keys(goalsBySubjectId) as subjectId}
+            <li class="list-group-item">
+              <h6>{getSubjectName(subjectId)}</h6>
+              <ol>
+                {#each goalsBySubjectId[subjectId] as goal, index}
+                  <li class="row">
+                    <div class="col-md-{goalTitleColumns}">
+                      {#if isShowGoalTitleEnabled}
+                        Mål {index + 1}: {goal.title}
+                      {:else}
+                        Mål {index + 1}
+                      {/if}
+                    </div>
+                    <div class="col-md-{12 - goalTitleColumns}">
+                      {#if masteryByGoalId[goal.id]}
+                        <div class="d-flex align-items-center gap-2">
+                          <MasteryLevelBadge masteryData={masteryByGoalId[goal.id]} />
+                          <SparklineChart
+                            data={(
+                              goal as GoalReadable & { observations: ObservationReadable[] }
+                            ).observations.map((o: ObservationReadable) => o.masteryValue)}
+                            lineColor="rgb(100, 100, 100)"
+                            label={goal.title}
+                          />
+                        </div>
+                      {:else}
+                        <span>ingen observasjoner</span>
+                      {/if}
+                    </div>
+                  </li>
+                {/each}
+              </ol>
+            </li>
+          {/each}
+        </ul>
+      {:else}
+        <div class="alert alert-danger">Ingen fag/mål/observasjoner</div>
+      {/if}
     </div>
   {:else}
     <div class="alert alert-danger">Fant ikke eleven</div>
   {/if}
 </section>
+
+<style>
+</style>
