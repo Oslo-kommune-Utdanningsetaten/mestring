@@ -42,7 +42,7 @@
         path: { id: currentSchool.id },
         query: { roles: 'student' },
       })
-      students = result.data || []
+      students = Array.isArray(result.data) ? result.data : []
     } catch (error) {
       console.error('Error fetching all students:', error)
       students = []
