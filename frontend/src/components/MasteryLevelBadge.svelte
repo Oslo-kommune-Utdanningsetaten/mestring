@@ -2,16 +2,18 @@
   import type { Mastery } from '../types/models'
 
   const { masteryData } = $props<{ masteryData: Mastery | null }>()
-
-  const { mastery, trend, title } = masteryData || {}
-  const similarityRange = 6 // +/- 5 similarity threshold
-  const isFlat = Math.abs(trend) < similarityRange
-  const isDecreasing = trend < 0 && !isFlat
-
   const increasingColor = 'var(--bs-success)'
   const flatColor = 'var(--bs-warning)'
   const decreasingColor = 'var(--bs-danger)'
-  const trendColor = isDecreasing ? decreasingColor : isFlat ? flatColor : increasingColor
+
+  const mastery = $derived(masteryData?.mastery ?? 0)
+  const trend = $derived(masteryData?.trend ?? 0)
+  const title = $derived(masteryData?.title ?? '')
+
+  const similarityRange = 6 // +/- 5 range for flat trend
+  const isFlat = $derived(Math.abs(trend) < similarityRange)
+  const isDecreasing = $derived(trend < 0 && !isFlat)
+  const trendColor = $derived(isDecreasing ? decreasingColor : isFlat ? flatColor : increasingColor)
 
   const trendBoxSize = 25
   const masteryIndicatorHeight = 4

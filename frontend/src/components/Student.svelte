@@ -208,7 +208,9 @@
                       {:else}
                         <span>ingen observasjoner</span>
                       {/if}
-                      <button onclick={() => handleEditObservation(goal)}>ny observasjon</button>
+                      <button onclick={() => handleEditObservation(goal, null)}>
+                        ny observasjon
+                      </button>
                     </div>
                   </li>
                 {/each}
