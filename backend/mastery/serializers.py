@@ -144,12 +144,6 @@ class SituationSerializer(BaseModelSerializer):
         fields = '__all__'
 
 class ObservationSerializer(BaseModelSerializer):
-    # nest all FK relations for read
-    goal = BasicGoalSerializer(read_only=True)
-    student = BasicUserSerializer(read_only=True)
-    observer = BasicUserSerializer(read_only=True)
-    situation = BasicSituationSerializer(read_only=True)
-
     class Meta:
         model = models.Observation
         fields = '__all__'

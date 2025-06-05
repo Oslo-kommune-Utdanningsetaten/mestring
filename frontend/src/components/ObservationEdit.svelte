@@ -1,13 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import { dataStore } from '../stores/data'
+  import { observationsCreate, observationsUpdate } from '../api/sdk.gen'
   import type { ObservationReadable, GoalReadable, UserReadable } from '../api/types.gen'
 
-  const { student, goal, observation, onSave, onCancel } = $props<{
+  const { student, goal, observation, onDone } = $props<{
     student: UserReadable | null
     goal: GoalReadable | null
     observation: ObservationReadable | null
-    onSave: (observation: any) => void
-    onCancel: () => void
+    onDone: () => void
   }>()
 
   const masteryLevels = [
@@ -37,11 +38,35 @@
     value = Number(sliderInput.value)
   }
 
-  const handleSave = () => {
+  async function handleSave() {
     localObservation.studentId = student?.id
     localObservation.goalId = goal?.id
     localObservation.masteryValue = value
-    onSave(localObservation)
+    localObservation.observerId = $dataStore.currentUser?.id
+    localObservation.observedAt = new Date().toISOString()
+
+    console.log('Wanna store observation:', JSON.stringify(localObservation, null, 2))
+    try {
+      if (localObservation.id) {
+        // Update existing Observation
+        const result = await observationsUpdate({
+          path: { id: localObservation.id },
+          body: localObservation,
+        })
+        console.log('Observation updated:', result.data)
+      } else {
+        // Create new Observation
+        const result = await observationsCreate({
+          body: localObservation,
+        })
+        console.log('Observation created:', result.data)
+      }
+      // Report to parent component
+      onDone()
+    } catch (error) {
+      // TODO: Show an error message to the user
+      console.error('Error saving Observation:', error)
+    }
   }
 
   $effect(() => {
@@ -113,11 +138,11 @@
       type="button"
       variant="label-only"
       class="m-2"
-      onclick={() => onCancel()}
+      onclick={() => onDone()}
       onkeydown={(e: any) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
-          onCancel()
+          onDone()
         }
       }}
       role="button"

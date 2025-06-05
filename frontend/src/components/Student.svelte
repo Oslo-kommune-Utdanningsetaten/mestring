@@ -64,7 +64,7 @@
 
   function handleEditObservation(goal: GoalReadable, observation: ObservationReadable | null) {
     observationWip = observation || {}
-    goalForObservation = goal
+    goalForObservation = { ...goal }
   }
 
   function handleCloseEditObservation() {
@@ -77,41 +77,31 @@
     }
   }
 
-  async function handleSaveGoal(goal: any) {
-    console.log('Wanna store goal:', goal)
-    try {
-      if (goal.id) {
-        // Update existing goal
-        const result = await goalsUpdate({
-          path: { id: goal.id },
-          body: goal,
-        })
-        console.log('Goal updated:', result.data)
-      } else {
-        // Create new goal
-        const result = await goalsCreate({
-          body: goal,
-        })
-        console.log('Goal created:', result.data)
-      }
+  async function handleGoalDone() {
+    console.log('handleGoalDone')
+    goalForObservation = null
+    // Close the edit modal
+    handleCloseEditGoal()
 
-      // Close the edit modal
-      handleCloseEditGoal()
-
-      // Refresh the goals data
-      if (studentId) {
-        calculateMasterysForStudent(studentId).then(result => {
-          goalsBySubjectId = result
-        })
-      }
-    } catch (error) {
-      // TODO: Show an error message to the user
-      console.error('Error saving goal:', error)
+    // Refresh the goals data
+    if (studentId) {
+      calculateMasterysForStudent(studentId).then(result => {
+        goalsBySubjectId = result
+      })
     }
   }
 
-  async function handleSaveObservation(observation: any) {
-    console.log('Wanna store observation:', observation)
+  async function handleObservationDone() {
+    console.log('handleObservationDone')
+    // Close the edit modal
+    handleCloseEditObservation()
+
+    // Refresh the goals data
+    if (studentId) {
+      calculateMasterysForStudent(studentId).then(result => {
+        goalsBySubjectId = result
+      })
+    }
   }
 
   $effect(() => {
@@ -218,7 +208,7 @@
                       {:else}
                         <span>ingen observasjoner</span>
                       {/if}
-                      <button onclick={() => handleEditObservation()}>ny observasjon</button>
+                      <button onclick={() => handleEditObservation(goal)}>ny observasjon</button>
                     </div>
                   </li>
                 {/each}
@@ -239,7 +229,7 @@
 
 <!-- offcanvas for creating/editing goals -->
 <div class="custom-offcanvas shadow-sm" class:visible={!!goalWip}>
-  <GoalEdit {student} goal={goalWip} onSave={handleSaveGoal} onCancel={handleCloseEditGoal} />
+  <GoalEdit {student} goal={goalWip} onDone={handleGoalDone} />
 </div>
 
 <!-- offcanvas for adding an observation -->
@@ -248,8 +238,7 @@
     {student}
     observation={observationWip}
     goal={goalForObservation}
-    onSave={handleSaveObservation}
-    onCancel={handleCloseEditObservation}
+    onDone={handleObservationDone}
   />
 </div>
 

@@ -6,10 +6,8 @@ import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage
 import type { AppData } from '../types/models'
 
 const defaultUser = {
-  id: 'user-01',
+  id: 'yWdH1WRlKsET',
   name: 'Maria Kemp',
-  studentId: undefined,
-  teacherId: 'teacher-02',
 }
 
 // function for updating the current user

@@ -1,18 +1,39 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
+  import { goalsCreate, goalsUpdate } from '../api/sdk.gen'
   import type { GoalWritable, UserReadable } from '../api/types.gen'
 
-  const { student, goal, onSave, onCancel } = $props<{
+  const { student, goal, onDone } = $props<{
     student: UserReadable | null
     goal: GoalWritable | null
-    onSave: (goal: any) => void
-    onCancel: () => void
+    onDone: () => void
   }>()
   let localGoal = $state<Record<string, any>>({ ...goal })
 
-  const handleSave = () => {
+  async function handleSave() {
     localGoal.studentId = student?.id
-    onSave(localGoal)
+    console.log('Wanna store goal:', localGoal)
+    try {
+      if (goal.id) {
+        // Update existing goal
+        const result = await goalsUpdate({
+          path: { id: localGoal.id },
+          body: localGoal,
+        })
+        console.log('Goal updated:', result.data)
+      } else {
+        // Create new goal
+        const result = await goalsCreate({
+          body: localGoal,
+        })
+        console.log('Goal created:', result.data)
+      }
+      // Report to parent component
+      onDone()
+    } catch (error) {
+      // TODO: Show an error message to the user
+      console.error('Error saving goal:', error)
+    }
   }
 </script>
 
@@ -69,11 +90,11 @@
       type="button"
       variant="label-only"
       class="m-2"
-      onclick={() => onCancel()}
+      onclick={() => onDone()}
       onkeydown={(e: any) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
-          onCancel()
+          onDone()
         }
       }}
       role="button"
