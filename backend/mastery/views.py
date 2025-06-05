@@ -13,6 +13,42 @@ class SchoolViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.SchoolSerializer
     filterset_fields = ['is_service_enabled']
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='roles',
+                description='Comma-separated list of role names to filter users by (e.g., student,teacher)',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            )
+        ]
+    )
+    @action(
+        detail=True,
+        methods=['get'],
+        url_path='users',
+        description="Get all users belonging to groups in this school, optionally filtered by role",
+        serializer_class=serializers.UserSerializer
+    )
+    def users(self, request, pk=None):
+        """Get all users from groups belonging to this school"""
+        school = self.get_object()
+        
+        # Get users from groups belonging to this school
+        users_qs = models.User.objects.filter(
+            user_groups__group__school=school
+        ).distinct()
+        
+        # Apply role filtering if provided
+        roles_param = request.query_params.get('roles')
+        if roles_param:
+            role_names = [r.strip() for r in roles_param.split(',') if r.strip()]
+            users_qs = users_qs.filter(user_groups__role__name__in=role_names)
+        
+        serializer = self.get_serializer(users_qs, many=True, context={'request': request})
+        return Response(serializer.data)
+    
 
 class SubjectViewSet(viewsets.ModelViewSet):
     queryset = models.Subject.objects.all()

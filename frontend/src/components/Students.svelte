@@ -1,11 +1,17 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-select.js'
+  import '@oslokommune/punkt-elements/dist/pkt-textinput.js'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
   import StudentRow from './StudentRow.svelte'
 
-  import { groupsList, groupsMembersRetrieve, usersGoalsRetrieve } from '../api/sdk.gen'
+  import {
+    groupsList,
+    groupsMembersRetrieve,
+    usersGoalsRetrieve,
+    schoolsUsersRetrieve,
+  } from '../api/sdk.gen'
   import {
     type GroupReadable,
     type GoalReadable,
@@ -21,7 +27,27 @@
   let selectedGroup = $state<GroupReadable | null>(null)
   let allGroups = $state<GroupReadable[]>([])
   let students = $state<UserReadable[]>([])
+  let filteredStudents = $state<UserReadable[]>([])
   let subjects = $state<SubjectReadable[]>([])
+  let nameFilter = $state<string>('')
+  let headerText = $derived(
+    selectedGroup ? `Elever i gruppe: ${selectedGroup.displayName}` : 'Alle elever'
+  )
+
+  async function fetchAllStudentsInSchool() {
+    if (!currentSchool?.id) return
+
+    try {
+      const result = await schoolsUsersRetrieve({
+        path: { id: currentSchool.id },
+        query: { roles: 'student' },
+      })
+      students = result.data || []
+    } catch (error) {
+      console.error('Error fetching all students:', error)
+      students = []
+    }
+  }
 
   async function fetchAllGroups() {
     try {
@@ -91,17 +117,34 @@
       fetchAllGroups().then(() => {
         if (selectedGroupId) {
           selectedGroup = allGroups.find(group => group.id === selectedGroupId) || null
-          fetchGroupMembers(selectedGroupId).then(() => {
-            fetchSubjectsForStudents(students)
-          })
+          fetchGroupMembers(selectedGroupId)
+        } else {
+          // fetch all students if no group is selected
+          fetchAllStudentsInSchool()
         }
       })
+    }
+  })
+
+  $effect(() => {
+    if (students.length > 0) {
+      fetchSubjectsForStudents(students)
+    }
+  })
+
+  $effect(() => {
+    if (nameFilter) {
+      filteredStudents = students.filter(student =>
+        student.name.toLowerCase().includes(nameFilter.toLowerCase())
+      )
+    } else {
+      filteredStudents = students
     }
   })
 </script>
 
 <section class="pt-3">
-  <h2 class="pb-2">Elever i {selectedGroup ? selectedGroup.displayName : ''}</h2>
+  <h2 class="py-3">{headerText}</h2>
 
   <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">
@@ -119,13 +162,12 @@
         {/each}
       </select>
     </div>
+    <input type="text" class="filterStudentsByName" placeholder="Navn" bind:value={nameFilter} />
   </div>
 </section>
 
 <section class="py-3">
-  {#if !selectedGroup}
-    <div class="alert alert-info">Ingen gruppe valgt</div>
-  {:else}
+  {#if students.length > 0}
     <div class="card shadow-sm">
       <!-- Header row -->
       <div class="student-grid-row fw-bold header">
@@ -138,12 +180,22 @@
       </div>
 
       <!-- Student rows -->
-      {#each students as student}
+      {#each filteredStudents as student}
         <StudentRow {student} {subjects} />
       {/each}
     </div>
+  {:else}
+    <div class="alert alert-info">Ingen elever</div>
   {/if}
 </section>
 
 <style>
+  .filterStudentsByName {
+    border: 2px solid var(--bs-primary);
+    border-radius: 0;
+    height: 48px;
+    margin-top: 0px;
+    padding-left: 15px;
+    margin-left: 10px;
+  }
 </style>

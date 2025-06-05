@@ -1029,6 +1029,29 @@ export type SchoolsUpdateResponses = {
 
 export type SchoolsUpdateResponse = SchoolsUpdateResponses[keyof SchoolsUpdateResponses];
 
+export type SchoolsUsersRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this school.
+         */
+        id: string;
+    };
+    query?: {
+        /**
+         * Comma-separated list of role names to filter users by (e.g., student,teacher)
+         */
+        roles?: string;
+    };
+    url: '/schools/{id}/users/';
+};
+
+export type SchoolsUsersRetrieveResponses = {
+    200: UserReadable;
+};
+
+export type SchoolsUsersRetrieveResponse = SchoolsUsersRetrieveResponses[keyof SchoolsUsersRetrieveResponses];
+
 export type SituationsListData = {
     body?: never;
     path?: never;
