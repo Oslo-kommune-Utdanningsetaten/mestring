@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Mastery } from '../types/models'
 
-  const { masteryData } = $props<{ masteryData: Mastery }>()
+  const { masteryData } = $props<{ masteryData: Mastery | null }>()
 
   const { mastery, trend, title } = masteryData || {}
   const similarityRange = 6 // +/- 5 similarity threshold

@@ -99,7 +99,10 @@ export async function calculateMasterysForStudent(studentId: string) {
   return goalsBySubjectId
 }
 
-export function inferMastery(goal: any): Mastery {
+export function inferMastery(goal: any): Mastery | null {
+  if (!goal.observations || goal.observations.length === 0) {
+    return null
+  }
   const firstValue = goal.observations[0]?.masteryValue
   const lastValue = goal.observations[goal.observations.length - 1]?.masteryValue
   return {
@@ -111,4 +114,8 @@ export function inferMastery(goal: any): Mastery {
 
 export function findAverage(numbers: number[]): number {
   return numbers.reduce((sum, currentValue) => sum + currentValue, 0) / numbers.length
+}
+
+export function isNumber(value: any) {
+  return typeof value === 'number'
 }

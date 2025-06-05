@@ -118,7 +118,7 @@
                     </div>
                     <div class="col-md-{12 - goalTitleColumns}">
                       {#if goal.masteryData}
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-3">
                           <MasteryLevelBadge masteryData={goal.masteryData} />
                           <SparklineChart
                             data={goal.observations?.map(
@@ -139,7 +139,7 @@
           {/each}
         </ul>
       {:else}
-        <div class="alert alert-danger">Ingen fag/mål/observasjoner</div>
+        <div class="alert alert-info">Ingen mål</div>
       {/if}
     </div>
   {:else}

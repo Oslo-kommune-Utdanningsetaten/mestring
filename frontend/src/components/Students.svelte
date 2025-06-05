@@ -100,8 +100,8 @@
   })
 </script>
 
-<section class="py-3">
-  <h2 class="pb-2">Elever i gruppe</h2>
+<section class="pt-3">
+  <h2 class="pb-2">Elever i {selectedGroup ? selectedGroup.displayName : ''}</h2>
 
   <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">

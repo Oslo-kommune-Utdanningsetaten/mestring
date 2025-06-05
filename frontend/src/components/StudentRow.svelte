@@ -1,33 +1,40 @@
 <script lang="ts">
   import type { Mastery, GoalDecorated } from '../types/models'
   import type { UserReadable, SubjectReadable } from '../api/types.gen'
-  import { calculateMasterysForStudent, findAverage } from '../utils/functions'
+  import { calculateMasterysForStudent, findAverage, isNumber } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
 
   let { student, subjects } = $props<{ student: UserReadable; subjects: SubjectReadable[] }>()
   let goalsBySubjectId = $state<Record<string, GoalDecorated[]>>({})
-  let masteryBySubjectId = $state<Record<string, Mastery>>({})
+  let masteryBySubjectId = $state<Record<string, Mastery | null>>({})
 
-  function aggregateMasterys(goals: GoalDecorated[]): Mastery {
-    console.log('Aggggggg --->', goals)
-    const masteryValues = goals.map((goal: any) => goal.masteryData.mastery)
-    const trendValues = goals.map((goal: any) => goal.masteryData.trend)
+  function aggregateMasterys(goals: GoalDecorated[]): Mastery | null {
+    const masteryValues: number[] = []
+    const trendValues: number[] = []
+    goals.forEach(goal => {
+      if (isNumber(goal.masteryData?.mastery)) {
+        masteryValues.push(goal.masteryData.mastery)
+      }
+      if (isNumber(goal.masteryData?.trend)) {
+        trendValues.push(goal.masteryData.trend)
+      }
+    })
+    // if there are no mastery values, there will not be a trend either
+    if (masteryValues.length === 0) {
+      return null
+    }
     return {
       mastery: findAverage(masteryValues),
       trend: findAverage(trendValues),
-      title: `Aggregert for ${goals.length} mål`,
+      title: `Aggregert: ${masteryValues.length}/${goals.length} mål har data`,
     }
   }
 
   $effect(() => {
     calculateMasterysForStudent(student.id).then(result => {
-      console.log(`Calculating - student ${student.id}`)
       goalsBySubjectId = result
-      console.log(`Calculating - goals`, goalsBySubjectId)
       subjects.forEach((subject: SubjectReadable) => {
         const goals = goalsBySubjectId[subject.id] || []
-        console.log(`Found ${goals.length} goals for subject ${subject.id}`)
-        // The problem is that if there is no mastery data, the aggregateMasterys function crashes. Maybe not call it at all?
         if (goals.length > 0) {
           masteryBySubjectId[subject.id] = aggregateMasterys(goals)
         }

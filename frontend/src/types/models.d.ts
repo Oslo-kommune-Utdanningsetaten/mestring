@@ -13,7 +13,7 @@ export interface AppData {
 }
 
 export interface GoalDecorated extends GoalReadable {
-  masteryData?: Mastery
+  masteryData?: Mastery | null
   observations?: ObservationReadable[]
-  title: string // why do i need to specify this when it exists on GoalReadable?
+  title: string // why do we need to specify this, when it exists on GoalReadable?
 }
