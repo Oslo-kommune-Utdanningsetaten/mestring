@@ -71,7 +71,7 @@ export async function calculateMasterysForStudent(studentId: string) {
     return {}
   }
   const goals = result.data
-
+  //     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
   const observationsPromises = goals.map(goal =>
     observationsList({
       query: { goalId: goal.id, studentId: studentId },

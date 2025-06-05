@@ -501,7 +501,15 @@ export type UserGroupWritable = {
 export type GoalsListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        groupId?: string | null;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        studentId?: string | null;
+        subjectId?: string | null;
+    };
     url: '/goals/';
 };
 

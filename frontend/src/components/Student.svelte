@@ -63,7 +63,7 @@
   }
 
   async function handleSaveGoal(goal: any) {
-    console.log('Saving goal:', goal)
+    console.log('Wanna store goal:', goal)
     try {
       if (goal.id) {
         // Update existing goal
@@ -90,8 +90,8 @@
         })
       }
     } catch (error) {
+      // TODO: Show an error message to the user
       console.error('Error saving goal:', error)
-      // You might want to show an error message to the user here
     }
   }
 
@@ -159,7 +159,7 @@
       </pkt-button>
 
       {#if goalsBySubjectId && Object.keys(goalsBySubjectId).length > 0}
-        <div class="pkt-input-check ms-2">
+        <div class="pkt-input-check m-2">
           <div class="pkt-input-check__input">
             <input
               class="pkt-input-check__input-checkbox"

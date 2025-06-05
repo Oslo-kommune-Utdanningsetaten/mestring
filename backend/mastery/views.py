@@ -2,6 +2,8 @@ from mastery import models, serializers
 from rest_framework import viewsets, status, views, filters
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 
@@ -129,7 +131,7 @@ class UserViewSet(viewsets.ModelViewSet):
         group_goals = models.Goal.objects.filter(group__in=student_groups)
         
         # Combine both querysets
-        all_goals = personal_goals.union(group_goals).order_by('-created_at')
+        all_goals = personal_goals.union(group_goals).order_by('created_at')
         
         # Apply filters based on query parameters
         subject_id = request.query_params.get('subjectId')
@@ -167,6 +169,10 @@ class GroupViewSet(viewsets.ModelViewSet):
 class GoalViewSet(viewsets.ModelViewSet):
     queryset = models.Goal.objects.all()
     serializer_class = serializers.GoalSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['student_id', 'group_id', 'subject_id']
+    ordering_fields = ['created_at', 'updated_at', 'title']
+    ordering = ['created_at']  # Default ordering
 
 
 class SituationViewSet(viewsets.ModelViewSet):
