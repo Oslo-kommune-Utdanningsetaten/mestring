@@ -1,34 +1,12 @@
 <script lang="ts">
   import type { Mastery, GoalDecorated } from '../types/models'
   import type { UserReadable, SubjectReadable } from '../api/types.gen'
-  import { calculateMasterysForStudent, findAverage, isNumber } from '../utils/functions'
+  import { calculateMasterysForStudent, aggregateMasterys } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
 
   let { student, subjects } = $props<{ student: UserReadable; subjects: SubjectReadable[] }>()
   let goalsBySubjectId = $state<Record<string, GoalDecorated[]>>({})
   let masteryBySubjectId = $state<Record<string, Mastery | null>>({})
-
-  function aggregateMasterys(goals: GoalDecorated[]): Mastery | null {
-    const masteryValues: number[] = []
-    const trendValues: number[] = []
-    goals.forEach(goal => {
-      if (isNumber(goal.masteryData?.mastery)) {
-        masteryValues.push(goal.masteryData.mastery)
-      }
-      if (isNumber(goal.masteryData?.trend)) {
-        trendValues.push(goal.masteryData.trend)
-      }
-    })
-    // if there are no mastery values, there will not be a trend either
-    if (masteryValues.length === 0) {
-      return null
-    }
-    return {
-      mastery: findAverage(masteryValues),
-      trend: findAverage(trendValues),
-      title: `Aggregert: ${masteryValues.length}/${goals.length} mål har data`,
-    }
-  }
 
   $effect(() => {
     calculateMasterysForStudent(student.id).then(result => {

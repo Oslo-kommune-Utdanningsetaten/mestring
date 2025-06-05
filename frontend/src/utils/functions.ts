@@ -112,6 +112,28 @@ export function inferMastery(goal: any): Mastery | null {
   }
 }
 
+export function aggregateMasterys(goals: GoalDecorated[]): Mastery | null {
+  const masteryValues: number[] = []
+  const trendValues: number[] = []
+  goals.forEach(goal => {
+    if (isNumber(goal.masteryData?.mastery)) {
+      masteryValues.push(goal.masteryData.mastery)
+    }
+    if (isNumber(goal.masteryData?.trend)) {
+      trendValues.push(goal.masteryData.trend)
+    }
+  })
+  // if there are no mastery values, there will not be a trend either
+  if (masteryValues.length === 0) {
+    return null
+  }
+  return {
+    mastery: findAverage(masteryValues),
+    trend: findAverage(trendValues),
+    title: `Aggregert: ${masteryValues.length}/${goals.length} mål har data`,
+  }
+}
+
 export function findAverage(numbers: number[]): number {
   return numbers.reduce((sum, currentValue) => sum + currentValue, 0) / numbers.length
 }
