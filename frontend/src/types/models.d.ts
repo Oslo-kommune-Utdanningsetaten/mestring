@@ -17,3 +17,10 @@ export interface GoalDecorated extends GoalReadable {
   observations?: ObservationReadable[]
   title: string // why do we need to specify this, when it exists on GoalReadable?
 }
+
+export interface MasteryLevel {
+  minValue: number
+  maxValue: number
+  color: string
+  text: string
+}

@@ -5,7 +5,7 @@
   const { student, goal, onSave, onCancel } = $props<{
     student: UserReadable | null
     goal: GoalWritable | null
-    onSave: () => void
+    onSave: (goal: any) => void
     onCancel: () => void
   }>()
   let localGoal = $state<Record<string, any>>({ ...goal })

@@ -1,15 +1,19 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-button.js'
   import { dataStore } from '../stores/data'
-  import type { GroupReadable, UserReadable, ObservationReadable } from '../api/types.gen'
+  import type {
+    GroupReadable,
+    UserReadable,
+    ObservationReadable,
+    GoalReadable,
+  } from '../api/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { usersRetrieve, usersGroupsRetrieve, goalsCreate, goalsUpdate } from '../api/sdk.gen'
-
   import { urlStringFrom, calculateMasterysForStudent } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparklineChart from './SparklineChart.svelte'
   import GoalEdit from './GoalEdit.svelte'
-  import { slide } from 'svelte/transition'
+  import ObservationEdit from './ObservationEdit.svelte'
 
   const { studentId } = $props<{ studentId: string }>()
   let student = $state<UserReadable | null>(null)
@@ -17,8 +21,10 @@
 
   let goalsBySubjectId = $state<Record<string, GoalDecorated[]>>({})
   let isShowGoalTitleEnabled = $state<boolean>(true)
-  let goalWip = $state<GoalDecorated | null>(null)
   let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 5 : 2)
+  let goalWip = $state<GoalDecorated | null>(null)
+  let goalForObservation = $state<GoalReadable | null>(null)
+  let observationWip = $state<ObservationReadable | null>(null)
 
   async function fetchUser(userId: string) {
     try {
@@ -48,12 +54,21 @@
     return subject ? subject.displayName : 'ukjent'
   }
 
-  function handleEditGoal(goal: Goal | null) {
+  function handleEditGoal(goal: GoalDecorated | null) {
     goalWip = goal || {}
   }
 
   function handleCloseEditGoal() {
     goalWip = null
+  }
+
+  function handleEditObservation(goal: GoalReadable, observation: ObservationReadable | null) {
+    observationWip = observation || {}
+    goalForObservation = goal
+  }
+
+  function handleCloseEditObservation() {
+    observationWip = null
   }
 
   function handleKeydown(event: KeyboardEvent) {
@@ -93,6 +108,10 @@
       // TODO: Show an error message to the user
       console.error('Error saving goal:', error)
     }
+  }
+
+  async function handleSaveObservation(observation: any) {
+    console.log('Wanna store observation:', observation)
   }
 
   $effect(() => {
@@ -188,21 +207,18 @@
                         Mål {index + 1}
                       {/if}
                     </div>
-                    <div class="col-md-{12 - goalTitleColumns}">
+                    <div class="col-md-{12 - goalTitleColumns} d-flex align-items-center gap-3">
                       {#if goal.masteryData}
-                        <div class="d-flex align-items-center gap-3">
-                          <MasteryLevelBadge masteryData={goal.masteryData} />
-                          <SparklineChart
-                            data={goal.observations?.map(
-                              (o: ObservationReadable) => o.masteryValue
-                            )}
-                            lineColor="rgb(100, 100, 100)"
-                            label={goal.title}
-                          />
-                        </div>
+                        <MasteryLevelBadge masteryData={goal.masteryData} />
+                        <SparklineChart
+                          data={goal.observations?.map((o: ObservationReadable) => o.masteryValue)}
+                          lineColor="rgb(100, 100, 100)"
+                          label={goal.title}
+                        />
                       {:else}
                         <span>ingen observasjoner</span>
                       {/if}
+                      <button onclick={() => handleEditObservation()}>ny observasjon</button>
                     </div>
                   </li>
                 {/each}
@@ -224,6 +240,17 @@
 <!-- offcanvas for creating/editing goals -->
 <div class="custom-offcanvas shadow-sm" class:visible={!!goalWip}>
   <GoalEdit {student} goal={goalWip} onSave={handleSaveGoal} onCancel={handleCloseEditGoal} />
+</div>
+
+<!-- offcanvas for adding an observation -->
+<div class="custom-offcanvas shadow-sm" class:visible={!!observationWip}>
+  <ObservationEdit
+    {student}
+    observation={observationWip}
+    goal={goalForObservation}
+    onSave={handleSaveObservation}
+    onCancel={handleCloseEditObservation}
+  />
 </div>
 
 <style>

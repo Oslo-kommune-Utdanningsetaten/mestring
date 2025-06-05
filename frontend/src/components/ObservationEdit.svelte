@@ -1,26 +1,48 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { formatISO } from 'date-fns'
+  import type { ObservationReadable, GoalReadable, UserReadable } from '../api/types.gen'
 
-  import { dataStore } from '../stores/data'
-  import type {
-    Student as StudentType,
-    Observation as ObservationType,
-    Goal as GoalType,
-  } from '../types/models'
-
-  const { student, goal, observation } = $props<{
-    student: StudentType
-    goal: GoalType
-    observation: ObservationType | null
+  const { student, goal, observation, onSave, onCancel } = $props<{
+    student: UserReadable | null
+    goal: GoalReadable | null
+    observation: ObservationReadable | null
+    onSave: (observation: any) => void
+    onCancel: () => void
   }>()
-  const masteryLevels = $derived($dataStore.masteryLevels)
 
-  let slider: HTMLInputElement
+  const masteryLevels = [
+    {
+      text: 'Mestrer ikke',
+    },
+    {
+      text: 'Mestrer sjelden',
+    },
+    {
+      text: 'Mestrer iblant',
+    },
+    {
+      text: 'Mestrer ofte',
+    },
+    {
+      text: 'Mestrer',
+    },
+  ]
+
+  let sliderInput: HTMLInputElement
   let masteryIndicator: HTMLElement
-  let value = $state(observation ? observation.masteryValue : 50)
-  let submitting = $state(false)
-  let error = $state('')
+  let localObservation = $state<Record<string, any>>({ ...observation })
+  let value = $state(localObservation.masteryValue || 50)
+
+  function handleSliderInput() {
+    value = Number(sliderInput.value)
+  }
+
+  const handleSave = () => {
+    localObservation.studentId = student?.id
+    localObservation.goalId = goal?.id
+    localObservation.masteryValue = value
+    onSave(localObservation)
+  }
 
   $effect(() => {
     if (masteryIndicator) {
@@ -28,65 +50,19 @@
     }
   })
 
-  function handleSliderInput() {
-    value = Number(slider.value)
-  }
-
-  function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('nb-NO', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  }
-
-  function saveObservation() {
-    submitting = true
-    error = ''
-
-    try {
-      const newObservationId = `obs-${student.id}-${Date.now()}`
-
-      const newObservation: ObservationType = {
-        id: newObservationId,
-        createdAt: formatISO(new Date()),
-        masteryValue: value,
-        groupId: goal.groupId,
-        goalId: goal.id,
-        studentId: student.id,
-      }
-
-      // Add to the observations array in the dataStore
-      dataStore.update(state => {
-        // Add the new observation
-        const observations = [...state.observations, newObservation]
-
-        return {
-          ...state,
-          observations,
-        }
-      })
-    } catch (err) {
-      error = 'Kunne ikke lagre observasjon. Prøv igjen senere.'
-      console.error('Error saving observation:', err)
-    } finally {
-      submitting = false
+  $effect(() => {
+    if (localObservation) {
+      localObservation.masteryValue = value
     }
-  }
-
-  onMount(() => {
-    slider.value = value.toString()
   })
 </script>
 
-<div class="observation-edit">
-  <h3>{observation ? 'Rediger observasjon' : 'Ny observasjon'}</h3>
-  <p>Mål: {goal?.title || 'Ukjent mål'}</p>
-
-  {#if error}
-    <div class="alert alert-danger">{error}</div>
-  {/if}
+<div class="observation-edit p-4">
+  <h3 class="pb-2">
+    {localObservation.id ? 'Redigerer observasjon for' : 'Ny observasjon for'}
+    {student?.name}
+  </h3>
+  <p>Mål: {goal?.title}</p>
 
   <div class="mb-4">
     <label class="form-label">Mestringsnivå</label>
@@ -103,17 +79,52 @@
         max="100"
         {value}
         class="slider"
-        bind:this={slider}
-        on:input={handleSliderInput}
+        bind:this={sliderInput}
+        oninput={() => handleSliderInput()}
       />
     </div>
     <div id="slider-value" class="text-center">{value}%</div>
   </div>
 
-  <div class="d-flex gap-2 justify-content-end mt-4">
-    <button class="btn btn-secondary" on:click={saveObservation} disabled={submitting}>
-      {submitting ? 'Lagrer...' : 'Lagre observasjon'}
-    </button>
+  <div class="d-flex gap-2 justify-content-start mt-4">
+    <pkt-button
+      size="medium"
+      skin="primary"
+      type="button"
+      variant="label-only"
+      class="m-2"
+      onclick={() => handleSave()}
+      onkeydown={(e: any) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleSave()
+        }
+      }}
+      role="button"
+      tabindex="0"
+      disabled={false}
+    >
+      Lagre
+    </pkt-button>
+
+    <pkt-button
+      size="medium"
+      skin="secondary"
+      type="button"
+      variant="label-only"
+      class="m-2"
+      onclick={() => onCancel()}
+      onkeydown={(e: any) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onCancel()
+        }
+      }}
+      role="button"
+      tabindex="0"
+    >
+      Avbryt
+    </pkt-button>
   </div>
 </div>
 
