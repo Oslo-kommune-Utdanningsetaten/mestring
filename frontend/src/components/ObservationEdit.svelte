@@ -45,7 +45,6 @@
     localObservation.observerId = $dataStore.currentUser?.id
     localObservation.observedAt = new Date().toISOString()
 
-    console.log('Wanna store observation:', JSON.stringify(localObservation, null, 2))
     try {
       if (localObservation.id) {
         // Update existing Observation
@@ -84,13 +83,13 @@
 
 <div class="observation-edit p-4">
   <h3 class="pb-2">
-    {localObservation.id ? 'Redigerer observasjon for' : 'Ny observasjon for'}
-    {student?.name}
+    {localObservation.id ? 'Redigerer observasjon' : 'Ny observasjon'}
   </h3>
-  <p>Mål: {goal?.title}</p>
 
   <div class="mb-4">
-    <label class="form-label">Mestringsnivå</label>
+    <label class="form-label" for="slider-value-indicator">
+      Hvor ofte mestrer {student?.name}: {goal?.title}
+    </label>
     <div class="stairs-container">
       {#each masteryLevels as masteryLevel}
         <span class="rung">{masteryLevel.text}</span>
@@ -108,7 +107,7 @@
         oninput={() => handleSliderInput()}
       />
     </div>
-    <div id="slider-value" class="text-center">{value}%</div>
+    <div id="slider-value" class="text-center">{value}</div>
   </div>
 
   <div class="d-flex gap-2 justify-content-start mt-4">
@@ -185,17 +184,16 @@
 
   .rung {
     width: 20%;
-    border-top-left-radius: 5px;
     display: flex;
     justify-content: center;
     align-items: flex-end;
     padding-bottom: 5px;
-    font-size: small;
+    font-size: medium;
     font-weight: bold;
   }
 
   .stairs-container > span:nth-child(1) {
-    height: 30px;
+    height: 35px;
     background-color: var(--color-1);
   }
   .stairs-container > span:nth-child(2) {

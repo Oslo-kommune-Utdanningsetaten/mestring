@@ -12,7 +12,6 @@
 
   async function handleSave() {
     localGoal.studentId = student?.id
-    console.log('Wanna store goal:', localGoal)
     try {
       if (goal.id) {
         // Update existing goal

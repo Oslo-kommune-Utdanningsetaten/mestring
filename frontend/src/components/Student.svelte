@@ -1,5 +1,6 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-button.js'
+  import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { dataStore } from '../stores/data'
   import type {
     GroupReadable,
@@ -185,7 +186,7 @@
         </div>
         <ul class="list-group list-group-flush">
           {#each Object.keys(goalsBySubjectId) as subjectId}
-            <li class="list-group-item">
+            <li class="list-group-item py-3">
               <h6>{getSubjectName(subjectId)}</h6>
               <ol>
                 {#each goalsBySubjectId[subjectId] as goal, index}
@@ -208,9 +209,25 @@
                       {:else}
                         <span>ingen observasjoner</span>
                       {/if}
-                      <button onclick={() => handleEditObservation(goal, null)}>
-                        ny observasjon
-                      </button>
+
+                      <pkt-button
+                        title="Ny observasjon"
+                        role="button"
+                        tabindex="0"
+                        size="small"
+                        skin="secondary"
+                        type="button"
+                        variant="icon-only"
+                        iconName="plus-sign"
+                        class="border-0"
+                        onclick={() => handleEditObservation(goal, null)}
+                        onkeydown={(e: any) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            handleEditObservation(goal, null)
+                          }
+                        }}
+                      ></pkt-button>
                     </div>
                   </li>
                 {/each}
