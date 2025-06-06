@@ -4,14 +4,6 @@
 
   let schools = $state<SchoolReadable[]>([])
 
-  const dateFormat = Intl.DateTimeFormat('nb', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-
   async function fetchSchools() {
     try {
       const result = await schoolsList()

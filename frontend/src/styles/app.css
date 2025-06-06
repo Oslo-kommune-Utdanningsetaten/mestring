@@ -163,6 +163,18 @@ a:hover {
   border-top-left-radius: inherit;
 }
 
+.hover-glow {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.hover-glow:hover {
+  filter: drop-shadow(0 0 15px var(--bs-primary-hover));
+  transform: scale(1.2);
+  background-color: rgba(0, 123, 255, 0.1);
+  border-radius: 50%;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: var(--bs-primary);

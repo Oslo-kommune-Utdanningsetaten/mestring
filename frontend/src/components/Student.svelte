@@ -9,7 +9,7 @@
     GoalReadable,
   } from '../api/types.gen'
   import type { GoalDecorated } from '../types/models'
-  import { usersRetrieve, usersGroupsRetrieve } from '../api/sdk.gen'
+  import { usersRetrieve, usersGroupsRetrieve, observationsDestroy } from '../api/sdk.gen'
   import { urlStringFrom, calculateMasterysForStudent } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparklineChart from './SparklineChart.svelte'
@@ -25,8 +25,20 @@
   let isShowGoalTitleToggleVisible = $state<boolean>(false)
   let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 5 : 2)
   let goalWip = $state<GoalDecorated | null>(null)
-  let goalForObservation = $state<GoalReadable | null>(null)
+  let goalForObservation = $state<GoalDecorated | null>(null)
   let observationWip = $state<ObservationReadable | null>(null)
+  let expandedGoals = $state<Record<string, boolean>>({})
+
+  const dateFormat = Intl.DateTimeFormat('nb', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  })
+
+  function formatDate(dateString: string): string {
+    const date = new Date(dateString)
+    return dateFormat.format(date)
+  }
 
   async function fetchUser(userId: string) {
     try {
@@ -64,7 +76,7 @@
     goalWip = null
   }
 
-  function handleEditObservation(goal: GoalReadable, observation: ObservationReadable | null) {
+  function handleEditObservation(goal: GoalDecorated, observation: ObservationReadable | null) {
     observationWip = observation || {}
     goalForObservation = { ...goal }
   }
@@ -80,12 +92,8 @@
   }
 
   async function handleGoalDone() {
-    console.log('handleGoalDone')
     goalForObservation = null
-    // Close the edit modal
     handleCloseEditGoal()
-
-    // Refresh the goals data
     if (studentId) {
       calculateMasterysForStudent(studentId).then(result => {
         goalsBySubjectId = result
@@ -94,16 +102,30 @@
   }
 
   async function handleObservationDone() {
-    console.log('handleObservationDone')
-    // Close the edit modal
     handleCloseEditObservation()
-
-    // Refresh the goals data
     if (studentId) {
       calculateMasterysForStudent(studentId).then(result => {
         goalsBySubjectId = result
       })
     }
+  }
+
+  async function handleDeleteObservation(observationId: string) {
+    try {
+      await observationsDestroy({ path: { id: observationId } })
+      // Refresh goals after deletion
+      if (studentId) {
+        calculateMasterysForStudent(studentId).then(result => {
+          goalsBySubjectId = result
+        })
+      }
+    } catch (error) {
+      console.error('Error deleting observation:', error)
+    }
+  }
+
+  function toggleGoalExpansion(goalId: string) {
+    expandedGoals[goalId] = !expandedGoals[goalId]
   }
 
   $effect(() => {
@@ -196,6 +218,11 @@
                 {#each goalsBySubjectId[subjectId] as goal, index}
                   <li class="row">
                     <div class="col-md-{goalTitleColumns} d-flex align-items-center">
+                      <pkt-icon
+                        class="hover-glow me-2"
+                        name="chevron-thin-{expandedGoals[goal.id] ? 'down' : 'right'}"
+                        onclick={() => toggleGoalExpansion(goal.id)}
+                      ></pkt-icon>
                       <span>
                         {#if isShowGoalTitleEnabled}
                           Mål {index + 1}: {goal.title}
@@ -235,6 +262,24 @@
                         }}
                       ></pkt-button>
                     </div>
+                    {#if expandedGoals[goal.id]}
+                      <div class="bg-primary-subtle p-2 me-5">
+                        {#each goal?.observations as observation}
+                          <div class="row">
+                            <span class="col-2">{formatDate(observation.observedAt)}</span>
+                            <span class="col-1">{observation.masteryValue}</span>
+                            <span class="col-1">
+                              <pkt-icon
+                                title="Slet observasjon"
+                                class="hover-glow me-2"
+                                name="trash-can"
+                                onclick={() => handleDeleteObservation(observation.id)}
+                              ></pkt-icon>
+                            </span>
+                          </div>
+                        {/each}
+                      </div>
+                    {/if}
                   </li>
                 {/each}
               </ol>
