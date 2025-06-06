@@ -22,7 +22,7 @@
 </script>
 
 <div class="student-grid-row">
-  <a href={`/students/${student.id}`} class="fw-bold">{student.name}</a>
+  <a href={`/students/${student.id}`}>{student.name}</a>
   <div class="group-grid-columns">
     {#each subjects as subject}
       {#if masteryBySubjectId[subject.id]}
