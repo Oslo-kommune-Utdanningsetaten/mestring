@@ -19,7 +19,7 @@
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparklineChart from './SparklineChart.svelte'
   import GoalEdit from './GoalEdit.svelte'
-  import ObservationEdit from './ObservationEdit.svelte'
+  import ObservationEditVertical from './ObservationEditVertical.svelte'
 
   const { studentId } = $props<{ studentId: string }>()
   let student = $state<UserReadable | null>(null)
@@ -324,7 +324,7 @@
 
 <!-- offcanvas for adding an observation -->
 <div class="custom-offcanvas shadow-sm" class:visible={!!observationWip}>
-  <ObservationEdit
+  <ObservationEditVertical
     {student}
     observation={observationWip}
     goal={goalForObservation}

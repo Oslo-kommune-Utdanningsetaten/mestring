@@ -103,7 +103,6 @@
         max="100"
         {value}
         class="slider"
-        orient="vertical"
         bind:this={sliderInput}
         oninput={() => handleSliderInput()}
       />
