@@ -280,7 +280,7 @@
       {/if}
     </div>
   {:else}
-    <div class="alert alert-danger m-2">Fant ikke eleven</div>
+    <div class="m-2">Fant ikke eleven</div>
   {/if}
 </section>
 
