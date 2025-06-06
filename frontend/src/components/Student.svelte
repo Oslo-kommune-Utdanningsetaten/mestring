@@ -9,7 +9,12 @@
     GoalReadable,
   } from '../api/types.gen'
   import type { GoalDecorated } from '../types/models'
-  import { usersRetrieve, usersGroupsRetrieve, observationsDestroy } from '../api/sdk.gen'
+  import {
+    usersRetrieve,
+    usersGroupsRetrieve,
+    observationsDestroy,
+    goalsDestroy,
+  } from '../api/sdk.gen'
   import { urlStringFrom, calculateMasterysForStudent } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparklineChart from './SparklineChart.svelte'
@@ -21,9 +26,9 @@
   let studentGroups = $state<GroupReadable[] | []>([])
 
   let goalsBySubjectId = $state<Record<string, GoalDecorated[]>>({})
-  let isShowGoalTitleEnabled = $state<boolean>(false)
-  let isShowGoalTitleToggleVisible = $state<boolean>(false)
-  let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 5 : 2)
+  let isShowGoalTitleEnabled = $state<boolean>(true)
+  let isShowGoalTitleToggleVisible = $state<boolean>(true)
+  let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 6 : 2)
   let goalWip = $state<GoalDecorated | null>(null)
   let goalForObservation = $state<GoalDecorated | null>(null)
   let observationWip = $state<ObservationReadable | null>(null)
@@ -113,7 +118,7 @@
   async function handleDeleteObservation(observationId: string) {
     try {
       await observationsDestroy({ path: { id: observationId } })
-      // Refresh goals after deletion
+      // Refresh after deletion
       if (studentId) {
         calculateMasterysForStudent(studentId).then(result => {
           goalsBySubjectId = result
@@ -121,6 +126,20 @@
       }
     } catch (error) {
       console.error('Error deleting observation:', error)
+    }
+  }
+
+  async function handleDeleteGoal(goalId: string) {
+    try {
+      await goalsDestroy({ path: { id: goalId } })
+      // Refresh after deletion
+      if (studentId) {
+        calculateMasterysForStudent(studentId).then(result => {
+          goalsBySubjectId = result
+        })
+      }
+    } catch (error) {
+      console.error('Error deleting goal:', error)
     }
   }
 
@@ -208,7 +227,6 @@
               </label>
             </div>
           </div>
-          1
         {/if}
         <ul class="list-group list-group-flush">
           {#each Object.keys(goalsBySubjectId) as subjectId}
@@ -241,7 +259,7 @@
                           label={goal.title}
                         />
                       {:else}
-                        <span>ingen observasjoner</span>
+                        <span>Ikke pågbegynt</span>
                       {/if}
 
                       <pkt-icon
@@ -253,6 +271,19 @@
                     </div>
                     {#if expandedGoals[goal.id]}
                       <div class="bg-primary-subtle p-2 me-5">
+                        <div>
+                          {#if goal.observations.length === 0}
+                            Slett mål {index}
+                            <span class="col-1">
+                              <pkt-icon
+                                title="Slet mål"
+                                class="hover-glow me-2"
+                                name="trash-can"
+                                onclick={() => handleDeleteGoal(goal.id)}
+                              ></pkt-icon>
+                            </span>
+                          {/if}
+                        </div>
                         {#each goal?.observations as observation}
                           <div class="row">
                             <span class="col-2">{formatDate(observation.observedAt)}</span>
