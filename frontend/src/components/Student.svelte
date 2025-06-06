@@ -9,7 +9,7 @@
     GoalReadable,
   } from '../api/types.gen'
   import type { GoalDecorated } from '../types/models'
-  import { usersRetrieve, usersGroupsRetrieve, goalsCreate, goalsUpdate } from '../api/sdk.gen'
+  import { usersRetrieve, usersGroupsRetrieve } from '../api/sdk.gen'
   import { urlStringFrom, calculateMasterysForStudent } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparklineChart from './SparklineChart.svelte'
@@ -21,7 +21,8 @@
   let studentGroups = $state<GroupReadable[] | []>([])
 
   let goalsBySubjectId = $state<Record<string, GoalDecorated[]>>({})
-  let isShowGoalTitleEnabled = $state<boolean>(true)
+  let isShowGoalTitleEnabled = $state<boolean>(false)
+  let isShowGoalTitleToggleVisible = $state<boolean>(false)
   let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 5 : 2)
   let goalWip = $state<GoalDecorated | null>(null)
   let goalForObservation = $state<GoalReadable | null>(null)
@@ -169,21 +170,24 @@
       </pkt-button>
 
       {#if goalsBySubjectId && Object.keys(goalsBySubjectId).length > 0}
-        <div class="pkt-input-check m-2">
-          <div class="pkt-input-check__input">
-            <input
-              class="pkt-input-check__input-checkbox"
-              type="checkbox"
-              role="switch"
-              id="goalTitleSwitch"
-              bind:checked={isShowGoalTitleEnabled}
-              style="transform: scale(0.8);"
-            />
-            <label class="pkt-input-check__input-label" for="goalTitleSwitch">
-              Vis mål som anonyme
-            </label>
+        {#if isShowGoalTitleToggleVisible}
+          <div class="pkt-input-check m-2">
+            <div class="pkt-input-check__input">
+              <input
+                class="pkt-input-check__input-checkbox"
+                type="checkbox"
+                role="switch"
+                id="goalTitleSwitch"
+                bind:checked={isShowGoalTitleEnabled}
+                style="transform: scale(0.8);"
+              />
+              <label class="pkt-input-check__input-label" for="goalTitleSwitch">
+                Vis mål som anonyme
+              </label>
+            </div>
           </div>
-        </div>
+          1
+        {/if}
         <ul class="list-group list-group-flush">
           {#each Object.keys(goalsBySubjectId) as subjectId}
             <li class="list-group-item py-3">
@@ -191,12 +195,14 @@
               <ol>
                 {#each goalsBySubjectId[subjectId] as goal, index}
                   <li class="row">
-                    <div class="col-md-{goalTitleColumns}">
-                      {#if isShowGoalTitleEnabled}
-                        Mål {index + 1}: {goal.title}
-                      {:else}
-                        Mål {index + 1}
-                      {/if}
+                    <div class="col-md-{goalTitleColumns} d-flex align-items-center">
+                      <span>
+                        {#if isShowGoalTitleEnabled}
+                          Mål {index + 1}: {goal.title}
+                        {:else}
+                          Mål {index + 1}
+                        {/if}
+                      </span>
                     </div>
                     <div class="col-md-{12 - goalTitleColumns} d-flex align-items-center gap-3">
                       {#if goal.masteryData}
@@ -236,11 +242,11 @@
           {/each}
         </ul>
       {:else}
-        <div class="alert alert-info">Ingen mål</div>
+        <div class="alert alert-info m-2">Ingen mål for denne eleven</div>
       {/if}
     </div>
   {:else}
-    <div class="alert alert-danger">Fant ikke eleven</div>
+    <div class="alert alert-danger m-2">Fant ikke eleven</div>
   {/if}
 </section>
 
