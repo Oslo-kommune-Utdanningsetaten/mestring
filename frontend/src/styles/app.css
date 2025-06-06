@@ -170,7 +170,7 @@ a:hover {
 
 .hover-glow:hover {
   filter: drop-shadow(0 0 15px var(--bs-primary-hover));
-  transform: scale(1.2);
+  transform: scale(1.4);
   background-color: rgba(0, 123, 255, 0.1);
   border-radius: 50%;
 }

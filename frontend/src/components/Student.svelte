@@ -219,6 +219,7 @@
                   <li class="row">
                     <div class="col-md-{goalTitleColumns} d-flex align-items-center">
                       <pkt-icon
+                        title="Vis alle observasjoner"
                         class="hover-glow me-2"
                         name="chevron-thin-{expandedGoals[goal.id] ? 'down' : 'right'}"
                         onclick={() => toggleGoalExpansion(goal.id)}
@@ -243,24 +244,12 @@
                         <span>ingen observasjoner</span>
                       {/if}
 
-                      <pkt-button
+                      <pkt-icon
                         title="Ny observasjon"
-                        role="button"
-                        tabindex="0"
-                        size="small"
-                        skin="secondary"
-                        type="button"
-                        variant="icon-only"
-                        iconName="plus-sign"
-                        class="border-0"
+                        class="hover-glow me-2"
+                        name="plus-sign"
                         onclick={() => handleEditObservation(goal, null)}
-                        onkeydown={(e: any) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault()
-                            handleEditObservation(goal, null)
-                          }
-                        }}
-                      ></pkt-button>
+                      ></pkt-icon>
                     </div>
                     {#if expandedGoals[goal.id]}
                       <div class="bg-primary-subtle p-2 me-5">

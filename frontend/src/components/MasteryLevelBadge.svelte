@@ -3,15 +3,18 @@
 
   const { masteryData } = $props<{ masteryData: Mastery }>()
 
-  const { mastery, trend, title } = masteryData || {}
+  const mastery = $derived(masteryData?.mastery ?? 0)
+  const trend = $derived(masteryData?.trend ?? 0)
+  const title = $derived(masteryData?.title ?? '')
+
   const similarityRange = 6 // +/- 5 similarity threshold
-  const isFlat = Math.abs(trend) < similarityRange
-  const isDecreasing = trend < 0 && !isFlat
+  const isFlat = $derived(Math.abs(trend) < similarityRange)
+  const isDecreasing = $derived(trend < 0 && !isFlat)
 
   const increasingColor = 'var(--bs-success)'
   const flatColor = 'var(--bs-warning)'
   const decreasingColor = 'var(--bs-danger)'
-  const trendColor = isDecreasing ? decreasingColor : isFlat ? flatColor : increasingColor
+  const trendColor = $derived(isDecreasing ? decreasingColor : isFlat ? flatColor : increasingColor)
 
   const trendBoxSize = 22
   const masteryIndicatorHeight = 4
