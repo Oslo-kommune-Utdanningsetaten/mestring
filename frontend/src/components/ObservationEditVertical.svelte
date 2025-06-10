@@ -100,16 +100,16 @@
         class="slider"
         bind:value={localObservation.masteryValue}
       />
-      <div class="slider-indicator" style="top: {100 - localObservation.masteryValue}%"></div>
 
       <div class="stairs-container">
         {#each masteryLevels as masteryLevel, index}
           <span
             class="rung"
-            style="width: {(index + 1) * levelMultiplier}%; {localObservation?.masteryValue >=
+            style="width: {(index + 1) *
+              levelMultiplier}%; background-color: {localObservation?.masteryValue >=
             masteryLevel.minValue
-              ? `background-color: ${masteryLevel.color};`
-              : 'background-color: var(--bs-gray);'}"
+              ? masteryLevel.color
+              : 'var(--bs-gray)'};"
           >
             {masteryLevel.text}
           </span>
@@ -117,7 +117,7 @@
       </div>
     </div>
   </div>
-  <pre>{JSON.stringify(localObservation.masteryValue, null, 2)}</pre>
+
   <div class="d-flex gap-2 justify-content-start mt-4">
     <pkt-button
       size="medium"
@@ -186,15 +186,6 @@
     padding-top: 0px;
     background-color: var(--bs-gray);
     z-index: 1;
-  }
-  .slider-indicator {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background-color: var(--bs-gray);
-    z-index: -1;
   }
 
   .slider::-webkit-slider-thumb,
