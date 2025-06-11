@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Mastery, GoalDecorated } from '../types/models'
-  import type { UserReadable, SubjectReadable } from '../api/types.gen'
+  import type { UserReadable, SubjectReadable } from '../generated/types.gen'
   import { calculateMasterysForStudent, aggregateMasterys } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
 

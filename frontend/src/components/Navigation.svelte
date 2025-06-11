@@ -5,8 +5,8 @@
 
   import { currentPath } from '../stores/navigation'
   import { dataStore, setCurrentSchool } from '../stores/data'
-  import { type SchoolReadable } from '../api/types.gen'
-  import { schoolsList } from '../api/sdk.gen'
+  import { type SchoolReadable } from '../generated/types.gen'
+  import { schoolsList } from '../generated/sdk.gen'
 
   let isHomeActive = $derived($currentPath === '/')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))

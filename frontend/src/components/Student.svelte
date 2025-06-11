@@ -2,19 +2,14 @@
   import '@oslokommune/punkt-elements/dist/pkt-button.js'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { dataStore } from '../stores/data'
-  import type {
-    GroupReadable,
-    UserReadable,
-    ObservationReadable,
-    GoalReadable,
-  } from '../api/types.gen'
+  import type { GroupReadable, UserReadable, ObservationReadable } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import {
     usersRetrieve,
     usersGroupsRetrieve,
     observationsDestroy,
     goalsDestroy,
-  } from '../api/sdk.gen'
+  } from '../generated/sdk.gen'
   import { urlStringFrom, calculateMasterysForStudent } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparklineChart from './SparklineChart.svelte'
@@ -25,7 +20,7 @@
   let student = $state<UserReadable | null>(null)
   let studentGroups = $state<GroupReadable[] | []>([])
 
-  let goalsBySubjectId = $state<Record<string, GoalDecorated[]>>({})
+  let goalsBySubjectId = $state<Record<string, GoalDecorated>>({})
   let isShowGoalTitleEnabled = $state<boolean>(true)
   let isShowGoalTitleToggleVisible = $state<boolean>(true)
   let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 6 : 2)

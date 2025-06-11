@@ -1,8 +1,8 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
-  import { groupsList, groupsMembersRetrieve } from '../api/sdk.gen'
-  import { type GroupReadable, type NestedGroupUserReadable } from '../api/types.gen'
+  import { groupsList, groupsMembersRetrieve } from '../generated/sdk.gen'
+  import { type GroupReadable, type NestedGroupUserReadable } from '../generated/types.gen'
 
   const currentSchool = $derived($dataStore.currentSchool)
   const currentUser = $derived($dataStore.currentUser)

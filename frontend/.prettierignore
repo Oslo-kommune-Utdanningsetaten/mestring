@@ -1,0 +1,17 @@
+node_modules
+/build
+/package
+.env
+.env.*
+!.env.example
+
+# generated client code and types
+src/generated
+
+# macos
+.DS_Store
+
+# Don't mess with lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock

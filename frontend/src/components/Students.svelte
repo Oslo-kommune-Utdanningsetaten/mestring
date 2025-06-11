@@ -11,14 +11,14 @@
     groupsMembersRetrieve,
     usersGoalsRetrieve,
     schoolsUsersRetrieve,
-  } from '../api/sdk.gen'
+  } from '../generated/sdk.gen'
   import {
     type GroupReadable,
     type GoalReadable,
     type NestedGroupUserReadable,
     type UserReadable,
     type SubjectReadable,
-  } from '../api/types.gen'
+  } from '../generated/types.gen'
 
   const router = useTinyRouter()
   const currentSchool = $state($dataStore.currentSchool)

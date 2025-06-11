@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { groupsRetrieve, groupsMembersRetrieve } from '../api/sdk.gen'
-  import { type GroupReadable, type NestedGroupUserReadable } from '../api/types.gen'
+  import { groupsRetrieve, groupsMembersRetrieve } from '../generated/sdk.gen'
+  import { type GroupReadable, type NestedGroupUserReadable } from '../generated/types.gen'
 
   const { groupId } = $props<{ groupId: string }>()
 

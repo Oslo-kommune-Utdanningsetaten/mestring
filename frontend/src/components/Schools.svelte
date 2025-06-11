@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { type SchoolReadable } from '../api/types.gen'
-  import { schoolsList, schoolsPartialUpdate } from '../api/sdk.gen'
+  import { type SchoolReadable } from '../generated/types.gen'
+  import { schoolsList, schoolsPartialUpdate } from '../generated/sdk.gen'
 
   let schools = $state<SchoolReadable[]>([])
 

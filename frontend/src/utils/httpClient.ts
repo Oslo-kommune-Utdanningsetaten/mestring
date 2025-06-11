@@ -1,4 +1,4 @@
-import { client } from '../api/client.gen'
+import { client } from '../generated/client.gen'
 
 client.setConfig({
   baseUrl: 'http://localhost:5000',

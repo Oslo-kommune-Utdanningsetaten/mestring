@@ -1,7 +1,7 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
-  import { goalsCreate, goalsUpdate } from '../api/sdk.gen'
-  import type { GoalWritable, UserReadable } from '../api/types.gen'
+  import { goalsCreate, goalsUpdate } from '../generated/sdk.gen'
+  import type { GoalWritable, UserReadable } from '../generated/types.gen'
 
   const { student, goal, onDone } = $props<{
     student: UserReadable | null

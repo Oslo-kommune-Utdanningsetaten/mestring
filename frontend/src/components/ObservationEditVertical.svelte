@@ -1,8 +1,7 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
-  import { observationsCreate, observationsUpdate } from '../api/sdk.gen'
-  import type { ObservationReadable, GoalReadable, UserReadable } from '../api/types.gen'
-  import { color } from 'chart.js/helpers'
+  import { observationsCreate, observationsUpdate } from '../generated/sdk.gen'
+  import type { ObservationReadable, GoalReadable, UserReadable } from '../generated/types.gen'
 
   const { student, goal, observation, onDone } = $props<{
     student: UserReadable | null

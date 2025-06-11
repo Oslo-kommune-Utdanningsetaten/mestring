@@ -1,6 +1,6 @@
 import type { Mastery, GoalDecorated } from '../types/models'
-import { type GoalReadable, type SubjectReadable } from '../api/types.gen'
-import { usersGoalsRetrieve, observationsList } from '../api/sdk.gen'
+import { type GoalReadable, type SubjectReadable } from '../generated/types.gen'
+import { usersGoalsRetrieve, observationsList } from '../generated/sdk.gen'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
   [key: string]: string

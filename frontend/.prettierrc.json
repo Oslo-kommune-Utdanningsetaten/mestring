@@ -8,5 +8,6 @@
   "arrowParens": "avoid",
   "bracketSpacing": true,
   "bracketSameLine": false,
-  "htmlWhitespaceSensitivity": "ignore"
+  "htmlWhitespaceSensitivity": "ignore",
+  "overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }]
 }

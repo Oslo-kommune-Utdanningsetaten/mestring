@@ -6,31 +6,33 @@
 
 # Checklist
 
-- [ ] /students/id
-  - goals from groups
 - [ ] /ping endpoint
   - warning in frontend with not pong
-- [ ] /students should show subjects
-  - subjects are derived from Goals
-- [ ] App funker like bra som prototypen
-  - [ ] /home (my groups)
-  - [ ] /students
-  - [x] /schools
-- [ ] implementer: punkt web components https://punkt.oslo.kommune.no/latest/komponenter/om-komponenter/
+- [ ] /students/id
+  - [ ] personal goals
+  - [x] group goals
 - [ ] prettier i frontend
+- [ ] properly responsive navigation bar
 - [ ] Teste relasjoner status/goal
-- [ ] Import med options og logging
+- [ ] Smartere Excel-import
 - [ ] Finne ut av sikkerhet/ACL
 - [ ] Feide
   - [ ] Auth for bruker
   - [x] Importere skoler
   - [x] Importere grupper pr. skole
   - [x] Importere subjects fra UDIR/grep (som matcher teaching-groups)
+- [x] implementer: punkt web components https://punkt.oslo.kommune.no/latest/komponenter/om-komponenter/
 - [x] Dataimport fra Excel
   - [x] Observation, Goal
   - [x] User
   - [x] Group
   - [x] Subject
+- [x] App funker like bra som prototypen
+  - [x] /home (my groups)
+  - [x] /students
+  - [x] /schools
+- [x] /students should show subjects
+  - subjects are derived from Goals
 - [x] revamp Subject model
 - [x] Svelte-kompatibel, datastore-aktig localstorage
 - [x] En unit-test som sjekker noe som helst

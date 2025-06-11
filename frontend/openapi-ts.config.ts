@@ -2,7 +2,7 @@ import { defaultPlugins } from '@hey-api/openapi-ts'
 
 export default {
   input: 'http://localhost:5000/api/schema',
-  output: 'src/api',
+  output: 'src/generated',
   plugins: [
     ...defaultPlugins,
     {
