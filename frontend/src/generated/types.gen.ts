@@ -460,7 +460,7 @@ export type GoalsListData = {
         studentId?: string | null;
         subjectId?: string | null;
     };
-    url: '/goals/';
+    url: '/api/goals/';
 };
 
 export type GoalsListResponses = {
@@ -473,7 +473,7 @@ export type GoalsCreateData = {
     body?: GoalWritable;
     path?: never;
     query?: never;
-    url: '/goals/';
+    url: '/api/goals/';
 };
 
 export type GoalsCreateResponses = {
@@ -491,7 +491,7 @@ export type GoalsDestroyData = {
         id: string;
     };
     query?: never;
-    url: '/goals/{id}/';
+    url: '/api/goals/{id}/';
 };
 
 export type GoalsDestroyResponses = {
@@ -512,7 +512,7 @@ export type GoalsRetrieveData = {
         id: string;
     };
     query?: never;
-    url: '/goals/{id}/';
+    url: '/api/goals/{id}/';
 };
 
 export type GoalsRetrieveResponses = {
@@ -530,7 +530,7 @@ export type GoalsPartialUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/goals/{id}/';
+    url: '/api/goals/{id}/';
 };
 
 export type GoalsPartialUpdateResponses = {
@@ -548,7 +548,7 @@ export type GoalsUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/goals/{id}/';
+    url: '/api/goals/{id}/';
 };
 
 export type GoalsUpdateResponses = {
@@ -564,7 +564,7 @@ export type GroupsListData = {
         school?: string;
         type?: string;
     };
-    url: '/groups/';
+    url: '/api/groups/';
 };
 
 export type GroupsListResponses = {
@@ -577,7 +577,7 @@ export type GroupsCreateData = {
     body: GroupWritable;
     path?: never;
     query?: never;
-    url: '/groups/';
+    url: '/api/groups/';
 };
 
 export type GroupsCreateResponses = {
@@ -595,7 +595,7 @@ export type GroupsDestroyData = {
         id: string;
     };
     query?: never;
-    url: '/groups/{id}/';
+    url: '/api/groups/{id}/';
 };
 
 export type GroupsDestroyResponses = {
@@ -616,7 +616,7 @@ export type GroupsRetrieveData = {
         id: string;
     };
     query?: never;
-    url: '/groups/{id}/';
+    url: '/api/groups/{id}/';
 };
 
 export type GroupsRetrieveResponses = {
@@ -634,7 +634,7 @@ export type GroupsPartialUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/groups/{id}/';
+    url: '/api/groups/{id}/';
 };
 
 export type GroupsPartialUpdateResponses = {
@@ -652,7 +652,7 @@ export type GroupsUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/groups/{id}/';
+    url: '/api/groups/{id}/';
 };
 
 export type GroupsUpdateResponses = {
@@ -670,7 +670,7 @@ export type GroupsMembersRetrieveData = {
         id: string;
     };
     query?: never;
-    url: '/groups/{id}/members/';
+    url: '/api/groups/{id}/members/';
 };
 
 export type GroupsMembersRetrieveResponses = {
@@ -686,7 +686,7 @@ export type ObservationsListData = {
         goalId?: string;
         studentId?: string;
     };
-    url: '/observations/';
+    url: '/api/observations/';
 };
 
 export type ObservationsListResponses = {
@@ -699,7 +699,7 @@ export type ObservationsCreateData = {
     body: ObservationWritable;
     path?: never;
     query?: never;
-    url: '/observations/';
+    url: '/api/observations/';
 };
 
 export type ObservationsCreateResponses = {
@@ -717,7 +717,7 @@ export type ObservationsDestroyData = {
         id: string;
     };
     query?: never;
-    url: '/observations/{id}/';
+    url: '/api/observations/{id}/';
 };
 
 export type ObservationsDestroyResponses = {
@@ -738,7 +738,7 @@ export type ObservationsRetrieveData = {
         id: string;
     };
     query?: never;
-    url: '/observations/{id}/';
+    url: '/api/observations/{id}/';
 };
 
 export type ObservationsRetrieveResponses = {
@@ -756,7 +756,7 @@ export type ObservationsPartialUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/observations/{id}/';
+    url: '/api/observations/{id}/';
 };
 
 export type ObservationsPartialUpdateResponses = {
@@ -774,7 +774,7 @@ export type ObservationsUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/observations/{id}/';
+    url: '/api/observations/{id}/';
 };
 
 export type ObservationsUpdateResponses = {
@@ -787,7 +787,7 @@ export type PingRetrieveData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/ping/';
+    url: '/api/ping/';
 };
 
 export type PingRetrieveResponses = {
@@ -801,7 +801,7 @@ export type RolesListData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/roles/';
+    url: '/api/roles/';
 };
 
 export type RolesListResponses = {
@@ -814,7 +814,7 @@ export type RolesCreateData = {
     body: RoleWritable;
     path?: never;
     query?: never;
-    url: '/roles/';
+    url: '/api/roles/';
 };
 
 export type RolesCreateResponses = {
@@ -832,7 +832,7 @@ export type RolesDestroyData = {
         id: string;
     };
     query?: never;
-    url: '/roles/{id}/';
+    url: '/api/roles/{id}/';
 };
 
 export type RolesDestroyResponses = {
@@ -853,7 +853,7 @@ export type RolesRetrieveData = {
         id: string;
     };
     query?: never;
-    url: '/roles/{id}/';
+    url: '/api/roles/{id}/';
 };
 
 export type RolesRetrieveResponses = {
@@ -871,7 +871,7 @@ export type RolesPartialUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/roles/{id}/';
+    url: '/api/roles/{id}/';
 };
 
 export type RolesPartialUpdateResponses = {
@@ -889,7 +889,7 @@ export type RolesUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/roles/{id}/';
+    url: '/api/roles/{id}/';
 };
 
 export type RolesUpdateResponses = {
@@ -904,7 +904,7 @@ export type SchoolsListData = {
     query?: {
         isServiceEnabled?: boolean;
     };
-    url: '/schools/';
+    url: '/api/schools/';
 };
 
 export type SchoolsListResponses = {
@@ -917,7 +917,7 @@ export type SchoolsCreateData = {
     body: SchoolWritable;
     path?: never;
     query?: never;
-    url: '/schools/';
+    url: '/api/schools/';
 };
 
 export type SchoolsCreateResponses = {
@@ -935,7 +935,7 @@ export type SchoolsDestroyData = {
         id: string;
     };
     query?: never;
-    url: '/schools/{id}/';
+    url: '/api/schools/{id}/';
 };
 
 export type SchoolsDestroyResponses = {
@@ -956,7 +956,7 @@ export type SchoolsRetrieveData = {
         id: string;
     };
     query?: never;
-    url: '/schools/{id}/';
+    url: '/api/schools/{id}/';
 };
 
 export type SchoolsRetrieveResponses = {
@@ -974,7 +974,7 @@ export type SchoolsPartialUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/schools/{id}/';
+    url: '/api/schools/{id}/';
 };
 
 export type SchoolsPartialUpdateResponses = {
@@ -992,7 +992,7 @@ export type SchoolsUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/schools/{id}/';
+    url: '/api/schools/{id}/';
 };
 
 export type SchoolsUpdateResponses = {
@@ -1015,7 +1015,7 @@ export type SchoolsUsersRetrieveData = {
          */
         roles?: string;
     };
-    url: '/schools/{id}/users/';
+    url: '/api/schools/{id}/users/';
 };
 
 export type SchoolsUsersRetrieveResponses = {
@@ -1028,7 +1028,7 @@ export type SituationsListData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/situations/';
+    url: '/api/situations/';
 };
 
 export type SituationsListResponses = {
@@ -1041,7 +1041,7 @@ export type SituationsCreateData = {
     body: SituationWritable;
     path?: never;
     query?: never;
-    url: '/situations/';
+    url: '/api/situations/';
 };
 
 export type SituationsCreateResponses = {
@@ -1059,7 +1059,7 @@ export type SituationsDestroyData = {
         id: string;
     };
     query?: never;
-    url: '/situations/{id}/';
+    url: '/api/situations/{id}/';
 };
 
 export type SituationsDestroyResponses = {
@@ -1080,7 +1080,7 @@ export type SituationsRetrieveData = {
         id: string;
     };
     query?: never;
-    url: '/situations/{id}/';
+    url: '/api/situations/{id}/';
 };
 
 export type SituationsRetrieveResponses = {
@@ -1098,7 +1098,7 @@ export type SituationsPartialUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/situations/{id}/';
+    url: '/api/situations/{id}/';
 };
 
 export type SituationsPartialUpdateResponses = {
@@ -1116,7 +1116,7 @@ export type SituationsUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/situations/{id}/';
+    url: '/api/situations/{id}/';
 };
 
 export type SituationsUpdateResponses = {
@@ -1129,7 +1129,7 @@ export type StatusListData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/status/';
+    url: '/api/status/';
 };
 
 export type StatusListResponses = {
@@ -1142,7 +1142,7 @@ export type StatusCreateData = {
     body: StatusWritable;
     path?: never;
     query?: never;
-    url: '/status/';
+    url: '/api/status/';
 };
 
 export type StatusCreateResponses = {
@@ -1160,7 +1160,7 @@ export type StatusDestroyData = {
         id: string;
     };
     query?: never;
-    url: '/status/{id}/';
+    url: '/api/status/{id}/';
 };
 
 export type StatusDestroyResponses = {
@@ -1181,7 +1181,7 @@ export type StatusRetrieveData = {
         id: string;
     };
     query?: never;
-    url: '/status/{id}/';
+    url: '/api/status/{id}/';
 };
 
 export type StatusRetrieveResponses = {
@@ -1199,7 +1199,7 @@ export type StatusPartialUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/status/{id}/';
+    url: '/api/status/{id}/';
 };
 
 export type StatusPartialUpdateResponses = {
@@ -1217,7 +1217,7 @@ export type StatusUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/status/{id}/';
+    url: '/api/status/{id}/';
 };
 
 export type StatusUpdateResponses = {
@@ -1232,7 +1232,7 @@ export type SubjectsListData = {
     query?: {
         maintenedBySchool?: string;
     };
-    url: '/subjects/';
+    url: '/api/subjects/';
 };
 
 export type SubjectsListResponses = {
@@ -1245,7 +1245,7 @@ export type SubjectsCreateData = {
     body: SubjectWritable;
     path?: never;
     query?: never;
-    url: '/subjects/';
+    url: '/api/subjects/';
 };
 
 export type SubjectsCreateResponses = {
@@ -1263,7 +1263,7 @@ export type SubjectsDestroyData = {
         id: string;
     };
     query?: never;
-    url: '/subjects/{id}/';
+    url: '/api/subjects/{id}/';
 };
 
 export type SubjectsDestroyResponses = {
@@ -1284,7 +1284,7 @@ export type SubjectsRetrieveData = {
         id: string;
     };
     query?: never;
-    url: '/subjects/{id}/';
+    url: '/api/subjects/{id}/';
 };
 
 export type SubjectsRetrieveResponses = {
@@ -1302,7 +1302,7 @@ export type SubjectsPartialUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/subjects/{id}/';
+    url: '/api/subjects/{id}/';
 };
 
 export type SubjectsPartialUpdateResponses = {
@@ -1320,7 +1320,7 @@ export type SubjectsUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/subjects/{id}/';
+    url: '/api/subjects/{id}/';
 };
 
 export type SubjectsUpdateResponses = {
@@ -1333,7 +1333,7 @@ export type UserGroupsListData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/user-groups/';
+    url: '/api/user-groups/';
 };
 
 export type UserGroupsListResponses = {
@@ -1346,7 +1346,7 @@ export type UserGroupsCreateData = {
     body: UserGroupWritable;
     path?: never;
     query?: never;
-    url: '/user-groups/';
+    url: '/api/user-groups/';
 };
 
 export type UserGroupsCreateResponses = {
@@ -1364,7 +1364,7 @@ export type UserGroupsDestroyData = {
         id: string;
     };
     query?: never;
-    url: '/user-groups/{id}/';
+    url: '/api/user-groups/{id}/';
 };
 
 export type UserGroupsDestroyResponses = {
@@ -1385,7 +1385,7 @@ export type UserGroupsRetrieveData = {
         id: string;
     };
     query?: never;
-    url: '/user-groups/{id}/';
+    url: '/api/user-groups/{id}/';
 };
 
 export type UserGroupsRetrieveResponses = {
@@ -1403,7 +1403,7 @@ export type UserGroupsPartialUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/user-groups/{id}/';
+    url: '/api/user-groups/{id}/';
 };
 
 export type UserGroupsPartialUpdateResponses = {
@@ -1421,7 +1421,7 @@ export type UserGroupsUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/user-groups/{id}/';
+    url: '/api/user-groups/{id}/';
 };
 
 export type UserGroupsUpdateResponses = {
@@ -1434,7 +1434,7 @@ export type UsersListData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/users/';
+    url: '/api/users/';
 };
 
 export type UsersListResponses = {
@@ -1447,7 +1447,7 @@ export type UsersCreateData = {
     body: UserWritable;
     path?: never;
     query?: never;
-    url: '/users/';
+    url: '/api/users/';
 };
 
 export type UsersCreateResponses = {
@@ -1465,7 +1465,7 @@ export type UsersDestroyData = {
         id: string;
     };
     query?: never;
-    url: '/users/{id}/';
+    url: '/api/users/{id}/';
 };
 
 export type UsersDestroyResponses = {
@@ -1486,7 +1486,7 @@ export type UsersRetrieveData = {
         id: string;
     };
     query?: never;
-    url: '/users/{id}/';
+    url: '/api/users/{id}/';
 };
 
 export type UsersRetrieveResponses = {
@@ -1504,7 +1504,7 @@ export type UsersPartialUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/users/{id}/';
+    url: '/api/users/{id}/';
 };
 
 export type UsersPartialUpdateResponses = {
@@ -1522,7 +1522,7 @@ export type UsersUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/users/{id}/';
+    url: '/api/users/{id}/';
 };
 
 export type UsersUpdateResponses = {
@@ -1549,7 +1549,7 @@ export type UsersGoalsRetrieveData = {
          */
         subjectId?: string;
     };
-    url: '/users/{id}/goals/';
+    url: '/api/users/{id}/goals/';
 };
 
 export type UsersGoalsRetrieveResponses = {
@@ -1572,7 +1572,7 @@ export type UsersGroupsRetrieveData = {
          */
         roles?: string;
     };
-    url: '/users/{id}/groups/';
+    url: '/api/users/{id}/groups/';
 };
 
 export type UsersGroupsRetrieveResponses = {

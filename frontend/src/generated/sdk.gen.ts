@@ -31,7 +31,7 @@ export const goalsList = <ThrowOnError extends boolean = false>(options?: Option
                 type: 'http'
             }
         ],
-        url: '/goals/',
+        url: '/api/goals/',
         ...options
     });
 };
@@ -50,7 +50,7 @@ export const goalsCreate = <ThrowOnError extends boolean = false>(options?: Opti
                 type: 'http'
             }
         ],
-        url: '/goals/',
+        url: '/api/goals/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -72,7 +72,7 @@ export const goalsDestroy = <ThrowOnError extends boolean = false>(options: Opti
                 type: 'http'
             }
         ],
-        url: '/goals/{id}/',
+        url: '/api/goals/{id}/',
         ...options
     });
 };
@@ -90,7 +90,7 @@ export const goalsRetrieve = <ThrowOnError extends boolean = false>(options: Opt
                 type: 'http'
             }
         ],
-        url: '/goals/{id}/',
+        url: '/api/goals/{id}/',
         ...options
     });
 };
@@ -109,7 +109,7 @@ export const goalsPartialUpdate = <ThrowOnError extends boolean = false>(options
                 type: 'http'
             }
         ],
-        url: '/goals/{id}/',
+        url: '/api/goals/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -132,7 +132,7 @@ export const goalsUpdate = <ThrowOnError extends boolean = false>(options: Optio
                 type: 'http'
             }
         ],
-        url: '/goals/{id}/',
+        url: '/api/goals/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -154,7 +154,7 @@ export const groupsList = <ThrowOnError extends boolean = false>(options?: Optio
                 type: 'http'
             }
         ],
-        url: '/groups/',
+        url: '/api/groups/',
         ...options
     });
 };
@@ -173,7 +173,7 @@ export const groupsCreate = <ThrowOnError extends boolean = false>(options: Opti
                 type: 'http'
             }
         ],
-        url: '/groups/',
+        url: '/api/groups/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -195,7 +195,7 @@ export const groupsDestroy = <ThrowOnError extends boolean = false>(options: Opt
                 type: 'http'
             }
         ],
-        url: '/groups/{id}/',
+        url: '/api/groups/{id}/',
         ...options
     });
 };
@@ -213,7 +213,7 @@ export const groupsRetrieve = <ThrowOnError extends boolean = false>(options: Op
                 type: 'http'
             }
         ],
-        url: '/groups/{id}/',
+        url: '/api/groups/{id}/',
         ...options
     });
 };
@@ -232,7 +232,7 @@ export const groupsPartialUpdate = <ThrowOnError extends boolean = false>(option
                 type: 'http'
             }
         ],
-        url: '/groups/{id}/',
+        url: '/api/groups/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -255,7 +255,7 @@ export const groupsUpdate = <ThrowOnError extends boolean = false>(options: Opti
                 type: 'http'
             }
         ],
-        url: '/groups/{id}/',
+        url: '/api/groups/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -280,7 +280,7 @@ export const groupsMembersRetrieve = <ThrowOnError extends boolean = false>(opti
                 type: 'http'
             }
         ],
-        url: '/groups/{id}/members/',
+        url: '/api/groups/{id}/members/',
         ...options
     });
 };
@@ -298,7 +298,7 @@ export const observationsList = <ThrowOnError extends boolean = false>(options?:
                 type: 'http'
             }
         ],
-        url: '/observations/',
+        url: '/api/observations/',
         ...options
     });
 };
@@ -317,7 +317,7 @@ export const observationsCreate = <ThrowOnError extends boolean = false>(options
                 type: 'http'
             }
         ],
-        url: '/observations/',
+        url: '/api/observations/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -339,7 +339,7 @@ export const observationsDestroy = <ThrowOnError extends boolean = false>(option
                 type: 'http'
             }
         ],
-        url: '/observations/{id}/',
+        url: '/api/observations/{id}/',
         ...options
     });
 };
@@ -357,7 +357,7 @@ export const observationsRetrieve = <ThrowOnError extends boolean = false>(optio
                 type: 'http'
             }
         ],
-        url: '/observations/{id}/',
+        url: '/api/observations/{id}/',
         ...options
     });
 };
@@ -376,7 +376,7 @@ export const observationsPartialUpdate = <ThrowOnError extends boolean = false>(
                 type: 'http'
             }
         ],
-        url: '/observations/{id}/',
+        url: '/api/observations/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -399,7 +399,7 @@ export const observationsUpdate = <ThrowOnError extends boolean = false>(options
                 type: 'http'
             }
         ],
-        url: '/observations/{id}/',
+        url: '/api/observations/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -424,7 +424,7 @@ export const pingRetrieve = <ThrowOnError extends boolean = false>(options?: Opt
                 type: 'http'
             }
         ],
-        url: '/ping/',
+        url: '/api/ping/',
         ...options
     });
 };
@@ -442,7 +442,7 @@ export const rolesList = <ThrowOnError extends boolean = false>(options?: Option
                 type: 'http'
             }
         ],
-        url: '/roles/',
+        url: '/api/roles/',
         ...options
     });
 };
@@ -461,7 +461,7 @@ export const rolesCreate = <ThrowOnError extends boolean = false>(options: Optio
                 type: 'http'
             }
         ],
-        url: '/roles/',
+        url: '/api/roles/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -483,7 +483,7 @@ export const rolesDestroy = <ThrowOnError extends boolean = false>(options: Opti
                 type: 'http'
             }
         ],
-        url: '/roles/{id}/',
+        url: '/api/roles/{id}/',
         ...options
     });
 };
@@ -501,7 +501,7 @@ export const rolesRetrieve = <ThrowOnError extends boolean = false>(options: Opt
                 type: 'http'
             }
         ],
-        url: '/roles/{id}/',
+        url: '/api/roles/{id}/',
         ...options
     });
 };
@@ -520,7 +520,7 @@ export const rolesPartialUpdate = <ThrowOnError extends boolean = false>(options
                 type: 'http'
             }
         ],
-        url: '/roles/{id}/',
+        url: '/api/roles/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -543,7 +543,7 @@ export const rolesUpdate = <ThrowOnError extends boolean = false>(options: Optio
                 type: 'http'
             }
         ],
-        url: '/roles/{id}/',
+        url: '/api/roles/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -565,7 +565,7 @@ export const schoolsList = <ThrowOnError extends boolean = false>(options?: Opti
                 type: 'http'
             }
         ],
-        url: '/schools/',
+        url: '/api/schools/',
         ...options
     });
 };
@@ -584,7 +584,7 @@ export const schoolsCreate = <ThrowOnError extends boolean = false>(options: Opt
                 type: 'http'
             }
         ],
-        url: '/schools/',
+        url: '/api/schools/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -606,7 +606,7 @@ export const schoolsDestroy = <ThrowOnError extends boolean = false>(options: Op
                 type: 'http'
             }
         ],
-        url: '/schools/{id}/',
+        url: '/api/schools/{id}/',
         ...options
     });
 };
@@ -624,7 +624,7 @@ export const schoolsRetrieve = <ThrowOnError extends boolean = false>(options: O
                 type: 'http'
             }
         ],
-        url: '/schools/{id}/',
+        url: '/api/schools/{id}/',
         ...options
     });
 };
@@ -643,7 +643,7 @@ export const schoolsPartialUpdate = <ThrowOnError extends boolean = false>(optio
                 type: 'http'
             }
         ],
-        url: '/schools/{id}/',
+        url: '/api/schools/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -666,7 +666,7 @@ export const schoolsUpdate = <ThrowOnError extends boolean = false>(options: Opt
                 type: 'http'
             }
         ],
-        url: '/schools/{id}/',
+        url: '/api/schools/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -691,7 +691,7 @@ export const schoolsUsersRetrieve = <ThrowOnError extends boolean = false>(optio
                 type: 'http'
             }
         ],
-        url: '/schools/{id}/users/',
+        url: '/api/schools/{id}/users/',
         ...options
     });
 };
@@ -709,7 +709,7 @@ export const situationsList = <ThrowOnError extends boolean = false>(options?: O
                 type: 'http'
             }
         ],
-        url: '/situations/',
+        url: '/api/situations/',
         ...options
     });
 };
@@ -728,7 +728,7 @@ export const situationsCreate = <ThrowOnError extends boolean = false>(options: 
                 type: 'http'
             }
         ],
-        url: '/situations/',
+        url: '/api/situations/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -750,7 +750,7 @@ export const situationsDestroy = <ThrowOnError extends boolean = false>(options:
                 type: 'http'
             }
         ],
-        url: '/situations/{id}/',
+        url: '/api/situations/{id}/',
         ...options
     });
 };
@@ -768,7 +768,7 @@ export const situationsRetrieve = <ThrowOnError extends boolean = false>(options
                 type: 'http'
             }
         ],
-        url: '/situations/{id}/',
+        url: '/api/situations/{id}/',
         ...options
     });
 };
@@ -787,7 +787,7 @@ export const situationsPartialUpdate = <ThrowOnError extends boolean = false>(op
                 type: 'http'
             }
         ],
-        url: '/situations/{id}/',
+        url: '/api/situations/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -810,7 +810,7 @@ export const situationsUpdate = <ThrowOnError extends boolean = false>(options: 
                 type: 'http'
             }
         ],
-        url: '/situations/{id}/',
+        url: '/api/situations/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -832,7 +832,7 @@ export const statusList = <ThrowOnError extends boolean = false>(options?: Optio
                 type: 'http'
             }
         ],
-        url: '/status/',
+        url: '/api/status/',
         ...options
     });
 };
@@ -851,7 +851,7 @@ export const statusCreate = <ThrowOnError extends boolean = false>(options: Opti
                 type: 'http'
             }
         ],
-        url: '/status/',
+        url: '/api/status/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -873,7 +873,7 @@ export const statusDestroy = <ThrowOnError extends boolean = false>(options: Opt
                 type: 'http'
             }
         ],
-        url: '/status/{id}/',
+        url: '/api/status/{id}/',
         ...options
     });
 };
@@ -891,7 +891,7 @@ export const statusRetrieve = <ThrowOnError extends boolean = false>(options: Op
                 type: 'http'
             }
         ],
-        url: '/status/{id}/',
+        url: '/api/status/{id}/',
         ...options
     });
 };
@@ -910,7 +910,7 @@ export const statusPartialUpdate = <ThrowOnError extends boolean = false>(option
                 type: 'http'
             }
         ],
-        url: '/status/{id}/',
+        url: '/api/status/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -933,7 +933,7 @@ export const statusUpdate = <ThrowOnError extends boolean = false>(options: Opti
                 type: 'http'
             }
         ],
-        url: '/status/{id}/',
+        url: '/api/status/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -955,7 +955,7 @@ export const subjectsList = <ThrowOnError extends boolean = false>(options?: Opt
                 type: 'http'
             }
         ],
-        url: '/subjects/',
+        url: '/api/subjects/',
         ...options
     });
 };
@@ -974,7 +974,7 @@ export const subjectsCreate = <ThrowOnError extends boolean = false>(options: Op
                 type: 'http'
             }
         ],
-        url: '/subjects/',
+        url: '/api/subjects/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -996,7 +996,7 @@ export const subjectsDestroy = <ThrowOnError extends boolean = false>(options: O
                 type: 'http'
             }
         ],
-        url: '/subjects/{id}/',
+        url: '/api/subjects/{id}/',
         ...options
     });
 };
@@ -1014,7 +1014,7 @@ export const subjectsRetrieve = <ThrowOnError extends boolean = false>(options: 
                 type: 'http'
             }
         ],
-        url: '/subjects/{id}/',
+        url: '/api/subjects/{id}/',
         ...options
     });
 };
@@ -1033,7 +1033,7 @@ export const subjectsPartialUpdate = <ThrowOnError extends boolean = false>(opti
                 type: 'http'
             }
         ],
-        url: '/subjects/{id}/',
+        url: '/api/subjects/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -1056,7 +1056,7 @@ export const subjectsUpdate = <ThrowOnError extends boolean = false>(options: Op
                 type: 'http'
             }
         ],
-        url: '/subjects/{id}/',
+        url: '/api/subjects/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -1078,7 +1078,7 @@ export const userGroupsList = <ThrowOnError extends boolean = false>(options?: O
                 type: 'http'
             }
         ],
-        url: '/user-groups/',
+        url: '/api/user-groups/',
         ...options
     });
 };
@@ -1097,7 +1097,7 @@ export const userGroupsCreate = <ThrowOnError extends boolean = false>(options: 
                 type: 'http'
             }
         ],
-        url: '/user-groups/',
+        url: '/api/user-groups/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -1119,7 +1119,7 @@ export const userGroupsDestroy = <ThrowOnError extends boolean = false>(options:
                 type: 'http'
             }
         ],
-        url: '/user-groups/{id}/',
+        url: '/api/user-groups/{id}/',
         ...options
     });
 };
@@ -1137,7 +1137,7 @@ export const userGroupsRetrieve = <ThrowOnError extends boolean = false>(options
                 type: 'http'
             }
         ],
-        url: '/user-groups/{id}/',
+        url: '/api/user-groups/{id}/',
         ...options
     });
 };
@@ -1156,7 +1156,7 @@ export const userGroupsPartialUpdate = <ThrowOnError extends boolean = false>(op
                 type: 'http'
             }
         ],
-        url: '/user-groups/{id}/',
+        url: '/api/user-groups/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -1179,7 +1179,7 @@ export const userGroupsUpdate = <ThrowOnError extends boolean = false>(options: 
                 type: 'http'
             }
         ],
-        url: '/user-groups/{id}/',
+        url: '/api/user-groups/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -1201,7 +1201,7 @@ export const usersList = <ThrowOnError extends boolean = false>(options?: Option
                 type: 'http'
             }
         ],
-        url: '/users/',
+        url: '/api/users/',
         ...options
     });
 };
@@ -1220,7 +1220,7 @@ export const usersCreate = <ThrowOnError extends boolean = false>(options: Optio
                 type: 'http'
             }
         ],
-        url: '/users/',
+        url: '/api/users/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -1242,7 +1242,7 @@ export const usersDestroy = <ThrowOnError extends boolean = false>(options: Opti
                 type: 'http'
             }
         ],
-        url: '/users/{id}/',
+        url: '/api/users/{id}/',
         ...options
     });
 };
@@ -1260,7 +1260,7 @@ export const usersRetrieve = <ThrowOnError extends boolean = false>(options: Opt
                 type: 'http'
             }
         ],
-        url: '/users/{id}/',
+        url: '/api/users/{id}/',
         ...options
     });
 };
@@ -1279,7 +1279,7 @@ export const usersPartialUpdate = <ThrowOnError extends boolean = false>(options
                 type: 'http'
             }
         ],
-        url: '/users/{id}/',
+        url: '/api/users/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -1302,7 +1302,7 @@ export const usersUpdate = <ThrowOnError extends boolean = false>(options: Optio
                 type: 'http'
             }
         ],
-        url: '/users/{id}/',
+        url: '/api/users/{id}/',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -1327,7 +1327,7 @@ export const usersGoalsRetrieve = <ThrowOnError extends boolean = false>(options
                 type: 'http'
             }
         ],
-        url: '/users/{id}/goals/',
+        url: '/api/users/{id}/goals/',
         ...options
     });
 };
@@ -1345,7 +1345,7 @@ export const usersGroupsRetrieve = <ThrowOnError extends boolean = false>(option
                 type: 'http'
             }
         ],
-        url: '/users/{id}/groups/',
+        url: '/api/users/{id}/groups/',
         ...options
     });
 };
