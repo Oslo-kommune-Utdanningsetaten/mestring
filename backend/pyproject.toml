@@ -4,7 +4,6 @@ version = "0.0.1"
 description = ""
 authors = []
 readme = "../README.md"
-package-mode = false
 
 
 [tool.poetry.dependencies]
@@ -46,10 +45,9 @@ pythonpath = ["."]
 
 
 [tool.poetry.group.test.dependencies]
-pytest = "^8.3.5"
+pytest = "^8.4.0"
 pytest-django = "^4.11.1"
 pytest-cov = "^6.1.1"
-freezegun = "^1.5.1"
 
 
 [tool.poe.tasks]
