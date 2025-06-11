@@ -9,7 +9,9 @@ COPY pyproject.toml poetry.lock ./
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
 FROM python:3.13-slim as runtime
-RUN apt-get update && apt-get install -y libpq-dev
+RUN apt-get update && \
+    apt-get install -y libpq-dev curl && \
+    rm -rf /var/lib/apt/lists/*
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}

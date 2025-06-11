@@ -13,6 +13,11 @@ services:
     profiles:
       - dev
       - prod
+    healthcheck:
+      test: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB_NAME}
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   adminer:
     image: adminer
@@ -43,8 +48,7 @@ services:
 
   backend:
     build: ./backend
-    # Number of workers (w) should be (2 * CPU cores) + 1
-    command:
+    command: # Number of gunicorn workers (w) should be (2 * CPU cores) + 1
       - bash
       - -c
       - |
@@ -63,7 +67,13 @@ services:
       - prod
     restart: always
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:5000/ping']
+      interval: 10s
+      retries: 5
+      timeout: 10s
 
   frontend:
     build: ./frontend
@@ -71,7 +81,8 @@ services:
       - 5000:80 # For local testing
       - 80:80
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     volumes:
       - ./frontend/nginx:/etc/nginx/conf.d
     restart: always
