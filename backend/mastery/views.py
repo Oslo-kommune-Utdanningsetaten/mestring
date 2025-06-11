@@ -201,7 +201,8 @@ class UserGroupViewSet(viewsets.ModelViewSet):
 @permission_classes([AllowAny])
 def ping(request):
     """Simple ping endpoint to check API and database availability"""
-    db_status = 'unknown'    
+    db_status = 'unknown'
+    status = 200
     # Lightweight database check - just run a simple query
     try:
         with connection.cursor() as cursor:
@@ -210,9 +211,10 @@ def ping(request):
             db_status = 'up'
     except Exception:
         db_status = 'down'
+        status = 503
     
-    return Response({
+    return Response(data={
         "api": "up",
         "db": db_status
-    })
+    }, status=status)
 
