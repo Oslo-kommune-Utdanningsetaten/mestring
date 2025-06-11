@@ -59,7 +59,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      DJANGO_DEBUG: 'False'
+      DJANGO_DEBUG: 'True'
       DB_HOST: 'postgres'
     extra_hosts:
       - 'host.docker.internal:host-gateway'

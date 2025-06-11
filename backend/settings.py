@@ -29,9 +29,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
-print("DEBUG:", DEBUG)
-
-ALLOWED_HOSTS = []
 
 ADMIN_ENABLED = False
 
@@ -79,14 +76,14 @@ TEMPLATES = [
 ]
 WSGI_APPLICATION = 'wsgi.application'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'mestring.osloskolen.no', 'mestring-dev.osloskolen.no', 'iz-mestring-ap01t.oslo.int']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'mestring.osloskolen.no', 'mestring-dev.osloskolen.no', 'iz-mest-ap01t.oslo.int']
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5000',
     'https://mestring-dev.osloskolen.no',
     'https://mestring.osloskolen.no',
     'http://localhost:5173',
-    'http://iz-mestring-ap01t.oslo.int'
+    'http://iz-mest-ap01t.oslo.int'
 ]
                         
 CORS_ALLOWED_ORIGINS = [
@@ -94,7 +91,7 @@ CORS_ALLOWED_ORIGINS = [
     'https://mestring-dev.osloskolen.no',
     'http://127.0.0.1:5173',
     'http://localhost:5173',
-    'http://iz-mestring-ap01t.oslo.int'
+    'http://iz-mest-ap01t.oslo.int'
 ]
 
 # Database
