@@ -36,8 +36,8 @@ export const goalsList = <ThrowOnError extends boolean = false>(options?: Option
     });
 };
 
-export const goalsCreate = <ThrowOnError extends boolean = false>(options: Options<GoalsCreateData, ThrowOnError>) => {
-    return (options.client ?? _heyApiClient).post<GoalsCreateResponse, unknown, ThrowOnError>({
+export const goalsCreate = <ThrowOnError extends boolean = false>(options?: Options<GoalsCreateData, ThrowOnError>) => {
+    return (options?.client ?? _heyApiClient).post<GoalsCreateResponse, unknown, ThrowOnError>({
         ...urlSearchParamsBodySerializer,
         security: [
             {

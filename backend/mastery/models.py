@@ -161,7 +161,7 @@ class Goal(BaseModel):
     """
     A Goal represents something a student should strive towards. A Goal is either for all students in a Group (if goal.group is set), or personal for a specific student (if goal.student is set)
     """
-    title = models.CharField(max_length=200, null=False)
+    title = models.CharField(max_length=200, null=True)
     description = models.TextField(null=True)
     group = models.ForeignKey(Group, on_delete=models.RESTRICT, null=True)
     student = models.ForeignKey(User, on_delete=models.RESTRICT, null=True)

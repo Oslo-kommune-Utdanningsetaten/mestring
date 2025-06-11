@@ -30,7 +30,7 @@ export type GoalReadable = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    title: string;
+    title?: string | null;
     description?: string | null;
     masterySchema?: unknown;
     groupId?: string;
@@ -40,7 +40,7 @@ export type GoalReadable = {
 };
 
 export type GoalWritable = {
-    title: string;
+    title?: string | null;
     description?: string | null;
     masterySchema?: unknown;
     groupId?: string;
@@ -134,7 +134,7 @@ export type PatchedGoalReadable = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
-    title?: string;
+    title?: string | null;
     description?: string | null;
     masterySchema?: unknown;
     groupId?: string;
@@ -144,7 +144,7 @@ export type PatchedGoalReadable = {
 };
 
 export type PatchedGoalWritable = {
-    title?: string;
+    title?: string | null;
     description?: string | null;
     masterySchema?: unknown;
     groupId?: string;
@@ -470,7 +470,7 @@ export type GoalsListResponses = {
 export type GoalsListResponse = GoalsListResponses[keyof GoalsListResponses];
 
 export type GoalsCreateData = {
-    body: GoalWritable;
+    body?: GoalWritable;
     path?: never;
     query?: never;
     url: '/goals/';
@@ -540,7 +540,7 @@ export type GoalsPartialUpdateResponses = {
 export type GoalsPartialUpdateResponse = GoalsPartialUpdateResponses[keyof GoalsPartialUpdateResponses];
 
 export type GoalsUpdateData = {
-    body: GoalWritable;
+    body?: GoalWritable;
     path: {
         /**
          * A unique value identifying this goal.
