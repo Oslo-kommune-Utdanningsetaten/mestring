@@ -1,10 +1,8 @@
-// Get the environment from import.meta.env (Vite's way to access environment variables)
-const env = import.meta.env.VITE_ENV || 'dev'
 const appKeyPrefix = 'mastery'
 type T = string | number | boolean | Array<any> | object | null
 
 function getKey(key: string): string {
-  return [appKeyPrefix, env, key].join('-')
+  return [appKeyPrefix, key].join('-')
 }
 
 export function getLocalStorageItem(key: string): T {
