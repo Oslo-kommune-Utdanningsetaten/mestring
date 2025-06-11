@@ -6,8 +6,7 @@
 
 # Checklist
 
-- [ ] /ping endpoint
-  - warning in frontend with not pong
+- [ ] deploy to test server
 - [ ] properly responsive navigation bar
 - [ ] /students/id
   - [ ] personal goals
@@ -20,6 +19,10 @@
   - [x] Importere skoler
   - [x] Importere grupper pr. skole
   - [x] Importere subjects fra UDIR/grep (som matcher teaching-groups)
+- [x] .env example files
+- [x] license
+- [x] /ping endpoint
+  - warning in frontend with not pong
 - [x] prettier i frontend
 - [x] implementer: punkt web components https://punkt.oslo.kommune.no/latest/komponenter/om-komponenter/
 - [x] Dataimport fra Excel
