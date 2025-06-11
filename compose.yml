@@ -43,6 +43,7 @@ services:
 
   backend:
     build: ./backend
+    # Number of workers (w) should be (2 * CPU cores) + 1
     command:
       - bash
       - -c
