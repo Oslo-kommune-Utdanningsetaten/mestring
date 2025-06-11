@@ -9,7 +9,7 @@ COPY pyproject.toml poetry.lock ./
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
 FROM python:3.13-slim as runtime
-RUN apt-get update && apt-get install -y default-libmysqlclient-dev
+RUN apt-get update && apt-get install -y libpq-dev
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}

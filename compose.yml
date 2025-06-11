@@ -48,12 +48,7 @@ services:
       - -c
       - |
         python manage.py migrate
-        python manage.py collectstatic --noinput
-        cp -r ./public/ /var/www/static/
         gunicorn asgi -b :8000 -w 9
-    volumes:
-      - ./backend:/code
-      - /var/www/:/var/www/
     ports:
       - 8001:8000
     env_file:
@@ -66,6 +61,8 @@ services:
     profiles:
       - prod
     restart: always
+    depends_on:
+      - postgres
 
   frontend:
     build: ./frontend
@@ -76,7 +73,6 @@ services:
       - backend
     volumes:
       - ./frontend/nginx:/etc/nginx/conf.d
-      - /var/www/:/var/www/
     restart: always
     profiles:
       - prod
