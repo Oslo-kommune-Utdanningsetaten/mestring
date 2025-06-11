@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store'
 import { client } from '../generated/client.gen'
+import { pingRetrieve } from '../generated/sdk.gen'
 
 export type ComponentStatus = 'unknown' | 'up' | 'down'
 
@@ -20,10 +21,7 @@ const createApiHealthStore = () => {
     subscribe,
     checkHealth: async () => {
       try {
-        const result: any = await client.request({
-          method: 'GET',
-          url: '/ping/',
-        })
+        const result: any = await pingRetrieve()
         const { response, data } = result
         if (response.status === 200) {
           const { api, db } = data as { api: ComponentStatus; db: ComponentStatus }
