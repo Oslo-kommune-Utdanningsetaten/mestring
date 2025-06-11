@@ -783,6 +783,20 @@ export type ObservationsUpdateResponses = {
 
 export type ObservationsUpdateResponse = ObservationsUpdateResponses[keyof ObservationsUpdateResponses];
 
+export type PingRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/ping/';
+};
+
+export type PingRetrieveResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
 export type RolesListData = {
     body?: never;
     path?: never;

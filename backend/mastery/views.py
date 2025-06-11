@@ -1,7 +1,9 @@
 from mastery import models, serializers
 from rest_framework import viewsets, status, views, filters
 from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from django.db import connection
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -193,4 +195,24 @@ class StatusViewSet(viewsets.ModelViewSet):
 class UserGroupViewSet(viewsets.ModelViewSet):
     queryset = models.UserGroup.objects.all()
     serializer_class = serializers.UserGroupSerializer
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def ping(request):
+    """Simple ping endpoint to check API and database availability"""
+    db_status = 'unknown'    
+    # Lightweight database check - just run a simple query
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+            db_status = 'up'
+    except Exception:
+        db_status = 'down'
+    
+    return Response({
+        "api": "up",
+        "db": db_status
+    })
 

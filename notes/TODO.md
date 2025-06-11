@@ -8,11 +8,10 @@
 
 - [ ] /ping endpoint
   - warning in frontend with not pong
+- [ ] properly responsive navigation bar
 - [ ] /students/id
   - [ ] personal goals
   - [x] group goals
-- [ ] prettier i frontend
-- [ ] properly responsive navigation bar
 - [ ] Teste relasjoner status/goal
 - [ ] Smartere Excel-import
 - [ ] Finne ut av sikkerhet/ACL
@@ -21,6 +20,7 @@
   - [x] Importere skoler
   - [x] Importere grupper pr. skole
   - [x] Importere subjects fra UDIR/grep (som matcher teaching-groups)
+- [x] prettier i frontend
 - [x] implementer: punkt web components https://punkt.oslo.kommune.no/latest/komponenter/om-komponenter/
 - [x] Dataimport fra Excel
   - [x] Observation, Goal

@@ -1,12 +1,12 @@
 <script lang="ts">
   import Link from './Link.svelte'
-
   import oslologoUrl from '@oslokommune/punkt-assets/dist/logos/oslologo.svg?url'
 
   import { currentPath } from '../stores/navigation'
   import { dataStore, setCurrentSchool } from '../stores/data'
   import { type SchoolReadable } from '../generated/types.gen'
   import { schoolsList } from '../generated/sdk.gen'
+  import { apiHealth } from '../stores/apiHealth'
 
   let isHomeActive = $derived($currentPath === '/')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
@@ -40,8 +40,26 @@
 
   $effect(() => {
     fetchSchools()
+    // Check API health on component load
+    apiHealth.checkHealth()
+
+    // Set up an interval to check API health periodically (every 30 seconds)
+    const interval = setInterval(() => {
+      apiHealth.checkHealth()
+    }, 30000)
+
+    return () => {
+      clearInterval(interval)
+    }
   })
 </script>
+
+{#if !$apiHealth.isOk}
+  <div class="alert alert-danger">
+    <strong>Not all is well😬</strong>
+    API: {$apiHealth.api} | DB: {$apiHealth.db}
+  </div>
+{/if}
 
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   <div class="container-md">
