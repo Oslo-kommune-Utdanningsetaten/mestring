@@ -7,6 +7,7 @@ export default {
     ...defaultPlugins,
     {
       name: '@hey-api/client-fetch',
+      baseUrl: '/',
     },
     {
       enums: false, // default

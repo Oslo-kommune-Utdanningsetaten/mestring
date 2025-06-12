@@ -1,5 +1,4 @@
 import { writable } from 'svelte/store'
-import { client } from '../generated/client.gen'
 import { pingRetrieve } from '../generated/sdk.gen'
 
 export type ComponentStatus = 'unknown' | 'up' | 'down'
