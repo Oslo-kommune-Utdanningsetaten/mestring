@@ -6,7 +6,8 @@ log/
 *.log*
 __pycache__/
 .vscode/launch.json
-backend/import/data/
+backend/import/data/old/
+backend/import/data/*.json
 
 # ai agent tooling
 .goose
