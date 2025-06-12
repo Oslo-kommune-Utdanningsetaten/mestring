@@ -8,6 +8,8 @@ __pycache__/
 .vscode/launch.json
 backend/import/data/old/
 backend/import/data/*.json
+.htpasswd
+
 
 # ai agent tooling
 .goose
