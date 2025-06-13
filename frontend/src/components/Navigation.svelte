@@ -66,60 +66,83 @@
     <a class="navbar-brand fw-bold" href="/">
       {$dataStore.currentSchool ? $dataStore.currentSchool.displayName : 'INGEN SKOLE VALGT'}
     </a>
-    <ul class="navbar-nav ms-auto">
-      <li class="nav-item">
-        <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
-      </li>
-      <li class="nav-item">
-        <Link to="/students" className={`nav-link ${isStudentsActive ? 'active' : ''}`}>
-          Elever
-        </Link>
-      </li>
-      <li class="nav-item">
-        <Link to="/schools" className={`nav-link ${isSchoolsActive ? 'active' : ''}`}>Skoler</Link>
-      </li>
-      <li class="nav-item">
-        <Link to="/about" className={`nav-link ${isAboutActive ? 'active' : ''}`}>
-          Om tjenesten
-        </Link>
-      </li>
-      <li class="nav-item dropdown">
-        <a
-          class="nav-link dropdown-toggle"
-          id="navbarDropdown"
-          role="button"
-          data-bs-toggle="dropdown"
-        >
-          Admin
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-          {#each schools as school}
-            <li>
-              <a
-                class="dropdown-item {$dataStore.currentSchool?.id === school.id
-                  ? 'selected-school'
-                  : ''}"
-                href="#"
-                onclick={() => handleSetCurrentSchool(school.id)}
-              >
-                {school.displayName}
-              </a>
-            </li>
-          {/each}
-          <li><hr class="dropdown-divider" /></li>
-          <li><a class="dropdown-item" href="#">Option 3</a></li>
-        </ul>
-      </li>
-    </ul>
-    <a href="https://www.oslo.kommune.no" class="logo-image" target="_blank">
-      <img class="oslologo" alt="Oslo kommune logo" src={oslologoUrl} />
-    </a>
+
+    <!-- Burger menu button -->
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
+        </li>
+        <li class="nav-item">
+          <Link to="/students" className={`nav-link ${isStudentsActive ? 'active' : ''}`}>
+            Elever
+          </Link>
+        </li>
+        <li class="nav-item">
+          <Link to="/schools" className={`nav-link ${isSchoolsActive ? 'active' : ''}`}>
+            Skoler
+          </Link>
+        </li>
+        <li class="nav-item">
+          <Link to="/about" className={`nav-link ${isAboutActive ? 'active' : ''}`}>
+            Om&nbsp;tjenesten
+          </Link>
+        </li>
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            id="navbarDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+          >
+            Admin
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+            {#each schools as school}
+              <li>
+                <a
+                  class="dropdown-item {$dataStore.currentSchool?.id === school.id
+                    ? 'selected-school'
+                    : ''}"
+                  href="#"
+                  onclick={() => handleSetCurrentSchool(school.id)}
+                >
+                  {school.displayName}
+                </a>
+              </li>
+            {/each}
+            <li><hr class="dropdown-divider" /></li>
+            <li><a class="dropdown-item" href="#">Option 3</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <!-- Logo outside collapsible area for desktop -->
+      <a href="https://www.oslo.kommune.no" class="logo-image" target="_blank">
+        <img class="oslologo" alt="Oslo kommune logo" src={oslologoUrl} />
+      </a>
+    </div>
   </div>
 </nav>
 
 <style>
   .logo-image {
+    display: inline-block;
     width: 100px;
+    max-width: 100px;
     padding-left: 30px;
   }
 
