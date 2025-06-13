@@ -1,6 +1,7 @@
 # Mestring
 
-Prototyping what a keep-track-of-student-mastery app could be
+Prototyping what a keep-track-of-student-mastery app could be.
+
 Some [temporary notes](./notes/notes.md).
 
 ## Getting started with development
