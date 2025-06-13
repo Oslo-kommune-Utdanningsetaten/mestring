@@ -2,5 +2,7 @@
   $font-path: '@oslokommune/punkt-assets/dist',
   $icon-path: '@oslokommune/punkt-assets/dist/icons'
 );
-
 @use '@oslokommune/punkt-css/dist/scss/pkt';
+@use 'sass:map';
+@use '@oslokommune/punkt-css/dist/scss/abstracts/mixins/breakpoints' as *;
+@use '@oslokommune/punkt-css/dist/scss/abstracts/mixins/typography';
