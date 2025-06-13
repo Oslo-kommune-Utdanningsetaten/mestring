@@ -30,9 +30,11 @@
   let filteredStudents = $state<UserReadable[]>([])
   let subjects = $state<SubjectReadable[]>([])
   let nameFilter = $state<string>('')
-  let headerText = $derived(
-    selectedGroup ? `Elever i gruppe: ${selectedGroup.displayName}` : 'Alle elever'
-  )
+  let headerText = $derived.by(() => {
+    let text = selectedGroup ? `Elever i gruppe: ${selectedGroup.displayName}` : 'Alle elever'
+    text = nameFilter ? `${text} med navn som inneholder "${nameFilter}"` : text
+    return text
+  })
 
   async function fetchAllStudentsInSchool() {
     if (!currentSchool?.id) return
