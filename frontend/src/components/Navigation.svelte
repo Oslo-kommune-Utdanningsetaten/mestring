@@ -10,7 +10,6 @@
 
   let isHomeActive = $derived($currentPath === '/')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
-  let isAboutActive = $derived($currentPath.startsWith('/about'))
   let isSchoolsActive = $derived($currentPath.startsWith('/schools'))
 
   let schools = $state<SchoolReadable[]>([])
@@ -43,10 +42,10 @@
     // Check API health on component load
     apiHealth.checkHealth()
 
-    // Set up an interval to check API health periodically (every 30 seconds)
+    // Set up an interval to check API health periodically (every 60 seconds)
     const interval = setInterval(() => {
       apiHealth.checkHealth()
-    }, 30000)
+    }, 60 * 1000)
 
     return () => {
       clearInterval(interval)
@@ -56,7 +55,7 @@
 
 {#if !$apiHealth.isOk}
   <div class="alert alert-danger">
-    <strong>Not all is well😬</strong>
+    <strong>Connection issues 😬</strong>
     API: {$apiHealth.api} | DB: {$apiHealth.db}
   </div>
 {/if}
@@ -96,11 +95,6 @@
             Skoler
           </Link>
         </li>
-        <li class="nav-item">
-          <Link to="/about" className={`nav-link ${isAboutActive ? 'active' : ''}`}>
-            Om&nbsp;tjenesten
-          </Link>
-        </li>
         <li class="nav-item dropdown">
           <a
             class="nav-link dropdown-toggle"
@@ -108,7 +102,7 @@
             role="button"
             data-bs-toggle="dropdown"
           >
-            Admin
+            Annet
           </a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
             {#each schools as school}
@@ -125,6 +119,7 @@
               </li>
             {/each}
             <li><hr class="dropdown-divider" /></li>
+            <li><a class="dropdown-item" href="/about">Om&nbsp;tjenesten</a></li>
             <li><a class="dropdown-item" href="#">Option 3</a></li>
           </ul>
         </li>
