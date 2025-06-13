@@ -4,60 +4,9 @@
   - UI med stein på stein?
   - Achievments?
 
-# Checklist
+# Datamodell
 
-- [ ] properly responsive navigation bar
-- [ ] /students/id
-  - [x] personal goals
-  - [ ] group goals
-- [ ] Teste relasjoner status/goal
-- [ ] Smartere Excel-import
-- [ ] Finne ut av sikkerhet/ACL
-- [ ] Feide
-  - [ ] Auth for bruker
-  - [x] Importere skoler
-  - [x] Importere grupper pr. skole
-  - [x] Importere subjects fra UDIR/grep (som matcher teaching-groups)
-- [x] deploy to test server
-  - [x] basic auth
-  - [x] inkludert importere data
-- [x] .env example files
-- [x] license
-- [x] /ping endpoint
-  - warning in frontend
-- [x] prettier i frontend
-- [x] implementer: punkt web components https://punkt.oslo.kommune.no/latest/komponenter/om-komponenter/
-- [x] Dataimport fra Excel
-  - [x] Observation, Goal
-  - [x] User
-  - [x] Group
-  - [x] Subject
-- [x] App funker like bra som prototypen
-  - [x] /home (my groups)
-  - [x] /students
-  - [x] /schools
-- [x] /students should show subjects
-  - subjects are derived from Goals
-- [x] revamp Subject model
-- [x] Svelte-kompatibel, datastore-aktig localstorage
-- [x] En unit-test som sjekker noe som helst
-- [x] Urls, view, serializers for hele databasen
-- [x] Teste relasjoner user/group
-- [x] En test som sjekker at APIet leverer noe og gir 200
-- [x] openapi: kode + typings
-- [x] Fetch noe fra APIet og rendre
-- [x] API with camelCase
-- [x] Skissere en datamodell
-- [x] models.py
-- [x] Sette opp en database, mariadb
-- [x] Koble django til databasen
-- [x] Generere og kjøre migrasjoner
-- [x] API: Eksponere innhold fra den ene tabellen via http
-- [x] Konfigurere .env og prosjektet for lokal utvikling og deployment
-- [x] Dockerization m/gunicorn
-- [x] Sette opp en frontend m/svelte
-- [x] svelte-routing
-- [x] Bootstrap
+![Data Model](data_model.png 'Database Schema Diagram')
 
 # Pattern for feide_id:
 
