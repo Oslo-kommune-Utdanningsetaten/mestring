@@ -6,11 +6,10 @@
 
 # Checklist
 
-- [ ] deploy to test server
 - [ ] properly responsive navigation bar
 - [ ] /students/id
-  - [ ] personal goals
-  - [x] group goals
+  - [x] personal goals
+  - [ ] group goals
 - [ ] Teste relasjoner status/goal
 - [ ] Smartere Excel-import
 - [ ] Finne ut av sikkerhet/ACL
@@ -19,10 +18,13 @@
   - [x] Importere skoler
   - [x] Importere grupper pr. skole
   - [x] Importere subjects fra UDIR/grep (som matcher teaching-groups)
+- [x] deploy to test server
+  - [x] basic auth
+  - [x] inkludert importere data
 - [x] .env example files
 - [x] license
 - [x] /ping endpoint
-  - warning in frontend with not pong
+  - warning in frontend
 - [x] prettier i frontend
 - [x] implementer: punkt web components https://punkt.oslo.kommune.no/latest/komponenter/om-komponenter/
 - [x] Dataimport fra Excel
