@@ -37,11 +37,11 @@
   let localMasterySchema = $state<Partial<MasterySchemaReadable>>({ ...masterySchema })
   let localJson = $derived<any>(localMasterySchema?.schema || defaultSchema)
 
-  const handleJsonChange = (newContent: any) => {
-    if (newContent.json) {
-      localJson = newContent.json
-    } else if (newContent.text) {
-      localJson = JSON.parse(newContent.text)
+  const handleJsonChange = (updatedContent: any) => {
+    if (updatedContent.json) {
+      localJson = updatedContent.json
+    } else if (updatedContent.text) {
+      localJson = JSON.parse(updatedContent.text)
     }
   }
 
