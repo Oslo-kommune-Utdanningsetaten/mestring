@@ -8,6 +8,7 @@
   import Students from './components/Students.svelte'
   import Subjects from './components/Subjects.svelte'
   import Navigation from './components/Navigation.svelte'
+  import MasterySchemas from './components/MasterySchemas.svelte'
   import { loadData } from './stores/data'
   import 'bootstrap/dist/css/bootstrap.min.css'
   import 'bootstrap/dist/js/bootstrap.min.js'
@@ -30,6 +31,7 @@
     <Route path="/schools" component={Schools} />
     <Route path="/students" component={Students} />
     <Route path="/subjects" component={Subjects} />
+    <Route path="/mastery-schemas" component={MasterySchemas} />
 
     <!-- Fallback route: no "path" prop means it always matches -->
     <Route>

@@ -119,6 +119,7 @@
               </li>
             {/each}
             <li><hr class="dropdown-divider" /></li>
+            <li><a class="dropdown-item" href="/mastery-schemas">Mastery Schemas</a></li>
             <li><a class="dropdown-item" href="/about">Om&nbsp;tjenesten</a></li>
             <li><a class="dropdown-item" href="#">Option 3</a></li>
           </ul>

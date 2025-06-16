@@ -3,9 +3,11 @@ from rest_framework import viewsets, status, views, filters
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.db import connection
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.parsers import JSONParser, FormParser
 from rest_framework.filters import OrderingFilter
+from django.db import connection
+import json
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 
@@ -200,6 +202,7 @@ class UserGroupViewSet(viewsets.ModelViewSet):
 class MasterySchemaViewSet(viewsets.ModelViewSet):
     queryset = models.MasterySchema.objects.all()
     serializer_class = serializers.MasterySchemaSerializer
+
 
 
 @api_view(['GET'])

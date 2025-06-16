@@ -328,21 +328,4 @@
 </div>
 
 <style>
-  .custom-offcanvas {
-    position: fixed;
-    right: -50vw;
-    top: 0;
-    height: 100vh;
-    width: 50vw;
-    background: white;
-    z-index: 1050;
-    border: 2px solid var(--bs-primary);
-    transition: right 0.22s ease-in-out;
-    pointer-events: none;
-  }
-
-  .custom-offcanvas.visible {
-    right: 0;
-    pointer-events: all;
-  }
 </style>
