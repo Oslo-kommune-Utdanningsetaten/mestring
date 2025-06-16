@@ -73,6 +73,21 @@ export type GroupWritable = {
     schoolId: string;
 };
 
+export type MasterySchemaReadable = {
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    title?: string | null;
+    description?: string | null;
+    schema?: unknown;
+};
+
+export type MasterySchemaWritable = {
+    title?: string | null;
+    description?: string | null;
+    schema?: unknown;
+};
+
 export type NestedGroupUserReadable = {
     readonly id: string;
     role: RoleReadable;
@@ -175,6 +190,21 @@ export type PatchedGroupWritable = {
     validTo?: string | null;
     subjectId?: string;
     schoolId?: string;
+};
+
+export type PatchedMasterySchemaReadable = {
+    readonly id?: string;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    title?: string | null;
+    description?: string | null;
+    schema?: unknown;
+};
+
+export type PatchedMasterySchemaWritable = {
+    title?: string | null;
+    description?: string | null;
+    schema?: unknown;
 };
 
 export type PatchedObservationReadable = {
@@ -678,6 +708,107 @@ export type GroupsMembersRetrieveResponses = {
 };
 
 export type GroupsMembersRetrieveResponse = GroupsMembersRetrieveResponses[keyof GroupsMembersRetrieveResponses];
+
+export type MasterySchemasListData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/mastery-schemas/';
+};
+
+export type MasterySchemasListResponses = {
+    200: Array<MasterySchemaReadable>;
+};
+
+export type MasterySchemasListResponse = MasterySchemasListResponses[keyof MasterySchemasListResponses];
+
+export type MasterySchemasCreateData = {
+    body?: MasterySchemaWritable;
+    path?: never;
+    query?: never;
+    url: '/api/mastery-schemas/';
+};
+
+export type MasterySchemasCreateResponses = {
+    201: MasterySchemaReadable;
+};
+
+export type MasterySchemasCreateResponse = MasterySchemasCreateResponses[keyof MasterySchemasCreateResponses];
+
+export type MasterySchemasDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this mastery schema.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/mastery-schemas/{id}/';
+};
+
+export type MasterySchemasDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type MasterySchemasDestroyResponse = MasterySchemasDestroyResponses[keyof MasterySchemasDestroyResponses];
+
+export type MasterySchemasRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this mastery schema.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/mastery-schemas/{id}/';
+};
+
+export type MasterySchemasRetrieveResponses = {
+    200: MasterySchemaReadable;
+};
+
+export type MasterySchemasRetrieveResponse = MasterySchemasRetrieveResponses[keyof MasterySchemasRetrieveResponses];
+
+export type MasterySchemasPartialUpdateData = {
+    body?: PatchedMasterySchemaWritable;
+    path: {
+        /**
+         * A unique value identifying this mastery schema.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/mastery-schemas/{id}/';
+};
+
+export type MasterySchemasPartialUpdateResponses = {
+    200: MasterySchemaReadable;
+};
+
+export type MasterySchemasPartialUpdateResponse = MasterySchemasPartialUpdateResponses[keyof MasterySchemasPartialUpdateResponses];
+
+export type MasterySchemasUpdateData = {
+    body?: MasterySchemaWritable;
+    path: {
+        /**
+         * A unique value identifying this mastery schema.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/mastery-schemas/{id}/';
+};
+
+export type MasterySchemasUpdateResponses = {
+    200: MasterySchemaReadable;
+};
+
+export type MasterySchemasUpdateResponse = MasterySchemasUpdateResponses[keyof MasterySchemasUpdateResponses];
 
 export type ObservationsListData = {
     body?: never;

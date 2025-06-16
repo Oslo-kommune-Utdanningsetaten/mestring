@@ -49,11 +49,13 @@ class BaseModelSerializer(serializers.ModelSerializer):
                     data[f"{field.name}Id"] = data.pop(field.name)
         return data
 
+
 # Base serializers for UserGroup and StatusGoal
 class UserGroupSerializer(BaseModelSerializer):
     class Meta:
         model = models.UserGroup
         fields = '__all__'
+
 
 # Basic serializers (without nested relationships)
 class SchoolSerializer(BaseModelSerializer):
@@ -61,10 +63,12 @@ class SchoolSerializer(BaseModelSerializer):
         model = models.School
         fields = '__all__'
 
+
 class SubjectSerializer(BaseModelSerializer):
     class Meta:
         model = models.Subject
         fields = '__all__'
+
 
 class RoleSerializer(BaseModelSerializer):
     class Meta:
@@ -78,11 +82,13 @@ class BasicUserSerializer(BaseModelSerializer):
         model = models.User
         fields = '__all__'
 
+
 class BasicGroupSerializer(BaseModelSerializer):
     """Basic group serializer without nested relationships to avoid circular references"""
     class Meta:
         model = models.Group
         fields = '__all__'
+
 
 class BasicGoalSerializer(BaseModelSerializer):
     """Basic goal serializer without nested relationships to avoid circular references"""
@@ -90,17 +96,20 @@ class BasicGoalSerializer(BaseModelSerializer):
         model = models.Goal
         fields = '__all__'
 
+
 class BasicStatusSerializer(BaseModelSerializer):
     """Basic status serializer without nested relationships to avoid circular references"""
     class Meta:
         model = models.Status
         fields = '__all__'
 
+
 class BasicSituationSerializer(BaseModelSerializer):
     """Basic situation serializer without nested relationships to avoid circular references"""
     class Meta:
         model = models.Situation
         fields = '__all__'
+
 
 # Nested UserGroup serializer for use in User and Group serializers
 class NestedUserGroupSerializer(BaseModelSerializer):
@@ -109,7 +118,8 @@ class NestedUserGroupSerializer(BaseModelSerializer):
     class Meta:
         model = models.UserGroup
         exclude = ('user',)  # Exclude user when used within User serializer
-        
+
+
 class NestedGroupUserSerializer(BaseModelSerializer):
     role = RoleSerializer(read_only=True)
     user = BasicUserSerializer(read_only=True)
@@ -117,6 +127,7 @@ class NestedGroupUserSerializer(BaseModelSerializer):
     class Meta:
         model = models.UserGroup
         exclude = ('group',)  # Exclude group when used within Group serializer
+
 
 # Main serializers with relationships
 class UserSerializer(BaseModelSerializer):
@@ -126,6 +137,7 @@ class UserSerializer(BaseModelSerializer):
         model = models.User
         fields = '__all__'
 
+
 class GroupSerializer(BaseModelSerializer):
     members = NestedGroupUserSerializer(source='usergroup_set', many=True, read_only=True)
     
@@ -133,22 +145,32 @@ class GroupSerializer(BaseModelSerializer):
         model = models.Group
         fields = '__all__'
 
+
 class GoalSerializer(BaseModelSerializer):
     class Meta:
         model = models.Goal
         fields = '__all__'
+
 
 class SituationSerializer(BaseModelSerializer):
     class Meta:
         model = models.Situation
         fields = '__all__'
 
+
 class ObservationSerializer(BaseModelSerializer):
     class Meta:
         model = models.Observation
         fields = '__all__'
 
+
 class StatusSerializer(BaseModelSerializer):    
     class Meta:
         model = models.Status
+        fields = '__all__'
+
+
+class MasterySchemaSerializer(BaseModelSerializer):    
+    class Meta:
+        model = models.MasterySchema
         fields = '__all__'

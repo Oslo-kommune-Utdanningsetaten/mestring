@@ -197,6 +197,11 @@ class UserGroupViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.UserGroupSerializer
 
 
+class MasterySchemaViewSet(viewsets.ModelViewSet):
+    queryset = models.MasterySchema.objects.all()
+    serializer_class = serializers.MasterySchemaSerializer
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def ping(request):
