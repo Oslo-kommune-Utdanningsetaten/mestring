@@ -11,12 +11,13 @@ class BaseModel(models.Model):
     """
     Abstract base model that provides common fields for all models.
     """
-    id = models.CharField(primary_key=True, max_length=12, default=generate_nanoid, editable=False)
+    id = models.CharField(primary_key=True, max_length=50, default=generate_nanoid, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         abstract = True
+
 
 class School(BaseModel):
     """
@@ -183,8 +184,8 @@ class Goal(BaseModel):
 
     @property
     def is_group(self):
-        return self.student is None and self.group is not None
-    
+        return self.student is None and self.group is not None 
+
 
 class Situation(BaseModel):
     """
@@ -225,3 +226,10 @@ class Status(BaseModel):
     feedforward = models.TextField(null=True)
 
 
+class MasterySchema(BaseModel):
+    """
+    A MasterySchema models how student mastery, with regards to a specific Goal, is considered.
+    """
+    title = models.CharField(max_length=200, null=True)
+    description = models.TextField(null=True)
+    schema = models.JSONField(null=True)
