@@ -69,7 +69,7 @@
   }
 
   function handleEditGoal(goal: GoalDecorated | null) {
-    goalWip = goal || {}
+    goalWip = { ...goal }
   }
 
   function handleCloseEditGoal() {
@@ -254,7 +254,18 @@
                           label={goal.title}
                         />
                       {:else}
-                        <span>Ikke pågbegynt</span>
+                        <pkt-icon
+                          title="Rediger mål"
+                          class="hover-glow me-2"
+                          name="edit"
+                          onclick={() => handleEditGoal(goal)}
+                        ></pkt-icon>
+                        <pkt-icon
+                          title="Slett mål"
+                          class="hover-glow me-2"
+                          name="trash-can"
+                          onclick={() => handleDeleteGoal(goal.id)}
+                        ></pkt-icon>
                       {/if}
 
                       <pkt-icon
@@ -266,22 +277,12 @@
                     </div>
                     {#if expandedGoals[goal.id]}
                       <div class="bg-primary-subtle p-2 me-5">
-                        <div>
-                          {#if goal.observations.length === 0}
-                            Slett mål {index}
-                            <span class="col-1">
-                              <pkt-icon
-                                title="Slet mål"
-                                class="hover-glow me-2"
-                                name="trash-can"
-                                onclick={() => handleDeleteGoal(goal.id)}
-                              ></pkt-icon>
-                            </span>
-                          {/if}
-                        </div>
+                        {#if goal?.observations.length === 0}
+                          Ingen observasjoner for dette målet
+                        {/if}
                         {#each goal?.observations as observation}
                           <div class="row">
-                            <span class="col-2">{formatDate(observation.observedAt)}</span>
+                            <span class="col-3">{formatDate(observation.observedAt)}</span>
                             <span class="col-1">{observation.masteryValue}</span>
                             <span class="col-1">
                               <pkt-icon

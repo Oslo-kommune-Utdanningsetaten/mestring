@@ -48,6 +48,7 @@
   // Fetch mastery schemas when component mounts
   $effect(() => {
     fetchMasterySchemas()
+    localGoal = { ...goal }
   })
 </script>
 
@@ -56,7 +57,7 @@
   <div class="form-group mb-3">
     <div class="pkt-inputwrapper">
       <label for="goalSubject" class="form-label">Fag</label>
-      <select class="pkt-input" bind:value={localGoal.subject_id}>
+      <select class="pkt-input" bind:value={localGoal.subjectId}>
         <option value="">Velg fag</option>
         {#each $dataStore.subjects as subject}
           <option value={subject.id}>{subject.displayName}</option>
@@ -104,7 +105,7 @@
       }}
       role="button"
       tabindex="0"
-      disabled={!localGoal.title?.trim() || !localGoal.subject_id}
+      disabled={!localGoal.title?.trim() || !localGoal.subjectId || !localGoal.masterySchemaId}
     >
       Lagre
     </pkt-button>

@@ -180,7 +180,7 @@ class Goal(BaseModel):
     student = models.ForeignKey(User, on_delete=models.RESTRICT, null=True)
     subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True)
     previous_goal = models.ForeignKey('Goal', on_delete=models.RESTRICT, null=True)
-    mastery_schema_id = models.ForeignKey(MasterySchema, on_delete=models.RESTRICT, null=True)
+    mastery_schema = models.ForeignKey(MasterySchema, on_delete=models.RESTRICT, null=True)
 
     class Meta:
         constraints = [

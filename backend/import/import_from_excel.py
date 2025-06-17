@@ -16,6 +16,78 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
 django.setup()
 from mastery import models
 
+def ensure_test_school():
+    """
+    Ensure that a test school exists in the database.
+    If it does not exist, create it.
+    """
+    school_id = 'kakrafoonorg'
+    school = models.School.objects.filter(id=school_id).first()
+    if not school:
+        print("Creating test school:", school_id)
+        school = models.School.objects.create(
+            display_name='Kakrafoon barneskole',
+            short_name='kak',
+            id='kakrafoonorg',
+            maintained_at=timezone.now(),
+            feide_id='fc:org:feide.osloskolen.no:unit:NO987654321',
+            org_number='NO987654321',
+            is_service_enabled=True,
+        )
+        school.save()
+    return school
+
+
+def ensure_mastery_schema_exists():
+    title = 'Mestringstrappa'
+    mastery_schema = models.MasterySchema.objects.filter(title=title).first()
+    if not mastery_schema:
+        print("Creating default mastery_schema:", title)
+        mastery_schema = models.MasterySchema.objects.create(
+            title=title,
+            description='Mestring angitt med fem nivåer, fra "aldri" til "mestrer".',
+            maintained_at=timezone.now(),
+            schema={
+                "levels": [
+                    {
+                    "text": "Mestrer ikke",
+                    "color": "rgb(229, 50, 43)",
+                    "maxValue": 20,
+                    "minValue": 1
+                    },
+                    {
+                    "text": "Mestrer sjelden",
+                    "color": "rgb(159, 113, 202)",
+                    "maxValue": 40,
+                    "minValue": 21
+                    },
+                    {
+                    "text": "Mestrer iblant",
+                    "color": "rgb(86, 174, 232)",
+                    "maxValue": 60,
+                    "minValue": 41
+                    },
+                    {
+                    "text": "Mestrer ofte",
+                    "color": "rgb(241, 249, 97)",
+                    "maxValue": 80,
+                    "minValue": 61
+                    },
+                    {
+                    "text": "Mestrer",
+                    "color": "rgb(160, 207, 106)",
+                    "maxValue": 100,
+                    "minValue": 81
+                    }
+                ],
+                "inputIncrement": 1,
+                "renderDirection": "vertical",
+                "isColorGradientEnabled": False
+            }
+        )
+        mastery_schema.save()
+    return mastery_schema
+
 
 def ensure_roles_exist():
     """
@@ -139,10 +211,11 @@ def run_import():
         field_names = ['id', 'title', 'subject_id', 'student_feide_id'] # ONLY IMPORTING STUDENT GOALS!
         goal_dicts = objects_from_sheet(sheet, field_names)
         results = []
+        schema = ensure_mastery_schema_exists()
         for goal_dict in goal_dicts:
             subject = models.Subject.objects.filter(id__exact=goal_dict['subject_id']).first()
             student = models.User.objects.filter(feide_id__exact=goal_dict['student_feide_id']).first()
-            defaults = {'maintained_at': timezone.now()}
+            defaults = {'maintained_at': timezone.now(), 'mastery_schema': schema}
             for k, v in goal_dict.items():
                 if k == 'id':
                     continue

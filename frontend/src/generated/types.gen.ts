@@ -45,7 +45,7 @@ export type GoalReadable = {
     studentId?: string;
     subjectId?: string;
     previousGoalId?: string;
-    masterySchemaIdId?: string;
+    masterySchemaId?: string;
 };
 
 export type GoalWritable = {
@@ -58,7 +58,7 @@ export type GoalWritable = {
     studentId?: string;
     subjectId?: string;
     previousGoalId?: string;
-    masterySchemaIdId?: string;
+    masterySchemaId?: string;
 };
 
 export type GroupReadable = {
@@ -200,7 +200,7 @@ export type PatchedGoalReadable = {
     studentId?: string;
     subjectId?: string;
     previousGoalId?: string;
-    masterySchemaIdId?: string;
+    masterySchemaId?: string;
 };
 
 export type PatchedGoalWritable = {
@@ -213,7 +213,7 @@ export type PatchedGoalWritable = {
     studentId?: string;
     subjectId?: string;
     previousGoalId?: string;
-    masterySchemaIdId?: string;
+    masterySchemaId?: string;
 };
 
 export type PatchedGroupReadable = {
