@@ -127,5 +127,6 @@
   .custom-offcanvas {
     right: -70vw;
     width: 70vw;
+    overflow-y: auto;
   }
 </style>
