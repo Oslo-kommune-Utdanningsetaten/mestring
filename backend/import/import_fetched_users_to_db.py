@@ -14,6 +14,56 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
 django.setup()
 from mastery import models
 
+def ensure_mastery_schema_exists():
+    title = 'Mestringstrappa'
+    mastery_schema = models.MasterySchema.objects.filter(title=title).first()
+    if not system_user:
+        print("Creating default mastery_schema:", title)
+        system_user = models.MasterySchema.objects.create(
+            title=title,
+            description='Mestring angitt med fem nivåer, fra "aldri" til "mestrer".',
+            schema={
+                "levels": [
+                    {
+                    "text": "Mestrer ikke",
+                    "color": "rgb(229, 50, 43)",
+                    "maxValue": 20,
+                    "minValue": 1
+                    },
+                    {
+                    "text": "Mestrer sjelden",
+                    "color": "rgb(159, 113, 202)",
+                    "maxValue": 40,
+                    "minValue": 21
+                    },
+                    {
+                    "text": "Mestrer iblant",
+                    "color": "rgb(86, 174, 232)",
+                    "maxValue": 60,
+                    "minValue": 41
+                    },
+                    {
+                    "text": "Mestrer ofte",
+                    "color": "rgb(241, 249, 97)",
+                    "maxValue": 80,
+                    "minValue": 61
+                    },
+                    {
+                    "text": "Mestrer",
+                    "color": "rgb(160, 207, 106)",
+                    "maxValue": 100,
+                    "minValue": 81
+                    }
+                ],
+                "inputIncrement": 1,
+                "renderDirection": "vertical",
+                "isColorGradientEnabled": False
+            }
+        )
+        mastery_schema.save()
+    return mastery_schema
+
+
 def ensure_roles_exist():
     """
     Ensure that the roles 'teacher' and 'student' exist in the database.

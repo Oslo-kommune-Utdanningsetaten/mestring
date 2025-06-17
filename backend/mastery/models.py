@@ -158,6 +158,15 @@ class UserGroup(BaseModel):
         unique_together = ('user', 'group', 'role')
 
 
+class MasterySchema(BaseModel):
+    """
+    A MasterySchema models how student mastery, with regards to a specific Goal, is considered.
+    """
+    title = models.CharField(max_length=200, null=True)
+    description = models.TextField(null=True)
+    schema = models.JSONField(null=True)
+
+
 class Goal(BaseModel):
     """
     A Goal represents something a student should strive towards. A Goal is either for all students in a Group (if goal.group is set), or personal for a specific student (if goal.student is set)
@@ -168,7 +177,7 @@ class Goal(BaseModel):
     student = models.ForeignKey(User, on_delete=models.RESTRICT, null=True)
     subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True)
     previous_goal = models.ForeignKey('Goal', on_delete=models.RESTRICT, null=True)
-    mastery_schema = models.JSONField(null=True)
+    mastery_schema_id = models.ForeignKey(MasterySchema, on_delete=models.RESTRICT, null=True)
 
     class Meta:
         constraints = [
@@ -225,11 +234,3 @@ class Status(BaseModel):
     mastery_description = models.TextField(null=True)
     feedforward = models.TextField(null=True)
 
-
-class MasterySchema(BaseModel):
-    """
-    A MasterySchema models how student mastery, with regards to a specific Goal, is considered.
-    """
-    title = models.CharField(max_length=200, null=True)
-    description = models.TextField(null=True)
-    schema = models.JSONField(null=True)
