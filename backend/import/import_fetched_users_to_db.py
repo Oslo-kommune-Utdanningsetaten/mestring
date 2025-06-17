@@ -1,8 +1,8 @@
 import os
 import sys
 import json
-import requests
 from dotenv import load_dotenv
+from django.utils import timezone
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(script_dir, '..'))
@@ -22,6 +22,7 @@ def ensure_mastery_schema_exists():
         system_user = models.MasterySchema.objects.create(
             title=title,
             description='Mestring angitt med fem nivåer, fra "aldri" til "mestrer".',
+            maintained_at=timezone.now(),
             schema={
                 "levels": [
                     {
@@ -69,8 +70,14 @@ def ensure_roles_exist():
     Ensure that the roles 'teacher' and 'student' exist in the database.
     If they do not exist, create them.
     """
-    teacher_role, _ = models.Role.objects.get_or_create(name='teacher')
-    student_role, _ = models.Role.objects.get_or_create(name='student')
+    teacher_role, _ = models.Role.objects.get_or_create(
+        name='teacher',
+        defaults={'maintained_at': timezone.now()}
+    )
+    student_role, _ = models.Role.objects.get_or_create(
+        name='student',
+        defaults={'maintained_at': timezone.now()}
+    )
     return teacher_role, student_role
 
 # Create a new subject if it doesn't exist
@@ -79,7 +86,12 @@ def ensure_membership(user, group, role):
     Ensure that a user is a member of a group with the specified role.
     If the user is not already a member, create the membership.
     """
-    user_group, created = models.UserGroup.objects.get_or_create(user=user, group=group, role=role)
+    user_group, created = models.UserGroup.objects.get_or_create(
+        user=user,
+        group=group,
+        role=role,
+        defaults={'maintained_at': timezone.now()}
+    )
     if created:
         print("  Membership created!", user_group.id)
     else:
@@ -117,6 +129,7 @@ def import_users_to_db():
                     name=teacher['name'],
                     feide_id=teacher['feide_id'],
                     email=teacher['email'],
+                    maintained_at=timezone.now(),
                 )
                 user.save()
                 print("  User created!", user.email)
@@ -134,6 +147,7 @@ def import_users_to_db():
                     name=student['name'],
                     feide_id=student['feide_id'],
                     email=student['email'],
+                    maintained_at=timezone.now(),
                 )
                 user.save()
                 print("  User created!", user.email)

@@ -2,6 +2,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from pyexcel_xlsx import get_data
+from django.utils import timezone
 
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -21,8 +22,14 @@ def ensure_roles_exist():
     Ensure that the roles 'teacher' and 'student' exist in the database.
     If they do not exist, create them.
     """
-    teacher_role, _ = models.Role.objects.get_or_create(name='teacher')
-    student_role, _ = models.Role.objects.get_or_create(name='student')
+    teacher_role, _ = models.Role.objects.get_or_create(
+        name='teacher',
+        defaults={'maintained_at': timezone.now()}
+    )
+    student_role, _ = models.Role.objects.get_or_create(
+        name='student',
+        defaults={'maintained_at': timezone.now()}
+    )
     return teacher_role, student_role
 
 
@@ -59,7 +66,7 @@ def run_import():
         results = []
         for subject_dict in subject_dicts:
             school = models.School.objects.filter(id__exact=subject_dict['maintened_by_school_id']).first()
-            defaults = {}
+            defaults = {'maintained_at': timezone.now()}
             for k, v in subject_dict.items():
                 if k == 'id':
                     continue
@@ -81,7 +88,7 @@ def run_import():
         for group_dict in group_dicts:
             school = models.School.objects.filter(id__exact=group_dict['school_id']).first()
             subject = models.Subject.objects.filter(id__exact=group_dict['subject_id']).first() if group_dict['subject_id'] is not None else None
-            defaults = {}
+            defaults = {'maintained_at': timezone.now()}
             for k, v in group_dict.items():
                 if k == 'id':
                     continue
@@ -105,10 +112,12 @@ def run_import():
         for member_dict in member_dicts:
             # maybe create the user
             user_email = member_dict['user_feide_id'].split(':')[1].replace('@feide.', '@')
-            user, created = models.User.objects.get_or_create(feide_id=member_dict['user_feide_id'], defaults={'name': member_dict['name'], 'email': user_email})
+            user, created = models.User.objects.get_or_create(
+                feide_id=member_dict['user_feide_id'],
+                defaults={'name': member_dict['name'], 'email': user_email, 'maintained_at': timezone.now()})
             group = models.Group.objects.filter(feide_id__exact=member_dict['group_feide_id']).first()
             role = teacher_role if member_dict['role'] == 'teacher' else student_role
-            defaults = {}
+            defaults = {'maintained_at': timezone.now()}
             for k, v in member_dict.items():
                 if k == 'id':
                     continue
@@ -133,7 +142,7 @@ def run_import():
         for goal_dict in goal_dicts:
             subject = models.Subject.objects.filter(id__exact=goal_dict['subject_id']).first()
             student = models.User.objects.filter(feide_id__exact=goal_dict['student_feide_id']).first()
-            defaults = {}
+            defaults = {'maintained_at': timezone.now()}
             for k, v in goal_dict.items():
                 if k == 'id':
                     continue
@@ -158,7 +167,7 @@ def run_import():
             student = models.User.objects.filter(feide_id__exact=observation_dict['student_feide_id']).first()
             observer = models.User.objects.filter(feide_id__exact=observation_dict['observer_feide_id']).first()
             goal = models.Goal.objects.filter(id=observation_dict['goal_id']).first()
-            defaults = {}
+            defaults = {'maintained_at': timezone.now()}
             for k, v in observation_dict.items():
                 if k == 'id':
                     continue

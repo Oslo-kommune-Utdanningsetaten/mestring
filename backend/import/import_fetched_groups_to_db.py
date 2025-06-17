@@ -3,6 +3,8 @@ import sys
 import json
 import requests
 from dotenv import load_dotenv
+from django.utils import timezone
+
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(script_dir, '..'))
@@ -32,6 +34,7 @@ def ensure_subject(grep_code):
                 short_name=short_name,
                 grep_code=grep_code,
                 grep_group_code=grep_group_code,
+                maintained_at=timezone.now(),
             )
         else:
             print("🚷Failed to fetch subject from UDIR:", grep_code)
@@ -66,6 +69,7 @@ def import_groups_to_db():
                 org_number=org_number,
                 owner=school['parent'],
                 feide_id=school['id'],
+                maintained_at=timezone.now(),
             )
             new_school.save()
             print("  School created!", new_school.display_name)
@@ -90,6 +94,7 @@ def import_groups_to_db():
                     feide_id=feide_id,
                     valid_from=group['notBefore'],
                     valid_to=group['notAfter'],
+                    maintained_at=timezone.now(),
                 )
                 new_group.save()
                 print("  Basis group created!", new_group.display_name)
@@ -116,6 +121,7 @@ def import_groups_to_db():
                     feide_id=feide_id,
                     valid_from=group['notBefore'],
                     valid_to=group['notAfter'],
+                    maintained_at=timezone.now(),
                 )
                 new_group.save()
                 print("  Teaching group created!", new_group.display_name)
