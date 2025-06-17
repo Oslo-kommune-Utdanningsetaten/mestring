@@ -1,7 +1,12 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
   import { observationsCreate, observationsUpdate } from '../generated/sdk.gen'
-  import type { ObservationReadable, GoalReadable, UserReadable } from '../generated/types.gen'
+  import type {
+    ObservationReadable,
+    GoalReadable,
+    UserReadable,
+    MasterySchemaReadable,
+  } from '../generated/types.gen'
 
   const { student, goal, observation, onDone } = $props<{
     student: UserReadable | null
@@ -10,23 +15,9 @@
     onDone: () => void
   }>()
 
-  const masteryLevels = [
-    {
-      text: 'Mestrer ikke',
-    },
-    {
-      text: 'Mestrer sjelden',
-    },
-    {
-      text: 'Mestrer iblant',
-    },
-    {
-      text: 'Mestrer ofte',
-    },
-    {
-      text: 'Mestrer',
-    },
-  ]
+  const masterySchema: MasterySchemaReadable = $derived(
+    $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
+  )
 
   let sliderInput: HTMLInputElement
   let masteryIndicator: HTMLElement
@@ -90,7 +81,7 @@
       Hvor ofte mestrer {student?.name}: {goal?.title}
     </label>
     <div class="stairs-container">
-      {#each masteryLevels as masteryLevel}
+      {#each masterySchema.schema.levels as masteryLevel}
         <span class="rung">{masteryLevel.text}</span>
       {/each}
       <div id="slider-value-indicator" bind:this={masteryIndicator}></div>

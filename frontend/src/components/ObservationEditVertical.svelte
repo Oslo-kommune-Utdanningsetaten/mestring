@@ -10,40 +10,16 @@
     onDone: () => void
   }>()
 
-  const masteryLevels = [
-    {
-      text: 'Mestrer',
-      minValue: 81,
-      maxValue: 100,
-      color: 'rgb(160, 207, 106)',
-    },
-    {
-      text: 'Mestrer ofte',
-      minValue: 61,
-      maxValue: 80,
-      color: 'rgb(241, 249, 97)',
-    },
-    {
-      text: 'Mestrer iblant',
-      minValue: 41,
-      maxValue: 60,
-      color: 'rgb(86, 174, 232)',
-    },
-    {
-      text: 'Mestrer sjelden',
-      minValue: 21,
-      maxValue: 40,
-      color: 'rgb(159, 113, 202)',
-    },
-    {
-      text: 'Mestrer ikke',
-      minValue: 1,
-      maxValue: 20,
-      color: 'rgb(229, 50, 43)',
-    },
-  ]
-
-  const levelMultiplier = 100 / masteryLevels.length
+  const masterySchema = $derived(
+    $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
+  )
+  const masteryLevels = $derived(masterySchema?.schema?.levels.reverse() || [])
+  const minValue = $derived(
+    masteryLevels.length ? masteryLevels[masteryLevels.length - 1].minValue : 1
+  )
+  const maxValue = $derived(masteryLevels.length ? masteryLevels[0].maxValue : 100)
+  const sliderValueIncrement = $derived(masteryLevels.length ? masteryLevels[0].increment || 1 : 1)
+  const widthMultiplier = $derived(masteryLevels.length ? 100 / masteryLevels.length : 1)
 
   let localObservation = $state<ObservationReadable>({
     ...observation,
@@ -58,18 +34,14 @@
 
     try {
       if (localObservation.id) {
-        // Update existing Observation
         const result = await observationsUpdate({
           path: { id: localObservation.id },
           body: localObservation,
         })
-        console.log('Observation updated:', result.data)
       } else {
-        // Create new Observation
         const result = await observationsCreate({
           body: localObservation,
         })
-        console.log('Observation created:', result.data)
       }
       onDone()
     } catch (error) {
@@ -93,9 +65,9 @@
       <input
         id="mastery-slider"
         type="range"
-        min="1"
-        max="100"
-        step="1"
+        min={minValue}
+        max={maxValue}
+        step={sliderValueIncrement}
         class="slider"
         bind:value={localObservation.masteryValue}
       />
@@ -105,7 +77,7 @@
           <span
             class="rung"
             style="width: {(index + 1) *
-              levelMultiplier}%; background-color: {localObservation?.masteryValue >=
+              widthMultiplier}%; background-color: {localObservation?.masteryValue >=
             masteryLevel.minValue
               ? masteryLevel.color
               : 'var(--bs-gray)'};"

@@ -1,7 +1,11 @@
 import { get, writable } from 'svelte/store'
 import type { Writable as WritableType } from 'svelte/store'
-import { subjectsList, schoolsList } from '../generated/sdk.gen'
-import type { SchoolReadable, BasicUserReadable } from '../generated/types.gen'
+import { subjectsList, schoolsList, masterySchemasList } from '../generated/sdk.gen'
+import type {
+  SchoolReadable,
+  BasicUserReadable,
+  MasterySchemaReadable,
+} from '../generated/types.gen'
 import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage'
 import type { AppData } from '../types/models'
 
@@ -26,11 +30,18 @@ export const setCurrentSchool = (school: SchoolReadable) => {
   }
 }
 
+const setMasterySchemas = (schemas: MasterySchemaReadable[]) => {
+  dataStore.update(data => {
+    return { ...data, masterySchemas: schemas }
+  })
+}
+
 // Create a writable store with initial empty values
 export const dataStore: WritableType<AppData> = writable({
   subjects: [],
   currentSchool: null,
   currentUser: null,
+  masterySchemas: [],
 })
 
 const loadDefaultSchool = async () => {
@@ -43,6 +54,17 @@ const loadDefaultSchool = async () => {
     }
   } catch (error) {
     console.error('Error fetching schools:', error)
+    return null
+  }
+}
+
+const loadMasterySchemas = async () => {
+  try {
+    const result = await masterySchemasList()
+    const schemas = result.data || []
+    setMasterySchemas(schemas)
+  } catch (error) {
+    console.error('Error fetching mastery schemas:', error)
     return null
   }
 }
@@ -78,6 +100,7 @@ export const loadData = async () => {
       currentSchool,
       currentUser: defaultUser,
       subjects: [],
+      masterySchemas: [],
     })
 
     if (!currentSchool) {
@@ -88,6 +111,7 @@ export const loadData = async () => {
     if (currentSchool?.id) {
       await loadSubjectsForSchool(currentSchool.id)
     }
+    await loadMasterySchemas()
   } catch (error) {
     console.error('Failed to load data:', error)
   }

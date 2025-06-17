@@ -65,7 +65,7 @@
   <div class="mt-4">
     {#if masterySchemas.length > 0}
       {#each masterySchemas as masterySchema}
-        <div class="card">
+        <div class="card shadow-sm">
           <div class="card-body">
             <h5 class="card-title">{masterySchema.title}</h5>
             <p class="card-text">

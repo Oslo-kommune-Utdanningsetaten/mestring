@@ -142,6 +142,12 @@
     expandedGoals[goalId] = !expandedGoals[goalId]
   }
 
+  const renderDirection = (goal: GoalDecorated): 'horizontal' | 'vertical' => {
+    if (!goal || !$dataStore.masterySchemas) return 'vertical'
+    const masterySchema = $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
+    return masterySchema.schema?.renderDirection === 'horizontal' ? 'horizontal' : 'vertical'
+  }
+
   $effect(() => {
     if (studentId) {
       fetchUser(studentId)
@@ -320,12 +326,21 @@
 
 <!-- offcanvas for adding an observation -->
 <div class="custom-offcanvas shadow-sm" class:visible={!!observationWip}>
-  <ObservationEditVertical
-    {student}
-    observation={observationWip}
-    goal={goalForObservation}
-    onDone={handleObservationDone}
-  />
+  {#if renderDirection(goalForObservation) === 'horizontal'}
+    <ObservationEditVertical
+      {student}
+      observation={observationWip}
+      goal={goalForObservation}
+      onDone={handleObservationDone}
+    />
+  {:else}
+    <ObservationEditVertical
+      {student}
+      observation={observationWip}
+      goal={goalForObservation}
+      onDone={handleObservationDone}
+    />
+  {/if}
 </div>
 
 <style>

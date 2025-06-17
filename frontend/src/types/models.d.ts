@@ -10,6 +10,7 @@ export interface AppData {
   subjects: SubjectReadable[]
   currentSchool: SchoolReadable | null
   currentUser: BasicUserReadable | null
+  masterySchemas: MasterySchemaReadable[]
 }
 
 export interface GoalDecorated extends GoalReadable {
