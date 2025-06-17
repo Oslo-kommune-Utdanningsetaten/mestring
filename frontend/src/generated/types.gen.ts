@@ -7,31 +7,40 @@ export type BasicUserReadable = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    maintainedAt?: string | null;
     name: string;
     feideId: string;
     email: string;
     lastActivityAt?: string | null;
     disabledAt?: string | null;
     readonly groups: Array<string | null>;
+    createdById?: string;
+    updatedById?: string;
 };
 
 /**
  * Basic user serializer without nested relationships to avoid circular references
  */
 export type BasicUserWritable = {
+    maintainedAt?: string | null;
     name: string;
     feideId: string;
     email: string;
     lastActivityAt?: string | null;
     disabledAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type GoalReadable = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
+    createdById?: string;
+    updatedById?: string;
     groupId?: string;
     studentId?: string;
     subjectId?: string;
@@ -40,8 +49,11 @@ export type GoalReadable = {
 };
 
 export type GoalWritable = {
+    maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
+    createdById?: string;
+    updatedById?: string;
     groupId?: string;
     studentId?: string;
     subjectId?: string;
@@ -54,21 +66,27 @@ export type GroupReadable = {
     readonly members: Array<NestedGroupUserReadable>;
     readonly createdAt: string;
     readonly updatedAt: string;
+    maintainedAt?: string | null;
     feideId: string;
     displayName: string;
     type: string;
     validFrom?: string | null;
     validTo?: string | null;
+    createdById?: string;
+    updatedById?: string;
     subjectId?: string;
     schoolId: string;
 };
 
 export type GroupWritable = {
+    maintainedAt?: string | null;
     feideId: string;
     displayName: string;
     type: string;
     validFrom?: string | null;
     validTo?: string | null;
+    createdById?: string;
+    updatedById?: string;
     subjectId?: string;
     schoolId: string;
 };
@@ -77,15 +95,21 @@ export type MasterySchemaReadable = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
     schema?: unknown;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type MasterySchemaWritable = {
+    maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
     schema?: unknown;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type NestedGroupUserReadable = {
@@ -94,12 +118,18 @@ export type NestedGroupUserReadable = {
     user: BasicUserReadable;
     readonly createdAt: string;
     readonly updatedAt: string;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
     groupId: string;
 };
 
 export type NestedGroupUserWritable = {
     role: RoleWritable;
     user: BasicUserWritable;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
     groupId: string;
 };
 
@@ -108,12 +138,18 @@ export type NestedUserGroupReadable = {
     role: RoleReadable;
     readonly createdAt: string;
     readonly updatedAt: string;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
     userId: string;
     groupId: string;
 };
 
 export type NestedUserGroupWritable = {
     role: RoleWritable;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
     userId: string;
     groupId: string;
 };
@@ -122,11 +158,14 @@ export type ObservationReadable = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    maintainedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
     isPrivate?: boolean;
+    createdById?: string;
+    updatedById?: string;
     goalId: string;
     studentId: string;
     observerId?: string;
@@ -134,11 +173,14 @@ export type ObservationReadable = {
 };
 
 export type ObservationWritable = {
+    maintainedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
     isPrivate?: boolean;
+    createdById?: string;
+    updatedById?: string;
     goalId: string;
     studentId: string;
     observerId?: string;
@@ -149,8 +191,11 @@ export type PatchedGoalReadable = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
+    maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
+    createdById?: string;
+    updatedById?: string;
     groupId?: string;
     studentId?: string;
     subjectId?: string;
@@ -159,8 +204,11 @@ export type PatchedGoalReadable = {
 };
 
 export type PatchedGoalWritable = {
+    maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
+    createdById?: string;
+    updatedById?: string;
     groupId?: string;
     studentId?: string;
     subjectId?: string;
@@ -173,21 +221,27 @@ export type PatchedGroupReadable = {
     readonly members?: Array<NestedGroupUserReadable>;
     readonly createdAt?: string;
     readonly updatedAt?: string;
+    maintainedAt?: string | null;
     feideId?: string;
     displayName?: string;
     type?: string;
     validFrom?: string | null;
     validTo?: string | null;
+    createdById?: string;
+    updatedById?: string;
     subjectId?: string;
     schoolId?: string;
 };
 
 export type PatchedGroupWritable = {
+    maintainedAt?: string | null;
     feideId?: string;
     displayName?: string;
     type?: string;
     validFrom?: string | null;
     validTo?: string | null;
+    createdById?: string;
+    updatedById?: string;
     subjectId?: string;
     schoolId?: string;
 };
@@ -196,26 +250,35 @@ export type PatchedMasterySchemaReadable = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
+    maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
     schema?: unknown;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type PatchedMasterySchemaWritable = {
+    maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
     schema?: unknown;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type PatchedObservationReadable = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
+    maintainedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
     isPrivate?: boolean;
+    createdById?: string;
+    updatedById?: string;
     goalId?: string;
     studentId?: string;
     observerId?: string;
@@ -223,11 +286,14 @@ export type PatchedObservationReadable = {
 };
 
 export type PatchedObservationWritable = {
+    maintainedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
     isPrivate?: boolean;
+    createdById?: string;
+    updatedById?: string;
     goalId?: string;
     studentId?: string;
     observerId?: string;
@@ -238,66 +304,90 @@ export type PatchedRoleReadable = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
+    maintainedAt?: string | null;
     name?: string;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type PatchedRoleWritable = {
+    maintainedAt?: string | null;
     name?: string;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type PatchedSchoolReadable = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
+    maintainedAt?: string | null;
     feideId?: string;
     displayName?: string;
     shortName?: string | null;
     orgNumber?: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type PatchedSchoolWritable = {
+    maintainedAt?: string | null;
     feideId?: string;
     displayName?: string;
     shortName?: string | null;
     orgNumber?: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type PatchedSituationReadable = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
+    maintainedAt?: string | null;
     title?: string;
     description?: string | null;
     happensAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type PatchedSituationWritable = {
+    maintainedAt?: string | null;
     title?: string;
     description?: string | null;
     happensAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type PatchedStatusReadable = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
+    maintainedAt?: string | null;
     estimatedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
+    createdById?: string;
+    updatedById?: string;
     studentId?: string;
     subjectId?: string;
 };
 
 export type PatchedStatusWritable = {
+    maintainedAt?: string | null;
     estimatedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
+    createdById?: string;
+    updatedById?: string;
     studentId?: string;
     subjectId?: string;
 };
@@ -306,18 +396,24 @@ export type PatchedSubjectReadable = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
+    maintainedAt?: string | null;
     displayName?: string;
     shortName?: string;
     grepCode?: string | null;
     grepGroupCode?: string | null;
+    createdById?: string;
+    updatedById?: string;
     maintenedBySchoolId?: string;
 };
 
 export type PatchedSubjectWritable = {
+    maintainedAt?: string | null;
     displayName?: string;
     shortName?: string;
     grepCode?: string | null;
     grepGroupCode?: string | null;
+    createdById?: string;
+    updatedById?: string;
     maintenedBySchoolId?: string;
 };
 
@@ -326,31 +422,43 @@ export type PatchedUserReadable = {
     readonly groups?: Array<NestedUserGroupReadable>;
     readonly createdAt?: string;
     readonly updatedAt?: string;
+    maintainedAt?: string | null;
     name?: string;
     feideId?: string;
     email?: string;
     lastActivityAt?: string | null;
     disabledAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type PatchedUserWritable = {
+    maintainedAt?: string | null;
     name?: string;
     feideId?: string;
     email?: string;
     lastActivityAt?: string | null;
     disabledAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type PatchedUserGroupReadable = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
     userId?: string;
     groupId?: string;
     roleId?: string;
 };
 
 export type PatchedUserGroupWritable = {
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
     userId?: string;
     groupId?: string;
     roleId?: string;
@@ -360,66 +468,90 @@ export type RoleReadable = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    maintainedAt?: string | null;
     name: string;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type RoleWritable = {
+    maintainedAt?: string | null;
     name: string;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type SchoolReadable = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    maintainedAt?: string | null;
     feideId: string;
     displayName: string;
     shortName?: string | null;
     orgNumber: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type SchoolWritable = {
+    maintainedAt?: string | null;
     feideId: string;
     displayName: string;
     shortName?: string | null;
     orgNumber: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type SituationReadable = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    maintainedAt?: string | null;
     title: string;
     description?: string | null;
     happensAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type SituationWritable = {
+    maintainedAt?: string | null;
     title: string;
     description?: string | null;
     happensAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type StatusReadable = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    maintainedAt?: string | null;
     estimatedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
+    createdById?: string;
+    updatedById?: string;
     studentId: string;
     subjectId: string;
 };
 
 export type StatusWritable = {
+    maintainedAt?: string | null;
     estimatedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
+    createdById?: string;
+    updatedById?: string;
     studentId: string;
     subjectId: string;
 };
@@ -428,18 +560,24 @@ export type SubjectReadable = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    maintainedAt?: string | null;
     displayName: string;
     shortName: string;
     grepCode?: string | null;
     grepGroupCode?: string | null;
+    createdById?: string;
+    updatedById?: string;
     maintenedBySchoolId?: string;
 };
 
 export type SubjectWritable = {
+    maintainedAt?: string | null;
     displayName: string;
     shortName: string;
     grepCode?: string | null;
     grepGroupCode?: string | null;
+    createdById?: string;
+    updatedById?: string;
     maintenedBySchoolId?: string;
 };
 
@@ -448,31 +586,43 @@ export type UserReadable = {
     readonly groups: Array<NestedUserGroupReadable>;
     readonly createdAt: string;
     readonly updatedAt: string;
+    maintainedAt?: string | null;
     name: string;
     feideId: string;
     email: string;
     lastActivityAt?: string | null;
     disabledAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type UserWritable = {
+    maintainedAt?: string | null;
     name: string;
     feideId: string;
     email: string;
     lastActivityAt?: string | null;
     disabledAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
 };
 
 export type UserGroupReadable = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
     userId: string;
     groupId: string;
     roleId: string;
 };
 
 export type UserGroupWritable = {
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
     userId: string;
     groupId: string;
     roleId: string;
