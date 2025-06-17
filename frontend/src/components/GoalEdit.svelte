@@ -1,7 +1,7 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
-  import { goalsCreate, goalsUpdate } from '../generated/sdk.gen'
-  import type { GoalWritable, UserReadable } from '../generated/types.gen'
+  import { goalsCreate, goalsUpdate, masterySchemasList } from '../generated/sdk.gen'
+  import type { GoalWritable, UserReadable, MasterySchemaReadable } from '../generated/types.gen'
 
   const { student, goal, onDone } = $props<{
     student: UserReadable | null
@@ -9,8 +9,19 @@
     onDone: () => void
   }>()
   let localGoal = $state<Record<string, any>>({ ...goal })
+  let masterySchemas = $state<MasterySchemaReadable[]>([])
 
-  async function handleSave() {
+  const fetchMasterySchemas = async () => {
+    try {
+      const result = await masterySchemasList()
+      masterySchemas = result.data || []
+    } catch (error) {
+      console.error('Error fetching mastery schemas:', error)
+      masterySchemas = []
+    }
+  }
+
+  const handleSave = async () => {
     localGoal.studentId = student?.id
     try {
       if (goal.id) {
@@ -34,11 +45,14 @@
       console.error('Error saving goal:', error)
     }
   }
+  // Fetch mastery schemas when component mounts
+  $effect(() => {
+    fetchMasterySchemas()
+  })
 </script>
 
 <div class="p-4">
   <h3 class="pb-2">{localGoal.id ? 'Redigerer mål for' : 'Nytt mål for'} {student?.name}</h3>
-
   <div class="form-group mb-3">
     <div class="pkt-inputwrapper">
       <label for="goalSubject" class="form-label">Fag</label>
@@ -46,6 +60,18 @@
         <option value="">Velg fag</option>
         {#each $dataStore.subjects as subject}
           <option value={subject.id}>{subject.displayName}</option>
+        {/each}
+      </select>
+    </div>
+  </div>
+
+  <div class="form-group mb-3">
+    <div class="pkt-inputwrapper">
+      <label for="goalSubject" class="form-label">Skjema</label>
+      <select class="pkt-input" bind:value={localGoal.masterySchemaId}>
+        <option value="">Velg mestringsskjema</option>
+        {#each masterySchemas as masterySchema}
+          <option value={masterySchema.id}>{masterySchema.title}</option>
         {/each}
       </select>
     </div>

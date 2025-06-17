@@ -31,7 +31,7 @@
   }
 
   const { masterySchema, onDone } = $props<{
-    masterySchema: Partial<MasterySchemaReadable>
+    masterySchema: Partial<MasterySchemaReadable> | null
     onDone: () => void
   }>()
   let localMasterySchema = $state<Partial<MasterySchemaReadable>>({ ...masterySchema })
