@@ -32,21 +32,21 @@ export type GoalReadable = {
     readonly updatedAt: string;
     title?: string | null;
     description?: string | null;
-    masterySchema?: unknown;
     groupId?: string;
     studentId?: string;
     subjectId?: string;
     previousGoalId?: string;
+    masterySchemaIdId?: string;
 };
 
 export type GoalWritable = {
     title?: string | null;
     description?: string | null;
-    masterySchema?: unknown;
     groupId?: string;
     studentId?: string;
     subjectId?: string;
     previousGoalId?: string;
+    masterySchemaIdId?: string;
 };
 
 export type GroupReadable = {
@@ -151,21 +151,21 @@ export type PatchedGoalReadable = {
     readonly updatedAt?: string;
     title?: string | null;
     description?: string | null;
-    masterySchema?: unknown;
     groupId?: string;
     studentId?: string;
     subjectId?: string;
     previousGoalId?: string;
+    masterySchemaIdId?: string;
 };
 
 export type PatchedGoalWritable = {
     title?: string | null;
     description?: string | null;
-    masterySchema?: unknown;
     groupId?: string;
     studentId?: string;
     subjectId?: string;
     previousGoalId?: string;
+    masterySchemaIdId?: string;
 };
 
 export type PatchedGroupReadable = {

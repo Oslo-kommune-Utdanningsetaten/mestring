@@ -14,19 +14,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
 django.setup()
 from mastery import models
 UDIR_GREP_URL = "https://data.udir.no/kl06/v201906/fagkoder/"
-SYSTEM_USER_ID = '1'
 
-def ensure_system_user_exists():
-    system_user = models.User.objects.filter(id=SYSTEM_USER_ID).first()
-    if not system_user:
-        print("Creating system user with ID:", SYSTEM_USER_ID)
-        system_user = models.User.objects.create(
-            id=SYSTEM_USER_ID,
-            name='System User',
-            feide_id='system_user',
-        )
-        system_user.save()
-    return system_user
         
 # Create a new subject if it doesn't exist
 def ensure_subject(grep_code):
@@ -137,5 +125,4 @@ def import_groups_to_db():
     print("✅ import_groups_to_db")
 
 if __name__ == "__main__":
-    ensure_system_user_exists()
     import_groups_to_db()

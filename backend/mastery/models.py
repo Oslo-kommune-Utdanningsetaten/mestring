@@ -14,6 +14,9 @@ class BaseModel(models.Model):
     id = models.CharField(primary_key=True, max_length=50, default=generate_nanoid, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    maintained_at = models.DateTimeField(null=True)
+    created_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, related_name='created_%(class)s_set')
+    updated_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, related_name='updated_%(class)s_set')
     
     class Meta:
         abstract = True
@@ -64,7 +67,7 @@ class User(BaseModel):
     email = models.CharField(max_length=200)
     last_activity_at = models.DateTimeField(null=True)
     disabled_at = models.DateTimeField(null=True)
-    groups = models.ManyToManyField('Group', through='UserGroup', related_name='members', null=True)
+    groups = models.ManyToManyField('Group', through='UserGroup', through_fields=('user', 'group'), related_name='members', null=True)
     
     def role_groups(self, role_name):
         """Get all groups where user has a specific role"""
