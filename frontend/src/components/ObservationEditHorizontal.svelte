@@ -81,7 +81,7 @@
           </span>
         </span>
       {/each}
-      {#if masterySchema.schema.isIncrementIndicatorEnabled}
+      {#if masterySchema?.schema?.isIncrementIndicatorEnabled}
         <div
           id="incrementIndicator"
           style="left: calc(max(0px, {localObservation.masteryValue}% - 5px));"

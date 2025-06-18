@@ -13,7 +13,8 @@
   const masterySchema = $derived(
     $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
   )
-  const masteryLevels = $derived(masterySchema?.schema?.levels.reverse() || [])
+  const origLevels = $derived(masterySchema?.schema?.levels || [])
+  const masteryLevels = $derived(origLevels.reverse() || [])
   const minValue = $derived(
     masteryLevels.length ? masteryLevels[masteryLevels.length - 1].minValue : 1
   )
@@ -71,6 +72,13 @@
         class="slider"
         bind:value={localObservation.masteryValue}
       />
+
+      {#if masterySchema?.schema?.isIncrementIndicatorEnabled}
+        <div
+          id="incrementIndicator"
+          style="top: calc(max(0px, {100 - localObservation.masteryValue}% - 3px));"
+        ></div>
+      {/if}
 
       <div class="stairs-container">
         {#each masteryLevels as masteryLevel, index}
@@ -131,6 +139,16 @@
 </div>
 
 <style>
+  #incrementIndicator {
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 90%;
+    height: 5px;
+    background-color: rgba(0, 0, 0, 0.25);
+    z-index: 1;
+  }
+
   .stairs-container {
     position: relative;
     display: flex;
@@ -155,7 +173,7 @@
     direction: rtl;
     padding-top: 0px;
     background-color: var(--bs-gray);
-    z-index: 1;
+    z-index: 2;
   }
 
   .slider::-webkit-slider-thumb,
