@@ -20,7 +20,6 @@
   )
   const sliderValueIncrement = $derived(masteryLevels.length ? masteryLevels[0].increment || 1 : 1)
   const rungWidth = $derived(masteryLevels.length ? 100 / masteryLevels.length : 100)
-  const widthMultiplier = $derived(masteryLevels.length ? 100 / masteryLevels.length : 1)
 
   let localObservation = $state<ObservationReadable>({
     ...observation,
@@ -82,6 +81,12 @@
           </span>
         </span>
       {/each}
+      {#if masterySchema.schema.isIncrementIndicatorEnabled}
+        <div
+          id="incrementIndicator"
+          style="left: calc(max(0px, {localObservation.masteryValue}% - 5px));"
+        ></div>
+      {/if}
     </div>
 
     <input
@@ -138,8 +143,18 @@
 
 <style>
   .stairs-container {
+    position: relative;
     height: 200px;
     width: 100%;
+  }
+
+  #incrementIndicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.25);
   }
 
   .rung {
@@ -155,8 +170,8 @@
 
   .slider::-webkit-slider-thumb,
   .slider::-moz-range-thumb {
-    width: 10px;
-    height: 20px;
+    width: 5px;
+    height: 30px;
     border-radius: 3px;
     cursor: pointer;
   }
