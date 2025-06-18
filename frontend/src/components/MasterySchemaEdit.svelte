@@ -4,8 +4,9 @@
   import { JSONEditor } from 'svelte-jsoneditor'
   import { masterySchemasUpdate, masterySchemasCreate } from '../generated/sdk.gen'
   import type { MasterySchemaReadable } from '../generated/types.gen'
+  import type { MasterySchemaConfig } from '../types/models'
 
-  const defaultSchema = {
+  const defaultConfig = {
     levels: [
       {
         title: 'Gjengi',
@@ -35,7 +36,9 @@
     onDone: () => void
   }>()
   let localMasterySchema = $state<Partial<MasterySchemaReadable>>({ ...masterySchema })
-  let localJson = $derived<any>(localMasterySchema?.schema || defaultSchema)
+  let localJson = $derived<Partial<MasterySchemaConfig>>(
+    localMasterySchema?.config || defaultConfig
+  )
 
   const handleJsonChange = (updatedContent: any) => {
     if (updatedContent.json) {
@@ -46,15 +49,15 @@
   }
 
   async function handleSave() {
-    localMasterySchema.schema = JSON.stringify(localJson)
+    localMasterySchema.config = JSON.stringify(localJson)
     try {
       if (localMasterySchema.id) {
-        const result = await masterySchemasUpdate({
+        await masterySchemasUpdate({
           path: { id: localMasterySchema.id },
           body: localMasterySchema,
         })
       } else {
-        const result = await masterySchemasCreate({
+        await masterySchemasCreate({
           body: localMasterySchema,
         })
       }

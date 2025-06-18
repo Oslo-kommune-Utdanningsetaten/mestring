@@ -13,7 +13,7 @@
   const masterySchema = $derived(
     $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
   )
-  const masteryLevels = $derived(masterySchema?.schema?.levels || [])
+  const masteryLevels = $derived(masterySchema?.config?.levels || [])
   const minValue = $derived(masteryLevels.length ? masteryLevels[0].minValue : 1)
   const maxValue = $derived(
     masteryLevels.length ? masteryLevels[masteryLevels.length - 1].maxValue : 100
@@ -81,7 +81,7 @@
           </span>
         </span>
       {/each}
-      {#if masterySchema?.schema?.isIncrementIndicatorEnabled}
+      {#if masterySchema?.config?.isIncrementIndicatorEnabled}
         <div
           id="incrementIndicator"
           style="left: calc(max(0px, {localObservation.masteryValue}% - 5px));"

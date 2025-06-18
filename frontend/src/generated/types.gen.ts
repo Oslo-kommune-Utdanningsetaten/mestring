@@ -98,7 +98,7 @@ export type MasterySchemaReadable = {
     maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
-    schema?: unknown;
+    config?: unknown;
     createdById?: string;
     updatedById?: string;
 };
@@ -107,7 +107,7 @@ export type MasterySchemaWritable = {
     maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
-    schema?: unknown;
+    config?: unknown;
     createdById?: string;
     updatedById?: string;
 };
@@ -253,7 +253,7 @@ export type PatchedMasterySchemaReadable = {
     maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
-    schema?: unknown;
+    config?: unknown;
     createdById?: string;
     updatedById?: string;
 };
@@ -262,7 +262,7 @@ export type PatchedMasterySchemaWritable = {
     maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
-    schema?: unknown;
+    config?: unknown;
     createdById?: string;
     updatedById?: string;
 };

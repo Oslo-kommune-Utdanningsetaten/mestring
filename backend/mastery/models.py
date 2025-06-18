@@ -167,7 +167,7 @@ class MasterySchema(BaseModel):
     """
     title = models.CharField(max_length=200, null=True)
     description = models.TextField(null=True)
-    schema = models.JSONField(null=True)
+    config = models.JSONField(null=True)
 
 
 class Goal(BaseModel):

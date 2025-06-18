@@ -24,3 +24,18 @@ export type MasteryLevel = {
   color: string
   text: string
 }
+
+export type MasteryConfigLevel = {
+  minValue: number
+  maxValue: number
+  color: string
+  title: string
+}
+
+export type MasterySchemaConfig = {
+  levels: MasteryConfigLevel[]
+  inputIncrement: number
+  renderDirection?: 'horizontal' | 'vertical'
+  isColorGradientEnabled?: boolean
+  isIncrementIndicatorEnabled?: boolean
+}

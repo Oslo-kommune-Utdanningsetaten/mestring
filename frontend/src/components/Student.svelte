@@ -146,7 +146,7 @@
   const renderDirection = (goal: GoalDecorated): 'horizontal' | 'vertical' => {
     if (!goal || !$dataStore.masterySchemas) return 'vertical'
     const masterySchema = $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
-    return masterySchema.schema?.renderDirection === 'horizontal' ? 'horizontal' : 'vertical'
+    return masterySchema.config?.renderDirection === 'horizontal' ? 'horizontal' : 'vertical'
   }
 
   $effect(() => {

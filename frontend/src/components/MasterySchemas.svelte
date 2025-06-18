@@ -24,8 +24,8 @@
     fetchMasterySchemas()
   }
 
-  const handleEditMasterySchema = (schema: MasterySchemaReadable | null) => {
-    masterySchemaWip = schema ? { ...schema } : {}
+  const handleEditMasterySchema = (masterySchema: MasterySchemaReadable | null) => {
+    masterySchemaWip = masterySchema ? { ...masterySchema } : {}
   }
 
   async function handleDeleteMasterySchema(masterySchemaId: string) {
@@ -71,7 +71,7 @@
             <p class="card-text">
               {masterySchema.description || 'Ingen beskrivelse'}
             </p>
-            <pre>{JSON.stringify(masterySchema.schema, null, 2)}</pre>
+            <pre>{JSON.stringify(masterySchema.config, null, 2)}</pre>
             <pkt-button
               size="small"
               skin="secondary"
