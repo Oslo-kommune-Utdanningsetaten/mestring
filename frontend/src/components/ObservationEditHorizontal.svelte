@@ -1,56 +1,49 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
   import { observationsCreate, observationsUpdate } from '../generated/sdk.gen'
-  import type {
-    ObservationReadable,
-    GoalReadable,
-    UserReadable,
-    MasterySchemaReadable,
-  } from '../generated/types.gen'
+  import type { ObservationReadable, GoalReadable, UserReadable } from '../generated/types.gen'
 
   const { student, goal, observation, onDone } = $props<{
     student: UserReadable | null
     goal: GoalReadable | null
-    observation: ObservationReadable | null
+    observation: ObservationReadable | {} | null
     onDone: () => void
   }>()
 
-  const masterySchema: MasterySchemaReadable = $derived(
-    $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
+  const masterySchema = $derived(
+    $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
   )
+  const masteryLevels = $derived(masterySchema?.schema?.levels || [])
+  const minValue = $derived(masteryLevels.length ? masteryLevels[0].minValue : 1)
+  const maxValue = $derived(
+    masteryLevels.length ? masteryLevels[masteryLevels.length - 1].maxValue : 100
+  )
+  const sliderValueIncrement = $derived(masteryLevels.length ? masteryLevels[0].increment || 1 : 1)
+  const rungWidth = $derived(masteryLevels.length ? 100 / masteryLevels.length : 100)
+  const widthMultiplier = $derived(masteryLevels.length ? 100 / masteryLevels.length : 1)
 
-  let sliderInput: HTMLInputElement
-  let masteryIndicator: HTMLElement
-  let localObservation = $state<Record<string, any>>({ ...observation })
-  let value = $state(localObservation.masteryValue || 50)
-
-  function handleSliderInput() {
-    value = Number(sliderInput.value)
-  }
+  let localObservation = $state<ObservationReadable>({
+    ...observation,
+    masteryValue: observation?.masteryValue || 50,
+  })
 
   async function handleSave() {
     localObservation.studentId = student?.id
     localObservation.goalId = goal?.id
-    localObservation.masteryValue = value
     localObservation.observerId = $dataStore.currentUser?.id
     localObservation.observedAt = new Date().toISOString()
 
     try {
       if (localObservation.id) {
-        // Update existing Observation
         const result = await observationsUpdate({
           path: { id: localObservation.id },
           body: localObservation,
         })
-        console.log('Observation updated:', result.data)
       } else {
-        // Create new Observation
         const result = await observationsCreate({
           body: localObservation,
         })
-        console.log('Observation created:', result.data)
       }
-      // Report to parent component
       onDone()
     } catch (error) {
       // TODO: Show an error message to the user
@@ -58,46 +51,48 @@
     }
   }
 
-  $effect(() => {
-    if (masteryIndicator) {
-      masteryIndicator.style.width = `${value}%`
-    }
-  })
-
-  $effect(() => {
-    if (localObservation) {
-      localObservation.masteryValue = value
-    }
-  })
+  const calculateRungHeight = (index: number) => {
+    const result = (index + 1) * (100 / masteryLevels.length)
+    console.log(`Rung height for index ${index}: ${result}%`)
+    return result
+  }
 </script>
 
 <div class="observation-edit p-4">
   <h3 class="pb-2">
     {localObservation.id ? 'Redigerer observasjon' : 'Ny observasjon'}
   </h3>
-
   <div class="mb-4">
-    <label class="form-label" for="slider-value-indicator">
+    <label class="form-label" for="mastery-slider">
       Hvor ofte mestrer {student?.name}: {goal?.title}
     </label>
-    <div class="stairs-container">
-      {#each masterySchema.schema.levels as masteryLevel}
-        <span class="rung">{masteryLevel.text}</span>
+
+    <div class="stairs-container d-flex align-items-end mb-3">
+      {#each masteryLevels as masteryLevel, index}
+        <span
+          class="rung flex-grow d-flex align-items-end justify-content-center text-center"
+          style="width: {rungWidth}%; height: {calculateRungHeight(
+            index
+          )}%; background-color: {(localObservation.masteryValue ?? 0) >= masteryLevel.minValue
+            ? masteryLevel.color
+            : 'var(--bs-gray)'};"
+        >
+          <span class="pb-2 mx-2">
+            {masteryLevel.title}
+          </span>
+        </span>
       {/each}
-      <div id="slider-value-indicator" bind:this={masteryIndicator}></div>
     </div>
-    <div class="slider-container mb-2">
-      <input
-        type="range"
-        min="1"
-        max="100"
-        {value}
-        class="slider"
-        bind:this={sliderInput}
-        oninput={() => handleSliderInput()}
-      />
-    </div>
-    <div id="slider-value" class="text-center">{value}</div>
+
+    <input
+      id="mastery-slider"
+      type="range"
+      min={minValue}
+      max={maxValue}
+      step={sliderValueIncrement}
+      class="slider"
+      bind:value={localObservation.masteryValue}
+    />
   </div>
 
   <div class="d-flex gap-2 justify-content-start mt-4">
@@ -116,7 +111,6 @@
       }}
       role="button"
       tabindex="0"
-      disabled={false}
     >
       Lagre
     </pkt-button>
@@ -143,82 +137,27 @@
 </div>
 
 <style>
-  :root {
-    --color-1: rgb(229, 50, 43);
-    --color-2: rgb(159, 113, 202);
-    --color-3: rgb(86, 174, 232);
-    --color-4: rgb(241, 249, 97);
-    --color-5: rgb(160, 207, 106);
-    --slider-thumb-color: #04aa6d;
-    --slider-track-color: #d3d3d3;
-  }
-
-  #slider-value-indicator {
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 5px 10px;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.4);
-    backdrop-filter: saturate(250%);
-    transition: width 0.2s ease-out;
-  }
-
   .stairs-container {
-    position: relative;
-    display: flex;
-    justify-content: space-evenly;
-    align-items: flex-end;
-    margin-bottom: 20px;
+    height: 200px;
+    width: 100%;
   }
 
   .rung {
-    width: 20%;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    padding-bottom: 5px;
     font-size: medium;
-    font-weight: bold;
-  }
-
-  .stairs-container > span:nth-child(1) {
-    height: 35px;
-    background-color: var(--color-1);
-  }
-  .stairs-container > span:nth-child(2) {
-    height: 70px;
-    background-color: var(--color-2);
-  }
-  .stairs-container > span:nth-child(3) {
-    height: 100px;
-    background-color: var(--color-3);
-  }
-  .stairs-container > span:nth-child(4) {
-    height: 150px;
-    background-color: var(--color-4);
-  }
-  .stairs-container > span:nth-child(5) {
-    height: 190px;
-    background-color: var(--color-5);
   }
 
   .slider {
-    -webkit-appearance: none;
     width: 100%;
-    height: 15px;
-    background: var(--slider-track-color);
-    outline: none;
-    opacity: 0.7;
-    transition: opacity 0.2s;
+    height: 5px;
+    padding-top: 0px;
+    background-color: var(--bs-gray);
   }
 
   .slider::-webkit-slider-thumb,
   .slider::-moz-range-thumb {
-    width: 15px;
-    height: 25px;
-    border-radius: 6px;
-    background: var(--slider-thumb-color);
+    width: 10px;
+    height: 20px;
+    border-radius: 3px;
     cursor: pointer;
   }
 

@@ -6,7 +6,7 @@
   const { student, goal, observation, onDone } = $props<{
     student: UserReadable | null
     goal: GoalReadable | null
-    observation: ObservationReadable | null
+    observation: ObservationReadable | {} | null
     onDone: () => void
   }>()
 
@@ -61,7 +61,7 @@
       Hvor ofte mestrer {student?.name}: {goal?.title}
     </label>
 
-    <div class="d-flex gap-2 position-relative">
+    <div class="d-flex gap-3 position-relative">
       <input
         id="mastery-slider"
         type="range"
@@ -75,14 +75,14 @@
       <div class="stairs-container">
         {#each masteryLevels as masteryLevel, index}
           <span
-            class="rung"
+            class="rung px-2"
             style="width: {(index + 1) *
-              widthMultiplier}%; background-color: {localObservation?.masteryValue >=
+              widthMultiplier}%; background-color: {(localObservation.masteryValue ?? 0) >=
             masteryLevel.minValue
               ? masteryLevel.color
               : 'var(--bs-gray)'};"
           >
-            {masteryLevel.text}
+            {masteryLevel.title}
           </span>
         {/each}
       </div>
@@ -146,7 +146,6 @@
     justify-content: center;
     align-items: center;
     font-size: medium;
-    font-weight: bold;
   }
 
   .slider {

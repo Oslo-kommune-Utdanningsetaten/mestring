@@ -15,6 +15,7 @@
   import SparklineChart from './SparklineChart.svelte'
   import GoalEdit from './GoalEdit.svelte'
   import ObservationEditVertical from './ObservationEditVertical.svelte'
+  import ObservationEditHorizontal from './ObservationEditHorizontal.svelte'
 
   const { studentId } = $props<{ studentId: string }>()
   let student = $state<UserReadable | null>(null)
@@ -26,7 +27,7 @@
   let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 6 : 2)
   let goalWip = $state<GoalDecorated | null>(null)
   let goalForObservation = $state<GoalDecorated | null>(null)
-  let observationWip = $state<ObservationReadable | null>(null)
+  let observationWip = $state<ObservationReadable | {} | null>(null)
   let expandedGoals = $state<Record<string, boolean>>({})
 
   const dateFormat = Intl.DateTimeFormat('nb', {
@@ -77,7 +78,7 @@
   }
 
   function handleEditObservation(goal: GoalDecorated, observation: ObservationReadable | null) {
-    observationWip = observation || {}
+    observationWip = observation ? { ...observation } : {}
     goalForObservation = { ...goal }
   }
 
@@ -327,7 +328,7 @@
 <!-- offcanvas for adding an observation -->
 <div class="custom-offcanvas shadow-sm" class:visible={!!observationWip}>
   {#if renderDirection(goalForObservation) === 'horizontal'}
-    <ObservationEditVertical
+    <ObservationEditHorizontal
       {student}
       observation={observationWip}
       goal={goalForObservation}
