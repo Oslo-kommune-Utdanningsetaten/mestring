@@ -83,7 +83,7 @@
     <input
       id="goalTitle"
       type="text"
-      class="form-control rounded-0 border-2 border-primary"
+      class="form-control rounded-0 border-2 border-primary goal-title-input"
       bind:value={localGoal.title}
       placeholder="Tittel på målet"
     />
@@ -132,8 +132,12 @@
 </div>
 
 <style>
-  input {
-    height: 47px;
+  label {
+    font-weight: 800;
+  }
+
+  .goal-title-input {
+    height: 48px;
   }
   input,
   select {
