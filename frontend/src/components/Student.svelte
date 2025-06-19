@@ -86,8 +86,12 @@
   }
 
   function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape' && goalWip) {
-      handleCloseEditGoal()
+    if (event.key === 'Escape') {
+      if (goalWip) {
+        handleCloseEditGoal()
+      } else if (observationWip) {
+        handleCloseEditObservation()
+      }
     }
   }
 
