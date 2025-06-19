@@ -10,15 +10,15 @@ function removeNullValueKeys(obj: { [key: string]: string | null }): {
   }
 }
 
-export function getMasteryColorByValue(value: number, masteryLevels: any[]): string {
+export const getMasteryColorByValue = (value: number, masteryLevels: any[]): string => {
   const masteryLevel = masteryLevels.find(ml => ml.minValue <= value && ml.maxValue >= value)
   return masteryLevel ? masteryLevel.color : 'black'
 }
 
-export function urlStringFrom(
+export const urlStringFrom = (
   queryParams: { [key: string]: string | null },
   options?: { path?: string; mode?: string }
-): string {
+): string => {
   const path = options?.path || ''
   const prefix = path ? path + '?' : '?'
 
@@ -48,10 +48,10 @@ export function urlStringFrom(
   )
 }
 
-export function subjectNamesFromStudentGoals(
+export const subjectNamesFromStudentGoals = (
   goals: GoalReadable[],
   allSubjects: SubjectReadable[]
-): string[] {
+): string[] => {
   const result = new Set<string>()
   goals.forEach((goal: GoalReadable) => {
     const subject = allSubjects.find((subject: SubjectReadable) => subject.id === goal.subjectId)
@@ -62,7 +62,7 @@ export function subjectNamesFromStudentGoals(
   return Array.from(result)
 }
 
-export async function calculateMasterysForStudent(studentId: string) {
+export const calculateMasterysForStudent = async (studentId: string) => {
   const result = await usersGoalsRetrieve({
     path: { id: studentId },
   })
@@ -99,7 +99,7 @@ export async function calculateMasterysForStudent(studentId: string) {
   return goalsBySubjectId
 }
 
-export function inferMastery(goal: any): Mastery | null {
+export const inferMastery = (goal: any): Mastery | null => {
   if (!goal.observations || goal.observations.length === 0) {
     return null
   }
@@ -112,7 +112,7 @@ export function inferMastery(goal: any): Mastery | null {
   }
 }
 
-export function aggregateMasterys(goals: GoalDecorated[]): Mastery | null {
+export const aggregateMasterys = (goals: GoalDecorated[]): Mastery | null => {
   const masteryValues: number[] = []
   const trendValues: number[] = []
   goals.forEach(goal => {
@@ -134,10 +134,10 @@ export function aggregateMasterys(goals: GoalDecorated[]): Mastery | null {
   }
 }
 
-export function findAverage(numbers: number[]): number {
+export const findAverage = (numbers: number[]): number => {
   return numbers.reduce((sum, currentValue) => sum + currentValue, 0) / numbers.length
 }
 
-export function isNumber(value: any) {
+export const isNumber = (value: any) => {
   return typeof value === 'number'
 }

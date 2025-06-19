@@ -4,7 +4,7 @@
 
   let schools = $state<SchoolReadable[]>([])
 
-  async function fetchSchools() {
+  const fetchSchools = async () => {
     try {
       const result = await schoolsList()
       schools = result.data || []
@@ -14,7 +14,7 @@
     }
   }
 
-  async function toggleServiceEnabled(school: SchoolReadable) {
+  const toggleServiceEnabled = async (school: SchoolReadable) => {
     try {
       const result = await schoolsPartialUpdate({
         path: { id: school.id },

@@ -36,7 +36,7 @@
     return text
   })
 
-  async function fetchAllStudentsInSchool() {
+  const fetchAllStudentsInSchool = async () => {
     if (!currentSchool?.id) return
 
     try {
@@ -51,7 +51,7 @@
     }
   }
 
-  async function fetchAllGroups() {
+  const fetchAllGroups = async () => {
     try {
       const result = await groupsList({
         query: {
@@ -65,7 +65,7 @@
     }
   }
 
-  async function fetchGroupMembers(groupId: string) {
+  const fetchGroupMembers = async (groupId: string) => {
     try {
       const result = await groupsMembersRetrieve({
         path: {
@@ -83,7 +83,7 @@
     }
   }
 
-  async function fetchSubjectsForStudents(students: UserReadable[]) {
+  const fetchSubjectsForStudents = async (students: UserReadable[]) => {
     const goalsArrays = await Promise.all(
       students.map(async (student): Promise<GoalReadable[]> => {
         const result = await usersGoalsRetrieve({
@@ -106,7 +106,7 @@
     })
   }
 
-  function handleGroupSelect(groupId: string): void {
+  const handleGroupSelect = (groupId: string): void => {
     if (groupId && groupId !== '0') {
       window.location.href = urlStringFrom({ groupId }, { mode: 'merge' })
     } else {

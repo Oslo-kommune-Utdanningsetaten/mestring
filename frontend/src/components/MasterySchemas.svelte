@@ -28,7 +28,7 @@
     masterySchemaWip = masterySchema ? { ...masterySchema } : {}
   }
 
-  async function handleDeleteMasterySchema(masterySchemaId: string) {
+  const handleDeleteMasterySchema = async (masterySchemaId: string) => {
     try {
       await masterySchemasDestroy({ path: { id: masterySchemaId } })
       await fetchMasterySchemas()

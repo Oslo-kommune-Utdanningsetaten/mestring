@@ -10,7 +10,7 @@
   let isLoading = $state(true)
   let error = $state<string | null>(null)
 
-  async function fetchGroup() {
+  const fetchGroup = async () => {
     if (!groupId) return
 
     try {

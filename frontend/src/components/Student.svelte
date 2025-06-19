@@ -35,12 +35,12 @@
     year: 'numeric',
   })
 
-  function formatDate(dateString: string): string {
+  const formatDate = (dateString: string): string => {
     const date = new Date(dateString)
     return dateFormat.format(date)
   }
 
-  async function fetchUser(userId: string) {
+  const fetchUser = async (userId: string) => {
     try {
       const result = await usersRetrieve({ path: { id: userId } })
       student = result.data!
@@ -50,7 +50,7 @@
     }
   }
 
-  async function fetchGroupsForStudent(studentId: string) {
+  const fetchGroupsForStudent = async (studentId: string) => {
     try {
       const result = await usersGroupsRetrieve({
         path: { id: studentId },
@@ -63,29 +63,29 @@
     }
   }
 
-  function getSubjectName(subjectId: string): string {
+  const getSubjectName = (subjectId: string): string => {
     const subject = $dataStore.subjects.find(s => s.id === subjectId)
     return subject ? subject.displayName : 'ukjent'
   }
 
-  function handleEditGoal(goal: GoalDecorated | null) {
+  const handleEditGoal = (goal: GoalDecorated | null) => {
     goalWip = { ...goal }
   }
 
-  function handleCloseEditGoal() {
+  const handleCloseEditGoal = () => {
     goalWip = null
   }
 
-  function handleEditObservation(goal: GoalDecorated, observation: ObservationReadable | null) {
+  const handleEditObservation = (goal: GoalDecorated, observation: ObservationReadable | null) => {
     observationWip = observation ? { ...observation } : {}
     goalForObservation = { ...goal }
   }
 
-  function handleCloseEditObservation() {
+  const handleCloseEditObservation = () => {
     observationWip = null
   }
 
-  function handleKeydown(event: KeyboardEvent) {
+  const handleKeydown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
       if (goalWip) {
         handleCloseEditGoal()
@@ -95,7 +95,7 @@
     }
   }
 
-  async function handleGoalDone() {
+  const handleGoalDone = () => {
     goalForObservation = null
     handleCloseEditGoal()
     if (studentId) {
@@ -105,7 +105,7 @@
     }
   }
 
-  async function handleObservationDone() {
+  const handleObservationDone = () => {
     handleCloseEditObservation()
     if (studentId) {
       calculateMasterysForStudent(studentId).then(result => {
@@ -114,7 +114,7 @@
     }
   }
 
-  async function handleDeleteObservation(observationId: string) {
+  const handleDeleteObservation = async (observationId: string) => {
     try {
       await observationsDestroy({ path: { id: observationId } })
       // Refresh after deletion
@@ -128,7 +128,7 @@
     }
   }
 
-  async function handleDeleteGoal(goalId: string) {
+  const handleDeleteGoal = async (goalId: string) => {
     try {
       await goalsDestroy({ path: { id: goalId } })
       // Refresh after deletion
@@ -142,7 +142,7 @@
     }
   }
 
-  function toggleGoalExpansion(goalId: string) {
+  const toggleGoalExpansion = (goalId: string) => {
     expandedGoals[goalId] = !expandedGoals[goalId]
   }
 

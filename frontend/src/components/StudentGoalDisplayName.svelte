@@ -9,7 +9,7 @@
 
   const isAnonymous = true
 
-  function getGroupDescription(goal: GoalType) {
+  const getGroupDescription = (goal: GoalType) => {
     const group = $dataStore.groups.find(g => g.id === goal.groupId)
     if (!group) return null
     return group.type === 'basis' ? 'Sosialt' : group.name

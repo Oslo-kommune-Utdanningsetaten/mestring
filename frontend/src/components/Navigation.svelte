@@ -14,7 +14,7 @@
 
   let schools = $state<SchoolReadable[]>([])
 
-  async function fetchSchools() {
+  const fetchSchools = async () => {
     try {
       const result = await schoolsList({
         query: {
@@ -28,7 +28,7 @@
     }
   }
 
-  function handleSetCurrentSchool(schoolId: string) {
+  const handleSetCurrentSchool = async (schoolId: string) => {
     const selectedSchool = schools.find(s => s.id === schoolId)
     if (!selectedSchool) {
       console.error('Selected school not found')

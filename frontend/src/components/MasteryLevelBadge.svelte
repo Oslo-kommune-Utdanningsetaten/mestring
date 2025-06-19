@@ -22,7 +22,7 @@
   const masteryIndicatorWidth = trendBoxSize + masteryIndicatorOutcrop * 2
 
   // Calculate mastery indicator position based on available space
-  function indicatorPosition(masteryValue: number) {
+  const indicatorPosition = (masteryValue: number) => {
     const maxY = trendBoxSize - masteryIndicatorHeight
     if (masteryValue < 0) return 0
     if (masteryValue > 100) return maxY

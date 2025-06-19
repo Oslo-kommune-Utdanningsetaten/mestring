@@ -1,15 +1,15 @@
 const appKeyPrefix = 'mastery'
 type T = string | number | boolean | Array<any> | object | null
 
-function getKey(key: string): string {
+const getKey = (key: string): string => {
   return [appKeyPrefix, key].join('-')
 }
 
-export function getLocalStorageItem(key: string): T {
+export const getLocalStorageItem = (key: string): T => {
   const item = localStorage.getItem(getKey(key))
   return item ? JSON.parse(item) : null
 }
 
-export function setLocalStorageItem(key: string, item: T) {
+export const setLocalStorageItem = (key: string, item: T) => {
   localStorage.setItem(getKey(key), JSON.stringify(item))
 }

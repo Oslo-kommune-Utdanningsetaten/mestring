@@ -48,7 +48,7 @@
     }
   }
 
-  async function handleSave() {
+  const handleSave = async () => {
     localMasterySchema.config = JSON.stringify(localJson)
     try {
       if (localMasterySchema.id) {

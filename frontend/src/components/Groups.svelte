@@ -12,7 +12,7 @@
     Record<string, { teachers: NestedGroupUserReadable[]; students: NestedGroupUserReadable[] }>
   >({})
 
-  async function fetchGroups() {
+  const fetchGroups = async () => {
     const options = isAllGroupsTypesEnabled
       ? { school: currentSchool?.id }
       : { school: currentSchool?.id, type: 'basis' }
@@ -27,7 +27,7 @@
     }
   }
 
-  async function fetchAllGroupMembers() {
+  const fetchAllGroupMembers = async () => {
     groups.forEach(async group => {
       try {
         const result = await groupsMembersRetrieve({

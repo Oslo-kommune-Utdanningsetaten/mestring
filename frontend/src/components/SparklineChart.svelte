@@ -12,7 +12,7 @@
   let chartContainer
   let chart
 
-  function updateChart() {
+  const updateChart = () => {
     if (!chartContainer) return
     if (!chart) {
       chart = new Chart(chartContainer, {

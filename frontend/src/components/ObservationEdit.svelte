@@ -31,7 +31,7 @@
     masteryValue: observation?.masteryValue || 50,
   })
 
-  function handleValueChange(newValue: number) {
+  const handleValueChange = (newValue: number) => {
     localObservation.masteryValue = newValue
   }
 

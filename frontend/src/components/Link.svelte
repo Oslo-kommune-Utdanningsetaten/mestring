@@ -4,7 +4,7 @@
   export let to: string
   export let className: string = ''
 
-  function handleClick(event: MouseEvent) {
+  const handleClick = (event: MouseEvent) => {
     // Allow opening in new tabs with modifier keys
     if (event.ctrlKey || event.metaKey || event.shiftKey) {
       return
