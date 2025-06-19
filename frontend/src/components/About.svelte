@@ -1,4 +1,4 @@
 <script lang="ts">
 </script>
 
-<div>About page</div>
+<h2>About page</h2>

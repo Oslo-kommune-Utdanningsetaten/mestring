@@ -25,20 +25,15 @@
     localGoal.studentId = student?.id
     try {
       if (goal.id) {
-        // Update existing goal
-        const result = await goalsUpdate({
+        await goalsUpdate({
           path: { id: localGoal.id },
           body: localGoal,
         })
-        console.log('Goal updated:', result.data)
       } else {
-        // Create new goal
-        const result = await goalsCreate({
+        await goalsCreate({
           body: localGoal,
         })
-        console.log('Goal created:', result.data)
       }
-      // Report to parent component
       onDone()
     } catch (error) {
       // TODO: Show an error message to the user
@@ -48,7 +43,7 @@
   // Fetch mastery schemas when component mounts
   $effect(() => {
     fetchMasterySchemas()
-    localGoal = { ...goal }
+    localGoal = { masterySchemaId: '', subjectId: '', ...goal }
   })
 </script>
 
@@ -70,7 +65,7 @@
     <div class="pkt-inputwrapper">
       <label for="goalSubject" class="form-label">Skjema</label>
       <select class="pkt-input" bind:value={localGoal.masterySchemaId}>
-        <option value="">Velg mestringsskjema</option>
+        <option value="" disabled>Velg mestringsskjema</option>
         {#each masterySchemas as masterySchema}
           <option value={masterySchema.id}>{masterySchema.title}</option>
         {/each}
@@ -96,6 +91,7 @@
       type="button"
       variant="label-only"
       class="m-2"
+      role="button"
       onclick={() => handleSave()}
       onkeydown={(e: any) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -103,9 +99,10 @@
           handleSave()
         }
       }}
-      role="button"
       tabindex="0"
-      disabled={!localGoal.title?.trim() || !localGoal.subjectId || !localGoal.masterySchemaId}
+      disabled={localGoal.masterySchemaId === '' ||
+        localGoal.subjectId === '' ||
+        !localGoal.title?.trim()}
     >
       Lagre
     </pkt-button>
