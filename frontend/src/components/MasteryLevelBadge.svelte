@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Mastery } from '../types/models'
 
-  const { masteryData } = $props<{ masteryData: Mastery }>()
+  const { masteryData } = $props<{ masteryData: Mastery | null }>()
 
   const mastery = $derived(masteryData?.mastery ?? 0)
   const trend = $derived(masteryData?.trend ?? 0)
