@@ -9,11 +9,7 @@
     UserReadable,
     MasterySchemaReadable,
   } from '../generated/types.gen'
-  import type { GoalDecorated, MasterySchemaConfig } from '../types/models'
-
-  type MasterySchemaWithConfig = MasterySchemaReadable & {
-    config?: MasterySchemaConfig
-  }
+  import type { GoalDecorated, MasterySchemaWithConfig } from '../types/models'
 
   const { student, goal, observation, onDone } = $props<{
     student: UserReadable | null

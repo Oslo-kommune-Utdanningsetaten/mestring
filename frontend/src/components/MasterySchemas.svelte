@@ -4,10 +4,13 @@
   import MasterySchemaEdit from './MasterySchemaEdit.svelte'
   import { masterySchemasList, masterySchemasDestroy } from '../generated/sdk.gen'
   import type { MasterySchemaReadable } from '../generated/types.gen'
+  import type { GoalDecorated, MasterySchemaWithConfig } from '../types/models'
 
-  let masterySchemas = $state<MasterySchemaReadable[]>([])
+  let masterySchemas = $state<MasterySchemaWithConfig[]>([])
   let masterySchemaWip: Partial<MasterySchemaReadable> | null =
     $state<Partial<MasterySchemaReadable> | null>(null)
+
+  let isJsonVisible = $state<boolean>(false)
 
   const fetchMasterySchemas = async () => {
     try {
@@ -62,6 +65,19 @@
     Nytt mestringsskjema
   </pkt-button>
 
+  <div class="pkt-input-check mt-3">
+    <div class="pkt-input-check__input">
+      <input
+        class="pkt-input-check__input-checkbox"
+        type="checkbox"
+        role="switch"
+        id="groupTypeSwitch"
+        bind:checked={isJsonVisible}
+      />
+      <label class="pkt-input-check__input-label" for="groupTypeSwitch">Vis JSON config</label>
+    </div>
+  </div>
+
   <div class="mt-4">
     {#if masterySchemas.length > 0}
       {#each masterySchemas as masterySchema}
@@ -71,7 +87,21 @@
             <p class="card-text">
               {masterySchema.description || 'Ingen beskrivelse'}
             </p>
-            <pre>{JSON.stringify(masterySchema.config, null, 2)}</pre>
+
+            <div class="mb-4">
+              {#each masterySchema?.config?.levels as level}
+                <span class="p-2" style="background-color: {level.color || 'white'};">
+                  {level.title}
+                </span>
+              {/each}
+            </div>
+
+            {#if isJsonVisible}
+              <div class="json-viewer">
+                <pre>{JSON.stringify(masterySchema, null, 2)}</pre>
+              </div>
+            {/if}
+
             <pkt-button
               size="small"
               skin="secondary"

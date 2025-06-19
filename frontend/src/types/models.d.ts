@@ -43,3 +43,7 @@ export type MasterySchemaConfig = {
   isMasteryDescriptionInputEnabled?: boolean
   isFeedforwardInputEnabled?: boolean
 }
+
+export type MasterySchemaWithConfig = MasterySchemaReadable & {
+  config?: MasterySchemaConfig
+}
