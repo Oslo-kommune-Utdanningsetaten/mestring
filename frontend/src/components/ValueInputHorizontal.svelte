@@ -84,6 +84,7 @@
     width: 5px;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.25);
+    transition: left 0.2s ease-out;
   }
 
   .rung {
