@@ -2,13 +2,14 @@
   import { dataStore } from '../stores/data'
   import { observationsCreate, observationsUpdate } from '../generated/sdk.gen'
   import ValueInputVertical from './ValueInputVertical.svelte'
+  import ValueInputHorizontal from './ValueInputHorizontal.svelte'
   import type {
     ObservationReadable,
     GoalReadable,
     UserReadable,
     MasterySchemaReadable,
   } from '../generated/types.gen'
-  import type { MasteryConfigLevel, MasterySchemaConfig } from '../types/models'
+  import type { GoalDecorated, MasterySchemaConfig } from '../types/models'
 
   type MasterySchemaWithConfig = MasterySchemaReadable & {
     config?: MasterySchemaConfig
@@ -34,7 +35,13 @@
     localObservation.masteryValue = newValue
   }
 
-  async function handleSave() {
+  const renderDirection = (goal: GoalDecorated): 'horizontal' | 'vertical' => {
+    if (!goal || !$dataStore.masterySchemas) return 'vertical'
+    const masterySchema = $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
+    return masterySchema.config?.renderDirection === 'horizontal' ? 'horizontal' : 'vertical'
+  }
+
+  const handleSave = async () => {
     localObservation.studentId = student?.id
     localObservation.goalId = goal?.id
     localObservation.observerId = $dataStore.currentUser?.id
@@ -65,12 +72,21 @@
   </h3>
 
   <div class="mb-4">
-    <ValueInputVertical
-      {masterySchema}
-      masteryValue={localObservation.masteryValue ?? 50}
-      label="Hvor ofte mestrer {student?.name}: {goal?.title}"
-      onValueChange={handleValueChange}
-    />
+    {#if renderDirection(goal) === 'vertical'}
+      <ValueInputVertical
+        {masterySchema}
+        masteryValue={localObservation.masteryValue ?? 50}
+        label="Hvor ofte mestrer {student?.name}: {goal?.title}"
+        onValueChange={handleValueChange}
+      />
+    {:else}
+      <ValueInputHorizontal
+        {masterySchema}
+        masteryValue={localObservation.masteryValue ?? 50}
+        label="Hvor ofte mestrer {student?.name}: {goal?.title}"
+        onValueChange={handleValueChange}
+      />
+    {/if}
   </div>
 
   <div class="d-flex gap-2 justify-content-start mt-4">

@@ -14,8 +14,7 @@
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparklineChart from './SparklineChart.svelte'
   import GoalEdit from './GoalEdit.svelte'
-  import ObservationEditVertical from './ObservationEditVertical.svelte'
-  import ObservationEditHorizontal from './ObservationEditHorizontal.svelte'
+  import ObservationEdit from './ObservationEdit.svelte'
 
   const { studentId } = $props<{ studentId: string }>()
   let student = $state<UserReadable | null>(null)
@@ -141,12 +140,6 @@
 
   function toggleGoalExpansion(goalId: string) {
     expandedGoals[goalId] = !expandedGoals[goalId]
-  }
-
-  const renderDirection = (goal: GoalDecorated): 'horizontal' | 'vertical' => {
-    if (!goal || !$dataStore.masterySchemas) return 'vertical'
-    const masterySchema = $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
-    return masterySchema.config?.renderDirection === 'horizontal' ? 'horizontal' : 'vertical'
   }
 
   $effect(() => {
@@ -327,21 +320,12 @@
 
 <!-- offcanvas for adding an observation -->
 <div class="custom-offcanvas shadow-sm" class:visible={!!observationWip}>
-  {#if renderDirection(goalForObservation) === 'horizontal'}
-    <ObservationEditHorizontal
-      {student}
-      observation={observationWip}
-      goal={goalForObservation}
-      onDone={handleObservationDone}
-    />
-  {:else}
-    <ObservationEditVertical
-      {student}
-      observation={observationWip}
-      goal={goalForObservation}
-      onDone={handleObservationDone}
-    />
-  {/if}
+  <ObservationEdit
+    {student}
+    observation={observationWip}
+    goal={goalForObservation}
+    onDone={handleObservationDone}
+  />
 </div>
 
 <style>
