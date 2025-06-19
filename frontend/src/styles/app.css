@@ -177,15 +177,17 @@ a:hover {
 
 .custom-offcanvas {
   position: fixed;
-  right: -50vw;
+  right: -60vw;
   top: 0;
   height: 100vh;
   width: 50vw;
   background: white;
   z-index: 1;
-  border: 2px solid var(--bs-primary);
+  border-left: 2px solid var(--bs-primary);
+  border-radius: 5px 0px 0px 5px;
   transition: right 0.22s ease-in-out;
   pointer-events: none;
+  box-shadow: 0 0 10px 10px rgba(0, 0, 0, 0.075);
 }
 
 .custom-offcanvas.visible {

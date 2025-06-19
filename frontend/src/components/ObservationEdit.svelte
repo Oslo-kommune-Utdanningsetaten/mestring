@@ -71,23 +71,51 @@
     {localObservation.id ? 'Redigerer observasjon' : 'Ny observasjon'}
   </h3>
 
-  <div class="mb-4">
-    {#if renderDirection(goal) === 'vertical'}
-      <ValueInputVertical
-        {masterySchema}
-        masteryValue={localObservation.masteryValue ?? 50}
-        label="Hvor ofte mestrer {student?.name}: {goal?.title}"
-        onValueChange={handleValueChange}
-      />
-    {:else}
-      <ValueInputHorizontal
-        {masterySchema}
-        masteryValue={localObservation.masteryValue ?? 50}
-        label="Hvor ofte mestrer {student?.name}: {goal?.title}"
-        onValueChange={handleValueChange}
-      />
-    {/if}
-  </div>
+  {#if masterySchema?.config?.isMasteryValueInputEnabled}
+    <div class="mb-4">
+      {#if renderDirection(goal) === 'vertical'}
+        <ValueInputVertical
+          {masterySchema}
+          masteryValue={localObservation.masteryValue ?? 50}
+          label="Hvor ofte mestrer {student?.name}: {goal?.title}"
+          onValueChange={handleValueChange}
+        />
+      {:else}
+        <ValueInputHorizontal
+          {masterySchema}
+          masteryValue={localObservation.masteryValue ?? 50}
+          label="Hvor ofte mestrer {student?.name}: {goal?.title}"
+          onValueChange={handleValueChange}
+        />
+      {/if}
+    </div>
+  {/if}
+
+  {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
+    <div class="form-group mb-3">
+      <label for="description" class="form-label">Beskrivelse/tilbakemelding</label>
+      <textarea
+        id="description"
+        class="form-control rounded-0 border-2 border-primary"
+        bind:value={localObservation.masteryDescription}
+        placeholder="..."
+        rows="5"
+      ></textarea>
+    </div>
+  {/if}
+
+  {#if masterySchema?.config?.isFeedforwardInputEnabled}
+    <div class="form-group mb-3">
+      <label for="feedforward" class="form-label">Fremovermelding</label>
+      <textarea
+        id="feedforward"
+        class="form-control rounded-0 border-2 border-primary"
+        bind:value={localObservation.masteryDescription}
+        placeholder="..."
+        rows="5"
+      ></textarea>
+    </div>
+  {/if}
 
   <div class="d-flex gap-2 justify-content-start mt-4">
     <pkt-button
