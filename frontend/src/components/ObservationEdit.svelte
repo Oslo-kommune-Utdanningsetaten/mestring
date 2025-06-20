@@ -3,12 +3,7 @@
   import { observationsCreate, observationsUpdate } from '../generated/sdk.gen'
   import ValueInputVertical from './ValueInputVertical.svelte'
   import ValueInputHorizontal from './ValueInputHorizontal.svelte'
-  import type {
-    ObservationReadable,
-    GoalReadable,
-    UserReadable,
-    MasterySchemaReadable,
-  } from '../generated/types.gen'
+  import type { ObservationReadable, GoalReadable, UserReadable } from '../generated/types.gen'
   import type { GoalDecorated, MasterySchemaWithConfig } from '../types/models'
 
   const { student, goal, observation, onDone } = $props<{
@@ -22,9 +17,22 @@
     $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
   )
 
-  let localObservation = $state<ObservationReadable>({
-    ...observation,
-    masteryValue: observation?.masteryValue || 50,
+  let localObservation = $state<Partial<ObservationReadable>>({
+    masteryValue: 50,
+  })
+
+  // Update localObservation when observation prop changes
+  $effect(() => {
+    if (observation) {
+      localObservation = {
+        ...observation,
+        masteryValue: observation?.masteryValue || 50,
+      }
+    } else {
+      localObservation = {
+        masteryValue: 50,
+      }
+    }
   })
 
   const handleValueChange = (newValue: number) => {
@@ -47,11 +55,11 @@
       if (localObservation.id) {
         const result = await observationsUpdate({
           path: { id: localObservation.id },
-          body: localObservation,
+          body: localObservation as any,
         })
       } else {
         const result = await observationsCreate({
-          body: localObservation,
+          body: localObservation as any,
         })
       }
       onDone()
@@ -60,13 +68,17 @@
       console.error('Error saving Observation:', error)
     }
   }
+
+  $effect(() => {
+    $inspect('EDIT localObservation:', localObservation)
+  })
 </script>
 
 <div class="observation-edit p-4">
   <h3 class="pb-2">
     {localObservation.id ? 'Redigerer observasjon' : 'Ny observasjon'}
   </h3>
-
+  <pre>{JSON.stringify(localObservation, null, 2)}</pre>
   {#if masterySchema?.config?.isMasteryValueInputEnabled}
     <div class="mb-4">
       {#if renderDirection(goal) === 'vertical'}
@@ -88,14 +100,14 @@
   {/if}
 
   {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
-    <div class="form-group mb-3">
+    <div class="form-group my-4">
       <label for="description" class="form-label">Beskrivelse/tilbakemelding</label>
       <textarea
         id="description"
         class="form-control rounded-0 border-2 border-primary"
         bind:value={localObservation.masteryDescription}
-        placeholder="..."
-        rows="5"
+        placeholder="Kort beskrivelse av elevens mestringsnivå"
+        rows="4"
       ></textarea>
     </div>
   {/if}
@@ -106,9 +118,9 @@
       <textarea
         id="feedforward"
         class="form-control rounded-0 border-2 border-primary"
-        bind:value={localObservation.masteryDescription}
-        placeholder="..."
-        rows="5"
+        bind:value={localObservation.feedforward}
+        placeholder="Konkret, hva kan eleven gjøre for å forbedre seg?"
+        rows="4"
       ></textarea>
     </div>
   {/if}

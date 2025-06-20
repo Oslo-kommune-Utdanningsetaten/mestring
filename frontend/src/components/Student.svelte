@@ -77,7 +77,9 @@
   }
 
   const handleEditObservation = (goal: GoalDecorated, observation: ObservationReadable | null) => {
-    observationWip = observation ? { ...observation } : {}
+    console.log('Editing observation for goal:', goal)
+    observationWip = observation || {}
+    console.log('Observation:', observationWip)
     goalForObservation = { ...goal }
   }
 
@@ -222,7 +224,7 @@
                 style="transform: scale(0.8);"
               />
               <label class="pkt-input-check__input-label" for="goalTitleSwitch">
-                Vis mål som anonyme
+                Vis tittel på mål
               </label>
             </div>
           </div>
@@ -280,24 +282,40 @@
                       ></pkt-icon>
                     </div>
                     {#if expandedGoals[goal.id]}
-                      <div class="bg-primary-subtle p-2 me-5">
+                      <div class="p-2 me-5 px-3">
                         {#if goal?.observations.length === 0}
                           Ingen observasjoner for dette målet
-                        {/if}
-                        {#each goal?.observations as observation}
-                          <div class="row">
-                            <span class="col-3">{formatDate(observation.observedAt)}</span>
-                            <span class="col-1">{observation.masteryValue}</span>
-                            <span class="col-1">
-                              <pkt-icon
-                                title="Slet observasjon"
-                                class="hover-glow me-2"
-                                name="trash-can"
-                                onclick={() => handleDeleteObservation(observation.id)}
-                              ></pkt-icon>
-                            </span>
+                        {:else}
+                          <div class="row border-bottom border-dashed fw-bold d-flex gap-4">
+                            <span class="col-3">Dato</span>
+                            <span class="col-1">Verdi</span>
+                            <span class="col-3">Handlinger</span>
                           </div>
-                        {/each}
+                          {#each goal?.observations as observation}
+                            <div class="row border-bottom border-dashed d-flex gap-4">
+                              <span class="col-3">
+                                {formatDate(observation.observedAt)}
+                              </span>
+                              <span class="col-1 d-flex justify-content-end pe-4">
+                                {observation.masteryValue}
+                              </span>
+                              <span class="col-3">
+                                <pkt-icon
+                                  title="Rediger observasjon"
+                                  class="hover-glow me-2"
+                                  name="edit"
+                                  onclick={() => handleEditObservation(goal, observation)}
+                                ></pkt-icon>
+                                <pkt-icon
+                                  title="Slet observasjon"
+                                  class="hover-glow me-2"
+                                  name="trash-can"
+                                  onclick={() => handleDeleteObservation(observation.id)}
+                                ></pkt-icon>
+                              </span>
+                            </div>
+                          {/each}
+                        {/if}
                       </div>
                     {/if}
                   </li>
