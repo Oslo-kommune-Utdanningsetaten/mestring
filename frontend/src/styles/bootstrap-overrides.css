@@ -4,7 +4,7 @@
   --bs-success: #034b45;
   --bs-danger: #ff8274;
   --bs-warning: #f9c66b;
-  --bs-info: #6fe9ff;
+  --bs-info: #b3f5ff;
   --bs-light: #f9f9f9;
   --bs-gray: rgb(206, 206, 206);
   --bs-primary-rgb: #4a6fa5;
@@ -53,4 +53,8 @@ a:hover,
 
 .card-header {
   font-weight: bold;
+}
+
+.bg-info {
+  background-color: var(--bs-info) !important;
 }

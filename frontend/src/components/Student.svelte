@@ -257,19 +257,6 @@
                           lineColor="rgb(100, 100, 100)"
                           label={goal.title}
                         />
-                      {:else}
-                        <pkt-icon
-                          title="Rediger mål"
-                          class="hover-glow me-2"
-                          name="edit"
-                          onclick={() => handleEditGoal(goal)}
-                        ></pkt-icon>
-                        <pkt-icon
-                          title="Slett mål"
-                          class="hover-glow me-2"
-                          name="trash-can"
-                          onclick={() => handleDeleteGoal(goal.id)}
-                        ></pkt-icon>
                       {/if}
 
                       <pkt-icon
@@ -282,7 +269,47 @@
                     {#if expandedGoals[goal.id]}
                       <div class="p-2 me-5 px-3">
                         {#if goal?.observations.length === 0}
-                          Ingen observasjoner for dette målet
+                          <div class="bg-info p-3">
+                            <p>Ingen observasjoner for dette målet</p>
+
+                            <pkt-button
+                              size="small"
+                              skin="secondary"
+                              variant="icon-left"
+                              iconName="edit"
+                              class="my-2 me-2"
+                              onclick={() => handleEditGoal(goal)}
+                              onkeydown={(e: any) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault()
+                                  handleEditGoal(goal)
+                                }
+                              }}
+                              role="button"
+                              tabindex="0"
+                            >
+                              Rediger mål
+                            </pkt-button>
+
+                            <pkt-button
+                              size="small"
+                              skin="secondary"
+                              variant="icon-left"
+                              iconName="trash-can"
+                              class="my-2"
+                              onclick={() => handleDeleteGoal(goal.id)}
+                              onkeydown={(e: any) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault()
+                                  handleDeleteGoal(goal.id)
+                                }
+                              }}
+                              role="button"
+                              tabindex="0"
+                            >
+                              Slett mål
+                            </pkt-button>
+                          </div>
                         {:else}
                           <div class="row border-bottom border-dashed fw-bold d-flex gap-4">
                             <span class="col-3">Dato</span>
