@@ -1,22 +1,21 @@
 <script lang="ts">
   import type { MasteryConfigLevel, MasterySchemaConfig } from '../types/models'
   import type { MasterySchemaReadable } from '../generated/types.gen'
+  import { isNumber } from '../utils/functions'
 
   type MasterySchemaWithConfig = MasterySchemaReadable & {
     config?: MasterySchemaConfig
   }
 
-  const {
+  let {
     masterySchema,
-    masteryValue = 50,
+    masteryValue = $bindable(),
     label = 'Mastery Value',
-    onValueChange,
-  } = $props<{
+  }: {
     masterySchema: MasterySchemaWithConfig | null
-    masteryValue?: number
+    masteryValue?: number | null
     label?: string
-    onValueChange: (value: number) => void
-  }>()
+  } = $props()
 
   const masteryLevels: MasteryConfigLevel[] = $derived(masterySchema?.config?.levels || [])
   const minValue = $derived(masteryLevels.length ? masteryLevels[0].minValue : 1)
@@ -26,11 +25,15 @@
   const sliderValueIncrement = $derived(masterySchema?.config?.inputIncrement || 1)
   const rungWidth = $derived(masteryLevels.length ? 100 / masteryLevels.length : 100)
 
-  let value = $state(masteryValue)
-
   const calculateRungHeight = (index: number) => {
     return (index + 1) * (100 / masteryLevels.length)
   }
+
+  $effect(() => {
+    if (!isNumber(masteryValue)) {
+      masteryValue = minValue + maxValue / 2
+    }
+  })
 </script>
 
 <div class="mb-4">
@@ -44,7 +47,7 @@
         class="rung flex-grow d-flex align-items-end justify-content-center text-center"
         style="width: {rungWidth}%; height: {calculateRungHeight(
           index
-        )}%; background-color: {(value ?? 0) >= masteryLevel.minValue
+        )}%; background-color: {(masteryValue ?? 0) >= masteryLevel.minValue
           ? masteryLevel.color
           : 'var(--bs-gray)'};"
       >
@@ -54,7 +57,7 @@
       </span>
     {/each}
     {#if masterySchema?.config?.isIncrementIndicatorEnabled}
-      <div id="incrementIndicator" style="left: calc(max(0px, {value}% - 5px));"></div>
+      <div id="incrementIndicator" style="left: calc(max(0px, {masteryValue}% - 5px));"></div>
     {/if}
   </div>
 
@@ -65,8 +68,7 @@
     max={maxValue}
     step={sliderValueIncrement}
     class="slider"
-    bind:value
-    oninput={() => onValueChange(value)}
+    bind:value={masteryValue}
   />
 </div>
 

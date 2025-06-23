@@ -77,9 +77,7 @@
   }
 
   const handleEditObservation = (goal: GoalDecorated, observation: ObservationReadable | null) => {
-    console.log('Editing observation for goal:', goal)
     observationWip = observation || {}
-    console.log('Observation:', observationWip)
     goalForObservation = { ...goal }
   }
 
@@ -286,13 +284,15 @@
                         {#if goal?.observations.length === 0}
                           Ingen observasjoner for dette målet
                         {:else}
-                          <div class="row border-bottom border-dashed fw-bold d-flex gap-4 pb-2">
+                          <div class="row border-bottom border-dashed fw-bold d-flex gap-4">
                             <span class="col-3">Dato</span>
                             <span class="col-1">Verdi</span>
                             <span class="col-3">Valg</span>
                           </div>
                           {#each goal?.observations as observation}
-                            <div class="row border-bottom border-dashed d-flex gap-4 pt-2 pb-1">
+                            <div
+                              class="row border-bottom border-dashed d-flex gap-4 pt-2 observation-item"
+                            >
                               <span class="col-3">
                                 {formatDate(observation.observedAt)}
                               </span>
@@ -351,4 +351,7 @@
 </div>
 
 <style>
+  div.observation-item > span {
+    font-family: 'Courier New', Courier, monospace !important;
+  }
 </style>

@@ -1,22 +1,21 @@
 <script lang="ts">
   import type { MasteryConfigLevel, MasterySchemaConfig } from '../types/models'
   import type { MasterySchemaReadable } from '../generated/types.gen'
+  import { isNumber } from '../utils/functions'
 
   type MasterySchemaWithConfig = MasterySchemaReadable & {
     config?: MasterySchemaConfig
   }
 
-  const {
+  let {
     masterySchema,
-    masteryValue = 50,
+    masteryValue = $bindable(),
     label = 'Mastery Value',
-    onValueChange,
-  } = $props<{
+  }: {
     masterySchema: MasterySchemaWithConfig | null
-    masteryValue?: number
+    masteryValue?: number | null
     label?: string
-    onValueChange: (value: number) => void
-  }>()
+  } = $props()
 
   const masteryLevels: MasteryConfigLevel[] = $derived(masterySchema?.config?.levels || [])
   const sortedMasteryLevels: MasteryConfigLevel[] = $derived(
@@ -30,7 +29,12 @@
   )
   const sliderValueIncrement = $derived(masterySchema?.config?.inputIncrement || 1)
   const widthMultiplier = $derived(masteryLevels.length ? 100 / masteryLevels.length : 1)
-  let value = $state(masteryValue)
+
+  $effect(() => {
+    if (!isNumber(masteryValue)) {
+      masteryValue = minValue + maxValue / 2
+    }
+  })
 </script>
 
 <div class="mb-4">
@@ -46,19 +50,21 @@
       max={maxValue}
       step={sliderValueIncrement}
       class="slider"
-      bind:value
-      oninput={() => onValueChange(value)}
+      bind:value={masteryValue}
     />
 
     {#if masterySchema?.config?.isIncrementIndicatorEnabled}
-      <div id="incrementIndicator" style="top: calc(max(0px, {100 - value}% - 3px));"></div>
+      <div
+        id="incrementIndicator"
+        style="top: calc(max(0px, {100 - (masteryValue ?? 0)}% - 3px));"
+      ></div>
     {/if}
 
     <div class="stairs-container">
       {#each sortedMasteryLevels as masteryLevel, index}
         <span
           class="rung px-2"
-          style="width: {(index + 1) * widthMultiplier}%; background-color: {(value ?? 0) >=
+          style="width: {(index + 1) * widthMultiplier}%; background-color: {(masteryValue ?? 0) >=
           masteryLevel.minValue
             ? masteryLevel.color
             : 'var(--bs-gray)'};"

@@ -18,7 +18,7 @@
   )
 
   let localObservation = $state<Partial<ObservationReadable>>({
-    masteryValue: 50,
+    masteryValue: null,
   })
 
   // Update localObservation when observation prop changes
@@ -26,18 +26,14 @@
     if (observation) {
       localObservation = {
         ...observation,
-        masteryValue: observation?.masteryValue || 50,
+        masteryValue: observation?.masteryValue,
       }
     } else {
       localObservation = {
-        masteryValue: 50,
+        masteryValue: null,
       }
     }
   })
-
-  const handleValueChange = (newValue: number) => {
-    localObservation.masteryValue = newValue
-  }
 
   const renderDirection = (goal: GoalDecorated): 'horizontal' | 'vertical' => {
     if (!goal || !$dataStore.masterySchemas) return 'vertical'
@@ -69,9 +65,9 @@
     }
   }
 
-  $effect(() => {
-    $inspect('EDIT localObservation:', localObservation)
-  })
+  // $effect(() => {
+  //   $inspect('EDIT localObservation:', localObservation)
+  // })
 </script>
 
 <div class="observation-edit p-4">
@@ -84,16 +80,14 @@
       {#if renderDirection(goal) === 'vertical'}
         <ValueInputVertical
           {masterySchema}
-          masteryValue={localObservation.masteryValue ?? 50}
+          bind:masteryValue={localObservation.masteryValue}
           label="Hvor ofte mestrer {student?.name}: {goal?.title}"
-          onValueChange={handleValueChange}
         />
       {:else}
         <ValueInputHorizontal
           {masterySchema}
-          masteryValue={localObservation.masteryValue ?? 50}
+          bind:masteryValue={localObservation.masteryValue}
           label="Hvor ofte mestrer {student?.name}: {goal?.title}"
-          onValueChange={handleValueChange}
         />
       {/if}
     </div>
