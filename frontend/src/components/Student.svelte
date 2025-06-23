@@ -274,7 +274,7 @@
 
                             <pkt-button
                               size="small"
-                              skin="secondary"
+                              skin="primary"
                               variant="icon-left"
                               iconName="edit"
                               class="my-2 me-2"
@@ -293,7 +293,7 @@
 
                             <pkt-button
                               size="small"
-                              skin="secondary"
+                              skin="primary"
                               variant="icon-left"
                               iconName="trash-can"
                               class="my-2"

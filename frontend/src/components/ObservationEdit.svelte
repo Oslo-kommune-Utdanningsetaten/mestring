@@ -64,17 +64,13 @@
       console.error('Error saving Observation:', error)
     }
   }
-
-  // $effect(() => {
-  //   $inspect('EDIT localObservation:', localObservation)
-  // })
 </script>
 
 <div class="observation-edit p-4">
   <h3 class="pb-2">
     {localObservation.id ? 'Redigerer observasjon' : 'Ny observasjon'}
   </h3>
-  <pre>{JSON.stringify(localObservation, null, 2)}</pre>
+
   {#if masterySchema?.config?.isMasteryValueInputEnabled}
     <div class="mb-4">
       {#if renderDirection(goal) === 'vertical'}
