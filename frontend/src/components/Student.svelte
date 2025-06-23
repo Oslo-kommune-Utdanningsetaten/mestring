@@ -286,13 +286,13 @@
                         {#if goal?.observations.length === 0}
                           Ingen observasjoner for dette målet
                         {:else}
-                          <div class="row border-bottom border-dashed fw-bold d-flex gap-4">
+                          <div class="row border-bottom border-dashed fw-bold d-flex gap-4 pb-2">
                             <span class="col-3">Dato</span>
                             <span class="col-1">Verdi</span>
-                            <span class="col-3">Handlinger</span>
+                            <span class="col-3">Valg</span>
                           </div>
                           {#each goal?.observations as observation}
-                            <div class="row border-bottom border-dashed d-flex gap-4">
+                            <div class="row border-bottom border-dashed d-flex gap-4 pt-2 pb-1">
                               <span class="col-3">
                                 {formatDate(observation.observedAt)}
                               </span>
