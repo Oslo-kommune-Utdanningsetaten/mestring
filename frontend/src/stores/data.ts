@@ -1,6 +1,11 @@
 import { get, writable } from 'svelte/store'
 import type { Writable as WritableType } from 'svelte/store'
-import { subjectsList, schoolsList, masterySchemasList } from '../generated/sdk.gen'
+import {
+  subjectsList,
+  schoolsList,
+  masterySchemasList,
+  usersList,
+} from '../generated/sdk.gen'
 import type {
   SchoolReadable,
   BasicUserReadable,
@@ -9,9 +14,11 @@ import type {
 import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage'
 import type { AppData } from '../types/models'
 
-const defaultUser = {
-  id: 'yWdH1WRlKsET',
-  name: 'Maria Kemp',
+const loadDefaultUser = async () => {
+  const result = await usersList()
+  const mariaKemp = result.data?.find(user => user.name === 'Maria Kemp')
+  // If Maria Kemp is not found, return the original default id
+  return mariaKemp || { name: 'Maria Kemp', id: 'yWdH1WRlKsET' }
 }
 
 export const setCurrentUser = (user: BasicUserReadable) => {
@@ -98,7 +105,7 @@ export const loadData = async () => {
 
     dataStore.set({
       currentSchool,
-      currentUser: defaultUser,
+      currentUser: loadDefaultUser(),
       subjects: [],
       masterySchemas: [],
     })
