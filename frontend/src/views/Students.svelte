@@ -4,20 +4,19 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
-  import StudentRow from './StudentRow.svelte'
-
+  import StudentRow from '../components/StudentRow.svelte'
   import {
     groupsList,
     groupsMembersRetrieve,
     usersGoalsRetrieve,
     schoolsUsersRetrieve,
   } from '../generated/sdk.gen'
-  import {
-    type GroupReadable,
-    type GoalReadable,
-    type NestedGroupUserReadable,
-    type UserReadable,
-    type SubjectReadable,
+  import type {
+    GroupReadable,
+    GoalReadable,
+    NestedGroupUserReadable,
+    UserReadable,
+    SubjectReadable,
   } from '../generated/types.gen'
 
   const router = useTinyRouter()

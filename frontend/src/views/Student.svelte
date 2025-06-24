@@ -11,10 +11,10 @@
     goalsDestroy,
   } from '../generated/sdk.gen'
   import { urlStringFrom, calculateMasterysForStudent } from '../utils/functions'
-  import MasteryLevelBadge from './MasteryLevelBadge.svelte'
-  import SparklineChart from './SparklineChart.svelte'
-  import GoalEdit from './GoalEdit.svelte'
-  import ObservationEdit from './ObservationEdit.svelte'
+  import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
+  import SparklineChart from '../components/SparklineChart.svelte'
+  import GoalEdit from '../components/GoalEdit.svelte'
+  import ObservationEdit from '../components/ObservationEdit.svelte'
 
   const { studentId } = $props<{ studentId: string }>()
   let student = $state<UserReadable | null>(null)

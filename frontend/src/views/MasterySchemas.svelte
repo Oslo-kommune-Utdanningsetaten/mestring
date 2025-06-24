@@ -1,10 +1,10 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-button.js'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
-  import MasterySchemaEdit from './MasterySchemaEdit.svelte'
-  import { masterySchemasList, masterySchemasDestroy } from '../generated/sdk.gen'
+  import MasterySchemaEdit from '../components/MasterySchemaEdit.svelte'
+  import { masterySchemasDestroy, masterySchemasList } from '../generated/sdk.gen'
   import type { MasterySchemaReadable } from '../generated/types.gen'
-  import type { GoalDecorated, MasterySchemaWithConfig } from '../types/models'
+  import type { MasterySchemaWithConfig } from '../types/models'
 
   let masterySchemas = $state<MasterySchemaWithConfig[]>([])
   let masterySchemaWip: Partial<MasterySchemaReadable> | null =
