@@ -173,6 +173,8 @@ class MasterySchema(BaseModel):
 class Goal(BaseModel):
     """
     A Goal represents something a student should strive towards. A Goal is either for all students in a Group (if goal.group is set), or personal for a specific student (if goal.student is set)
+
+    The integer value sort_order is relative to goal.subject (for personal goals) or goal.group.subject (for group goals) and won't make sense to use across subjects.
     """
     title = models.CharField(max_length=200, null=True)
     description = models.TextField(null=True)
@@ -181,6 +183,7 @@ class Goal(BaseModel):
     subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True)
     previous_goal = models.ForeignKey('Goal', on_delete=models.RESTRICT, null=True)
     mastery_schema = models.ForeignKey(MasterySchema, on_delete=models.RESTRICT, null=True)
+    sort_order = models.IntegerField(null=True)
 
     class Meta:
         constraints = [
