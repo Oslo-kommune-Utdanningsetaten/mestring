@@ -52,7 +52,7 @@
 
     <!-- Groups -->
     <div class="card shadow-sm">
-      <div class="card-header">Grupper</div>
+      <div class="card-header"><mark>Grupper</mark></div>
       <div class="card-body">
         {#if studentGroups}
           <ul class="mb-0">
@@ -80,7 +80,7 @@
 
     <!-- Goals and mastery -->
     <div class="card shadow-sm">
-      <div class="card-header">Mål</div>
+      <div class="card-header"><mark>Mål</mark></div>
 
       {#if goalsBySubjectId && Object.keys(goalsBySubjectId).length > 0}
         <ul class="list-group list-group-flush">
