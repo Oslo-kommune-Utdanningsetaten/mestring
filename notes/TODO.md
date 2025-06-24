@@ -6,7 +6,7 @@
 
 # Datamodell
 
-![Data Model](data_model.png 'Database Schema Diagram')
+![Data Model](data_model.jpeg 'Database Schema Diagram')
 
 # Pattern for feide_id:
 
