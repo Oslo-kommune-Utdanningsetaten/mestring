@@ -123,186 +123,188 @@
   })
 </script>
 
-<div>
-  <div class="d-flex align-items-center gap-2 mb-3">
-    <h4 class="mb-0">
-      {getSubjectName(subjectId)}
-    </h4>
-    <pkt-button
-      size="small"
-      skin="tertiary"
-      type="button"
-      variant="icon-only"
-      iconName="plus-sign"
-      title="Legg til nytt mål"
-      onclick={() => handleEditGoal(null)}
-      onkeydown={(e: any) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          handleEditGoal(null)
-        }
-      }}
-      role="button"
-      tabindex="0"
-    >
-      Nytt mål
-    </pkt-button>
-  </div>
+<div class="d-flex align-items-center gap-2 mb-3">
+  <h3>
+    {getSubjectName(subjectId)}
+  </h3>
+  <pkt-button
+    size="small"
+    skin="tertiary"
+    type="button"
+    variant="icon-only"
+    iconName="plus-sign"
+    title="Legg til nytt mål"
+    class="mini-button bordered"
+    onclick={() => handleEditGoal(null)}
+    onkeydown={(e: any) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        handleEditGoal(null)
+      }
+    }}
+    role="button"
+    tabindex="0"
+  >
+    Nytt mål
+  </pkt-button>
+</div>
 
-  {#if goals.length > 0}
-    {#each goals as goal, index}
-      <div class="row d-flex align-items-center">
-        <pkt-icon
-          title="Vis alle observasjoner"
-          class="hover-glow me-1 col-1 goal-expand-icon"
-          name="chevron-thin-{expandedGoals[goal.id] ? 'down' : 'right'}"
-          onclick={() => toggleGoalExpansion(goal.id)}
+{#if goals.length > 0}
+  {#each goals as goal, index}
+    <div class="row d-flex align-items-center border-bottom mb-3">
+      <pkt-button
+        size="small"
+        skin="tertiary"
+        type="button"
+        variant="icon-only"
+        iconName="chevron-thin-{expandedGoals[goal.id] ? 'down' : 'right'}"
+        class="mini-button col-1 rounded"
+        title="Vis alle observasjoner"
+        onclick={() => toggleGoalExpansion(goal.id)}
+        onkeydown={(e: any) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            toggleGoalExpansion(goal.id)
+          }
+        }}
+        role="button"
+        tabindex="0"
+      ></pkt-button>
+
+      <span class="col-1">{goal.sortOrder || 'x'}</span>
+      <span class="col-md-{goalTitleColumns}">
+        {isShowGoalTitleEnabled ? goal.title : index + 1}
+      </span>
+      <span class="col-5 d-flex align-items-center gap-3">
+        {#if goal.masteryData}
+          <MasteryLevelBadge masteryData={goal.masteryData} />
+          <SparklineChart
+            data={goal.observations?.map((o: ObservationReadable) => o.masteryValue)}
+            lineColor="rgb(100, 100, 100)"
+            label={goal.title}
+          />
+        {/if}
+
+        <pkt-button
+          size="small"
+          skin="tertiary"
+          type="button"
+          variant="icon-only"
+          iconName="plus-sign"
+          class="mini-button bordered"
+          title="Legg til ny observasjon"
+          onclick={() => handleEditObservation(goal, null)}
           onkeydown={(e: any) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault()
-              toggleGoalExpansion(goal.id)
+              handleEditObservation(goal, null)
             }
           }}
           role="button"
           tabindex="0"
-        ></pkt-icon>
-        <span class="col-md-{goalTitleColumns}">
-          {#if isShowGoalTitleEnabled}
-            Mål {index + 1}: {goal.title}
-          {:else}
-            Mål {index + 1}
-          {/if}
-        </span>
-        <span class="col-5 d-flex align-items-center gap-3">
-          {#if goal.masteryData}
-            <MasteryLevelBadge masteryData={goal.masteryData} />
-            <SparklineChart
-              data={goal.observations?.map((o: ObservationReadable) => o.masteryValue)}
-              lineColor="rgb(100, 100, 100)"
-              label={goal.title}
-            />
-          {/if}
+        >
+          Ny observasjon
+        </pkt-button>
+      </span>
+    </div>
 
-          <pkt-button
-            size="small"
-            skin="tertiary"
-            type="button"
-            variant="icon-only"
-            iconName="plus-sign"
-            title="Legg til ny observasjon"
-            onclick={() => handleEditObservation(goal, null)}
-            onkeydown={(e: any) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                handleEditObservation(goal, null)
-              }
-            }}
-            role="button"
-            tabindex="0"
-          >
-            Ny observasjon
-          </pkt-button>
-        </span>
+    {#if expandedGoals[goal.id]}
+      <div class="mx-3">
+        {#if goal?.observations.length === 0}
+          <div class="bg-info p-3">
+            <p>Ingen observasjoner for dette målet</p>
+
+            <pkt-button
+              size="small"
+              skin="primary"
+              variant="icon-left"
+              iconName="edit"
+              class="my-2 me-2"
+              onclick={() => handleEditGoal(goal)}
+              onkeydown={(e: any) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleEditGoal(goal)
+                }
+              }}
+              role="button"
+              tabindex="0"
+            >
+              Rediger mål
+            </pkt-button>
+
+            <pkt-button
+              size="small"
+              skin="primary"
+              variant="icon-left"
+              iconName="trash-can"
+              class="my-2"
+              onclick={() => handleDeleteGoal(goal.id)}
+              onkeydown={(e: any) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleDeleteGoal(goal.id)
+                }
+              }}
+              role="button"
+              tabindex="0"
+            >
+              Slett mål
+            </pkt-button>
+          </div>
+        {:else}
+          <div class="row fw-bold d-flex gap-4 mt-2">
+            <span class="col-3">Dato</span>
+            <span class="col-1">Verdi</span>
+            <span class="col-3">Valg</span>
+          </div>
+          {#each goal?.observations as observation}
+            <div class="row d-flex gap-4 pt-2 observation-item">
+              <span class="col-3">
+                {formatDate(observation.observedAt)}
+              </span>
+              <span class="col-1 d-flex justify-content-end pe-4">
+                {observation.masteryValue}
+              </span>
+              <span class="col-3">
+                <pkt-icon
+                  title="Rediger observasjon"
+                  class="hover-glow me-2"
+                  name="edit"
+                  onclick={() => handleEditObservation(goal, observation)}
+                  onkeydown={(e: any) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleEditObservation(goal, observation)
+                    }
+                  }}
+                  role="button"
+                  tabindex="0"
+                ></pkt-icon>
+                <pkt-icon
+                  title="Slet observasjon"
+                  class="hover-glow me-2"
+                  name="trash-can"
+                  onclick={() => handleDeleteObservation(observation.id)}
+                  onkeydown={(e: any) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleDeleteObservation(observation.id)
+                    }
+                  }}
+                  role="button"
+                  tabindex="0"
+                ></pkt-icon>
+              </span>
+            </div>
+          {/each}
+        {/if}
       </div>
-
-      {#if expandedGoals[goal.id]}
-        <div class="p-2 me-5 px-3">
-          {#if goal?.observations.length === 0}
-            <div class="bg-info p-3">
-              <p>Ingen observasjoner for dette målet</p>
-
-              <pkt-button
-                size="small"
-                skin="primary"
-                variant="icon-left"
-                iconName="edit"
-                class="my-2 me-2"
-                onclick={() => handleEditGoal(goal)}
-                onkeydown={(e: any) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    handleEditGoal(goal)
-                  }
-                }}
-                role="button"
-                tabindex="0"
-              >
-                Rediger mål
-              </pkt-button>
-
-              <pkt-button
-                size="small"
-                skin="primary"
-                variant="icon-left"
-                iconName="trash-can"
-                class="my-2"
-                onclick={() => handleDeleteGoal(goal.id)}
-                onkeydown={(e: any) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    handleDeleteGoal(goal.id)
-                  }
-                }}
-                role="button"
-                tabindex="0"
-              >
-                Slett mål
-              </pkt-button>
-            </div>
-          {:else}
-            <div class="row border-bottom border-dashed fw-bold d-flex gap-4">
-              <span class="col-3">Dato</span>
-              <span class="col-1">Verdi</span>
-              <span class="col-3">Valg</span>
-            </div>
-            {#each goal?.observations as observation}
-              <div class="row border-bottom border-dashed d-flex gap-4 pt-2 observation-item">
-                <span class="col-3">
-                  {formatDate(observation.observedAt)}
-                </span>
-                <span class="col-1 d-flex justify-content-end pe-4">
-                  {observation.masteryValue}
-                </span>
-                <span class="col-3">
-                  <pkt-icon
-                    title="Rediger observasjon"
-                    class="hover-glow me-2"
-                    name="edit"
-                    onclick={() => handleEditObservation(goal, observation)}
-                    onkeydown={(e: any) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        handleEditObservation(goal, observation)
-                      }
-                    }}
-                    role="button"
-                    tabindex="0"
-                  ></pkt-icon>
-                  <pkt-icon
-                    title="Slet observasjon"
-                    class="hover-glow me-2"
-                    name="trash-can"
-                    onclick={() => handleDeleteObservation(observation.id)}
-                    onkeydown={(e: any) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        handleDeleteObservation(observation.id)
-                      }
-                    }}
-                    role="button"
-                    tabindex="0"
-                  ></pkt-icon>
-                </span>
-              </div>
-            {/each}
-          {/if}
-        </div>
-      {/if}
-    {/each}
-  {:else}
-    <div class="alert alert-info">Ingen mål for {getSubjectName(subjectId)}</div>
-  {/if}
-</div>
+    {/if}
+  {/each}
+{:else}
+  <div class="alert alert-info">Ingen mål for {getSubjectName(subjectId)}</div>
+{/if}
 
 <svelte:window on:keydown={handleKeydown} />
 
@@ -324,10 +326,5 @@
 <style>
   div.observation-item > span {
     font-family: 'Courier New', Courier, monospace !important;
-  }
-
-  .goal-expand-icon {
-    cursor: pointer;
-    width: 2rem;
   }
 </style>

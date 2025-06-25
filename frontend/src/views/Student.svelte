@@ -1,11 +1,9 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-button.js'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
-  import { dataStore } from '../stores/data'
   import type { GroupReadable, UserReadable } from '../generated/types.gen'
   import { usersRetrieve, usersGroupsRetrieve } from '../generated/sdk.gen'
   import { urlStringFrom, calculateMasterysForStudent } from '../utils/functions'
-  import GoalEdit from '../components/GoalEdit.svelte'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
 
   const { studentId } = $props<{ studentId: string }>()
@@ -48,11 +46,11 @@
 
 <section class="py-3">
   {#if student}
-    <h2>Elev: {student.name}</h2>
+    <h1>Elev: {student.name}</h1>
 
     <!-- Groups -->
     <div class="card shadow-sm">
-      <div class="card-header"><mark>Grupper</mark></div>
+      <div class="card-header"><h2>Grupper</h2></div>
       <div class="card-body">
         {#if studentGroups}
           <ul class="mb-0">
@@ -80,7 +78,7 @@
 
     <!-- Goals and mastery -->
     <div class="card shadow-sm">
-      <div class="card-header"><mark>Mål</mark></div>
+      <div class="card-header"><h2>Mål</h2></div>
 
       {#if goalsBySubjectId && Object.keys(goalsBySubjectId).length > 0}
         <ul class="list-group list-group-flush">

@@ -175,8 +175,8 @@ class GoalViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.GoalSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ['student_id', 'group_id', 'subject_id']
-    ordering_fields = ['created_at', 'updated_at', 'title']
-    ordering = ['created_at']  # Default ordering
+    ordering_fields = ['created_at', 'updated_at', 'title', 'sort_order']
+    ordering = ['sort_order']  # Default ordering
 
 
 class SituationViewSet(viewsets.ModelViewSet):

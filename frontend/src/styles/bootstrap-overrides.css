@@ -14,6 +14,15 @@
   --bs-danger: #ff8274;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0px;
+}
+
 /* Override specific Bootstrap classes */
 .nav-link {
   color: var(--bs-primary);
