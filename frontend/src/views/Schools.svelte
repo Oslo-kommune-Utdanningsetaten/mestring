@@ -1,9 +1,7 @@
 <script lang="ts">
   import { type SchoolReadable } from '../generated/types.gen'
   import { schoolsList, schoolsPartialUpdate } from '../generated/sdk.gen'
-  import { navigate } from 'svelte-tiny-router'
   import { setCurrentSchool } from '../stores/data'
-  import Link from '../components/Link.svelte'
 
   let schools = $state<SchoolReadable[]>([])
 
@@ -50,17 +48,16 @@
         {#each schools as school}
           <li class="list-group-item d-flex justify-content-between align-items-center">
             {#if school.isServiceEnabled}
-            <Link 
+            <a 
+              href="/"
               onclick={() => setCurrentSchool(school)}
-              to="/"
-              class="btn text-start d-flex align-items-center"  
             >
             <div>
               <span class="school-name">
                 {school.displayName}, sist oppdatert {new Date(school.updatedAt).toLocaleString('no-NO')}
               </span>
             </div>
-          </Link>
+          </a>
             {:else}
             <div class="text-start d-flex align-items-center">
               <div>

@@ -3,7 +3,6 @@
 
   export let to: string
   export let className: string = ''
-  export let onclick: ((event: MouseEvent) => void) | undefined = undefined
 
   const handleClick = (event: MouseEvent) => {
     // Allow opening in new tabs with modifier keys
@@ -12,12 +11,6 @@
     }
 
     event.preventDefault()
-
-    // Exute onlcick if provided
-    if (onclick) {
-      onclick(event)
-    }
-
     navigate(to)
   }
 </script>

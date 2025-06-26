@@ -8,20 +8,27 @@ import {
 } from '../generated/sdk.gen'
 import type {
   SchoolReadable,
-  BasicUserReadable,
   MasterySchemaReadable,
+  UserReadable,
 } from '../generated/types.gen'
 import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage'
 import type { AppData } from '../types/models'
 
 const loadDefaultUser = async () => {
-  const result = await usersList()
-  const mariaKemp = result.data?.find(user => user.name === 'Maria Kemp')
-  // If Maria Kemp is not found, return the original default id
-  return mariaKemp || { name: 'Maria Kemp', id: 'yWdH1WRlKsET' }
+  try {
+    const result = await usersList()
+    const mariaKemp = result.data?.find(user => user.name === 'Maria Kemp')
+    if (mariaKemp) {
+      setCurrentUser(mariaKemp)
+    }
+  } catch (error) {
+    console.error('Error fetching user Maria Kemp:', error)
+    return null
+  }
 }
 
-export const setCurrentUser = (user: BasicUserReadable) => {
+export const setCurrentUser = (user: UserReadable) => {
+  setLocalStorageItem('currentUser', user)
   dataStore.update(data => {
     return { ...data, currentUser: user }
   })
@@ -102,13 +109,20 @@ export const loadData = async () => {
     const currentSchool: SchoolReadable | null = getLocalStorageItem(
       'currentSchool'
     ) as SchoolReadable | null
+    const currentUser: UserReadable | null = getLocalStorageItem(
+      'currentUser'
+    ) as UserReadable | null
 
     dataStore.set({
       currentSchool,
-      currentUser: loadDefaultUser(),
+      currentUser,
       subjects: [],
       masterySchemas: [],
     })
+    
+    if (!currentUser) {
+      await loadDefaultUser()
+    }
 
     if (!currentSchool) {
       await loadDefaultSchool()
