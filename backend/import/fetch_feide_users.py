@@ -16,8 +16,8 @@ from mastery import models
 
 TOKEN_ENDPOINT = "https://auth.dataporten.no/oauth/token"
 GROUPS_ENDPOINT = "https://groups-api.dataporten.no/groups/orgs/feide.osloskolen.no/groups/"
-FEIDE_PUBLIC_KEY = os.environ.get('FEIDE_PUBLIC_KEY')
-FEIDE_PRIVATE_KEY = os.environ.get('FEIDE_PRIVATE_KEY')
+FEIDE_CLIENT_ID = os.environ.get('FEIDE_CLIENT_ID')
+FEIDE_CLIENT_SECRET = os.environ.get('FEIDE_CLIENT_SECRET')
 
 def create_user_item(member):
     feide_id = member['userid_sec'][0]
@@ -32,12 +32,12 @@ def create_user_item(member):
 def fetch_and_store_feide_users():
     print("BEGIN: fetch_and_store_feide_users")
     # Check if credentials are set
-    if not FEIDE_PUBLIC_KEY or not FEIDE_PRIVATE_KEY:
-        print("Error: FEIDE_PUBLIC_KEY or FEIDE_PRIVATE_KEY environment variables not set")
+    if not FEIDE_CLIENT_ID or not FEIDE_CLIENT_SECRET:
+        print("Error: FEIDE_CLIENT_ID or FEIDE_CLIENT_SECRET environment variables not set")
         return
 
     # Get token
-    token_response = requests.post(TOKEN_ENDPOINT, auth=(FEIDE_PUBLIC_KEY, FEIDE_PRIVATE_KEY), data={'grant_type': 'client_credentials'})
+    token_response = requests.post(TOKEN_ENDPOINT, auth=(FEIDE_CLIENT_ID, FEIDE_CLIENT_SECRET), data={'grant_type': 'client_credentials'})
 
     if token_response.status_code == 200 and token_response.text:
         token = token_response.json()['access_token']
