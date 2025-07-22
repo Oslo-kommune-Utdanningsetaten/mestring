@@ -1,20 +1,34 @@
 import { get, writable } from 'svelte/store'
 import type { Writable as WritableType } from 'svelte/store'
-import { subjectsList, schoolsList, masterySchemasList } from '../generated/sdk.gen'
+import {
+  subjectsList,
+  schoolsList,
+  masterySchemasList,
+  usersList,
+} from '../generated/sdk.gen'
 import type {
   SchoolReadable,
-  BasicUserReadable,
   MasterySchemaReadable,
+  UserReadable,
 } from '../generated/types.gen'
 import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage'
 import type { AppData } from '../types/models'
 
-const defaultUser = {
-  id: 'yWdH1WRlKsET',
-  name: 'Maria Kemp',
+const loadDefaultUser = async () => {
+  try {
+    const result = await usersList()
+    const mariaKemp = result.data?.find(user => user.name === 'Maria Kemp')
+    if (mariaKemp) {
+      setCurrentUser(mariaKemp)
+    }
+  } catch (error) {
+    console.error('Error fetching user Maria Kemp:', error)
+    return null
+  }
 }
 
-export const setCurrentUser = (user: BasicUserReadable) => {
+export const setCurrentUser = (user: UserReadable) => {
+  setLocalStorageItem('currentUser', user)
   dataStore.update(data => {
     return { ...data, currentUser: user }
   })
@@ -95,13 +109,20 @@ export const loadData = async () => {
     const currentSchool: SchoolReadable | null = getLocalStorageItem(
       'currentSchool'
     ) as SchoolReadable | null
+    const currentUser: UserReadable | null = getLocalStorageItem(
+      'currentUser'
+    ) as UserReadable | null
 
     dataStore.set({
       currentSchool,
-      currentUser: defaultUser,
+      currentUser,
       subjects: [],
       masterySchemas: [],
     })
+    
+    if (!currentUser) {
+      await loadDefaultUser()
+    }
 
     if (!currentSchool) {
       await loadDefaultSchool()
