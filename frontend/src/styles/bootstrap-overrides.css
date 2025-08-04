@@ -56,6 +56,13 @@ a:hover,
   background-color: var(--bs-light);
 }
 
+.row {
+  margin-left: 0px;
+  * {
+    padding-left: 0px;
+  }
+}
+
 .card {
   margin-top: 2rem;
 }
