@@ -115,7 +115,7 @@ def import_groups_to_db():
                 subject = ensure_subject(group['grep']['code'])
                 new_group = models.Group.objects.create(
                     display_name=group['displayName'],
-                    type='undervisning',
+                    type='teaching',
                     school=school,
                     subject=subject,
                     feide_id=feide_id,
