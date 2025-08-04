@@ -218,10 +218,12 @@
               role="button"
               tabindex="0"
             ></pkt-icon>
-            {goal.sortOrder || index + 1}
+            <span>
+              {goal.sortOrder || index + 1}
+            </span>
           </span>
           <span class="col-md-{goalTitleColumns}">
-            {isShowGoalTitleEnabled ? goal.title : '🙊'} [{goal.subjectId}]
+            {isShowGoalTitleEnabled ? goal.title : '🙊'}
           </span>
           <span class="col-1">
             <pkt-button
@@ -410,5 +412,6 @@
 
   .row-handle {
     cursor: move;
+    vertical-align: -8%;
   }
 </style>
