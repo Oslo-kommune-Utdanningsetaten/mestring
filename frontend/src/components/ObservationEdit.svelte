@@ -68,7 +68,7 @@
 
 <div class="observation-edit p-4">
   <h3 class="pb-2">
-    {localObservation.id ? 'Redigerer observasjon' : 'Ny observasjon'}
+    {localObservation.id ? 'Redigerer' : 'Ny'} observasjon
   </h3>
 
   {#if masterySchema?.config?.isMasteryValueInputEnabled}

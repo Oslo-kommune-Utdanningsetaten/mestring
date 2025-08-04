@@ -39,6 +39,7 @@ export type GoalReadable = {
     maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
+    sortOrder?: number | null;
     createdById?: string;
     updatedById?: string;
     groupId?: string;
@@ -52,6 +53,7 @@ export type GoalWritable = {
     maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
+    sortOrder?: number | null;
     createdById?: string;
     updatedById?: string;
     groupId?: string;
@@ -194,6 +196,7 @@ export type PatchedGoalReadable = {
     maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
+    sortOrder?: number | null;
     createdById?: string;
     updatedById?: string;
     groupId?: string;
@@ -207,6 +210,7 @@ export type PatchedGoalWritable = {
     maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
+    sortOrder?: number | null;
     createdById?: string;
     updatedById?: string;
     groupId?: string;

@@ -15,6 +15,7 @@
     "@hey-api/openapi-ts": "^0.66.6",
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@tsconfig/svelte": "^5.0.4",
+    "@types/sortablejs": "^1.15.8",
     "prettier": "^3.5.3",
     "sass": "^1.89.0",
     "svelte": "^5.20.2",
@@ -32,6 +33,7 @@
     "chart.js": "^4.4.8",
     "date-fns": "^4.1.0",
     "lodash": "^4.17.21",
+    "sortablejs": "^1.15.6",
     "svelte-jsoneditor": "^3.5.0",
     "svelte-tiny-router": "^1.0.3"
   }

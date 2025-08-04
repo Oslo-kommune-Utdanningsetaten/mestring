@@ -197,6 +197,39 @@ a:hover {
   pointer-events: all;
 }
 
+.mini-button {
+  button {
+    height: 1.5rem;
+    width: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.rounded button {
+  svg {
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+  }
+}
+
+mark {
+  margin: 0 -0.4em;
+  padding: 0.1em 0.4em;
+  border-radius: 0.8em 0.3em;
+  background: transparent;
+  background-image: linear-gradient(
+    to right,
+    rgba(199, 243, 95, 0.048),
+    rgba(29, 228, 95, 0.367) 4%,
+    rgba(174, 255, 0, 0.3)
+  );
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: var(--bs-primary);

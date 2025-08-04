@@ -78,9 +78,20 @@
     <input
       id="goalTitle"
       type="text"
-      class="form-control rounded-0 border-2 border-primary goal-title-input"
+      class="form-control rounded-0 border-2 border-primary input-field"
       bind:value={localGoal.title}
       placeholder="Tittel på målet"
+    />
+  </div>
+
+  <div class="form-group mb-3">
+    <label for="goalSortOrder" class="form-label">Rekkefølge</label>
+    <input
+      id="goalSortOrder"
+      type="integer"
+      class="form-control rounded-0 border-2 border-primary input-field"
+      bind:value={localGoal.sortOrder}
+      placeholder="Rekkefølge (tall)"
     />
   </div>
 
@@ -133,7 +144,7 @@
     font-weight: 800;
   }
 
-  .goal-title-input {
+  .input-field {
     height: 48px;
   }
   input,

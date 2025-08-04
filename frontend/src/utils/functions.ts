@@ -1,6 +1,7 @@
 import type { Mastery, GoalDecorated } from '../types/models'
-import { type GoalReadable, type SubjectReadable } from '../generated/types.gen'
-import { usersGoalsRetrieve, observationsList } from '../generated/sdk.gen'
+import type { GoalReadable, SubjectReadable, ObservationReadable } from '../generated/types.gen'
+import { usersGoalsRetrieve, observationsList, usersGroupsRetrieve } from '../generated/sdk.gen'
+import { dataStore } from '../stores/data'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
   [key: string]: string
@@ -62,25 +63,18 @@ export const subjectNamesFromStudentGoals = (
   return Array.from(result)
 }
 
-export const calculateMasterysForStudent = async (studentId: string) => {
-  const result = await usersGoalsRetrieve({
-    path: { id: studentId },
-  })
-
-  if (!result.data || !Array.isArray(result.data)) {
-    return {}
-  }
-  const goals = result.data
-  //     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-  const observationsPromises = goals.map(goal =>
+export const goalsWithCalculatedMastery = async (
+  studentId: string,
+  studentGoals: GoalReadable[]
+): Promise<GoalDecorated[]> => {
+  const observationsPromises = studentGoals.map(goal =>
     observationsList({
       query: { goalId: goal.id, studentId: studentId },
     })
   )
   const observationsResults = await Promise.all(observationsPromises)
-  let goalsBySubjectId: Record<string, GoalDecorated[]> = {}
-
-  goals.forEach((goal, index) => {
+  const result = [] as GoalDecorated[]
+  studentGoals.forEach((goal, index) => {
     const observations = observationsResults[index]?.data || []
     const subjectId = goal.subjectId
     if (!subjectId) {
@@ -89,25 +83,69 @@ export const calculateMasterysForStudent = async (studentId: string) => {
     }
 
     const decoratedGoal: GoalDecorated = { ...goal }
+    decoratedGoal.masteryData = inferMastery(goal, observations)
     decoratedGoal.observations = observations
-    decoratedGoal.masteryData = inferMastery(decoratedGoal)
+    result.push(decoratedGoal)
+  })
+  return result
+}
 
-    const goalsOnThisSubject = goalsBySubjectId[subjectId] || []
-    goalsOnThisSubject.push(decoratedGoal)
-    goalsBySubjectId[subjectId] = goalsOnThisSubject
+export const subjectIdsViaGroupOrGoal = async (studentId: string): Promise<string[]> => {
+  const subjectsId: Set<string> = new Set()
+  const userGroups: any = await usersGroupsRetrieve({
+    path: { id: studentId },
+    query: { roles: 'student' },
+  })
+  userGroups.data.forEach((group: any) => {
+    if (group.subjectId && ['undervisning', 'teaching'].includes(group.type)) {
+      subjectsId.add(group.subjectId)
+    }
+  })
+  const userGoals: any = await usersGoalsRetrieve({
+    path: { id: studentId },
+  })
+  userGoals.data.forEach((goal: GoalReadable) => {
+    if (goal.subjectId) {
+      subjectsId.add(goal.subjectId)
+    }
+  })
+  return Array.from(subjectsId)
+}
+
+export const goalsWithCalculatedMasteryBySubjectId = async (
+  studentId: string,
+  studentGoals: GoalReadable[]
+) => {
+  const decoratedGoals = await goalsWithCalculatedMastery(studentId, studentGoals)
+  let goalsBySubjectId: Record<string, GoalDecorated[]> = {}
+  decoratedGoals.forEach((goal: GoalDecorated) => {
+    const subjectId = goal.subjectId
+    if (!subjectId) {
+      console.error(`Goal ${goal.id} has no subjectId!`)
+      return
+    }
+    goalsBySubjectId[subjectId] = goalsBySubjectId[subjectId] || []
+    goalsBySubjectId[subjectId].push(goal)
+  })
+  Object.keys(goalsBySubjectId).forEach(subjectId => {
+    goalsBySubjectId[subjectId].sort((a, b) => a.sortOrder - b.sortOrder)
   })
   return goalsBySubjectId
 }
 
-export const inferMastery = (goal: any): Mastery | null => {
-  if (!goal.observations || goal.observations.length === 0) {
+export const inferMastery = (
+  goal: GoalReadable,
+  observationsForGoal: ObservationReadable[]
+): Mastery | null => {
+  if (observationsForGoal.length === 0) {
     return null
   }
-  const firstValue = goal.observations[0]?.masteryValue
-  const lastValue = goal.observations[goal.observations.length - 1]?.masteryValue
+  const firstValue = observationsForGoal[0]?.masteryValue
+  const lastValue = observationsForGoal[observationsForGoal.length - 1]?.masteryValue
+  const trend = isNumber(lastValue) && isNumber(firstValue) ? lastValue - firstValue : null
   return {
     mastery: lastValue || 0,
-    trend: lastValue - firstValue,
+    trend: trend || 0,
     title: `${goal.title}: ${lastValue}`,
   }
 }
