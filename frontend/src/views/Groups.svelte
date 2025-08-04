@@ -88,7 +88,7 @@
     {:else}
       <div class="card shadow-sm">
         <!-- Header row -->
-        <div class="group-card-header row fw-bold bg-light border-bottom p-2 mx-0">
+        <div class="group-card-header row fw-bold bg-light border-bottom p-3 mx-0">
           <div class="col-3">Gruppe</div>
           <div class="col-3">Elever</div>
           <div class="col-6">Lærere</div>
@@ -96,7 +96,7 @@
 
         <!-- Student rows -->
         {#each groups as group}
-          <div class="row align-items-center border-bottom p-2 mx-0">
+          <div class="row align-items-center border-bottom p-3 mx-0">
             <div class="col-3">
               <a href="/groups/{group.id}">
                 {group.displayName}
