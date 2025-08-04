@@ -6,27 +6,26 @@
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
 
   let { student, subjects } = $props<{ student: UserReadable; subjects: SubjectReadable[] }>()
-  let goalsBySubjectId = $state<Record<string, GoalDecorated[]>>({})
   let masteryBySubjectId = $state<Record<string, Mastery | null>>({})
-  let studentGoals = $state<GoalDecorated[]>([])
 
   $effect(() => {
+    let studentGoals: GoalDecorated[] = []
     usersGoalsRetrieve({
       path: { id: student.id },
     }).then(result => {
       studentGoals = result.data && Array.isArray(result.data) ? result.data : []
-    })
-    if (studentGoals.length > 0) {
-      goalsWithCalculatedMasteryBySubjectId(student.id, studentGoals).then(result => {
-        goalsBySubjectId = result
-        subjects.forEach((subject: SubjectReadable) => {
-          const goals = goalsBySubjectId[subject.id] || []
-          if (goals.length > 0) {
-            masteryBySubjectId[subject.id] = aggregateMasterys(goals)
-          }
+      if (studentGoals.length > 0) {
+        goalsWithCalculatedMasteryBySubjectId(student.id, studentGoals).then(result => {
+          let goalsBySubjectId: Record<string, GoalDecorated[]> = result
+          subjects.forEach((subject: SubjectReadable) => {
+            const goals = goalsBySubjectId[subject.id] || []
+            if (goals.length > 0) {
+              masteryBySubjectId[subject.id] = aggregateMasterys(goals)
+            }
+          })
         })
-      })
-    }
+      }
+    })
   })
 </script>
 
