@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store'
 
 export interface AuthUser {
-  id: number | null 
+  id: String | null
   name: string
   email: string
   feide_id: string
@@ -40,7 +40,7 @@ export const login = (): void => {
 export const logout = (): void => {
   loggedIn.set(false)
   currentUser.set(null)
-  
+  localStorage.removeItem('currentUser') 
   window.location.href = '/auth/logout/'
 }
 

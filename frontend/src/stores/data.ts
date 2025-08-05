@@ -4,31 +4,12 @@ import {
   subjectsList,
   schoolsList,
   masterySchemasList,
-  usersList,
   usersRetrieve,
 } from '../generated/sdk.gen'
 import type { SchoolReadable, MasterySchemaReadable, UserReadable } from '../generated/types.gen'
 import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage'
 import type { AppData } from '../types/models'
 import { currentUser as authUser, loggedIn } from './auth'
-
-let mariaKempData: UserReadable | null = null
-
-const getMariaKempData = async (): Promise<UserReadable | null> => {
-  if (mariaKempData) return mariaKempData
-
-  try {
-    const result = await usersList()
-    const mariaKemp = result.data?.find(user => user.name === 'Maria Kemp')
-    if (mariaKemp) {
-      mariaKempData = mariaKemp
-      return mariaKemp
-    }
-  } catch (error) {
-    console.error('Error fetching Maria Kemp:', error)
-  }
-  return null
-}
 
 const loadUser = async () => {
   try {
@@ -43,34 +24,23 @@ const loadUser = async () => {
         return
       }
     }
-
-    // For session-only users or logged in users not in DB
     if (isAuthenticated && authUserData) {
-      const mariaKemp = await getMariaKempData()
-      if (mariaKemp) {
-        // Create session user with Maria's ID and groups but session user's info
-        const sessionUser: UserReadable = {
-          id: mariaKemp.id, // Use Maria's ID for observations
-          name: authUserData.name,
-          email: authUserData.email,
-          feideId: authUserData.feide_id,
-          groups: mariaKemp.groups, // Use Maria's groups
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          maintainedAt: new Date().toISOString(),
-          lastActivityAt: null,
-          disabledAt: null,
-          createdById: '',
-          updatedById: '',
-        }
-        setCurrentUser(sessionUser)
-        return
+      const sessionUser: UserReadable = {
+        id: String(null),
+        name: authUserData.name,
+        email: authUserData.email,
+        feideId: authUserData.feide_id,
+        groups: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        maintainedAt: new Date().toISOString(),
+        lastActivityAt: null,
+        disabledAt: null,
+        createdById: '',
+        updatedById: '',
       }
-    }
-    // Fallback: Load Maria Kemp as default user
-    const mariaKemp = await getMariaKempData()
-    if (mariaKemp) {
-      setCurrentUser(mariaKemp)
+      setCurrentUser(sessionUser)
+      return
     }
   } catch (error) {
     console.error('Error loading user:', error)
