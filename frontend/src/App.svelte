@@ -9,13 +9,17 @@
   import Subjects from './views/Subjects.svelte'
   import Navigation from './components/Navigation.svelte'
   import MasterySchemas from './views/MasterySchemas.svelte'
+  import UserInfo from './views/UserInfo.svelte'
+  import { refreshAuth } from './stores/auth'
   import { loadData } from './stores/data'
   import 'bootstrap/dist/css/bootstrap.min.css'
-  import 'bootstrap/dist/js/bootstrap.min.js'
   import './styles/bootstrap-overrides.css'
+  import 'bootstrap/dist/js/bootstrap.min.js'
   import './styles/app.css'
 
-  loadData()
+  refreshAuth().then(() =>{
+    loadData()
+  }) 
 </script>
 
 <header class="m-0 p-0 vw-100">
@@ -32,6 +36,7 @@
     <Route path="/students" component={Students} />
     <Route path="/subjects" component={Subjects} />
     <Route path="/mastery-schemas" component={MasterySchemas} />
+    <Route path="/user-info" component={UserInfo} />
 
     <!-- Fallback route: no "path" prop means it always matches -->
     <Route>

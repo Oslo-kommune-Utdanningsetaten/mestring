@@ -239,4 +239,3 @@ class Status(BaseModel):
     mastery_value = models.IntegerField(null=True)
     mastery_description = models.TextField(null=True)
     feedforward = models.TextField(null=True)
-

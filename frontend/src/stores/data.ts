@@ -5,25 +5,75 @@ import {
   schoolsList,
   masterySchemasList,
   usersList,
+  usersRetrieve,
 } from '../generated/sdk.gen'
-import type {
-  SchoolReadable,
-  MasterySchemaReadable,
-  UserReadable,
-} from '../generated/types.gen'
+import type { SchoolReadable, MasterySchemaReadable, UserReadable } from '../generated/types.gen'
 import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage'
 import type { AppData } from '../types/models'
+import { currentUser as authUser, loggedIn } from './auth'
 
-const loadDefaultUser = async () => {
+let mariaKempData: UserReadable | null = null
+
+const getMariaKempData = async (): Promise<UserReadable | null> => {
+  if (mariaKempData) return mariaKempData
+
   try {
     const result = await usersList()
     const mariaKemp = result.data?.find(user => user.name === 'Maria Kemp')
     if (mariaKemp) {
+      mariaKempData = mariaKemp
+      return mariaKemp
+    }
+  } catch (error) {
+    console.error('Error fetching Maria Kemp:', error)
+  }
+  return null
+}
+
+const loadUser = async () => {
+  try {
+    const authUserData = get(authUser)
+    const isAuthenticated = get(loggedIn)
+
+    // Try to load authenticated database user
+    if (isAuthenticated && authUserData?.id) {
+      const { data: user } = await usersRetrieve({ path: { id: String(authUserData.id) } })
+      if (user) {
+        setCurrentUser(user)
+        return
+      }
+    }
+
+    // For session-only users or logged in users not in DB
+    if (isAuthenticated && authUserData) {
+      const mariaKemp = await getMariaKempData()
+      if (mariaKemp) {
+        // Create session user with Maria's ID and groups but session user's info
+        const sessionUser: UserReadable = {
+          id: mariaKemp.id, // Use Maria's ID for observations
+          name: authUserData.name,
+          email: authUserData.email,
+          feideId: authUserData.feide_id,
+          groups: mariaKemp.groups, // Use Maria's groups
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          maintainedAt: new Date().toISOString(),
+          lastActivityAt: null,
+          disabledAt: null,
+          createdById: '',
+          updatedById: '',
+        }
+        setCurrentUser(sessionUser)
+        return
+      }
+    }
+    // Fallback: Load Maria Kemp as default user
+    const mariaKemp = await getMariaKempData()
+    if (mariaKemp) {
       setCurrentUser(mariaKemp)
     }
   } catch (error) {
-    console.error('Error fetching user Maria Kemp:', error)
-    return null
+    console.error('Error loading user:', error)
   }
 }
 
@@ -119,10 +169,8 @@ export const loadData = async () => {
       subjects: [],
       masterySchemas: [],
     })
-    
-    if (!currentUser) {
-      await loadDefaultUser()
-    }
+
+    await loadUser()
 
     if (!currentSchool) {
       await loadDefaultSchool()

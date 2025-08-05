@@ -57,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'djangorestframework_camel_case.middleware.CamelCaseMiddleWare',
+    'mastery.middleware.UpdateUserActivityMiddleware',
 ]
 ROOT_URLCONF = 'urls'
 TEMPLATES = [
@@ -172,3 +173,18 @@ SPECTACULAR_SETTINGS = {
         'drf_spectacular.hooks.postprocess_schema_enums'
     ],
 }
+
+FEIDE_CLIENT_ID = os.environ.get('FEIDE_CLIENT_ID')
+FEIDE_CLIENT_SECRET = os.environ.get('FEIDE_CLIENT_SECRET')
+FEIDE_AUTH_URL = "https://auth.dataporten.no/oauth/authorization"
+FEIDE_TOKEN_URL = "https://auth.dataporten.no/oauth/token"
+FEIDE_USERINFO_URL = "https://auth.dataporten.no/openid/userinfo"
+FEIDE_LOGOUT_URL = "https://auth.dataporten.no/openid/logout" 
+
+FEIDE_CALLBACK = os.environ.get('FEIDE_CALLBACK')
+FEIDE_DISCOVERY_URL = os.environ.get('FEIDE_DISCOVERY_URL')
+FEIDE_LOGOUT_REDIR = os.environ.get('FEIDE_LOGOUT_REDIR')
+FEIDE_SCOPES  = "openid"
+
+SESSION_COOKIE_AGE = 28800  # 8 hours, matching Feide expires_in
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
