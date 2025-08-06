@@ -51,6 +51,12 @@ a:hover,
   color: var(--bs-primary-hover);
 }
 
+.btn-primary {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+  color: #fff !important;
+}
+
 .dropdown-item:active {
   color: var(--bs-primary-hover);
   background-color: var(--bs-light);

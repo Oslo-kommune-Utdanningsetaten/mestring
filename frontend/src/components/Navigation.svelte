@@ -7,6 +7,8 @@
   import { type SchoolReadable } from '../generated/types.gen'
   import { schoolsList } from '../generated/sdk.gen'
   import { apiHealth } from '../stores/apiHealth'
+  import { onMount } from 'svelte'
+  import { loggedIn, refreshAuth, login, logout } from '../stores/auth'
 
   let isHomeActive = $derived($currentPath === '/')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
@@ -51,6 +53,8 @@
       clearInterval(interval)
     }
   })
+
+  onMount(refreshAuth)
 </script>
 
 {#if !$apiHealth.isOk}
@@ -105,7 +109,7 @@
             Annet
           </a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-            {#each schools as school}
+            <!-- {#each schools as school}
               <li>
                 <a
                   class="dropdown-item {$dataStore.currentSchool?.id === school.id
@@ -118,12 +122,22 @@
                 </a>
               </li>
             {/each}
-            <li><hr class="dropdown-divider" /></li>
+            <li><hr class="dropdown-divider" /></li> -->
+            <li><a class="dropdown-item" href="/user-info">Min side</a></li>
             <li><a class="dropdown-item" href="/mastery-schemas">Mastery Schemas</a></li>
             <li><a class="dropdown-item" href="/about">Om&nbsp;tjenesten</a></li>
             <li><a class="dropdown-item" href="#">Option 3</a></li>
           </ul>
         </li>
+          {#if $loggedIn}
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick={logout}>Logg ut</a>
+          </li>
+        {:else}
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick={login}>Logg inn</a>
+          </li>
+        {/if}
       </ul>
 
       <!-- Logo outside collapsible area for desktop -->

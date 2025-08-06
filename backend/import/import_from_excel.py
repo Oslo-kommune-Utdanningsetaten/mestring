@@ -47,7 +47,7 @@ def ensure_mastery_schema_exists():
             title=title,
             description='Mestring angitt med fem nivåer, fra "aldri" til "mestrer".',
             maintained_at=timezone.now(),
-            schema={
+            config={
                 "levels": [
                     {
                     "text": "Mestrer ikke",
@@ -259,4 +259,5 @@ def run_import():
     print("Excel import all done")
 
 if __name__ == '__main__':
+    ensure_test_school()
     run_import()

@@ -57,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'djangorestframework_camel_case.middleware.CamelCaseMiddleWare',
+    'mastery.middleware.UpdateUserActivityMiddleware',
 ]
 ROOT_URLCONF = 'urls'
 TEMPLATES = [
@@ -172,3 +173,6 @@ SPECTACULAR_SETTINGS = {
         'drf_spectacular.hooks.postprocess_schema_enums'
     ],
 }
+
+SESSION_COOKIE_AGE = 28800  
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True

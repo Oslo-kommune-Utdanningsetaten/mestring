@@ -1,20 +1,34 @@
 import { get, writable } from 'svelte/store'
 import type { Writable as WritableType } from 'svelte/store'
-import { subjectsList, schoolsList, masterySchemasList } from '../generated/sdk.gen'
-import type {
-  SchoolReadable,
-  BasicUserReadable,
-  MasterySchemaReadable,
-} from '../generated/types.gen'
+import { subjectsList, schoolsList, masterySchemasList, usersRetrieve } from '../generated/sdk.gen'
+import type { SchoolReadable, MasterySchemaReadable, UserReadable } from '../generated/types.gen'
 import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage'
 import type { AppData } from '../types/models'
+import { currentUser as authUser, loggedIn, type AuthUser } from './auth'
 
-const defaultUser = {
-  id: 'yWdH1WRlKsET',
-  name: 'Maria Kemp',
+const loadUser = async () => {
+  try {
+    const authUserData = get(authUser)
+    const isAuthenticated = get(loggedIn)
+
+    if (!isAuthenticated || !authUserData) return
+
+    // If user has an ID try to load from database
+    if (authUserData.id) {
+      const { data: user } = await usersRetrieve({ path: { id: authUserData.id } })
+      if (user) {
+        setCurrentUser(user)
+        return
+      }
+    }
+    setCurrentUser(authUserData)
+  } catch (error) {
+    console.error('Error loading user:', error)
+  }
 }
 
-export const setCurrentUser = (user: BasicUserReadable) => {
+export const setCurrentUser = (user: UserReadable | AuthUser) => {
+  setLocalStorageItem('currentUser', user)
   dataStore.update(data => {
     return { ...data, currentUser: user }
   })
@@ -95,13 +109,18 @@ export const loadData = async () => {
     const currentSchool: SchoolReadable | null = getLocalStorageItem(
       'currentSchool'
     ) as SchoolReadable | null
+    const currentUser: UserReadable | null = getLocalStorageItem(
+      'currentUser'
+    ) as UserReadable | null
 
     dataStore.set({
       currentSchool,
-      currentUser: defaultUser,
+      currentUser,
       subjects: [],
       masterySchemas: [],
     })
+
+    await loadUser()
 
     if (!currentSchool) {
       await loadDefaultSchool()

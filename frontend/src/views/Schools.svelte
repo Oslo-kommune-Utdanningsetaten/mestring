@@ -1,6 +1,7 @@
 <script lang="ts">
   import { type SchoolReadable } from '../generated/types.gen'
   import { schoolsList, schoolsPartialUpdate } from '../generated/sdk.gen'
+  import { setCurrentSchool } from '../stores/data'
 
   let schools = $state<SchoolReadable[]>([])
 
@@ -46,11 +47,25 @@
       <ul class="list-group w-100">
         {#each schools as school}
           <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-              {school.displayName}, sist oppdatert {new Date(school.updatedAt).toLocaleString(
-                'no-NO'
-              )}
-            </div>
+            {#if school.isServiceEnabled}
+              <a href="/" onclick={() => setCurrentSchool(school)}>
+                <div>
+                  <span class="school-name">
+                    {school.displayName}, sist oppdatert {new Date(school.updatedAt).toLocaleString(
+                      'no-NO'
+                    )}
+                  </span>
+                </div>
+              </a>
+            {:else}
+              <div class="text-start d-flex align-items-center">
+                <span class="inactive-school">
+                  {school.displayName}, sist oppdatert {new Date(school.updatedAt).toLocaleString(
+                    'no-NO'
+                  )}
+                </span>
+              </div>
+            {/if}
 
             <div class="form-check form-switch">
               <input
@@ -81,5 +96,9 @@
     width: 3em;
     height: 1.5em;
     margin-right: 0.5em;
+  }
+
+  .inactive-school {
+    color: #6c757d;
   }
 </style>
