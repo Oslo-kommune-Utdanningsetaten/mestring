@@ -11,7 +11,6 @@
   let isHomeActive = $derived($currentPath === '/')
   let isAboutActive = $derived($currentPath === '/about')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
-  let isSchoolsActive = $derived($currentPath.startsWith('/schools'))
 
   $effect(() => {
     // Check API health on component load
