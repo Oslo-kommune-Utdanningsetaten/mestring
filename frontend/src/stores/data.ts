@@ -1,53 +1,33 @@
 import { get, writable } from 'svelte/store'
 import type { Writable as WritableType } from 'svelte/store'
-import {
-  subjectsList,
-  schoolsList,
-  masterySchemasList,
-  usersRetrieve,
-} from '../generated/sdk.gen'
+import { subjectsList, schoolsList, masterySchemasList, usersRetrieve } from '../generated/sdk.gen'
 import type { SchoolReadable, MasterySchemaReadable, UserReadable } from '../generated/types.gen'
 import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage'
 import type { AppData } from '../types/models'
-import { currentUser as authUser, loggedIn } from './auth'
+import { currentUser as authUser, loggedIn, type AuthUser } from './auth'
 
 const loadUser = async () => {
   try {
     const authUserData = get(authUser)
     const isAuthenticated = get(loggedIn)
 
-    // Try to load authenticated database user
-    if (isAuthenticated && authUserData?.id) {
-      const { data: user } = await usersRetrieve({ path: { id: String(authUserData.id) } })
+    if (!isAuthenticated || !authUserData) return
+
+    // If user has an ID try to load from database
+    if (authUserData.id) {
+      const { data: user } = await usersRetrieve({ path: { id: authUserData.id } })
       if (user) {
         setCurrentUser(user)
         return
       }
     }
-    if (isAuthenticated && authUserData) {
-      const sessionUser: UserReadable = {
-        id: String(null),
-        name: authUserData.name,
-        email: authUserData.email,
-        feideId: authUserData.feide_id,
-        groups: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        maintainedAt: new Date().toISOString(),
-        lastActivityAt: null,
-        disabledAt: null,
-        createdById: '',
-        updatedById: '',
-      }
-      setCurrentUser(sessionUser)
-      return
-    }
+    setCurrentUser(authUserData)
   } catch (error) {
     console.error('Error loading user:', error)
   }
 }
 
-export const setCurrentUser = (user: UserReadable) => {
+export const setCurrentUser = (user: UserReadable | AuthUser) => {
   setLocalStorageItem('currentUser', user)
   dataStore.update(data => {
     return { ...data, currentUser: user }

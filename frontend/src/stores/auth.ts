@@ -1,10 +1,11 @@
 import { writable } from 'svelte/store'
+import type { UserReadable } from '../generated/types.gen'
 
 export interface AuthUser {
-  id: String | null
+  id: string | null
   name: string
   email: string
-  feide_id: string
+  feideId: string
 }
 
 export const loggedIn = writable<boolean>(false)
@@ -40,7 +41,7 @@ export const login = (): void => {
 export const logout = (): void => {
   loggedIn.set(false)
   currentUser.set(null)
-  localStorage.removeItem('currentUser') 
+  localStorage.removeItem('currentUser')
   window.location.href = '/auth/logout/'
 }
 

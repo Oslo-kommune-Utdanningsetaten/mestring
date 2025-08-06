@@ -68,14 +68,16 @@
       <div class="card-body">
         <div class="row">
           <div class="col-md-6">
-            <strong>Navn:</strong>
-            <br />
-            {currentUser.name}
+            <div class="mb-2">
+              <strong>Navn:</strong>
+              <div class="text-muted">{currentUser?.name}</div>
+            </div>
           </div>
           <div class="col-md-6">
-            <strong>E-post:</strong>
-            <br />
-            {currentUser.email}
+            <div class="mb-2">
+              <strong>E-post:</strong>
+              <div class="text-muted">{currentUser?.email}</div>
+            </div>
           </div>
         </div>
       </div>
