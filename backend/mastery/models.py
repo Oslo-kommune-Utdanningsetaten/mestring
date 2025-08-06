@@ -67,7 +67,7 @@ class User(BaseModel):
     email = models.CharField(max_length=200)
     last_activity_at = models.DateTimeField(null=True)
     disabled_at = models.DateTimeField(null=True)
-    groups = models.ManyToManyField('Group', through='UserGroup', through_fields=('user', 'group'), related_name='members', null=True)
+    groups = models.ManyToManyField('Group', through='UserGroup', through_fields=('user', 'group'), related_name='members')
     
     def role_groups(self, role_name):
         """Get all groups where user has a specific role"""
@@ -239,3 +239,27 @@ class Status(BaseModel):
     mastery_value = models.IntegerField(null=True)
     mastery_description = models.TextField(null=True)
     feedforward = models.TextField(null=True)
+
+
+
+class DataMaintenanceTask(BaseModel):
+    """
+    A DataMaintenanceTask represents a task that maintains data in the system, such as importing groups for a school.
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('running', 'Running'),
+        ('finished', 'Finished'),
+        ('failed', 'Failed'),
+    ]
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending') # current status of the task
+    job_name = models.CharField(max_length=200) # e.g. 'import_groups'
+    target_id = models.CharField(max_length=200, null=True) # id to the entity being maintained, e.g. a school id
+    is_overwrite_enabled = models.BooleanField(default=False) # whether overwriting existing data is allowed
+    is_dryrun_enabled = models.BooleanField(default=False) # whether the task is a dry run (no changes applied)
+    is_crash_on_error_enabled = models.BooleanField(default=False) # whether the task should crash on encountering an error
+    started_at = models.DateTimeField(null=True) 
+    failed_at = models.DateTimeField(null=True) 
+    finished_at = models.DateTimeField(null=True) 
+    result = models.JSONField() # JSON field to store the result or output of the task
