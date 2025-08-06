@@ -10,16 +10,16 @@
   import Navigation from './components/Navigation.svelte'
   import MasterySchemas from './views/MasterySchemas.svelte'
   import UserInfo from './views/UserInfo.svelte'
-  import { refreshAuth } from './stores/auth'
+  import { checkAuth } from './stores/auth'
   import { loadData } from './stores/data'
   import 'bootstrap/dist/css/bootstrap.min.css'
   import './styles/bootstrap-overrides.css'
   import 'bootstrap/dist/js/bootstrap.min.js'
   import './styles/app.css'
 
-  refreshAuth().then(() =>{
+  checkAuth().then(() => {
     loadData()
-  }) 
+  })
 </script>
 
 <header class="m-0 p-0 vw-100">

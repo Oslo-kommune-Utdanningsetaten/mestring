@@ -3,44 +3,17 @@
   import oslologoUrl from '@oslokommune/punkt-assets/dist/logos/oslologo.svg?url'
 
   import { currentPath } from '../stores/navigation'
-  import { dataStore, setCurrentSchool } from '../stores/data'
-  import { type SchoolReadable } from '../generated/types.gen'
-  import { schoolsList } from '../generated/sdk.gen'
+  import { dataStore } from '../stores/data'
   import { apiHealth } from '../stores/apiHealth'
   import { onMount } from 'svelte'
-  import { loggedIn, refreshAuth, login, logout } from '../stores/auth'
+  import { currentUser, checkAuth, login, logout } from '../stores/auth'
 
   let isHomeActive = $derived($currentPath === '/')
+  let isAboutActive = $derived($currentPath === '/about')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
   let isSchoolsActive = $derived($currentPath.startsWith('/schools'))
 
-  let schools = $state<SchoolReadable[]>([])
-
-  const fetchSchools = async () => {
-    try {
-      const result = await schoolsList({
-        query: {
-          isServiceEnabled: true,
-        },
-      })
-      schools = result.data || []
-    } catch (error) {
-      console.error('Error fetching schools:', error)
-      schools = []
-    }
-  }
-
-  const handleSetCurrentSchool = async (schoolId: string) => {
-    const selectedSchool = schools.find(s => s.id === schoolId)
-    if (!selectedSchool) {
-      console.error('Selected school not found')
-      return
-    }
-    setCurrentSchool(selectedSchool)
-  }
-
   $effect(() => {
-    fetchSchools()
     // Check API health on component load
     apiHealth.checkHealth()
 
@@ -54,7 +27,7 @@
     }
   })
 
-  onMount(refreshAuth)
+  onMount(checkAuth)
 </script>
 
 {#if !$apiHealth.isOk}
@@ -86,54 +59,60 @@
     <!-- Collapsible content -->
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
-        </li>
-        <li class="nav-item">
-          <Link to="/students" className={`nav-link ${isStudentsActive ? 'active' : ''}`}>
-            Elever
-          </Link>
-        </li>
-        <li class="nav-item">
-          <Link to="/schools" className={`nav-link ${isSchoolsActive ? 'active' : ''}`}>
-            Skoler
-          </Link>
-        </li>
-        <li class="nav-item dropdown">
-          <a
-            class="nav-link dropdown-toggle"
-            id="navbarDropdown"
-            role="button"
-            data-bs-toggle="dropdown"
-          >
-            Annet
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-            <!-- {#each schools as school}
-              <li>
-                <a
-                  class="dropdown-item {$dataStore.currentSchool?.id === school.id
-                    ? 'selected-school'
-                    : ''}"
-                  href="#"
-                  onclick={() => handleSetCurrentSchool(school.id)}
-                >
-                  {school.displayName}
-                </a>
-              </li>
-            {/each}
-            <li><hr class="dropdown-divider" /></li> -->
-            <li><a class="dropdown-item" href="/user-info">Min side</a></li>
-            <li><a class="dropdown-item" href="/mastery-schemas">Mastery Schemas</a></li>
-            <li><a class="dropdown-item" href="/about">Om&nbsp;tjenesten</a></li>
-            <li><a class="dropdown-item" href="#">Option 3</a></li>
-          </ul>
-        </li>
-          {#if $loggedIn}
+        {#if $currentUser}
           <li class="nav-item">
-            <a class="nav-link" href="#" onclick={logout}>Logg ut</a>
+            <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
           </li>
-        {:else}
+          <li class="nav-item">
+            <Link to="/students" className={`nav-link ${isStudentsActive ? 'active' : ''}`}>
+              Elever
+            </Link>
+          </li>
+        {/if}
+        <li class="nav-item">
+          <Link to="/about" className={`nav-link ${isAboutActive ? 'active' : ''}`}>
+            Om&nbsp;tjenesten
+          </Link>
+        </li>
+        {#if $currentUser}
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              id="navbarDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+            >
+              Profil
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="/user-info">Min side</a></li>
+              <li>
+                <a class="dropdown-item" href="#" onclick={logout}>Logg ut</a>
+              </li>
+            </ul>
+          </li>
+        {/if}
+
+        {#if $currentUser}
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              id="navbarDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+            >
+              Admin
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+              <li>
+                <a class="dropdown-item" href="/schools">Skoler</a>
+              </li>
+              <li><a class="dropdown-item" href="/mastery-schemas">Mastery Schemas</a></li>
+            </ul>
+          </li>
+        {/if}
+
+        {#if !$currentUser}
           <li class="nav-item">
             <a class="nav-link" href="#" onclick={login}>Logg inn</a>
           </li>

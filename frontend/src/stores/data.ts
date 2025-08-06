@@ -4,22 +4,15 @@ import { subjectsList, schoolsList, masterySchemasList, usersRetrieve } from '..
 import type { SchoolReadable, MasterySchemaReadable, UserReadable } from '../generated/types.gen'
 import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage'
 import type { AppData } from '../types/models'
-import { currentUser as authUser, loggedIn, type AuthUser } from './auth'
+import { currentUser as authUser } from './auth'
 
 const loadUser = async () => {
   try {
     const authUserData = get(authUser)
-    const isAuthenticated = get(loggedIn)
 
-    if (!isAuthenticated || !authUserData) return
-
-    // If user has an ID try to load from database
-    if (authUserData.id) {
-      const { data: user } = await usersRetrieve({ path: { id: authUserData.id } })
-      if (user) {
-        setCurrentUser(user)
-        return
-      }
+    if (!authUserData) {
+      console.info('No user')
+      return
     }
     setCurrentUser(authUserData)
   } catch (error) {
@@ -27,8 +20,7 @@ const loadUser = async () => {
   }
 }
 
-export const setCurrentUser = (user: UserReadable | AuthUser) => {
-  setLocalStorageItem('currentUser', user)
+export const setCurrentUser = (user: UserReadable) => {
   dataStore.update(data => {
     return { ...data, currentUser: user }
   })
@@ -109,13 +101,10 @@ export const loadData = async () => {
     const currentSchool: SchoolReadable | null = getLocalStorageItem(
       'currentSchool'
     ) as SchoolReadable | null
-    const currentUser: UserReadable | null = getLocalStorageItem(
-      'currentUser'
-    ) as UserReadable | null
 
     dataStore.set({
       currentSchool,
-      currentUser,
+      currentUser: null,
       subjects: [],
       masterySchemas: [],
     })

@@ -4,12 +4,10 @@
   import { schoolsList, usersGroupsRetrieve } from '../generated/sdk.gen'
   import { urlStringFrom } from '../utils/functions'
   import type { GroupReadable, SchoolReadable } from '../generated/types.gen'
-  import { loggedIn } from '../stores/auth'
 
   let schools = $state<SchoolReadable[]>([])
   let userGroups = $state<GroupReadable[]>([])
   let isLoading = $state(true)
-  const isAuthenticated = $derived($loggedIn)
 
   const currentUser = $derived($dataStore.currentUser)
   const currentSchool = $derived($dataStore.currentSchool)
@@ -57,7 +55,7 @@
     <div class="text-center my-5">
       <div class="spinner-border" role="status"></div>
     </div>
-  {:else if !isAuthenticated}
+  {:else if !currentUser}
     <div class="alert alert-info">Du må logge inn for å se denne siden.</div>
   {:else}
     <!-- User Information -->
