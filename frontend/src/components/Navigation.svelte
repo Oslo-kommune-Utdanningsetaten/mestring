@@ -6,7 +6,9 @@
   import { dataStore } from '../stores/data'
   import { apiHealth } from '../stores/apiHealth'
   import { onMount } from 'svelte'
-  import { currentUser, checkAuth, login, logout } from '../stores/auth'
+  import { checkAuth, login, logout } from '../stores/auth'
+
+  const currentUser = $derived($dataStore.currentUser)
 
   let isHomeActive = $derived($currentPath === '/')
   let isAboutActive = $derived($currentPath === '/about')
@@ -58,7 +60,7 @@
     <!-- Collapsible content -->
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
-        {#if $currentUser}
+        {#if currentUser}
           <li class="nav-item">
             <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
           </li>
@@ -73,26 +75,8 @@
             Om&nbsp;tjenesten
           </Link>
         </li>
-        {#if $currentUser}
-          <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              id="navbarDropdown"
-              role="button"
-              data-bs-toggle="dropdown"
-            >
-              Profil
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item" href="/user-info">Min side</a></li>
-              <li>
-                <a class="dropdown-item" href="#" onclick={logout}>Logg ut</a>
-              </li>
-            </ul>
-          </li>
-        {/if}
 
-        {#if $currentUser}
+        {#if currentUser}
           <li class="nav-item dropdown">
             <a
               class="nav-link dropdown-toggle"
@@ -111,7 +95,26 @@
           </li>
         {/if}
 
-        {#if !$currentUser}
+        {#if currentUser}
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              id="navbarDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+            >
+              Profil
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="/user-info">Min side</a></li>
+              <li>
+                <a class="dropdown-item" href="#" onclick={logout}>Logg ut</a>
+              </li>
+            </ul>
+          </li>
+        {/if}
+
+        {#if !currentUser}
           <li class="nav-item">
             <a class="nav-link" href="#" onclick={login}>Logg inn</a>
           </li>

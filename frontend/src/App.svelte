@@ -11,11 +11,13 @@
   import MasterySchemas from './views/MasterySchemas.svelte'
   import UserInfo from './views/UserInfo.svelte'
   import { checkAuth } from './stores/auth'
-  import { loadData } from './stores/data'
+  import { loadData, dataStore } from './stores/data'
   import 'bootstrap/dist/css/bootstrap.min.css'
   import './styles/bootstrap-overrides.css'
   import 'bootstrap/dist/js/bootstrap.min.js'
   import './styles/app.css'
+
+  const currentUser = $derived($dataStore.currentUser)
 
   checkAuth().then(() => {
     loadData()
@@ -30,18 +32,21 @@
   <Router>
     <Route path="/" component={Home} />
     <Route path="/about" component={About} />
-    <Route path="/students/:studentId" component={Student} />
-    <Route path="/groups/:groupId" component={Group} />
-    <Route path="/schools" component={Schools} />
-    <Route path="/students" component={Students} />
-    <Route path="/subjects" component={Subjects} />
-    <Route path="/mastery-schemas" component={MasterySchemas} />
-    <Route path="/user-info" component={UserInfo} />
+
+    {#if currentUser}
+      <Route path="/students/:studentId" component={Student} />
+      <Route path="/groups/:groupId" component={Group} />
+      <Route path="/schools" component={Schools} />
+      <Route path="/students" component={Students} />
+      <Route path="/subjects" component={Subjects} />
+      <Route path="/mastery-schemas" component={MasterySchemas} />
+      <Route path="/user-info" component={UserInfo} />
+    {/if}
 
     <!-- Fallback route: no "path" prop means it always matches -->
     <Route>
       <div class="alert alert-danger">
-        <h4>Page not found :/</h4>
+        <h4>Unrecognized path :/</h4>
         <p>The page you're looking for doesn't exist.</p>
       </div>
     </Route>
