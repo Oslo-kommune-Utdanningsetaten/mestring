@@ -1,15 +1,18 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-button.js'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
-  import type { GroupReadable, UserReadable } from '../generated/types.gen'
+  import { onMount } from 'svelte'
+
+  import type { GroupReadable, UserReadable, SubjectReadable } from '../generated/types.gen'
   import { usersRetrieve, usersGroupsRetrieve } from '../generated/sdk.gen'
-  import { urlStringFrom, calculateMasterysForStudent } from '../utils/functions'
+  import { urlStringFrom, subjectIdsViaGroupOrGoal } from '../utils/functions'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
+  import { dataStore } from '../stores/data'
 
   const { studentId } = $props<{ studentId: string }>()
   let student = $state<UserReadable | null>(null)
-  let studentGroups = $state<GroupReadable[] | []>([])
-  let goalsBySubjectId = $state<Record<string, any>>({})
+  let groups = $state<GroupReadable[] | []>([])
+  let subjects = $state<SubjectReadable[]>([])
 
   const fetchUser = async (userId: string) => {
     try {
@@ -27,19 +30,31 @@
         path: { id: studentId },
         query: { roles: 'student' },
       })
-      studentGroups = Array.isArray(result.data) ? result.data : []
+      groups = Array.isArray(result.data) ? result.data : []
     } catch (err) {
       console.error(`Could not load groups for ${studentId}`, err)
-      studentGroups = []
+      groups = []
     }
   }
 
-  $effect(() => {
+  const fetchSubjects = async (studentId: string) => {
+    try {
+      const subjectIds = await subjectIdsViaGroupOrGoal(studentId)
+      if (subjectIds.length > 0) {
+        subjects = $dataStore.subjects.filter((subject: SubjectReadable) =>
+          subjectIds.includes(subject.id)
+        )
+      }
+    } catch (err) {
+      console.error(`Could not load subjects for ${studentId}`, err)
+      subjects = []
+    }
+  }
+
+  onMount(() => {
     if (studentId) {
       fetchUser(studentId)
-      calculateMasterysForStudent(studentId).then(result => {
-        goalsBySubjectId = result
-      })
+      fetchSubjects(studentId)
     }
   })
 </script>
@@ -50,11 +65,11 @@
 
     <!-- Groups -->
     <div class="card shadow-sm">
-      <div class="card-header"><h2>Grupper</h2></div>
+      <h2 class="card-header">Grupper</h2>
       <div class="card-body">
-        {#if studentGroups}
+        {#if groups}
           <ul class="mb-0">
-            {#each studentGroups as group}
+            {#each groups as group}
               <li>
                 <a
                   href={urlStringFrom(
@@ -78,13 +93,13 @@
 
     <!-- Goals and mastery -->
     <div class="card shadow-sm">
-      <div class="card-header"><h2>Mål</h2></div>
+      <h2 class="card-header">Mål</h2>
 
-      {#if goalsBySubjectId && Object.keys(goalsBySubjectId).length > 0}
+      {#if subjects.length > 0}
         <ul class="list-group list-group-flush">
-          {#each Object.keys(goalsBySubjectId) as subjectId}
+          {#each subjects as subject (subject.id)}
             <li class="list-group-item py-3">
-              <StudentSubjectGoals {subjectId} {studentId} />
+              <StudentSubjectGoals subjectId={subject.id} {studentId} />
             </li>
           {/each}
         </ul>

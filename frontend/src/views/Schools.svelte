@@ -48,25 +48,24 @@
         {#each schools as school}
           <li class="list-group-item d-flex justify-content-between align-items-center">
             {#if school.isServiceEnabled}
-            <a 
-              href="/"
-              onclick={() => setCurrentSchool(school)}
-            >
-            <div>
-              <span class="school-name">
-                {school.displayName}, sist oppdatert {new Date(school.updatedAt).toLocaleString('no-NO')}
-              </span>
-            </div>
-          </a>
+              <a href="/" onclick={() => setCurrentSchool(school)}>
+                <div>
+                  <span class="school-name">
+                    {school.displayName}, sist oppdatert {new Date(school.updatedAt).toLocaleString(
+                      'no-NO'
+                    )}
+                  </span>
+                </div>
+              </a>
             {:else}
-            <div class="text-start d-flex align-items-center">
-              <div>
+              <div class="text-start d-flex align-items-center">
                 <span class="inactive-school">
-                  {school.displayName}, sist oppdatert {new Date(school.updatedAt).toLocaleString('no-NO')}
+                  {school.displayName}, sist oppdatert {new Date(school.updatedAt).toLocaleString(
+                    'no-NO'
+                  )}
                 </span>
               </div>
-            </div>
-          {/if}
+            {/if}
 
             <div class="form-check form-switch">
               <input
@@ -101,5 +100,5 @@
 
   .inactive-school {
     color: #6c757d;
-  } 
+  }
 </style>

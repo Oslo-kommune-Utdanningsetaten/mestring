@@ -207,11 +207,6 @@ a:hover {
   }
 }
 
-.bordered {
-  border: 1px solid var(--bs-primary);
-  border-radius: 0.25rem;
-}
-
 .rounded button {
   svg {
     border-radius: 50%;
