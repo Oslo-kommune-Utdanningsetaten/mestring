@@ -20,8 +20,8 @@ FEIDE_CLIENT_ID = os.environ.get('FEIDE_CLIENT_ID')
 FEIDE_CLIENT_SECRET = os.environ.get('FEIDE_CLIENT_SECRET')
 
 def create_user_item(member):
-    feide_id = member['userid_sec'][0]
-    email = feide_id.split(':')[1].replace('@feide.', '@')
+    feide_id = member['userid_sec'][0].split(':')[1]
+    email = feide_id.replace('@feide.', '@')
     return {
         "feide_id": feide_id,
         "name": member['name'],

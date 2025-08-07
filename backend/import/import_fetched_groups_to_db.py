@@ -20,6 +20,8 @@ UDIR_GREP_URL = "https://data.udir.no/kl06/v201906/fagkoder/"
         
 # Create a new subject if it doesn't exist
 def ensure_subject(grep_code):
+    if not grep_code:
+        return None
     subject = models.Subject.objects.filter(grep_code__exact=grep_code).first()
     if not subject:
         udir_response = requests.get(UDIR_GREP_URL + grep_code)
@@ -112,7 +114,7 @@ def import_groups_to_db():
         else:
             school = models.School.objects.filter(feide_id__exact=group['parent']).first()
             if school:
-                subject = ensure_subject(group['grep']['code'])
+                subject = ensure_subject(group.get('grep.code', None))
                 new_group = models.Group.objects.create(
                     display_name=group['displayName'],
                     type='teaching',
