@@ -2,25 +2,16 @@ import { get, writable } from 'svelte/store'
 import type { Writable as WritableType } from 'svelte/store'
 import { subjectsList, schoolsList, masterySchemasList } from '../generated/sdk.gen'
 import type { SchoolReadable, MasterySchemaReadable, UserReadable } from '../generated/types.gen'
-import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage'
+import {
+  getLocalStorageItem,
+  setLocalStorageItem,
+  removeLocalStorageItem,
+} from '../stores/localStorage'
 import type { AppData } from '../types/models'
-import { currentUser as authUser } from './auth'
+import { currentUser } from './auth'
 
-const loadUser = async () => {
-  try {
-    const authUserData = get(authUser)
-
-    if (!authUserData) {
-      console.info('No user')
-      return
-    }
-    setCurrentUser(authUserData)
-  } catch (error) {
-    console.error('Error loading user:', error)
-  }
-}
-
-export const setCurrentUser = (user: UserReadable) => {
+export const updateStoreWithCurrentUser = () => {
+  const user = get(currentUser)
   dataStore.update(data => {
     return { ...data, currentUser: user }
   })
@@ -50,18 +41,34 @@ export const dataStore: WritableType<AppData> = writable({
   masterySchemas: [],
 })
 
-const loadDefaultSchool = async () => {
+const loadSchool = async () => {
+  let schools: SchoolReadable[] = []
   try {
     const result = await schoolsList()
-    const schools = result.data || []
-    const defaultSchool = schools.find(school => school.isServiceEnabled) || null
-    if (defaultSchool) {
-      setCurrentSchool(defaultSchool)
-    }
+    schools = result.data || []
   } catch (error) {
     console.error('Error fetching schools:', error)
     return null
   }
+
+  let previousSchool = getLocalStorageItem('currentSchool') as SchoolReadable | null
+  const isPreviousSchoolValid =
+    previousSchool &&
+    schools.find(school => school.id === previousSchool.id && school.isServiceEnabled)
+
+  if (isPreviousSchoolValid) {
+    // Previously used school is still valid, set it as current school
+    setCurrentSchool(previousSchool)
+    return
+  }
+  // Just grab the first school that is enabled
+  const selectedSchool = schools.find(school => school.isServiceEnabled)
+  if (selectedSchool) {
+    setCurrentSchool(selectedSchool)
+    return
+  }
+  console.warn('No valid school found')
+  removeLocalStorageItem('currentSchool')
 }
 
 const loadMasterySchemas = async () => {
@@ -98,27 +105,15 @@ const loadSubjectsForSchool = async (schoolId: string): Promise<void> => {
 
 export const loadData = async () => {
   try {
-    const currentSchool: SchoolReadable | null = getLocalStorageItem(
-      'currentSchool'
-    ) as SchoolReadable | null
-
     dataStore.set({
-      currentSchool,
+      currentSchool: null,
       currentUser: null,
       subjects: [],
       masterySchemas: [],
     })
 
-    await loadUser()
-
-    if (!currentSchool) {
-      await loadDefaultSchool()
-    }
-
-    // Load subjects if we have a current school
-    if (currentSchool?.id) {
-      await loadSubjectsForSchool(currentSchool.id)
-    }
+    await updateStoreWithCurrentUser()
+    await loadSchool()
     await loadMasterySchemas()
   } catch (error) {
     console.error('Failed to load data:', error)
