@@ -45,7 +45,7 @@
 
     <!-- Fallback route: no "path" prop means it always matches -->
     <Route>
-      <div class="alert alert-danger">
+      <div>
         <h4>Unrecognized path :/</h4>
         <p>The page you're looking for doesn't exist.</p>
       </div>

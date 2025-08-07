@@ -20,15 +20,18 @@
   } from '../generated/types.gen'
 
   const router = useTinyRouter()
-  const currentSchool = $state($dataStore.currentSchool)
-
-  let selectedGroupId = $derived(router.getQueryParam('groupId'))
-  let selectedGroup = $state<GroupReadable | null>(null)
+  let currentSchool = $state($dataStore.currentSchool)
+  let selectedGroupId = $state<string | undefined>(undefined)
+  let selectedGroup = $state<GroupReadable | undefined>(undefined)
   let allGroups = $state<GroupReadable[]>([])
   let students = $state<UserReadable[]>([])
-  let filteredStudents = $state<UserReadable[]>([])
-  let subjects = $state<SubjectReadable[]>([])
   let nameFilter = $state<string>('')
+  let filteredStudents = $derived(
+    nameFilter
+      ? students.filter(student => student.name.toLowerCase().includes(nameFilter.toLowerCase()))
+      : students
+  )
+  let subjects = $state<SubjectReadable[]>([])
   let headerText = $derived.by(() => {
     let text = selectedGroup ? `Elever i gruppe: ${selectedGroup.displayName}` : 'Alle elever'
     text = nameFilter ? `${text} med navn som inneholder "${nameFilter}"` : text
@@ -36,8 +39,7 @@
   })
 
   const fetchAllStudentsInSchool = async () => {
-    if (!currentSchool?.id) return
-
+    if (!currentSchool) return
     try {
       const result = await schoolsUsersRetrieve({
         path: { id: currentSchool.id },
@@ -51,6 +53,7 @@
   }
 
   const fetchAllGroups = async () => {
+    if (!currentSchool) return
     try {
       const result = await groupsList({
         query: {
@@ -65,6 +68,7 @@
   }
 
   const fetchGroupMembers = async (groupId: string) => {
+    if (!currentSchool) return
     try {
       const result = await groupsMembersRetrieve({
         path: {
@@ -83,49 +87,42 @@
   }
 
   const fetchSubjectsForStudents = async (students: UserReadable[]) => {
+    const subjectIds = new Set(subjects.map(s => s.id))
+
     const goalsArrays = await Promise.all(
       students.map(async (student): Promise<GoalReadable[]> => {
         const result = await usersGoalsRetrieve({
-          path: {
-            id: student.id,
-          },
+          path: { id: student.id },
         })
         return Array.isArray(result.data) ? result.data : []
       })
     )
+
+    const newSubjects: SubjectReadable[] = []
     goalsArrays.forEach(goals => {
-      if (goals) {
-        goals.forEach(goal => {
+      goals?.forEach(goal => {
+        if (goal.subjectId && !subjectIds.has(goal.subjectId)) {
           const subject = $dataStore.subjects.find(s => s.id === goal.subjectId)
-          if (subject && !subjects.some(s => s.id === subject.id)) {
-            subjects.push(subject)
+          if (subject) {
+            newSubjects.push(subject)
+            subjectIds.add(subject.id)
           }
-        })
-      }
+        }
+      })
     })
+
+    if (newSubjects.length > 0) {
+      subjects = [...subjects, ...newSubjects]
+    }
   }
 
   const handleGroupSelect = (groupId: string): void => {
     if (groupId && groupId !== '0') {
-      window.location.href = urlStringFrom({ groupId }, { mode: 'merge' })
+      router.navigate(urlStringFrom({ groupId }, { path: '/students', mode: 'merge' }))
     } else {
-      window.location.href = urlStringFrom({}, { mode: 'replace' })
+      router.navigate(urlStringFrom({}, { path: '/students', mode: 'replace' }))
     }
   }
-
-  $effect(() => {
-    if (currentSchool) {
-      fetchAllGroups().then(() => {
-        if (selectedGroupId) {
-          selectedGroup = allGroups.find(group => group.id === selectedGroupId) || null
-          fetchGroupMembers(selectedGroupId)
-        } else {
-          // fetch all students if no group is selected
-          fetchAllStudentsInSchool()
-        }
-      })
-    }
-  })
 
   $effect(() => {
     if (students.length > 0) {
@@ -134,19 +131,27 @@
   })
 
   $effect(() => {
-    if (nameFilter) {
-      filteredStudents = students.filter(student =>
-        student.name.toLowerCase().includes(nameFilter.toLowerCase())
-      )
-    } else {
-      filteredStudents = students
-    }
+    currentSchool = $dataStore.currentSchool
+  })
+
+  $effect(() => {
+    // Read both dependencies first to establish reactivity
+    selectedGroupId = router.getQueryParam('groupId')
+    if (!currentSchool) return
+    fetchAllGroups().then(() => {
+      selectedGroup = allGroups.find(group => group.id === selectedGroupId)
+      if (selectedGroup) {
+        fetchGroupMembers(selectedGroup.id)
+      } else {
+        // fetch all students if no group is selected
+        fetchAllStudentsInSchool()
+      }
+    })
   })
 </script>
 
 <section class="pt-3">
   <h2 class="py-3">{headerText}</h2>
-
   <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">
     <div class="pkt-inputwrapper">
