@@ -68,7 +68,8 @@ class User(BaseModel):
     last_activity_at = models.DateTimeField(null=True)
     disabled_at = models.DateTimeField(null=True)
     groups = models.ManyToManyField('Group', through='UserGroup', through_fields=('user', 'group'), related_name='members', null=True)
-    
+    is_superadmin = models.BooleanField(default=False)
+
     def role_groups(self, role_name):
         """Get all groups where user has a specific role"""
         return self.groups.filter(user_groups__role__name=role_name)
