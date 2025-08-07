@@ -13,6 +13,7 @@ export type BasicUserReadable = {
     email: string;
     lastActivityAt?: string | null;
     disabledAt?: string | null;
+    isSuperadmin?: boolean;
     readonly groups: Array<string | null>;
     createdById?: string;
     updatedById?: string;
@@ -28,6 +29,7 @@ export type BasicUserWritable = {
     email: string;
     lastActivityAt?: string | null;
     disabledAt?: string | null;
+    isSuperadmin?: boolean;
     createdById?: string;
     updatedById?: string;
 };
@@ -432,6 +434,7 @@ export type PatchedUserReadable = {
     email?: string;
     lastActivityAt?: string | null;
     disabledAt?: string | null;
+    isSuperadmin?: boolean;
     createdById?: string;
     updatedById?: string;
 };
@@ -443,6 +446,7 @@ export type PatchedUserWritable = {
     email?: string;
     lastActivityAt?: string | null;
     disabledAt?: string | null;
+    isSuperadmin?: boolean;
     createdById?: string;
     updatedById?: string;
 };
@@ -596,6 +600,7 @@ export type UserReadable = {
     email: string;
     lastActivityAt?: string | null;
     disabledAt?: string | null;
+    isSuperadmin?: boolean;
     createdById?: string;
     updatedById?: string;
 };
@@ -607,6 +612,7 @@ export type UserWritable = {
     email: string;
     lastActivityAt?: string | null;
     disabledAt?: string | null;
+    isSuperadmin?: boolean;
     createdById?: string;
     updatedById?: string;
 };

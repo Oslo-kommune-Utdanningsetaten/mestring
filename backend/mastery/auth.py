@@ -6,7 +6,8 @@ from datetime import datetime
 from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
 from django.conf import settings
-from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from oauthlib.oauth2 import WebApplicationClient
 from .models import User
 
@@ -23,6 +24,7 @@ client = WebApplicationClient(FEIDE_CLIENT_ID)
 def get_provider_cfg():
     return requests.get(FEIDE_DISCOVERY_URL).json()
 
+
 @require_GET
 def feidelogin(request):
     feide_provider_cfg = get_provider_cfg()
@@ -35,6 +37,7 @@ def feidelogin(request):
         login_hint=f"feide|realm|{FEIDE_REALM}",
     )
     return redirect(request_uri)
+
 
 @require_GET
 def feidecallback(request):
@@ -59,47 +62,36 @@ def feidecallback(request):
         auth=(FEIDE_CLIENT_ID, FEIDE_CLIENT_SECRET),
     )
 
-    tokens = client.parse_request_body_response(
-        json.dumps(token_response.json()))
+    tokens = client.parse_request_body_response(json.dumps(token_response.json()))
     
     userinfo_endpoint = provider_cfg["userinfo_endpoint"]
     uri, headers, body = client.add_token(userinfo_endpoint)
     userinfo_response = requests.get(uri, headers=headers, data=body)
-    username = userinfo_response.json().get("https://n.feide.no/claims/eduPersonPrincipalName")
+    principal_name = userinfo_response.json().get("https://n.feide.no/claims/eduPersonPrincipalName")
 
-    if username:
+    if principal_name:
+        feide_user_id = principal_name.strip().lower()
         # Store tokens in session
         request.session["feide_tokens"] = tokens
-        request.session["feide_username"] = username
-        request.session["feide_name"] = userinfo_response.json().get("name")
-        
-        feide_id = username.strip().lower()
-        email = feide_id.replace('@feide.', '@')
-        
+        request.session["feide_user_id"] = feide_user_id
+               
         # Check if user exists in database
         try:
-            user = User.objects.get(feide_id=feide_id)
+            user = User.objects.get(feide_id=feide_user_id)
             print(f"Found existing user: {user.id}")
             
             # Update existing user info
             user.name = userinfo_response.json().get("name", user.name)
-            user.email = email
+            user.email = feide_user_id.replace('@feide.', '@')
             user.last_activity_at = datetime.now()
             user.save()
             
-            # Store database user ID
-            request.session["feide_user_id"] = user.id
+            # Store user_id in session
+            request.session["user_id"] = user.id
             
         except User.DoesNotExist:
-            print(f"User not found in database, storing in session only")
-            
-            # Store user data in session without creating database record
-            request.session["feide_user_data"] = {
-                "feide_id": feide_id,
-                "name": userinfo_response.json().get("name", ""),
-                "email": email,
-            }
-        
+            print(f"User not found in database: {feide_user_id}")
+                    
         return redirect(FRONTEND)
     else:
         request.session.clear()
@@ -127,38 +119,27 @@ def feidelogout(request):
     return redirect(FRONTEND)
 
 
-@require_GET
+@api_view(['GET'])
 def auth_status(request):
-    """Check if user is authenticated"""
-    feide_user_id = request.session.get("feide_user_id")
-    feide_user_data = request.session.get("feide_user_data")
-    
-    # Check if user exists in database
-    if feide_user_id:
-        try:
-            user = User.objects.get(id=feide_user_id)
-            return JsonResponse({
-                "authenticated": True,
-                "user": {
-                    "id": user.id,
-                    "name": user.name,
-                    "email": user.email,
-                    "feide_id": user.feide_id,
-                }
-            })
-        except User.DoesNotExist:
-            pass
-    
-    # Check if user data is stored in session only
-    if feide_user_data:
-        return JsonResponse({
-            "authenticated": True,
+    """Return authentication status using DRF Response for camelCase conversion"""
+    user_id = request.session["user_id"]
+    try:
+        user = User.objects.get(id=user_id)
+        return Response({
+            "is_authenticated": True,
             "user": {
-                "id": None, 
-                "name": feide_user_data.get("name", ""),
-                "email": feide_user_data.get("email", ""),
-                "feide_id": feide_user_data.get("feide_id", ""),
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "feide_id": user.feide_id,
+                "is_superadmin": getattr(user, 'is_superadmin', False),
+                # Add any other user fields you need
             }
         })
-    
-    return JsonResponse({"authenticated": False})
+    except User.DoesNotExist:
+        # Clear invalid session
+        request.session.flush()
+        return Response({
+            "is_authenticated": False,
+            "user": None
+        })
