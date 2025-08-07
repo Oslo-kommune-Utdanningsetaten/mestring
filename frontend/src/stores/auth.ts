@@ -9,7 +9,6 @@ export const checkAuth = async (): Promise<void> => {
   try {
     const response = await fetch('/api/auth/status', { credentials: 'include' })
     const data = response.ok ? await response.json() : null
-
     if (data?.authenticated) {
       currentUser.set(data.user)
     } else {
@@ -31,5 +30,3 @@ export const logout = (): void => {
   currentUser.set(null)
   window.location.href = '/auth/logout/'
 }
-
-checkAuth()
