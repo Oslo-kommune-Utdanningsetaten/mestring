@@ -122,7 +122,12 @@ def feidelogout(request):
 @api_view(['GET'])
 def auth_status(request):
     """Return authentication status using DRF Response for camelCase conversion"""
-    user_id = request.session["user_id"]
+    user_id = request.session.get("user_id", None)
+    if not user_id:
+        return Response({
+            "is_authenticated": False,
+            "user": None
+        })
     try:
         user = User.objects.get(id=user_id)
         return Response({
