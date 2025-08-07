@@ -114,7 +114,12 @@ def import_groups_to_db():
         else:
             school = models.School.objects.filter(feide_id__exact=group['parent']).first()
             if school:
-                subject = ensure_subject(group.get('grep.code', None))
+                grep_data = group.get('grep', {})
+                grep_code = grep_data.get('code') if grep_data else None
+                if grep_code:
+                    subject = ensure_subject(grep_code)
+                else:
+                    subject = None
                 new_group = models.Group.objects.create(
                     display_name=group['displayName'],
                     type='teaching',
