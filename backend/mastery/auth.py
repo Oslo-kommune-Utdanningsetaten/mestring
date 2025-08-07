@@ -6,7 +6,8 @@ from datetime import datetime
 from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
 from django.conf import settings
-from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from oauthlib.oauth2 import WebApplicationClient
 from .models import User
 
@@ -118,25 +119,27 @@ def feidelogout(request):
     return redirect(FRONTEND)
 
 
-@require_GET
+@api_view(['GET'])
 def auth_status(request):
-    """Check if there is a sessoion user, and it matches it matches a db entry"""
-    user_id = request.session.get('user_id', None)
-    # Check if user exists in database
-    if user_id:
-        try:
-            user = User.objects.get(id=user_id)
-            return JsonResponse({
-                "authenticated": True,
-                "user": {
-                    "id": user.id,
-                    "name": user.name,
-                    "email": user.email,
-                    "feide_id": user.feide_id,
-                    "is_superadmin": user.is_superadmin,
-                }
-            })
-        except User.DoesNotExist:
-            pass
-        
-    return JsonResponse({"authenticated": False})
+    """Return authentication status using DRF Response for camelCase conversion"""
+    user_id = request.session["user_id"]
+    try:
+        user = User.objects.get(id=user_id)
+        return Response({
+            "is_authenticated": True,
+            "user": {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "feide_id": user.feide_id,
+                "is_superadmin": getattr(user, 'is_superadmin', False),
+                # Add any other user fields you need
+            }
+        })
+    except User.DoesNotExist:
+        # Clear invalid session
+        request.session.flush()
+        return Response({
+            "is_authenticated": False,
+            "user": None
+        })

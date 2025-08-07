@@ -73,7 +73,7 @@
           </Link>
         </li>
 
-        {#if currentUser}
+        {#if currentUser?.isSuperadmin}
           <li class="nav-item dropdown">
             <a
               class="nav-link dropdown-toggle"

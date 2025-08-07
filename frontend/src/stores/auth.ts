@@ -9,7 +9,7 @@ export const checkAuth = async (): Promise<void> => {
   try {
     const response = await fetch('/api/auth/status', { credentials: 'include' })
     const data = response.ok ? await response.json() : null
-    if (data?.authenticated) {
+    if (data?.isAuthenticated) {
       currentUser.set(data.user)
     } else {
       currentUser.set(null)
