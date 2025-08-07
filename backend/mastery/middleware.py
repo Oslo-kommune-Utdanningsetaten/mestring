@@ -19,12 +19,10 @@ class CamelCaseQueryParamMiddleware(MiddlewareMixin):
 class UpdateUserActivityMiddleware(MiddlewareMixin):
     def process_request(self, request):
         # Update user's last activity timestamp if user is authenticated
-        if hasattr(request, 'session') and "feide_user_id" in request.session:
-            user_id = request.session["feide_user_id"]
+        if hasattr(request, 'session') and "user_id" in request.session:
+            user_id = request.session["user_id"]
             try:
-                User.objects.filter(id=user_id).update(
-                    last_activity_at=timezone.now()
-                )
+                User.objects.filter(id=user_id).update(last_activity_at=timezone.now())
             except Exception:
                 pass
         return None
