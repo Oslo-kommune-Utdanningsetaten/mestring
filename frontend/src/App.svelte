@@ -17,8 +17,6 @@
   import 'bootstrap/dist/js/bootstrap.min.js'
   import './styles/app.css'
 
-  const currentUser = $derived($dataStore.currentUser)
-
   checkAuth().then(() => {
     loadData()
   })
@@ -33,7 +31,7 @@
     <Route path="/" component={Home} />
     <Route path="/about" component={About} />
 
-    {#if currentUser}
+    {#if $dataStore.currentUser}
       <Route path="/students/:studentId" component={Student} />
       <Route path="/groups/:groupId" component={Group} />
       <Route path="/schools" component={Schools} />

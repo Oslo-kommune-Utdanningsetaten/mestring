@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
   import { dataStore, setCurrentSchool } from '../stores/data'
   import { schoolsList, usersGroupsRetrieve } from '../generated/sdk.gen'
   import { urlStringFrom } from '../utils/functions'
@@ -8,9 +7,8 @@
   let schools = $state<SchoolReadable[]>([])
   let userGroups = $state<GroupReadable[]>([])
   let isLoading = $state(true)
-
-  const currentUser = $derived($dataStore.currentUser)
-  const currentSchool = $derived($dataStore.currentSchool)
+  let currentUser = $state($dataStore.currentUser)
+  let currentSchool = $state($dataStore.currentSchool)
 
   const fetchSchools = async () => {
     try {
@@ -24,7 +22,7 @@
   }
 
   const fetchUserGroups = async () => {
-    if (!currentUser?.id) return
+    if (!currentUser) return
 
     try {
       const result = await usersGroupsRetrieve({
@@ -42,9 +40,14 @@
     setCurrentSchool(school)
   }
 
-  onMount(() => {
-    fetchSchools()
-    fetchUserGroups()
+  $effect(() => {
+    currentUser = $dataStore.currentUser
+    currentSchool = $dataStore.currentSchool
+    fetchSchools().then(() => {
+      if (currentSchool) {
+        fetchUserGroups()
+      }
+    })
   })
 </script>
 

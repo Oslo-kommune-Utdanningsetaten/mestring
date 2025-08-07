@@ -7,8 +7,8 @@
   import { apiHealth } from '../stores/apiHealth'
   import { login, logout } from '../stores/auth'
 
-  const currentUser = $derived($dataStore.currentUser)
-
+  let currentUser = $state($dataStore.currentUser)
+  let currentSchool = $state($dataStore.currentSchool)
   let isHomeActive = $derived($currentPath === '/')
   let isAboutActive = $derived($currentPath === '/about')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
@@ -26,6 +26,11 @@
       clearInterval(interval)
     }
   })
+
+  $effect(() => {
+    currentUser = $dataStore.currentUser
+    currentSchool = $dataStore.currentSchool
+  })
 </script>
 
 {#if !$apiHealth.isOk}
@@ -38,7 +43,7 @@
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   <div class="container-md">
     <a class="navbar-brand fw-bold" href="/">
-      {$dataStore.currentSchool ? $dataStore.currentSchool.displayName : 'INGEN SKOLE VALGT'}
+      {currentSchool?.displayName || 'INGEN SKOLE VALGT'}
     </a>
 
     <!-- Burger menu button -->

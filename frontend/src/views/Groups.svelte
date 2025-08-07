@@ -4,8 +4,8 @@
   import { groupsList, groupsMembersRetrieve } from '../generated/sdk.gen'
   import type { GroupReadable, NestedGroupUserReadable } from '../generated/types.gen'
 
-  const currentSchool = $derived($dataStore.currentSchool)
-  const currentUser = $derived($dataStore.currentUser)
+  let currentUser = $state($dataStore.currentUser)
+  let currentSchool = $state($dataStore.currentSchool)
   let groups = $state<GroupReadable[]>([])
   let isAllGroupsTypesEnabled = $state<boolean>(false)
   let groupMembers = $state<
@@ -54,6 +54,11 @@
         fetchAllGroupMembers()
       })
     }
+  })
+
+  $effect(() => {
+    currentUser = $dataStore.currentUser
+    currentSchool = $dataStore.currentSchool
   })
 </script>
 
