@@ -35,6 +35,6 @@
     "lodash": "^4.17.21",
     "sortablejs": "^1.15.6",
     "svelte-jsoneditor": "^3.5.0",
-    "svelte-tiny-router": "^1.0.3"
+    "svelte-tiny-router": "^1.0.5"
   }
 }
