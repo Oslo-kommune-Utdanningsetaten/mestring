@@ -74,6 +74,13 @@ class UserViewSet(viewsets.ModelViewSet):
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='school',
+                description='School ID to filter groups by',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
             )
         ]
     )
@@ -81,17 +88,22 @@ class UserViewSet(viewsets.ModelViewSet):
         detail=True,
         methods=['get'],
         url_path='groups',
-        description="List all groups for this user, optional ?roles=role1,role2 filter",
+        description="List all groups for this user, optional ?roles=role1,role2 and ?school=id filters",
         serializer_class=serializers.GroupSerializer
     )
     def groups(self, request, pk=None):
         user = self.get_object()
         qs = models.Group.objects.filter(user_groups__user=user)
         roles_param = request.query_params.get('roles')
+        school_param = request.query_params.get('school')
 
         if roles_param:
             role_names = [r.strip() for r in roles_param.split(',') if r.strip()]
             qs = qs.filter(user_groups__role__name__in=role_names)
+
+        if school_param:
+            school_id = school_param.strip()
+            qs = qs.filter(school_id=school_id)
 
         qs = qs.distinct()
         # this will use the GroupSerializer defined above

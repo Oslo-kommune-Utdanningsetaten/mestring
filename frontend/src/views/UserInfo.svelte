@@ -27,7 +27,7 @@
     try {
       const result = await usersGroupsRetrieve({
         path: { id: currentUser.id },
-        query: { roles: 'student' },
+        query: { roles: 'student', school: currentSchool?.id },
       })
       userGroups = Array.isArray(result.data) ? result.data : []
     } catch (err) {

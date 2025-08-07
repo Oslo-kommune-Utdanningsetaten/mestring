@@ -638,6 +638,20 @@ export type UserGroupWritable = {
     roleId: string;
 };
 
+export type AuthStatusRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/status';
+};
+
+export type AuthStatusRetrieveResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
 export type GoalsListData = {
     body?: never;
     path?: never;
@@ -1862,6 +1876,10 @@ export type UsersGroupsRetrieveData = {
          * Comma-separated list of role names to filter groups by
          */
         roles?: string;
+        /**
+         * School ID to filter groups by
+         */
+        school?: string;
     };
     url: '/api/users/{id}/groups/';
 };

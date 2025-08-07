@@ -90,11 +90,14 @@ export const goalsWithCalculatedMastery = async (
   return result
 }
 
-export const subjectIdsViaGroupOrGoal = async (studentId: string): Promise<string[]> => {
+export const subjectIdsViaGroupOrGoal = async (
+  studentId: string,
+  schoolId: string
+): Promise<string[]> => {
   const subjectsId: Set<string> = new Set()
   const userGroups: any = await usersGroupsRetrieve({
     path: { id: studentId },
-    query: { roles: 'student' },
+    query: { roles: 'student', school: schoolId },
   })
   userGroups.data.forEach((group: any) => {
     if (group.subjectId && ['undervisning', 'teaching'].includes(group.type)) {

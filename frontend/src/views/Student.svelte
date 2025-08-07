@@ -28,7 +28,7 @@
     try {
       const result = await usersGroupsRetrieve({
         path: { id: studentId },
-        query: { roles: 'student' },
+        query: { roles: 'student', school: $dataStore.currentSchool?.id },
       })
       groups = Array.isArray(result.data) ? result.data : []
     } catch (err) {
@@ -39,7 +39,7 @@
 
   const fetchSubjects = async (studentId: string) => {
     try {
-      const subjectIds = await subjectIdsViaGroupOrGoal(studentId)
+      const subjectIds = await subjectIdsViaGroupOrGoal(studentId, $dataStore.currentSchool?.id)
       if (subjectIds.length > 0) {
         subjects = $dataStore.subjects.filter((subject: SubjectReadable) =>
           subjectIds.includes(subject.id)
