@@ -5,8 +5,7 @@
   import { currentPath } from '../stores/navigation'
   import { dataStore } from '../stores/data'
   import { apiHealth } from '../stores/apiHealth'
-  import { onMount } from 'svelte'
-  import { checkAuth, login, logout } from '../stores/auth'
+  import { login, logout } from '../stores/auth'
 
   const currentUser = $derived($dataStore.currentUser)
 
@@ -27,8 +26,6 @@
       clearInterval(interval)
     }
   })
-
-  onMount(checkAuth)
 </script>
 
 {#if !$apiHealth.isOk}
