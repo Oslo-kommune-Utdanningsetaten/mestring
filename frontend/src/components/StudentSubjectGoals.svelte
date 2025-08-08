@@ -17,10 +17,8 @@
   import GoalEdit from './GoalEdit.svelte'
   import ObservationEdit from './ObservationEdit.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
-  import { onMount, tick } from 'svelte'
 
   const { subjectId, studentId } = $props<{ subjectId: string; studentId: string }>()
-
   let student = $state<UserReadable | null>(null)
   let goals = $state<GoalDecorated[]>([])
   let isShowGoalTitleEnabled = $state<boolean>(true)
@@ -98,21 +96,21 @@
     }
   }
 
-  const handleGoalDone = () => {
+  const handleGoalDone = async () => {
     goalForObservation = null
     handleCloseEditGoal()
-    fetchGoalsForSubject()
+    await fetchGoalsForSubject()
   }
 
-  const handleObservationDone = () => {
+  const handleObservationDone = async () => {
     handleCloseEditObservation()
-    fetchGoalsForSubject()
+    await fetchGoalsForSubject()
   }
 
   const handleDeleteObservation = async (observationId: string) => {
     try {
       await observationsDestroy({ path: { id: observationId } })
-      fetchGoalsForSubject()
+      await fetchGoalsForSubject()
     } catch (error) {
       console.error('Error deleting observation:', error)
     }
@@ -121,7 +119,7 @@
   const handleDeleteGoal = async (goalId: string) => {
     try {
       await goalsDestroy({ path: { id: goalId } })
-      fetchGoalsForSubject()
+      await fetchGoalsForSubject()
     } catch (error) {
       console.error('Error deleting goal:', error)
     }
@@ -159,11 +157,12 @@
     } catch (error) {
       console.error('Error updating goal order:', error)
       // Refetch to restore correct state
-      fetchGoalsForSubject()
+      await fetchGoalsForSubject()
     }
   }
 
-  onMount(() => {
+  $effect(() => {
+    if (!studentId || !subjectId) return
     fetchStudent()
     fetchGoalsForSubject()
   })
@@ -189,8 +188,8 @@
     type="button"
     variant="icon-only"
     iconName="plus-sign"
-    title="Legg til nytt mål"
-    class="mini-button"
+    title="Legg til nytt personlig mål"
+    class="mini-button bordered"
     onclick={() => handleEditGoal(null)}
     onkeydown={(e: any) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -201,11 +200,11 @@
     role="button"
     tabindex="0"
   >
-    Nytt mål
+    Nytt personlig mål
   </pkt-button>
 </div>
 
-{#if goals.length > 0}
+{#if goals?.length > 0}
   <div bind:this={goalsListElement} class="list-group">
     {#each goals as goal, index (goal.id)}
       <div class="list-group-item goal-list-item">
@@ -232,7 +231,7 @@
               type="button"
               variant="icon-only"
               iconName="plus-sign"
-              class="mini-button"
+              class="mini-button bordered"
               title="Legg til ny observasjon"
               onclick={() => handleEditObservation(goal, null)}
               onkeydown={(e: any) => {
@@ -291,6 +290,7 @@
                   variant="icon-left"
                   iconName="edit"
                   class="my-2 me-2"
+                  title="Rediger personlig mål"
                   onclick={() => handleEditGoal(goal)}
                   onkeydown={(e: any) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -301,7 +301,7 @@
                   role="button"
                   tabindex="0"
                 >
-                  Rediger mål
+                  Rediger personlig mål
                 </pkt-button>
 
                 <pkt-button
@@ -310,6 +310,7 @@
                   variant="icon-left"
                   iconName="trash-can"
                   class="my-2"
+                  title="Slett personlig mål"
                   onclick={() => handleDeleteGoal(goal.id)}
                   onkeydown={(e: any) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -383,7 +384,7 @@
 
 <!-- offcanvas for creating/editing goals -->
 <div class="custom-offcanvas" class:visible={!!goalWip}>
-  <GoalEdit {student} goal={goalWip} onDone={handleGoalDone} />
+  <GoalEdit {student} goal={goalWip} isGoalPersonal={true} onDone={handleGoalDone} />
 </div>
 
 <!-- offcanvas for adding an observation -->

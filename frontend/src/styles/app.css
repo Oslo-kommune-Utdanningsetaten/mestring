@@ -207,6 +207,17 @@ a:hover {
   }
 }
 
+.mini-button.bordered {
+  button {
+    border: 1px solid rgba(from var(--bs-primary) r g b / 0.3);
+    border-radius: 2px;
+  }
+  :hover {
+    border: 1px solid rgba(from var(--bs-primary) r g b / 0.5);
+    border-radius: 2px;
+  }
+}
+
 .rounded button {
   svg {
     border-radius: 50%;
