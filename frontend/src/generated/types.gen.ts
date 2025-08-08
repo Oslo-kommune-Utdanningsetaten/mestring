@@ -409,7 +409,7 @@ export type PatchedSubjectReadable = {
     grepGroupCode?: string | null;
     createdById?: string;
     updatedById?: string;
-    maintenedBySchoolId?: string;
+    usedBySchoolId?: string;
 };
 
 export type PatchedSubjectWritable = {
@@ -420,7 +420,7 @@ export type PatchedSubjectWritable = {
     grepGroupCode?: string | null;
     createdById?: string;
     updatedById?: string;
-    maintenedBySchoolId?: string;
+    usedBySchoolId?: string;
 };
 
 export type PatchedUserReadable = {
@@ -575,7 +575,7 @@ export type SubjectReadable = {
     grepGroupCode?: string | null;
     createdById?: string;
     updatedById?: string;
-    maintenedBySchoolId?: string;
+    usedBySchoolId?: string;
 };
 
 export type SubjectWritable = {
@@ -586,7 +586,7 @@ export type SubjectWritable = {
     grepGroupCode?: string | null;
     createdById?: string;
     updatedById?: string;
-    maintenedBySchoolId?: string;
+    usedBySchoolId?: string;
 };
 
 export type UserReadable = {
@@ -1535,7 +1535,7 @@ export type SubjectsListData = {
     body?: never;
     path?: never;
     query?: {
-        maintenedBySchool?: string;
+        usedBySchool?: string;
     };
     url: '/api/subjects/';
 };

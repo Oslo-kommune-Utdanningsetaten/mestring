@@ -59,7 +59,7 @@ class SchoolViewSet(viewsets.ModelViewSet):
 class SubjectViewSet(viewsets.ModelViewSet):
     queryset = models.Subject.objects.all()
     serializer_class = serializers.SubjectSerializer
-    filterset_fields = ['maintened_by_school']
+    filterset_fields = ['used_by_school']
 
 
 class UserViewSet(viewsets.ModelViewSet):

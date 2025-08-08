@@ -42,19 +42,19 @@ class School(BaseModel):
 
 class Subject(BaseModel):
     """
-    A Subject represents something taught. If maintened_by_school is unset, the row is Feide synchronized and can be overwritten by import scripts.
+    A Subject represents something taught. If used_by_school is unset, the row is Feide synchronized and can be overwritten by import scripts.
     Refer to UDIR grep for list of possible subjects
     """
     display_name = models.CharField(max_length=200)
     short_name = models.CharField(max_length=200)
-    maintened_by_school = models.ForeignKey(School, on_delete=models.RESTRICT, null=True, related_name='subjects')
+    used_by_school = models.ForeignKey(School, on_delete=models.RESTRICT, null=True, related_name='subjects')
     grep_code = models.CharField(max_length=200, null=True) # UDIR grep code
     grep_group_code = models.CharField(max_length=200, null=True) # UDIR grep code opplæringsfag
 
     @property
     def is_feide_synchronized(self):
         """Convenience property to check if subject is Feide synchronized"""
-        return self.maintened_by_school is None
+        return self.used_by_school is None
 
 
 class User(BaseModel):
