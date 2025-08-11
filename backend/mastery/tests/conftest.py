@@ -1,6 +1,6 @@
 import pytest
 from django.test import Client
-from mastery.models import School, User, Group, Role, UserGroup
+from mastery.models import School, User, Group, Role
 
 # Basic fixture for Django client
 @pytest.fixture
@@ -10,12 +10,6 @@ def client():
 # Fixture for authenticated client
 @pytest.fixture
 def auth_client(db, client):
-    # Implement authentication logic here
-    # For example:
-    # from django.contrib.auth import get_user_model
-    # User = get_user_model()
-    # user = User.objects.create_user(username='testuser', password='password')
-    # client.force_login(user)
     return client
 
 @pytest.fixture
@@ -29,22 +23,31 @@ def school(db):
 
 @pytest.fixture
 def roles(db):
-    # Create a student role
+    # Student and teacher roles
     student_role = Role.objects.create(name="student")
-    # Create a teacher role
     teacher_role = Role.objects.create(name="teacher")
     return student_role, teacher_role
 
 @pytest.fixture
-def group_with_members(db, school, roles):
-    # Create a group
+def superadmin(db) -> User:
+    # Superadmin user
+    superadmin_user = User.objects.create(
+        name="Superadmin", 
+        feide_id="superadmin001@kakrafoon.kommune.no",
+        email="superadmin001@kakrafoon.kommune.no",
+        is_superadmin=True
+    )
+    return superadmin_user
+
+@pytest.fixture
+def teaching_group_with_members(db, school, roles):
+    # Create a teaching group
     group = Group.objects.create(
         feide_id="fc:group:test",
         display_name="Test Group",
-        type="basis",
+        type="teaching",
         school=school
     )
-    
     # Create users
     student_1 = User.objects.create(
         name="Student 1", 

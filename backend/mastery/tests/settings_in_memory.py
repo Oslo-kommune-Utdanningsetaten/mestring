@@ -8,7 +8,6 @@ DATABASES = {
     }
 }
 
-# Make tests faster by using simpler password hashing
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.MD5PasswordHasher',
 ]

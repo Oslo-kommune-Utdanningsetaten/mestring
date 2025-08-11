@@ -3,5 +3,8 @@
   "prettier.prettierPath": "./frontend/node_modules/prettier",
   "prettier.ignorePath": "./frontend/.prettierignore",
   "sqltools.connections": [],
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "python.testing.pytestArgs": ["backend"],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }

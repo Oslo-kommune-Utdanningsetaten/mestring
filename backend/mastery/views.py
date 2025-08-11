@@ -9,6 +9,7 @@ from django.db import connection
 import json
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+from mastery.policies import GroupAccessPolicy
 
 
 # More about filtering in Django REST Framework:
@@ -172,6 +173,11 @@ class GroupViewSet(viewsets.ModelViewSet):
     queryset = models.Group.objects.all()
     serializer_class = serializers.GroupSerializer
     filterset_fields = ['school', 'type']
+    permission_classes = [GroupAccessPolicy]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return GroupAccessPolicy().scope_queryset(self.request, qs)
     
     @action(detail=True, methods=['get'])
     def members(self, request, pk=None):
