@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from mastery.policies import GroupAccessPolicy
+from mastery.access_policies.group import GroupAccessPolicy
 
 class SchoolViewSet(viewsets.ModelViewSet):
     queryset = models.School.objects.all()

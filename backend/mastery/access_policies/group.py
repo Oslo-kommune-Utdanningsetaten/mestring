@@ -1,27 +1,6 @@
-from rest_access_policy import AccessPolicy
-from django.contrib.auth.models import AnonymousUser
+from .base import BasicAccessPolicy
 
-# Override AccessPolicy for Group model
-class CustomAccessPolicy(AccessPolicy):
-    group_prefix = "role:"
-
-    def get_user_group_values(self, user) -> list[str]:
-        # shorcircuit AnonymouseUser
-        if isinstance(user, AnonymousUser):
-            return []
-
-        values = []
-        if user.is_superadmin:
-            values.append("superadmin")
-        try:
-            # Collect role names from memberships, e.g. 'teacher', 'student'
-            values.extend({ug.role.name for ug in user.user_groups.all()})
-        except Exception:
-            pass
-        return values
-
-
-class GroupAccessPolicy(CustomAccessPolicy):
+class GroupAccessPolicy(BasicAccessPolicy):
     """
     Access rules:
     - Superadmin can do anything on any group.
@@ -83,4 +62,5 @@ class GroupAccessPolicy(CustomAccessPolicy):
             return False
 
         user = request.user
+        return bool(user and user.is_authenticated and group.get_teachers().filter(id=user.id).exists())
         return bool(user and user.is_authenticated and group.get_teachers().filter(id=user.id).exists())
