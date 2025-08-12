@@ -84,6 +84,15 @@ class User(BaseModel):
         """Get all groups where user is a teacher"""
         return self.role_groups('teacher')
 
+    # Mark instances as authenticated principals for DRF permissions
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
 
 class Role(BaseModel):
     """
