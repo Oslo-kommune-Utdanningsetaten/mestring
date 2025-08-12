@@ -176,6 +176,8 @@ SPECTACULAR_SETTINGS = {
         'drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields',
         'drf_spectacular.hooks.postprocess_schema_enums'
     ],
+    # Strip the leading /api from paths when generating operationIds so operation names do not start with 'api'
+    'SCHEMA_PATH_PREFIX': '/api',
 }
 
 SESSION_COOKIE_AGE = 28800  

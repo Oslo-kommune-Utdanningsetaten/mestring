@@ -3,6 +3,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.db import connection
 
+# Used by frontend to check status of API and DB
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def ping(request):

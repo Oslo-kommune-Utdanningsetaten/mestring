@@ -11,10 +11,9 @@ class SessionUserIdAuthentication(BaseAuthentication):
     def authenticate(self, request) -> Optional[Tuple[User, None]]:
         user_id = request.session.get("user_id")
         if not user_id:
-            return None # anonymous allowed for public endpoints, trust DRF to handle security
+            return None # AnonymousUser allowed for public endpoints, trust DRF to handle security
             # We could instead consider to disallow anonymous access whatsoever, and instead create a separate public endpoint
             # raise AuthenticationFailed("Authentication required")
-
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:

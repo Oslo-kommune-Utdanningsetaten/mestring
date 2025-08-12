@@ -638,20 +638,6 @@ export type UserGroupWritable = {
     roleId: string;
 };
 
-export type AuthStatusRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/auth/status';
-};
-
-export type AuthStatusRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
-};
-
 export type GoalsListData = {
     body?: never;
     path?: never;
@@ -1889,6 +1875,20 @@ export type UsersGroupsRetrieveResponses = {
 };
 
 export type UsersGroupsRetrieveResponse = UsersGroupsRetrieveResponses[keyof UsersGroupsRetrieveResponses];
+
+export type AuthStatusRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/auth/status';
+};
+
+export type AuthStatusRetrieveResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
 
 export type ClientOptions = {
     baseUrl: 'http://localhost:5000' | (string & {});

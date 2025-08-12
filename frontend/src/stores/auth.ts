@@ -7,7 +7,7 @@ export const isLoggingInUser = writable<boolean>(true)
 export const checkAuth = async (): Promise<void> => {
   isLoggingInUser.set(true)
   try {
-    const response = await fetch('/api/auth/status', { credentials: 'include' })
+    const response = await fetch('/auth/status', { credentials: 'include' })
     const data = response.ok ? await response.json() : null
     if (data?.isAuthenticated) {
       currentUser.set(data.user)
