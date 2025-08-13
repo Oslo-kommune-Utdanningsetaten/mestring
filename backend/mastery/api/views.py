@@ -5,12 +5,19 @@ from rest_framework.response import Response
 from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+from rest_access_policy import AccessViewSetMixin
 from mastery.access_policies.group import GroupAccessPolicy
+from mastery.access_policies.school import SchoolAccessPolicy
+from mastery.access_policies.subject import SubjectAccessPolicy
 
-class SchoolViewSet(viewsets.ModelViewSet):
+class SchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.School.objects.all()
     serializer_class = serializers.SchoolSerializer
     filterset_fields = ['is_service_enabled']
+    access_policy = SchoolAccessPolicy
+
+    def get_queryset(self):
+        return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
     @extend_schema(
         parameters=[
@@ -36,10 +43,28 @@ class SchoolViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(users_qs, many=True, context={'request': request})
         return Response(serializer.data)
 
-class SubjectViewSet(viewsets.ModelViewSet):
+    # @action(detail=True, methods=['get'], url_path='groups',
+    #         description="Get all groups belonging to this school",
+    #         serializer_class=serializers.GroupSerializer)
+    # def groups(self, request, pk=None):
+    #     school = self.get_object()
+    #     users_qs = models.User.objects.filter(user_groups__group__school=school).distinct()
+    #     roles_param = request.query_params.get('roles')
+    #     if roles_param:
+    #         role_names = [r.strip() for r in roles_param.split(',') if r.strip()]
+    #         users_qs = users_qs.filter(user_groups__role__name__in=role_names)
+    #     serializer = self.get_serializer(users_qs, many=True, context={'request': request})
+    #     return Response(serializer.data)
+
+
+class SubjectViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Subject.objects.all()
     serializer_class = serializers.SubjectSerializer
-    filterset_fields = ['used_by_school']
+    access_policy = SubjectAccessPolicy
+
+    def get_queryset(self):
+        return self.access_policy().scope_queryset(self.request, super().get_queryset())
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = models.User.objects.all()
@@ -83,7 +108,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def goals(self, request, pk=None):
         user = self.get_object()
         personal_goals = models.Goal.objects.filter(student=user)
-        student_groups = user.role_groups('student')
+        student_groups = user.student_groups
         group_goals = models.Goal.objects.filter(group__in=student_groups)
         all_goals = personal_goals.union(group_goals).order_by('created_at')
         subject_id = request.query_params.get('subjectId')
@@ -95,18 +120,20 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(all_goals, many=True, context={'request': request})
         return Response(serializer.data)
 
+
 class RoleViewSet(viewsets.ModelViewSet):
     queryset = models.Role.objects.all()
     serializer_class = serializers.RoleSerializer
 
-class GroupViewSet(viewsets.ModelViewSet):
+
+class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Group.objects.all()
     serializer_class = serializers.GroupSerializer
     filterset_fields = ['school', 'type']
-    permission_classes = [GroupAccessPolicy]
+    access_policy = GroupAccessPolicy
 
     def get_queryset(self):
-        return GroupAccessPolicy().scope_queryset(self.request, super().get_queryset())
+        return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
     @action(detail=True, methods=['get'])
     def members(self, request, pk=None):
@@ -114,6 +141,7 @@ class GroupViewSet(viewsets.ModelViewSet):
         gm = models.UserGroup.objects.filter(group=group)
         serializer = serializers.NestedGroupUserSerializer(gm, many=True)
         return Response(serializer.data)
+
 
 class GoalViewSet(viewsets.ModelViewSet):
     queryset = models.Goal.objects.all()
@@ -123,22 +151,27 @@ class GoalViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'updated_at', 'title', 'sort_order']
     ordering = ['sort_order']
 
+
 class SituationViewSet(viewsets.ModelViewSet):
     queryset = models.Situation.objects.all()
     serializer_class = serializers.SituationSerializer
+
 
 class ObservationViewSet(viewsets.ModelViewSet):
     queryset = models.Observation.objects.all()
     serializer_class = serializers.ObservationSerializer
     filterset_fields = ['student_id', 'goal_id']
 
+
 class StatusViewSet(viewsets.ModelViewSet):
     queryset = models.Status.objects.all()
     serializer_class = serializers.StatusSerializer
 
+
 class UserGroupViewSet(viewsets.ModelViewSet):
     queryset = models.UserGroup.objects.all()
     serializer_class = serializers.UserGroupSerializer
+
 
 class MasterySchemaViewSet(viewsets.ModelViewSet):
     queryset = models.MasterySchema.objects.all()

@@ -87,7 +87,7 @@ class User(BaseModel):
         """Get all groups where user has a specific role"""
         return self.groups.filter(user_groups__role__name=role_name)
     
-    def schools(self):
+    def get_schools(self):
         """Return all schools a user belongs to, via group memeberships"""
         return School.objects.filter(groups__members=self).distinct()
     

@@ -86,7 +86,7 @@ const loadSubjectsForSchool = async (schoolId: string): Promise<void> => {
   try {
     const result = await subjectsList({
       query: {
-        maintenedBySchool: schoolId,
+        school: schoolId,
       },
     })
 

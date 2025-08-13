@@ -9,14 +9,6 @@ def set_up_database(db):
 
 
 @pytest.mark.django_db
-def test_schools_endpoint(school):
-    """Test /schools endpoint returns school array"""
-    response = APIClient().get('/api/schools/')
-    assert response.status_code == 200
-    assert response.json()[0]['displayName'] == school.display_name
-
-
-@pytest.mark.django_db
 def test_groups_endpoint_denies_unauthenticated_user(teaching_group_with_members):
     """Test /groups endpoint denies access for unauthenticated users"""
     client = APIClient()
