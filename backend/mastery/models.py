@@ -40,9 +40,18 @@ class School(BaseModel):
             self.short_name = short_name
             self.save()
 
-    def subjects(self):
-        """Get all subjects used by this school"""
-        return self.subjects.all()
+    def get_group_subjects(self):
+        """
+        Get all subjects used by this school via groups.
+        These subjects are synchronized from Feide and will be overwritten by import scripts.
+        """
+        return Subject.objects.filter(groups__school=self).distinct()
+    
+    def get_all_subjects(self):
+        """
+        Get all subjects used by this school, both owned and synchronized.
+        """
+        return self.owned_subjects.all() | self.get_group_subjects()
 
 class Subject(BaseModel):
     """
@@ -51,7 +60,7 @@ class Subject(BaseModel):
     """
     display_name = models.CharField(max_length=200)
     short_name = models.CharField(max_length=200)
-    owned_by_school = models.ForeignKey(School, on_delete=models.RESTRICT, null=True, related_name='subjects')
+    owned_by_school = models.ForeignKey(School, on_delete=models.RESTRICT, null=True, related_name='owned_subjects')
     grep_code = models.CharField(max_length=200, null=True) # UDIR grep code
     grep_group_code = models.CharField(max_length=200, null=True) # UDIR grep code opplæringsfag
 
@@ -74,7 +83,7 @@ class User(BaseModel):
     groups = models.ManyToManyField('Group', through='UserGroup', through_fields=('user', 'group'), related_name='members', null=True)
     is_superadmin = models.BooleanField(default=False)
 
-    def role_groups(self, role_name):
+    def _get_groups_with_role(self, role_name):
         """Get all groups where user has a specific role"""
         return self.groups.filter(user_groups__role__name=role_name)
     
@@ -85,12 +94,12 @@ class User(BaseModel):
     @property
     def student_groups(self):
         """Get all groups where user is a student"""
-        return self.role_groups('student')
+        return self._get_groups_with_role('student')
     
     @property
     def teacher_groups(self):
         """Get all groups where user is a teacher"""
-        return self.role_groups('teacher')
+        return self._get_groups_with_role('teacher')
 
     # Needed for DRF permissions
     @property
