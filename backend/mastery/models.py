@@ -40,21 +40,25 @@ class School(BaseModel):
             self.short_name = short_name
             self.save()
 
+    def subjects(self):
+        """Get all subjects used by this school"""
+        return self.subjects.all()
+
 class Subject(BaseModel):
     """
-    A Subject represents something taught. If used_by_school is unset, the row is Feide synchronized and can be overwritten by import scripts.
+    A Subject represents something taught. If owned_by_school is unset, the row is Feide synchronized and will be overwritten by import scripts.
     Refer to UDIR grep for list of possible subjects
     """
     display_name = models.CharField(max_length=200)
     short_name = models.CharField(max_length=200)
-    used_by_school = models.ForeignKey(School, on_delete=models.RESTRICT, null=True, related_name='subjects')
+    owned_by_school = models.ForeignKey(School, on_delete=models.RESTRICT, null=True, related_name='subjects')
     grep_code = models.CharField(max_length=200, null=True) # UDIR grep code
     grep_group_code = models.CharField(max_length=200, null=True) # UDIR grep code opplæringsfag
 
     @property
     def is_feide_synchronized(self):
         """Convenience property to check if subject is Feide synchronized"""
-        return self.used_by_school is None
+        return self.owned_by_school is None
 
 
 class User(BaseModel):
@@ -73,6 +77,10 @@ class User(BaseModel):
     def role_groups(self, role_name):
         """Get all groups where user has a specific role"""
         return self.groups.filter(user_groups__role__name=role_name)
+    
+    def schools(self):
+        """Return all schools a user belongs to, via group memeberships"""
+        return School.objects.filter(groups__members=self).distinct()
     
     @property
     def student_groups(self):
