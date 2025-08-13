@@ -1,4 +1,5 @@
 from .. import models, serializers
+from django.db.models import Q  # added
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -43,18 +44,26 @@ class SchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         serializer = self.get_serializer(users_qs, many=True, context={'request': request})
         return Response(serializer.data)
 
-    # @action(detail=True, methods=['get'], url_path='groups',
-    #         description="Get all groups belonging to this school",
-    #         serializer_class=serializers.GroupSerializer)
-    # def groups(self, request, pk=None):
-    #     school = self.get_object()
-    #     users_qs = models.User.objects.filter(user_groups__group__school=school).distinct()
-    #     roles_param = request.query_params.get('roles')
-    #     if roles_param:
-    #         role_names = [r.strip() for r in roles_param.split(',') if r.strip()]
-    #         users_qs = users_qs.filter(user_groups__role__name__in=role_names)
-    #     serializer = self.get_serializer(users_qs, many=True, context={'request': request})
-    #     return Response(serializer.data)
+    @action(
+        detail=True,
+        methods=['get'],
+        url_path='subjects',
+        description="Get all subjects belonging to this school (owned + group subjects)",
+        serializer_class=serializers.SubjectSerializer
+    )
+    def subjects(self, request, pk=None):
+        school = self.get_object()
+        # Start with subjects user can access
+        accessible = SubjectAccessPolicy().scope_queryset(
+            request,
+            models.Subject.objects.all()
+        )
+        # Narrow to this school (owned or via a group in the school)
+        school_subjects = accessible.filter(
+            Q(owned_by_school=school) | Q(group__school=school)
+        ).distinct()
+        serializer = self.get_serializer(school_subjects, many=True, context={'request': request})
+        return Response(serializer.data)
 
 
 class SubjectViewSet(AccessViewSetMixin, viewsets.ModelViewSet):

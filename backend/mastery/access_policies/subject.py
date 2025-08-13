@@ -1,4 +1,5 @@
 from .base import BasicAccessPolicy
+from django.db.models import Q  # added
 
 class SubjectAccessPolicy(BasicAccessPolicy):
     statements = [
@@ -22,9 +23,10 @@ class SubjectAccessPolicy(BasicAccessPolicy):
         if user.is_superadmin:
             return qs
         try:
-            subject_ids = set()
-            for school in user.get_schools():
-                subject_ids.update(school.get_all_subjects().values_list('id', flat=True))
-            return qs.filter(id__in=subject_ids)
+            user_schools = user.get_schools()
+            return qs.filter(
+                Q(owned_by_school__in=user_schools) |
+                Q(group__school__in=user_schools)
+            ).distinct()
         except Exception:
             return qs.none()

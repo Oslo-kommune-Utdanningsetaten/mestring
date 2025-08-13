@@ -108,15 +108,26 @@ def teaching_group_with_no_members(db, school):
     )
     return group
 
-
 @pytest.fixture
-def teaching_group_owned_by_school(db, school):
+def subject_with_group(db, school):
     group = Group.objects.create(
-        feide_id="fc:group:teaching-group-owned-by-school",
-        display_name="Some other Group",
+        feide_id="fc:group:some-teaching-group",
+        display_name="Some teaching group",
         type="teaching",
         school=school
     )
+    subject = Subject.objects.create(
+        display_name = "Test Engelsk 6. årstrinn",
+        short_name = "Engelsk",
+        grep_code = "ENG0006",
+        grep_group_code = "ENG1Z03",
+    )
+    group.subject = subject
+    group.save()
+    return subject
+
+@pytest.fixture
+def subject_without_group(db, school):
     subject = Subject.objects.create(
         display_name = "Test Engelsk 6. årstrinn",
         short_name = "Engelsk",
@@ -124,6 +135,4 @@ def teaching_group_owned_by_school(db, school):
         grep_code = "ENG0006",
         grep_group_code = "ENG1Z03",
     )
-    group.subject = subject
-    group.save()
-    return group
+    return subject
