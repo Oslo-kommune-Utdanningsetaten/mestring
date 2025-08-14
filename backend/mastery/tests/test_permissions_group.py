@@ -3,11 +3,11 @@ from rest_framework.test import APIClient
 from mastery.models import User, Group
 
 @pytest.mark.django_db
-def test_superadmin_group_access(teaching_group_with_members, teaching_group_with_no_members, superadmin, school):
+def test_superadmin_group_access(teaching_group_with_members, teaching_group_without_members, superadmin, school):
     client = APIClient()
     client.force_authenticate(user=superadmin)
 
-    # Can list groups (should include at least the fixture group)
+    # Can list groups
     resp = client.get('/api/groups/')
     assert resp.status_code == 200
     assert any(group['id'] == teaching_group_with_members.id for group in resp.json())
@@ -25,18 +25,18 @@ def test_superadmin_group_access(teaching_group_with_members, teaching_group_wit
     ids = {group['id'] for group in resp.json()}
     assert teaching_group_with_members.id in ids
     assert other.id in ids
-    assert teaching_group_with_no_members.id in ids
+    assert teaching_group_without_members.id in ids
 
     # Can retrieve a group
     resp = client.get(f'/api/groups/{teaching_group_with_members.id}/')
     assert resp.status_code == 200
 
     # Can retrieve a memberless group
-    resp = client.get(f'/api/groups/{teaching_group_with_no_members.id}/')
+    resp = client.get(f'/api/groups/{teaching_group_without_members.id}/')
     assert resp.status_code == 200
 
 @pytest.mark.django_db
-def test_teacher_group_access(teaching_group_with_members, teaching_group_with_no_members, roles, school):
+def test_teacher_group_access(teaching_group_with_members, roles, school):
     client = APIClient()
     teacher = teaching_group_with_members.get_teachers().first()
     client.force_authenticate(user=teacher)
@@ -50,8 +50,8 @@ def test_teacher_group_access(teaching_group_with_members, teaching_group_with_n
 
     # Create another group taught by someone else
     other_group = Group.objects.create(
-        feide_id="fc:group:other-teaching-group",
-        display_name="Some Group",
+        feide_id="fc:group:some-other-teaching-group",
+        display_name="Some other group",
         type="teaching",
         school=school
     )
@@ -64,21 +64,21 @@ def test_teacher_group_access(teaching_group_with_members, teaching_group_with_n
     _, teacher_role = roles
     other_group.add_member(other_teacher, teacher_role)
 
-    # Teacher should only see their own groups in list
+    # Teacher should not see other group in list
     resp = client.get('/api/groups/')
     assert resp.status_code == 200
     ids = {group['id'] for group in resp.json()}
     assert teaching_group_with_members.id in ids
     assert other_group.id not in ids
 
-    # Retrieving other group should not be found
+    # Retrieving other group fails
     resp = client.get(f'/api/groups/{other_group.id}/')
     assert resp.status_code == 404
 
 @pytest.mark.django_db
-def test_student_group_access(teaching_group_with_members, teaching_group_with_no_members):
-    client = APIClient()
+def test_student_group_access(teaching_group_with_members, teaching_group_without_members):
     student = teaching_group_with_members.get_students().first()
+    client = APIClient()
     client.force_authenticate(user=student)
 
     # List group with membership is allowed
@@ -93,5 +93,5 @@ def test_student_group_access(teaching_group_with_members, teaching_group_with_n
     assert resp.status_code == 200
 
     # Retrieve other group should be forbidden
-    resp = client.get(f'/api/groups/{teaching_group_with_no_members.id}/')
+    resp = client.get(f'/api/groups/{teaching_group_without_members.id}/')
     assert resp.status_code == 404

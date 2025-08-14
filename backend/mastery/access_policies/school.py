@@ -10,7 +10,7 @@ class SchoolAccessPolicy(BasicAccessPolicy):
         },
         # Authenticated users can list and retrieve schools they belong to
         {
-            "action": ["list", "retrieve"],
+            "action": ["list", "retrieve", "subjects"],
             "principal": ["authenticated"],
             "effect": "allow",
         },

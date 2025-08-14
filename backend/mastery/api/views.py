@@ -1,5 +1,6 @@
 from .. import models, serializers
 from django.db.models import Q  # added
+import logging  # added
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -11,11 +12,20 @@ from mastery.access_policies.group import GroupAccessPolicy
 from mastery.access_policies.school import SchoolAccessPolicy
 from mastery.access_policies.subject import SubjectAccessPolicy
 
+logger = logging.getLogger(__name__)  # added
+
 class SchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.School.objects.all()
     serializer_class = serializers.SchoolSerializer
     filterset_fields = ['is_service_enabled']
     access_policy = SchoolAccessPolicy
+
+    def get_serializer_class(self):  # added
+        if getattr(self, 'action', None) == 'subjects':
+            return serializers.SubjectSerializer
+        if getattr(self, 'action', None) == 'users':
+            return serializers.UserSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self):
         return self.access_policy().scope_queryset(self.request, super().get_queryset())
@@ -53,16 +63,14 @@ class SchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     )
     def subjects(self, request, pk=None):
         school = self.get_object()
-        # Start with subjects user can access
-        accessible = SubjectAccessPolicy().scope_queryset(
+        qs = SubjectAccessPolicy().scope_queryset(
             request,
             models.Subject.objects.all()
         )
-        # Narrow to this school (owned or via a group in the school)
-        school_subjects = accessible.filter(
+        school_subjects_qs = qs.filter(
             Q(owned_by_school=school) | Q(group__school=school)
         ).distinct()
-        serializer = self.get_serializer(school_subjects, many=True, context={'request': request})
+        serializer = self.get_serializer(school_subjects_qs, many=True, context={'request': request})
         return Response(serializer.data)
 
 

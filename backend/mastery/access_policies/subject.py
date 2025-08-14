@@ -1,5 +1,8 @@
 from .base import BasicAccessPolicy
 from django.db.models import Q  # added
+import logging  # added
+
+logger = logging.getLogger(__name__)  # added
 
 class SubjectAccessPolicy(BasicAccessPolicy):
     statements = [
@@ -20,13 +23,20 @@ class SubjectAccessPolicy(BasicAccessPolicy):
 
     def scope_queryset(self, request, qs):
         user = request.user
-        if user.is_superadmin:
+        if getattr(user, 'is_superadmin', False):
+            logger.debug("SubjectAccessPolicy.scope_queryset superadmin user=%s", getattr(user, 'id', None))
             return qs
         try:
             user_schools = user.get_schools()
+            logger.debug(
+                "SubjectAccessPolicy.scope_queryset user=%s schools=%s",
+                getattr(user, 'id', None),
+                list(user_schools.values_list('id', flat=True))
+            )
             return qs.filter(
                 Q(owned_by_school__in=user_schools) |
                 Q(group__school__in=user_schools)
             ).distinct()
-        except Exception:
+        except Exception as e:
+            logger.debug("SubjectAccessPolicy.scope_queryset user=%s exception=%s", getattr(user, 'id', None), e)
             return qs.none()

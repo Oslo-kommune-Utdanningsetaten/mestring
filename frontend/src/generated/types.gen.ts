@@ -1292,6 +1292,24 @@ export type SchoolsUpdateResponses = {
 
 export type SchoolsUpdateResponse = SchoolsUpdateResponses[keyof SchoolsUpdateResponses];
 
+export type SchoolsSubjectsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this school.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/schools/{id}/subjects/';
+};
+
+export type SchoolsSubjectsRetrieveResponses = {
+    200: SubjectReadable;
+};
+
+export type SchoolsSubjectsRetrieveResponse = SchoolsSubjectsRetrieveResponses[keyof SchoolsSubjectsRetrieveResponses];
+
 export type SchoolsUsersRetrieveData = {
     body?: never;
     path: {

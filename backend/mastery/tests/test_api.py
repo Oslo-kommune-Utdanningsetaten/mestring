@@ -9,7 +9,7 @@ def set_up_database(db):
 
 
 @pytest.mark.django_db
-def test_groups_endpoint_denies_unauthenticated_user(teaching_group_with_members):
+def test_groups_endpoint_denies_unauthenticated_user(teaching_group):
     """Test /groups endpoint denies access for unauthenticated users"""
     client = APIClient()
     response = client.get('/api/groups/')
