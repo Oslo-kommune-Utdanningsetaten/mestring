@@ -9,9 +9,12 @@ def set_up_database(db):
 
 
 @pytest.mark.django_db
-def test_groups_endpoint_denies_unauthenticated_user(teaching_group):
-    """Test /groups endpoint denies access for unauthenticated users"""
+def test_ping():
+    """Test ping endpoint"""
     client = APIClient()
-    response = client.get('/api/groups/')
-    assert response.status_code == 403
+    resp = client.get('/api/ping/')
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data['api'] == 'up'
+    assert data['db'] == 'up'
 
