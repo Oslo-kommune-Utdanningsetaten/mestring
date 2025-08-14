@@ -1,6 +1,16 @@
 import pytest
 from rest_framework.test import APIClient
 
+
+@pytest.mark.django_db
+def test_non_user_school_access(school):
+    client = APIClient()
+    # Non-authenticated user cannot access schools
+    resp = client.get(f'/api/schools/')
+    assert resp.status_code == 403
+    resp = client.get(f'/api/schools/{school.id}/')
+    assert resp.status_code == 403
+
 @pytest.mark.django_db
 def test_superadmin_school_access(superadmin, school, other_school):
     client = APIClient()

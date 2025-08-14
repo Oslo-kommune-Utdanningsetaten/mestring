@@ -5,10 +5,10 @@ from mastery.models import User, Group
 @pytest.mark.django_db
 def test_non_user_subject_access(school, subject_with_group, subject_without_group):
     client = APIClient()
-    # Non-authenticated user should not access subjects
+    # Non-authenticated user cannot access subjects
     resp = client.get(f'/api/schools/{school.id}/subjects/')
     assert resp.status_code == 403
-
+    
 @pytest.mark.django_db
 def test_superadmin_subject_access(superadmin, school, subject_with_group, subject_without_group):
     client = APIClient()

@@ -3,6 +3,17 @@ from rest_framework.test import APIClient
 from mastery.models import User, Group
 
 @pytest.mark.django_db
+def test_non_user_group_access(school, teaching_group_with_members, teaching_group_without_members):
+    client = APIClient()
+    # Non-authenticated user cannot access groups
+    resp = client.get('/api/groups/')
+    assert resp.status_code == 403
+    resp = client.get(f'/api/groups/{teaching_group_with_members.id}/')
+    assert resp.status_code == 403
+    resp = client.get(f'/api/groups/{teaching_group_without_members.id}/')
+    assert resp.status_code == 403
+
+@pytest.mark.django_db
 def test_superadmin_group_access(teaching_group_with_members, teaching_group_without_members, superadmin, school):
     client = APIClient()
     client.force_authenticate(user=superadmin)
