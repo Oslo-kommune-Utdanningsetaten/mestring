@@ -37,19 +37,27 @@ def test_superadmin_user_access_via_group(superadmin, teaching_group_with_member
     assert resp.status_code == 200
 
 @pytest.mark.django_db
-def test_user_self_access(teacher, student, other_student, teaching_group, roles):
+def test_user_self_access(teacher, student):
+    client = APIClient()
+
+    for user in [teacher, student]:
+        client.force_authenticate(user=user)
+
+        resp = client.get('/api/users/')
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data) == 1
+        assert data[0]['id'] == user.id
+
+        # User can retrieve self
+        resp = client.get(f'/api/users/{user.id}/')
+        assert resp.status_code == 200
+
+
+@pytest.mark.django_db
+def test_user_user_access(teacher, student, other_student, teaching_group, roles):
     client = APIClient()
     client.force_authenticate(user=teacher)
-
-    resp = client.get('/api/users/')
-    assert resp.status_code == 200
-    data = resp.json()
-    assert len(data) == 1
-    assert data[0]['id'] == teacher.id
-
-    # Teacher can retrieve self
-    resp = client.get(f'/api/users/{teacher.id}/')
-    assert resp.status_code == 200
 
     # Teacher cannot retrieve an unrelated student
     resp = client.get(f'/api/users/{student.id}/')
