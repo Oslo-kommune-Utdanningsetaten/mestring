@@ -1,15 +1,16 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
+  import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   import { groupsList, groupsMembersRetrieve } from '../generated/sdk.gen'
-  import type { GroupReadable, NestedGroupUserReadable } from '../generated/types.gen'
+  import type { GroupReadable, GroupMemberReadable } from '../generated/types.gen'
 
   let currentUser = $state($dataStore.currentUser)
   let currentSchool = $state($dataStore.currentSchool)
   let groups = $state<GroupReadable[]>([])
   let isAllGroupsTypesEnabled = $state<boolean>(false)
   let groupMembers = $state<
-    Record<string, { teachers: NestedGroupUserReadable[]; students: NestedGroupUserReadable[] }>
+    Record<string, { teachers: GroupMemberReadable[]; students: GroupMemberReadable[] }>
   >({})
 
   const fetchGroups = async () => {
@@ -37,9 +38,9 @@
         })
         const members: any = result.data || []
         const teachers =
-          members.filter((member: NestedGroupUserReadable) => member.role.name === 'teacher') || []
+          members.filter((member: GroupMemberReadable) => member.roles.includes(TEACHER_ROLE)) || []
         const students =
-          members.filter((member: NestedGroupUserReadable) => member.role.name === 'student') || []
+          members.filter((member: GroupMemberReadable) => member.roles.includes(STUDENT_ROLE)) || []
         groupMembers = { ...groupMembers, [group.id]: { teachers, students } }
       } catch (error) {
         console.error(`Error fetching members for group ${group.id}:`, error)
@@ -129,7 +130,7 @@
             </div>
             <div class="col-6">
               {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
-                {groupMembers[group.id].teachers.map(m => m.user.name).join(', ')}
+                {groupMembers[group.id].teachers.map(m => m.name).join(', ')}
               {:else}
                 <div class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Henter data...</span>

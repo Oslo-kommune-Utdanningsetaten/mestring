@@ -5,6 +5,7 @@
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
   import StudentRow from '../components/StudentRow.svelte'
+  import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   import {
     groupsList,
     groupsMembersRetrieve,
@@ -14,7 +15,7 @@
   import type {
     GroupReadable,
     GoalReadable,
-    NestedGroupUserReadable,
+    GroupMemberReadable,
     UserReadable,
     SubjectReadable,
   } from '../generated/types.gen'
@@ -76,10 +77,9 @@
         },
       })
       const members: any = result.data || []
-      students =
-        members
-          .filter((member: NestedGroupUserReadable) => member.role.name === 'student')
-          .map((member: NestedGroupUserReadable) => member.user) || []
+      students = members.filter((member: GroupMemberReadable) =>
+        member.roles.includes(STUDENT_ROLE)
+      )
     } catch (error) {
       console.error(`Error fetching members for group ${groupId}:`, error)
       students = []

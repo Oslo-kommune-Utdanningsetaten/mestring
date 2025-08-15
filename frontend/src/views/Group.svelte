@@ -1,12 +1,12 @@
 <script lang="ts">
   import { groupsRetrieve, groupsMembersRetrieve } from '../generated/sdk.gen'
-  import type { GroupReadable, NestedGroupUserReadable } from '../generated/types.gen'
-
+  import type { GroupReadable, GroupMemberReadable } from '../generated/types.gen'
+  import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   const { groupId } = $props<{ groupId: string }>()
 
   let group = $state<GroupReadable | null>(null)
-  let teachers = $state<NestedGroupUserReadable[]>([])
-  let students = $state<NestedGroupUserReadable[]>([])
+  let teachers = $state<GroupMemberReadable[]>([])
+  let students = $state<GroupMemberReadable[]>([])
   let isLoading = $state(true)
   let error = $state<string | null>(null)
 
@@ -27,9 +27,13 @@
       const membersResult = await groupsMembersRetrieve({
         path: { id: groupId },
       })
-      const members: NestedGroupUserReadable[] = membersResult.data || []
-      teachers = members.filter(member => member.role.name === 'teacher')
-      students = members.filter(member => member.role.name === 'student')
+      const members: GroupMemberReadable[] = Array.isArray(membersResult.data)
+        ? membersResult.data
+        : membersResult.data
+          ? [membersResult.data]
+          : []
+      teachers = members.filter(member => member.roles.includes(TEACHER_ROLE))
+      students = members.filter(member => member.roles.includes(STUDENT_ROLE))
     } catch (error) {
       console.error('Error fetching group:', error)
       error = 'Kunne ikke hente gruppeinformasjon'
@@ -97,7 +101,7 @@
         <div class="card-body">
           <ul>
             {#each teachers as teacher}
-              <li>{teacher.user.name}</li>
+              <li>{teacher.name}</li>
             {/each}
           </ul>
         </div>
@@ -114,8 +118,8 @@
           <ul>
             {#each students as student}
               <li>
-                <a href={`/students/${student.user.id}`} class="col-md-6">
-                  {student.user.name}
+                <a href={`/students/${student.id}`} class="col-md-6">
+                  {student.name}
                 </a>
               </li>
             {/each}

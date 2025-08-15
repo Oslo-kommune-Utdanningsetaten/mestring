@@ -6,11 +6,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Prefetch
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_access_policy import AccessViewSetMixin
 from mastery.access_policies.group import GroupAccessPolicy
 from mastery.access_policies.school import SchoolAccessPolicy
 from mastery.access_policies.subject import SubjectAccessPolicy
+from mastery.access_policies.user import UserAccessPolicy
 
 logger = logging.getLogger(__name__)  # added
 
@@ -83,9 +85,13 @@ class SubjectViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
+    access_policy = UserAccessPolicy
+
+    def get_queryset(self):
+        return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
     @extend_schema(
         parameters=[
@@ -152,11 +158,27 @@ class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['get'], url_path='members', serializer_class=serializers.GroupMemberSerializer)
+
     def members(self, request, pk=None):
         group = self.get_object()
-        gm = models.UserGroup.objects.filter(group=group)
-        serializer = serializers.NestedGroupUserSerializer(gm, many=True)
+        base_qs = UserAccessPolicy().scope_queryset(
+            request,
+            models.User.objects.all()
+        )
+        # Prefetch only memberships for this group to avoid N+1
+        memberships_for_group = models.UserGroup.objects.filter(group=group).select_related('role')
+        qs = (base_qs
+              .filter(user_groups__group=group)
+              .distinct()
+              .prefetch_related(
+                  Prefetch('user_groups', queryset=memberships_for_group)
+              ))
+        serializer = serializers.GroupMemberSerializer(
+            qs,
+            many=True,
+            context={'request': request, 'group': group}
+        )
         return Response(serializer.data)
 
 

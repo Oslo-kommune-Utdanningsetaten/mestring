@@ -14,7 +14,7 @@ class GroupAccessPolicy(BasicAccessPolicy):
             "action": ["list", "retrieve"],
             "principal": ["role:teacher"],
             "effect": "allow",
-            "condition": "is_group_teacher",
+            "condition": ["is_group_teacher", "is_group_student"]
         },
         # Student: can list and retrieve groups they are students in
         {
@@ -22,6 +22,13 @@ class GroupAccessPolicy(BasicAccessPolicy):
             "principal": ["role:student"],
             "effect": "allow",
             "condition": "is_group_student",
+        },
+        # Add/extend rule to cover the custom members action:
+        {
+            "action": ["members"],
+            "principal": ["authenticated"],
+            "effect": "allow",
+            "condition": ["is_group_teacher", "is_group_student"]
         },
         # Everyone else: implicitly denied
     ]

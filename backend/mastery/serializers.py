@@ -120,18 +120,31 @@ class NestedUserGroupSerializer(BaseModelSerializer):
         exclude = ('user',)  # Exclude user when used within User serializer
 
 
-class NestedGroupUserSerializer(BaseModelSerializer):
-    role = RoleSerializer(read_only=True)
-    user = BasicUserSerializer(read_only=True)
-    
+class GroupMemberSerializer(BaseModelSerializer):
+    roles = serializers.SerializerMethodField()
+
     class Meta:
-        model = models.UserGroup
-        exclude = ('group',)  # Exclude group when used within Group serializer
+        model = models.User
+        fields = ['id', 'name', 'email', 'roles']
+
+    def get_roles(self, obj):
+        group = self.context.get('group')
+        # Fallback so it also works if used inside GroupSerializer without explicit group in context
+        if not group:
+            parent = getattr(self, 'parent', None)
+            if parent and hasattr(parent, 'parent'):
+                group_instance = getattr(parent.parent, 'instance', None)
+                if isinstance(group_instance, models.Group):
+                    group = group_instance
+        if not group:
+            return []
+        role_names = {ug.role.name for ug in obj.user_groups.all() if ug.group_id == group.id}
+        return sorted(role_names)
 
 
 # Main serializers with relationships
 class UserSerializer(BaseModelSerializer):
-    groups = NestedUserGroupSerializer(source='usergroup_set', many=True, read_only=True)
+    groups = NestedUserGroupSerializer(source='user_groups', many=True, read_only=True)
     
     class Meta:
         model = models.User
@@ -139,11 +152,28 @@ class UserSerializer(BaseModelSerializer):
 
 
 class GroupSerializer(BaseModelSerializer):
-    members = NestedGroupUserSerializer(source='usergroup_set', many=True, read_only=True)
-    
+    members = serializers.SerializerMethodField()
+
     class Meta:
         model = models.Group
         fields = '__all__'
+
+    def get_members(self, obj: models.Group):
+        memberships = obj.user_groups.select_related('user', 'role')
+        by_user = {}
+        for m in memberships:
+            u = m.user
+            entry = by_user.setdefault(
+                u.id,
+                {"id": str(u.id), "name": u.name, "email": u.email, "roles": set()}
+            )
+            entry["roles"].add(m.role.name)
+        # Convert role sets to sorted lists
+        result = []
+        for entry in by_user.values():
+            entry["roles"] = sorted(entry["roles"])
+            result.append(entry)
+        return result
 
 
 class GoalSerializer(BaseModelSerializer):

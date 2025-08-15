@@ -51,9 +51,17 @@ def superadmin(db) -> User:
 @pytest.fixture
 def teacher(db) -> User:
     return User.objects.create(
-        name="Teacher", 
+        name="Teacher 1", 
         feide_id="teacher-id@example.com",
         email="teacher@example.com"
+    )
+
+@pytest.fixture
+def other_teacher(db) -> User:
+    return User.objects.create(
+        name="Teacher 2", 
+        feide_id="other-teacher-id@example.com",
+        email="other-teacher@example.com"
     )
 
 @pytest.fixture

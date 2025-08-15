@@ -19,4 +19,3 @@ def test_user_school_affiliation(teaching_group_with_members, school):
     student = teaching_group_with_members.get_students().first()
     assert teacher.get_schools().first().id == school.id 
     assert student.get_schools().first().id == school.id
-
