@@ -53,6 +53,17 @@ class School(BaseModel):
         """
         return self.owned_subjects.all() | self.get_group_subjects()
 
+    def get_teachers(self):
+        """
+        Get all teachers in this school.
+        Only counts a user as a teacher here if they have a teacher role in a group
+        that belongs to this school.
+        """
+        return User.objects.filter(
+            user_groups__group__school=self,
+            user_groups__role__name='teacher'
+        ).distinct()
+
 class Subject(BaseModel):
     """
     A Subject represents something taught. If owned_by_school is unset, the row is Feide synchronized and will be overwritten by import scripts.
@@ -126,7 +137,7 @@ class Group(BaseModel):
     feide_id = models.CharField(max_length=200, unique=True)
     display_name = models.CharField(max_length=200)
     type = models.CharField(max_length=200) # either 'basis' or 'teaching' for now
-    subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True)
+    subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True, related_name='groups')
     school = models.ForeignKey(School, on_delete=models.RESTRICT, null=False, related_name='groups')
     valid_from = models.DateTimeField(null=True)
     valid_to = models.DateTimeField(null=True)
@@ -208,7 +219,7 @@ class Goal(BaseModel):
     description = models.TextField(null=True)
     group = models.ForeignKey(Group, on_delete=models.RESTRICT, null=True)
     student = models.ForeignKey(User, on_delete=models.RESTRICT, null=True)
-    subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True)
+    subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True, related_name='goals')
     previous_goal = models.ForeignKey('Goal', on_delete=models.RESTRICT, null=True)
     mastery_schema = models.ForeignKey(MasterySchema, on_delete=models.RESTRICT, null=True)
     sort_order = models.IntegerField(null=True)
