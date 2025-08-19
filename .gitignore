@@ -8,6 +8,7 @@ __pycache__/
 .vscode/launch.json
 backend/import/data/old/
 backend/import/data/*.json
+backend/mastery/data/
 .htpasswd
 
 
