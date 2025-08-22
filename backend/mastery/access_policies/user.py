@@ -1,10 +1,8 @@
-from .base import BasicAccessPolicy
+from .base import BaseAccessPolicy
 from django.db.models import Q
-import logging
+from mastery.models import User
 
-logger = logging.getLogger(__name__)
-
-class UserAccessPolicy(BasicAccessPolicy):
+class UserAccessPolicy(BaseAccessPolicy):
     statements = [
         # Superadmin: full access
         {
@@ -12,7 +10,7 @@ class UserAccessPolicy(BasicAccessPolicy):
             "principal": ["role:superadmin"],
             "effect": "allow",
         },
-        # List: any authenticated user may list according to scope_queryset
+        # Authenticated user can list according to scope_queryset
         {
             "action": ["list"],
             "principal": ["authenticated"],
@@ -25,12 +23,12 @@ class UserAccessPolicy(BasicAccessPolicy):
             "effect": "allow",
             "condition": "is_user_self",
         },
-        # Teacher can retrieve users in groups they teach
+        # Teachers and students can retrieve users in groups they are member of, or teachers at their school
         {
             "action": ["retrieve"],
-            "principal": ["role:teacher"],
+            "principal": ["role:student", "role:teacher"],
             "effect": "allow",
-            "condition": "is_group_teacher",
+            "condition_expression": ["(is_in_same_group or is_target_teacher_at_my_school)"],
         },
     ]
 
@@ -39,43 +37,58 @@ class UserAccessPolicy(BasicAccessPolicy):
         if user.is_superadmin:
             return qs
         try:
-            teacher_groups = user.teacher_groups
-            student_groups = user.student_groups
-            # the incoming queryset is all users, so we filter by groups
+            groups_where_current_user_is_teacher = user.teacher_groups
+            groups_where_current_user_is_student = user.student_groups
+            # Collect all teacher user IDs from schools the user is affiliated with
+            teacher_ids = User.objects.filter(
+                user_groups__group__school__in=user.get_schools(),
+                user_groups__role__name='teacher'
+            ).values_list('id', flat=True)
+
             new_qs = qs.filter(
-                Q(id=user.id) |  # ensure self always visible
-                Q(user_groups__group__in=teacher_groups) |
-                Q(user_groups__group__in=student_groups)
+                Q(id=user.id) |  # always include self
+                Q(user_groups__group__in=groups_where_current_user_is_teacher) |
+                Q(user_groups__group__in=groups_where_current_user_is_student) |
+                Q(id__in=teacher_ids)
             ).distinct()
             return new_qs
         except Exception:
             return qs.none()
 
 
-    def is_user_self(self, request, view, action, obj=None):
-        # For permission phase (obj is None) allow; queryset scoping enforces visibility
-        if obj is None:
-            return True
+    # True if requester is the target user  
+    def is_user_self(self, request, view, action):
         try:
-            target_user = obj
-            # If requesting themselves, allow access
+            target_user = view.get_object()
             return bool(request.user.id == target_user.id)
-        except Exception as e:
+        except Exception:
             return False
 
 
-    def is_group_teacher(self, request, view, action, obj=None):
-        # When evaluated in has_permission (no object yet), defer to object-level check
-        if obj is None:
-            return True
+    # True if requester and target share any group (any role)
+    def is_in_same_group(self, request, view, action):
         try:
-            request_user = request.user
-            target_user = obj
-            # Teacher groups (where requester has role=teacher)
-            teacher_group_ids = request_user.teacher_groups.values_list("id", flat=True)
-            if not teacher_group_ids:
+            requester = request.user
+            target_user = view.get_object()
+            return target_user.user_groups.filter(
+                group_id__in=requester.groups.values_list("id", flat=True)
+            ).exists()
+        except Exception:
+            return False
+
+
+    # True if target user is a teacher at any school the requester belongs to
+    def is_target_teacher_at_my_school(self, request, view, action):
+        try:
+            requester = request.user
+            target_user = view.get_object()
+            school_ids = list(requester.get_schools().values_list("id", flat=True))
+            if not school_ids:
                 return False
-            # Does target user belong to any of those groups?
-            return target_user.user_groups.filter(group_id__in=teacher_group_ids).exists()
-        except Exception as e:
+            # Check if target has a teacher membership in any of these schools
+            return target_user.user_groups.filter(
+                role__name='teacher',
+                group__school_id__in=school_ids
+            ).exists()
+        except Exception:
             return False

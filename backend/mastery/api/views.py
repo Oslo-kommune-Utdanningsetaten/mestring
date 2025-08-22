@@ -1,20 +1,32 @@
 from .. import models, serializers
-from django.db.models import Q  # added
-import logging  # added
+from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.filters import OrderingFilter
+from rest_framework.exceptions import ValidationError
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Prefetch
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_access_policy import AccessViewSetMixin
-from mastery.access_policies.group import GroupAccessPolicy
-from mastery.access_policies.school import SchoolAccessPolicy
-from mastery.access_policies.subject import SubjectAccessPolicy
-from mastery.access_policies.user import UserAccessPolicy
+from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy
 
-logger = logging.getLogger(__name__)  # added
+
+def get_request_param(query_params, name: str):
+    """
+    Return the stripped string value of a query parameter, or None if
+    the parameter is missing, empty, or only whitespace.
+    """
+    value = query_params.get(name)
+    if value is None:
+        return None
+    value = value.strip()
+    if value == '':
+        return None
+    return value
+
+# School
+
 
 class SchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.School.objects.all()
@@ -22,179 +34,252 @@ class SchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     filterset_fields = ['is_service_enabled']
     access_policy = SchoolAccessPolicy
 
-    def get_serializer_class(self):  # added
-        if getattr(self, 'action', None) == 'subjects':
-            return serializers.SubjectSerializer
-        if getattr(self, 'action', None) == 'users':
-            return serializers.UserSerializer
-        return super().get_serializer_class()
-
     def get_queryset(self):
         return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
-    @extend_schema(
+
+# User
+@extend_schema_view(
+    list=extend_schema(
         parameters=[
             OpenApiParameter(
+                name='school',
+                description='Filter users by School ID (users in any group of that school)',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='roles',
-                description='Comma-separated list of role names to filter users by (e.g., student,teacher)',
+                description='Filter users by roles they have. Comma-separated list of role names (e.g., student,teacher)',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
-            )
+            ),
+            OpenApiParameter(
+                name='groups',
+                description='Filter users by group membership. Comma-separated list of group IDs',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
         ]
     )
-    @action(detail=True, methods=['get'], url_path='users',
-            description="Get all users belonging to groups in this school, optionally filtered by role",
-            serializer_class=serializers.UserSerializer)
-    def users(self, request, pk=None):
-        school = self.get_object()
-        users_qs = models.User.objects.filter(user_groups__group__school=school).distinct()
-        roles_param = request.query_params.get('roles')
-        if roles_param:
-            role_names = [r.strip() for r in roles_param.split(',') if r.strip()]
-            users_qs = users_qs.filter(user_groups__role__name__in=role_names)
-        serializer = self.get_serializer(users_qs, many=True, context={'request': request})
-        return Response(serializer.data)
-
-    @action(
-        detail=True,
-        methods=['get'],
-        url_path='subjects',
-        description="Get all subjects belonging to this school (owned + group subjects)",
-        serializer_class=serializers.SubjectSerializer
-    )
-    def subjects(self, request, pk=None):
-        school = self.get_object()
-        qs = SubjectAccessPolicy().scope_queryset(
-            request,
-            models.Subject.objects.all()
-        )
-        school_subjects_qs = qs.filter(
-            Q(owned_by_school=school) | Q(group__school=school)
-        ).distinct()
-        serializer = self.get_serializer(school_subjects_qs, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-class SubjectViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
-    queryset = models.Subject.objects.all()
-    serializer_class = serializers.SubjectSerializer
-    access_policy = SubjectAccessPolicy
-
-    def get_queryset(self):
-        return self.access_policy().scope_queryset(self.request, super().get_queryset())
-
-
+)
 class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
     access_policy = UserAccessPolicy
 
     def get_queryset(self):
-        return self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        if self.action == 'list':
+            school_param = get_request_param(
+                self.request.query_params, 'school')
+            roles_param = get_request_param(self.request.query_params, 'roles')
+            groups_param = get_request_param(
+                self.request.query_params, 'groups')
 
-    @extend_schema(
+            if not school_param:
+                raise ValidationError(
+                    {'error': 'missing-parameter', 'message': 'The "school" query parameter is required.'})
+
+            qs = qs.filter(user_groups__group__school_id=school_param)
+            if roles_param:
+                role_names = [role.strip()
+                              for role in roles_param.split(',') if role]
+                if role_names:
+                    qs = qs.filter(user_groups__role__name__in=role_names)
+            if groups_param:
+                group_ids = [group.strip()
+                             for group in groups_param.split(',') if group]
+                if group_ids:
+                    qs = qs.filter(user_groups__group_id__in=group_ids)
+        # non-list actions (retrieve, create, update, destroy) do not require parameters
+        return qs.distinct()
+
+
+# Group
+@extend_schema_view(
+    list=extend_schema(
         parameters=[
-            OpenApiParameter(name='roles', description='Comma-separated list of role names to filter groups by',
-                             required=False, type={'type': 'string'}, location=OpenApiParameter.QUERY),
-            OpenApiParameter(name='school', description='School ID to filter groups by',
-                             required=False, type={'type': 'string'}, location=OpenApiParameter.QUERY)
+            OpenApiParameter(
+                name='school',
+                description='Filter users by School ID (users in any group of that school)',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='type',
+                description='Filter groups by type (e.g., teaching, basis)',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
         ]
     )
-    @action(detail=True, methods=['get'], url_path='groups',
-            description="List all groups for this user, optional ?roles=role1,role2 and ?school=id filters",
-            serializer_class=serializers.GroupSerializer)
-    def groups(self, request, pk=None):
-        user = self.get_object()
-        qs = models.Group.objects.filter(user_groups__user=user)
-        roles_param = request.query_params.get('roles')
-        school_param = request.query_params.get('school')
-        if roles_param:
-            role_names = [r.strip() for r in roles_param.split(',') if r.strip()]
-            qs = qs.filter(user_groups__role__name__in=role_names)
-        if school_param:
-            qs = qs.filter(school_id=school_param.strip())
-        serializer = self.get_serializer(qs.distinct(), many=True, context={'request': request})
-        return Response(serializer.data)
-
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(name='subjectId', description='Filter goals by subject ID',
-                             required=False, type={'type': 'string'}, location=OpenApiParameter.QUERY),
-            OpenApiParameter(name='groupId', description='Filter goals by group ID',
-                             required=False, type={'type': 'string'}, location=OpenApiParameter.QUERY)
-        ]
-    )
-    @action(detail=True, methods=['get'], url_path='goals',
-            description="List all goals for this user (both personal and group goals)",
-            serializer_class=serializers.GoalSerializer)
-    def goals(self, request, pk=None):
-        user = self.get_object()
-        personal_goals = models.Goal.objects.filter(student=user)
-        student_groups = user.student_groups
-        group_goals = models.Goal.objects.filter(group__in=student_groups)
-        all_goals = personal_goals.union(group_goals).order_by('created_at')
-        subject_id = request.query_params.get('subjectId')
-        group_id = request.query_params.get('groupId')
-        if subject_id:
-            all_goals = all_goals.filter(subject_id=subject_id)
-        if group_id:
-            all_goals = all_goals.filter(group_id=group_id)
-        serializer = self.get_serializer(all_goals, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-class RoleViewSet(viewsets.ModelViewSet):
-    queryset = models.Role.objects.all()
-    serializer_class = serializers.RoleSerializer
-
-
+)
 class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Group.objects.all()
     serializer_class = serializers.GroupSerializer
-    filterset_fields = ['school', 'type']
     access_policy = GroupAccessPolicy
 
     def get_queryset(self):
-        return self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        if self.action == 'list':
+            school_param = get_request_param(
+                self.request.query_params, 'school')
+            type_param = get_request_param(self.request.query_params, 'type')
 
-    @action(detail=True, methods=['get'], url_path='members', serializer_class=serializers.GroupMemberSerializer)
+            if not school_param:
+                raise ValidationError(
+                    {'error': 'missing-parameter', 'message': 'The "school" query parameter is required.'})
 
-    def members(self, request, pk=None):
-        group = self.get_object()
-        base_qs = UserAccessPolicy().scope_queryset(
-            request,
-            models.User.objects.all()
-        )
-        # Prefetch only memberships for this group to avoid N+1
-        memberships_for_group = models.UserGroup.objects.filter(group=group).select_related('role')
-        qs = (base_qs
-              .filter(user_groups__group=group)
-              .distinct()
-              .prefetch_related(
-                  Prefetch('user_groups', queryset=memberships_for_group)
-              ))
-        serializer = serializers.GroupMemberSerializer(
-            qs,
-            many=True,
-            context={'request': request, 'group': group}
-        )
-        return Response(serializer.data)
+            qs = qs.filter(school_id=school_param)
+            if type_param:
+                qs = qs.filter(type=type_param.lower())
+        # non-list actions (retrieve, create, update, destroy) do not require parameters
+        return qs.distinct()
 
 
-class GoalViewSet(viewsets.ModelViewSet):
+# Subject
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='school',
+                description='Filter subject by subject.groups belonging to school',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='owned_by',
+                description='Filter subject by owned_by_school (school ID)',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            )
+        ]
+    )
+)
+class SubjectViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+    queryset = models.Subject.objects.all()
+    serializer_class = serializers.SubjectSerializer
+    access_policy = SubjectAccessPolicy
+
+    def get_queryset(self):
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+
+        if self.action == 'list':
+            school_param = get_request_param(
+                self.request.query_params, 'school')
+            owned_by_school_param = get_request_param(
+                self.request.query_params, 'owned_by')
+
+            # Require at least one of the two parameters (school OR owned_by)
+            if (not school_param) and (not owned_by_school_param):
+                raise ValidationError(
+                    {'error': 'missing-parameter', 'message': 'At least one of "school" or "owned_by" parameters are required.'})
+
+            # Build a union of the selected filters instead of constraining sequentially
+            result_qs = qs.none()
+            if school_param:
+                result_qs = qs.filter(groups__school_id=school_param)
+            if owned_by_school_param:
+                result_qs = result_qs | qs.filter(
+                    owned_by_school_id=owned_by_school_param)
+
+            return result_qs.distinct()
+        # non-list actions (retrieve, create, update, destroy) do not require parameters
+        return qs
+
+
+# Goal
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='student',
+                description='Filter goals by the student owning them. Using this parameter will return both personal goals and group goals where the student is a member.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='subject',
+                description='Filter goals by subject',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='group',
+                description='Filter goals by group',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+        ]
+    )
+)
+class GoalViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Goal.objects.all()
     serializer_class = serializers.GoalSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ['student_id', 'group_id', 'subject_id']
     ordering_fields = ['created_at', 'updated_at', 'title', 'sort_order']
     ordering = ['sort_order']
+    access_policy = GoalAccessPolicy
 
+    def get_queryset(self):
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+
+        if self.action == 'list':
+            student_param = get_request_param(
+                self.request.query_params, 'student')
+            subject_param = get_request_param(
+                self.request.query_params, 'subject')
+            group_param = get_request_param(self.request.query_params, 'group')
+
+            if (not student_param) and (not subject_param) and (not group_param):
+                raise ValidationError(
+                    {'error': 'missing-parameter', 'message': 'At least one of "subject", "group" or "student" parameters are required.'})
+
+            if (group_param and subject_param):
+                raise ValidationError(
+                    {'error': 'wrong-parameter', 'message': 'group and subject parameters cannot be used together (goals are either personal or group).'})
+
+            if student_param:
+                qs = qs.filter(
+                    Q(student_id=student_param) |
+                    Q(group__user_groups__user_id=student_param)
+                )
+            if group_param:
+                qs = qs.filter(group_id=group_param)
+            if subject_param:
+                qs = qs.filter(subject_id=subject_param)
+
+        # non-list actions (retrieve, create, update, destroy) do not require parameters
+        return qs
+
+
+# Role
+
+class RoleViewSet(viewsets.ModelViewSet):
+    queryset = models.Role.objects.all()
+    serializer_class = serializers.RoleSerializer
+
+
+# Situation
 
 class SituationViewSet(viewsets.ModelViewSet):
     queryset = models.Situation.objects.all()
     serializer_class = serializers.SituationSerializer
 
+
+# Observation
 
 class ObservationViewSet(viewsets.ModelViewSet):
     queryset = models.Observation.objects.all()
@@ -202,16 +287,22 @@ class ObservationViewSet(viewsets.ModelViewSet):
     filterset_fields = ['student_id', 'goal_id']
 
 
+# Status
+
 class StatusViewSet(viewsets.ModelViewSet):
     queryset = models.Status.objects.all()
     serializer_class = serializers.StatusSerializer
 
 
-class UserGroupViewSet(viewsets.ModelViewSet):
-    queryset = models.UserGroup.objects.all()
-    serializer_class = serializers.UserGroupSerializer
-
+# Mastery
 
 class MasterySchemaViewSet(viewsets.ModelViewSet):
     queryset = models.MasterySchema.objects.all()
     serializer_class = serializers.MasterySchemaSerializer
+
+
+# UserGroup - not sure if this is needed?
+
+class UserGroupViewSet(viewsets.ModelViewSet):
+    queryset = models.UserGroup.objects.all()
+    serializer_class = serializers.UserGroupSerializer

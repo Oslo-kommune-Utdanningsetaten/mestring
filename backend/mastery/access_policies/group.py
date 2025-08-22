@@ -1,7 +1,7 @@
-from .base import BasicAccessPolicy
+from .base import BaseAccessPolicy
 from django.db.models import Q
 
-class GroupAccessPolicy(BasicAccessPolicy):
+class GroupAccessPolicy(BaseAccessPolicy):
     statements = [
         # Superadmin: full access
         {
@@ -9,28 +9,19 @@ class GroupAccessPolicy(BasicAccessPolicy):
             "principal": ["role:superadmin"],
             "effect": "allow",
         },
-        # Teacher: can list and retrieve groups they teach
+        # Authenticated user can list according to scope_queryset
         {
-            "action": ["list", "retrieve"],
-            "principal": ["role:teacher"],
-            "effect": "allow",
-            "condition": ["is_group_teacher", "is_group_student"]
-        },
-        # Student: can list and retrieve groups they are students in
-        {
-            "action": ["list", "retrieve"],
-            "principal": ["role:student"],
-            "effect": "allow",
-            "condition": "is_group_student",
-        },
-        # Add/extend rule to cover the custom members action:
-        {
-            "action": ["members"],
+            "action": ["list"],
             "principal": ["authenticated"],
             "effect": "allow",
-            "condition": ["is_group_teacher", "is_group_student"]
         },
-        # Everyone else: implicitly denied
+        # Teachers and students can retrieve groups they are member of
+        {
+            "action": ["retrieve"],
+            "principal": ["role:student", "role:teacher"],
+            "effect": "allow",
+            "condition": "is_member_of_group",
+        },
     ]
 
     def scope_queryset(self, request, qs):
@@ -48,36 +39,11 @@ class GroupAccessPolicy(BasicAccessPolicy):
             return qs.none()
 
 
-    def is_group_teacher(self, request, view, action, obj=None):
-        # When evaluated in has_permission (no object yet), defer to object-level check
-        if obj is None:
-            return True
-
-        # Resolve the group instance
-        group = obj
+    # True if requester is member of the group
+    def is_member_of_group(self, request, view, action):
         try:
-            from mastery.models import Group
-            if not isinstance(group, Group) and hasattr(view, "get_object"):
-                group = view.get_object()
+            requester = request.user
+            target_group = view.get_object()
+            return requester.groups.filter(id=target_group.id).exists()
         except Exception:
             return False
-
-        user = request.user
-        return bool(user and user.is_authenticated and group.get_teachers().filter(id=user.id).exists())
-
-    def is_group_student(self, request, view, action, obj=None):
-        # When evaluated in has_permission (no object yet), defer to object-level check
-        if obj is None:
-            return True
-
-        # Resolve the group instance
-        group = obj
-        try:
-            from mastery.models import Group
-            if not isinstance(group, Group) and hasattr(view, "get_object"):
-                group = view.get_object()
-        except Exception:
-            return False
-
-        user = request.user
-        return bool(user and user.is_authenticated and group.get_students().filter(id=user.id).exists())

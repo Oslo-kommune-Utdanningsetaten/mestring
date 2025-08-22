@@ -1,6 +1,6 @@
 import pytest
 from django.test import Client
-from mastery.models import School, User, Group, Role, Subject
+from mastery.models import School, User, Group, Role, Subject, Goal
 
 # Basic fixture for Django client
 @pytest.fixture
@@ -65,6 +65,14 @@ def other_teacher(db) -> User:
     )
 
 @pytest.fixture
+def other_school_teacher(db) -> User:
+    return User.objects.create(
+        name="Teacher 3", 
+        feide_id="other-school-teacher-id@example.com",
+        email="other-school-teacher@example.com"
+    )
+
+@pytest.fixture
 def student(db) -> User:
     return User.objects.create(
         name="Student 1", 
@@ -81,6 +89,14 @@ def other_student(db) -> User:
     )
 
 @pytest.fixture
+def other_school_student(db) -> User:
+    return User.objects.create(
+        name="Student 3",
+        feide_id="other-school-student-id@example.com",
+        email="other-school-student@example.com"
+    )
+
+@pytest.fixture
 def teaching_group(db, school):
     return Group.objects.create(
         feide_id="fc:group:some-teaching-group",
@@ -90,12 +106,43 @@ def teaching_group(db, school):
     )
 
 @pytest.fixture
-def teaching_group_with_members(db, roles, teacher, student, other_student, teaching_group):
+def teaching_group_with_members(db, roles, teacher, student, teaching_group):
     student_role, teacher_role = roles
     teaching_group.add_member(teacher, teacher_role)
     teaching_group.add_member(student, student_role)
-    teaching_group.add_member(other_student, student_role)
     return teaching_group
+
+@pytest.fixture
+def other_teaching_group(db, school):
+    return Group.objects.create(
+        feide_id="fc:group:other-teaching-group",
+        display_name="Engelsk 8a",
+        type="teaching",
+        school=school
+    )
+
+@pytest.fixture
+def other_school_teaching_group(db, other_school):
+    return Group.objects.create(
+        feide_id="fc:group:some-teaching-group-at-other-school",
+        display_name="Engelsk 1a",
+        type="teaching",
+        school=other_school
+    )
+
+@pytest.fixture
+def other_school_teaching_group_with_members(db, roles, other_school_teacher, other_school_student, other_school_teaching_group):
+    student_role, teacher_role = roles
+    other_school_teaching_group.add_member(other_school_teacher, teacher_role)
+    other_school_teaching_group.add_member(other_school_student, student_role)
+    return other_school_teaching_group
+
+@pytest.fixture
+def other_teaching_group_with_members(db, roles, other_teaching_group, other_teacher, other_student):
+    student_role, teacher_role = roles
+    other_teaching_group.add_member(other_teacher, teacher_role)
+    other_teaching_group.add_member(other_student, student_role)
+    return other_teaching_group
 
 
 @pytest.fixture
@@ -108,7 +155,7 @@ def teaching_group_without_members(db, school):
     )
 
 @pytest.fixture
-def subject_with_group(db, teaching_group_with_members):  # changed dependency
+def subject_with_group(db, teaching_group_with_members):
     # Owned by school is None to simulate group subject
     subject = Subject.objects.create(
         display_name = "Engelsk 7. årstrinn",
@@ -117,7 +164,7 @@ def subject_with_group(db, teaching_group_with_members):  # changed dependency
         grep_group_code = "ENG1Z03",
         owned_by_school = None,
     )
-    teaching_group_with_members.subject = subject  # updated variable name
+    teaching_group_with_members.subject = subject
     teaching_group_with_members.save()
     return subject
 
@@ -128,4 +175,19 @@ def subject_without_group(db, school):
         display_name = "Sosiale ferdigheter",
         short_name = "Sosialt",
         owned_by_school = school,
+    )
+
+@pytest.fixture
+def goal_with_group(db, teaching_group_with_members):
+    return Goal.objects.create(
+        title="Lese 2 bøker",
+        group=teaching_group_with_members,
+    )
+
+@pytest.fixture
+def goal_personal(db, subject_without_group, other_student):
+    return Goal.objects.create(
+        title="Lese 2 bøker",
+        student=other_student,
+        subject=subject_without_group,
     )

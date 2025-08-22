@@ -1,6 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 
+# This test suite should cover all cases where users access shools, no matter which endpoint is used
 
 @pytest.mark.django_db
 def test_non_user_school_access(school):

@@ -20,6 +20,8 @@ backend/.venv # in case your
 .goose
 .gooseignore
 
+.vscode/mcp.json
+
 # macos
 .DS_Store
 

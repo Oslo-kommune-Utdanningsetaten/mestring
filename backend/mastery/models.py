@@ -98,6 +98,10 @@ class User(BaseModel):
         """Get all groups where user has a specific role"""
         return self.groups.filter(user_groups__role__name=role_name)
     
+    def _get_groups_of_type(self, group_type):
+        """Get all groups of a specific type (e.g. 'basis', 'teaching')"""
+        return self.groups.filter(type=group_type)
+    
     def get_schools(self):
         """Return all schools a user belongs to, via group memeberships"""
         return School.objects.filter(groups__members=self).distinct()
@@ -111,6 +115,17 @@ class User(BaseModel):
     def teacher_groups(self):
         """Get all groups where user is a teacher"""
         return self._get_groups_with_role('teacher')
+    
+    @property
+    def basis_groups(self):
+        """Get all basis groups where user is a member"""
+        return self._get_groups_of_type('basis')
+    
+    @property
+    def teaching_groups(self):
+        """Get all teaching groups where user is a member"""
+        return self._get_groups_of_type('teaching')
+
 
     # Needed for DRF permissions
     @property

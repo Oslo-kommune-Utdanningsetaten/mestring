@@ -1,7 +1,7 @@
 from rest_access_policy import AccessPolicy
 from django.contrib.auth.models import AnonymousUser
 
-class BasicAccessPolicy(AccessPolicy):
+class BaseAccessPolicy(AccessPolicy):
     group_prefix = "role:"
 
     def get_user_group_values(self, user) -> list[str]:

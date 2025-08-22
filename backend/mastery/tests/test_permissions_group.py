@@ -2,6 +2,8 @@ import pytest
 from rest_framework.test import APIClient
 from mastery.models import User, Group
 
+# This test suite should cover all cases where users access groups, no matter which endpoint is used
+
 @pytest.mark.django_db
 def test_non_user_group_access(school, teaching_group_with_members, teaching_group_without_members):
     client = APIClient()
@@ -14,95 +16,116 @@ def test_non_user_group_access(school, teaching_group_with_members, teaching_gro
     assert resp.status_code == 403
 
 @pytest.mark.django_db
-def test_superadmin_group_access(teaching_group_with_members, teaching_group_without_members, superadmin, school):
+def test_school_id_requirement(school, superadmin, teaching_group_with_members):
+    client = APIClient()
+    client.force_authenticate(user=superadmin)
+    # School ID is required for listing groups
+    resp = client.get('/api/groups/')
+    assert resp.status_code == 400
+    # Listing groups with school ID
+    resp = client.get('/api/groups/', {'school': school.id})
+    assert resp.status_code == 200
+    # School not required for retrieving a specific group
+    resp = client.get(f'/api/groups/{teaching_group_with_members.id}/')
+    assert resp.status_code == 200
+
+@pytest.mark.django_db
+def test_superadmin_group_access(school, teaching_group_with_members, other_teaching_group_with_members, superadmin):
     client = APIClient()
     client.force_authenticate(user=superadmin)
 
     # Can list groups
-    resp = client.get('/api/groups/')
+    resp = client.get('/api/groups/', {'school': school.id})
     assert resp.status_code == 200
-    assert any(group['id'] == teaching_group_with_members.id for group in resp.json())
+    data = resp.json()
+    expected_ids = {teaching_group_with_members.id, other_teaching_group_with_members.id}
+    received_ids = {group['id'] for group in data}
+    assert len(received_ids) == len(expected_ids)
+    assert expected_ids.issubset(received_ids)
 
     # Create another group and verify superadmin sees it too
-    other = Group.objects.create(
+    a_group = Group.objects.create(
+        feide_id="fc:group:other",
+        display_name="Nother Group",
+        type="basis",
+        school=school
+    )
+    # Group listing should include new group
+    resp = client.get('/api/groups/', {'school': school.id})
+    assert resp.status_code == 200
+    data = resp.json()
+    expected_ids = {teaching_group_with_members.id, other_teaching_group_with_members.id, a_group.id}
+    received_ids = {group['id'] for group in data}
+    assert len(received_ids) == len(expected_ids)
+    assert expected_ids.issubset(received_ids)
+
+    # Can retrieve a specific group
+    resp = client.get(f'/api/groups/{teaching_group_with_members.id}/')
+    assert resp.status_code == 200
+
+
+@pytest.mark.django_db
+def test_teacher_group_access(teaching_group_with_members, other_teaching_group_with_members, teacher, school):
+    client = APIClient()
+    client.force_authenticate(user=teacher)
+
+    # School ID is required for listing groups
+    resp = client.get('/api/groups/')
+    assert resp.status_code == 400
+
+    # Teacher can only list own groups
+    resp = client.get('/api/groups/', {'school': school.id})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 1
+    assert all(group['id'] == teaching_group_with_members.id for group in data)
+
+    # Teacher can retrieve own group
+    resp = client.get(f'/api/groups/{teaching_group_with_members.id}/')
+    assert resp.status_code == 200
+
+    # Teacher cannot retrieve other group
+    resp = client.get(f'/api/groups/{other_teaching_group_with_members.id}/')
+    assert resp.status_code == 403
+
+
+@pytest.mark.django_db
+def test_student_group_access(teaching_group_with_members, other_teaching_group_with_members, school, roles):
+    student = teaching_group_with_members.get_students().first()
+    student_role, _ = roles
+    client = APIClient()
+    client.force_authenticate(user=student)
+
+    # School ID is required for listing groups
+    resp = client.get('/api/groups/')
+    assert resp.status_code == 400
+
+    # Student can only list own groups
+    resp = client.get('/api/groups/', {'school': school.id})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 1
+    assert all(group['id'] == teaching_group_with_members.id for group in data)
+
+    # Add student to new groups and verify student does not see it
+    a_group = Group.objects.create(
         feide_id="fc:group:other",
         display_name="Other Group",
         type="basis",
         school=school
     )
-    # Group listing should include both groups
-    resp = client.get('/api/groups/')
-    assert resp.status_code == 200
-    ids = {group['id'] for group in resp.json()}
-    assert teaching_group_with_members.id in ids
-    assert other.id in ids
-    assert teaching_group_without_members.id in ids
+    a_group.add_member(student, student_role)
+    resp = client.get('/api/groups/', {'school': school.id})
+    data = resp.json()
+    expected_ids = {teaching_group_with_members.id, a_group.id}
+    received_ids = {group['id'] for group in data}
+    assert len(received_ids) == len(expected_ids)
+    assert expected_ids.issubset(received_ids)
 
-    # Can retrieve a group
+    # Student can retrieve own group
     resp = client.get(f'/api/groups/{teaching_group_with_members.id}/')
     assert resp.status_code == 200
 
-    # Can retrieve a memberless group
-    resp = client.get(f'/api/groups/{teaching_group_without_members.id}/')
-    assert resp.status_code == 200
-
-@pytest.mark.django_db
-def test_teacher_group_access(teaching_group_with_members, roles, school):
-    client = APIClient()
-    teacher = teaching_group_with_members.get_teachers().first()
-    client.force_authenticate(user=teacher)
-
-    # List shows only own groups
-    resp = client.get('/api/groups/')
-    assert resp.status_code == 200
-    data = resp.json()
-    assert len(data) == 1
-    assert all(group['id'] == teaching_group_with_members.id for group in data)
-
-    # Create another group taught by someone else
-    other_group = Group.objects.create(
-        feide_id="fc:group:some-other-teaching-group",
-        display_name="Some other group",
-        type="teaching",
-        school=school
-    )
-    # Different teacher for the other group
-    other_teacher = User.objects.create(
-        name="Teacher 2",
-        feide_id="teacher2@example.com",
-        email="teacher2@example.com"
-    )
-    _, teacher_role = roles
-    other_group.add_member(other_teacher, teacher_role)
-
-    # Teacher should not see other group in list
-    resp = client.get('/api/groups/')
-    assert resp.status_code == 200
-    ids = {group['id'] for group in resp.json()}
-    assert teaching_group_with_members.id in ids
-    assert other_group.id not in ids
-
-    # Retrieving other group fails
-    resp = client.get(f'/api/groups/{other_group.id}/')
-    assert resp.status_code == 404
-
-@pytest.mark.django_db
-def test_student_group_access(teaching_group_with_members, teaching_group_without_members):
-    student = teaching_group_with_members.get_students().first()
-    client = APIClient()
-    client.force_authenticate(user=student)
-
-    # List group with membership is allowed
-    resp = client.get('/api/groups/')
-    assert resp.status_code == 200
-    data = resp.json()
-    assert len(data) == 1
-    assert all(group['id'] == teaching_group_with_members.id for group in data)
-
-    # Retrieve should also be allowed
-    resp = client.get(f'/api/groups/{teaching_group_with_members.id}/')
-    assert resp.status_code == 200
-
-    # Retrieve other group should be forbidden
-    resp = client.get(f'/api/groups/{teaching_group_without_members.id}/')
-    assert resp.status_code == 404
+    # Student cannot retrieve other group
+    resp = client.get(f'/api/groups/{other_teaching_group_with_members.id}/')
+    assert resp.status_code == 403

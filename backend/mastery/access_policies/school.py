@@ -1,6 +1,6 @@
-from .base import BasicAccessPolicy
+from .base import BaseAccessPolicy
 
-class SchoolAccessPolicy(BasicAccessPolicy):
+class SchoolAccessPolicy(BaseAccessPolicy):
     statements = [
         # Superadmin: full access
         {
@@ -10,7 +10,7 @@ class SchoolAccessPolicy(BasicAccessPolicy):
         },
         # Authenticated users can list and retrieve schools they belong to
         {
-            "action": ["list", "retrieve", "subjects"],
+            "action": ["list", "retrieve"],
             "principal": ["authenticated"],
             "effect": "allow",
         },
