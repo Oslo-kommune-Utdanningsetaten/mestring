@@ -1,7 +1,8 @@
 import pytest
 from rest_framework.test import APIClient
 
-# This test suite should cover all cases where users access shools, no matter which endpoint is used
+# This test suite should cover all cases where users access shools
+
 
 @pytest.mark.django_db
 def test_non_user_school_access(school):
@@ -11,6 +12,7 @@ def test_non_user_school_access(school):
     assert resp.status_code == 403
     resp = client.get(f'/api/schools/{school.id}/')
     assert resp.status_code == 403
+
 
 @pytest.mark.django_db
 def test_superadmin_school_access(superadmin, school, other_school):
@@ -31,6 +33,7 @@ def test_superadmin_school_access(superadmin, school, other_school):
     assert resp.status_code == 200
     resp = client.get(f'/api/schools/{other_school.id}/')
     assert resp.status_code == 200
+
 
 @pytest.mark.django_db
 def test_user_school_access(teaching_group_with_members, school, other_school):

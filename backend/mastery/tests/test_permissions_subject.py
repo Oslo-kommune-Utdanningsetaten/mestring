@@ -2,7 +2,8 @@ import pytest
 from rest_framework.test import APIClient
 from mastery.models import User, Group, Subject, Goal
 
-# This test suite should cover all cases where users access subjects, no matter which endpoint is used
+# This test suite should cover all cases where users access subjects
+
 
 @pytest.mark.django_db
 def test_non_user_subject_access(school, subject_with_group, subject_without_group):
@@ -18,6 +19,7 @@ def test_non_user_subject_access(school, subject_with_group, subject_without_gro
     assert resp.status_code == 403
     resp = client.get(f'/api/subjects/{subject_without_group.id}/')
     assert resp.status_code == 403
+
 
 @pytest.mark.django_db
 def test_superadmin_subject_access(superadmin, school, subject_with_group, subject_without_group):
@@ -47,7 +49,8 @@ def test_superadmin_subject_access(superadmin, school, subject_with_group, subje
     assert subject_with_group.id not in ids
 
     # Superadmin can retrieve both kinds of subjects in one go
-    resp = client.get('/api/subjects/', {'school': school.id, 'owned_by': school.id})
+    resp = client.get('/api/subjects/',
+                      {'school': school.id, 'owned_by': school.id})
     data = resp.json()
     expected_ids = {subject_without_group.id, subject_with_group.id}
     received_ids = {group['id'] for group in data}
@@ -62,7 +65,7 @@ def test_superadmin_subject_access(superadmin, school, subject_with_group, subje
 
 
 @pytest.mark.django_db
-def test_student_subject_access(school, subject_with_group, subject_without_group):      
+def test_student_subject_access(school, subject_with_group, subject_without_group):
     student = subject_with_group.groups.all()[0].get_students().first()
     client = APIClient()
     client.force_authenticate(user=student)
@@ -92,8 +95,9 @@ def test_student_subject_access(school, subject_with_group, subject_without_grou
     resp = client.get(f'/api/subjects/{subject_without_group.id}/')
     assert resp.status_code == 200
 
+
 @pytest.mark.django_db
-def test_teacher_subject_access(school, roles, subject_with_group, subject_without_group):      
+def test_teacher_subject_access(school, roles, subject_with_group, subject_without_group):
     teacher = subject_with_group.groups.all()[0].get_teachers().first()
     client = APIClient()
     client.force_authenticate(user=teacher)
@@ -164,10 +168,12 @@ def test_teacher_subject_access(school, roles, subject_with_group, subject_witho
     assert resp.status_code == 200
 
     # Teacher can now list all 3 subjects
-    resp = client.get('/api/subjects/', {'school': school.id, 'owned_by': school.id})
+    resp = client.get('/api/subjects/',
+                      {'school': school.id, 'owned_by': school.id})
     assert resp.status_code == 200
     data = resp.json()
-    expected_ids = {special_subject.id, subject_without_group.id, subject_with_group.id}
+    expected_ids = {special_subject.id,
+                    subject_without_group.id, subject_with_group.id}
     received_ids = {group['id'] for group in data}
     assert len(received_ids) == len(expected_ids)
     assert expected_ids.issubset(received_ids)

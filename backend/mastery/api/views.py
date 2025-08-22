@@ -9,7 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Prefetch
 from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_access_policy import AccessViewSetMixin
-from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy
+from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy
 
 
 def get_request_param(query_params, name: str):
@@ -276,7 +276,19 @@ class RoleViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
 
+# Mastery
+
+class MasterySchemaViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+    queryset = models.MasterySchema.objects.all()
+    serializer_class = serializers.MasterySchemaSerializer
+    access_policy = MasterySchemaAccessPolicy
+
+    def get_queryset(self):
+        return self.access_policy().scope_queryset(self.request, super().get_queryset())
+
+
 # Situation
+
 
 class SituationViewSet(viewsets.ModelViewSet):
     queryset = models.Situation.objects.all()
@@ -296,10 +308,3 @@ class ObservationViewSet(viewsets.ModelViewSet):
 class StatusViewSet(viewsets.ModelViewSet):
     queryset = models.Status.objects.all()
     serializer_class = serializers.StatusSerializer
-
-
-# Mastery
-
-class MasterySchemaViewSet(viewsets.ModelViewSet):
-    queryset = models.MasterySchema.objects.all()
-    serializer_class = serializers.MasterySchemaSerializer

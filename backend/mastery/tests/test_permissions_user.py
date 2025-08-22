@@ -2,7 +2,8 @@ import pytest
 from rest_framework.test import APIClient
 from mastery.models import User, Group
 
-# This test suite should cover all cases where users access other users, no matter which endpoint is used
+# This test suite should cover all cases where users access other users
+
 
 @pytest.mark.django_db
 def test_non_user_user_access(school, teaching_group_with_members, teacher, student):
@@ -36,7 +37,8 @@ def test_superadmin_user_access(superadmin, school, teaching_group_with_members,
     resp = client.get('/api/users/', {'school': school.id})
     assert resp.status_code == 200
     data = resp.json()
-    expected_ids = {user.id for user in teaching_group_with_members.get_members()} | {user.id for user in other_teaching_group_with_members.get_members()}
+    expected_ids = {user.id for user in teaching_group_with_members.get_members(
+    )} | {user.id for user in other_teaching_group_with_members.get_members()}
     received_ids = {user['id'] for user in data}
     assert len(received_ids) == len(expected_ids)
     assert expected_ids.issubset(received_ids)
@@ -44,18 +46,22 @@ def test_superadmin_user_access(superadmin, school, teaching_group_with_members,
     # Can list all teachers in school
     resp = client.get('/api/users/', {'school': school.id, 'roles': 'teacher'})
     data = resp.json()
-    expected_ids = {user.id for user in teaching_group_with_members.get_teachers()} | {user.id for user in other_teaching_group_with_members.get_teachers()}
+    expected_ids = {user.id for user in teaching_group_with_members.get_teachers(
+    )} | {user.id for user in other_teaching_group_with_members.get_teachers()}
     received_ids = {user['id'] for user in data}
     assert len(received_ids) == len(expected_ids)
     assert expected_ids.issubset(received_ids)
 
     # Can list users by group
-    resp = client.get('/api/users/', {'school': school.id, 'groups': teaching_group_with_members.id})
+    resp = client.get(
+        '/api/users/', {'school': school.id, 'groups': teaching_group_with_members.id})
     data = resp.json()
-    expected_ids = {user.id for user in teaching_group_with_members.get_members()}
+    expected_ids = {
+        user.id for user in teaching_group_with_members.get_members()}
     received_ids = {user['id'] for user in data}
     assert len(received_ids) == len(expected_ids)
     assert expected_ids.issubset(received_ids)
+
 
 @pytest.mark.django_db
 def test_user_self_access(teaching_group_with_members, school):
@@ -111,7 +117,8 @@ def test_teacher_user_access(school, teaching_group_with_members, other_teaching
     assert expected_ids.issubset(received_ids)
 
     # Teacher can list users in their groups
-    resp = client.get('/api/users/', {'school': school.id, 'groups': teaching_group_with_members.id})
+    resp = client.get(
+        '/api/users/', {'school': school.id, 'groups': teaching_group_with_members.id})
     assert resp.status_code == 200
     data = resp.json()
     expected_ids = {teacher.id, student.id}
@@ -129,13 +136,14 @@ def test_teacher_user_access(school, teaching_group_with_members, other_teaching
     resp = client.get(f'/api/users/{other_school_student.id}/')
     assert resp.status_code == 403
 
+
 @pytest.mark.django_db
 def test_student_user_access(school, roles, teaching_group_with_members, other_teaching_group_with_members, other_school_teaching_group_with_members):
     teacher = teaching_group_with_members.get_teachers().first()
     student = teaching_group_with_members.get_students().first()
     other_teacher = other_teaching_group_with_members.get_teachers().first()
     other_student = other_teaching_group_with_members.get_students().first()
- 
+
     client = APIClient()
     client.force_authenticate(user=student)
 
@@ -153,7 +161,8 @@ def test_student_user_access(school, roles, teaching_group_with_members, other_t
     assert expected_ids.issubset(received_ids)
 
     # Student can list users in their groups
-    resp = client.get('/api/users/', {'school': school.id, 'groups': teaching_group_with_members.id})
+    resp = client.get(
+        '/api/users/', {'school': school.id, 'groups': teaching_group_with_members.id})
     assert resp.status_code == 200
     data = resp.json()
     expected_ids = {teacher.id, student.id}

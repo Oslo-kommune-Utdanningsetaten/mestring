@@ -2,7 +2,8 @@ import pytest
 from rest_framework.test import APIClient
 from mastery.models import User, Group
 
-# This test suite should cover all cases where users access groups, no matter which endpoint is used
+# This test suite should cover all cases where users access groups
+
 
 @pytest.mark.django_db
 def test_non_user_group_access(school, teaching_group_with_members, teaching_group_without_members):
@@ -14,6 +15,7 @@ def test_non_user_group_access(school, teaching_group_with_members, teaching_gro
     assert resp.status_code == 403
     resp = client.get(f'/api/groups/{teaching_group_without_members.id}/')
     assert resp.status_code == 403
+
 
 @pytest.mark.django_db
 def test_school_id_requirement(school, superadmin, teaching_group_with_members):
@@ -29,6 +31,7 @@ def test_school_id_requirement(school, superadmin, teaching_group_with_members):
     resp = client.get(f'/api/groups/{teaching_group_with_members.id}/')
     assert resp.status_code == 200
 
+
 @pytest.mark.django_db
 def test_superadmin_group_access(school, teaching_group_with_members, other_teaching_group_with_members, superadmin):
     client = APIClient()
@@ -38,7 +41,8 @@ def test_superadmin_group_access(school, teaching_group_with_members, other_teac
     resp = client.get('/api/groups/', {'school': school.id})
     assert resp.status_code == 200
     data = resp.json()
-    expected_ids = {teaching_group_with_members.id, other_teaching_group_with_members.id}
+    expected_ids = {teaching_group_with_members.id,
+                    other_teaching_group_with_members.id}
     received_ids = {group['id'] for group in data}
     assert len(received_ids) == len(expected_ids)
     assert expected_ids.issubset(received_ids)
@@ -54,7 +58,8 @@ def test_superadmin_group_access(school, teaching_group_with_members, other_teac
     resp = client.get('/api/groups/', {'school': school.id})
     assert resp.status_code == 200
     data = resp.json()
-    expected_ids = {teaching_group_with_members.id, other_teaching_group_with_members.id, a_group.id}
+    expected_ids = {teaching_group_with_members.id,
+                    other_teaching_group_with_members.id, a_group.id}
     received_ids = {group['id'] for group in data}
     assert len(received_ids) == len(expected_ids)
     assert expected_ids.issubset(received_ids)
