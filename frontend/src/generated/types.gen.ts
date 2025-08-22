@@ -114,7 +114,7 @@ export type ObservationReadable = {
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
-    isPrivate?: boolean;
+    isVisibleToStudent?: boolean;
     createdById?: string;
     updatedById?: string;
     goalId: string;
@@ -129,7 +129,7 @@ export type ObservationWritable = {
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
-    isPrivate?: boolean;
+    isVisibleToStudent?: boolean;
     createdById?: string;
     updatedById?: string;
     goalId: string;
@@ -231,7 +231,7 @@ export type PatchedObservationReadable = {
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
-    isPrivate?: boolean;
+    isVisibleToStudent?: boolean;
     createdById?: string;
     updatedById?: string;
     goalId?: string;
@@ -246,7 +246,7 @@ export type PatchedObservationWritable = {
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
-    isPrivate?: boolean;
+    isVisibleToStudent?: boolean;
     createdById?: string;
     updatedById?: string;
     goalId?: string;
@@ -880,10 +880,7 @@ export type MasterySchemasUpdateResponse = MasterySchemasUpdateResponses[keyof M
 export type ObservationsListData = {
     body?: never;
     path?: never;
-    query?: {
-        goalId?: string;
-        studentId?: string;
-    };
+    query?: never;
     url: '/api/observations/';
 };
 
