@@ -10,10 +10,11 @@ router.register(r'roles', views.RoleViewSet, basename="role")
 router.register(r'groups', views.GroupViewSet, basename="group")
 router.register(r'goals', views.GoalViewSet, basename="goal")
 router.register(r'situations', views.SituationViewSet, basename="situation")
-router.register(r'observations', views.ObservationViewSet, basename="observation")
+router.register(r'observations', views.ObservationViewSet,
+                basename="observation")
 router.register(r'status', views.StatusViewSet, basename="status")
-router.register(r'user-groups', views.UserGroupViewSet, basename="user-group")
-router.register(r'mastery-schemas', views.MasterySchemaViewSet, basename="mastery-schema")
+router.register(r'mastery-schemas', views.MasterySchemaViewSet,
+                basename="mastery-schema")
 
 urlpatterns = [
     path('', include(router.urls)),

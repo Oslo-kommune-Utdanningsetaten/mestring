@@ -15,6 +15,8 @@ export type GoalReadable = {
     subjectId?: string;
     previousGoalId?: string;
     masterySchemaId?: string;
+    readonly isPersonal: boolean;
+    readonly isGroup: boolean;
 };
 
 export type GoalWritable = {
@@ -59,22 +61,6 @@ export type GroupWritable = {
     updatedById?: string;
     subjectId?: string;
     schoolId: string;
-};
-
-export type GroupMemberReadable = {
-    readonly id: string;
-    name: string;
-    email: string;
-    readonly roles: string;
-    createdById?: string;
-    updatedById?: string;
-};
-
-export type GroupMemberWritable = {
-    name: string;
-    email: string;
-    createdById?: string;
-    updatedById?: string;
 };
 
 export type MasterySchemaReadable = {
@@ -167,6 +153,8 @@ export type PatchedGoalReadable = {
     subjectId?: string;
     previousGoalId?: string;
     masterySchemaId?: string;
+    readonly isPersonal?: boolean;
+    readonly isGroup?: boolean;
 };
 
 export type PatchedGoalWritable = {
@@ -412,27 +400,6 @@ export type PatchedUserWritable = {
     updatedById?: string;
 };
 
-export type PatchedUserGroupReadable = {
-    readonly id?: string;
-    readonly createdAt?: string;
-    readonly updatedAt?: string;
-    maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
-    userId?: string;
-    groupId?: string;
-    roleId?: string;
-};
-
-export type PatchedUserGroupWritable = {
-    maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
-    userId?: string;
-    groupId?: string;
-    roleId?: string;
-};
-
 export type RoleReadable = {
     readonly id: string;
     readonly createdAt: string;
@@ -578,37 +545,28 @@ export type UserWritable = {
     updatedById?: string;
 };
 
-export type UserGroupReadable = {
-    readonly id: string;
-    readonly createdAt: string;
-    readonly updatedAt: string;
-    maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
-    userId: string;
-    groupId: string;
-    roleId: string;
-};
-
-export type UserGroupWritable = {
-    maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
-    userId: string;
-    groupId: string;
-    roleId: string;
-};
-
 export type GoalsListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Filter goals by group
+         */
+        group?: string;
         groupId?: string | null;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
+        /**
+         * Filter goals by the student owning them. Using this parameter will return both personal goals and group goals where the student is a member.
+         */
+        student?: string;
         studentId?: string | null;
+        /**
+         * Filter goals by subject
+         */
+        subject?: string;
         subjectId?: string | null;
     };
     url: '/api/goals/';
@@ -711,8 +669,14 @@ export type GoalsUpdateResponse = GoalsUpdateResponses[keyof GoalsUpdateResponse
 export type GroupsListData = {
     body?: never;
     path?: never;
-    query?: {
-        school?: string;
+    query: {
+        /**
+         * Filter users by School ID (users in any group of that school)
+         */
+        school: string;
+        /**
+         * Filter groups by type (e.g., teaching, basis)
+         */
         type?: string;
     };
     url: '/api/groups/';
@@ -811,24 +775,6 @@ export type GroupsUpdateResponses = {
 };
 
 export type GroupsUpdateResponse = GroupsUpdateResponses[keyof GroupsUpdateResponses];
-
-export type GroupsMembersRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique value identifying this group.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/groups/{id}/members/';
-};
-
-export type GroupsMembersRetrieveResponses = {
-    200: GroupMemberReadable;
-};
-
-export type GroupsMembersRetrieveResponse = GroupsMembersRetrieveResponses[keyof GroupsMembersRetrieveResponses];
 
 export type MasterySchemasListData = {
     body?: never;
@@ -1253,47 +1199,6 @@ export type SchoolsUpdateResponses = {
 
 export type SchoolsUpdateResponse = SchoolsUpdateResponses[keyof SchoolsUpdateResponses];
 
-export type SchoolsSubjectsRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique value identifying this school.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/schools/{id}/subjects/';
-};
-
-export type SchoolsSubjectsRetrieveResponses = {
-    200: SubjectReadable;
-};
-
-export type SchoolsSubjectsRetrieveResponse = SchoolsSubjectsRetrieveResponses[keyof SchoolsSubjectsRetrieveResponses];
-
-export type SchoolsUsersRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique value identifying this school.
-         */
-        id: string;
-    };
-    query?: {
-        /**
-         * Comma-separated list of role names to filter users by (e.g., student,teacher)
-         */
-        roles?: string;
-    };
-    url: '/api/schools/{id}/users/';
-};
-
-export type SchoolsUsersRetrieveResponses = {
-    200: UserReadable;
-};
-
-export type SchoolsUsersRetrieveResponse = SchoolsUsersRetrieveResponses[keyof SchoolsUsersRetrieveResponses];
-
 export type SituationsListData = {
     body?: never;
     path?: never;
@@ -1499,7 +1404,16 @@ export type StatusUpdateResponse = StatusUpdateResponses[keyof StatusUpdateRespo
 export type SubjectsListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Filter subject by owned_by_school (school ID)
+         */
+        ownedBy?: string;
+        /**
+         * Filter subject by subject.groups belonging to school
+         */
+        school?: string;
+    };
     url: '/api/subjects/';
 };
 
@@ -1597,111 +1511,23 @@ export type SubjectsUpdateResponses = {
 
 export type SubjectsUpdateResponse = SubjectsUpdateResponses[keyof SubjectsUpdateResponses];
 
-export type UserGroupsListData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/user-groups/';
-};
-
-export type UserGroupsListResponses = {
-    200: Array<UserGroupReadable>;
-};
-
-export type UserGroupsListResponse = UserGroupsListResponses[keyof UserGroupsListResponses];
-
-export type UserGroupsCreateData = {
-    body: UserGroupWritable;
-    path?: never;
-    query?: never;
-    url: '/api/user-groups/';
-};
-
-export type UserGroupsCreateResponses = {
-    201: UserGroupReadable;
-};
-
-export type UserGroupsCreateResponse = UserGroupsCreateResponses[keyof UserGroupsCreateResponses];
-
-export type UserGroupsDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique value identifying this user group.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/user-groups/{id}/';
-};
-
-export type UserGroupsDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type UserGroupsDestroyResponse = UserGroupsDestroyResponses[keyof UserGroupsDestroyResponses];
-
-export type UserGroupsRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique value identifying this user group.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/user-groups/{id}/';
-};
-
-export type UserGroupsRetrieveResponses = {
-    200: UserGroupReadable;
-};
-
-export type UserGroupsRetrieveResponse = UserGroupsRetrieveResponses[keyof UserGroupsRetrieveResponses];
-
-export type UserGroupsPartialUpdateData = {
-    body?: PatchedUserGroupWritable;
-    path: {
-        /**
-         * A unique value identifying this user group.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/user-groups/{id}/';
-};
-
-export type UserGroupsPartialUpdateResponses = {
-    200: UserGroupReadable;
-};
-
-export type UserGroupsPartialUpdateResponse = UserGroupsPartialUpdateResponses[keyof UserGroupsPartialUpdateResponses];
-
-export type UserGroupsUpdateData = {
-    body: UserGroupWritable;
-    path: {
-        /**
-         * A unique value identifying this user group.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/user-groups/{id}/';
-};
-
-export type UserGroupsUpdateResponses = {
-    200: UserGroupReadable;
-};
-
-export type UserGroupsUpdateResponse = UserGroupsUpdateResponses[keyof UserGroupsUpdateResponses];
-
 export type UsersListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        /**
+         * Filter users by group membership. Comma-separated list of group IDs
+         */
+        groups?: string;
+        /**
+         * Filter users by roles they have. Comma-separated list of role names (e.g., student,teacher)
+         */
+        roles?: string;
+        /**
+         * Filter users by School ID (users in any group of that school)
+         */
+        school: string;
+    };
     url: '/api/users/';
 };
 
@@ -1798,60 +1624,6 @@ export type UsersUpdateResponses = {
 };
 
 export type UsersUpdateResponse = UsersUpdateResponses[keyof UsersUpdateResponses];
-
-export type UsersGoalsRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique value identifying this user.
-         */
-        id: string;
-    };
-    query?: {
-        /**
-         * Filter goals by group ID
-         */
-        groupId?: string;
-        /**
-         * Filter goals by subject ID
-         */
-        subjectId?: string;
-    };
-    url: '/api/users/{id}/goals/';
-};
-
-export type UsersGoalsRetrieveResponses = {
-    200: GoalReadable;
-};
-
-export type UsersGoalsRetrieveResponse = UsersGoalsRetrieveResponses[keyof UsersGoalsRetrieveResponses];
-
-export type UsersGroupsRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique value identifying this user.
-         */
-        id: string;
-    };
-    query?: {
-        /**
-         * Comma-separated list of role names to filter groups by
-         */
-        roles?: string;
-        /**
-         * School ID to filter groups by
-         */
-        school?: string;
-    };
-    url: '/api/users/{id}/groups/';
-};
-
-export type UsersGroupsRetrieveResponses = {
-    200: GroupReadable;
-};
-
-export type UsersGroupsRetrieveResponse = UsersGroupsRetrieveResponses[keyof UsersGroupsRetrieveResponses];
 
 export type AuthStatusRetrieveData = {
     body?: never;

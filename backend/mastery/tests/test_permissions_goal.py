@@ -228,7 +228,7 @@ def test_teacher_goal_access(
     assert personal_goal_other.id not in received_ids
     assert group_goal_other.id not in received_ids
 
-    # Teach cannot list goals of unaffiliated students
+    # Teacher cannot list goals of unaffiliated students
     resp = client.get('/api/goals/', {'student': other_student.id})
     assert resp.status_code == 200
     assert resp.json() == []

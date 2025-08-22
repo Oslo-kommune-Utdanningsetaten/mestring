@@ -299,10 +299,3 @@ class StatusViewSet(viewsets.ModelViewSet):
 class MasterySchemaViewSet(viewsets.ModelViewSet):
     queryset = models.MasterySchema.objects.all()
     serializer_class = serializers.MasterySchemaSerializer
-
-
-# UserGroup - not sure if this is needed?
-
-class UserGroupViewSet(viewsets.ModelViewSet):
-    queryset = models.UserGroup.objects.all()
-    serializer_class = serializers.UserGroupSerializer
