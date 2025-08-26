@@ -10,7 +10,9 @@ import {
 import type { AppData } from '../types/models'
 import { currentUser } from './auth'
 
-export const updateStoreWithCurrentUser = () => {
+let masterySchemasCache = null as MasterySchemaReadable[] | null
+
+export const refreshCurrentUser = () => {
   const user = get(currentUser)
   const currentData = get(dataStore)
   if (currentData.currentUser?.id !== user?.id) {
@@ -34,6 +36,7 @@ export const setCurrentSchool = (school: SchoolReadable) => {
 }
 
 const setMasterySchemas = (schemas: MasterySchemaReadable[]) => {
+  masterySchemasCache = schemas
   dataStore.update(data => {
     return { ...data, masterySchemas: schemas }
   })
@@ -77,13 +80,20 @@ const loadSchool = async () => {
   removeLocalStorageItem('currentSchool')
 }
 
-const loadMasterySchemas = async () => {
+const refreshMasterySchemas = async (hardRefresh: boolean) => {
+  if (hardRefresh) {
+    masterySchemasCache = null
+  }
+  if (masterySchemasCache) {
+    return
+  }
   try {
     const result = await masterySchemasList()
     const schemas = result.data || []
     setMasterySchemas(schemas)
   } catch (error) {
     console.error('Error fetching mastery schemas:', error)
+    masterySchemasCache = null
     return null
   }
 }
@@ -118,9 +128,9 @@ export const loadData = async () => {
       masterySchemas: [],
     })
 
-    await updateStoreWithCurrentUser()
+    await refreshCurrentUser()
     await loadSchool()
-    await loadMasterySchemas()
+    await refreshMasterySchemas(false)
   } catch (error) {
     console.error('Failed to load data:', error)
   }

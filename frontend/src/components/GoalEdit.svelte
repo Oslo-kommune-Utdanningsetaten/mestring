@@ -1,7 +1,7 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
-  import { goalsCreate, goalsUpdate, masterySchemasList } from '../generated/sdk.gen'
-  import type { GoalWritable, UserReadable, MasterySchemaReadable } from '../generated/types.gen'
+  import { goalsCreate, goalsUpdate } from '../generated/sdk.gen'
+  import type { GoalWritable, UserReadable } from '../generated/types.gen'
 
   const { student, goal, onDone, isGoalPersonal } = $props<{
     student: UserReadable | null
@@ -10,17 +10,7 @@
     onDone: () => void
   }>()
   let localGoal = $state<Record<string, any>>({ ...goal })
-  let masterySchemas = $state<MasterySchemaReadable[]>([])
-
-  const fetchMasterySchemas = async () => {
-    try {
-      const result = await masterySchemasList()
-      masterySchemas = result.data || []
-    } catch (error) {
-      console.error('Error fetching mastery schemas:', error)
-      masterySchemas = []
-    }
-  }
+  let masterySchemas = $derived($dataStore.masterySchemas)
 
   const getTitle = () => {
     const goalType = isGoalPersonal ? 'personlig ' : 'gruppe'
@@ -50,7 +40,6 @@
   }
   // Fetch mastery schemas when component mounts
   $effect(() => {
-    fetchMasterySchemas()
     localGoal = { masterySchemaId: '', subjectId: '', ...goal }
   })
 </script>

@@ -99,7 +99,7 @@
         <ul class="list-group list-group-flush">
           {#each subjects as subject (subject.id)}
             <li class="list-group-item py-3">
-              <StudentSubjectGoals subjectId={subject.id} {studentId} />
+              <StudentSubjectGoals subjectId={subject.id} {student} />
             </li>
           {/each}
         </ul>

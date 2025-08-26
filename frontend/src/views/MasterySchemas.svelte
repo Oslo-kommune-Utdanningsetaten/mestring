@@ -2,29 +2,19 @@
   import '@oslokommune/punkt-elements/dist/pkt-button.js'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import MasterySchemaEdit from '../components/MasterySchemaEdit.svelte'
-  import { masterySchemasDestroy, masterySchemasList } from '../generated/sdk.gen'
+  import { masterySchemasDestroy } from '../generated/sdk.gen'
   import type { MasterySchemaReadable } from '../generated/types.gen'
-  import type { MasterySchemaWithConfig } from '../types/models'
+  import { dataStore } from '../stores/data'
 
-  let masterySchemas = $state<MasterySchemaWithConfig[]>([])
+  let masterySchemas = $derived($dataStore.masterySchemas)
+
   let masterySchemaWip: Partial<MasterySchemaReadable> | null =
     $state<Partial<MasterySchemaReadable> | null>(null)
 
   let isJsonVisible = $state<boolean>(false)
 
-  const fetchMasterySchemas = async () => {
-    try {
-      const result = await masterySchemasList()
-      masterySchemas = result.data || []
-    } catch (error) {
-      console.error('Error fetching groups:', error)
-      masterySchemas = []
-    }
-  }
-
   const handleDone = () => {
     masterySchemaWip = null
-    fetchMasterySchemas()
   }
 
   const handleEditMasterySchema = (masterySchema: MasterySchemaReadable | null) => {
@@ -34,15 +24,10 @@
   const handleDeleteMasterySchema = async (masterySchemaId: string) => {
     try {
       await masterySchemasDestroy({ path: { id: masterySchemaId } })
-      await fetchMasterySchemas()
     } catch (error) {
       console.error('Error deleting schema:', error)
     }
   }
-
-  $effect(() => {
-    fetchMasterySchemas()
-  })
 </script>
 
 <section class="py-4">

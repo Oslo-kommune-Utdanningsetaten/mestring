@@ -4,13 +4,7 @@
   import { dataStore } from '../stores/data'
   import type { UserReadable, ObservationReadable } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
-  import {
-    usersRetrieve,
-    observationsDestroy,
-    goalsDestroy,
-    goalsUpdate,
-    goalsList,
-  } from '../generated/sdk.gen'
+  import { observationsDestroy, goalsDestroy, goalsUpdate, goalsList } from '../generated/sdk.gen'
   import { goalsWithCalculatedMasteryBySubjectId } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparklineChart from './SparklineChart.svelte'
@@ -18,8 +12,8 @@
   import ObservationEdit from './ObservationEdit.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
 
-  const { subjectId, studentId } = $props<{ subjectId: string; studentId: string }>()
-  let student = $state<UserReadable | null>(null)
+  const { subjectId, student } = $props<{ subjectId: string; student: UserReadable }>()
+
   let goals = $state<GoalDecorated[]>([])
   let isShowGoalTitleEnabled = $state<boolean>(true)
   let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 5 : 2)
@@ -45,20 +39,11 @@
     return subject ? subject.displayName : 'ukjent'
   }
 
-  const fetchStudent = async () => {
-    try {
-      const result = await usersRetrieve({ path: { id: studentId } })
-      student = result.data!
-    } catch (e) {
-      console.error(`Could not load student with id ${studentId}`, e)
-    }
-  }
-
   const fetchGoalsForSubject = async () => {
     try {
-      const result = await goalsList({ query: { student: studentId, subject: subjectId } })
+      const result = await goalsList({ query: { student: student.id, subject: subjectId } })
       const studentGoals = result.data && Array.isArray(result.data) ? result.data : []
-      const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(studentId, studentGoals)
+      const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(student.id, studentGoals)
       goals = goalsBySubjectId[subjectId]
     } catch (error) {
       console.error('Error fetching goals:', error)
@@ -67,7 +52,7 @@
   }
 
   const handleEditGoal = (goal: GoalDecorated | null) => {
-    goalWip = { ...goal, subjectId, studentId }
+    goalWip = { ...goal, subjectId, studentId: student.id }
   }
 
   const handleCloseEditGoal = () => {
@@ -159,8 +144,7 @@
   }
 
   $effect(() => {
-    if (!studentId || !subjectId) return
-    fetchStudent()
+    if (!student || !subjectId) return
     fetchGoalsForSubject()
   })
 
