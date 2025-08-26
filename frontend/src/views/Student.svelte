@@ -3,7 +3,7 @@
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import type { GroupReadable, UserReadable, SubjectReadable } from '../generated/types.gen'
   import { usersRetrieve, groupsList } from '../generated/sdk.gen'
-  import { urlStringFrom, subjectIdsViaGroupOrGoal } from '../utils/functions'
+  import { subjectIdsViaGroupOrGoal } from '../utils/functions'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
   import { dataStore } from '../stores/data'
 
@@ -52,7 +52,6 @@
   }
 
   $effect(() => {
-    console.log('Current school changed, refetching student data', currentSchool)
     if (currentSchool && currentSchool.id) {
       fetchStudentData(studentId)
     }
