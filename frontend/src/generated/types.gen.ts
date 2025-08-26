@@ -553,7 +553,6 @@ export type GoalsListData = {
          * Filter goals by group
          */
         group?: string;
-        groupId?: string | null;
         /**
          * Which field to use when ordering the results.
          */
@@ -562,12 +561,10 @@ export type GoalsListData = {
          * Filter goals by the student owning them. Using this parameter will return both personal goals and group goals where the student is a member.
          */
         student?: string;
-        studentId?: string | null;
         /**
          * Filter goals by subject
          */
         subject?: string;
-        subjectId?: string | null;
     };
     url: '/api/goals/';
 };
@@ -880,7 +877,20 @@ export type MasterySchemasUpdateResponse = MasterySchemasUpdateResponses[keyof M
 export type ObservationsListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Filter observations by goal.
+         */
+        goal?: string;
+        /**
+         * Filter observations by who has done the observing.
+         */
+        observer?: string;
+        /**
+         * Filter observations by the observed student.
+         */
+        student?: string;
+    };
     url: '/api/observations/';
 };
 
@@ -1097,6 +1107,9 @@ export type SchoolsListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Filter schools by whether the mastery service is enabled
+         */
         isServiceEnabled?: boolean;
     };
     url: '/api/schools/';

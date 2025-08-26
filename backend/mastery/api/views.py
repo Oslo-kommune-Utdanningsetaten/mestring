@@ -1,15 +1,13 @@
 from .. import models, serializers
 from django.db.models import Q
 from rest_framework import viewsets
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.filters import OrderingFilter
 from rest_framework.exceptions import ValidationError
-from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Prefetch
 from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_access_policy import AccessViewSetMixin
 from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 def get_request_param(query_params, name: str):
@@ -25,20 +23,31 @@ def get_request_param(query_params, name: str):
         return None
     return value
 
-# School
 
-
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='is_service_enabled',
+                description='Filter schools by whether the mastery service is enabled',
+                required=False,
+                type={'type': 'boolean'},
+                location=OpenApiParameter.QUERY
+            )
+        ]
+    )
+)
 class SchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.School.objects.all()
     serializer_class = serializers.SchoolSerializer
     filterset_fields = ['is_service_enabled']
+    filter_backends = [DjangoFilterBackend]
     access_policy = SchoolAccessPolicy
 
     def get_queryset(self):
         return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
 
-# User
 @extend_schema_view(
     list=extend_schema(
         parameters=[
@@ -74,11 +83,9 @@ class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
         if self.action == 'list':
-            school_param = get_request_param(
-                self.request.query_params, 'school')
+            school_param = get_request_param(self.request.query_params, 'school')
             roles_param = get_request_param(self.request.query_params, 'roles')
-            groups_param = get_request_param(
-                self.request.query_params, 'groups')
+            groups_param = get_request_param(self.request.query_params, 'groups')
 
             if not school_param:
                 raise ValidationError(
@@ -86,20 +93,17 @@ class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
 
             qs = qs.filter(user_groups__group__school_id=school_param)
             if roles_param:
-                role_names = [role.strip()
-                              for role in roles_param.split(',') if role]
+                role_names = [role.strip() for role in roles_param.split(',') if role]
                 if role_names:
                     qs = qs.filter(user_groups__role__name__in=role_names)
             if groups_param:
-                group_ids = [group.strip()
-                             for group in groups_param.split(',') if group]
+                group_ids = [group.strip() for group in groups_param.split(',') if group]
                 if group_ids:
                     qs = qs.filter(user_groups__group_id__in=group_ids)
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs.distinct()
 
 
-# Group
 @extend_schema_view(
     list=extend_schema(
         parameters=[
@@ -143,7 +147,6 @@ class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         return qs.distinct()
 
 
-# Subject
 @extend_schema_view(
     list=extend_schema(
         parameters=[
@@ -181,7 +184,8 @@ class SubjectViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             # Require at least one of the two parameters (school OR owned_by)
             if (not school_param) and (not owned_by_school_param):
                 raise ValidationError(
-                    {'error': 'missing-parameter', 'message': 'At least one of "school" or "owned_by" parameters are required.'})
+                    {'error': 'missing-parameter',
+                     'message': 'At least one of "school" or "owned_by" parameters are required.'})
 
             # Build a union of the selected filters instead of constraining sequentially
             result_qs = qs.none()
@@ -196,7 +200,6 @@ class SubjectViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         return qs
 
 
-# Goal
 @extend_schema_view(
     list=extend_schema(
         parameters=[
@@ -227,8 +230,7 @@ class SubjectViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
 class GoalViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Goal.objects.all()
     serializer_class = serializers.GoalSerializer
-    filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_fields = ['student_id', 'group_id', 'subject_id']
+    filter_backends = [OrderingFilter]
     ordering_fields = ['created_at', 'updated_at', 'title', 'sort_order']
     ordering = ['sort_order']
     access_policy = GoalAccessPolicy
@@ -245,11 +247,14 @@ class GoalViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
 
             if (not student_param) and (not subject_param) and (not group_param):
                 raise ValidationError(
-                    {'error': 'missing-parameter', 'message': 'At least one of "subject", "group" or "student" parameters are required.'})
+                    {'error': 'missing-parameter',
+                     'message': 'At least one of "subject", "group" or "student" parameters are required.'})
 
             if (group_param and subject_param):
                 raise ValidationError(
-                    {'error': 'wrong-parameter', 'message': 'group and subject parameters cannot be used together (goals are either personal or group).'})
+                    {'error': 'wrong-parameter',
+                     'message':
+                     'group and subject parameters cannot be used together (goals are either personal or group).'})
 
             if student_param:
                 qs = qs.filter(
@@ -265,8 +270,6 @@ class GoalViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         return qs
 
 
-# Role
-
 class RoleViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Role.objects.all()
     serializer_class = serializers.RoleSerializer
@@ -276,8 +279,6 @@ class RoleViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
 
-# Mastery
-
 class MasterySchemaViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.MasterySchema.objects.all()
     serializer_class = serializers.MasterySchemaSerializer
@@ -285,8 +286,6 @@ class MasterySchemaViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.access_policy().scope_queryset(self.request, super().get_queryset())
-
-# Observation
 
 
 @extend_schema_view(
@@ -333,7 +332,8 @@ class ObservationViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
 
             if (not student_param) and (not observer_param) and (not goal_param):
                 raise ValidationError(
-                    {'error': 'missing-parameter', 'message': 'At least one of "student", "observer" or "goal" parameters are required.'})
+                    {'error': 'missing-parameter',
+                     'message': 'At least one of "student", "observer" or "goal" parameters are required.'})
 
             if student_param:
                 qs = qs.filter(
@@ -347,15 +347,11 @@ class ObservationViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs
 
-# Situation
-
 
 class SituationViewSet(viewsets.ModelViewSet):
     queryset = models.Situation.objects.all()
     serializer_class = serializers.SituationSerializer
 
-
-# Status
 
 class StatusViewSet(viewsets.ModelViewSet):
     queryset = models.Status.objects.all()
