@@ -5,6 +5,7 @@ from .user import UserAccessPolicy
 from .goal import GoalAccessPolicy
 from .role import RoleAccessPolicy
 from .mastery_schema import MasterySchemaAccessPolicy
+from .observation import ObservationAccessPolicy
 
 __all__ = [
     "GroupAccessPolicy",
@@ -14,4 +15,5 @@ __all__ = [
     "GoalAccessPolicy",
     "RoleAccessPolicy",
     "MasterySchemaAccessPolicy",
+    "ObservationAccessPolicy",
 ]

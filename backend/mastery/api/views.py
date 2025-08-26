@@ -9,7 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Prefetch
 from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_access_policy import AccessViewSetMixin
-from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy
+from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy
 
 
 def get_request_param(query_params, name: str):
@@ -286,6 +286,66 @@ class MasterySchemaViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
+# Observation
+
+
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='student',
+                description='Filter observations by the observed student.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='observer',
+                description='Filter observations by who has done the observing.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='goal',
+                description='Filter observations by goal.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+        ]
+    )
+)
+class ObservationViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+    queryset = models.Observation.objects.all()
+    serializer_class = serializers.ObservationSerializer
+    access_policy = ObservationAccessPolicy
+
+    def get_queryset(self):
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+
+        if self.action == 'list':
+            student_param = get_request_param(
+                self.request.query_params, 'student')
+            observer_param = get_request_param(
+                self.request.query_params, 'observer')
+            goal_param = get_request_param(self.request.query_params, 'goal')
+
+            if (not student_param) and (not observer_param) and (not goal_param):
+                raise ValidationError(
+                    {'error': 'missing-parameter', 'message': 'At least one of "student", "observer" or "goal" parameters are required.'})
+
+            if student_param:
+                qs = qs.filter(
+                    Q(student_id=student_param)
+                )
+            if observer_param:
+                qs = qs.filter(observer_id=observer_param)
+            if goal_param:
+                qs = qs.filter(goal_id=goal_param)
+
+        # non-list actions (retrieve, create, update, destroy) do not require parameters
+        return qs
 
 # Situation
 
@@ -293,14 +353,6 @@ class MasterySchemaViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
 class SituationViewSet(viewsets.ModelViewSet):
     queryset = models.Situation.objects.all()
     serializer_class = serializers.SituationSerializer
-
-
-# Observation
-
-class ObservationViewSet(viewsets.ModelViewSet):
-    queryset = models.Observation.objects.all()
-    serializer_class = serializers.ObservationSerializer
-    filterset_fields = ['student_id', 'goal_id']
 
 
 # Status

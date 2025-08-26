@@ -12,7 +12,7 @@ def test_non_user_goal_access():
 
 
 @pytest.mark.django_db
-def test_superadmin_goal_access(superadmin, goal_with_group, goal_personal):
+def test_superadmin_goal_access(superadmin, goal_with_group, goal_personal_other_student):
     client = APIClient()
     client.force_authenticate(user=superadmin)
 
@@ -40,18 +40,18 @@ def test_superadmin_goal_access(superadmin, goal_with_group, goal_personal):
     assert expected_ids.issubset(received_ids)
 
     # Superadmin can list personal goals by subject
-    resp = client.get(f'/api/goals/', {'subject': goal_personal.subject.id})
+    resp = client.get(f'/api/goals/', {'subject': goal_personal_other_student.subject.id})
     assert resp.status_code == 200
     data = resp.json()
     received_ids = {goal['id'] for goal in data}
-    expected_ids = {goal_personal.id}
+    expected_ids = {goal_personal_other_student.id}
     assert len(received_ids) == len(expected_ids)
     assert expected_ids.issubset(received_ids)
 
     # Surperadmin can retrieve a specific goal
     resp = client.get(f'/api/goals/{goal_with_group.id}/')
     assert resp.status_code == 200
-    resp = client.get(f'/api/goals/{goal_personal.id}/')
+    resp = client.get(f'/api/goals/{goal_personal_other_student.id}/')
     assert resp.status_code == 200
 
 

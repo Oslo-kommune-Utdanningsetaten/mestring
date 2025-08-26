@@ -1,8 +1,6 @@
 import pytest
 from django.test import Client
-from mastery.models import School, User, Group, Role, Subject, Goal, MasterySchema
-
-# Basic fixture for Django client
+from mastery.models import School, User, Group, Role, Subject, Goal, MasterySchema, Observation
 
 
 @pytest.fixture
@@ -119,6 +117,16 @@ def teaching_group(db, school):
 
 
 @pytest.fixture
+def basis_group(db, school):
+    return Group.objects.create(
+        feide_id="fc:group:some-basis-group",
+        display_name="Klasse 7a",
+        type="basis",
+        school=school
+    )
+
+
+@pytest.fixture
 def teaching_group_with_members(db, roles, teacher, student, teaching_group):
     student_role, teacher_role = roles
     teaching_group.add_member(teacher, teacher_role)
@@ -147,7 +155,8 @@ def other_school_teaching_group(db, other_school):
 
 
 @pytest.fixture
-def other_school_teaching_group_with_members(db, roles, other_school_teacher, other_school_student, other_school_teaching_group):
+def other_school_teaching_group_with_members(
+        db, roles, other_school_teacher, other_school_student, other_school_teaching_group):
     student_role, teacher_role = roles
     other_school_teaching_group.add_member(other_school_teacher, teacher_role)
     other_school_teaching_group.add_member(other_school_student, student_role)
@@ -206,7 +215,15 @@ def goal_with_group(db, teaching_group_with_members):
 
 
 @pytest.fixture
-def goal_personal(db, subject_without_group, other_student):
+def goal_personal(db, student):
+    return Goal.objects.create(
+        title="Lese 2 bøker",
+        student=student,
+    )
+
+
+@pytest.fixture
+def goal_personal_other_student(db, subject_without_group, other_student):
     return Goal.objects.create(
         title="Lese 2 bøker",
         student=other_student,
@@ -221,27 +238,54 @@ def mastery_schema(db):
         description="Gjengi, forklare, se sammenhenger",
         config={
             "levels": [
-                    {
-                        "text": "Gjengi",
-                        "color": "rgb(229, 50, 43)",
-                        "maxValue": 33,
-                        "minValue": 1
-                    },
                 {
-                        "text": "Forklare",
-                        "color": "rgb(255, 204, 0)",
-                        "maxValue": 66,
-                        "minValue": 34
+                    "text": "Gjengi",
+                    "color": "rgb(229, 50, 43)",
+                    "maxValue": 33,
+                    "minValue": 1
                 },
                 {
-                        "text": "Se sammenhenger",
-                        "color": "rgb(23, 231, 21)",
-                        "maxValue": 100,
-                        "minValue": 67
+                    "text": "Forklare",
+                    "color": "rgb(255, 204, 0)",
+                    "maxValue": 66,
+                    "minValue": 34
+                },
+                {
+                    "text": "Se sammenhenger",
+                    "color": "rgb(23, 231, 21)",
+                    "maxValue": 100,
+                    "minValue": 67
                 },
             ],
             "inputIncrement": 1,
             "renderDirection": "horizontal",
             "isColorGradientEnabled": False
         },
+    )
+
+
+@pytest.fixture
+def observation_on_group_goal(db, student, goal_with_group):
+    return Observation.objects.create(
+        student=student,
+        goal=goal_with_group,
+        is_visible_to_student=True
+    )
+
+
+@pytest.fixture
+def observation_on_personal_goal(db, student, goal_personal):
+    return Observation.objects.create(
+        student=student,
+        goal=goal_personal,
+        is_visible_to_student=True
+    )
+
+
+@pytest.fixture
+def observation_on_personal_goal_other_student(db, other_student, goal_personal_other_student):
+    return Observation.objects.create(
+        student=other_student,
+        goal=goal_personal_other_student,
+        is_visible_to_student=True
     )

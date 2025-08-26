@@ -1,5 +1,8 @@
 from .base import BaseAccessPolicy
 from django.db.models import Q
+import logging
+logger = logging.getLogger(__name__)
+
 
 class GroupAccessPolicy(BaseAccessPolicy):
     statements = [
@@ -38,8 +41,8 @@ class GroupAccessPolicy(BaseAccessPolicy):
         except Exception:
             return qs.none()
 
-
     # True if requester is member of the group
+
     def is_member_of_group(self, request, view, action):
         try:
             requester = request.user

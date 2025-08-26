@@ -12,15 +12,14 @@ class BaseModel(models.Model):
     """
     Abstract base model that provides common fields for all models.
     """
-    id = models.CharField(primary_key=True, max_length=50,
-                          default=generate_nanoid, editable=False)
+    id = models.CharField(primary_key=True, max_length=50, default=generate_nanoid, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     maintained_at = models.DateTimeField(null=True)
-    created_by = models.ForeignKey(
-        'User', on_delete=models.SET_NULL, null=True, related_name='created_%(class)s_set')
-    updated_by = models.ForeignKey(
-        'User', on_delete=models.SET_NULL, null=True, related_name='updated_%(class)s_set')
+    created_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True,
+                                   related_name='created_%(class)s_set')
+    updated_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True,
+                                   related_name='updated_%(class)s_set')
 
     class Meta:
         abstract = True
@@ -76,11 +75,10 @@ class Subject(BaseModel):
     """
     display_name = models.CharField(max_length=200)
     short_name = models.CharField(max_length=200)
-    owned_by_school = models.ForeignKey(
-        School, on_delete=models.RESTRICT, null=True, related_name='owned_subjects')
+    owned_by_school = models.ForeignKey(School, on_delete=models.RESTRICT,
+                                        null=True, related_name='owned_subjects')
     grep_code = models.CharField(max_length=200, null=True)  # UDIR grep code
-    grep_group_code = models.CharField(
-        max_length=200, null=True)  # UDIR grep code opplæringsfag
+    grep_group_code = models.CharField(max_length=200, null=True)  # UDIR grep code opplæringsfag
 
     @property
     def is_feide_synchronized(self):
@@ -98,8 +96,9 @@ class User(BaseModel):
     email = models.CharField(max_length=200)
     last_activity_at = models.DateTimeField(null=True)
     disabled_at = models.DateTimeField(null=True)
-    groups = models.ManyToManyField('Group', through='UserGroup', through_fields=(
-        'user', 'group'), related_name='members', null=True)
+    groups = models.ManyToManyField(
+        'Group', through='UserGroup', through_fields=('user', 'group'),
+        related_name='members', null=True)
     is_superadmin = models.BooleanField(default=False)
 
     def _get_groups_with_role(self, role_name):
@@ -161,10 +160,8 @@ class Group(BaseModel):
     display_name = models.CharField(max_length=200)
     # either 'basis' or 'teaching' for now
     type = models.CharField(max_length=200)
-    subject = models.ForeignKey(
-        Subject, on_delete=models.RESTRICT, null=True, related_name='groups')
-    school = models.ForeignKey(
-        School, on_delete=models.RESTRICT, null=False, related_name='groups')
+    subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True, related_name='groups')
+    school = models.ForeignKey(School, on_delete=models.RESTRICT, null=False, related_name='groups')
     valid_from = models.DateTimeField(null=True)
     valid_to = models.DateTimeField(null=True)
     # members attribute added via User.groups reverse relation
@@ -217,12 +214,11 @@ class UserGroup(BaseModel):
     """
     A UserGroup represents a User in a Group with a specific Role. Teacher/Student roles are stored on UserGroup
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE,
-                             null=False, blank=False, related_name='user_groups')
-    group = models.ForeignKey(Group, on_delete=models.CASCADE,
-                              null=False, blank=False, related_name='user_groups')
-    role = models.ForeignKey(
-        Role, on_delete=models.CASCADE, null=False, blank=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False,
+                             blank=False, related_name='user_groups')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=False,
+                              blank=False, related_name='user_groups')
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=False, blank=False)
 
     class Meta:
         unique_together = ('user', 'group', 'role')
@@ -247,22 +243,16 @@ class Goal(BaseModel):
     description = models.TextField(null=True)
     group = models.ForeignKey(Group, on_delete=models.RESTRICT, null=True)
     student = models.ForeignKey(User, on_delete=models.RESTRICT, null=True)
-    subject = models.ForeignKey(
-        Subject, on_delete=models.RESTRICT, null=True, related_name='goals')
-    previous_goal = models.ForeignKey(
-        'Goal', on_delete=models.RESTRICT, null=True)
-    mastery_schema = models.ForeignKey(
-        MasterySchema, on_delete=models.RESTRICT, null=True)
+    subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True, related_name='goals')
+    previous_goal = models.ForeignKey('Goal', on_delete=models.RESTRICT, null=True)
+    mastery_schema = models.ForeignKey(MasterySchema, on_delete=models.RESTRICT, null=True)
     sort_order = models.IntegerField(null=True)
 
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=models.Q(group__isnull=False) | models.Q(
-                    student__isnull=False),
-                name='goal_group_or_student'
-            ),
-        ]
+                check=models.Q(group__isnull=False) | models.Q(student__isnull=False),
+                name='goal_group_or_student'),]
 
     @property
     def is_personal(self):
@@ -284,16 +274,14 @@ class Situation(BaseModel):
 
 class Observation(BaseModel):
     """
-    An Observation represents an observation of a student, performed by a teacher or student. Only the observer can access the observation if it is private.
+    An Observation represents an observation of a student, performed by a teacher or student. Only teachers and admins can access an observation if is_visible_to_student is False.
     """
-    goal = models.ForeignKey(
-        Goal, on_delete=models.RESTRICT, null=False, blank=False)
-    student = models.ForeignKey(User, on_delete=models.CASCADE,
-                                null=False, blank=False, related_name='observations_received')
-    observer = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name='observations_performed')
-    situation = models.ForeignKey(
-        Situation, on_delete=models.SET_NULL, null=True)
+    goal = models.ForeignKey(Goal, on_delete=models.RESTRICT, null=False, blank=False)
+    student = models.ForeignKey(User, on_delete=models.CASCADE, null=False,
+                                blank=False, related_name='observations_received')
+    observer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
+                                 related_name='observations_performed')
+    situation = models.ForeignKey(Situation, on_delete=models.SET_NULL, null=True)
     mastery_value = models.IntegerField(null=True)
     mastery_description = models.TextField(null=True)
     feedforward = models.TextField(null=True)
@@ -308,10 +296,8 @@ class Status(BaseModel):
     """
     A status represents a snapshot of a students mastery at a point in time, typically in a subject, e.g. how is Lois doing in math (all math Goals are then considered)
     """
-    student = models.ForeignKey(
-        User, on_delete=models.CASCADE, null=False, blank=False)
-    subject = models.ForeignKey(
-        Subject, on_delete=models.CASCADE, null=False, blank=False)
+    student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=False, blank=False)
     estimated_at = models.DateTimeField(null=True)
     mastery_value = models.IntegerField(null=True)
     mastery_description = models.TextField(null=True)
