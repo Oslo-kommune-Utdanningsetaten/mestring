@@ -1,10 +1,8 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-button.js'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
-  import { onMount } from 'svelte'
-
   import type { GroupReadable, UserReadable, SubjectReadable } from '../generated/types.gen'
-  import { usersRetrieve, usersGroupsRetrieve } from '../generated/sdk.gen'
+  import { usersRetrieve, groupsList } from '../generated/sdk.gen'
   import { urlStringFrom, subjectIdsViaGroupOrGoal } from '../utils/functions'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
   import { dataStore } from '../stores/data'
@@ -13,48 +11,51 @@
   let student = $state<UserReadable | null>(null)
   let groups = $state<GroupReadable[] | []>([])
   let subjects = $state<SubjectReadable[]>([])
+  let currentSchool = $state($dataStore.currentSchool)
 
-  const fetchUser = async (userId: string) => {
+  const fetchStudentData = async (userId: string) => {
     try {
       const result = await usersRetrieve({ path: { id: userId } })
       student = result.data!
-      fetchGroupsForStudent(student.id)
-    } catch (e) {
-      console.error(`Could not load student with id ${userId}`, e)
+      if (!student) return
+      await fetchGroupsForStudent(student.id)
+      await fetchSubjects(student.id)
+    } catch (error) {
+      console.error(`Could not load data for student ${userId}`, error)
     }
   }
 
   const fetchGroupsForStudent = async (studentId: string) => {
     try {
-      const result = await usersGroupsRetrieve({
-        path: { id: studentId },
-        query: { roles: 'student', school: $dataStore.currentSchool?.id },
+      const userGroups: any = await groupsList({
+        query: { user: studentId, roles: 'student', school: currentSchool.id },
       })
-      groups = Array.isArray(result.data) ? result.data : []
-    } catch (err) {
-      console.error(`Could not load groups for ${studentId}`, err)
+      groups = userGroups.data || []
+    } catch (error) {
+      console.error(`Could not load groups for ${studentId}`, error)
       groups = []
     }
   }
 
   const fetchSubjects = async (studentId: string) => {
     try {
-      const subjectIds = await subjectIdsViaGroupOrGoal(studentId, $dataStore.currentSchool?.id)
+      const subjectIds = await subjectIdsViaGroupOrGoal(studentId, currentSchool.id)
       if (subjectIds.length > 0) {
         subjects = $dataStore.subjects.filter((subject: SubjectReadable) =>
           subjectIds.includes(subject.id)
         )
       }
-    } catch (err) {
-      console.error(`Could not load subjects for ${studentId}`, err)
+    } catch (error) {
+      console.error(`Could not load subjects for ${studentId}`, error)
       subjects = []
     }
   }
 
-  onMount(() => {
-    if (studentId) {
-      fetchUser(studentId)
-      fetchSubjects(studentId)
+  $effect(() => {
+    currentSchool = $dataStore.currentSchool
+    console.log('Current school changed, refetching student data', currentSchool)
+    if (currentSchool && currentSchool.id) {
+      fetchStudentData(studentId)
     }
   })
 </script>

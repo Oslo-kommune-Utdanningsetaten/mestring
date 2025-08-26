@@ -7,7 +7,6 @@ from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_access_policy import AccessViewSetMixin
 from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy
-from django_filters.rest_framework import DjangoFilterBackend
 
 
 def get_request_param(query_params, name: str):
@@ -41,7 +40,6 @@ class SchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.School.objects.all()
     serializer_class = serializers.SchoolSerializer
     filterset_fields = ['is_service_enabled']
-    filter_backends = [DjangoFilterBackend]
     access_policy = SchoolAccessPolicy
 
     def get_queryset(self):
@@ -60,7 +58,7 @@ class SchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             ),
             OpenApiParameter(
                 name='roles',
-                description='Filter users by roles they have. Comma-separated list of role names (e.g., student,teacher)',
+                description='Filter users by roles the users have. Comma-separated list of role names (e.g., student,teacher)',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
@@ -121,6 +119,20 @@ class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
+            OpenApiParameter(
+                name='user',
+                description='Filter groups by user ID (groups where the user is a member)',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='roles',
+                description='Filter groups by roles a user has in that group (comma-separated list of role names, e.g., student,teacher)',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
         ]
     )
 )
@@ -132,17 +144,29 @@ class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
         if self.action == 'list':
-            school_param = get_request_param(
-                self.request.query_params, 'school')
+            school_param = get_request_param(self.request.query_params, 'school')
             type_param = get_request_param(self.request.query_params, 'type')
+            user_param = get_request_param(self.request.query_params, 'user')
+            roles_param = get_request_param(self.request.query_params, 'roles')
 
             if not school_param:
                 raise ValidationError(
                     {'error': 'missing-parameter', 'message': 'The "school" query parameter is required.'})
 
+            if roles_param and not user_param:
+                logger.warning(
+                    'The "roles" parameter was provided without the "user" parameter. This is probably a unintended.')
+
             qs = qs.filter(school_id=school_param)
             if type_param:
                 qs = qs.filter(type=type_param.lower())
+            if user_param:
+                qs = qs.filter(user_groups__user_id=user_param)
+            if roles_param:
+                role_names = [role.strip() for role in roles_param.split(',') if role]
+                if role_names:
+                    qs = qs.filter(user_groups__role__name__in=role_names)
+
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs.distinct()
 

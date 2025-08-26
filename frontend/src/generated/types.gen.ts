@@ -668,6 +668,10 @@ export type GroupsListData = {
     path?: never;
     query: {
         /**
+         * Filter groups by roles a user has in that group (comma-separated list of role names, e.g., student,teacher)
+         */
+        roles?: string;
+        /**
          * Filter users by School ID (users in any group of that school)
          */
         school: string;
@@ -675,6 +679,10 @@ export type GroupsListData = {
          * Filter groups by type (e.g., teaching, basis)
          */
         type?: string;
+        /**
+         * Filter groups by user ID (groups where the user is a member)
+         */
+        user?: string;
     };
     url: '/api/groups/';
 };
@@ -1530,7 +1538,7 @@ export type UsersListData = {
          */
         groups?: string;
         /**
-         * Filter users by roles they have. Comma-separated list of role names (e.g., student,teacher)
+         * Filter users by roles the users have. Comma-separated list of role names (e.g., student,teacher)
          */
         roles?: string;
         /**

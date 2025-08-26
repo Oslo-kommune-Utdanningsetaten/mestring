@@ -9,7 +9,7 @@
     observationsDestroy,
     goalsDestroy,
     goalsUpdate,
-    usersGoalsRetrieve,
+    goalsList,
   } from '../generated/sdk.gen'
   import { goalsWithCalculatedMasteryBySubjectId } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
@@ -56,10 +56,7 @@
 
   const fetchGoalsForSubject = async () => {
     try {
-      const result = await usersGoalsRetrieve({
-        path: { id: studentId },
-        query: { subjectId },
-      })
+      const result = await goalsList({ query: { student: studentId, subject: subjectId } })
       const studentGoals = result.data && Array.isArray(result.data) ? result.data : []
       const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(studentId, studentGoals)
       goals = goalsBySubjectId[subjectId]

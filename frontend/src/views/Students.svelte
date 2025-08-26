@@ -5,17 +5,11 @@
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
   import StudentRow from '../components/StudentRow.svelte'
-  import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
-  import {
-    groupsList,
-    groupsMembersRetrieve,
-    usersGoalsRetrieve,
-    schoolsUsersRetrieve,
-  } from '../generated/sdk.gen'
+  import { STUDENT_ROLE } from '../utils/constants'
+  import { groupsList, usersList, goalsList } from '../generated/sdk.gen'
   import type {
     GroupReadable,
     GoalReadable,
-    GroupMemberReadable,
     UserReadable,
     SubjectReadable,
   } from '../generated/types.gen'
@@ -42,11 +36,10 @@
   const fetchAllStudentsInSchool = async () => {
     if (!currentSchool) return
     try {
-      const result = await schoolsUsersRetrieve({
-        path: { id: currentSchool.id },
-        query: { roles: 'student' },
+      const studentsResult = await usersList({
+        query: { roles: 'student', school: currentSchool.id },
       })
-      students = Array.isArray(result.data) ? result.data : []
+      students = studentsResult.data || []
     } catch (error) {
       console.error('Error fetching all students:', error)
       students = []
@@ -71,15 +64,10 @@
   const fetchGroupMembers = async (groupId: string) => {
     if (!currentSchool) return
     try {
-      const result = await groupsMembersRetrieve({
-        path: {
-          id: groupId,
-        },
+      const studentsResult = await usersList({
+        query: { groups: groupId, school: currentSchool.id, roles: STUDENT_ROLE },
       })
-      const members: any = result.data || []
-      students = members.filter((member: GroupMemberReadable) =>
-        member.roles.includes(STUDENT_ROLE)
-      )
+      students = studentsResult.data || []
     } catch (error) {
       console.error(`Error fetching members for group ${groupId}:`, error)
       students = []
@@ -91,8 +79,8 @@
 
     const goalsArrays = await Promise.all(
       students.map(async (student): Promise<GoalReadable[]> => {
-        const result = await usersGoalsRetrieve({
-          path: { id: student.id },
+        const result = await goalsList({
+          query: { student: student.id },
         })
         return Array.isArray(result.data) ? result.data : []
       })

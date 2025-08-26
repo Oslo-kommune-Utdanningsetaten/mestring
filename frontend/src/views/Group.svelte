@@ -1,12 +1,15 @@
 <script lang="ts">
-  import { groupsRetrieve, groupsMembersRetrieve } from '../generated/sdk.gen'
-  import type { GroupReadable, GroupMemberReadable } from '../generated/types.gen'
+  import { groupsRetrieve, usersList } from '../generated/sdk.gen'
+  import type { GroupReadable, UserReadable } from '../generated/types.gen'
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
+  import { dataStore } from '../stores/data'
+
   const { groupId } = $props<{ groupId: string }>()
 
+  let currentSchool = $state($dataStore.currentSchool)
   let group = $state<GroupReadable | null>(null)
-  let teachers = $state<GroupMemberReadable[]>([])
-  let students = $state<GroupMemberReadable[]>([])
+  let teachers = $state<UserReadable[]>([])
+  let students = $state<UserReadable[]>([])
   let isLoading = $state(true)
   let error = $state<string | null>(null)
 
@@ -23,17 +26,15 @@
       })
       group = groupResult.data || null
 
-      // Fetch group members
-      const membersResult = await groupsMembersRetrieve({
-        path: { id: groupId },
+      // Fetch group members, this can be optimized to a single call, then filtered by role
+      const teachersResult = await usersList({
+        query: { groups: groupId, school: currentSchool.id, roles: TEACHER_ROLE },
       })
-      const members: GroupMemberReadable[] = Array.isArray(membersResult.data)
-        ? membersResult.data
-        : membersResult.data
-          ? [membersResult.data]
-          : []
-      teachers = members.filter(member => member.roles.includes(TEACHER_ROLE))
-      students = members.filter(member => member.roles.includes(STUDENT_ROLE))
+      const studentsResult = await usersList({
+        query: { groups: groupId, school: currentSchool.id, roles: STUDENT_ROLE },
+      })
+      teachers = teachersResult.data || []
+      students = studentsResult.data || []
     } catch (error) {
       console.error('Error fetching group:', error)
       error = 'Kunne ikke hente gruppeinformasjon'
@@ -41,6 +42,10 @@
       isLoading = false
     }
   }
+
+  $effect(() => {
+    currentSchool = $dataStore.currentSchool
+  })
 
   $effect(() => {
     if (groupId) {

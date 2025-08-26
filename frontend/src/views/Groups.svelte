@@ -2,16 +2,16 @@
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
-  import { groupsList, groupsMembersRetrieve } from '../generated/sdk.gen'
-  import type { GroupReadable, GroupMemberReadable } from '../generated/types.gen'
+  import { groupsList, usersList } from '../generated/sdk.gen'
+  import type { GroupReadable, UserReadable } from '../generated/types.gen'
 
   let currentUser = $state($dataStore.currentUser)
   let currentSchool = $state($dataStore.currentSchool)
   let groups = $state<GroupReadable[]>([])
   let isAllGroupsTypesEnabled = $state<boolean>(false)
-  let groupMembers = $state<
-    Record<string, { teachers: GroupMemberReadable[]; students: GroupMemberReadable[] }>
-  >({})
+  let groupMembers = $state<Record<string, { teachers: UserReadable[]; students: UserReadable[] }>>(
+    {}
+  )
 
   const fetchGroups = async () => {
     const options = isAllGroupsTypesEnabled
@@ -31,16 +31,14 @@
   const fetchAllGroupMembers = async () => {
     groups.forEach(async group => {
       try {
-        const result = await groupsMembersRetrieve({
-          path: {
-            id: group.id,
-          },
+        const teachersResult = await usersList({
+          query: { groups: group.id, school: currentSchool.id, roles: TEACHER_ROLE },
         })
-        const members: any = result.data || []
-        const teachers =
-          members.filter((member: GroupMemberReadable) => member.roles.includes(TEACHER_ROLE)) || []
-        const students =
-          members.filter((member: GroupMemberReadable) => member.roles.includes(STUDENT_ROLE)) || []
+        const studentsResult = await usersList({
+          query: { groups: group.id, school: currentSchool.id, roles: STUDENT_ROLE },
+        })
+        const teachers = teachersResult.data || []
+        const students = studentsResult.data || []
         groupMembers = { ...groupMembers, [group.id]: { teachers, students } }
       } catch (error) {
         console.error(`Error fetching members for group ${group.id}:`, error)
@@ -58,15 +56,19 @@
   })
 
   $effect(() => {
-    currentUser = $dataStore.currentUser
     currentSchool = $dataStore.currentSchool
+  })
+
+  $effect(() => {
+    currentUser = $dataStore.currentUser
   })
 </script>
 
 <section class="py-3">
   <h2 class="mb-4">Mine grupper</h2>
   <p class="d-flex align-items-center gap-2">
-    Dette er <span class="fw-bold">
+    Dette er
+    <span class="fw-bold">
       {#if isAllGroupsTypesEnabled}
         alle gruppene
       {:else}

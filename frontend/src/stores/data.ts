@@ -1,7 +1,7 @@
 import { get, writable } from 'svelte/store'
 import type { Writable as WritableType } from 'svelte/store'
 import { subjectsList, schoolsList, masterySchemasList } from '../generated/sdk.gen'
-import type { SchoolReadable, MasterySchemaReadable, UserReadable } from '../generated/types.gen'
+import type { SchoolReadable, MasterySchemaReadable } from '../generated/types.gen'
 import {
   getLocalStorageItem,
   setLocalStorageItem,

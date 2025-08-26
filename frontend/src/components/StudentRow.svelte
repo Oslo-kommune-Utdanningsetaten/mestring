@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Mastery, GoalDecorated } from '../types/models'
   import type { UserReadable, SubjectReadable } from '../generated/types.gen'
-  import { usersGoalsRetrieve } from '../generated/sdk.gen'
+  import { goalsList } from '../generated/sdk.gen'
   import { goalsWithCalculatedMasteryBySubjectId, aggregateMasterys } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
 
@@ -10,9 +10,7 @@
 
   $effect(() => {
     let studentGoals: GoalDecorated[] = []
-    usersGoalsRetrieve({
-      path: { id: student.id },
-    }).then(result => {
+    goalsList({ query: { student: student.id } }).then(result => {
       studentGoals = result.data && Array.isArray(result.data) ? result.data : []
       if (studentGoals.length > 0) {
         goalsWithCalculatedMasteryBySubjectId(student.id, studentGoals).then(result => {

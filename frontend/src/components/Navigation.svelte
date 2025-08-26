@@ -28,8 +28,11 @@
   })
 
   $effect(() => {
-    currentUser = $dataStore.currentUser
     currentSchool = $dataStore.currentSchool
+  })
+
+  $effect(() => {
+    currentUser = $dataStore.currentUser
   })
 </script>
 
