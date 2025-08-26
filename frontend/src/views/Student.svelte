@@ -11,7 +11,7 @@
   let student = $state<UserReadable | null>(null)
   let groups = $state<GroupReadable[] | []>([])
   let subjects = $state<SubjectReadable[]>([])
-  let currentSchool = $state($dataStore.currentSchool)
+  let currentSchool = $derived($dataStore.currentSchool)
 
   const fetchStudentData = async (userId: string) => {
     try {
@@ -52,7 +52,6 @@
   }
 
   $effect(() => {
-    currentSchool = $dataStore.currentSchool
     console.log('Current school changed, refetching student data', currentSchool)
     if (currentSchool && currentSchool.id) {
       fetchStudentData(studentId)

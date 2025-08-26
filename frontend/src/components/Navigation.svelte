@@ -7,8 +7,8 @@
   import { apiHealth } from '../stores/apiHealth'
   import { login, logout } from '../stores/auth'
 
-  let currentUser = $state($dataStore.currentUser)
-  let currentSchool = $state($dataStore.currentSchool)
+  let currentUser = $derived($dataStore.currentUser)
+  let currentSchool = $derived($dataStore.currentSchool)
   let isHomeActive = $derived($currentPath === '/')
   let isAboutActive = $derived($currentPath === '/about')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
@@ -25,14 +25,6 @@
     return () => {
       clearInterval(interval)
     }
-  })
-
-  $effect(() => {
-    currentSchool = $dataStore.currentSchool
-  })
-
-  $effect(() => {
-    currentUser = $dataStore.currentUser
   })
 </script>
 

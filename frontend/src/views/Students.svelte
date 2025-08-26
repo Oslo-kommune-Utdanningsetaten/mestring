@@ -15,7 +15,7 @@
   } from '../generated/types.gen'
 
   const router = useTinyRouter()
-  let currentSchool = $state($dataStore.currentSchool)
+  let currentSchool = $derived($dataStore.currentSchool)
   let selectedGroupId = $state<string | undefined>(undefined)
   let selectedGroup = $state<GroupReadable | undefined>(undefined)
   let allGroups = $state<GroupReadable[]>([])
@@ -123,18 +123,19 @@
   })
 
   $effect(() => {
-    // Read both dependencies first to establish reactivity
+    // Read selectedGroupId first to establish reactivity
     selectedGroupId = router.getQueryParam('groupId')
-    if (!currentSchool) return
-    fetchAllGroups().then(() => {
-      selectedGroup = allGroups.find(group => group.id === selectedGroupId)
-      if (selectedGroup) {
-        fetchGroupMembers(selectedGroup.id)
-      } else {
-        // fetch all students if no group is selected
-        fetchAllStudentsInSchool()
-      }
-    })
+    if (currentSchool && currentSchool.id) {
+      fetchAllGroups().then(() => {
+        selectedGroup = allGroups.find(group => group.id === selectedGroupId)
+        if (selectedGroup) {
+          fetchGroupMembers(selectedGroup.id)
+        } else {
+          // fetch all students if no group is selected
+          fetchAllStudentsInSchool()
+        }
+      })
+    }
   })
 </script>
 

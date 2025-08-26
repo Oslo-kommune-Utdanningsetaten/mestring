@@ -12,18 +12,24 @@ import { currentUser } from './auth'
 
 export const updateStoreWithCurrentUser = () => {
   const user = get(currentUser)
-  dataStore.update(data => {
-    return { ...data, currentUser: user }
-  })
+  const currentData = get(dataStore)
+  if (currentData.currentUser?.id !== user?.id) {
+    dataStore.update(data => {
+      return { ...data, currentUser: user }
+    })
+  }
 }
 
 export const setCurrentSchool = (school: SchoolReadable) => {
-  setLocalStorageItem('currentSchool', school)
-  dataStore.update(data => {
-    return { ...data, currentSchool: school }
-  })
-  if (school?.id) {
-    loadSubjectsForSchool(school.id)
+  const currentData = get(dataStore)
+  if (currentData.currentSchool?.id !== school?.id) {
+    setLocalStorageItem('currentSchool', school)
+    dataStore.update(data => {
+      return { ...data, currentSchool: school }
+    })
+    if (school?.id) {
+      loadSubjectsForSchool(school.id)
+    }
   }
 }
 
@@ -119,6 +125,3 @@ export const loadData = async () => {
     console.error('Failed to load data:', error)
   }
 }
-
-// Load data when this module is imported
-loadData()

@@ -7,8 +7,8 @@
   let schools = $state<SchoolReadable[]>([])
   let groups = $state<GroupReadable[]>([])
   let isLoading = $state(true)
-  let currentUser = $state($dataStore.currentUser)
-  let currentSchool = $state($dataStore.currentSchool)
+  let currentUser = $derived($dataStore.currentUser)
+  let currentSchool = $derived($dataStore.currentSchool)
 
   const fetchSchools = async () => {
     try {
@@ -40,16 +40,13 @@
   }
 
   $effect(() => {
-    currentUser = $dataStore.currentUser
-  })
-
-  $effect(() => {
-    currentSchool = $dataStore.currentSchool
-    fetchSchools().then(() => {
-      if (currentSchool) {
-        fetchUserGroups()
-      }
-    })
+    if (currentSchool && currentSchool.id) {
+      fetchSchools().then(() => {
+        if (currentSchool) {
+          fetchUserGroups()
+        }
+      })
+    }
   })
 </script>
 

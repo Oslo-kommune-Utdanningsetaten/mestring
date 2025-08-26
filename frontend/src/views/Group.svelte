@@ -6,7 +6,7 @@
 
   const { groupId } = $props<{ groupId: string }>()
 
-  let currentSchool = $state($dataStore.currentSchool)
+  let currentSchool = $derived($dataStore.currentSchool)
   let group = $state<GroupReadable | null>(null)
   let teachers = $state<UserReadable[]>([])
   let students = $state<UserReadable[]>([])
@@ -44,11 +44,7 @@
   }
 
   $effect(() => {
-    currentSchool = $dataStore.currentSchool
-  })
-
-  $effect(() => {
-    if (groupId) {
+    if (groupId && currentSchool && currentSchool.id) {
       fetchGroup()
     }
   })

@@ -5,8 +5,7 @@
   import { groupsList, usersList } from '../generated/sdk.gen'
   import type { GroupReadable, UserReadable } from '../generated/types.gen'
 
-  let currentUser = $state($dataStore.currentUser)
-  let currentSchool = $state($dataStore.currentSchool)
+  let currentSchool = $derived($dataStore.currentSchool)
   let groups = $state<GroupReadable[]>([])
   let isAllGroupsTypesEnabled = $state<boolean>(false)
   let groupMembers = $state<Record<string, { teachers: UserReadable[]; students: UserReadable[] }>>(
@@ -53,14 +52,6 @@
         fetchAllGroupMembers()
       })
     }
-  })
-
-  $effect(() => {
-    currentSchool = $dataStore.currentSchool
-  })
-
-  $effect(() => {
-    currentUser = $dataStore.currentUser
   })
 </script>
 
