@@ -32,10 +32,14 @@
     text = nameFilter ? `${text} med navn som inneholder "${nameFilter}"` : text
     return text
   })
+  let isLoadingGroups = $state<boolean>(false)
+  let isLoadingStudents = $state<boolean>(false)
+  let isLoadingSubjects = $state<boolean>(false)
 
   const fetchAllStudentsInSchool = async () => {
     if (!currentSchool) return
     try {
+      isLoadingStudents = true
       const studentsResult = await usersList({
         query: { roles: 'student', school: currentSchool.id },
       })
@@ -43,12 +47,15 @@
     } catch (error) {
       console.error('Error fetching all students:', error)
       students = []
+    } finally {
+      isLoadingStudents = false
     }
   }
 
   const fetchAllGroups = async () => {
     if (!currentSchool) return
     try {
+      isLoadingGroups = true
       const result = await groupsList({
         query: {
           school: currentSchool?.id,
@@ -58,12 +65,15 @@
     } catch (error) {
       console.error('Error fetching groups:', error)
       allGroups = []
+    } finally {
+      isLoadingGroups = false
     }
   }
 
   const fetchGroupMembers = async (groupId: string) => {
     if (!currentSchool) return
     try {
+      isLoadingStudents = true
       const studentsResult = await usersList({
         query: { groups: groupId, school: currentSchool.id, roles: STUDENT_ROLE },
       })
@@ -71,6 +81,8 @@
     } catch (error) {
       console.error(`Error fetching members for group ${groupId}:`, error)
       students = []
+    } finally {
+      isLoadingStudents = false
     }
   }
 
@@ -82,7 +94,7 @@
         const result = await goalsList({
           query: { student: student.id },
         })
-        return Array.isArray(result.data) ? result.data : []
+        return result.data || []
       })
     )
 
@@ -143,26 +155,38 @@
   <h2 class="py-3">{headerText}</h2>
   <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">
-    <div class="pkt-inputwrapper">
-      <select
-        class="pkt-input"
-        id="groupSelect"
-        onchange={(e: Event) => handleGroupSelect((e.target as HTMLSelectElement).value)}
-      >
-        <option value="0" selected={!selectedGroupId}>Velg gruppe</option>
-        {#each allGroups as group}
-          <option value={group.id} selected={group.id === selectedGroupId}>
-            {group.displayName}
-          </option>
-        {/each}
-      </select>
-    </div>
-    <input type="text" class="filterStudentsByName" placeholder="Navn" bind:value={nameFilter} />
+    {#if isLoadingGroups}
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Henter data...</span>
+      </div>
+      <span>Henter grupper...</span>
+    {:else}
+      <div class="pkt-inputwrapper">
+        <select
+          class="pkt-input"
+          id="groupSelect"
+          onchange={(e: Event) => handleGroupSelect((e.target as HTMLSelectElement).value)}
+        >
+          <option value="0" selected={!selectedGroupId}>Velg gruppe</option>
+          {#each allGroups as group}
+            <option value={group.id} selected={group.id === selectedGroupId}>
+              {group.displayName}
+            </option>
+          {/each}
+        </select>
+      </div>
+      <input type="text" class="filterStudentsByName" placeholder="Navn" bind:value={nameFilter} />
+    {/if}
   </div>
 </section>
 
 <section class="py-3">
-  {#if students.length > 0}
+  {#if isLoadingStudents}
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Henter elever...</span>
+    </div>
+    <span>Henter elever...</span>
+  {:else if students.length > 0}
     <div class="card shadow-sm">
       <!-- Header row -->
       <div class="student-grid-row fw-bold header">
@@ -179,7 +203,7 @@
         <StudentRow {student} {subjects} />
       {/each}
     </div>
-  {:else}
+  {:else if !isLoadingStudents && !isLoadingGroups}
     <div class="alert alert-info">Ingen elever</div>
   {/if}
 </section>

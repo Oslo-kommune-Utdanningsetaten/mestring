@@ -11,7 +11,7 @@
   $effect(() => {
     let studentGoals: GoalDecorated[] = []
     goalsList({ query: { student: student.id } }).then(result => {
-      studentGoals = result.data && Array.isArray(result.data) ? result.data : []
+      studentGoals = result.data || []
       if (studentGoals.length > 0) {
         goalsWithCalculatedMasteryBySubjectId(student.id, studentGoals).then(result => {
           let goalsBySubjectId: Record<string, GoalDecorated[]> = result

@@ -42,7 +42,7 @@
   const fetchGoalsForSubject = async () => {
     try {
       const result = await goalsList({ query: { student: student.id, subject: subjectId } })
-      const studentGoals = result.data && Array.isArray(result.data) ? result.data : []
+      const studentGoals = result.data || []
       const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(student.id, studentGoals)
       goals = goalsBySubjectId[subjectId]
     } catch (error) {
