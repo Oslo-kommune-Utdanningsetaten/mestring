@@ -2,16 +2,14 @@ import pytest
 from rest_framework.test import APIClient
 from mastery.models import Observation, Goal
 
-# This test suite should cover all cases where users access observations
-
 
 @pytest.mark.django_db
-def test_non_user_observation_access(mastery_schema):
+def test_non_user_observation_access(observation_on_personal_goal):
     client = APIClient()
     # Non-authenticated user cannot access observations
     resp = client.get(f"/api/observations/")
     assert resp.status_code == 403
-    resp = client.get(f"/api/observations/{mastery_schema.id}/")
+    resp = client.get(f"/api/observations/{observation_on_personal_goal.id}/")
     assert resp.status_code == 403
 
 

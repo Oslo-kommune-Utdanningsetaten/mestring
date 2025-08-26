@@ -1,13 +1,15 @@
 import pytest
 from rest_framework.test import APIClient
-from mastery.models import User, Group, Subject, Goal
+from mastery.models import User, Goal
 
 
 @pytest.mark.django_db
-def test_non_user_goal_access():
+def test_non_user_goal_access(goal_with_group):
     client = APIClient()
     # Non-authenticated user cannot access goals
     resp = client.get(f'/api/goals/')
+    assert resp.status_code == 403
+    resp = client.get(f'/api/goals/{goal_with_group.id}/')
     assert resp.status_code == 403
 
 

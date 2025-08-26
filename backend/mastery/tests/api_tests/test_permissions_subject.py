@@ -2,8 +2,6 @@ import pytest
 from rest_framework.test import APIClient
 from mastery.models import User, Group, Subject, Goal
 
-# This test suite should cover all cases where users access subjects
-
 
 @pytest.mark.django_db
 def test_non_user_subject_access(school, subject_with_group, subject_without_group):

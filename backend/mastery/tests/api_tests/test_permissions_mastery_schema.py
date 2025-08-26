@@ -1,8 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
 
-# This test suite should cover all cases where users access mastery schemas
-
 
 @pytest.mark.django_db
 def test_non_user_role_access(mastery_schema):

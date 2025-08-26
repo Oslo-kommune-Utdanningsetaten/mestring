@@ -1,5 +1,4 @@
 import pytest
-from rest_framework.test import force_authenticate
 from rest_framework.test import APIClient
 
 
@@ -17,4 +16,3 @@ def test_ping():
     data = resp.json()
     assert data['api'] == 'up'
     assert data['db'] == 'up'
-

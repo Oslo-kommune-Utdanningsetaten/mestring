@@ -1,8 +1,5 @@
 import pytest
 from rest_framework.test import APIClient
-from mastery.models import User, Group
-
-# This test suite should cover all cases where users access other users
 
 
 @pytest.mark.django_db
@@ -29,7 +26,8 @@ def test_school_id_requirement(superadmin, student):
 
 
 @pytest.mark.django_db
-def test_superadmin_user_access(superadmin, school, teaching_group_with_members, other_teaching_group_with_members):
+def test_superadmin_user_access(superadmin, school, teaching_group_with_members,
+                                other_teaching_group_with_members):
     client = APIClient()
     client.force_authenticate(user=superadmin)
 
@@ -86,7 +84,9 @@ def test_user_self_access(teaching_group_with_members, school):
 
 
 @pytest.mark.django_db
-def test_teacher_user_access(school, teaching_group_with_members, other_teaching_group_with_members, other_school_teaching_group_with_members):
+def test_teacher_user_access(
+        school, teaching_group_with_members, other_teaching_group_with_members,
+        other_school_teaching_group_with_members):
     teacher = teaching_group_with_members.get_teachers().first()
     student = teaching_group_with_members.get_students().first()
     other_teacher = other_teaching_group_with_members.get_teachers().first()
@@ -138,7 +138,9 @@ def test_teacher_user_access(school, teaching_group_with_members, other_teaching
 
 
 @pytest.mark.django_db
-def test_student_user_access(school, roles, teaching_group_with_members, other_teaching_group_with_members, other_school_teaching_group_with_members):
+def test_student_user_access(
+        school, roles, teaching_group_with_members, other_teaching_group_with_members,
+        other_school_teaching_group_with_members):
     teacher = teaching_group_with_members.get_teachers().first()
     student = teaching_group_with_members.get_students().first()
     other_teacher = other_teaching_group_with_members.get_teachers().first()

@@ -1,8 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
-from mastery.models import User, Group
-
-# This test suite should cover all cases where users access groups
+from mastery.models import Group
 
 
 @pytest.mark.django_db
@@ -33,7 +31,8 @@ def test_school_id_requirement(school, superadmin, teaching_group_with_members):
 
 
 @pytest.mark.django_db
-def test_superadmin_group_access(school, teaching_group_with_members, other_teaching_group_with_members, superadmin):
+def test_superadmin_group_access(
+        school, teaching_group_with_members, other_teaching_group_with_members, superadmin):
     client = APIClient()
     client.force_authenticate(user=superadmin)
 
@@ -70,7 +69,8 @@ def test_superadmin_group_access(school, teaching_group_with_members, other_teac
 
 
 @pytest.mark.django_db
-def test_teacher_group_access(teaching_group_with_members, other_teaching_group_with_members, teacher, school):
+def test_teacher_group_access(
+        teaching_group_with_members, other_teaching_group_with_members, teacher, school):
     client = APIClient()
     client.force_authenticate(user=teacher)
 
