@@ -71,15 +71,7 @@
           <ul class="mb-0">
             {#each groups as group}
               <li>
-                <a
-                  href={urlStringFrom(
-                    { groupId: group.id },
-                    {
-                      path: '/students',
-                      mode: 'replace',
-                    }
-                  )}
-                >
+                <a href={`/groups/${group.id}`}>
                   {group.displayName}
                 </a>
               </li>
