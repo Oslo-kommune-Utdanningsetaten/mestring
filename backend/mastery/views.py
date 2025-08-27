@@ -9,6 +9,10 @@ from django.db import connection
 import json
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+from mastery.imports.task_tracker import run_with_task_tracking
+from mastery.imports.cli import sync_school_data
+from mastery.imports.feide_api import fetch_and_store_feide_groups
+from mastery.imports.school_importer import import_schools_from_file
 
 
 # More about filtering in Django REST Framework:
@@ -204,7 +208,6 @@ class MasterySchemaViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.MasterySchemaSerializer
 
 
-
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def ping(request):
@@ -225,4 +228,125 @@ def ping(request):
         "api": "up",
         "db": db_status
     }, status=status)
+
+
+def _get_flag(data, key, default=False):
+    v = data.get(key, default)
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, str):
+        return v.lower() in {"1","true","t","yes","on","y"}
+    if isinstance(v, int):
+        return v != 0
+    return default
+
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def sync_school_data_api(request, org_number):
+    """
+    Sync school API endpoint for a specific school.
+    Runs the workflow and returns the task + step results.
+    """
+    try:
+        school = models.School.objects.filter(org_number=org_number).first()
+        if not school:
+            return Response({
+                "status": "error",
+                "message": f"School with org_number {org_number} not found",
+                "org_number": org_number
+            }, status=404)
+        
+        is_dryrun_enabled = _get_flag(request.data, 'is_dryrun_enabled', False)
+        is_overwrite_enabled = _get_flag(request.data, 'is_overwrite_enabled', False)
+        is_crash_on_error_enabled = _get_flag(request.data, 'is_crash_on_error_enabled', False)
+
+        # Run with consistent job name
+        result = run_with_task_tracking(
+            job_name='sync_school_data',
+            target_id=school.org_number,
+            func=sync_school_data,           
+            org_number=school.org_number,    
+            is_dryrun_enabled=is_dryrun_enabled,
+            is_overwrite_enabled=is_overwrite_enabled,
+            is_crash_on_error_enabled=is_crash_on_error_enabled,
+        )
+
+        # # Include task in response
+        task = models.DataMaintenanceTask.objects.get(id=result['task_id'])
+        task_serializer = serializers.DataMaintenanceTaskSerializer(task)
+
+        return Response({
+            "status": "success",
+            "message": f"Sync school completed for {school.display_name}",
+            "org_number": org_number,
+            "school_name": school.display_name,
+            "step_results": result.get('step_results', {}),
+            "task": task_serializer.data
+        })
+
+    except Exception as e:
+        return Response({
+            "status": "error",
+            "message": f"Sync school failed: {str(e)}",
+            "org_number": org_number
+        }, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def fetch_groups_api(request):
+    """
+    Fetch Feide groups and write to imports/data/unified + per-school files.
+    """
+    try:
+        result = run_with_task_tracking(
+            job_name='fetch_groups',
+            target_id=None,
+            func=fetch_and_store_feide_groups
+        )
+        return Response({
+            "status": "success",
+            "message": "Groups fetched successfully",
+            "step_results": result.get('step_results', {}),
+            "task": result['task_id']
+        })
+    except Exception as e:
+        return Response({
+            "status": "error",
+            "message": f"Failed to fetch groups: {str(e)}"
+        }, status=400)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def import_schools_api(request):
+    """
+    Import schools from imports/data/unified/schools.json (or per-school dir if org_number provided).
+    """
+    try:
+        is_dryrun_enabled = _get_flag(request.data, 'is_dryrun_enabled', False)
+        is_overwrite_enabled = _get_flag(request.data, 'is_overwrite_enabled', False)
+        is_crash_on_error_enabled = _get_flag(request.data, 'is_crash_on_error_enabled', False)
+        result = run_with_task_tracking(
+            job_name='import_schools',
+            target_id=None,
+            func=import_schools_from_file,
+            is_dryrun_enabled=is_dryrun_enabled,
+            is_overwrite_enabled=is_overwrite_enabled,
+            is_crash_on_error_enabled=is_crash_on_error_enabled,
+        )
+        return Response({
+            "status": "success",
+            "message": "Schools imported successfully",
+            "step_results": result.get('step_results', {}),
+            "task": result['task_id']
+        })
+    except Exception as e:
+        return Response({
+            "status": "error",
+            "message": f"Failed to import schools: {str(e)}"
+        }, status=400)
+
 

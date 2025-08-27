@@ -17,4 +17,7 @@ router.register(r'mastery-schemas', views.MasterySchemaViewSet, basename="master
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('import/school/<str:org_number>/', views.sync_school_data_api, name='smart-import-school'),
+    path('fetch/groups/', views.fetch_groups_api, name='fetch-groups-api'),
+    path('import/schools/', views.import_schools_api, name='import-schools-api'),
 ]

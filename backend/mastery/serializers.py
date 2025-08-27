@@ -174,3 +174,9 @@ class MasterySchemaSerializer(BaseModelSerializer):
     class Meta:
         model = models.MasterySchema
         fields = '__all__'
+
+
+class DataMaintenanceTaskSerializer(BaseModelSerializer):
+    class Meta:
+        model = models.DataMaintenanceTask
+        fields = '__all__'

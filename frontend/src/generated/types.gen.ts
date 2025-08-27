@@ -13,7 +13,7 @@ export type BasicUserReadable = {
     email: string;
     lastActivityAt?: string | null;
     disabledAt?: string | null;
-    readonly groups: Array<string | null>;
+    readonly groups: Array<string>;
     createdById?: string;
     updatedById?: string;
 };
@@ -862,6 +862,74 @@ export type GroupsMembersRetrieveResponses = {
 };
 
 export type GroupsMembersRetrieveResponse = GroupsMembersRetrieveResponses[keyof GroupsMembersRetrieveResponses];
+
+export type ImportSchoolSmartData = {
+    body?: never;
+    path: {
+        orgNumber: string;
+    };
+    query?: never;
+    url: '/api/import/school/{org_number}/';
+};
+
+export type ImportSchoolSmartErrors = {
+    /**
+     * School not found
+     */
+    404: {
+        status?: string;
+        message?: string;
+        org_number?: string;
+    };
+    /**
+     * Import failed
+     */
+    500: {
+        status?: string;
+        message?: string;
+        org_number?: string;
+        task?: {
+            id?: string;
+            status?: string;
+            result?: {
+                [key: string]: unknown;
+            };
+        } | null;
+    };
+};
+
+export type ImportSchoolSmartError = ImportSchoolSmartErrors[keyof ImportSchoolSmartErrors];
+
+export type ImportSchoolSmartResponses = {
+    /**
+     * Import completed successfully
+     */
+    200: {
+        status?: string;
+        message?: string;
+        org_number?: string;
+        school_name?: string;
+        step_results?: {
+            [key: string]: unknown;
+        };
+        task?: {
+            id?: string;
+            status?: 'pending' | 'running' | 'finished' | 'failed';
+            jobName?: string;
+            targetId?: string | null;
+            startedAt?: string | null;
+            finishedAt?: string | null;
+            failedAt?: string | null;
+            result?: {
+                [key: string]: unknown;
+            };
+            durationSeconds?: number | null;
+            durationDisplay?: string | null;
+        };
+    };
+};
+
+export type ImportSchoolSmartResponse = ImportSchoolSmartResponses[keyof ImportSchoolSmartResponses];
 
 export type MasterySchemasListData = {
     body?: never;
