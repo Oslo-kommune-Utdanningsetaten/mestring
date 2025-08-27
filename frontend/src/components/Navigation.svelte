@@ -85,7 +85,13 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
               <li>
-                <a class="dropdown-item" href="/schools">Skoler</a>
+                <Link to="/schools" className="dropdown-item">Skoler</Link>
+              </li>
+              <li>
+                <Link to="/users" className="dropdown-item">Brukere</Link>
+              </li>
+              <li>
+                <Link to="/subjects" className="dropdown-item">Fag</Link>
               </li>
               <li><a class="dropdown-item" href="/mastery-schemas">Mastery Schemas</a></li>
             </ul>

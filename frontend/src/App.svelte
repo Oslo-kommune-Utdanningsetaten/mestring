@@ -6,6 +6,7 @@
   import Group from './views/Group.svelte'
   import Schools from './views/Schools.svelte'
   import Students from './views/Students.svelte'
+  import Users from './views/Users.svelte'
   import Subjects from './views/Subjects.svelte'
   import Navigation from './components/Navigation.svelte'
   import MasterySchemas from './views/MasterySchemas.svelte'
@@ -34,11 +35,12 @@
     {#if $dataStore.currentUser}
       <Route path="/students/:studentId" component={Student} />
       <Route path="/groups/:groupId" component={Group} />
-      <Route path="/schools" component={Schools} />
       <Route path="/students" component={Students} />
-      <Route path="/subjects" component={Subjects} />
-      <Route path="/mastery-schemas" component={MasterySchemas} />
       <Route path="/user-info" component={UserInfo} />
+      <Route path="/subjects" component={Subjects} />
+      <Route path="/users" component={Users} />
+      <Route path="/mastery-schemas" component={MasterySchemas} />
+      <Route path="/schools" component={Schools} />
     {/if}
 
     <!-- Fallback route: no "path" prop means it always matches -->
