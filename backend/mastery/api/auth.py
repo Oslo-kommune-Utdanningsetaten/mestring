@@ -20,13 +20,20 @@ FRONTEND = "http://localhost:5173"
 
 client = WebApplicationClient(FEIDE_CLIENT_ID)
 
-def get_provider_cfg():
+
+def get_provider_config():
     return requests.get(FEIDE_DISCOVERY_URL).json()
+
+
+def get_user_info(userinfo_endpoint):
+    uri, headers, body = client.add_token(userinfo_endpoint)
+    return requests.get(uri, headers=headers, data=body).json()
+
 
 @require_GET
 def feidelogin(request):
-    feide_provider_cfg = get_provider_cfg()
-    authorization_endpoint = feide_provider_cfg["authorization_endpoint"]
+    feide_provider_config = get_provider_config()
+    authorization_endpoint = feide_provider_config["authorization_endpoint"]
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
         redirect_uri=FEIDE_CALLBACK,
@@ -35,13 +42,14 @@ def feidelogin(request):
     )
     return redirect(request_uri)
 
+
 @require_GET
 def feidecallback(request):
     code = request.GET.get("code", "")
     if not code:
         return redirect(FRONTEND)
-    provider_cfg = get_provider_cfg()
-    token_endpoint = provider_cfg["token_endpoint"]
+    provider_config = get_provider_config()
+    token_endpoint = provider_config["token_endpoint"]
     token_url, headers, body = client.prepare_token_request(
         token_endpoint,
         redirect_url=FEIDE_CALLBACK,
@@ -54,33 +62,39 @@ def feidecallback(request):
         auth=(FEIDE_CLIENT_ID, FEIDE_CLIENT_SECRET),
     )
     tokens = client.parse_request_body_response(json.dumps(token_response.json()))
-    userinfo_endpoint = provider_cfg["userinfo_endpoint"]
-    uri, headers, body = client.add_token(userinfo_endpoint)
-    userinfo_response = requests.get(uri, headers=headers, data=body)
-    principal_name = userinfo_response.json().get("https://n.feide.no/claims/eduPersonPrincipalName")
+    user_info = get_user_info(provider_config["userinfo_endpoint"])
+    principal_name = user_info.get("https://n.feide.no/claims/eduPersonPrincipalName")
     if principal_name:
         feide_user_id = principal_name.strip().lower()
         request.session["feide_tokens"] = tokens
         request.session["feide_user_id"] = feide_user_id
         try:
             user = User.objects.get(feide_id=feide_user_id)
-            user.name = userinfo_response.json().get("name", user.name)
+            user.name = user_info.get("name", user.name)
             user.email = feide_user_id.replace('@feide.', '@')
             user.last_activity_at = datetime.now()
             user.save()
             request.session["user_id"] = user.id
         except User.DoesNotExist:
-            pass
+            # TODO: Only create user if affiliated with a known school
+            user = User.objects.create(
+                feide_id=feide_user_id,
+                name=user_info.get("name", user.name),
+                email=feide_user_id.replace('@feide.', '@'),
+                last_activity_at=datetime.now()
+            )
+            request.session["user_id"] = user.id
         return redirect(FRONTEND)
     request.session.clear()
     return redirect(f'{FRONTEND}?error=login_failed')
+
 
 @require_GET
 def feidelogout(request):
     tokens = request.session.get("feide_tokens")
     request.session.flush()
     if tokens and tokens.get("id_token"):
-        cfg = get_provider_cfg()
+        cfg = get_provider_config()
         end_session_endpoint = cfg.get("end_session_endpoint")
         if end_session_endpoint:
             logout_params = {
@@ -90,6 +104,7 @@ def feidelogout(request):
             feide_logout_url = end_session_endpoint + "?" + urllib.parse.urlencode(logout_params)
             return redirect(feide_logout_url)
     return redirect(FRONTEND)
+
 
 @api_view(['GET'])
 def auth_status(request):
