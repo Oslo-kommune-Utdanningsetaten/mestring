@@ -1,4 +1,7 @@
 from .base import BaseAccessPolicy
+import logging
+logger = logging.getLogger(__name__)
+
 
 class SchoolAccessPolicy(BaseAccessPolicy):
     statements = [
@@ -24,5 +27,6 @@ class SchoolAccessPolicy(BaseAccessPolicy):
         try:
             user_schools = user.get_schools()
             return qs.filter(id__in=user_schools.values("id"))
-        except Exception:
+        except Exception as error:
+            logger.debug("SchoolAccessPolicy.scope_queryset error: %s", error)
             return qs.none()

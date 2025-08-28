@@ -38,7 +38,8 @@ class GroupAccessPolicy(BaseAccessPolicy):
                 Q(id__in=teacher_groups.values("id")) |
                 Q(id__in=student_groups.values("id"))
             ).distinct()
-        except Exception:
+        except Exception as error:
+            logger.debug("GroupAccessPolicy.scope_queryset error: %s", error)
             return qs.none()
 
     # True if requester is member of the group
