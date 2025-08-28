@@ -34,13 +34,20 @@
       <div class="spinner-border text-primary" role="status"></div>
       <span>Henter brukere...</span>
     {:else}
-      <ul class="list-group w-100">
-        {#each users as user}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            {user.name}
-          </li>
+      <div class="card shadow-sm w-100">
+        <!-- Header row -->
+        <div class="row fw-bold header p-2">
+          <div class="col-4">Navn</div>
+          <div class="col-8">Roles</div>
+        </div>
+        <!-- Data rows -->
+        {#each users as user, index}
+          <div class="row p-2">
+            <div class="col-4">{user.name}</div>
+            <div class="col-8">{user.roles}</div>
+          </div>
         {/each}
-      </ul>
+      </div>
     {/if}
   </div>
 </section>
