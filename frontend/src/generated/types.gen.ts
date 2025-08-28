@@ -384,6 +384,7 @@ export type PatchedUserReadable = {
     lastActivityAt?: string | null;
     disabledAt?: string | null;
     isSuperadmin?: boolean;
+    readonly schools?: Array<string | null>;
     createdById?: string;
     updatedById?: string;
 };
@@ -529,6 +530,7 @@ export type UserReadable = {
     lastActivityAt?: string | null;
     disabledAt?: string | null;
     isSuperadmin?: boolean;
+    readonly schools: Array<string | null>;
     createdById?: string;
     updatedById?: string;
 };
