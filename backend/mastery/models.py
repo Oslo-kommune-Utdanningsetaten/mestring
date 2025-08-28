@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from nanoid import generate
 
 alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
@@ -67,6 +68,26 @@ class School(BaseModel):
             user_groups__role__name='teacher'
         ).distinct()
 
+    def add_staff(self, user, role):
+        """Add a staff member to this school with the specified role"""
+        if isinstance(role, str):
+            role, _ = Role.objects.get_or_create(name=role)
+
+        return UserSchool.objects.get_or_create(
+            user=user,
+            school=self,
+            defaults={'role': role}
+        )
+
+    def get_staff(self, role_name):
+        """Get all staff members by optional role_name"""
+        if role_name:
+            return User.objects.filter(
+                user_schools__school=self,
+                user_schools__role__name=role_name
+            )
+        return User.objects.filter(user_schools__school=self)
+
 
 class Subject(BaseModel):
     """
@@ -97,9 +118,12 @@ class User(BaseModel):
     last_activity_at = models.DateTimeField(null=True)
     disabled_at = models.DateTimeField(null=True)
     groups = models.ManyToManyField(
-        'Group', through='UserGroup', through_fields=('user', 'group'),
-        related_name='members', null=True)
-    is_superadmin = models.BooleanField(default=False)
+        'Group', through='UserGroup', through_fields=('user', 'group'), null=True,
+        related_name='members')
+    schools = models.ManyToManyField(
+        'School', through='UserSchool', through_fields=('user', 'school'), null=True,
+        related_name='staff')
+    is_superadmin = models.BooleanField(default=False)  # caution, site-wide admin
 
     def _get_groups_with_role(self, role_name):
         """Get all groups where user has a specific role"""
@@ -110,8 +134,10 @@ class User(BaseModel):
         return self.groups.filter(type=group_type)
 
     def get_schools(self):
-        """Return all schools a user belongs to, via group memeberships"""
-        return School.objects.filter(groups__members=self).distinct()
+        """Return all schools a user belongs to, via group or school memberships"""
+        group_schools = School.objects.filter(groups__members=self)
+        school_schools = School.objects.filter(user_schools__user=self)
+        return (group_schools | school_schools).distinct()
 
     @property
     def student_groups(self):
@@ -147,7 +173,7 @@ class User(BaseModel):
 
 class Role(BaseModel):
     """
-    A Role represents a role a User can have in a Group
+    A Role represents a role a User can have in a Group. So far we only have 'student', 'teacher', 'staff', 'admin'.
     """
     name = models.CharField(max_length=200)
 
@@ -204,8 +230,7 @@ class Group(BaseModel):
             UserGroup object that was created
         """
         if isinstance(role, str):
-            from mastery.models import Role
-            role, created = Role.objects.get_or_create(name=role)
+            role, _ = Role.objects.get_or_create(name=role)
 
         return UserGroup.objects.create(user=user, group=self, role=role)
 
@@ -214,14 +239,24 @@ class UserGroup(BaseModel):
     """
     A UserGroup represents a User in a Group with a specific Role. Teacher/Student roles are stored on UserGroup
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False,
-                             blank=False, related_name='user_groups')
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=False,
-                              blank=False, related_name='user_groups')
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=False, blank=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, related_name='user_groups')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=False, related_name='user_groups')
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=False, related_name='user_groups')
 
     class Meta:
         unique_together = ('user', 'group', 'role')
+
+
+class UserSchool(BaseModel):
+    """
+    A UserSchool represents a User in a School with a specific Role. We use this to model roles that are not connected to a specific Group, e.g. school admins
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, related_name='user_schools')
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='user_schools')
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=False, related_name='user_schools')
+
+    class Meta:
+        unique_together = ('user', 'school', 'role')
 
 
 class MasterySchema(BaseModel):
@@ -241,11 +276,12 @@ class Goal(BaseModel):
     """
     title = models.CharField(max_length=200, null=True)
     description = models.TextField(null=True)
-    group = models.ForeignKey(Group, on_delete=models.RESTRICT, null=True)
-    student = models.ForeignKey(User, on_delete=models.RESTRICT, null=True)
+    group = models.ForeignKey(Group, on_delete=models.RESTRICT, null=True, related_name='goals')
+    student = models.ForeignKey(User, on_delete=models.RESTRICT, null=True, related_name='goals')
     subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True, related_name='goals')
     previous_goal = models.ForeignKey('Goal', on_delete=models.RESTRICT, null=True)
-    mastery_schema = models.ForeignKey(MasterySchema, on_delete=models.RESTRICT, null=True)
+    mastery_schema = models.ForeignKey(
+        MasterySchema, on_delete=models.RESTRICT, null=True, related_name='goals')
     sort_order = models.IntegerField(null=True)
 
     class Meta:
@@ -276,9 +312,9 @@ class Observation(BaseModel):
     """
     An Observation represents an observation of a student, performed by a teacher or student. Only teachers and admins can access an observation if is_visible_to_student is False.
     """
-    goal = models.ForeignKey(Goal, on_delete=models.RESTRICT, null=False, blank=False)
+    goal = models.ForeignKey(Goal, on_delete=models.RESTRICT, null=False, related_name='observations')
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False,
-                                blank=False, related_name='observations_received')
+                                related_name='observations_received')
     observer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
                                  related_name='observations_performed')
     situation = models.ForeignKey(Situation, on_delete=models.SET_NULL, null=True)
@@ -296,8 +332,8 @@ class Status(BaseModel):
     """
     A status represents a snapshot of a students mastery at a point in time, typically in a subject, e.g. how is Lois doing in math (all math Goals are then considered)
     """
-    student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=False, blank=False)
+    student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, related_name='statuses')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=False, related_name='statuses')
     estimated_at = models.DateTimeField(null=True)
     mastery_value = models.IntegerField(null=True)
     mastery_description = models.TextField(null=True)
