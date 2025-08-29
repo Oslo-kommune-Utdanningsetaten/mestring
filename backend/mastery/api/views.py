@@ -6,7 +6,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_access_policy import AccessViewSetMixin
-from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy
+from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy
 
 
 def get_request_param(query_params, name: str):
@@ -129,10 +129,46 @@ class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         ]
     )
 )
-class SchoolAffiliationViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+class UserSchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.UserSchool.objects.all()
     serializer_class = serializers.NestedUserSchoolSerializer
     access_policy = UserSchoolAccessPolicy
+
+    def get_queryset(self):
+        return self.access_policy().scope_queryset(self.request, super().get_queryset())
+
+
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='group',
+                description='Group ID',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='user',
+                description='User ID',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='role',
+                description='Role name (e.g., student, teacher, staff, admin)',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+        ]
+    )
+)
+class UserGroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+    queryset = models.UserGroup.objects.all()
+    serializer_class = serializers.NestedUserGroupSerializer
+    access_policy = UserGroupAccessPolicy
 
     def get_queryset(self):
         return self.access_policy().scope_queryset(self.request, super().get_queryset())
