@@ -83,6 +83,48 @@ export type MasterySchemaWritable = {
     updatedById?: string;
 };
 
+export type NestedUserGroupReadable = {
+    readonly id: string;
+    user: UserReadable;
+    group: GroupReadable;
+    role: RoleReadable;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
+};
+
+export type NestedUserGroupWritable = {
+    user: UserWritable;
+    group: GroupWritable;
+    role: RoleWritable;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
+};
+
+export type NestedUserSchoolReadable = {
+    readonly id: string;
+    user: UserReadable;
+    school: SchoolReadable;
+    role: RoleReadable;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
+};
+
+export type NestedUserSchoolWritable = {
+    user: UserWritable;
+    school: SchoolWritable;
+    role: RoleWritable;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
+};
+
 export type ObservationReadable = {
     readonly id: string;
     readonly createdAt: string;
@@ -195,6 +237,48 @@ export type PatchedMasterySchemaWritable = {
     title?: string | null;
     description?: string | null;
     config?: unknown;
+    createdById?: string;
+    updatedById?: string;
+};
+
+export type PatchedNestedUserGroupReadable = {
+    readonly id?: string;
+    user?: UserReadable;
+    group?: GroupReadable;
+    role?: RoleReadable;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
+};
+
+export type PatchedNestedUserGroupWritable = {
+    user?: UserWritable;
+    group?: GroupWritable;
+    role?: RoleWritable;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
+};
+
+export type PatchedNestedUserSchoolReadable = {
+    readonly id?: string;
+    user?: UserReadable;
+    school?: SchoolReadable;
+    role?: RoleReadable;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
+};
+
+export type PatchedNestedUserSchoolWritable = {
+    user?: UserWritable;
+    school?: SchoolWritable;
+    role?: RoleWritable;
+    maintainedAt?: string | null;
     createdById?: string;
     updatedById?: string;
 };
@@ -1507,6 +1591,238 @@ export type SubjectsUpdateResponses = {
 };
 
 export type SubjectsUpdateResponse = SubjectsUpdateResponses[keyof SubjectsUpdateResponses];
+
+export type UserGroupsListData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Group ID
+         */
+        group?: string;
+        /**
+         * Role name (e.g., student, teacher, staff, admin)
+         */
+        role?: string;
+        /**
+         * School ID
+         */
+        school: string;
+        /**
+         * User ID
+         */
+        user?: string;
+    };
+    url: '/api/user-groups/';
+};
+
+export type UserGroupsListResponses = {
+    200: Array<NestedUserGroupReadable>;
+};
+
+export type UserGroupsListResponse = UserGroupsListResponses[keyof UserGroupsListResponses];
+
+export type UserGroupsCreateData = {
+    body?: NestedUserGroupWritable;
+    path?: never;
+    query?: never;
+    url: '/api/user-groups/';
+};
+
+export type UserGroupsCreateResponses = {
+    201: NestedUserGroupReadable;
+};
+
+export type UserGroupsCreateResponse = UserGroupsCreateResponses[keyof UserGroupsCreateResponses];
+
+export type UserGroupsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this user group.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/user-groups/{id}/';
+};
+
+export type UserGroupsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type UserGroupsDestroyResponse = UserGroupsDestroyResponses[keyof UserGroupsDestroyResponses];
+
+export type UserGroupsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this user group.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/user-groups/{id}/';
+};
+
+export type UserGroupsRetrieveResponses = {
+    200: NestedUserGroupReadable;
+};
+
+export type UserGroupsRetrieveResponse = UserGroupsRetrieveResponses[keyof UserGroupsRetrieveResponses];
+
+export type UserGroupsPartialUpdateData = {
+    body?: PatchedNestedUserGroupWritable;
+    path: {
+        /**
+         * A unique value identifying this user group.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/user-groups/{id}/';
+};
+
+export type UserGroupsPartialUpdateResponses = {
+    200: NestedUserGroupReadable;
+};
+
+export type UserGroupsPartialUpdateResponse = UserGroupsPartialUpdateResponses[keyof UserGroupsPartialUpdateResponses];
+
+export type UserGroupsUpdateData = {
+    body?: NestedUserGroupWritable;
+    path: {
+        /**
+         * A unique value identifying this user group.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/user-groups/{id}/';
+};
+
+export type UserGroupsUpdateResponses = {
+    200: NestedUserGroupReadable;
+};
+
+export type UserGroupsUpdateResponse = UserGroupsUpdateResponses[keyof UserGroupsUpdateResponses];
+
+export type UserSchoolsListData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Role name (e.g., student, teacher, staff, admin)
+         */
+        role?: string;
+        /**
+         * School ID
+         */
+        school: string;
+        /**
+         * User ID
+         */
+        user?: string;
+    };
+    url: '/api/user-schools/';
+};
+
+export type UserSchoolsListResponses = {
+    200: Array<NestedUserSchoolReadable>;
+};
+
+export type UserSchoolsListResponse = UserSchoolsListResponses[keyof UserSchoolsListResponses];
+
+export type UserSchoolsCreateData = {
+    body?: NestedUserSchoolWritable;
+    path?: never;
+    query?: never;
+    url: '/api/user-schools/';
+};
+
+export type UserSchoolsCreateResponses = {
+    201: NestedUserSchoolReadable;
+};
+
+export type UserSchoolsCreateResponse = UserSchoolsCreateResponses[keyof UserSchoolsCreateResponses];
+
+export type UserSchoolsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this user school.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/user-schools/{id}/';
+};
+
+export type UserSchoolsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type UserSchoolsDestroyResponse = UserSchoolsDestroyResponses[keyof UserSchoolsDestroyResponses];
+
+export type UserSchoolsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this user school.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/user-schools/{id}/';
+};
+
+export type UserSchoolsRetrieveResponses = {
+    200: NestedUserSchoolReadable;
+};
+
+export type UserSchoolsRetrieveResponse = UserSchoolsRetrieveResponses[keyof UserSchoolsRetrieveResponses];
+
+export type UserSchoolsPartialUpdateData = {
+    body?: PatchedNestedUserSchoolWritable;
+    path: {
+        /**
+         * A unique value identifying this user school.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/user-schools/{id}/';
+};
+
+export type UserSchoolsPartialUpdateResponses = {
+    200: NestedUserSchoolReadable;
+};
+
+export type UserSchoolsPartialUpdateResponse = UserSchoolsPartialUpdateResponses[keyof UserSchoolsPartialUpdateResponses];
+
+export type UserSchoolsUpdateData = {
+    body?: NestedUserSchoolWritable;
+    path: {
+        /**
+         * A unique value identifying this user school.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/user-schools/{id}/';
+};
+
+export type UserSchoolsUpdateResponses = {
+    200: NestedUserSchoolReadable;
+};
+
+export type UserSchoolsUpdateResponse = UserSchoolsUpdateResponses[keyof UserSchoolsUpdateResponses];
 
 export type UsersListData = {
     body?: never;

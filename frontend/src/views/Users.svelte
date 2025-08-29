@@ -4,6 +4,7 @@
   import { urlStringFrom } from '../utils/functions'
   import { dataStore } from '../stores/data'
   import { useTinyRouter } from 'svelte-tiny-router'
+  import User from '../components/User.svelte'
 
   const router = useTinyRouter()
   let users = $state<UserReadable[]>([])
@@ -128,18 +129,18 @@
           <div class="spinner-border text-primary" role="status"></div>
           <span>Henter brukere...</span>
         </div>
+      {:else if filteredUsers.length === 0}
+        <div class="m-4">Ingen brukere funnet</div>
       {:else}
         <!-- Header row -->
-        <div class="row fw-bold header p-2">
-          <div class="col-4">Navn</div>
-          <div class="col-8">Roles</div>
+        <div class="row fw-bold header p-2 bg-light">
+          <div class="col-4">Bruker</div>
+          <div class="col-4">Handlinger</div>
+          <div class="col-4">Tilknytninger</div>
         </div>
         <!-- Data rows -->
         {#each filteredUsers as user}
-          <div class="row p-2">
-            <div class="col-4">{user.name}</div>
-            <div class="col-8">{user.id}</div>
-          </div>
+          <User {user} schoolId={selectedSchool.id} />
         {/each}
       {/if}
     </div>

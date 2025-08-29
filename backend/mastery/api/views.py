@@ -115,14 +115,14 @@ class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             OpenApiParameter(
                 name='user',
                 description='User ID',
-                required=True,
+                required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
                 name='role',
                 description='Role name (e.g., student, teacher, staff, admin)',
-                required=True,
+                required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
@@ -135,30 +135,55 @@ class UserSchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     access_policy = UserSchoolAccessPolicy
 
     def get_queryset(self):
-        return self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+
+        if self.action == 'list':
+            school_param = get_request_param(self.request.query_params, 'school')
+            user_param = get_request_param(self.request.query_params, 'user')
+            role_param = get_request_param(self.request.query_params, 'role')
+
+            if not school_param:
+                raise ValidationError({'error': 'missing-parameter',
+                                      'message': 'The "school" parameter is required.'})
+
+            qs = qs.filter(school_id=school_param)
+            if user_param:
+                qs = qs.filter(user_id=user_param)
+            if role_param:
+                qs = qs.filter(role__name=role_param)
+
+        # non-list actions (retrieve, create, update, destroy) do not require parameters
+        return qs.distinct()
 
 
 @extend_schema_view(
     list=extend_schema(
         parameters=[
             OpenApiParameter(
+                name='school',
+                description='School ID',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='group',
                 description='Group ID',
-                required=True,
+                required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
                 name='user',
                 description='User ID',
-                required=True,
+                required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
                 name='role',
                 description='Role name (e.g., student, teacher, staff, admin)',
-                required=True,
+                required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
@@ -171,7 +196,28 @@ class UserGroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     access_policy = UserGroupAccessPolicy
 
     def get_queryset(self):
-        return self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+
+        if self.action == 'list':
+            school_param = get_request_param(self.request.query_params, 'school')
+            group_param = get_request_param(self.request.query_params, 'group')
+            user_param = get_request_param(self.request.query_params, 'user')
+            role_param = get_request_param(self.request.query_params, 'role')
+
+            if not school_param:
+                raise ValidationError({'error': 'missing-parameter',
+                                      'message': 'The "school" parameter is required.'})
+
+            qs = qs.filter(group__school_id=school_param)
+            if user_param:
+                qs = qs.filter(user_id=user_param)
+            if group_param:
+                qs = qs.filter(group_id=group_param)
+            if role_param:
+                qs = qs.filter(role__name=role_param)
+
+        # non-list actions (retrieve, create, update, destroy) do not require parameters
+        return qs.distinct()
 
 
 @extend_schema_view(
