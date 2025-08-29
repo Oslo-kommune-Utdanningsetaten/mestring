@@ -6,7 +6,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_access_policy import AccessViewSetMixin
-from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy
+from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy
 
 
 def get_request_param(query_params, name: str):
@@ -100,6 +100,42 @@ class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                     qs = qs.filter(user_groups__group_id__in=group_ids)
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs.distinct()
+
+
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='school',
+                description='School ID',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='user',
+                description='User ID',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='role',
+                description='Role name (e.g., student, teacher, staff, admin)',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+        ]
+    )
+)
+class SchoolAffiliationViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+    queryset = models.UserSchool.objects.all()
+    serializer_class = serializers.NestedUserSchoolSerializer
+    access_policy = UserSchoolAccessPolicy
+
+    def get_queryset(self):
+        return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
 
 @extend_schema_view(

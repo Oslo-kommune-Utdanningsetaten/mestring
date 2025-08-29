@@ -68,8 +68,8 @@ class School(BaseModel):
             user_groups__role__name='teacher'
         ).distinct()
 
-    def add_staff(self, user, role):
-        """Add a staff member to this school with the specified role"""
+    def set_affiliated_user(self, user, role):
+        """Add a user to this school with the specified role"""
         if isinstance(role, str):
             role, _ = Role.objects.get_or_create(name=role)
 
@@ -79,8 +79,8 @@ class School(BaseModel):
             defaults={'role': role}
         )
 
-    def get_staff(self, role_name):
-        """Get all staff members by optional role_name"""
+    def get_affiliated_user(self, role_name):
+        """Get all affiliated users by optional role_name"""
         if role_name:
             return User.objects.filter(
                 user_schools__school=self,

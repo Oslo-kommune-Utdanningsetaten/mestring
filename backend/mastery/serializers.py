@@ -3,28 +3,30 @@ from mastery import models
 from django.db.models import ForeignKey
 
 # Base serializer that rewrites foreign key fields
+
+
 class BaseModelSerializer(serializers.ModelSerializer):
     def get_fields(self):
         fields = super().get_fields()
-        
+
         # Get explicitly declared fields from the serializer class
         declared_fields = getattr(self.Meta, 'fields', [])
         explicitly_nested_fields = set()
-        
+
         # Check for explicitly declared nested serializers
         for field_name, field_instance in self._declared_fields.items():
             if isinstance(field_instance, serializers.ModelSerializer):
                 explicitly_nested_fields.add(field_name)
-        
+
         # Add FK ID fields and remove original FK fields
         for field in self.Meta.model._meta.get_fields():
             if isinstance(field, ForeignKey):
                 name = field.name
-                
+
                 # Skip conversion if this field is explicitly declared as nested
                 if name in explicitly_nested_fields:
                     continue
-                    
+
                 qs = field.remote_field.model.objects.all()
                 # Add the ID field
                 fields[f"{name}_id"] = serializers.PrimaryKeyRelatedField(
@@ -36,8 +38,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
                 if name in fields:
                     del fields[name]
         return fields
-    
-    
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         # On outgoing data, rename all FK fields `foo` → `fooId`
@@ -48,20 +49,6 @@ class BaseModelSerializer(serializers.ModelSerializer):
                 if not isinstance(val, (dict, list)):
                     data[f"{field.name}Id"] = data.pop(field.name)
         return data
-
-
-# Base serializers for UserGroup and StatusGoal
-class UserGroupSerializer(BaseModelSerializer):
-    class Meta:
-        model = models.UserGroup
-        fields = '__all__'
-
-
-# Basic serializers (without nested relationships)
-class SchoolSerializer(BaseModelSerializer):
-    class Meta:
-        model = models.School
-        fields = '__all__'
 
 
 class SubjectSerializer(BaseModelSerializer):
@@ -75,105 +62,17 @@ class RoleSerializer(BaseModelSerializer):
         model = models.Role
         fields = '__all__'
 
-# Nested serializers
-class BasicUserSerializer(BaseModelSerializer):
-    """Basic user serializer without nested relationships to avoid circular references"""
-    class Meta:
-        model = models.User
-        fields = '__all__'
 
-
-class BasicGroupSerializer(BaseModelSerializer):
-    """Basic group serializer without nested relationships to avoid circular references"""
-    class Meta:
-        model = models.Group
-        fields = '__all__'
-
-
-class BasicGoalSerializer(BaseModelSerializer):
-    """Basic goal serializer without nested relationships to avoid circular references"""
-    class Meta:
-        model = models.Goal
-        fields = '__all__'
-
-
-class BasicStatusSerializer(BaseModelSerializer):
-    """Basic status serializer without nested relationships to avoid circular references"""
-    class Meta:
-        model = models.Status
-        fields = '__all__'
-
-
-class BasicSituationSerializer(BaseModelSerializer):
-    """Basic situation serializer without nested relationships to avoid circular references"""
-    class Meta:
-        model = models.Situation
-        fields = '__all__'
-
-
-# Nested UserGroup serializer for use in User and Group serializers
-class NestedUserGroupSerializer(BaseModelSerializer):
-    role = RoleSerializer(read_only=True)
-    
-    class Meta:
-        model = models.UserGroup
-        exclude = ('user',)  # Exclude user when used within User serializer
-
-
-class GroupMemberSerializer(BaseModelSerializer):
-    roles = serializers.SerializerMethodField()
-
-    class Meta:
-        model = models.User
-        fields = ['id', 'name', 'email', 'roles']
-
-    def get_roles(self, obj):
-        group = self.context.get('group')
-        # Fallback so it also works if used inside GroupSerializer without explicit group in context
-        if not group:
-            parent = getattr(self, 'parent', None)
-            if parent and hasattr(parent, 'parent'):
-                group_instance = getattr(parent.parent, 'instance', None)
-                if isinstance(group_instance, models.Group):
-                    group = group_instance
-        if not group:
-            return []
-        role_names = {ug.role.name for ug in obj.user_groups.all() if ug.group_id == group.id}
-        return sorted(role_names)
-
-
-# Main serializers with relationships
 class UserSerializer(BaseModelSerializer):
-    groups = NestedUserGroupSerializer(source='user_groups', many=True, read_only=True)
-    
     class Meta:
         model = models.User
         fields = '__all__'
 
 
 class GroupSerializer(BaseModelSerializer):
-    members = serializers.SerializerMethodField()
-
     class Meta:
         model = models.Group
         fields = '__all__'
-
-    def get_members(self, obj: models.Group):
-        memberships = obj.user_groups.select_related('user', 'role')
-        by_user = {}
-        for m in memberships:
-            u = m.user
-            entry = by_user.setdefault(
-                u.id,
-                {"id": str(u.id), "name": u.name, "email": u.email, "roles": set()}
-            )
-            entry["roles"].add(m.role.name)
-        # Convert role sets to sorted lists
-        result = []
-        for entry in by_user.values():
-            entry["roles"] = sorted(entry["roles"])
-            result.append(entry)
-        return result
 
 
 class GoalSerializer(BaseModelSerializer):
@@ -201,13 +100,51 @@ class ObservationSerializer(BaseModelSerializer):
         fields = '__all__'
 
 
-class StatusSerializer(BaseModelSerializer):    
+class StatusSerializer(BaseModelSerializer):
     class Meta:
         model = models.Status
         fields = '__all__'
 
 
-class MasterySchemaSerializer(BaseModelSerializer):    
+class SchoolSerializer(BaseModelSerializer):
+    class Meta:
+        model = models.School
+        fields = '__all__'
+
+
+class MasterySchemaSerializer(BaseModelSerializer):
     class Meta:
         model = models.MasterySchema
+        fields = '__all__'
+
+
+class UserSchoolSerializer(BaseModelSerializer):
+    class Meta:
+        model = models.UserSchool
+        fields = '__all__'
+
+
+class UserGroupSerializer(BaseModelSerializer):
+    class Meta:
+        model = models.UserGroup
+        fields = '__all__'
+
+
+class NestedUserGroupSerializer(BaseModelSerializer):
+    user = UserSerializer(read_only=True)
+    group = GroupSerializer(read_only=True)
+    role = RoleSerializer(read_only=True)
+
+    class Meta:
+        model = models.UserGroup
+        fields = '__all__'
+
+
+class NestedUserSchoolSerializer(BaseModelSerializer):
+    user = UserSerializer(read_only=True)
+    school = SchoolSerializer(read_only=True)
+    role = RoleSerializer(read_only=True)
+
+    class Meta:
+        model = models.UserSchool
         fields = '__all__'

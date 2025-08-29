@@ -57,6 +57,20 @@
     }
   }
 
+  const handleUserAffiliationFetch = async (userId: string) => {
+    if (!selectedSchool) return
+    try {
+      isLoadingUsers = true
+      const result = await usersList({ query: { school: selectedSchool.id } })
+      users = result.data || []
+    } catch (error) {
+      console.error('Error fetching users:', error)
+      users = []
+    } finally {
+      isLoadingUsers = false
+    }
+  }
+
   $effect(() => {
     fetchSchools()
   })
@@ -96,7 +110,12 @@
           {/each}
         </select>
       </div>
-      <input type="text" class="user-filter-input" placeholder="Navn" bind:value={nameFilter} />
+      <input
+        type="text"
+        class="user-filter-input"
+        placeholder="Navn på bruker"
+        bind:value={nameFilter}
+      />
     {/if}
   </div>
 </section>

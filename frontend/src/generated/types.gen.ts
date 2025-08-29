@@ -35,7 +35,6 @@ export type GoalWritable = {
 
 export type GroupReadable = {
     readonly id: string;
-    readonly members: string;
     readonly createdAt: string;
     readonly updatedAt: string;
     maintainedAt?: string | null;
@@ -82,27 +81,6 @@ export type MasterySchemaWritable = {
     config?: unknown;
     createdById?: string;
     updatedById?: string;
-};
-
-export type NestedUserGroupReadable = {
-    readonly id: string;
-    role: RoleReadable;
-    readonly createdAt: string;
-    readonly updatedAt: string;
-    maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
-    userId: string;
-    groupId: string;
-};
-
-export type NestedUserGroupWritable = {
-    role: RoleWritable;
-    maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
-    userId: string;
-    groupId: string;
 };
 
 export type ObservationReadable = {
@@ -173,7 +151,6 @@ export type PatchedGoalWritable = {
 
 export type PatchedGroupReadable = {
     readonly id?: string;
-    readonly members?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
     maintainedAt?: string | null;
@@ -374,7 +351,6 @@ export type PatchedSubjectWritable = {
 
 export type PatchedUserReadable = {
     readonly id?: string;
-    readonly groups?: Array<NestedUserGroupReadable>;
     readonly createdAt?: string;
     readonly updatedAt?: string;
     maintainedAt?: string | null;
@@ -384,6 +360,7 @@ export type PatchedUserReadable = {
     lastActivityAt?: string | null;
     disabledAt?: string | null;
     isSuperadmin?: boolean;
+    readonly groups?: Array<string | null>;
     readonly schools?: Array<string | null>;
     createdById?: string;
     updatedById?: string;
@@ -520,7 +497,6 @@ export type SubjectWritable = {
 
 export type UserReadable = {
     readonly id: string;
-    readonly groups: Array<NestedUserGroupReadable>;
     readonly createdAt: string;
     readonly updatedAt: string;
     maintainedAt?: string | null;
@@ -530,6 +506,7 @@ export type UserReadable = {
     lastActivityAt?: string | null;
     disabledAt?: string | null;
     isSuperadmin?: boolean;
+    readonly groups: Array<string | null>;
     readonly schools: Array<string | null>;
     createdById?: string;
     updatedById?: string;
