@@ -101,6 +101,7 @@ def feidecallback(request):
 
     # check if user has affiliation with an existing school
     student_schools, teacher_schools, staff_schools = check_affiliations(feide_user_id, affiliations)
+
     logger.debug(f"💁‍♀️ User {feide_user_id}")
     logger.debug(f"💁‍♀️ Student affiliations: {student_schools}")
     logger.debug(f"💁‍♀️ Teacher affiliations: {teacher_schools}")

@@ -99,7 +99,7 @@
         {/if}
 
         {#if currentUser}
-          <li class="nav-item dropdown">
+          <li class="nav-item dropdown" title="Logget på som {currentUser.name}">
             <a
               class="nav-link dropdown-toggle"
               id="navbarDropdown"

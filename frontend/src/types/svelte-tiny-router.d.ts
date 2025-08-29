@@ -13,6 +13,7 @@ declare module 'svelte-tiny-router' {
     path: string
     getQueryParam(name: string): string | undefined
     hasQueryParam(name: string): boolean
+    navigate(path: string): void
   }
 
   export class Router extends SvelteComponentTyped {}
