@@ -57,7 +57,7 @@ def request_tokens_from_feide(code):
 def check_affiliations(feide_user_id, affiliations):
     """
     Check if user has affiliation with an existing school.
-    Returns a tuple (is_student_or_teacher, staff_at_schools)
+    Returns a tuple (student_schools, teacher_schools, staff_schools)
     """
     if not feide_user_id or not affiliations:
         return [], [], []
