@@ -15,6 +15,7 @@
   let overwrite = $state(false)
   let crashOnError = $state(false)
   let feideOrgInput: HTMLInputElement
+  let readiness = $state<Record<string, { groups: number; users: number }>>({})
 
   const fetchSchools = async () => {
     try {
@@ -48,7 +49,11 @@
     rawJsonResult = null
   }
 
+  const isBusy = (org: string) =>
+    fetchingGroups.has(org) || fetchingUsers.has(org) || importingGroupsAndUsers.has(org)
+
   const feideFetchGroupsForSchool = async (orgNumber: string) => {
+    if (isBusy(orgNumber)) return
     fetchingGroups = new Set([...fetchingGroups, orgNumber])
     dismissAlert()
     try {
@@ -58,9 +63,16 @@
       })
       const result = await response.json()
       if (response.ok && result.status === 'success') {
-        alertMessage = `✅ Hentet grupper for ${orgNumber} (basis: ${result.basis_groups}, undervisning: ${result.teaching_groups})`
+        alertMessage = `✅ Hentet grupper for ${orgNumber}`
         alertType = 'success'
         rawJsonResult = result
+        readiness = {
+          ...readiness,
+          [orgNumber]: {
+            groups: result.stepResults?.totalGroups ?? 0,
+            users: readiness[orgNumber]?.users ?? 0,
+          },
+        }
       } else {
         alertMessage = `❌ Feil ved henting av grupper for ${orgNumber}: ${result.message || 'Ukjent feil'}`
         alertType = 'error'
@@ -74,6 +86,7 @@
   }
 
   const feideFetchUsersForSchool = async (orgNumber: string) => {
+    if (isBusy(orgNumber)) return
     fetchingUsers = new Set([...fetchingUsers, orgNumber])
     dismissAlert()
     try {
@@ -83,9 +96,16 @@
       })
       const result = await response.json()
       if (response.ok && result.status === 'success') {
-        alertMessage = `✅ Hentet brukere/medlemskap for ${orgNumber} (grupper: ${result.groups_processed}, brukere: ${result.unique_users})`
+        alertMessage = `✅ Hentet brukere/medlemskap for ${orgNumber}`
         alertType = 'success'
         rawJsonResult = result
+        readiness = {
+          ...readiness,
+          [orgNumber]: {
+            groups: readiness[orgNumber]?.groups ?? 0,
+            users: result.stepResults?.uniqueUsers ?? 0,
+          },
+        }
       } else {
         alertMessage = `❌ Feil ved henting av brukere for ${orgNumber}: ${result.message || 'Ukjent feil'}`
         alertType = 'error'
@@ -98,7 +118,7 @@
     }
   }
 
-  const feideSchoolImport = async (orgNumber: string) => {
+  const importSchoolFromFeide = async (orgNumber: string) => {
     dismissAlert()
     try {
       const response = await fetch(`/api/import/school/feide/${orgNumber}/`, {
@@ -122,6 +142,7 @@
   }
 
   const importGroupsAndUsers = async (orgNumber: string) => {
+    if (isBusy(orgNumber)) return
     dismissAlert()
     importingGroupsAndUsers = new Set([...importingGroupsAndUsers, orgNumber])
     try {
@@ -149,6 +170,8 @@
       alertType = 'error'
     } finally {
       importingGroupsAndUsers = new Set([...importingGroupsAndUsers].filter(id => id !== orgNumber))
+      const { [orgNumber]: removed, ...rest } = readiness
+      readiness = rest
     }
   }
 
@@ -162,21 +185,23 @@
 
   <div class="mb-4">
     <label for="feideOrgInput" class="form-label">Importer skole fra Feide (org.nr):</label>
-    <div class="input-group mb-3" style="max-width: 400px;">
-      <input
-        type="text"
-        class="form-control"
-        id="feideOrgInput"
-        placeholder="Organisasjonsnummer"
-        bind:this={feideOrgInput}
-      />
-      <button
-        class="btn btn-outline-secondary"
-        type="button"
-        onclick={() => feideSchoolImport(feideOrgInput.value)}
-      >
-        Importer fra Feide
-      </button>
+    <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+      <div class="input-group mb-3">
+        <input
+          type="text"
+          class="form-control"
+          id="feideOrgInput"
+          placeholder="Organisasjonsnummer"
+          bind:this={feideOrgInput}
+        />
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          onclick={() => importSchoolFromFeide(feideOrgInput.value)}
+        >
+          Importer fra Feide
+        </button>
+      </div>
     </div>
     <div class="d-flex align-items-center gap-3 mb-3">
       <div class="form-check form-switch">
@@ -223,7 +248,7 @@
 
               {#if showDetails}
                 <div class="mt-2 pt-2 border-top">
-                  <small class="text-muted">Response:</small>
+                  <small class="text-muted">Raw JSON:</small>
                   <pre class="json-display">{JSON.stringify(rawJsonResult, null, 2)}</pre>
                 </div>
               {/if}
@@ -297,18 +322,24 @@
                     Importerer...
                   {:else}
                     📥 Importer
+                    {#if readiness[school.orgNumber]}
+                      <span class="ms-2 text-muted small">
+                        ({readiness[school.orgNumber].groups} grupper, {readiness[school.orgNumber]
+                          .users} brukere)
+                      </span>
+                    {/if}
                   {/if}
                 </button>
 
                 <div class="form-check form-switch">
                   <input
-                    id={"service-" + school.id}
+                    id={'service-' + school.id}
                     class="form-check-input"
                     type="checkbox"
                     checked={school.isServiceEnabled}
                     onchange={() => toggleServiceEnabled(school)}
                   />
-                  <label class="form-check-label" for={"service-" + school.id}>
+                  <label class="form-check-label" for={'service-' + school.id}>
                     {school.isServiceEnabled ? 'Aktiv' : 'Inaktiv'}
                   </label>
                 </div>

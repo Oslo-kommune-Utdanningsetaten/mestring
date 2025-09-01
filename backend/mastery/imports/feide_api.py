@@ -18,7 +18,6 @@ GROUPS_BASE = "https://groups-api.dataporten.no/groups/v1"
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(script_dir, 'data') 
-_subject_cache = {}
 
 def _fetch_groups(url, token, result):
     """Helper function for pagination """
@@ -227,8 +226,6 @@ def fetch_school_group(org_number, access_token):
 def ensure_subject(grep_code, is_dryrun_enabled=False):
     """Ensure a subject exists in the database, fetching from UDIR if necessary."""
     subject = models.Subject.objects.filter(grep_code__exact=grep_code).first()
-    if grep_code in _subject_cache:
-        return _subject_cache[grep_code]
     if not subject:
         udir_response = requests.get(UDIR_GREP_URL + grep_code)
         if udir_response.status_code == 200 and udir_response.text:
@@ -259,5 +256,4 @@ def ensure_subject(grep_code, is_dryrun_enabled=False):
         else:
             print("🚷Failed to fetch subject from UDIR:", grep_code)
             subject = None
-    _subject_cache[grep_code] = subject
     return subject
