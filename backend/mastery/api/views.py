@@ -134,6 +134,11 @@ class UserSchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     serializer_class = serializers.NestedUserSchoolSerializer
     access_policy = UserSchoolAccessPolicy
 
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return serializers.UserSchoolSerializer
+        return serializers.NestedUserSchoolSerializer
+
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
 

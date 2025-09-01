@@ -262,27 +262,6 @@ export type PatchedNestedUserGroupWritable = {
     updatedById?: string;
 };
 
-export type PatchedNestedUserSchoolReadable = {
-    readonly id?: string;
-    user?: UserReadable;
-    school?: SchoolReadable;
-    role?: RoleReadable;
-    readonly createdAt?: string;
-    readonly updatedAt?: string;
-    maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
-};
-
-export type PatchedNestedUserSchoolWritable = {
-    user?: UserWritable;
-    school?: SchoolWritable;
-    role?: RoleWritable;
-    maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
-};
-
 export type PatchedObservationReadable = {
     readonly id?: string;
     readonly createdAt?: string;
@@ -462,6 +441,27 @@ export type PatchedUserWritable = {
     updatedById?: string;
 };
 
+export type PatchedUserSchoolReadable = {
+    readonly id?: string;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
+    userId?: string;
+    schoolId?: string;
+    roleId?: string;
+};
+
+export type PatchedUserSchoolWritable = {
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
+    userId?: string;
+    schoolId?: string;
+    roleId?: string;
+};
+
 export type RoleReadable = {
     readonly id: string;
     readonly createdAt: string;
@@ -606,6 +606,27 @@ export type UserWritable = {
     isSuperadmin?: boolean;
     createdById?: string;
     updatedById?: string;
+};
+
+export type UserSchoolReadable = {
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
+    userId: string;
+    schoolId: string;
+    roleId: string;
+};
+
+export type UserSchoolWritable = {
+    maintainedAt?: string | null;
+    createdById?: string;
+    updatedById?: string;
+    userId: string;
+    schoolId: string;
+    roleId: string;
 };
 
 export type GoalsListData = {
@@ -1737,14 +1758,14 @@ export type UserSchoolsListResponses = {
 export type UserSchoolsListResponse = UserSchoolsListResponses[keyof UserSchoolsListResponses];
 
 export type UserSchoolsCreateData = {
-    body?: NestedUserSchoolWritable;
+    body: UserSchoolWritable;
     path?: never;
     query?: never;
     url: '/api/user-schools/';
 };
 
 export type UserSchoolsCreateResponses = {
-    201: NestedUserSchoolReadable;
+    201: UserSchoolReadable;
 };
 
 export type UserSchoolsCreateResponse = UserSchoolsCreateResponses[keyof UserSchoolsCreateResponses];
@@ -1789,7 +1810,7 @@ export type UserSchoolsRetrieveResponses = {
 export type UserSchoolsRetrieveResponse = UserSchoolsRetrieveResponses[keyof UserSchoolsRetrieveResponses];
 
 export type UserSchoolsPartialUpdateData = {
-    body?: PatchedNestedUserSchoolWritable;
+    body?: PatchedUserSchoolWritable;
     path: {
         /**
          * A unique value identifying this user school.
@@ -1801,13 +1822,13 @@ export type UserSchoolsPartialUpdateData = {
 };
 
 export type UserSchoolsPartialUpdateResponses = {
-    200: NestedUserSchoolReadable;
+    200: UserSchoolReadable;
 };
 
 export type UserSchoolsPartialUpdateResponse = UserSchoolsPartialUpdateResponses[keyof UserSchoolsPartialUpdateResponses];
 
 export type UserSchoolsUpdateData = {
-    body?: NestedUserSchoolWritable;
+    body: UserSchoolWritable;
     path: {
         /**
          * A unique value identifying this user school.
@@ -1819,7 +1840,7 @@ export type UserSchoolsUpdateData = {
 };
 
 export type UserSchoolsUpdateResponses = {
-    200: NestedUserSchoolReadable;
+    200: UserSchoolReadable;
 };
 
 export type UserSchoolsUpdateResponse = UserSchoolsUpdateResponses[keyof UserSchoolsUpdateResponses];

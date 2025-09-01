@@ -602,8 +602,8 @@ export const userSchoolsList = <ThrowOnError extends boolean = false>(options: O
     });
 };
 
-export const userSchoolsCreate = <ThrowOnError extends boolean = false>(options?: Options<UserSchoolsCreateData, ThrowOnError>) => {
-    return (options?.client ?? _heyApiClient).post<UserSchoolsCreateResponse, unknown, ThrowOnError>({
+export const userSchoolsCreate = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsCreateData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).post<UserSchoolsCreateResponse, unknown, ThrowOnError>({
         ...urlSearchParamsBodySerializer,
         url: '/api/user-schools/',
         ...options,
