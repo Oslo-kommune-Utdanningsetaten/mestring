@@ -1,6 +1,6 @@
 import { get, writable } from 'svelte/store'
 import type { Writable as WritableType } from 'svelte/store'
-import { subjectsList, schoolsList, masterySchemasList } from '../generated/sdk.gen'
+import { subjectsList, schoolsList, masterySchemasList, rolesList } from '../generated/sdk.gen'
 import type { SchoolReadable, MasterySchemaReadable } from '../generated/types.gen'
 import {
   getLocalStorageItem,
@@ -105,9 +105,7 @@ const loadSubjectsForSchool = async (schoolId: string): Promise<void> => {
         school: schoolId,
       },
     })
-
     const subjects = result.data || []
-
     dataStore.update(data => {
       return { ...data, subjects }
     })
@@ -119,6 +117,21 @@ const loadSubjectsForSchool = async (schoolId: string): Promise<void> => {
   }
 }
 
+const loadRoles = async (): Promise<void> => {
+  try {
+    const result = await rolesList()
+    const roles = result.data || []
+    dataStore.update(data => {
+      return { ...data, roles }
+    })
+  } catch (error) {
+    console.error('Failed to load roles:', error)
+    dataStore.update(data => {
+      return { ...data, roles: [] }
+    })
+  }
+}
+
 export const loadData = async () => {
   try {
     dataStore.set({
@@ -126,9 +139,11 @@ export const loadData = async () => {
       currentUser: null,
       subjects: [],
       masterySchemas: [],
+      roles: [],
     })
 
     await refreshCurrentUser()
+    await loadRoles()
     await loadSchool()
     await refreshMasterySchemas(false)
   } catch (error) {
