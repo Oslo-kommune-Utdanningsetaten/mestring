@@ -1,7 +1,10 @@
 <script lang="ts">
-  import { groupsRetrieve, usersList } from '../generated/sdk.gen'
-  import type { GroupReadable, UserReadable } from '../generated/types.gen'
+  import '@oslokommune/punkt-elements/dist/pkt-tag.js'
+  import { groupsRetrieve, usersList, goalsList } from '../generated/sdk.gen'
+  import type { GoalReadable, GroupReadable, UserReadable } from '../generated/types.gen'
+  import type { GoalDecorated } from '../types/models'
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
+  import GoalEdit from '../components/GoalEdit.svelte'
   import { dataStore } from '../stores/data'
 
   const { groupId } = $props<{ groupId: string }>()
@@ -10,10 +13,12 @@
   let group = $state<GroupReadable | null>(null)
   let teachers = $state<UserReadable[]>([])
   let students = $state<UserReadable[]>([])
+  let goals = $state<GoalReadable[]>([])
+  let goalWip = $state<GoalDecorated | null>(null)
   let isLoading = $state(true)
   let error = $state<string | null>(null)
 
-  const fetchGroup = async () => {
+  const fetchGroupData = async () => {
     if (!groupId) return
 
     try {
@@ -33,8 +38,12 @@
       const studentsResult = await usersList({
         query: { groups: groupId, school: currentSchool.id, roles: STUDENT_ROLE },
       })
+      const goalsResult = await goalsList({
+        query: { group: groupId },
+      })
       teachers = teachersResult.data || []
       students = studentsResult.data || []
+      goals = goalsResult.data || []
     } catch (error) {
       console.error('Error fetching group:', error)
       error = 'Kunne ikke hente gruppeinformasjon'
@@ -43,9 +52,30 @@
     }
   }
 
+  const handleEditGoal = (goal: GoalDecorated | null) => {
+    goalWip = { ...goal, groupId: group?.id }
+  }
+
+  const handleGoalDone = async () => {
+    handleCloseEditGoal()
+    await fetchGroupData()
+  }
+
+  const handleCloseEditGoal = () => {
+    goalWip = null
+  }
+
+  const handleKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      if (goalWip) {
+        handleCloseEditGoal()
+      }
+    }
+  }
+
   $effect(() => {
     if (groupId && currentSchool && currentSchool.id) {
-      fetchGroup()
+      fetchGroupData()
     }
   })
 </script>
@@ -65,46 +95,56 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h1 class="mb-1">{group.displayName}</h1>
-        <div class="text-muted">
-          <span class="badge bg-secondary me-2">
-            {group.type == 'basis' ? 'basisgruppe' : 'undervisningsgruppe'}
-          </span>
+
+        <div>
+          <pkt-tag iconName="two-people-dancing" skin="blue" class="me-1">
+            <span>{group.type == 'basis' ? 'Basisgruppe' : 'Undervisningsgruppe'}</span>
+          </pkt-tag>
+          {#each teachers as teacher}
+            <pkt-tag iconName="lecture" skin="green" class="me-2">
+              <span>{teacher.name}</span>
+            </pkt-tag>
+          {/each}
         </div>
       </div>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="row mb-4">
-      <div class="col-md-6">
-        <div class="card bg-success text-white">
-          <div class="card-body text-center">
-            <h3 class="card-title mb-0">{students.length}</h3>
-            <p class="card-text">Elever</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card bg-success text-white">
-          <div class="card-body text-center">
-            <h3 class="card-title mb-0">{teachers.length}</h3>
-            <p class="card-text">Lærere</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Teachers Section -->
-    {#if teachers}
+    <!-- Goals Section -->
+    {#if goals}
       <div class="card mb-4">
-        <div class="card-header">
-          <h3 class="mb-0">Lærere</h3>
+        <div class="card-header d-flex align-items-center gap-2 mb-3">
+          <h3 class="mb-0">Mål</h3>
+          <pkt-button
+            size="small"
+            skin="tertiary"
+            type="button"
+            variant="icon-only"
+            iconName="plus-sign"
+            title="Legg til nytt gruppemål"
+            class="mini-button bordered"
+            onclick={() => handleEditGoal(null)}
+            onkeydown={(e: any) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                handleEditGoal(null)
+              }
+            }}
+            role="button"
+            tabindex="0"
+          >
+            Nytt personlig mål
+          </pkt-button>
         </div>
         <div class="card-body">
-          <ul>
-            {#each teachers as teacher}
-              <li>{teacher.name}</li>
-            {/each}
-          </ul>
+          {#if goals.length === 0}
+            <p>Trykk pluss (+) knappen for å opprette et mål for denne gruppa</p>
+          {:else}
+            <ul>
+              {#each goals as goal}
+                <li>{goal.title}</li>
+              {/each}
+            </ul>
+          {/if}
         </div>
       </div>
     {/if}
@@ -138,6 +178,13 @@
     </div>
   {/if}
 </section>
+
+<svelte:window on:keydown={handleKeydown} />
+
+<!-- offcanvas for creating/editing goals -->
+<div class="custom-offcanvas" class:visible={!!goalWip}>
+  <GoalEdit {group} goal={goalWip} isGoalPersonal={false} onDone={handleGoalDone} />
+</div>
 
 <style>
 </style>

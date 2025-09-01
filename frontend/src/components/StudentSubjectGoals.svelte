@@ -6,6 +6,7 @@
   import type { GoalDecorated } from '../types/models'
   import { observationsDestroy, goalsDestroy, goalsUpdate, goalsList } from '../generated/sdk.gen'
   import { goalsWithCalculatedMasteryBySubjectId } from '../utils/functions'
+  import Link from './Link.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparklineChart from './SparklineChart.svelte'
   import GoalEdit from './GoalEdit.svelte'
@@ -263,47 +264,57 @@
           <div class="mx-3">
             {#if goal?.observations.length === 0}
               <div class="bg-info p-3">
-                <p>Ingen observasjoner for dette målet</p>
+                {#if goal.isGroup}
+                  <p>
+                    Dette målet er ikke personlig, men gitt for en hel gruppe. Du finner guppa <Link
+                      to={`/groups/${goal.groupId}/`}
+                    >
+                      her
+                    </Link>.
+                  </p>
+                {:else}
+                  <p>Ingen observasjoner for dette målet</p>
 
-                <pkt-button
-                  size="small"
-                  skin="primary"
-                  variant="icon-left"
-                  iconName="edit"
-                  class="my-2 me-2"
-                  title="Rediger personlig mål"
-                  onclick={() => handleEditGoal(goal)}
-                  onkeydown={(e: any) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      handleEditGoal(goal)
-                    }
-                  }}
-                  role="button"
-                  tabindex="0"
-                >
-                  Rediger personlig mål
-                </pkt-button>
+                  <pkt-button
+                    size="small"
+                    skin="primary"
+                    variant="icon-left"
+                    iconName="edit"
+                    class="my-2 me-2"
+                    title="Rediger personlig mål"
+                    onclick={() => handleEditGoal(goal)}
+                    onkeydown={(e: any) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleEditGoal(goal)
+                      }
+                    }}
+                    role="button"
+                    tabindex="0"
+                  >
+                    Rediger personlig mål
+                  </pkt-button>
 
-                <pkt-button
-                  size="small"
-                  skin="primary"
-                  variant="icon-left"
-                  iconName="trash-can"
-                  class="my-2"
-                  title="Slett personlig mål"
-                  onclick={() => handleDeleteGoal(goal.id)}
-                  onkeydown={(e: any) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      handleDeleteGoal(goal.id)
-                    }
-                  }}
-                  role="button"
-                  tabindex="0"
-                >
-                  Slett mål
-                </pkt-button>
+                  <pkt-button
+                    size="small"
+                    skin="primary"
+                    variant="icon-left"
+                    iconName="trash-can"
+                    class="my-2"
+                    title="Slett personlig mål"
+                    onclick={() => handleDeleteGoal(goal.id)}
+                    onkeydown={(e: any) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleDeleteGoal(goal.id)
+                      }
+                    }}
+                    role="button"
+                    tabindex="0"
+                  >
+                    Slett mål
+                  </pkt-button>
+                {/if}
               </div>
             {:else}
               <div class="row fw-bold d-flex gap-4 mt-2">
