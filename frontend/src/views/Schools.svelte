@@ -4,16 +4,17 @@
   import { setCurrentSchool } from '../stores/data'
 
   let schools = $state<SchoolReadable[]>([])
-  let importingSchool = $state<Set<number>>(new Set())
+  let fetchingGroups = $state<Set<string>>(new Set())
+  let fetchingUsers = $state<Set<string>>(new Set())
+  let importingGroupsAndUsers = $state<Set<string>>(new Set())
   let alertMessage = $state<string>('')
   let alertType = $state<'success' | 'error' | ''>('')
   let showDetails = $state<boolean>(false)
   let rawJsonResult = $state<any>(null)
-  let fetchingGroups = $state<boolean>(false)
-  let imporingSchools = $state<boolean>(false)
   let dryRun = $state(false)
   let overwrite = $state(false)
   let crashOnError = $state(false)
+  let feideOrgInput: HTMLInputElement
 
   const fetchSchools = async () => {
     try {
@@ -47,69 +48,84 @@
     rawJsonResult = null
   }
 
-  const syncSchoolData = async (school: SchoolReadable) => {
-    importingSchool = new Set([...importingSchool, school.id])
+  const feideFetchGroupsForSchool = async (orgNumber: string) => {
+    fetchingGroups = new Set([...fetchingGroups, orgNumber])
     dismissAlert()
     try {
-      const response = await fetch(`/api/import/school/${school.orgNumber}/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          is_dryrun_enabled: dryRun,
-          is_overwrite_enabled: overwrite,
-          is_crash_on_error_enabled: crashOnError,
-        }),
-      })
-      const result = await response.json()
-      if (response.ok && result.status === 'success') {
-        const taskId = result.task?.id || ''
-        alertMessage =
-          `✅ Import fullført for ${school.displayName}!` + (taskId ? ` (Task: ${taskId})` : '')
-        alertType = 'success'
-        rawJsonResult = result.task?.result || null
-        await fetchSchools()
-      } else {
-        alertMessage = `❌ Import feilet for ${school.displayName}: ${result.message || 'Ukjent feil'}`
-        alertType = 'error'
-      }
-    } catch (e: any) {
-      alertMessage = `❌ Import feilet for ${school.displayName}: ${e?.message || 'Nettverksfeil'}`
-      alertType = 'error'
-    } finally {
-      importingSchool = new Set([...importingSchool].filter(id => String(id) !== String(school.id)))
-    }
-  }
-
-  const fetchGroups = async () => {
-    dismissAlert()
-    fetchingGroups = true
-    try {
-      const response = await fetch('/api/fetch/groups/', {
+      const response = await fetch(`/api/fetch/groups/feide/${orgNumber}/`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       })
       const result = await response.json()
       if (response.ok && result.status === 'success') {
-        alertMessage = '✅ Grupper hentet fra Feide!'
+        alertMessage = `✅ Hentet grupper for ${orgNumber} (basis: ${result.basis_groups}, undervisning: ${result.teaching_groups})`
         alertType = 'success'
-        rawJsonResult = result.step_results || null
+        rawJsonResult = result
       } else {
-        alertMessage = `❌ Feil ved henting av grupper: ${result.message || 'Ukjent feil'}`
+        alertMessage = `❌ Feil ved henting av grupper for ${orgNumber}: ${result.message || 'Ukjent feil'}`
         alertType = 'error'
       }
     } catch (e: any) {
       alertMessage = `❌ Nettverksfeil: ${e?.message || e}`
       alertType = 'error'
     } finally {
-      fetchingGroups = false
+      fetchingGroups = new Set([...fetchingGroups].filter(id => id !== orgNumber))
     }
   }
 
-  const importSchoolsApi = async () => {
+  const feideFetchUsersForSchool = async (orgNumber: string) => {
+    fetchingUsers = new Set([...fetchingUsers, orgNumber])
     dismissAlert()
-    imporingSchools = true
     try {
-      const response = await fetch('/api/import/schools/', {
+      const response = await fetch(`/api/fetch/users/feide/${orgNumber}/`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const result = await response.json()
+      if (response.ok && result.status === 'success') {
+        alertMessage = `✅ Hentet brukere/medlemskap for ${orgNumber} (grupper: ${result.groups_processed}, brukere: ${result.unique_users})`
+        alertType = 'success'
+        rawJsonResult = result
+      } else {
+        alertMessage = `❌ Feil ved henting av brukere for ${orgNumber}: ${result.message || 'Ukjent feil'}`
+        alertType = 'error'
+      }
+    } catch (e: any) {
+      alertMessage = `❌ Nettverksfeil: ${e?.message || e}`
+      alertType = 'error'
+    } finally {
+      fetchingUsers = new Set([...fetchingUsers].filter(id => id !== orgNumber))
+    }
+  }
+
+  const feideSchoolImport = async (orgNumber: string) => {
+    dismissAlert()
+    try {
+      const response = await fetch(`/api/import/school/feide/${orgNumber}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const result = await response.json()
+      if (response.ok && result.status === 'success') {
+        alertMessage = `✅ Skole med org.nr ${orgNumber} importert fra Feide!`
+        alertType = 'success'
+        rawJsonResult = result
+        await fetchSchools()
+      } else {
+        alertMessage = `❌ Feil ved import av skole ${orgNumber}: ${result.message || 'Ukjent feil'}`
+        alertType = 'error'
+      }
+    } catch (e: any) {
+      alertMessage = `❌ Nettverksfeil: ${e?.message || e}`
+      alertType = 'error'
+    }
+  }
+
+  const importGroupsAndUsers = async (orgNumber: string) => {
+    dismissAlert()
+    importingGroupsAndUsers = new Set([...importingGroupsAndUsers, orgNumber])
+    try {
+      const response = await fetch(`/api/import/school_groups_and_users/${orgNumber}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -119,20 +135,20 @@
         }),
       })
       const result = await response.json()
+
       if (response.ok && result.status === 'success') {
-        alertMessage = '✅ Skoler importert fra fil!'
+        alertMessage = `✅ Grupper og brukere importert for skole ${orgNumber}!`
         alertType = 'success'
-        rawJsonResult = result.step_results || null
-        await fetchSchools()
+        rawJsonResult = result || null
       } else {
-        alertMessage = `❌ Feil ved import av skoler: ${result.message || 'Ukjent feil'}`
+        alertMessage = `❌ Feil ved import av grupper og brukere for skole ${orgNumber}: ${result.message || 'Ukjent feil'}`
         alertType = 'error'
       }
     } catch (e: any) {
       alertMessage = `❌ Nettverksfeil: ${e?.message || e}`
       alertType = 'error'
     } finally {
-      imporingSchools = false
+      importingGroupsAndUsers = new Set([...importingGroupsAndUsers].filter(id => id !== orgNumber))
     }
   }
 
@@ -143,133 +159,165 @@
 
 <section class="py-3">
   <h2>Skoler</h2>
-  <button class="btn btn-primary mb-3" onclick={fetchGroups}>
-    {#if fetchingGroups}
-      <span class="spinner-border spinner-border-sm me-2"></span>
-      Henter grupper..... tar litt tid
-    {:else}
-      Hent grupper fra feide
-    {/if}
-  </button>
 
-  <button class="btn btn-primary mb-3" onclick={importSchoolsApi}>
-    {#if imporingSchools}
-      <span class="spinner-border spinner-border-sm me-2"></span>
-      Importerer skoler fra fil...
-    {:else}
-      Importer skoler fra fil
-    {/if}
-  </button>
-
-  <div class="d-flex align-items-center gap-3 mb-3">
-  <div class="form-check form-switch">
-    <input class="form-check-input" type="checkbox" bind:checked={dryRun} id="dryRunSwitch" />
-    <label class="form-check-label" for="dryRunSwitch">Dry-run (ingen DB-skriving)</label>
-  </div>
-  <div class="form-check form-switch">
-    <input class="form-check-input" type="checkbox" bind:checked={overwrite} id="overwriteSwitch" />
-    <label class="form-check-label" for="overwriteSwitch">Overwrite eksisterende</label>
-  </div>
-  <div class="form-check form-switch">
-    <input class="form-check-input" type="checkbox" bind:checked={crashOnError} id="crashSwitch" />
-    <label class="form-check-label" for="crashSwitch">Stopp ved feil</label>
-  </div>
-</div>
-
-  {#if alertMessage}
-    <div
-      class="alert alert-{alertType === 'success' ? 'success' : 'danger'} alert-dismissible"
-      role="alert"
-    >
-      <div class="d-flex justify-content-between align-items-start">
-        <div class="flex-grow-1">
-          {alertMessage}
-
-          {#if rawJsonResult && alertType === 'success'}
-            <div class="mt-2">
-              <button
-                class="btn btn-sm btn-outline-secondary"
-                onclick={() => (showDetails = !showDetails)}
-              >
-                {showDetails ? '📄 Skjul JSON' : '📋 Vis JSON resultat'}
-              </button>
-            </div>
-
-            {#if showDetails}
-              <div class="mt-3 p-3 bg-light rounded">
-                <h6>Raw JSON fra database:</h6>
-                <pre
-                  class="bg-white p-2 border rounded small overflow-auto"
-                  style="max-height: 400px;">
-                    {JSON.stringify(rawJsonResult, null, 2)}
-                </pre>
-              </div>
-            {/if}
-          {/if}
-        </div>
-
-        <button type="button" class="btn-close" onclick={dismissAlert}></button>
+  <div class="mb-4">
+    <label for="feideOrgInput" class="form-label">Importer skole fra Feide (org.nr):</label>
+    <div class="input-group mb-3" style="max-width: 400px;">
+      <input
+        type="text"
+        class="form-control"
+        id="feideOrgInput"
+        placeholder="Organisasjonsnummer"
+        bind:this={feideOrgInput}
+      />
+      <button
+        class="btn btn-outline-secondary"
+        type="button"
+        onclick={() => feideSchoolImport(feideOrgInput.value)}
+      >
+        Importer fra Feide
+      </button>
+    </div>
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" bind:checked={dryRun} id="dryRunSwitch" />
+        <label class="form-check-label" for="dryRunSwitch">Dry-run (ingen DB-skriving)</label>
+      </div>
+      <div class="form-check form-switch">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          bind:checked={overwrite}
+          id="overwriteSwitch"
+        />
+        <label class="form-check-label" for="overwriteSwitch">Overwrite eksisterende</label>
+      </div>
+      <div class="form-check form-switch">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          bind:checked={crashOnError}
+          id="crashSwitch"
+        />
+        <label class="form-check-label" for="crashSwitch">Stopp ved feil</label>
       </div>
     </div>
-  {/if}
+    {#if alertMessage}
+      <div
+        class="alert alert-{alertType === 'success' ? 'success' : 'danger'} alert-dismissible"
+        role="alert"
+      >
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="flex-grow-1">
+            {alertMessage}
 
-  <div class="d-flex flex-column gap-2 w-100">
-    {#if schools.length === 0}
-      <div class="alert alert-info">Laster skoler...</div>
-    {:else}
-      {#each schools as school}
-        <div class="card">
-          <div class="card-body d-flex justify-content-between align-items-center">
-            <div class="school-info">
-              {#if school.isServiceEnabled}
-                <a href="/" onclick={() => setCurrentSchool(school)} class="text-decoration-none">
-                  <h6 class="mb-1">{school.displayName}</h6>
+            {#if rawJsonResult && alertType === 'success'}
+              <div class="mt-2">
+                <button
+                  class="btn btn-sm btn-outline-secondary"
+                  onclick={() => (showDetails = !showDetails)}
+                >
+                  {showDetails ? '📄 Skjul JSON' : '📋 Vis JSON resultat'}
+                </button>
+              </div>
+
+              {#if showDetails}
+                <div class="mt-2 pt-2 border-top">
+                  <small class="text-muted">Response:</small>
+                  <pre class="json-display">{JSON.stringify(rawJsonResult, null, 2)}</pre>
+                </div>
+              {/if}
+            {/if}
+          </div>
+
+          <button type="button" class="btn-close" onclick={dismissAlert} aria-label="Lukk"></button>
+        </div>
+      </div>
+    {/if}
+
+    <div class="d-flex flex-column gap-2 w-100">
+      {#if schools.length === 0}
+        <div class="alert alert-info">Laster skoler...</div>
+      {:else}
+        {#each schools as school}
+          <div class="card">
+            <div class="card-body d-flex justify-content-between align-items-center">
+              <div class="school-info">
+                {#if school.isServiceEnabled}
+                  <a href="/" onclick={() => setCurrentSchool(school)} class="text-decoration-none">
+                    <h6 class="mb-1">{school.displayName}</h6>
+                    <small class="text-muted">
+                      {school.orgNumber} • Sist oppdatert: {new Date(
+                        school.updatedAt
+                      ).toLocaleString('nb-NO')}
+                    </small>
+                  </a>
+                {:else}
+                  <h6 class="mb-1 text-muted">{school.displayName}</h6>
                   <small class="text-muted">
                     {school.orgNumber} • Sist oppdatert: {new Date(school.updatedAt).toLocaleString(
                       'nb-NO'
                     )}
                   </small>
-                </a>
-              {:else}
-                <h6 class="mb-1 text-muted">{school.displayName}</h6>
-                <small class="text-muted">
-                  {school.orgNumber} • Sist oppdatert: {new Date(school.updatedAt).toLocaleString(
-                    'nb-NO'
-                  )}
-                </small>
-              {/if}
-            </div>
-
-            <div class="d-flex align-items-center gap-2">
-              <button
-                class="btn btn-outline-primary btn-sm"
-                onclick={() => syncSchoolData(school)}
-                disabled={importingSchool.has(school.id)}
-              >
-                {#if importingSchool.has(school.id)}
-                  <span class="spinner-border spinner-border-sm me-1"></span>
-                  Importerer...
-                {:else}
-                  📥 Importer
                 {/if}
-              </button>
+              </div>
 
-              <div class="form-check form-switch">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  checked={school.isServiceEnabled}
-                  onchange={() => toggleServiceEnabled(school)}
-                />
-                <label class="form-check-label">
-                  {school.isServiceEnabled ? 'Aktiv' : 'Inaktiv'}
-                </label>
+              <div class="d-flex align-items-center gap-2">
+                <button
+                  class="btn btn-outline-secondary btn-sm"
+                  onclick={() => feideFetchGroupsForSchool(school.orgNumber)}
+                  disabled={fetchingGroups.has(school.orgNumber)}
+                >
+                  {#if fetchingGroups.has(school.orgNumber)}
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                    Henter grupper...
+                  {:else}
+                    🔁 Hent grupper
+                  {/if}
+                </button>
+                <button
+                  class="btn btn-outline-secondary btn-sm"
+                  onclick={() => feideFetchUsersForSchool(school.orgNumber)}
+                  disabled={fetchingUsers.has(school.orgNumber)}
+                >
+                  {#if fetchingUsers.has(school.orgNumber)}
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                    Henter brukere...
+                  {:else}
+                    👥 Hent brukere
+                  {/if}
+                </button>
+                <button
+                  class="btn btn-outline-primary btn-sm"
+                  onclick={() => importGroupsAndUsers(school.orgNumber)}
+                  disabled={importingGroupsAndUsers.has(school.orgNumber)}
+                >
+                  {#if importingGroupsAndUsers.has(school.orgNumber)}
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                    Importerer...
+                  {:else}
+                    📥 Importer
+                  {/if}
+                </button>
+
+                <div class="form-check form-switch">
+                  <input
+                    id={"service-" + school.id}
+                    class="form-check-input"
+                    type="checkbox"
+                    checked={school.isServiceEnabled}
+                    onchange={() => toggleServiceEnabled(school)}
+                  />
+                  <label class="form-check-label" for={"service-" + school.id}>
+                    {school.isServiceEnabled ? 'Aktiv' : 'Inaktiv'}
+                  </label>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      {/each}
-    {/if}
+        {/each}
+      {/if}
+    </div>
   </div>
 </section>
 
@@ -287,8 +335,11 @@
     height: 0.8rem;
   }
 
-  .bg-light {
-    background-color: #f8f9fa !important;
+  .json-display {
+    margin: 0;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    max-height: 400px;
+    overflow-y: auto;
   }
-
 </style>

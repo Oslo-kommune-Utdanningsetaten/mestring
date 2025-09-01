@@ -9,10 +9,9 @@ from django.db import connection
 import json
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from mastery.imports.task_tracker import run_with_task_tracking
-from mastery.imports.cli import sync_school_data
-from mastery.imports.feide_api import fetch_and_store_feide_groups
-from mastery.imports.school_importer import import_schools_from_file
+from mastery.imports.task_tracker import run_with_task_tracking,import_groups_and_users
+from mastery.imports.feide_api import fetch_and_store_feide_groups_for_school, fetch_feide_users_for_school
+from mastery.imports.school_importer import import_school_from_feide
 
 
 # More about filtering in Django REST Framework:
@@ -241,112 +240,125 @@ def _get_flag(data, key, default=False):
     return default
 
 
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def sync_school_data_api(request, org_number):
+def feide_import_school_api(request, org_number):
     """
-    Sync school API endpoint for a specific school.
-    Runs the workflow and returns the task + step results.
+    Import a single school by org number from Feide and create/update in our database.
     """
     try:
-        school = models.School.objects.filter(org_number=org_number).first()
-        if not school:
-            return Response({
-                "status": "error",
-                "message": f"School with org_number {org_number} not found",
-                "org_number": org_number
-            }, status=404)
-        
-        is_dryrun_enabled = _get_flag(request.data, 'is_dryrun_enabled', False)
-        is_overwrite_enabled = _get_flag(request.data, 'is_overwrite_enabled', False)
-        is_crash_on_error_enabled = _get_flag(request.data, 'is_crash_on_error_enabled', False)
-
-        # Run with consistent job name
+        # Use task tracking like the other endpoints
         result = run_with_task_tracking(
-            job_name='sync_school_data',
-            target_id=school.org_number,
-            func=sync_school_data,           
-            org_number=school.org_number,    
-            is_dryrun_enabled=is_dryrun_enabled,
-            is_overwrite_enabled=is_overwrite_enabled,
-            is_crash_on_error_enabled=is_crash_on_error_enabled,
+            job_name='feide_import_school',
+            target_id=org_number,
+            func=import_school_from_feide,
+            org_number=org_number,
         )
-
-        # # Include task in response
-        task = models.DataMaintenanceTask.objects.get(id=result['task_id'])
-        task_serializer = serializers.DataMaintenanceTaskSerializer(task)
-
+        
+        # Extract the actual result from stepResults (camelCase from task tracker)
+        import_result = result.get('step_results', {})
+        print("Import result:", import_result)
+        
+        if import_result.get('status') == 'not_found':
+            return Response({
+                "status": "error", 
+                "message": "Feide group not found"
+            }, status=404)
+            
         return Response({
             "status": "success",
-            "message": f"Sync school completed for {school.display_name}",
-            "org_number": org_number,
-            "school_name": school.display_name,
-            "step_results": result.get('step_results', {}),
-            "task": task_serializer.data
+            "message": f"School {import_result.get('display_name', org_number)} imported successfully",
+            "school": import_result,
+            "task_id": result.get('task_id')
         })
-
+        
     except Exception as e:
         return Response({
             "status": "error",
-            "message": f"Sync school failed: {str(e)}",
-            "org_number": org_number
-        }, status=500)
-
+            "message": f"Failed to import school: {str(e)}"
+        }, status=400)
+    
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def fetch_groups_api(request):
+def feide_fetch_groups_for_school_api(request, org_number):
     """
-    Fetch Feide groups and write to imports/data/unified + per-school files.
+    Fetch Feide groups for a single school (by org number) and store them
+    at imports/data/schools/<org>/groups.json. Returns simple counts.
     """
     try:
+        school = models.School.objects.filter(org_number=org_number).first()
+        target = school.display_name if school else org_number
+
         result = run_with_task_tracking(
-            job_name='fetch_groups',
-            target_id=None,
-            func=fetch_and_store_feide_groups
+            job_name='fetch_feide_groups_for_school',
+            target_id=target,
+            func=fetch_and_store_feide_groups_for_school,           
+            org_number= org_number,  
         )
-        return Response({
-            "status": "success",
-            "message": "Groups fetched successfully",
-            "step_results": result.get('step_results', {}),
-            "task": result['task_id']
-        })
+        return Response({"status": "success", **result})
     except Exception as e:
         return Response({
             "status": "error",
-            "message": f"Failed to fetch groups: {str(e)}"
+            "message": f"Failed to fetch groups for org {org_number}: {str(e)}"
         }, status=400)
-
-
-@api_view(['POST'])
+    
+@api_view(['GET'])
 @permission_classes([AllowAny])
-def import_schools_api(request):
+def feide_fetch_users_for_school_api(request, org_number):
     """
-    Import schools from imports/data/unified/schools.json (or per-school dir if org_number provided).
+    Fetch users/memberships for a single school (by org number) into imports/data/schools/<org>/users.json
     """
     try:
+        school = models.School.objects.filter(org_number=org_number).first()
+        target = school.display_name if school else org_number
+        result = run_with_task_tracking(
+            job_name='fetch_feide_users_for_school',
+            target_id=target,
+            func=fetch_feide_users_for_school,           
+            org_number= org_number,  
+        )
+        return Response({"status": "success", **result})
+    except Exception as e:
+        return Response({
+            "status": "error",
+            "message": f"Failed to fetch users for org {org_number}: {str(e)}"
+        }, status=400)
+
+    
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def import_groups_and_users_api(request, org_number):
+    """
+    Import groups and users for a specific school from previously fetched files.
+    """
+    try:
+        school = models.School.objects.filter(org_number=org_number).first()
+        target = school.display_name if school else org_number
+
         is_dryrun_enabled = _get_flag(request.data, 'is_dryrun_enabled', False)
         is_overwrite_enabled = _get_flag(request.data, 'is_overwrite_enabled', False)
         is_crash_on_error_enabled = _get_flag(request.data, 'is_crash_on_error_enabled', False)
+        
         result = run_with_task_tracking(
-            job_name='import_schools',
-            target_id=None,
-            func=import_schools_from_file,
+            job_name='import_groups_and_users',
+            target_id=target,
+            func=import_groups_and_users,
+            org_number=org_number,
             is_dryrun_enabled=is_dryrun_enabled,
             is_overwrite_enabled=is_overwrite_enabled,
             is_crash_on_error_enabled=is_crash_on_error_enabled,
         )
+
         return Response({
             "status": "success",
-            "message": "Schools imported successfully",
-            "step_results": result.get('step_results', {}),
-            "task": result['task_id']
+            "message": f"Import of groups and users completed for school {target}",
+            "org_number": org_number,
+             **result
         })
     except Exception as e:
         return Response({
             "status": "error",
-            "message": f"Failed to import schools: {str(e)}"
-        }, status=400)
-
-
+            "message": f"Import of groups and users failed: {str(e)}",
+            "org_number": org_number
+        }, status=500)
