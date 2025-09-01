@@ -632,6 +632,38 @@ export type UserGroupWritable = {
     roleId: string;
 };
 
+export type FetchGroupsFeideRetrieveData = {
+    body?: never;
+    path: {
+        orgNumber: string;
+    };
+    query?: never;
+    url: '/api/fetch/groups/feide/{org_number}/';
+};
+
+export type FetchGroupsFeideRetrieveResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
+export type FetchUsersFeideRetrieveData = {
+    body?: never;
+    path: {
+        orgNumber: string;
+    };
+    query?: never;
+    url: '/api/fetch/users/feide/{org_number}/';
+};
+
+export type FetchUsersFeideRetrieveResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
 export type GoalsListData = {
     body?: never;
     path?: never;
@@ -863,73 +895,37 @@ export type GroupsMembersRetrieveResponses = {
 
 export type GroupsMembersRetrieveResponse = GroupsMembersRetrieveResponses[keyof GroupsMembersRetrieveResponses];
 
-export type ImportSchoolSmartData = {
+export type ImportSchoolFeideCreateData = {
     body?: never;
     path: {
         orgNumber: string;
     };
     query?: never;
-    url: '/api/import/school/{org_number}/';
+    url: '/api/import/school/feide/{org_number}/';
 };
 
-export type ImportSchoolSmartErrors = {
+export type ImportSchoolFeideCreateResponses = {
     /**
-     * School not found
+     * No response body
      */
-    404: {
-        status?: string;
-        message?: string;
-        org_number?: string;
-    };
-    /**
-     * Import failed
-     */
-    500: {
-        status?: string;
-        message?: string;
-        org_number?: string;
-        task?: {
-            id?: string;
-            status?: string;
-            result?: {
-                [key: string]: unknown;
-            };
-        } | null;
-    };
+    200: unknown;
 };
 
-export type ImportSchoolSmartError = ImportSchoolSmartErrors[keyof ImportSchoolSmartErrors];
-
-export type ImportSchoolSmartResponses = {
-    /**
-     * Import completed successfully
-     */
-    200: {
-        status?: string;
-        message?: string;
-        org_number?: string;
-        school_name?: string;
-        step_results?: {
-            [key: string]: unknown;
-        };
-        task?: {
-            id?: string;
-            status?: 'pending' | 'running' | 'finished' | 'failed';
-            jobName?: string;
-            targetId?: string | null;
-            startedAt?: string | null;
-            finishedAt?: string | null;
-            failedAt?: string | null;
-            result?: {
-                [key: string]: unknown;
-            };
-            durationSeconds?: number | null;
-            durationDisplay?: string | null;
-        };
+export type ImportSchoolGroupsAndUsersCreateData = {
+    body?: never;
+    path: {
+        orgNumber: string;
     };
+    query?: never;
+    url: '/api/import/school_groups_and_users/{org_number}/';
 };
 
-export type ImportSchoolSmartResponse = ImportSchoolSmartResponses[keyof ImportSchoolSmartResponses];
+export type ImportSchoolGroupsAndUsersCreateResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
 
 export type MasterySchemasListData = {
     body?: never;

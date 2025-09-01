@@ -325,7 +325,7 @@ def feide_fetch_users_for_school_api(request, org_number):
             "message": f"Failed to fetch users for org {org_number}: {str(e)}"
         }, status=400)
 
-    
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def import_groups_and_users_api(request, org_number):
