@@ -5,6 +5,7 @@
   import type { GoalDecorated } from '../types/models'
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   import GoalEdit from '../components/GoalEdit.svelte'
+  import GoalCard from '../components/GoalCard.svelte'
   import { dataStore } from '../stores/data'
   import { getLocalStorageItem } from '../stores/localStorage'
 
@@ -57,9 +58,9 @@
     goalWip = {
       ...goal,
       groupId: group?.id,
-      sortOrder: goal.sortOrder || (goals.length ? goals.length + 1 : 1),
+      sortOrder: goal?.sortOrder || (goals.length ? goals.length + 1 : 1),
       masterySchemaId:
-        goal.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
+        goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
     }
   }
 
@@ -117,44 +118,40 @@
     </div>
 
     <!-- Goals Section -->
-    {#if goals}
-      <div class="card mb-4">
-        <div class="card-header d-flex align-items-center gap-2 mb-3">
-          <h3 class="mb-0">Mål</h3>
-          <pkt-button
-            size="small"
-            skin="tertiary"
-            type="button"
-            variant="icon-only"
-            iconName="plus-sign"
-            title="Legg til nytt gruppemål"
-            class="mini-button bordered"
-            onclick={() => handleEditGoal(null)}
-            onkeydown={(e: any) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                handleEditGoal(null)
-              }
-            }}
-            role="button"
-            tabindex="0"
-          >
-            Nytt personlig mål
-          </pkt-button>
-        </div>
-        <div class="card-body">
-          {#if goals.length === 0}
-            <p>Trykk pluss (+) knappen for å opprette et mål for denne gruppa</p>
-          {:else}
-            <ul>
-              {#each goals as goal}
-                <li>{goal.title}</li>
-              {/each}
-            </ul>
-          {/if}
-        </div>
+    <div class="mb-4">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <h3 class="mb-0">Mål</h3>
+        <pkt-button
+          size="small"
+          skin="tertiary"
+          type="button"
+          variant="icon-only"
+          iconName="plus-sign"
+          title="Legg til nytt gruppemål for {group.displayName}"
+          class="mini-button bordered"
+          onclick={() => handleEditGoal(null)}
+          onkeydown={(e: any) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              handleEditGoal(null)
+            }
+          }}
+          role="button"
+          tabindex="0"
+        >
+          Nytt gruppemål
+        </pkt-button>
       </div>
-    {/if}
+      <div>
+        {#if goals.length === 0}
+          <p>Trykk pluss (+) knappen for å opprette et mål for denne gruppa</p>
+        {:else}
+          {#each goals as goal}
+            <GoalCard {goal} />
+          {/each}
+        {/if}
+      </div>
+    </div>
 
     <!-- Students Section -->
     {#if students}

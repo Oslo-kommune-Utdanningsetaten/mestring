@@ -58,9 +58,9 @@
       ...goal,
       subjectId,
       studentId: student.id,
-      sortOrder: goal.sortOrder || (goals.length ? goals.length + 1 : 1),
+      sortOrder: goal?.sortOrder || (goals.length ? goals.length + 1 : 1),
       masterySchemaId:
-        goal.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
+        goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
     }
   }
 
