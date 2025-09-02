@@ -8,6 +8,7 @@ from mastery.imports.feide_api import (
     fetch_feide_users_for_school,
 )
 from mastery.imports.school_importer import import_school_from_feide
+from django.db.models import Q
 
 
 from mastery import models
@@ -61,7 +62,6 @@ def feide_import_school_api(request, org_number):
         return admin_check
 
     try:
-        # Use task tracking like the other endpoints
         result = run_with_task_tracking(
             job_name="feide_import_school",
             target_id=org_number,
@@ -69,7 +69,6 @@ def feide_import_school_api(request, org_number):
             org_number=org_number,
         )
 
-        # Extract the actual result from stepResults (camelCase from task tracker)
         import_result = result.get("step_results", {})
         print("Import result:", import_result)
 
@@ -201,3 +200,109 @@ def import_groups_and_users_api(request, org_number):
             },
             status=500,
         )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def fetch_school_import_status_api(request, org_number):
+    """
+    Return status for one school:
+    - Groups: last fetch count + time, DB count, diff
+    - Users:  last fetch count + time, DB count, diff
+    - Memberships: DB count, diff
+    - Last import timestamp
+    """
+    admin_check = _check_superadmin(request)
+    if admin_check:
+        return admin_check
+
+    school = models.School.objects.filter(org_number=org_number).first()
+
+    # Tasks target id filter
+    target_filter = Q(target_id=org_number)
+    if school and school.display_name:
+        target_filter |= Q(target_id=school.display_name)
+
+    # Latest finished tasks
+    last_groups_task = (
+        models.DataMaintenanceTask.objects
+        .filter(job_name="fetch_feide_groups_for_school", status="finished")
+        .filter(target_filter)
+        .order_by("-finished_at")
+        .first()
+    )
+    last_users_task = (
+        models.DataMaintenanceTask.objects
+        .filter(job_name="fetch_feide_users_for_school", status="finished")
+        .filter(target_filter)
+        .order_by("-finished_at")
+        .first()
+    )
+    last_import_task = (
+        models.DataMaintenanceTask.objects
+        .filter(job_name="import_groups_and_users", status="finished")
+        .filter(target_filter)
+        .filter(is_dryrun_enabled=False)  
+        .order_by("-finished_at")
+        .first()
+    )
+
+    # Extract fetched counts and timestamps
+    groups_fetched_count = (last_groups_task.result or {}).get("total_groups") if last_groups_task else None
+    users_fetched_count = (last_users_task.result or {}).get("unique_users") if last_users_task else None
+    memebership_fetched_count = (last_users_task.result or {}).get("total_memberships") if last_users_task else None
+    
+    groups_fetched_at = last_groups_task.finished_at.isoformat(
+    ) if last_groups_task and last_groups_task.finished_at else None
+    users_fetched_at = last_users_task.finished_at.isoformat(
+    ) if last_users_task and last_users_task.finished_at else None
+    last_import_at = last_import_task.finished_at.isoformat(
+    ) if last_import_task and last_import_task.finished_at else None
+
+    # DB counts 
+    if school:
+        groups_db_count = models.Group.objects.filter(
+            school=school, type__in=["basis", "teaching"]
+        ).count()
+        users_db_count = models.User.objects.filter(
+            groups__school=school
+        ).distinct().count()
+        user_groups_db_count = models.UserGroup.objects.filter(
+            group__school=school
+        ).count()
+    else:
+        groups_db_count = 0
+        users_db_count = 0
+        user_groups_db_count = 0
+
+    # Diffs
+    groups_diff = (groups_fetched_count - groups_db_count) if isinstance(groups_fetched_count, int) else None
+    users_diff = (users_fetched_count - users_db_count) if isinstance(users_fetched_count, int) else None
+    user_groups_diff = (memebership_fetched_count - user_groups_db_count) if isinstance(memebership_fetched_count, int) else None
+
+    return Response({
+        "status": "success",
+        "orgNumber": org_number,
+        "school": {
+            "id": getattr(school, "id", None),
+            "displayName": getattr(school, "display_name", None),
+        },
+        "groups": {
+            "fetchedCount": groups_fetched_count,
+            "fetchedAt": groups_fetched_at,
+            "dbCount": groups_db_count,
+            "diff": groups_diff,
+        },
+        "users": {
+            "fetchedCount": users_fetched_count,
+            "fetchedAt": users_fetched_at,
+            "dbCount": users_db_count,
+            "diff": users_diff,
+        },
+        "memberships": {
+            "fetchedCount": memebership_fetched_count,
+            "dbCount": user_groups_db_count,
+            "diff": user_groups_diff,
+        },
+        "lastImportAt": last_import_at,
+    })

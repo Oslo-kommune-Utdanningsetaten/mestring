@@ -17,10 +17,73 @@
   let feideOrgInput: HTMLInputElement
   let readiness = $state<Record<string, { groups: number; users: number }>>({})
 
+  type ImportStatus = {
+    groups: {
+      fetchedCount: number | null
+      fetchedAt: string | null
+      dbCount: number | null
+      diff: number | null
+    }
+    users: {
+      fetchedCount: number | null
+      fetchedAt: string | null
+      dbCount: number | null
+      diff: number | null
+    }
+    memeberships: {
+      fetchedCount: number | null
+      fetchedAt: string | null
+      dbCount: number | null
+      diff: number | null
+    }
+
+    lastImportAt: string | null
+  }
+  let importStatus = $state<Record<string, ImportStatus>>({})
+
+  const formatDate = (iso?: string | null) => (iso ? new Date(iso).toLocaleString('nb-NO') : '—')
+
+  const loadImportStatusForSchool = async (orgNumber: string) => {
+    try {
+      const response = await fetch(`/api/fetch/school_import_status/${orgNumber}/`)
+      const data = await response.json()
+      if (response.ok) {
+        importStatus = {
+          ...importStatus,
+          [orgNumber]: {
+            groups: {
+              fetchedCount: data.groups?.fetchedCount ?? null,
+              fetchedAt: data.groups?.fetchedAt ?? null,
+              dbCount: data.groups?.dbCount ?? 0,
+              diff: data.groups?.diff ?? null,
+            },
+            users: {
+              fetchedCount: data.users?.fetchedCount ?? null,
+              fetchedAt: data.users?.fetchedAt ?? null,
+              dbCount: data.users?.dbCount ?? 0,
+              diff: data.users?.diff ?? null,
+            },
+            memeberships: {
+              fetchedCount: data.memberships?.fetchedCount ?? null,
+              fetchedAt: data.memberships?.fetchedAt ?? null,
+              dbCount: data.memberships?.dbCount ?? 0,
+              diff: data.memberships?.diff ?? null,
+            },
+            lastImportAt: data.lastImportAt ?? null,
+          },
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching import status:', orgNumber, error)
+    }
+  }
+
   const fetchSchools = async () => {
     try {
       const result = await schoolsList()
       schools = result.data || []
+      // Load status for each school
+      await Promise.all(schools.map(s => loadImportStatusForSchool(s.orgNumber)))
     } catch (error) {
       console.error('Error fetching schools:', error)
       schools = []
@@ -73,6 +136,7 @@
             users: readiness[orgNumber]?.users ?? 0,
           },
         }
+        loadImportStatusForSchool(orgNumber)
       } else {
         alertMessage = `❌ Feil ved henting av grupper for ${orgNumber}: ${result.message || 'Ukjent feil'}`
         alertType = 'error'
@@ -106,6 +170,7 @@
             users: result.stepResults?.uniqueUsers ?? 0,
           },
         }
+        loadImportStatusForSchool(orgNumber)
       } else {
         alertMessage = `❌ Feil ved henting av brukere for ${orgNumber}: ${result.message || 'Ukjent feil'}`
         alertType = 'error'
@@ -161,6 +226,7 @@
         alertMessage = `✅ Grupper og brukere importert for skole ${orgNumber}!`
         alertType = 'success'
         rawJsonResult = result || null
+        loadImportStatusForSchool(orgNumber)
       } else {
         alertMessage = `❌ Feil ved import av grupper og brukere for skole ${orgNumber}: ${result.message || 'Ukjent feil'}`
         alertType = 'error'
@@ -280,10 +346,51 @@
                 {:else}
                   <h6 class="mb-1 text-muted">{school.displayName}</h6>
                   <small class="text-muted">
-                    {school.orgNumber} • Sist oppdatert: {new Date(school.updatedAt).toLocaleString(
-                      'nb-NO'
-                    )}
+                    {school.orgNumber} • Sist oppdatert: {formatDate(school.updatedAt)}
                   </small>
+                {/if}
+
+                {#if importStatus[school.orgNumber]}
+                  <div class="mt-3 small">
+                    <table class="table table-bordered align-middle w-100">
+                      <thead class="table-light">
+                        <tr>
+                          <th scope="col">Type</th>
+                          <th scope="col">Hentet</th>
+                          <th scope="col">DB</th>
+                          <th scope="col">Forskjell</th>
+                          <th scope="col">Sist hentet</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>Grupper</strong></td>
+                          <td>{importStatus[school.orgNumber].groups.fetchedCount ?? '—'}</td>
+                          <td>{importStatus[school.orgNumber].groups.dbCount ?? '—'}</td>
+                          <td>{importStatus[school.orgNumber].groups.diff ?? '—'}</td>
+                          <td>{formatDate(importStatus[school.orgNumber].groups.fetchedAt)}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Brukere</strong></td>
+                          <td>{importStatus[school.orgNumber].users.fetchedCount ?? '—'}</td>
+                          <td>{importStatus[school.orgNumber].users.dbCount ?? '—'}</td>
+                          <td>{importStatus[school.orgNumber].users.diff ?? '—'}</td>
+                          <td>{formatDate(importStatus[school.orgNumber].users.fetchedAt)}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Medlemskap</strong></td>
+                          <td>{importStatus[school.orgNumber].memeberships.fetchedCount ?? '—'}</td>
+                          <td>{importStatus[school.orgNumber].memeberships.dbCount ?? '—'}</td>
+                          <td>{importStatus[school.orgNumber].memeberships.diff ?? '—'}</td>
+                          <td>{formatDate(importStatus[school.orgNumber].users.fetchedAt)}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div class="text-muted">
+                      ⏱️ Sist import: {formatDate(importStatus[school.orgNumber].lastImportAt)}
+                    </div>
+                  </div>
                 {/if}
               </div>
 

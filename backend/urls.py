@@ -15,4 +15,5 @@ urlpatterns = [
     path('api/fetch/groups/feide/<str:org_number>/', custom.feide_fetch_groups_for_school_api, name='feide-fetch-groups-school'),
     path('api/fetch/users/feide/<str:org_number>/', custom.feide_fetch_users_for_school_api, name='feide-fetch-users-school'),
     path('api/import/school_groups_and_users/<str:org_number>/', custom.import_groups_and_users_api, name='import-groups-and-users-api'),
+    path('api/fetch/school_import_status/<str:org_number>/', custom.fetch_school_import_status_api, name='fetch-school-import-status'),
 ]
