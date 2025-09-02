@@ -1,5 +1,5 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.db import connection
 from mastery.imports.task_tracker import run_with_task_tracking,import_groups_and_users
@@ -35,13 +35,25 @@ def _get_flag(data, key, default=False):
         return v != 0
     return default
 
+def _check_superadmin(request):
+    if  not request.user.is_superadmin:
+        return Response({
+            "status": "error",
+            "message": "Only superadmins can access this endpoint"
+        }, status=403)
+    return None
+
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def feide_import_school_api(request, org_number):
     """
     Import a single school by org number from Feide and create/update in our database.
     """
+    admin_check = _check_superadmin(request)
+    if admin_check:
+        return admin_check
+    
     try:
         # Use task tracking like the other endpoints
         result = run_with_task_tracking(
@@ -76,12 +88,16 @@ def feide_import_school_api(request, org_number):
     
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def feide_fetch_groups_for_school_api(request, org_number):
     """
     Fetch Feide groups for a single school (by org number) and store them
     at imports/data/schools/<org>/groups.json. Returns simple counts.
     """
+    admin_check = _check_superadmin(request)
+    if admin_check:
+        return admin_check
+        
     try:
         school = models.School.objects.filter(org_number=org_number).first()
         target = school.display_name if school else org_number
@@ -100,11 +116,14 @@ def feide_fetch_groups_for_school_api(request, org_number):
         }, status=400)
     
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def feide_fetch_users_for_school_api(request, org_number):
     """
     Fetch users/memberships for a single school (by org number) into imports/data/schools/<org>/users.json
     """
+    admin_check = _check_superadmin(request)
+    if admin_check:
+        return admin_check
     try:
         school = models.School.objects.filter(org_number=org_number).first()
         target = school.display_name if school else org_number
@@ -123,11 +142,14 @@ def feide_fetch_users_for_school_api(request, org_number):
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def import_groups_and_users_api(request, org_number):
     """
     Import groups and users for a specific school from previously fetched files.
     """
+    admin_check = _check_superadmin(request)
+    if admin_check:
+        return admin_check
     try:
         school = models.School.objects.filter(org_number=org_number).first()
         target = school.display_name if school else org_number
