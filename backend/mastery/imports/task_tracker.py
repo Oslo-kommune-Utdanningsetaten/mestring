@@ -50,7 +50,7 @@ def run_with_task_tracking(
     )
 
     try:
-        # Let the function manage its own (short) transactions per step if needed.
+        # Refresh connection if needed
         result = func(*args, **kwargs)
 
         # Finish
@@ -68,7 +68,6 @@ def run_with_task_tracking(
             else None
         )
 
-        # FIXED: Use snake_case consistently
         return {
             "task_id": str(task.id),
             "job": job_name,
@@ -96,6 +95,7 @@ def run_with_task_tracking(
         print(f"❌ Task failed: {job_name} (ID: {task.id}) - {e}")
 
         if is_crash_on_error_enabled:
+            task.failed_at = timezone.now()
             raise
         raise e
 

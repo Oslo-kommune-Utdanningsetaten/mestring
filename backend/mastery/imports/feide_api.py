@@ -8,10 +8,7 @@ from .helpers import create_user_item, get_feide_access_token
 from urllib.parse import quote
 
 # API Configuration
-TOKEN_ENDPOINT = "https://auth.dataporten.no/oauth/token"
 GROUPS_ENDPOINT = "https://groups-api.dataporten.no/groups/orgs/feide.osloskolen.no/groups"
-FEIDE_CLIENT_ID = os.environ.get('FEIDE_CLIENT_ID')
-FEIDE_CLIENT_SECRET = os.environ.get('FEIDE_CLIENT_SECRET')
 UDIR_GREP_URL = "https://data.udir.no/kl06/v201906/fagkoder/"
 FEIDE_REALM = os.environ.get('FEIDE_REALM')
 GROUPS_BASE = "https://groups-api.dataporten.no/groups/v1"
