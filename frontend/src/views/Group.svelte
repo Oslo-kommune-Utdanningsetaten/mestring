@@ -6,6 +6,7 @@
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   import GoalEdit from '../components/GoalEdit.svelte'
   import { dataStore } from '../stores/data'
+  import { getLocalStorageItem } from '../stores/localStorage'
 
   const { groupId } = $props<{ groupId: string }>()
 
@@ -53,7 +54,13 @@
   }
 
   const handleEditGoal = (goal: GoalDecorated | null) => {
-    goalWip = { ...goal, groupId: group?.id }
+    goalWip = {
+      ...goal,
+      groupId: group?.id,
+      sortOrder: goal.sortOrder || (goals.length ? goals.length + 1 : 1),
+      masterySchemaId:
+        goal.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
+    }
   }
 
   const handleGoalDone = async () => {
@@ -94,7 +101,7 @@
     <!-- Group Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h1 class="mb-1">{group.displayName}</h1>
+        <h1>{group.displayName}</h1>
 
         <div>
           <pkt-tag iconName="two-people-dancing" skin="blue" class="me-1">

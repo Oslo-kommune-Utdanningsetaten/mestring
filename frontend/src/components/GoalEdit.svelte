@@ -2,7 +2,7 @@
   import { dataStore } from '../stores/data'
   import { goalsCreate, goalsUpdate } from '../generated/sdk.gen'
   import type { GoalWritable, GroupReadable, UserReadable } from '../generated/types.gen'
-  import { getLocalStorageItem, setLocalStorageItem } from '../stores/localStorage'
+  import { setLocalStorageItem } from '../stores/localStorage'
 
   const {
     student = null,
@@ -54,7 +54,6 @@
   // Fetch mastery schemas when component mounts
   $effect(() => {
     localGoal = {
-      masterySchemaId: getLocalStorageItem('preferredMasterySchemaId') || '',
       subjectId: '',
       ...goal,
     }

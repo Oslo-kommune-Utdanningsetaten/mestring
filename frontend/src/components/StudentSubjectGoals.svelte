@@ -12,6 +12,7 @@
   import GoalEdit from './GoalEdit.svelte'
   import ObservationEdit from './ObservationEdit.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
+  import { getLocalStorageItem } from '../stores/localStorage'
 
   const { subjectId, student } = $props<{ subjectId: string; student: UserReadable }>()
 
@@ -53,7 +54,14 @@
   }
 
   const handleEditGoal = (goal: GoalDecorated | null) => {
-    goalWip = { ...goal, subjectId, studentId: student.id }
+    goalWip = {
+      ...goal,
+      subjectId,
+      studentId: student.id,
+      sortOrder: goal.sortOrder || (goals.length ? goals.length + 1 : 1),
+      masterySchemaId:
+        goal.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
+    }
   }
 
   const handleCloseEditGoal = () => {
@@ -261,17 +269,17 @@
         </div>
 
         {#if expandedGoals[goal.id]}
-          <div class="mx-3">
+          <div>
             {#if goal?.observations.length === 0}
-              <div class="bg-info p-3">
+              <div class="alert alert-info my-3">
                 {#if goal.isGroup}
-                  <p>
+                  <div>
                     Dette målet er ikke personlig, men gitt for en hel gruppe. Du finner guppa <Link
                       to={`/groups/${goal.groupId}/`}
                     >
                       her
                     </Link>.
-                  </p>
+                  </div>
                 {:else}
                   <p>Ingen observasjoner for dette målet</p>
 
