@@ -1,6 +1,6 @@
 import type { Mastery, GoalDecorated } from '../types/models'
 import type { GoalReadable, SubjectReadable, ObservationReadable } from '../generated/types.gen'
-import { usersGoalsRetrieve, observationsList, usersGroupsRetrieve } from '../generated/sdk.gen'
+import { goalsList, observationsList, groupsList } from '../generated/sdk.gen'
 import { dataStore } from '../stores/data'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
@@ -69,7 +69,7 @@ export const goalsWithCalculatedMastery = async (
 ): Promise<GoalDecorated[]> => {
   const observationsPromises = studentGoals.map(goal =>
     observationsList({
-      query: { goalId: goal.id, studentId: studentId },
+      query: { goal: goal.id, student: studentId },
     })
   )
   const observationsResults = await Promise.all(observationsPromises)
@@ -90,21 +90,23 @@ export const goalsWithCalculatedMastery = async (
   return result
 }
 
-export const subjectIdsViaGroupOrGoal = async (studentId: string): Promise<string[]> => {
+export const subjectIdsViaGroupOrGoal = async (
+  studentId: string,
+  schoolId: string
+): Promise<string[]> => {
   const subjectsId: Set<string> = new Set()
-  const userGroups: any = await usersGroupsRetrieve({
-    path: { id: studentId },
-    query: { roles: 'student' },
+  const groupsResult: any = await groupsList({
+    query: { user: studentId, school: schoolId },
   })
-  userGroups.data.forEach((group: any) => {
+  const userGroups = groupsResult.data || []
+  userGroups.forEach((group: any) => {
     if (group.subjectId && ['undervisning', 'teaching'].includes(group.type)) {
       subjectsId.add(group.subjectId)
     }
   })
-  const userGoals: any = await usersGoalsRetrieve({
-    path: { id: studentId },
-  })
-  userGoals.data.forEach((goal: GoalReadable) => {
+  const goalsResult: any = await goalsList({ query: { student: studentId } })
+  const userGoals = goalsResult.data || []
+  userGoals.forEach((goal: GoalReadable) => {
     if (goal.subjectId) {
       subjectsId.add(goal.subjectId)
     }

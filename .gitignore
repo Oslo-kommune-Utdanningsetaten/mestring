@@ -6,15 +6,23 @@ log/
 *.log*
 __pycache__/
 .vscode/launch.json
+.htpasswd
+.coverage
+
+# import data we don't want in git
 backend/import/data/old/
 backend/import/data/*.json
 backend/mastery/imports/data/*
 .htpasswd
 
+# in case your python virtual environment is located in the project
+backend/.venv # in case your
 
 # ai agent tooling
 .goose
 .gooseignore
+
+.vscode/mcp.json
 
 # macos
 .DS_Store

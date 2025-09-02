@@ -13,3 +13,7 @@ export const getLocalStorageItem = (key: string): T => {
 export const setLocalStorageItem = (key: string, item: T) => {
   localStorage.setItem(getKey(key), JSON.stringify(item))
 }
+
+export const removeLocalStorageItem = (key: string) => {
+  localStorage.removeItem(getKey(key))
+}

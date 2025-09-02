@@ -3,5 +3,13 @@
   "prettier.prettierPath": "./frontend/node_modules/prettier",
   "prettier.ignorePath": "./frontend/.prettierignore",
   "sqltools.connections": [],
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "python.testing.pytestArgs": ["backend"],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-python.autopep8"
+  },
+  "autopep8.args": ["--max-line-length", "110", "--experimental"]
 }

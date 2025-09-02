@@ -5,9 +5,10 @@
   import { currentPath } from '../stores/navigation'
   import { dataStore } from '../stores/data'
   import { apiHealth } from '../stores/apiHealth'
-  import { onMount } from 'svelte'
-  import { currentUser, checkAuth, login, logout } from '../stores/auth'
+  import { login, logout } from '../stores/auth'
 
+  let currentUser = $derived($dataStore.currentUser)
+  let currentSchool = $derived($dataStore.currentSchool)
   let isHomeActive = $derived($currentPath === '/')
   let isAboutActive = $derived($currentPath === '/about')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
@@ -25,8 +26,6 @@
       clearInterval(interval)
     }
   })
-
-  onMount(checkAuth)
 </script>
 
 {#if !$apiHealth.isOk}
@@ -39,7 +38,7 @@
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   <div class="container-md">
     <a class="navbar-brand fw-bold" href="/">
-      {$dataStore.currentSchool ? $dataStore.currentSchool.displayName : 'INGEN SKOLE VALGT'}
+      {currentSchool?.displayName || 'INGEN SKOLE VALGT'}
     </a>
 
     <!-- Burger menu button -->
@@ -58,7 +57,7 @@
     <!-- Collapsible content -->
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
-        {#if $currentUser}
+        {#if currentUser}
           <li class="nav-item">
             <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
           </li>
@@ -73,8 +72,34 @@
             Om&nbsp;tjenesten
           </Link>
         </li>
-        {#if $currentUser}
+
+        {#if currentUser?.isSuperadmin}
           <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              id="navbarDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+            >
+              Admin
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+              <li>
+                <Link to="/schools" className="dropdown-item">Skoler</Link>
+              </li>
+              <li>
+                <Link to="/users" className="dropdown-item">Brukere</Link>
+              </li>
+              <li>
+                <Link to="/subjects" className="dropdown-item">Fag</Link>
+              </li>
+              <li><a class="dropdown-item" href="/mastery-schemas">Mastery Schemas</a></li>
+            </ul>
+          </li>
+        {/if}
+
+        {#if currentUser}
+          <li class="nav-item dropdown" title="Logget på som {currentUser.name}">
             <a
               class="nav-link dropdown-toggle"
               id="navbarDropdown"
@@ -92,26 +117,7 @@
           </li>
         {/if}
 
-        {#if $currentUser}
-          <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              id="navbarDropdown"
-              role="button"
-              data-bs-toggle="dropdown"
-            >
-              Admin
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-              <li>
-                <a class="dropdown-item" href="/schools">Skoler</a>
-              </li>
-              <li><a class="dropdown-item" href="/mastery-schemas">Mastery Schemas</a></li>
-            </ul>
-          </li>
-        {/if}
-
-        {#if !$currentUser}
+        {#if !currentUser}
           <li class="nav-item">
             <a class="nav-link" href="#" onclick={login}>Logg inn</a>
           </li>

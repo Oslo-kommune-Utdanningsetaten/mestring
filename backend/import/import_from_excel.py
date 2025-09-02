@@ -133,17 +133,17 @@ def run_import():
     if 'kakrafoon.subject' in excel_file_sheets:
         print("Importing subjects...")
         sheet = excel_file_sheets['kakrafoon.subject']
-        field_names = ['id', 'display_name', 'maintened_by_school_id']
+        field_names = ['id', 'display_name', 'owned_by_school']
         subject_dicts = objects_from_sheet(sheet, field_names)
         results = []
         for subject_dict in subject_dicts:
-            school = models.School.objects.filter(id__exact=subject_dict['maintened_by_school_id']).first()
+            school = models.School.objects.filter(id__exact=subject_dict['owned_by_school']).first()
             defaults = {'maintained_at': timezone.now()}
             for k, v in subject_dict.items():
                 if k == 'id':
                     continue
-                elif k == 'maintened_by_school_id':
-                    defaults['maintened_by_school'] = school
+                elif k == 'owned_by_school':
+                    defaults['owned_by_school'] = school
                 else:
                     defaults[k] = v
             subject, created = models.Subject.objects.get_or_create(id=subject_dict['id'], defaults=defaults)

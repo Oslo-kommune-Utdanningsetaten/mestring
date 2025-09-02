@@ -1,12 +1,15 @@
 <script lang="ts">
-  import { groupsRetrieve, groupsMembersRetrieve } from '../generated/sdk.gen'
-  import type { GroupReadable, NestedGroupUserReadable } from '../generated/types.gen'
+  import { groupsRetrieve, usersList } from '../generated/sdk.gen'
+  import type { GroupReadable, UserReadable } from '../generated/types.gen'
+  import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
+  import { dataStore } from '../stores/data'
 
   const { groupId } = $props<{ groupId: string }>()
 
+  let currentSchool = $derived($dataStore.currentSchool)
   let group = $state<GroupReadable | null>(null)
-  let teachers = $state<NestedGroupUserReadable[]>([])
-  let students = $state<NestedGroupUserReadable[]>([])
+  let teachers = $state<UserReadable[]>([])
+  let students = $state<UserReadable[]>([])
   let isLoading = $state(true)
   let error = $state<string | null>(null)
 
@@ -23,13 +26,15 @@
       })
       group = groupResult.data || null
 
-      // Fetch group members
-      const membersResult = await groupsMembersRetrieve({
-        path: { id: groupId },
+      // Fetch group members, this can be optimized to a single call, then filtered by role
+      const teachersResult = await usersList({
+        query: { groups: groupId, school: currentSchool.id, roles: TEACHER_ROLE },
       })
-      const members: NestedGroupUserReadable[] = membersResult.data || []
-      teachers = members.filter(member => member.role.name === 'teacher')
-      students = members.filter(member => member.role.name === 'student')
+      const studentsResult = await usersList({
+        query: { groups: groupId, school: currentSchool.id, roles: STUDENT_ROLE },
+      })
+      teachers = teachersResult.data || []
+      students = studentsResult.data || []
     } catch (error) {
       console.error('Error fetching group:', error)
       error = 'Kunne ikke hente gruppeinformasjon'
@@ -39,7 +44,7 @@
   }
 
   $effect(() => {
-    if (groupId) {
+    if (groupId && currentSchool && currentSchool.id) {
       fetchGroup()
     }
   })
@@ -97,7 +102,7 @@
         <div class="card-body">
           <ul>
             {#each teachers as teacher}
-              <li>{teacher.user.name}</li>
+              <li>{teacher.name}</li>
             {/each}
           </ul>
         </div>
@@ -114,8 +119,8 @@
           <ul>
             {#each students as student}
               <li>
-                <a href={`/students/${student.user.id}`} class="col-md-6">
-                  {student.user.name}
+                <a href={`/students/${student.id}`} class="col-md-6">
+                  {student.name}
                 </a>
               </li>
             {/each}

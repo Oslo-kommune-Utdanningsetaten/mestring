@@ -29,7 +29,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
-
 ADMIN_ENABLED = False
 
 # Application definition
@@ -77,7 +76,8 @@ TEMPLATES = [
 ]
 WSGI_APPLICATION = 'wsgi.application'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'mestring.osloskolen.no', 'mestring-dev.osloskolen.no', 'iz-mest-ap01t.oslo.int']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'mestring.osloskolen.no',
+                 'mestring-dev.osloskolen.no', 'iz-mest-ap01t.oslo.int']
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5000',
@@ -86,7 +86,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://iz-mest-ap01t.oslo.int'
 ]
-                        
+
 CORS_ALLOWED_ORIGINS = [
     'https://mestring.osloskolen.no',
     'https://mestring-dev.osloskolen.no',
@@ -157,9 +157,13 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
         'djangorestframework_camel_case.parser.CamelCaseJSONParser',
     ),
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'DEFAULT_AUTHENTICATION_CLASSES': []
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'mastery.authentication.SessionUserIdAuthentication',
+    ]
 }
 
 SPECTACULAR_SETTINGS = {
@@ -172,7 +176,30 @@ SPECTACULAR_SETTINGS = {
         'drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields',
         'drf_spectacular.hooks.postprocess_schema_enums'
     ],
+    # Strip the leading /api from paths when generating operationIds so operation names do not start with 'api'
+    'SCHEMA_PATH_PREFIX': '/api',
 }
 
-SESSION_COOKIE_AGE = 28800  
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'mastery.api.auth': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
+
+SESSION_COOKIE_AGE = 28800
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

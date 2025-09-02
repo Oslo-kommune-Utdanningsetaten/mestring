@@ -1,16 +1,16 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
-  import { groupsList, groupsMembersRetrieve } from '../generated/sdk.gen'
-  import type { GroupReadable, NestedGroupUserReadable } from '../generated/types.gen'
+  import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
+  import { groupsList, usersList } from '../generated/sdk.gen'
+  import type { GroupReadable, UserReadable } from '../generated/types.gen'
 
-  const currentSchool = $derived($dataStore.currentSchool)
-  const currentUser = $derived($dataStore.currentUser)
+  let currentSchool = $derived($dataStore.currentSchool)
   let groups = $state<GroupReadable[]>([])
   let isAllGroupsTypesEnabled = $state<boolean>(false)
-  let groupMembers = $state<
-    Record<string, { teachers: NestedGroupUserReadable[]; students: NestedGroupUserReadable[] }>
-  >({})
+  let groupMembers = $state<Record<string, { teachers: UserReadable[]; students: UserReadable[] }>>(
+    {}
+  )
 
   const fetchGroups = async () => {
     const options = isAllGroupsTypesEnabled
@@ -30,16 +30,14 @@
   const fetchAllGroupMembers = async () => {
     groups.forEach(async group => {
       try {
-        const result = await groupsMembersRetrieve({
-          path: {
-            id: group.id,
-          },
+        const teachersResult = await usersList({
+          query: { groups: group.id, school: currentSchool.id, roles: TEACHER_ROLE },
         })
-        const members: any = result.data || []
-        const teachers =
-          members.filter((member: NestedGroupUserReadable) => member.role.name === 'teacher') || []
-        const students =
-          members.filter((member: NestedGroupUserReadable) => member.role.name === 'student') || []
+        const studentsResult = await usersList({
+          query: { groups: group.id, school: currentSchool.id, roles: STUDENT_ROLE },
+        })
+        const teachers = teachersResult.data || []
+        const students = studentsResult.data || []
         groupMembers = { ...groupMembers, [group.id]: { teachers, students } }
       } catch (error) {
         console.error(`Error fetching members for group ${group.id}:`, error)
@@ -60,7 +58,8 @@
 <section class="py-3">
   <h2 class="mb-4">Mine grupper</h2>
   <p class="d-flex align-items-center gap-2">
-    Dette er <span class="fw-bold">
+    Dette er
+    <span class="fw-bold">
       {#if isAllGroupsTypesEnabled}
         alle gruppene
       {:else}
@@ -124,7 +123,7 @@
             </div>
             <div class="col-6">
               {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
-                {groupMembers[group.id].teachers.map(m => m.user.name).join(', ')}
+                {groupMembers[group.id].teachers.map(m => m.name).join(', ')}
               {:else}
                 <div class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Henter data...</span>

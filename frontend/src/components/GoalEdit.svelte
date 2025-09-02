@@ -1,24 +1,22 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
-  import { goalsCreate, goalsUpdate, masterySchemasList } from '../generated/sdk.gen'
-  import type { GoalWritable, UserReadable, MasterySchemaReadable } from '../generated/types.gen'
+  import { goalsCreate, goalsUpdate } from '../generated/sdk.gen'
+  import type { GoalWritable, UserReadable } from '../generated/types.gen'
 
-  const { student, goal, onDone } = $props<{
+  const { student, goal, onDone, isGoalPersonal } = $props<{
     student: UserReadable | null
     goal: GoalWritable | null
+    isGoalPersonal: boolean
     onDone: () => void
   }>()
   let localGoal = $state<Record<string, any>>({ ...goal })
-  let masterySchemas = $state<MasterySchemaReadable[]>([])
+  let masterySchemas = $derived($dataStore.masterySchemas)
 
-  const fetchMasterySchemas = async () => {
-    try {
-      const result = await masterySchemasList()
-      masterySchemas = result.data || []
-    } catch (error) {
-      console.error('Error fetching mastery schemas:', error)
-      masterySchemas = []
-    }
+  const getTitle = () => {
+    const goalType = isGoalPersonal ? 'personlig ' : 'gruppe'
+    return localGoal.id
+      ? `Redigerer ${goalType}mål for ${student?.name}`
+      : `Nytt ${goalType}mål for ${student?.name}`
   }
 
   const handleSave = async () => {
@@ -42,13 +40,12 @@
   }
   // Fetch mastery schemas when component mounts
   $effect(() => {
-    fetchMasterySchemas()
     localGoal = { masterySchemaId: '', subjectId: '', ...goal }
   })
 </script>
 
 <div class="p-4">
-  <h3 class="pb-2">{localGoal.id ? 'Redigerer mål for' : 'Nytt mål for'} {student?.name}</h3>
+  <h3 class="pb-2">{getTitle()}</h3>
   <div class="form-group mb-3">
     <div class="pkt-inputwrapper">
       <label for="goalSubject" class="form-label">Fag</label>

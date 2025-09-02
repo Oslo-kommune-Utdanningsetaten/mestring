@@ -1,16 +1,14 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
   import { dataStore, setCurrentSchool } from '../stores/data'
-  import { schoolsList, usersGroupsRetrieve } from '../generated/sdk.gen'
+  import { schoolsList, groupsList } from '../generated/sdk.gen'
   import { urlStringFrom } from '../utils/functions'
   import type { GroupReadable, SchoolReadable } from '../generated/types.gen'
 
   let schools = $state<SchoolReadable[]>([])
-  let userGroups = $state<GroupReadable[]>([])
+  let groups = $state<GroupReadable[]>([])
   let isLoading = $state(true)
-
-  const currentUser = $derived($dataStore.currentUser)
-  const currentSchool = $derived($dataStore.currentSchool)
+  let currentUser = $derived($dataStore.currentUser)
+  let currentSchool = $derived($dataStore.currentSchool)
 
   const fetchSchools = async () => {
     try {
@@ -24,17 +22,16 @@
   }
 
   const fetchUserGroups = async () => {
-    if (!currentUser?.id) return
+    if (!currentUser) return
 
     try {
-      const result = await usersGroupsRetrieve({
-        path: { id: currentUser.id },
-        query: { roles: 'student' },
+      const userGroups: any = await groupsList({
+        query: { user: currentUser.id, roles: 'student', school: $dataStore.currentSchool?.id },
       })
-      userGroups = Array.isArray(result.data) ? result.data : []
+      groups = userGroups.data || []
     } catch (err) {
       console.error('Error fetching user groups:', err)
-      userGroups = []
+      groups = []
     }
   }
 
@@ -42,9 +39,14 @@
     setCurrentSchool(school)
   }
 
-  onMount(() => {
-    fetchSchools()
-    fetchUserGroups()
+  $effect(() => {
+    if (currentSchool && currentSchool.id) {
+      fetchSchools().then(() => {
+        if (currentSchool) {
+          fetchUserGroups()
+        }
+      })
+    }
   })
 </script>
 
@@ -86,13 +88,13 @@
       <div class="card-header d-flex">
         <h5 class="mb-0">
           Mine grupper
-          <span class="text-muted">({userGroups.length})</span>
+          <span class="text-muted">({groups.length})</span>
         </h5>
       </div>
       <div class="card-body">
-        {#if userGroups.length > 0}
+        {#if groups.length > 0}
           <div class="list-group list-group-flush">
-            {#each userGroups as group}
+            {#each groups as group}
               <a
                 href={urlStringFrom({ groupId: group.id }, { path: '/students', mode: 'replace' })}
                 class="list-group-item list-group-item-action"

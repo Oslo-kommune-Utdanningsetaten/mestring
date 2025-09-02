@@ -98,7 +98,7 @@
   }
 
   .rung {
-    height: 40px;
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
