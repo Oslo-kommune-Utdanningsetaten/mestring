@@ -2,7 +2,7 @@ from django.utils import timezone
 from django.db import close_old_connections
 from .group_importer import import_groups_from_file
 from .user_importer import import_users_from_file
-from .helpers import check_school_data_status
+from .helpers import does_file_exist
 from mastery import models
 import inspect
 
@@ -11,7 +11,6 @@ def run_with_task_tracking(
     job_name,
     target_id,
     func,
-    is_dryrun_enabled=False,
     is_crash_on_error_enabled=False,
     is_overwrite_enabled=False,
     *args,
@@ -26,15 +25,12 @@ def run_with_task_tracking(
         target_id=target_id,
         status="pending",
         result={},
-        is_dryrun_enabled=is_dryrun_enabled,
         is_crash_on_error_enabled=is_crash_on_error_enabled,
         is_overwrite_enabled=is_overwrite_enabled,
     )
     print(f"📋 Starting task: {job_name} (ID: {task.id})")
     if is_overwrite_enabled:
         print("⚠️ Overwrite enabled: existing data may be replaced.")
-    if is_dryrun_enabled:
-        print("🧪 DRY RUN enabled: no database writes will be performed.")
 
     # Move to running
     task.status = "running"
@@ -44,7 +40,6 @@ def run_with_task_tracking(
     _forward_supported_flags(
         func,
         kwargs,
-        is_dryrun_enabled=is_dryrun_enabled,
         is_overwrite_enabled=is_overwrite_enabled,
         is_crash_on_error_enabled=is_crash_on_error_enabled,
     )
@@ -59,8 +54,6 @@ def run_with_task_tracking(
         task.result = result if isinstance(result, dict) else {"result": result}
         task.save()
         print(f"✅ Task completed: {job_name} (ID: {task.id})")
-        if is_dryrun_enabled:
-            print("🧪 DRY RUN: no changes were made to the database.")
 
         duration_s = (
             (task.finished_at - task.started_at).total_seconds()
@@ -69,14 +62,13 @@ def run_with_task_tracking(
         )
 
         return {
-            "task_id": str(task.id),
+            "task_id": task.id,
             "job": job_name,
             "target": target_id,
             "started_at": task.started_at.isoformat(),
             "finished_at": task.finished_at.isoformat(),
             "duration": duration_s,
             "flags": {
-                "dry_run": is_dryrun_enabled,
                 "overwrite": is_overwrite_enabled,
                 "crash_on_error": is_crash_on_error_enabled,
             },
@@ -84,7 +76,7 @@ def run_with_task_tracking(
         }
 
     except Exception as e:
-        # Refresh connection if needed
+        # Ensure DB connection is still valid for saving task
         close_old_connections()
 
         # Mark failed
@@ -101,12 +93,10 @@ def run_with_task_tracking(
 
 
 def _forward_supported_flags(
-    func, kwargs, *, is_dryrun_enabled, is_overwrite_enabled, is_crash_on_error_enabled
+    func, kwargs, *,  is_overwrite_enabled, is_crash_on_error_enabled
 ):
     """Only pass flags the function actually accepts."""
     params = inspect.signature(func).parameters
-    if "is_dryrun_enabled" in params and "is_dryrun_enabled" not in kwargs:
-        kwargs["is_dryrun_enabled"] = is_dryrun_enabled
     if "is_overwrite_enabled" in params and "is_overwrite_enabled" not in kwargs:
         kwargs["is_overwrite_enabled"] = is_overwrite_enabled
     if (
@@ -119,17 +109,15 @@ def _forward_supported_flags(
 def import_groups_and_users(
     org_number,
     is_overwrite_enabled=False,
-    is_dryrun_enabled=False,
     is_crash_on_error_enabled=False,
 ):
     results = {}
 
-    status = check_school_data_status(org_number)
-    if not status["groups_file_exists"]:
+    if not does_file_exist(org_number, "groups"):
         raise Exception(
             f"No groups file found for school {org_number}. Fetch groups first."
         )
-    if not status["users_file_exists"]:
+    if not does_file_exist(org_number, "users"):
         raise Exception(
             f"No users file found for school {org_number}. Fetch users first."
         )
@@ -139,12 +127,10 @@ def import_groups_and_users(
         groups_result = import_groups_from_file(
             org_number,
             is_overwrite_enabled=is_overwrite_enabled,
-            is_dryrun_enabled=is_dryrun_enabled,
         )
         users_result = import_users_from_file(
             org_number,
             is_overwrite_enabled=is_overwrite_enabled,
-            is_dryrun_enabled=is_dryrun_enabled,
         )
         results["groups"] = groups_result
         results["users"] = users_result
@@ -200,9 +186,9 @@ def import_groups_and_users(
 #         if step == "import_school":
 #             result = import_school_from_feide(org_number)
 #         elif step == "fetch_groups":
-#             result = fetch_and_store_feide_groups_for_school(org_number)
+#             result = fetch_feide_groups_for_school_and_store(org_number)
 #         elif step == "fetch_users":
-#             result = fetch_feide_users_for_school(org_number)
+#             result = fetch_feide_users_for_school_and_store(org_number)
 #         elif step == "import_groups":
 #             result = import_groups_from_file(
 #                 org_number,

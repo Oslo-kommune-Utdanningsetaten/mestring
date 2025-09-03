@@ -11,7 +11,6 @@
   let alertType = $state<'success' | 'error' | ''>('')
   let showDetails = $state<boolean>(false)
   let rawJsonResult = $state<any>(null)
-  let dryRun = $state(false)
   let overwrite = $state(false)
   let crashOnError = $state(false)
   let feideOrgInput: HTMLInputElement
@@ -215,7 +214,6 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          is_dryrun_enabled: dryRun,
           is_overwrite_enabled: overwrite,
           is_crash_on_error_enabled: crashOnError,
         }),
@@ -270,10 +268,6 @@
       </div>
     </div>
     <div class="d-flex align-items-center gap-3 mb-3">
-      <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" bind:checked={dryRun} id="dryRunSwitch" />
-        <label class="form-check-label" for="dryRunSwitch">Dry-run (ingen DB-skriving)</label>
-      </div>
       <div class="form-check form-switch">
         <input
           class="form-check-input"

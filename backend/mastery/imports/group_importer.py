@@ -10,7 +10,7 @@ data_dir = os.path.join(script_dir, "data")
 
 
 def import_groups_from_file(
-    org_number, is_overwrite_enabled=False, is_dryrun_enabled=False
+    org_number, is_overwrite_enabled=False
 ):
     """Import groups for ONE school from imports/data/schools/<org>/groups.json"""
     print("👉 import_groups_from_file: BEGIN")
@@ -32,14 +32,13 @@ def import_groups_from_file(
     stats = import_groups_from_data(
         groups,
         is_overwrite_enabled=is_overwrite_enabled,
-        is_dryrun_enabled=is_dryrun_enabled,
     )
     print("✅ import_groups_from_file COMPLETED")
     return stats
 
 
 def import_groups_from_data(
-    groups_data, is_overwrite_enabled=False, is_dryrun_enabled=False
+    groups_data, is_overwrite_enabled=False
 ):
     """Import both basis and teaching groups from provided data"""
     stats = {
@@ -56,22 +55,21 @@ def import_groups_from_data(
     }
 
     import_basis_groups(
-        groups_data.get("basis", []), stats, is_overwrite_enabled, is_dryrun_enabled
+        groups_data.get("basis", []), stats, is_overwrite_enabled
     )
     import_teaching_groups(
-        groups_data.get("teaching", []), stats, is_overwrite_enabled, is_dryrun_enabled
-    )
+        groups_data.get("teaching", []), stats, is_overwrite_enabled)
     return stats
 
 
 def import_basis_groups(
-    basis_groups, stats, is_overwrite_enabled=False, is_dryrun_enabled=False
+    basis_groups, stats, is_overwrite_enabled=False
 ):
     """Import basis groups from groups data"""
     print(f"\n👥 Basis groups: {len(basis_groups)}")
     for group in basis_groups:
-        group_obj, created, error = ensure_group_exists(
-            group, "basis", None, is_overwrite_enabled, is_dryrun_enabled
+        group_obj, created, error=ensure_group_exists(
+            group, "basis", None, is_overwrite_enabled
         )
         if error:
             print(f"  ❌ {error}")
@@ -89,14 +87,13 @@ def import_basis_groups(
 
 
 def import_teaching_groups(
-    teaching_groups, stats, is_overwrite_enabled=False, is_dryrun_enabled=False
-):
+    teaching_groups, stats, is_overwrite_enabled=False):
     """Import teaching groups from groups data"""
     print(f"\n📚 Teaching groups: {len(teaching_groups)}")
     for group in teaching_groups:
-        subject = process_subject_for_group(group, stats, is_dryrun_enabled)
-        group_obj, created, error = ensure_group_exists(
-            group, "teaching", subject, is_overwrite_enabled, is_dryrun_enabled
+        subject=process_subject_for_group(group, stats)
+        group_obj, created, error=ensure_group_exists(
+            group, "teaching", subject, is_overwrite_enabled
         )
         if error:
             print(f"  ❌ {error}")
@@ -118,68 +115,50 @@ def ensure_group_exists(
     group_type,
     subject=None,
     is_overwrite_enabled=False,
-    is_dryrun_enabled=False,
 ):
     """
     Create-or-update any group type.
     Returns (group, created_bool, error_message)
     """
-    feide_id = group_data["id"]
+    feide_id=group_data["id"]
 
     # Check if group already exists
-    existing_group = models.Group.objects.filter(feide_id__exact=feide_id).first()
+    existing_group=models.Group.objects.filter(feide_id__exact=feide_id).first()
     if existing_group:
         if is_overwrite_enabled:
-            existing_group.display_name = group_data["displayName"]
-            existing_group.subject = subject
-            existing_group.valid_from = group_data.get("notBefore")
-            existing_group.valid_to = group_data.get("notAfter")
-            existing_group.maintained_at = timezone.now()
-            if not is_dryrun_enabled:
-                existing_group.save()
-            else:
-                print(f"  🧪 DRY RUN: would update group {existing_group.display_name}")
-            return existing_group, False, None
+            existing_group.display_name=group_data["displayName"]
+            existing_group.subject=subject
+            existing_group.valid_from=group_data.get("notBefore")
+            existing_group.valid_to=group_data.get("notAfter")
+            existing_group.maintained_at=timezone.now()
+            existing_group.save()
         else:
             return existing_group, False, None
 
     # Find parent school
-    school = models.School.objects.filter(feide_id__exact=group_data["parent"]).first()
+    school=models.School.objects.filter(feide_id__exact=group_data["parent"]).first()
     if not school:
         return None, False, f"School not found for group {feide_id}"
 
     try:
-        if not is_dryrun_enabled:
-            new_group = models.Group.objects.create(
-                display_name=group_data["displayName"],
-                type=group_type,
-                school=school,
-                subject=subject,
-                feide_id=feide_id,
-                valid_from=group_data.get("notBefore"),
-                valid_to=group_data.get("notAfter"),
-                maintained_at=timezone.now(),
-            )
-            return new_group, True, None
-        else:
-            print(f"  🧪 DRY RUN: would create group {group_data['displayName']}")
-            ghost = models.Group(
-                display_name=group_data["displayName"],
-                type=group_type,
-                school=school,
-                subject=subject,
-                feide_id=feide_id,
-                valid_from=group_data.get("notBefore"),
-                valid_to=group_data.get("notAfter"),
-                maintained_at=timezone.now(),
-            )
-            return ghost, True, None
+        new_group=models.Group.objects.create(
+            display_name=group_data["displayName"],
+            type=group_type,
+            school=school,
+            subject=subject,
+            feide_id=feide_id,
+            valid_from=group_data.get("notBefore"),
+            valid_to=group_data.get("notAfter"),
+            maintained_at=timezone.now(),
+        )
+        return new_group, True, None
+
     except Exception as e:
-        error_message = f"Failed to create group {feide_id}: {str(e)}"
+        error_message=f"Failed to create group {feide_id}: {str(e)}"
         return None, False, error_message
 
 
-def process_subject_for_group(group_data, stats, is_dryrun_enabled=False):
+def process_subject_for_group(group_data, stats):
     """
     Handle subject processing for teaching groups
     Returns subject object or None
@@ -189,20 +168,20 @@ def process_subject_for_group(group_data, stats, is_dryrun_enabled=False):
         print(f"  ⚠️ No subject code for: {group_data['displayName']}")
         return None
 
-    grep_code = group_data["grep"]["code"]
+    grep_code=group_data["grep"]["code"]
 
-    existing_subject = models.Subject.objects.filter(grep_code__exact=grep_code).first()
+    existing_subject=models.Subject.objects.filter(grep_code__exact=grep_code).first()
     if existing_subject:
         stats["subjects_existing"] += 1
         print(f"  📖 Subject exists: {existing_subject.display_name}")
         stats["groups_with_subjects"] += 1
         return existing_subject
 
-    subject = ensure_subject(grep_code, is_dryrun_enabled=is_dryrun_enabled)
+    subject=ensure_subject(grep_code)
     if subject:
         stats["subjects_created"] += 1
         print(
-            f"  ✨ Subject {'would be ' if is_dryrun_enabled else ''}created: {subject.display_name}"
+            f"  ✨ Subject created: {subject.display_name}"
         )
         stats["groups_with_subjects"] += 1
         return subject

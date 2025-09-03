@@ -6,7 +6,7 @@ data_dir = os.path.join(script_dir, "data")
 
 FEIDE_CLIENT_ID = os.environ.get("FEIDE_CLIENT_ID")
 FEIDE_CLIENT_SECRET = os.environ.get("FEIDE_CLIENT_SECRET")
-TOKEN_URL = "https://auth.dataporten.no/oauth/token"
+TOKEN_URL = os.environ.get("TOKEN_URL")
 
 
 def get_feide_access_token():
@@ -34,13 +34,16 @@ def create_user_item(member):
     }
 
 
-def check_school_data_status(org_number):
-    """Check what data files exist for a school"""
-    school_dir = os.path.join(data_dir, org_number)
+# def check_school_data_status(org_number):
+#     """Check what data files exist for a school"""
+#     school_dir = os.path.join(data_dir, org_number)
 
-    status = {
-        "groups_file_exists": os.path.exists(os.path.join(school_dir, "groups.json")),
-        "users_file_exists": os.path.exists(os.path.join(school_dir, "users.json")),
-    }
+#     status = {
+#         "groups_file_exists": os.path.exists(os.path.join(school_dir, "groups.json")),
+#         "users_file_exists": os.path.exists(os.path.join(school_dir, "users.json")),
+#     }
 
-    return status
+#     return status
+def does_file_exist(org_number, type):  
+    school_dir = os.path.join(data_dir, org_number)  
+    return os.path.exists(os.path.join(school_dir, f"{type}.json"))  

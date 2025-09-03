@@ -8,13 +8,15 @@ from .helpers import create_user_item, get_feide_access_token
 from urllib.parse import quote
 
 # API Configuration
-GROUPS_ENDPOINT = "https://groups-api.dataporten.no/groups/orgs/feide.osloskolen.no/groups"
-UDIR_GREP_URL = "https://data.udir.no/kl06/v201906/fagkoder/"
+GROUPS_ENDPOINT = os.environ.get('GROUPS_ENDPOINT')
+UDIR_GREP_URL = os.environ.get('UDIR_GREP_URL')
 FEIDE_REALM = os.environ.get('FEIDE_REALM')
-GROUPS_BASE = "https://groups-api.dataporten.no/groups/v1"
+GROUPS_BASE = os.environ.get('GROUPS_BASE')
+MEMEBERS_URL = os.environ.get('MEMEBERS_URL')
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.join(script_dir, 'data') 
+data_dir = os.path.join(script_dir, 'data')
+
 
 def _fetch_groups(url, token, result):
     """Helper function for pagination """
@@ -32,7 +34,7 @@ def _fetch_groups(url, token, result):
             if 'parent' in group:
                 result['schools'].append(group)
             else:
-                result['owners'].append(group)            
+                result['owners'].append(group)
         elif group_type == 'fc:gogroup' and group_go_type == 'u':
             result['teaching'].append(group)
             if 'grep' in group and group['grep']:
@@ -42,7 +44,7 @@ def _fetch_groups(url, token, result):
                     result['subjects'].append({
                         'code': subject_code,
                         'displayName': subject_name
-                    })               
+                    })
         elif group_type == 'fc:gogroup' and group_go_type == 'b':
             result['basis'].append(group)
         elif group_type == 'fc:gogroup' and group_go_type == 'p':
@@ -51,7 +53,7 @@ def _fetch_groups(url, token, result):
             result['levels'].append(group)
         else:
             result['other'].append(group)
-            
+
     # Check for pagination
     next_url = None
     if 'Link' in groups_response.headers:
@@ -65,19 +67,19 @@ def _fetch_groups(url, token, result):
     return result, next_url
 
 
-def fetch_and_store_feide_groups_for_school(org_number: str):
+def fetch_feide_groups_for_school_and_store(org_number: str):
     """Fetch groups for a single school (by org number) and store them in a per-school file."""
-    print(f"BEGIN: fetch_and_store_feide_groups_for_school({org_number})")
+    print(f"BEGIN: fetch_feide_groups_for_school_and_store({org_number})")
 
     token = get_feide_access_token()
 
     result = {
         "owners": [],   # skoleeiere
         "schools": [],  # skoler
-        "teaching": [], # undervisningsgrupper
+        "teaching": [],  # undervisningsgrupper
         "basis": [],    # basisgrupper
-        "subjects": [], # fag
-        "programs": [], # programgrupper
+        "subjects": [],  # fag
+        "programs": [],  # programgrupper
         "levels": [],   # nivågrupper
         "other": [],    # andre grupper vi kan ha interesse av?
     }
@@ -90,10 +92,10 @@ def fetch_and_store_feide_groups_for_school(org_number: str):
     # Deduplicate subjects by code
     seen = set()
     unique_subjects = []
-    for s in result['subjects']:
-        code = s.get('code')
+    for subject in result['subjects']:
+        code = subject.get('code')
         if code and code not in seen:
-            unique_subjects.append(s)
+            unique_subjects.append(subject)
             seen.add(code)
     result['subjects'] = unique_subjects
 
@@ -108,7 +110,7 @@ def fetch_and_store_feide_groups_for_school(org_number: str):
     for group_type in result:
         print(f"{group_type}: {len(result[group_type])}")
 
-    print(f"END: fetch_and_store_feide_groups_for_school({org_number})")
+    print(f"END: fetch_feide_groups_for_school_and_store({org_number})")
 
     return {
         "message": "School groups fetched successfully",
@@ -120,9 +122,9 @@ def fetch_and_store_feide_groups_for_school(org_number: str):
     }
 
 
-def fetch_feide_users_for_school(org_number: str):
+def fetch_feide_users_for_school_and_store(org_number: str):
     """Fetch users/memberships for one school by reading its groups.json and hitting Feide members API."""
-    print(f"BEGIN: fetch_feide_users_for_school({org_number})")
+    print(f"BEGIN: fetch_feide_users_for_school_and_store({org_number})")
 
     token = get_feide_access_token()
 
@@ -145,22 +147,22 @@ def fetch_feide_users_for_school(org_number: str):
     groups_processed = 0
     total_memberships = 0
     unique_users = set()
-    
+
     # Progress tracking
     total_groups = len(all_groups)
     print(f"📊 Processing {total_groups} groups for school {org_number}")
 
-    for i, g in enumerate(all_groups, 1):
-        group_id = g.get('id')
-        display_name = g.get('displayName', '')
+    for index, group in enumerate(all_groups, 1):
+        group_id = group.get('id')
+        display_name = group.get('displayName', '')
         if not group_id:
             continue
 
         # Progress logging
-        print(f"  📥 Processing group {i}/{total_groups}: {display_name}")
+        print(f"  📥 Processing group {index}/{total_groups}: {display_name}")
 
         # Percent-encode the full Feide id when placing in the URL path
-        members_url = f"https://groups-api.dataporten.no/groups/orgs/feide.osloskolen.no/groups/{quote(group_id, safe='')}/members"
+        members_url = f"{MEMEBERS_URL}/{quote(group_id, safe='')}/members"
 
         members_response = requests.get(members_url, headers={"Authorization": "Bearer " + token})
         if members_response.status_code != 200:
@@ -171,23 +173,22 @@ def fetch_feide_users_for_school(org_number: str):
         feide_group_members = members_response.json() or []
 
         for feide_member in feide_group_members:
-            member_item = create_user_item(feide_member)
-            feide_id = member_item.get('feide_id')
+            user_item = create_user_item(feide_member)
+            feide_id = user_item.get('feide_id')
 
-            if feide_id:
-                unique_users.add(feide_id)
+            unique_users.add(feide_id)
 
-            affiliation = (member_item.get('affiliation') or '').lower()
+            affiliation = (user_item.get('affiliation') or '').lower()
             if affiliation == 'student':
-                result[group_id]['students'].append(member_item)
+                result[group_id]['students'].append(user_item)
             elif affiliation == 'faculty':
-                result[group_id]['teachers'].append(member_item)
+                result[group_id]['teachers'].append(user_item)
             else:
-                result[group_id]['other'].append(member_item)
+                result[group_id]['other'].append(user_item)
             total_memberships += 1
 
         groups_processed += 1
-        
+
     # Write per-school users file
     os.makedirs(school_dir, exist_ok=True)
     users_file = os.path.join(school_dir, 'users.json')
@@ -195,8 +196,9 @@ def fetch_feide_users_for_school(org_number: str):
         json.dump(result, f, indent=2, ensure_ascii=False)
 
     print(f"✅ Created school users file: {users_file}")
-    print(f"✅ Processed {groups_processed} groups, {len(unique_users)} unique users, {total_memberships} total memberships")
-    print(f"END: fetch_feide_users_for_school({org_number})")
+    print(
+        f"✅ Processed {groups_processed} groups, {len(unique_users)} unique users, {total_memberships} total memberships")
+    print(f"END: fetch_feide_users_for_school_and_store({org_number})")
 
     return {
         "message": "Users fetched successfully",
@@ -216,41 +218,32 @@ def fetch_school_group(org_number, access_token):
 
     response = requests.get(endpoint_url, headers={"Authorization": f"Bearer {access_token}"})
     if response.status_code != 200:
-        raise Exception(f"Failed to fetch groups for org {org_number}: {response.status_code} {response.text}")
+        raise Exception(
+            f"Failed to fetch groups for org {org_number}: {response.status_code} {response.text}")
     return response.json()
 
 
-def ensure_subject(grep_code, is_dryrun_enabled=False):
+def ensure_subject(grep_code):
     """Ensure a subject exists in the database, fetching from UDIR if necessary."""
     subject = models.Subject.objects.filter(grep_code__exact=grep_code).first()
-    if not subject:
-        udir_response = requests.get(UDIR_GREP_URL + grep_code)
-        if udir_response.status_code == 200 and udir_response.text:
-            udir_subject = udir_response.json()
-            display_name = udir_subject['tittel'][0]['verdi']
-            short_name = udir_subject['kortform'][0]['verdi']
-            grep_group_code = udir_subject['opplaeringsfag'][0]['kode'] if udir_subject.get('opplaeringsfag') and len(udir_subject['opplaeringsfag']) > 0 else None
-            
-            if not is_dryrun_enabled:
-                print("  Creating subject:", grep_code, display_name)
-                subject = models.Subject.objects.create(
-                    display_name=display_name,
-                    short_name=short_name,
-                    grep_code=grep_code,
-                    grep_group_code=grep_group_code,
-                    maintained_at=timezone.now(),
-                )
-            else:
-                print(f"  🧪 DRY RUN: would create subject {grep_code} - {display_name}")
-                # Return unsaved instance for dry-run
-                subject = models.Subject(
-                    display_name=display_name,
-                    short_name=short_name,
-                    grep_code=grep_code,
-                    grep_group_code=grep_group_code,
-                    maintained_at=timezone.now(),
-                )
-        else:
-            print("🚷Failed to fetch subject from UDIR:", grep_code)
-            subject = None
+    if subject:
+        return subject
+
+    udir_response = requests.get(f"{UDIR_GREP_URL}/{grep_code}")
+    if udir_response.status_code == 200 and udir_response.text:
+        udir_subject = udir_response.json()
+        display_name = udir_subject['tittel'][0]['verdi']
+        short_name = udir_subject['kortform'][0]['verdi']
+        grep_group_code = udir_subject['opplaeringsfag'][0]['kode'] if udir_subject.get(
+            'opplaeringsfag') and len(udir_subject['opplaeringsfag']) > 0 else None
+
+        print("  Creating subject:", grep_code, display_name)
+        subject = models.Subject.objects.create(
+            display_name=display_name,
+            short_name=short_name,
+            grep_code=grep_code,
+            grep_group_code=grep_group_code,
+            maintained_at=timezone.now(),
+        )
+
     return subject

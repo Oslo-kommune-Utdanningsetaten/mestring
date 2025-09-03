@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from django.db import connection
 from mastery.imports.task_tracker import run_with_task_tracking, import_groups_and_users
 from mastery.imports.feide_api import (
-    fetch_and_store_feide_groups_for_school,
-    fetch_feide_users_for_school,
+    fetch_feide_groups_for_school_and_store,
+    fetch_feide_users_for_school_and_store,
 )
 from mastery.imports.school_importer import import_school_from_feide
 from django.db.models import Q
@@ -111,7 +111,7 @@ def feide_fetch_groups_for_school_api(request, org_number):
         result = run_with_task_tracking(
             job_name="fetch_feide_groups_for_school",
             target_id=target,
-            func=fetch_and_store_feide_groups_for_school,
+            func=fetch_feide_groups_for_school_and_store,
             org_number=org_number,
         )
         return Response({"status": "success", **result})
@@ -138,9 +138,9 @@ def feide_fetch_users_for_school_api(request, org_number):
         school = models.School.objects.filter(org_number=org_number).first()
         target = school.display_name if school else org_number
         result = run_with_task_tracking(
-            job_name="fetch_feide_users_for_school",
+            job_name="fetch_feide_users_for_school_and_store",
             target_id=target,
-            func=fetch_feide_users_for_school,
+            func=fetch_feide_users_for_school_and_store,
             org_number=org_number,
         )
         return Response({"status": "success", **result})
@@ -167,7 +167,6 @@ def import_groups_and_users_api(request, org_number):
         school = models.School.objects.filter(org_number=org_number).first()
         target = school.display_name if school else org_number
 
-        is_dryrun_enabled = _get_flag(request.data, "is_dryrun_enabled", False)
         is_overwrite_enabled = _get_flag(request.data, "is_overwrite_enabled", False)
         is_crash_on_error_enabled = _get_flag(
             request.data, "is_crash_on_error_enabled", False
@@ -178,7 +177,6 @@ def import_groups_and_users_api(request, org_number):
             target_id=target,
             func=import_groups_and_users,
             org_number=org_number,
-            is_dryrun_enabled=is_dryrun_enabled,
             is_overwrite_enabled=is_overwrite_enabled,
             is_crash_on_error_enabled=is_crash_on_error_enabled,
         )
@@ -233,7 +231,7 @@ def fetch_school_import_status_api(request, org_number):
     )
     last_users_task = (
         models.DataMaintenanceTask.objects
-        .filter(job_name="fetch_feide_users_for_school", status="finished")
+        .filter(job_name="fetch_feide_users_for_school_and_store", status="finished")
         .filter(target_filter)
         .order_by("-finished_at")
         .first()
@@ -242,7 +240,6 @@ def fetch_school_import_status_api(request, org_number):
         models.DataMaintenanceTask.objects
         .filter(job_name="import_groups_and_users", status="finished")
         .filter(target_filter)
-        .filter(is_dryrun_enabled=False)  
         .order_by("-finished_at")
         .first()
     )
@@ -250,8 +247,9 @@ def fetch_school_import_status_api(request, org_number):
     # Extract fetched counts and timestamps
     groups_fetched_count = (last_groups_task.result or {}).get("total_groups") if last_groups_task else None
     users_fetched_count = (last_users_task.result or {}).get("unique_users") if last_users_task else None
-    memebership_fetched_count = (last_users_task.result or {}).get("total_memberships") if last_users_task else None
-    
+    memebership_fetched_count = (last_users_task.result or {}).get(
+        "total_memberships") if last_users_task else None
+
     groups_fetched_at = last_groups_task.finished_at.isoformat(
     ) if last_groups_task and last_groups_task.finished_at else None
     users_fetched_at = last_users_task.finished_at.isoformat(
@@ -259,7 +257,7 @@ def fetch_school_import_status_api(request, org_number):
     last_import_at = last_import_task.finished_at.isoformat(
     ) if last_import_task and last_import_task.finished_at else None
 
-    # DB counts 
+    # DB counts
     if school:
         groups_db_count = models.Group.objects.filter(
             school=school, type__in=["basis", "teaching"]
@@ -278,7 +276,8 @@ def fetch_school_import_status_api(request, org_number):
     # Diffs
     groups_diff = (groups_fetched_count - groups_db_count) if isinstance(groups_fetched_count, int) else None
     users_diff = (users_fetched_count - users_db_count) if isinstance(users_fetched_count, int) else None
-    user_groups_diff = (memebership_fetched_count - user_groups_db_count) if isinstance(memebership_fetched_count, int) else None
+    user_groups_diff = (
+        memebership_fetched_count - user_groups_db_count) if isinstance(memebership_fetched_count, int) else None
 
     return Response({
         "status": "success",
