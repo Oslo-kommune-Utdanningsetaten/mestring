@@ -377,7 +377,9 @@
     {/each}
   </div>
 {:else}
-  <div class="alert alert-info">Ingen mål for {getSubjectName(subjectId)}</div>
+  <div class="alert alert-info">
+    Trykk pluss (+) for å opprette et personlig mål for eleven i dette faget.
+  </div>
 {/if}
 
 <svelte:window on:keydown={handleKeydown} />

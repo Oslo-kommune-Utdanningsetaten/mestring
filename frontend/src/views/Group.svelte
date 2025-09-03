@@ -144,7 +144,9 @@
       </div>
       <div>
         {#if goals.length === 0}
-          <p>Trykk pluss (+) knappen for å opprette et mål for denne gruppa</p>
+          <div class="alert alert-info">
+            Ingen mål for denne gruppa. Trykk pluss (+) for å opprette mål for alle elever i gruppa.
+          </div>
         {:else}
           {#each goals as goal}
             <GoalCard {goal} />
