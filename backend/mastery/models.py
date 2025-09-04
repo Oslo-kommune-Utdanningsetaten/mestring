@@ -364,6 +364,7 @@ class DataMaintenanceTask(BaseModel):
     finished_at = models.DateTimeField(null=True)
     last_heartbeat_at = models.DateTimeField(null=True)  # last time the task reported progress
     result = models.JSONField(null=True, blank=False)  # JSON field to store updated result of task execution
+    attempts = models.IntegerField(default=0)  # number of attempts made
 
 
 class DataMaintenanceBot(BaseModel):
