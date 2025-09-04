@@ -340,7 +340,6 @@ class Status(BaseModel):
     feedforward = models.TextField(null=True)
 
 
-
 class DataMaintenanceTask(BaseModel):
     """
     A DataMaintenanceTask represents a task that maintains data in the system, such as importing groups for a school.
@@ -351,14 +350,24 @@ class DataMaintenanceTask(BaseModel):
         ('finished', 'Finished'),
         ('failed', 'Failed'),
     ]
-    
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending') # current status of the task
-    job_name = models.CharField(max_length=200) # e.g. 'import_groups'
-    target_id = models.CharField(max_length=200, null=True) # id to the entity being maintained, e.g. a school id
-    is_overwrite_enabled = models.BooleanField(default=False) # whether overwriting existing data is allowed
-    is_dryrun_enabled = models.BooleanField(default=False) # whether the task is a dry run (no changes applied)
-    is_crash_on_error_enabled = models.BooleanField(default=False) # whether the task should crash on encountering an error
-    started_at = models.DateTimeField(null=True) 
-    failed_at = models.DateTimeField(null=True) 
-    finished_at = models.DateTimeField(null=True) 
-    result = models.JSONField() # JSON field to store the result or output of the task
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    job_name = models.CharField(max_length=200, blank=False)  # e.g. 'fetch_groups_for_school'
+    job_params = models.JSONField(null=True, blank=False)  # JSON field for params the job needs
+    display_name = models.CharField(max_length=200, null=True, blank=False)  # human-readable name of the task
+    claimed_by = models.ForeignKey('DataMaintenanceBot', on_delete=models.SET_NULL, null=True,
+                                   related_name='tasks_claimed')  # which bot is responsible
+    is_overwrite_enabled = models.BooleanField(default=False)  # overwrite/update existing data
+    is_crash_on_error_enabled = models.BooleanField(default=False)  # should task crash on error
+    started_at = models.DateTimeField(null=True)
+    failed_at = models.DateTimeField(null=True)
+    finished_at = models.DateTimeField(null=True)
+    last_heartbeat_at = models.DateTimeField(null=True)  # last time the task reported progress
+    result = models.JSONField(null=True, blank=False)  # JSON field to store updated result of task execution
+
+
+class DataMaintenanceBot(BaseModel):
+    """
+    A DataMaintenanceBot represents a bot that performs data maintenance tasks in the system.
+    """
+    name = models.CharField(max_length=200, unique=True)
