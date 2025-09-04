@@ -115,7 +115,7 @@ def import_users_from_data(
 
 
 def ensure_roles_exist():
-    """Ensure that the roles 'teacher' and 'student' exist. In dry run: don't write."""
+    """Ensure that the roles 'teacher' and 'student' exist"""
     teacher_role = models.Role.objects.filter(name="teacher").first()
     student_role = models.Role.objects.filter(name="student").first()
 
@@ -133,7 +133,7 @@ def ensure_roles_exist():
 
 
 def ensure_user_exists(user_data, is_overwrite_enabled=False):
-    """Ensure user exists in database, create if not (skip writes in dry run)."""
+    """Ensure user exists in database, create if not"""
     user = models.User.objects.filter(feide_id__exact=user_data["feide_id"]).first()
     if user:
         if is_overwrite_enabled:
@@ -159,7 +159,7 @@ def ensure_user_exists(user_data, is_overwrite_enabled=False):
 
 
 def ensure_membership(user, group, role):
-    """Ensure user is member of group with role; skip write in dry run."""
+    """Ensure user is member of group with role"""
 
     user_group, created = models.UserGroup.objects.get_or_create(
         user=user, group=group, role=role, defaults={"maintained_at": timezone.now()}

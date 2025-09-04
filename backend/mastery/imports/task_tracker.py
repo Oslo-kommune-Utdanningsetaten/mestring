@@ -163,7 +163,6 @@ def import_groups_and_users(
 # def sync_school_data(
 #     org_number: str,
 #     is_overwrite_enabled: bool = False,
-#     is_dryrun_enabled: bool = False,
 # ):
 #     """
 #     Synchronize one school, per-school only:
@@ -193,13 +192,11 @@ def import_groups_and_users(
 #             result = import_groups_from_file(
 #                 org_number,
 #                 is_overwrite_enabled=is_overwrite_enabled,
-#                 is_dryrun_enabled=is_dryrun_enabled,
 #             )
 #         elif step == "import_users":
 #             result = import_users_from_file(
 #                 org_number,
 #                 is_overwrite_enabled=is_overwrite_enabled,
-#                 is_dryrun_enabled=is_dryrun_enabled,
 #             )
 #         else:
 #             result = {"message": f"Unknown step: {step}"}
