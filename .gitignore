@@ -24,6 +24,10 @@ backend/.venv # in case your
 
 .vscode/mcp.json
 
+# non-code files in notes
+notes/*.docx
+notes/*.pdf
+
 # macos
 .DS_Store
 
