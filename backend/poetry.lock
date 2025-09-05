@@ -754,6 +754,17 @@ files = [
 ]
 
 [[package]]
+name = "names"
+version = "0.3.0"
+description = "Generate random names"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "names-0.3.0.tar.gz", hash = "sha256:726e46254f2ed03f1ffb5d941dae3bc67c35123941c29becd02d48d0caa2a671"},
+]
+
+[[package]]
 name = "nanoid"
 version = "2.0.0"
 description = "A tiny, secure, URL-friendly, unique string ID generator for Python"
@@ -1610,4 +1621,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "73846a816447119e59a576e3601f873dc11c5d2775f41380959cec8339984f8d"
+content-hash = "991de7ebacca59721ea4529ba2dba7a4c625fdddffdd2828ee25729397be13ea"

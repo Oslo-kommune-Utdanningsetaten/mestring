@@ -25,6 +25,7 @@ django-filter = "^25.1"
 psycopg2-binary = "^2.9.9"
 drf-spectacular = "^0.28.0"
 drf-access-policy = "^1.5.0"
+names = "^0.3.0"
 
 [tool.poetry.group.dev.dependencies]
 daphne = "^4.1.0"
@@ -42,6 +43,7 @@ python_files = ["test_*.py"]
 testpaths = ["mastery/tests"]
 django_find_project = true
 pythonpath = ["."]
+
 
 
 [tool.poetry.group.test.dependencies]

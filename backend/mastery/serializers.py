@@ -148,3 +148,10 @@ class NestedUserSchoolSerializer(BaseModelSerializer):
     class Meta:
         model = models.UserSchool
         fields = '__all__'
+
+
+
+class DataMaintenanceTaskSerializer(BaseModelSerializer):
+    class Meta:
+        model = models.DataMaintenanceTask
+        fields = '__all__'
