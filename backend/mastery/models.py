@@ -5,8 +5,8 @@ from nanoid import generate
 alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 
-def generate_nanoid():
-    return generate(alphabet, 12)
+def generate_nanoid(size=12):
+    return generate(alphabet, size)
 
 
 class BaseModel(models.Model):
@@ -350,26 +350,17 @@ class DataMaintenanceTask(BaseModel):
         ('finished', 'Finished'),
         ('failed', 'Failed'),
     ]
-
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     job_name = models.CharField(max_length=200, blank=False)  # e.g. 'fetch_groups_for_school'
     job_params = models.JSONField(null=True, blank=False)  # JSON field for params the job needs
     display_name = models.CharField(max_length=200, null=True, blank=False)  # human-readable name of the task
-    claimed_by = models.ForeignKey('DataMaintenanceBot', on_delete=models.SET_NULL, null=True,
-                                   related_name='tasks_claimed')  # which bot is responsible
+    handler_name = models.CharField(max_length=200, null=True, blank=False)  # handler instance
     is_overwrite_enabled = models.BooleanField(default=False)  # overwrite/update existing data
     is_crash_on_error_enabled = models.BooleanField(default=False)  # should task crash on error
     started_at = models.DateTimeField(null=True)
-    failed_at = models.DateTimeField(null=True)
-    finished_at = models.DateTimeField(null=True)
+    failed_at = models.DateTimeField(null=True)  # only set if task failed
+    finished_at = models.DateTimeField(null=True)  # only set if successful
     last_heartbeat_at = models.DateTimeField(null=True)  # last time the task reported progress
-    earliest_run_at = models.DateTimeField(null=True)  # when the task can be retried
+    earliest_run_at = models.DateTimeField(null=True, auto_now_add=True)  # when the task can be retried
     result = models.JSONField(null=True, blank=False)  # JSON field to store updated result of task execution
     attempts = models.IntegerField(default=0)  # number of attempts made
-
-
-class DataMaintenanceBot(BaseModel):
-    """
-    A DataMaintenanceBot represents a bot that performs data maintenance tasks in the system.
-    """
-    name = models.CharField(max_length=200, unique=True)

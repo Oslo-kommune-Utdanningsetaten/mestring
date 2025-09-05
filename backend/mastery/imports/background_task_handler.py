@@ -1,74 +1,115 @@
-import os
+import names
 import time
-import uuid
 from datetime import timedelta
 from django.db import transaction
 from django.utils import timezone
-from django.db.models import Q
-from mastery.models import DataMaintenanceTask
+from mastery.models import DataMaintenanceTask, generate_nanoid
+from .school_importer import school_update
 
-WORKER_ID = f"worker-{uuid.uuid4()}"
-HEARTBEAT_EVERY = 5          # seconds
-LOCK_TIMEOUT = timedelta(minutes=10)
-RETRY_BACKOFF = [30, 120, 600]  # seconds
+RETRY_BACKOFF = [1*60, 3*60, 10*60]  # Retry in 1, 3, 10 minutes before giving up
 
 
+# Find next pending task, set status to running and return it
 def claim_next_task():
     now = timezone.now()
-    stale = now - LOCK_TIMEOUT
     with transaction.atomic():
         task = (
             DataMaintenanceTask.objects
             .select_for_update(skip_locked=True)
-            .filter(
-                Q(status="pending") |
-                Q(status="running", locked_at__lt=stale)  # requeue stale
-            )
+            .filter(status="pending", handler_name=None, earliest_run_at__lte=now)
             .order_by("created_at")
             .first()
         )
         if not task:
             return None
         task.status = "running"
-        task.locked_at = now
-        task.locked_by = WORKER_ID
+        task.started_at = now
         task.last_heartbeat_at = now
-        task.save(update_fields=["status", "locked_at", "locked_by", "last_heartbeat_at"])
+        task.handler_name = f"{names.get_full_name()} {generate_nanoid(size=6)}"
+        task.attempts = task.attempts + 1
+        task.result = {}
+        task.save(update_fields=["status", "started_at", "handler_name",
+                  "last_heartbeat_at", "attempts", "result"])
         return task
 
 
-def heartbeat(task):
-    task.last_heartbeat_at = timezone.now()
-    DataMaintenanceTask.objects.filter(id=task.id).update(last_heartbeat_at=task.last_heartbeat_at)
+# For each chunk of work done, update the progress
+def updateProgress(task, result):
+    DataMaintenanceTask.objects.filter(id=task.id).update(result=result, last_heartbeat_at=timezone.now())
 
 
-def run():
+def do_work(task):
+    '''
+    The yield from do_work(task) MUST produce dicts on this format:
+    {
+        "result": {
+            "key": "school-update",
+            "entity": "school",
+            "action": "update",
+            "total_count": iterations,
+            "success_count": success_count,
+            "failure_count": failure_count,
+            "errors": [{error: "...", message: "..."}],
+        },
+        "is_done": True|False,
+    }
+    '''
+    job_params = task.job_params or {}
+    org_number = job_params.get("org_number")
+    if task.job_name == "update_schools" and org_number:
+        yield from school_update(org_number)
+    else:
+        raise ValueError(f"Unknown job_name '{task.job_name}' or missing org_number")
+
+
+# Used when running as long-lived process
+def run_indefinitely():
     while True:
-        task = claim_next_task()
-        if not task:
-            time.sleep(1)
-            continue
+        run()
+        time.sleep(2)
+
+
+# Used on manual one-off tasks, or in tests
+def run():
+    task = claim_next_task()
+    if task:
         try:
-            # do work in chunks, update progress + heartbeat
+            # do work in chunks, update result
             for chunk in do_work(task):
-                task.results = chunk.progress  # keep small; consider separate log table
-                heartbeat(task)
-                time.sleep(HEARTBEAT_EVERY)
-            task.status = "completed"
-            task.completed_at = timezone.now()
-            task.error = None
-            task.attempts = (task.attempts or 0)
-        except Exception as e:
-            attempts = (task.attempts or 0) + 1
-            task.attempts = attempts
-            task.error = str(e)[:1000]
-            if attempts >= len(RETRY_BACKOFF) + 1:
-                task.status = "failed"
-            else:
-                task.status = "pending"
-                task.run_at = timezone.now() + timedelta(seconds=RETRY_BACKOFF[attempts - 1])
-        finally:
-            # release lock
-            task.locked_at = None
-            task.locked_by = None
-            task.save()
+                updateProgress(task, chunk.get("result"))
+                if chunk.get("is_done"):
+                    continue
+            task.refresh_from_db(fields=["result"])
+            task.status = "finished"
+            task.finished_at = timezone.now()
+            task.save(update_fields=["status", "finished_at", "updated_at"])
+        except Exception as error:
+            with transaction.atomic():
+                # refresh task to avoid stale data
+                fresh_task = (DataMaintenanceTask.objects.select_for_update().only(
+                    "id", "result", "attempts", "status", "handler_name", "earliest_run_at",
+                    "failed_at").get(id=task.id))
+                # append error to result
+                result = fresh_task.result or {}
+                errors = result.get("errors", [])
+                errors.append({"error": "unexpected-error", "message": str(error)[:1000]})
+                result["errors"] = errors
+                fresh_task.result = result
+
+                if fresh_task.attempts <= len(RETRY_BACKOFF):
+                    # failed, but schedule retry
+                    fresh_task.status = "pending"
+                    fresh_task.handler_name = None
+                    delay = RETRY_BACKOFF[fresh_task.attempts - 1]
+                    fresh_task.earliest_run_at = timezone.now() + timedelta(seconds=delay)
+                    fresh_task.failed_at = None
+                else:
+                    # failed, no more retries
+                    fresh_task.status = "failed"
+                    fresh_task.failed_at = timezone.now()
+                    fresh_task.earliest_run_at = None
+
+                fresh_task.save(update_fields=[
+                    "result", "attempts", "status", "handler_name",
+                    "earliest_run_at", "failed_at"
+                ])
