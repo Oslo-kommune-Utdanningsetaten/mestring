@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.db import models
 from django.db.models import Q
 from nanoid import generate
@@ -361,6 +362,6 @@ class DataMaintenanceTask(BaseModel):
     failed_at = models.DateTimeField(null=True)  # only set if task failed
     finished_at = models.DateTimeField(null=True)  # only set if successful
     last_heartbeat_at = models.DateTimeField(null=True)  # last time the task reported progress
-    earliest_run_at = models.DateTimeField(null=True, auto_now_add=True)  # when the task can be retried
+    earliest_run_at = models.DateTimeField(null=True, default=timezone.now)  # earliest execution time
     result = models.JSONField(null=True, blank=False)  # JSON field to store updated result of task execution
-    attempts = models.IntegerField(default=0)  # number of attempts made
+    attempts = models.IntegerField(default=0)  # number of attempts made (initial + retries)

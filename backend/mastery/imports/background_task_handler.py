@@ -6,7 +6,8 @@ from django.utils import timezone
 from mastery.models import DataMaintenanceTask, generate_nanoid
 from .school_importer import school_update
 
-RETRY_BACKOFF = [1*60, 3*60, 10*60]  # Retry in 1, 3, 10 minutes before giving up
+# Retries after initial attempt. Retry in 1, 3, 10 minutes before giving up.
+RETRY_BACKOFF = [1*60, 3*60, 10*60]
 
 
 # Find next pending task, set status to running and return it
@@ -27,15 +28,27 @@ def claim_next_task():
         task.last_heartbeat_at = now
         task.handler_name = f"{names.get_full_name()} {generate_nanoid(size=6)}"
         task.attempts = task.attempts + 1
-        task.result = {}
         task.save(update_fields=["status", "started_at", "handler_name",
-                  "last_heartbeat_at", "attempts", "result"])
+                  "last_heartbeat_at", "attempts", "updated_at"])
         return task
 
 
 # For each chunk of work done, update the progress
-def updateProgress(task, result):
+def update_progress(task, result):
     DataMaintenanceTask.objects.filter(id=task.id).update(result=result, last_heartbeat_at=timezone.now())
+
+
+def next_execution_time(task):
+    delay = RETRY_BACKOFF[task.attempts - 1]
+    return timezone.now() + timedelta(seconds=delay)
+
+
+def append_error_to_result(task, error):
+    result = task.result or {}
+    errors = result.get("errors", [])
+    errors.append({"error": "unexpected-error", "message": str(error)[:1000]})
+    result["errors"] = errors
+    return result
 
 
 def do_work(task):
@@ -76,9 +89,9 @@ def run():
         try:
             # do work in chunks, update result
             for chunk in do_work(task):
-                updateProgress(task, chunk.get("result"))
+                update_progress(task, chunk.get("result"))
                 if chunk.get("is_done"):
-                    continue
+                    break
             task.refresh_from_db(fields=["result"])
             task.status = "finished"
             task.finished_at = timezone.now()
@@ -87,22 +100,17 @@ def run():
             with transaction.atomic():
                 # refresh task to avoid stale data
                 fresh_task = (DataMaintenanceTask.objects.select_for_update().only(
-                    "id", "result", "attempts", "status", "handler_name", "earliest_run_at",
+                    "id", "result", "attempts", "status", "handler_name", "earliest_run_at", "updated_at",
                     "failed_at").get(id=task.id))
                 # append error to result
-                result = fresh_task.result or {}
-                errors = result.get("errors", [])
-                errors.append({"error": "unexpected-error", "message": str(error)[:1000]})
-                result["errors"] = errors
-                fresh_task.result = result
+                fresh_task.result = append_error_to_result(fresh_task, error)
 
                 if fresh_task.attempts <= len(RETRY_BACKOFF):
                     # failed, but schedule retry
                     fresh_task.status = "pending"
                     fresh_task.handler_name = None
-                    delay = RETRY_BACKOFF[fresh_task.attempts - 1]
-                    fresh_task.earliest_run_at = timezone.now() + timedelta(seconds=delay)
                     fresh_task.failed_at = None
+                    fresh_task.earliest_run_at = next_execution_time(fresh_task)
                 else:
                     # failed, no more retries
                     fresh_task.status = "failed"
@@ -111,5 +119,7 @@ def run():
 
                 fresh_task.save(update_fields=[
                     "result", "attempts", "status", "handler_name",
-                    "earliest_run_at", "failed_at"
+                    "earliest_run_at", "failed_at", "updated_at"
                 ])
+        return task
+    return None
