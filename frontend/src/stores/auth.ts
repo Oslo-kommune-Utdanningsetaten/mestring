@@ -1,7 +1,6 @@
 import { writable } from 'svelte/store'
-import type { UserReadable } from '../generated/types.gen'
+import { setCurrentUser } from './data'
 
-export const currentUser = writable<UserReadable | null>(null)
 export const isLoggingInUser = writable<boolean>(true)
 
 export const checkAuth = async (): Promise<void> => {
@@ -9,14 +8,10 @@ export const checkAuth = async (): Promise<void> => {
   try {
     const response = await fetch('/auth/status', { credentials: 'include' })
     const data = response.ok ? await response.json() : null
-    if (data?.isAuthenticated) {
-      currentUser.set(data.user)
-    } else {
-      currentUser.set(null)
-    }
+    setCurrentUser(data?.isAuthenticated ? data.user : null)
   } catch (error) {
     console.error('Error checking auth status:', error)
-    currentUser.set(null)
+    setCurrentUser(null)
   } finally {
     isLoggingInUser.set(false)
   }
@@ -27,6 +22,6 @@ export const login = (): void => {
 }
 
 export const logout = (): void => {
-  currentUser.set(null)
+  setCurrentUser(null)
   window.location.href = '/auth/logout/'
 }

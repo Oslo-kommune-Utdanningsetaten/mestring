@@ -1,26 +1,15 @@
-import { get, writable } from 'svelte/store'
+import { get, writable, derived } from 'svelte/store'
 import type { Writable as WritableType } from 'svelte/store'
 import { subjectsList, schoolsList, masterySchemasList, rolesList } from '../generated/sdk.gen'
-import type { SchoolReadable, MasterySchemaReadable } from '../generated/types.gen'
+import type { SchoolReadable, MasterySchemaReadable, UserReadable } from '../generated/types.gen'
 import {
   getLocalStorageItem,
   setLocalStorageItem,
   removeLocalStorageItem,
 } from '../stores/localStorage'
 import type { AppData } from '../types/models'
-import { currentUser } from './auth'
 
 let masterySchemasCache = null as MasterySchemaReadable[] | null
-
-export const refreshCurrentUser = () => {
-  const user = get(currentUser)
-  const currentData = get(dataStore)
-  if (currentData.currentUser?.id !== user?.id) {
-    dataStore.update(data => {
-      return { ...data, currentUser: user }
-    })
-  }
-}
 
 export const setCurrentSchool = (school: SchoolReadable) => {
   const currentData = get(dataStore)
@@ -42,13 +31,18 @@ const setMasterySchemas = (schemas: MasterySchemaReadable[]) => {
   })
 }
 
-// Create a writable store with initial empty values
 export const dataStore: WritableType<AppData> = writable({
   subjects: [],
   currentSchool: null,
   currentUser: null,
   masterySchemas: [],
 })
+
+export const currentUser = derived(dataStore, d => d.currentUser)
+
+export const setCurrentUser = (user: UserReadable | null) => {
+  dataStore.update(d => ({ ...d, currentUser: user }))
+}
 
 const loadSchool = async () => {
   let schools: SchoolReadable[] = []
@@ -134,15 +128,14 @@ const loadRoles = async (): Promise<void> => {
 
 export const loadData = async () => {
   try {
+    const existingUser = get(dataStore).currentUser
     dataStore.set({
       currentSchool: null,
-      currentUser: null,
+      currentUser: existingUser,
       subjects: [],
       masterySchemas: [],
       roles: [],
     })
-
-    await refreshCurrentUser()
     await loadRoles()
     await loadSchool()
     await refreshMasterySchemas(false)

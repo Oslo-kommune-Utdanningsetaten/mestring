@@ -11,15 +11,20 @@
   import Navigation from './components/Navigation.svelte'
   import MasterySchemas from './views/MasterySchemas.svelte'
   import UserInfo from './views/UserInfo.svelte'
-  import { checkAuth } from './stores/auth'
+  import { checkAuth, isLoggingInUser } from './stores/auth'
   import { loadData, dataStore } from './stores/data'
+  import { onMount } from 'svelte'
   import 'bootstrap/dist/css/bootstrap.min.css'
   import './styles/bootstrap-overrides.css'
   import 'bootstrap/dist/js/bootstrap.min.js'
   import './styles/app.css'
 
-  checkAuth().then(() => {
-    loadData()
+  // Defer sideeffect network calls until after component mount
+  onMount(async () => {
+    await checkAuth()
+    if ($dataStore.currentUser) {
+      loadData()
+    }
   })
 </script>
 
@@ -28,6 +33,12 @@
 </header>
 
 <main class="container-md py-4">
+  {#if $isLoggingInUser}
+    <div class="d-flex align-items-center gap-2 text-secondary small py-2">
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      <span>Logger inn…</span>
+    </div>
+  {/if}
   <Router>
     <Route path="/" component={Home} />
     <Route path="/about" component={About} />
