@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { dataStore } from '../stores/data'
+  import { dataStore, currentUser } from '../stores/data'
   import { observationsCreate, observationsUpdate } from '../generated/sdk.gen'
   import ValueInputVertical from './ValueInputVertical.svelte'
   import ValueInputHorizontal from './ValueInputHorizontal.svelte'
@@ -44,7 +44,7 @@
   const handleSave = async () => {
     localObservation.studentId = student?.id
     localObservation.goalId = goal?.id
-    localObservation.observerId = $dataStore.currentUser?.id
+    localObservation.observerId = $currentUser?.id
     localObservation.observedAt = new Date().toISOString()
 
     try {

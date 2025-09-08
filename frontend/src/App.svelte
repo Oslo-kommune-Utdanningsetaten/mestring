@@ -12,17 +12,17 @@
   import MasterySchemas from './views/MasterySchemas.svelte'
   import UserInfo from './views/UserInfo.svelte'
   import { checkAuth, isLoggingInUser } from './stores/auth'
-  import { loadData, dataStore } from './stores/data'
+  import { loadData, dataStore, currentUser } from './stores/data'
   import { onMount } from 'svelte'
   import 'bootstrap/dist/css/bootstrap.min.css'
   import './styles/bootstrap-overrides.css'
   import 'bootstrap/dist/js/bootstrap.min.js'
   import './styles/app.css'
 
-  // Defer sideeffect network calls until after component mount
+  // Defer side-effect network calls until after component mount
   onMount(async () => {
     await checkAuth()
-    if ($dataStore.currentUser) {
+    if ($currentUser) {
       loadData()
     }
   })
@@ -43,7 +43,7 @@
     <Route path="/" component={Home} />
     <Route path="/about" component={About} />
 
-    {#if $dataStore.currentUser}
+    {#if $currentUser}
       <Route path="/students/:studentId" component={Student} />
       <Route path="/groups/:groupId" component={Group} />
       <Route path="/students" component={Students} />

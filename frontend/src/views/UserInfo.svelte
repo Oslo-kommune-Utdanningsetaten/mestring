@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { dataStore, setCurrentSchool } from '../stores/data'
+  import { dataStore, setCurrentSchool, currentUser } from '../stores/data'
   import { schoolsList, groupsList } from '../generated/sdk.gen'
   import { urlStringFrom } from '../utils/functions'
   import type { GroupReadable, SchoolReadable } from '../generated/types.gen'
@@ -7,7 +7,6 @@
   let schools = $state<SchoolReadable[]>([])
   let groups = $state<GroupReadable[]>([])
   let isLoading = $state(true)
-  let currentUser = $derived($dataStore.currentUser)
   let currentSchool = $derived($dataStore.currentSchool)
 
   const fetchSchools = async () => {
@@ -22,11 +21,11 @@
   }
 
   const fetchUserGroups = async () => {
-    if (!currentUser) return
+    if (!$currentUser) return
 
     try {
       const userGroups: any = await groupsList({
-        query: { user: currentUser.id, roles: 'student', school: $dataStore.currentSchool?.id },
+        query: { user: $currentUser.id, roles: 'student', school: $dataStore.currentSchool?.id },
       })
       groups = userGroups.data || []
     } catch (err) {
@@ -57,7 +56,7 @@
     <div class="text-center my-5">
       <div class="spinner-border" role="status"></div>
     </div>
-  {:else if !currentUser}
+  {:else if !$currentUser}
     <div class="alert alert-info">Du må logge inn for å se denne siden.</div>
   {:else}
     <!-- User Information -->
@@ -70,13 +69,13 @@
           <div class="col-md-6">
             <div class="mb-2">
               <strong>Navn:</strong>
-              <div class="text-muted">{currentUser?.name}</div>
+              <div class="text-muted">{$currentUser?.name}</div>
             </div>
           </div>
           <div class="col-md-6">
             <div class="mb-2">
               <strong>E-post:</strong>
-              <div class="text-muted">{currentUser?.email}</div>
+              <div class="text-muted">{$currentUser?.email}</div>
             </div>
           </div>
         </div>
