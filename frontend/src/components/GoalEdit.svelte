@@ -1,11 +1,19 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
   import { goalsCreate, goalsUpdate } from '../generated/sdk.gen'
-  import type { GoalWritable, UserReadable } from '../generated/types.gen'
+  import type { GoalWritable, GroupReadable, UserReadable } from '../generated/types.gen'
+  import { setLocalStorageItem } from '../stores/localStorage'
 
-  const { student, goal, onDone, isGoalPersonal } = $props<{
-    student: UserReadable | null
-    goal: GoalWritable | null
+  const {
+    student = null,
+    group = null,
+    goal = null,
+    onDone,
+    isGoalPersonal,
+  } = $props<{
+    student?: UserReadable | null
+    group?: GroupReadable | null
+    goal?: GoalWritable | null
     isGoalPersonal: boolean
     onDone: () => void
   }>()
@@ -13,10 +21,16 @@
   let masterySchemas = $derived($dataStore.masterySchemas)
 
   const getTitle = () => {
+    const action = localGoal.id ? 'Redigerer' : 'Nytt'
     const goalType = isGoalPersonal ? 'personlig ' : 'gruppe'
-    return localGoal.id
-      ? `Redigerer ${goalType}mål for ${student?.name}`
-      : `Nytt ${goalType}mål for ${student?.name}`
+    const target = isGoalPersonal ? student?.name : group?.displayName
+    return `${action} ${goalType}mål for ${target}`
+  }
+
+  const handleUpdatePreferredMasterySchema = () => {
+    if (localGoal.masterySchemaId) {
+      setLocalStorageItem('preferredMasterySchemaId', localGoal.masterySchemaId)
+    }
   }
 
   const handleSave = async () => {
@@ -34,13 +48,15 @@
       }
       onDone()
     } catch (error) {
-      // TODO: Show an error message to the user
       console.error('Error saving goal:', error)
     }
   }
   // Fetch mastery schemas when component mounts
   $effect(() => {
-    localGoal = { masterySchemaId: '', subjectId: '', ...goal }
+    localGoal = {
+      subjectId: '',
+      ...goal,
+    }
   })
 </script>
 
@@ -60,8 +76,12 @@
 
   <div class="form-group mb-3">
     <div class="pkt-inputwrapper">
-      <label for="goalSubject" class="form-label">Skjema</label>
-      <select class="pkt-input" bind:value={localGoal.masterySchemaId}>
+      <label for="goalSubject" class="form-label">Mestringsskjema</label>
+      <select
+        class="pkt-input"
+        bind:value={localGoal.masterySchemaId}
+        onchange={handleUpdatePreferredMasterySchema}
+      >
         <option value="" disabled>Velg mestringsskjema</option>
         {#each masterySchemas as masterySchema}
           <option value={masterySchema.id}>{masterySchema.title}</option>

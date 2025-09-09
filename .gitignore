@@ -22,8 +22,6 @@ backend/.venv # in case your
 .goose
 .gooseignore
 
-.vscode/mcp.json
-
 # non-code files in notes
 notes/*.docx
 notes/*.pdf

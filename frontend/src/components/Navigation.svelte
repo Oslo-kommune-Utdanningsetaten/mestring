@@ -3,24 +3,24 @@
   import oslologoUrl from '@oslokommune/punkt-assets/dist/logos/oslologo.svg?url'
 
   import { currentPath } from '../stores/navigation'
-  import { dataStore } from '../stores/data'
+  import { dataStore, currentUser } from '../stores/data'
   import { apiHealth } from '../stores/apiHealth'
   import { login, logout } from '../stores/auth'
 
-  let currentUser = $derived($dataStore.currentUser)
   let currentSchool = $derived($dataStore.currentSchool)
   let isHomeActive = $derived($currentPath === '/')
   let isAboutActive = $derived($currentPath === '/about')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
+  const API_CHECK_INTERVAL = 60 * 1000 // every 60 secondss
 
   $effect(() => {
     // Check API health on component load
     apiHealth.checkHealth()
 
-    // Set up an interval to check API health periodically (every 60 seconds)
+    // Interval to check API health periodically
     const interval = setInterval(() => {
       apiHealth.checkHealth()
-    }, 60 * 1000)
+    }, API_CHECK_INTERVAL)
 
     return () => {
       clearInterval(interval)
@@ -57,7 +57,7 @@
     <!-- Collapsible content -->
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
-        {#if currentUser}
+        {#if $currentUser}
           <li class="nav-item">
             <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
           </li>
@@ -73,7 +73,7 @@
           </Link>
         </li>
 
-        {#if currentUser?.isSuperadmin}
+        {#if $currentUser?.isSuperadmin}
           <li class="nav-item dropdown">
             <a
               class="nav-link dropdown-toggle"
@@ -98,8 +98,8 @@
           </li>
         {/if}
 
-        {#if currentUser}
-          <li class="nav-item dropdown" title="Logget på som {currentUser.name}">
+        {#if $currentUser}
+          <li class="nav-item dropdown" title="Logget på som {$currentUser.name}">
             <a
               class="nav-link dropdown-toggle"
               id="navbarDropdown"
@@ -117,7 +117,7 @@
           </li>
         {/if}
 
-        {#if !currentUser}
+        {#if !$currentUser}
           <li class="nav-item">
             <a class="nav-link" href="#" onclick={login}>Logg inn</a>
           </li>
