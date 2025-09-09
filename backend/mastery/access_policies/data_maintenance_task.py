@@ -1,0 +1,22 @@
+from .base import BaseAccessPolicy
+import logging
+logger = logging.getLogger(__name__)
+
+
+class DataMaintenanceTaskAccessPolicy(BaseAccessPolicy):
+    statements = [
+        # Superadmin: full access
+        {
+            "action": ["*"],
+            "principal": ["role:superadmin"],
+            "effect": "allow",
+        },
+        # Everyone else: implicitly denied
+    ]
+
+    def scope_queryset(self, request, qs):
+        user = request.user
+        if user.is_superadmin:
+            return qs
+        else:
+            return qs.none()

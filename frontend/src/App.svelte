@@ -10,6 +10,7 @@
   import Subjects from './views/Subjects.svelte'
   import Navigation from './components/Navigation.svelte'
   import MasterySchemas from './views/MasterySchemas.svelte'
+  import DataMaintenanceTask from './views/DataMaintenanceTask.svelte'
   import UserInfo from './views/UserInfo.svelte'
   import { checkAuth, isLoggingInUser } from './stores/auth'
   import { loadData, dataStore, currentUser } from './stores/data'
@@ -51,6 +52,7 @@
       <Route path="/subjects" component={Subjects} />
       <Route path="/users" component={Users} />
       <Route path="/mastery-schemas" component={MasterySchemas} />
+      <Route path="/data-maintenance-tasks" component={DataMaintenanceTask} />
       <Route path="/schools" component={Schools} />
     {/if}
 

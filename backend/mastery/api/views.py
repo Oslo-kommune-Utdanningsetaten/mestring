@@ -6,7 +6,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_access_policy import AccessViewSetMixin
-from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy
+from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy
 
 
 def get_request_param(query_params, name: str):
@@ -490,6 +490,37 @@ class ObservationViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                 qs = qs.filter(observer_id=observer_param)
             if goal_param:
                 qs = qs.filter(goal_id=goal_param)
+
+        # non-list actions (retrieve, create, update, destroy) do not require parameters
+        return qs
+
+
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='status',
+                description='Filter tasks by status',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            )
+        ]
+    )
+)
+class DataMaintenanceTaskViewSet(viewsets.ModelViewSet):
+    queryset = models.DataMaintenanceTask.objects.all()
+    serializer_class = serializers.DataMaintenanceTaskSerializer
+    access_policy = DataMaintenanceTaskAccessPolicy
+
+    def get_queryset(self):
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+
+        if self.action == 'list':
+            statuts_param = get_request_param(self.request.query_params, 'status')
+
+            if statuts_param:
+                qs = qs.filter(statuts=statuts_param)
 
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs
