@@ -1,18 +1,18 @@
 from django.utils import timezone
 from django.db import close_old_connections
-from .group_importer import import_groups_from_file
-from .user_importer import import_users_from_file
+from .import_groups import import_groups_from_file
+from .import_users import import_users_from_file
 from .helpers import does_file_exist
 from mastery import models
 
 
 def run_with_task_tracking(
-    job_name, 
+    job_name,
     target_id,
-    func, 
+    func,
     org_number,
-    is_crash_on_error_enabled=False, 
-    is_overwrite_enabled=False, 
+    is_crash_on_error_enabled=False,
+    is_overwrite_enabled=False,
 ):
     """
     Run a function with DataMaintenanceTask tracking.
@@ -36,7 +36,7 @@ def run_with_task_tracking(
     task.save()
 
     try:
-        # Run the function and capture result 
+        # Run the function and capture result
         result = func(org_number, is_overwrite_enabled, is_crash_on_error_enabled)
 
         # Finish

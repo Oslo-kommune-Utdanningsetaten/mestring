@@ -1,19 +1,14 @@
 from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.db import connection
-from mastery.data_import.task_tracker import run_with_task_tracking, import_groups_and_users
-from mastery.data_import.feide_api import (
-    fetch_feide_users_for_school_and_store,
-)
-from mastery.data_import.school_importer import import_school_from_feide
+from backend.mastery.data_import.import_school import import_school_from_feide
 from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import serializers
+from mastery.data_import.task_tracker import run_with_task_tracking, import_groups_and_users
+from mastery.data_import.feide_api import (fetch_feide_users_for_school_and_store)
 from mastery.access_policies import ImportAccessPolicy
-
-
 from mastery import models
 
 

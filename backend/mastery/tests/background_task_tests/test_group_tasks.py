@@ -2,7 +2,7 @@
 import pytest
 from django.utils import timezone
 from mastery.models import DataMaintenanceTask
-from mastery.data_import import background_task_handler
+from backend.mastery.data_import import run_background_tasks
 
 
 @pytest.fixture
@@ -29,6 +29,6 @@ def school_update_task_with_wrong_job_name(db):
 
 @pytest.mark.django_db
 def test_group_fetch(groups_fetch_task):
-    background_task_handler.run()
+    run_background_tasks.run()
     groups_fetch_task.refresh_from_db()
     assert len(groups_fetch_task.result['errors']) == 1

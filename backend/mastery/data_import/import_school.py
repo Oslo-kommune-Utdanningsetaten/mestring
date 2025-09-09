@@ -60,7 +60,7 @@ def school_update(org_number: str):
             }
 
 
-def import_school_from_feide(org_number, is_overwrite_enabled = False, is_crash_on_error_enabled = False):
+def import_school_from_feide(org_number, is_overwrite_enabled=False, is_crash_on_error_enabled=False):
     """import a single school by org number from Feide and create/update in our database."""
 
     token = get_feide_access_token()
