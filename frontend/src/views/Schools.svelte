@@ -1,6 +1,11 @@
 <script lang="ts">
   import { type SchoolReadable } from '../generated/types.gen'
-  import { fetchGroupsForSchool, schoolsList, schoolsPartialUpdate } from '../generated/sdk.gen'
+  import {
+    fetchGroupsForSchool,
+    fetchMembershipsForSchool,
+    schoolsList,
+    schoolsPartialUpdate,
+  } from '../generated/sdk.gen'
   import { setCurrentSchool } from '../stores/data'
 
   let schools = $state<SchoolReadable[]>([])
@@ -138,7 +143,7 @@
     dismissAlert()
     // try {
     const response = await fetchGroupsForSchool({
-      path: {org_number: orgNumber},
+      path: { org_number: orgNumber },
     })
     console.log('response', response)
     //   if (response.ok && result.status === 'success') {
@@ -160,6 +165,13 @@
     // } finally {
     //   stopLoadingGroups(orgNumber)
     // }
+  }
+
+  const handleFetchMembershipsForSchool = async (orgNumber: string) => {
+    const response = await fetchMembershipsForSchool({
+      path: { org_number: orgNumber },
+    })
+    console.log('response', response)
   }
 
   const fetchUsersForSchool = async (orgNumber: string) => {
@@ -411,17 +423,17 @@
                   {/if}
                 </button>
 
-                <!-- Users -->
+                <!-- Memberships -->
                 <button
                   class="btn btn-outline-secondary btn-sm"
-                  onclick={() => fetchUsersForSchool(school.orgNumber)}
+                  onclick={() => handleFetchMembershipsForSchool(school.orgNumber)}
                   disabled={!!isLoadingUsers[school.orgNumber]}
                 >
                   {#if isLoadingUsers[school.orgNumber]}
                     <span class="spinner-border spinner-border-sm me-1"></span>
-                    Henter brukere...
+                    Henter medlemskap...
                   {:else}
-                    👥 Hent brukere
+                    👥 Hent medlemskap
                   {/if}
                 </button>
 

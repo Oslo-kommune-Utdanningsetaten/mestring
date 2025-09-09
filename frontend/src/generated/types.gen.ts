@@ -848,6 +848,25 @@ export type FetchGroupsForSchoolResponses = {
     200: unknown;
 };
 
+export type FetchMembershipsForSchoolData = {
+    body?: never;
+    path: {
+        /**
+         * Organization number of the school
+         */
+        orgNumber: string;
+    };
+    query?: never;
+    url: '/api/fetch/memberships/feide/{org_number}/';
+};
+
+export type FetchMembershipsForSchoolResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
 export type FetchSchoolImportStatusData = {
     body?: never;
     path: {
@@ -861,25 +880,6 @@ export type FetchSchoolImportStatusData = {
 };
 
 export type FetchSchoolImportStatusResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
-};
-
-export type FeideFetchUsersForSchoolData = {
-    body?: never;
-    path: {
-        /**
-         * Organization number of the school
-         */
-        orgNumber: string;
-    };
-    query?: never;
-    url: '/api/fetch/users/feide/{org_number}/';
-};
-
-export type FeideFetchUsersForSchoolResponses = {
     /**
      * No response body
      */

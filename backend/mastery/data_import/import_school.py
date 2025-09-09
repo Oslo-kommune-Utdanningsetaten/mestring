@@ -48,7 +48,6 @@ def school_update(org_number: str):
         if index % chunk_size == 0 or index == iterations:
             yield {
                 "result": {
-                    "key": "school-update",
                     "entity": "school",
                     "action": "update",
                     "total_count": iterations,

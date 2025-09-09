@@ -31,7 +31,7 @@ def _fetch_groups(url, token):
         "schools": [],  # skoler
         "teaching": [],  # undervisningsgrupper
         "basis": [],    # basisgrupper
-        "subjects": [],  # fag 
+        "subjects": [],  # fag
     }
     # Append groups to accumulated result
     for group in groups:
@@ -74,8 +74,6 @@ def _fetch_groups(url, token):
 
 def fetch_groups_from_feide(org_number: str):
     """Fetch groups for a single school (by org number) and store them in a per-school file."""
-    print(f"BEGIN: fetch_feide_groups_for_school_and_store({org_number})")
-
     token = get_feide_access_token()
 
     all_results = {
@@ -97,8 +95,8 @@ def fetch_groups_from_feide(org_number: str):
             result, next_url = _fetch_groups(next_url, token)
         except Exception as error:
             failure_count += 1
-            errors.append(error)
-
+            errors.append({"error": "fetch-error", "message": str(error)[:1000]})
+            continue
         all_results['basis'].extend(result['basis'])
         all_results['teaching'].extend(result['teaching'])
         all_results['subjects'].extend(result['subjects'])
@@ -107,7 +105,6 @@ def fetch_groups_from_feide(org_number: str):
         if index % chunk_size == 0:
             yield {
                 "result": {
-                    "key": "group-fetch",
                     "entity": "group",
                     "action": "fetch",
                     "total_count": None,
@@ -117,6 +114,7 @@ def fetch_groups_from_feide(org_number: str):
                 },
                 "is_done": False,
             }
+        index += 1
 
     # Deduplicate subjects by code
     seen = set()
@@ -135,16 +133,13 @@ def fetch_groups_from_feide(org_number: str):
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(all_results, f, indent=2, ensure_ascii=False)
 
-    print(f"✅ Created school groups file: {output_file}")
     for group_type in all_results:
         print(f"{group_type}: {len(all_results[group_type])}")
 
-    print(f"END: fetch_feide_groups_for_school_and_store({org_number})")
     success_count = len(all_results['subjects']
                         ) + len(all_results['teaching']) + len(all_results['basis'])
     yield {
         "result": {
-            "key": "group-fetch",
             "entity": "group",
             "action": "fetch",
             "total_count": None,
@@ -156,11 +151,9 @@ def fetch_groups_from_feide(org_number: str):
     }
 
 
-def fetch_feide_users_for_school_and_store(
-        org_number: str, is_overwrite_enabled=False, is_crash_on_error_enabled=False):
-    """Fetch users/memberships for one school by reading its groups.json and hitting Feide members API."""
-    print(f"BEGIN: fetch_feide_users_for_school_and_store({org_number})")
-
+def fetch_memberships_from_feide(org_number: str):
+    """Fetch memberships for one school by reading its groups.json and hitting Feide members API."""
+    print(f"👉 fetch_users_from_feide({org_number})")
     token = get_feide_access_token()
 
     # Ensure per-school groups file exists
@@ -174,75 +167,85 @@ def fetch_feide_users_for_school_and_store(
         groups_data = json.load(f)
 
     # Collect group ids (basis + teaching are what we care about for memberships)
-    basis_groups = groups_data.get('basis', []) or []
-    teaching_groups = groups_data.get('teaching', []) or []
+    basis_groups = groups_data.get('basis', [])
+    teaching_groups = groups_data.get('teaching', [])
     all_groups = basis_groups + teaching_groups
 
-    result = {}
-    groups_processed = 0
+    memberships = {}
+    errors = []
     total_memberships = 0
     unique_users = set()
 
     # Progress tracking
-    total_groups = len(all_groups)
-    print(f"📊 Processing {total_groups} groups for school {org_number}")
+    total_group_count = len(all_groups)
+    print(f"📊 Processing memberships for {total_group_count} groups")
 
-    for index, group in enumerate(all_groups, 1):
+    for index, group in enumerate(all_groups):
         group_id = group.get('id')
-        display_name = group.get('displayName', '')
         if not group_id:
+            group_name = group.get('displayName', 'unknown')
+            errors.append({"error": "data-error", "message": "Group without id {group_name}"})
             continue
 
-        # Progress logging
-        print(f"  📥 Processing group {index}/{total_groups}: {display_name}")
+        print(f"{index}/{total_group_count}")
 
         # Percent-encode the full Feide id when placing in the URL path
-        members_url = f"{MEMEBERS_URL}/{quote(group_id, safe='')}/members"
+        group_members_url = f"{MEMEBERS_URL}/{quote(group_id, safe='')}/members"
+        # Fetch members for this group
+        members_response = requests.get(group_members_url, headers={"Authorization": "Bearer " + token})
 
-        members_response = requests.get(members_url, headers={"Authorization": "Bearer " + token})
         if members_response.status_code != 200:
-            print(f"    ⚠️ Failed to fetch group {group_id} - skipping ({members_response.status_code})")
+            print(f"⚠️ Failed to fetch members for group {group_id} ({members_response.status_code})")
+            errors.append({"error": "fetch-error", "message": "Failed to fetch members for group {group_id}"})
             continue
 
-        result[group_id] = {"teachers": [], "students": [], "other": []}
+        memberships[group_id] = {"teachers": [], "students": [], "other": []}
         feide_group_members = members_response.json() or []
 
         for feide_member in feide_group_members:
             user_item = create_user_item(feide_member)
             feide_id = user_item.get('feide_id')
-
             unique_users.add(feide_id)
 
             affiliation = (user_item.get('affiliation') or '').lower()
             if affiliation == 'student':
-                result[group_id]['students'].append(user_item)
+                memberships[group_id]['students'].append(user_item)
             elif affiliation == 'faculty':
-                result[group_id]['teachers'].append(user_item)
+                memberships[group_id]['teachers'].append(user_item)
             else:
-                result[group_id]['other'].append(user_item)
+                memberships[group_id]['other'].append(user_item)
             total_memberships += 1
 
-        groups_processed += 1
+            yield {
+                "result": {
+                    "entity": "group-membership",
+                    "action": "fetch",
+                    "total_count": None,
+                    "success_count": total_memberships,
+                    "failure_count": len(errors),
+                    "errors": errors,
+                },
+                "is_done": False,
+            }
 
     # Write per-school users file
     os.makedirs(school_dir, exist_ok=True)
-    users_file = os.path.join(school_dir, 'users.json')
-    with open(users_file, "w") as f:
-        json.dump(result, f, indent=2, ensure_ascii=False)
+    memberships_file = os.path.join(school_dir, 'memberships.json')
+    with open(memberships_file, "w") as file:
+        json.dump(memberships, file, indent=2, ensure_ascii=False)
 
-    print(f"✅ Created school users file: {users_file}")
-    print(
-        f"✅ Processed {groups_processed} groups, {len(unique_users)} unique users, {total_memberships} total memberships")
-    print(f"END: fetch_feide_users_for_school_and_store({org_number})")
+    print(f"✅ Processed {len(memberships)} groups, {len(unique_users)} users, {total_memberships} memberships")
 
-    return {
-        "message": "Users fetched successfully",
-        "org_number": org_number,
-        "groups_processed": groups_processed,
-        "unique_users": len(unique_users),
-        "total_memberships": total_memberships,
-        "total_groups": total_groups,
-        "progress": f"{groups_processed}/{total_groups}",
+    yield {
+        "result": {
+            "entity": "group-membership",
+            "action": "fetch",
+            "total_count": None,
+            "success_count": total_memberships,
+            "failure_count": len(errors),
+            "errors": errors,
+        },
+        "is_done": True,
     }
 
 

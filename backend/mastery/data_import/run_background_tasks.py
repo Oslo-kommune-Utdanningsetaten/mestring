@@ -1,4 +1,4 @@
-from mastery.data_import.feide_api import fetch_groups_from_feide
+from mastery.data_import.feide_api import fetch_groups_from_feide, fetch_memberships_from_feide
 import names
 import time
 from datetime import timedelta
@@ -57,7 +57,6 @@ def do_work(task):
     The yield from do_work(task) MUST produce dicts on this format:
     {
         "result": {
-            "key": "school-update",
             "entity": "school",
             "action": "update",
             "total_count": iterations,
@@ -74,6 +73,8 @@ def do_work(task):
         yield from school_update(org_number)
     elif task.job_name == "fetch_groups_from_feide" and org_number:
         yield from fetch_groups_from_feide(org_number)
+    elif task.job_name == "fetch_memberships_from_feide" and org_number:
+        yield from fetch_memberships_from_feide(org_number)
     else:
         raise ValueError(f"Unknown job_name '{task.job_name}' or missing org_number")
 

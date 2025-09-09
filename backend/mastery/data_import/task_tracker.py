@@ -164,7 +164,7 @@ def import_groups_and_users(
 #         elif step == "fetch_groups":
 #             result = fetch_feide_groups_for_school_and_store(org_number)
 #         elif step == "fetch_users":
-#             result = fetch_feide_users_for_school_and_store(org_number)
+#             result = fetch_memberships_from_feide(org_number)
 #         elif step == "import_groups":
 #             result = import_groups_from_file(
 #                 org_number,

@@ -7,7 +7,7 @@ from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from mastery.data_import.import_school import import_school_from_feide
 from mastery.data_import.task_tracker import run_with_task_tracking, import_groups_and_users
-from mastery.data_import.feide_api import (fetch_feide_users_for_school_and_store)
+from mastery.data_import.feide_api import fetch_memberships_from_feide
 from mastery.access_policies import ImportAccessPolicy
 from mastery import models
 
@@ -85,7 +85,7 @@ def feide_import_school(request, org_number):
 @extend_schema(
     operation_id="fetch_groups_for_school",
     summary="Fetch groups for school",
-    description="Fetch Feide groups for a single school (by org number) and store them at imports/data/schools/<org>/groups.json. Returns simple counts.",
+    description="Fetch Feide groups for a single school (by org number) and store them at data_import/data/schools/<org>/groups.json. Returns simple counts.",
     parameters=[
         OpenApiParameter(
             name='org_number',
@@ -101,7 +101,7 @@ def feide_import_school(request, org_number):
 def fetch_groups_for_school(request, org_number):
     """
     Fetch Feide groups for a single school (by org number) and store them
-    at imports/data/schools/<org>/groups.json. Returns simple counts.
+    at data_import/data/schools/<org>/groups.json. Returns simple counts.
     """
     school = models.School.objects.filter(org_number=org_number).first()
     if not school:
@@ -120,9 +120,9 @@ def fetch_groups_for_school(request, org_number):
 
 
 @extend_schema(
-    operation_id="feide_fetch_users_for_school",
-    summary="Fetch Feide users for school",
-    description="Fetch users/memberships for a single school (by org number) into imports/data/schools/<org>/users.json",
+    operation_id="fetch_memberships_for_school",
+    summary="Fetch group memberships for school",
+    description="Fetch group memberships for a single school (by org number) and store at data_import/data/schools/<org>/users.json",
     parameters=[
         OpenApiParameter(
             name='org_number',
@@ -133,34 +133,26 @@ def fetch_groups_for_school(request, org_number):
         )
     ]
 )
-@api_view(["GET"])
+@api_view(["POST"])
 @permission_classes([ImportAccessPolicy])
-def feide_fetch_users_for_school(request, org_number):
+def fetch_memberships_for_school(request, org_number):
     """
-    Fetch users/memberships for a single school (by org number) into imports/data/schools/<org>/users.json
+    Fetch all group memberships for a single school (by org number) into data_import/data/schools/<org>/memberships.json
     """
     school = models.School.objects.filter(org_number=org_number).first()
     if not school:
         return Response(
-            {"status": "error", "message": f"School not found for org {org_number}"},
+            {"error": "unknown-school", "message": f"School not found for org {org_number}"},
             status=404,
         )
-    try:
-        result = run_with_task_tracking(
-            job_name="fetch_feide_users_for_school_and_store",
-            target_id=school.display_name,
-            func=fetch_feide_users_for_school_and_store,
-            org_number=org_number,
-        )
-        return Response({"status": "success", **result})
-    except Exception as e:
-        return Response(
-            {
-                "status": "error",
-                "message": f"Failed to fetch users for org {org_number}: {str(e)}",
-            },
-            status=400,
-        )
+    task = models.DataMaintenanceTask.objects.create(
+        status="pending",
+        job_name="fetch_memberships_from_feide",
+        job_params={"org_number": org_number},
+        display_name=f"Fetch memberships for {school.display_name}",
+        earliest_run_at=timezone.now()
+    )
+    return Response(status=201, data={"status": "task_created", "task_id": task.id})
 
 
 @extend_schema(
@@ -284,7 +276,7 @@ def fetch_school_import_status(request, org_number):
     )
     last_users_task = (
         models.DataMaintenanceTask.objects
-        .filter(job_name="fetch_feide_users_for_school_and_store", status="finished")
+        .filter(job_name="fetch_memberships_from_feide", status="finished")
         .filter(target_filter)
         .order_by("-finished_at")
         .first()

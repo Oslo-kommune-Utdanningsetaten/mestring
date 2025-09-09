@@ -10,9 +10,7 @@ __pycache__/
 .coverage
 
 # import data we don't want in git
-backend/import/data/old/
-backend/import/data/*.json
-backend/mastery/imports/data/*
+backend/mastery/data_import/data/*
 .htpasswd
 
 # in case your python virtual environment is located in the project
