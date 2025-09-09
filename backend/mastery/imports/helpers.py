@@ -34,16 +34,6 @@ def create_user_item(member):
     }
 
 
-# def check_school_data_status(org_number):
-#     """Check what data files exist for a school"""
-#     school_dir = os.path.join(data_dir, org_number)
-
-#     status = {
-#         "groups_file_exists": os.path.exists(os.path.join(school_dir, "groups.json")),
-#         "users_file_exists": os.path.exists(os.path.join(school_dir, "users.json")),
-#     }
-
-#     return status
 def does_file_exist(org_number, type):  
     school_dir = os.path.join(data_dir, org_number)  
     return os.path.exists(os.path.join(school_dir, f"{type}.json"))  

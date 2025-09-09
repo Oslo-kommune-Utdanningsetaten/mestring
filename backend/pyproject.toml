@@ -55,3 +55,4 @@ pytest-cov = "^6.1.1"
 [tool.poe.tasks]
 run-tests = "pytest --verbose -s"
 run-server = "python manage.py runserver 5000"
+run-background-tasks = "python manage.py shell -c \"from mastery.imports.background_task_handler import run; task = run(); print(f'Executed: {task.job_name} for {task.job_params}' if task else 'No tasks pending')\""

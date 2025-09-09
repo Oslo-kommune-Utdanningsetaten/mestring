@@ -9,7 +9,6 @@ from urllib.parse import quote
 
 # API Configuration
 GROUPS_ENDPOINT = os.environ.get('GROUPS_ENDPOINT')
-UDIR_GREP_URL = os.environ.get('UDIR_GREP_URL')
 FEIDE_REALM = os.environ.get('FEIDE_REALM')
 GROUPS_BASE = os.environ.get('GROUPS_BASE')
 MEMEBERS_URL = os.environ.get('MEMEBERS_URL')
@@ -18,11 +17,22 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(script_dir, 'data')
 
 
-def _fetch_groups(url, token, result):
+def _fetch_groups(url, token):
     """Helper function for pagination """
-    groups_response = requests.get(url, headers={"Authorization": "Bearer " + token})
-    groups = groups_response.json()
+    try:
+        groups_response = requests.get(url, headers={"Authorization": "Bearer " + token})
+        groups = groups_response.json()
+    except Exception as error:
+        raise Exception(
+            {"error": "fetch-error", "message": f"Failed to fetch groups from Feide: {str(error)[:1000]}"})
 
+    result = {
+        "owners": [],   # skoleeiere
+        "schools": [],  # skoler
+        "teaching": [],  # undervisningsgrupper
+        "basis": [],    # basisgrupper
+        "subjects": [],  # fag 
+    }
     # Append groups to accumulated result
     for group in groups:
         group_type = group['type']
@@ -30,6 +40,7 @@ def _fetch_groups(url, token, result):
 
         # by definition, school owners do not have the parent key
         # https://docs.feide.no/reference/apis/groups_api/group_types/pse_school_owner.html
+
         if group_type == 'fc:org':
             if 'parent' in group:
                 result['schools'].append(group)
@@ -47,12 +58,6 @@ def _fetch_groups(url, token, result):
                     })
         elif group_type == 'fc:gogroup' and group_go_type == 'b':
             result['basis'].append(group)
-        elif group_type == 'fc:gogroup' and group_go_type == 'p':
-            result['programs'].append(group)
-        elif group_type == 'fc:gogroup' and group_go_type == 'l':
-            result['levels'].append(group)
-        else:
-            result['other'].append(group)
 
     # Check for pagination
     next_url = None
@@ -67,62 +72,92 @@ def _fetch_groups(url, token, result):
     return result, next_url
 
 
-def fetch_feide_groups_for_school_and_store(org_number: str):
+def fetch_groups_from_feide(org_number: str):
     """Fetch groups for a single school (by org number) and store them in a per-school file."""
     print(f"BEGIN: fetch_feide_groups_for_school_and_store({org_number})")
 
     token = get_feide_access_token()
 
-    result = {
+    all_results = {
         "owners": [],   # skoleeiere
         "schools": [],  # skoler
         "teaching": [],  # undervisningsgrupper
         "basis": [],    # basisgrupper
         "subjects": [],  # fag
-        "programs": [],  # programgrupper
-        "levels": [],   # nivågrupper
-        "other": [],    # andre grupper vi kan ha interesse av?
     }
 
     # Page through org-scoped groups using the orgunit filter
     next_url = f"{GROUPS_ENDPOINT}?orgunit={org_number}"
+    index = 0
+    chunk_size = 10
+    failure_count = 0
+    errors = []
     while next_url:
-        result, next_url = _fetch_groups(next_url, token, result)
+        try:
+            result, next_url = _fetch_groups(next_url, token)
+        except Exception as error:
+            failure_count += 1
+            errors.append(error)
+
+        all_results['basis'].extend(result['basis'])
+        all_results['teaching'].extend(result['teaching'])
+        all_results['subjects'].extend(result['subjects'])
+        success_count = len(all_results['subjects']
+                            ) + len(all_results['teaching']) + len(all_results['basis'])
+        if index % chunk_size == 0:
+            yield {
+                "result": {
+                    "key": "group-fetch",
+                    "entity": "group",
+                    "action": "fetch",
+                    "total_count": None,
+                    "success_count": success_count,
+                    "failure_count": failure_count,
+                    "errors": errors,
+                },
+                "is_done": False,
+            }
 
     # Deduplicate subjects by code
     seen = set()
     unique_subjects = []
-    for subject in result['subjects']:
+    for subject in all_results['subjects']:
         code = subject.get('code')
         if code and code not in seen:
             unique_subjects.append(subject)
             seen.add(code)
-    result['subjects'] = unique_subjects
+    all_results['subjects'] = unique_subjects
 
     # Write to per-school file
     school_dir = os.path.join(data_dir, org_number)
     os.makedirs(school_dir, exist_ok=True)
     output_file = os.path.join(school_dir, 'groups.json')
-    with open(output_file, "w") as f:
-        json.dump(result, f, indent=2, ensure_ascii=False)
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(all_results, f, indent=2, ensure_ascii=False)
 
     print(f"✅ Created school groups file: {output_file}")
-    for group_type in result:
-        print(f"{group_type}: {len(result[group_type])}")
+    for group_type in all_results:
+        print(f"{group_type}: {len(all_results[group_type])}")
 
     print(f"END: fetch_feide_groups_for_school_and_store({org_number})")
-
-    return {
-        "message": "School groups fetched successfully",
-        "org_number": org_number,
-        "teaching_groups": len(result['teaching']),
-        "basis_groups": len(result['basis']),
-        "subjects": len(result['subjects']),
-        "total_groups": len(result['teaching']) + len(result['basis'])
+    success_count = len(all_results['subjects']
+                        ) + len(all_results['teaching']) + len(all_results['basis'])
+    yield {
+        "result": {
+            "key": "group-fetch",
+            "entity": "group",
+            "action": "fetch",
+            "total_count": None,
+            "success_count": success_count,
+            "failure_count": failure_count,
+            "errors": errors,
+        },
+        "is_done": True,
     }
 
 
-def fetch_feide_users_for_school_and_store(org_number: str):
+def fetch_feide_users_for_school_and_store(
+        org_number: str, is_overwrite_enabled=False, is_crash_on_error_enabled=False):
     """Fetch users/memberships for one school by reading its groups.json and hitting Feide members API."""
     print(f"BEGIN: fetch_feide_users_for_school_and_store({org_number})")
 
@@ -221,29 +256,3 @@ def fetch_school_group(org_number, access_token):
         raise Exception(
             f"Failed to fetch groups for org {org_number}: {response.status_code} {response.text}")
     return response.json()
-
-
-def ensure_subject(grep_code):
-    """Ensure a subject exists in the database, fetching from UDIR if necessary."""
-    subject = models.Subject.objects.filter(grep_code__exact=grep_code).first()
-    if subject:
-        return subject
-
-    udir_response = requests.get(f"{UDIR_GREP_URL}/{grep_code}")
-    if udir_response.status_code == 200 and udir_response.text:
-        udir_subject = udir_response.json()
-        display_name = udir_subject['tittel'][0]['verdi']
-        short_name = udir_subject['kortform'][0]['verdi']
-        grep_group_code = udir_subject['opplaeringsfag'][0]['kode'] if udir_subject.get(
-            'opplaeringsfag') and len(udir_subject['opplaeringsfag']) > 0 else None
-
-        print("  Creating subject:", grep_code, display_name)
-        subject = models.Subject.objects.create(
-            display_name=display_name,
-            short_name=short_name,
-            grep_code=grep_code,
-            grep_group_code=grep_group_code,
-            maintained_at=timezone.now(),
-        )
-
-    return subject

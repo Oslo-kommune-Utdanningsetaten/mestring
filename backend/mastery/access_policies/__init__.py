@@ -9,6 +9,7 @@ from .observation import ObservationAccessPolicy
 from .user_school import UserSchoolAccessPolicy
 from .user_group import UserGroupAccessPolicy
 from .data_maintenance_task import DataMaintenanceTaskAccessPolicy
+from .feide_import import ImportAccessPolicy
 
 __all__ = [
     "GroupAccessPolicy",
@@ -21,5 +22,6 @@ __all__ = [
     "ObservationAccessPolicy",
     "UserSchoolAccessPolicy",
     "UserGroupAccessPolicy",
-    "DataMaintenanceTaskAccessPolicy",
+    "DataMaintenanceTaskAccessPolicy", 
+    "ImportAccessPolicy",
 ]

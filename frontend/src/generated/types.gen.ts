@@ -829,48 +829,57 @@ export type DataMaintenanceTasksUpdateResponses = {
 
 export type DataMaintenanceTasksUpdateResponse = DataMaintenanceTasksUpdateResponses[keyof DataMaintenanceTasksUpdateResponses];
 
-export type FetchGroupsFeideRetrieveData = {
+export type FetchGroupsForSchoolData = {
     body?: never;
     path: {
+        /**
+         * Organization number of the school
+         */
         orgNumber: string;
     };
     query?: never;
     url: '/api/fetch/groups/feide/{org_number}/';
 };
 
-export type FetchGroupsFeideRetrieveResponses = {
+export type FetchGroupsForSchoolResponses = {
     /**
      * No response body
      */
     200: unknown;
 };
 
-export type FetchSchoolImportStatusRetrieveData = {
+export type FetchSchoolImportStatusData = {
     body?: never;
     path: {
+        /**
+         * Organization number of the school
+         */
         orgNumber: string;
     };
     query?: never;
     url: '/api/fetch/school_import_status/{org_number}/';
 };
 
-export type FetchSchoolImportStatusRetrieveResponses = {
+export type FetchSchoolImportStatusResponses = {
     /**
      * No response body
      */
     200: unknown;
 };
 
-export type FetchUsersFeideRetrieveData = {
+export type FeideFetchUsersForSchoolData = {
     body?: never;
     path: {
+        /**
+         * Organization number of the school
+         */
         orgNumber: string;
     };
     query?: never;
     url: '/api/fetch/users/feide/{org_number}/';
 };
 
-export type FetchUsersFeideRetrieveResponses = {
+export type FeideFetchUsersForSchoolResponses = {
     /**
      * No response body
      */
@@ -1113,32 +1122,47 @@ export type GroupsUpdateResponses = {
 
 export type GroupsUpdateResponse = GroupsUpdateResponses[keyof GroupsUpdateResponses];
 
-export type ImportSchoolFeideCreateData = {
+export type FeideImportSchoolData = {
     body?: never;
     path: {
+        /**
+         * Import a single school by org number from Feide and create/update in our database.
+         */
         orgNumber: string;
     };
     query?: never;
     url: '/api/import/school/feide/{org_number}/';
 };
 
-export type ImportSchoolFeideCreateResponses = {
+export type FeideImportSchoolResponses = {
     /**
      * No response body
      */
     200: unknown;
 };
 
-export type ImportSchoolGroupsAndUsersCreateData = {
-    body?: never;
+export type ImportGroupsAndUsersData = {
+    body?: {
+        /**
+         * Whether to overwrite existing data
+         */
+        is_overwrite_enabled?: boolean;
+        /**
+         * Whether to crash on errors instead of continuing
+         */
+        is_crash_on_error_enabled?: boolean;
+    };
     path: {
+        /**
+         * Organization number of the school
+         */
         orgNumber: string;
     };
     query?: never;
     url: '/api/import/school_groups_and_users/{org_number}/';
 };
 
-export type ImportSchoolGroupsAndUsersCreateResponses = {
+export type ImportGroupsAndUsersResponses = {
     /**
      * No response body
      */

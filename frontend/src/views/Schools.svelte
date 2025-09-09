@@ -1,12 +1,12 @@
 <script lang="ts">
   import { type SchoolReadable } from '../generated/types.gen'
-  import { schoolsList, schoolsPartialUpdate } from '../generated/sdk.gen'
+  import { fetchGroupsForSchool, schoolsList, schoolsPartialUpdate } from '../generated/sdk.gen'
   import { setCurrentSchool } from '../stores/data'
 
   let schools = $state<SchoolReadable[]>([])
-  let fetchingGroups = $state<Set<string>>(new Set())
-  let fetchingUsers = $state<Set<string>>(new Set())
-  let importingGroupsAndUsers = $state<Set<string>>(new Set())
+  let isLoadingGroups = $state<Record<string, boolean>>({})
+  let isLoadingUsers = $state<Record<string, boolean>>({})
+  let isImporting = $state<Record<string, boolean>>({})
   let alertMessage = $state<string>('')
   let alertType = $state<'success' | 'error' | ''>('')
   let showDetails = $state<boolean>(false)
@@ -29,7 +29,7 @@
       dbCount: number | null
       diff: number | null
     }
-    memeberships: {
+    memberships: {
       fetchedCount: number | null
       fetchedAt: string | null
       dbCount: number | null
@@ -42,47 +42,46 @@
 
   const formatDate = (iso?: string | null) => (iso ? new Date(iso).toLocaleString('nb-NO') : '—')
 
-  const loadImportStatusForSchool = async (orgNumber: string) => {
-    try {
-      const response = await fetch(`/api/fetch/school_import_status/${orgNumber}/`)
-      const data = await response.json()
-      if (response.ok) {
-        importStatus = {
-          ...importStatus,
-          [orgNumber]: {
-            groups: {
-              fetchedCount: data.groups?.fetchedCount ?? null,
-              fetchedAt: data.groups?.fetchedAt ?? null,
-              dbCount: data.groups?.dbCount ?? 0,
-              diff: data.groups?.diff ?? null,
-            },
-            users: {
-              fetchedCount: data.users?.fetchedCount ?? null,
-              fetchedAt: data.users?.fetchedAt ?? null,
-              dbCount: data.users?.dbCount ?? 0,
-              diff: data.users?.diff ?? null,
-            },
-            memeberships: {
-              fetchedCount: data.memberships?.fetchedCount ?? null,
-              fetchedAt: data.memberships?.fetchedAt ?? null,
-              dbCount: data.memberships?.dbCount ?? 0,
-              diff: data.memberships?.diff ?? null,
-            },
-            lastImportAt: data.lastImportAt ?? null,
-          },
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching import status:', orgNumber, error)
-    }
-  }
+  // const //loadImportStatusForSchool = async (orgNumber: string) => {
+  //   try {
+  //     const response = await fetch(`/api/fetch/school_import_status/${orgNumber}/`)
+  //     const data = await response.json()
+  //     if (response.ok) {
+  //       importStatus = {
+  //         ...importStatus,
+  //         [orgNumber]: {
+  //           groups: {
+  //             fetchedCount: data.groups?.fetchedCount ?? null,
+  //             fetchedAt: data.groups?.fetchedAt ?? null,
+  //             dbCount: data.groups?.dbCount ?? 0,
+  //             diff: data.groups?.diff ?? null,
+  //           },
+  //           users: {
+  //             fetchedCount: data.users?.fetchedCount ?? null,
+  //             fetchedAt: data.users?.fetchedAt ?? null,
+  //             dbCount: data.users?.dbCount ?? 0,
+  //             diff: data.users?.diff ?? null,
+  //           },
+  //           memberships: {
+  //             fetchedCount: data.memberships?.fetchedCount ?? null,
+  //             fetchedAt: data.memberships?.fetchedAt ?? null,
+  //             dbCount: data.memberships?.dbCount ?? 0,
+  //             diff: data.memberships?.diff ?? null,
+  //           },
+  //           lastImportAt: data.lastImportAt ?? null,
+  //         },
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching import status:', orgNumber, error)
+  //   }
+  // }
 
   const fetchSchools = async () => {
     try {
       const result = await schoolsList()
       schools = result.data || []
       // Load status for each school
-      await Promise.all(schools.map(s => loadImportStatusForSchool(s.orgNumber)))
     } catch (error) {
       console.error('Error fetching schools:', error)
       schools = []
@@ -112,64 +111,73 @@
   }
 
   const isBusy = (org: string) =>
-    fetchingGroups.has(org) || fetchingUsers.has(org) || importingGroupsAndUsers.has(org)
+    !!isLoadingGroups[org] || !!isLoadingUsers[org] || !!isImporting[org]
 
-  const feideFetchGroupsForSchool = async (orgNumber: string) => {
-    if (isBusy(orgNumber)) return
-    fetchingGroups = new Set([...fetchingGroups, orgNumber])
-    dismissAlert()
-    try {
-      const response = await fetch(`/api/fetch/groups/feide/${orgNumber}/`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      })
-      const result = await response.json()
-      if (response.ok && result.status === 'success') {
-        alertMessage = `✅ Hentet grupper for ${orgNumber}`
-        alertType = 'success'
-        rawJsonResult = result
-        readiness = {
-          ...readiness,
-          [orgNumber]: {
-            groups: result.stepResults?.totalGroups ?? 0,
-            users: readiness[orgNumber]?.users ?? 0,
-          },
-        }
-        loadImportStatusForSchool(orgNumber)
-      } else {
-        alertMessage = `❌ Feil ved henting av grupper for ${orgNumber}: ${result.message || 'Ukjent feil'}`
-        alertType = 'error'
-      }
-    } catch (e: any) {
-      alertMessage = `❌ Nettverksfeil: ${e?.message || e}`
-      alertType = 'error'
-    } finally {
-      fetchingGroups = new Set([...fetchingGroups].filter(id => id !== orgNumber))
-    }
+  const startLoadingGroups = (org: string) =>
+    (isLoadingGroups = { ...isLoadingGroups, [org]: true })
+  const stopLoadingGroups = (org: string) => {
+    const { [org]: _, ...rest } = isLoadingGroups
+    isLoadingGroups = rest
   }
 
-  const feideFetchUsersForSchool = async (orgNumber: string) => {
+  const startLoadingUsers = (org: string) => (isLoadingUsers = { ...isLoadingUsers, [org]: true })
+  const stopLoadingUsers = (org: string) => {
+    const { [org]: _, ...rest } = isLoadingUsers
+    isLoadingUsers = rest
+  }
+
+  const startImporting = (org: string) => (isImporting = { ...isImporting, [org]: true })
+  const stopImporting = (org: string) => {
+    const { [org]: _, ...rest } = isImporting
+    isImporting = rest
+  }
+
+  const handleFetchGroupsForSchool = async (orgNumber: string) => {
     if (isBusy(orgNumber)) return
-    fetchingUsers = new Set([...fetchingUsers, orgNumber])
+    startLoadingGroups(orgNumber)
+    dismissAlert()
+    // try {
+    const response = await fetchGroupsForSchool({
+      path: {org_number: orgNumber},
+    })
+    console.log('response', response)
+    //   if (response.ok && result.status === 'success') {
+    //     alertMessage = `✅ Hentet grupper for ${orgNumber}`
+    //     alertType = 'success'
+    //     rawJsonResult = result
+    //     readiness[orgNumber] = {
+    //       ...(readiness[orgNumber] ?? { groups: 0, users: 0 }),
+    //       groups: result.stepResults?.totalGroups ?? 0,
+    //     }
+    //     //loadImportStatusForSchool(orgNumber)
+    //   } else {
+    //     alertMessage = `❌ Feil ved henting av grupper for ${orgNumber}: ${result.message || 'Ukjent feil'}`
+    //     alertType = 'error'
+    //   }
+    // } catch (e: any) {
+    //   alertMessage = `❌ Nettverksfeil: ${e?.message || e}`
+    //   alertType = 'error'
+    // } finally {
+    //   stopLoadingGroups(orgNumber)
+    // }
+  }
+
+  const fetchUsersForSchool = async (orgNumber: string) => {
+    if (isBusy(orgNumber)) return
+    startLoadingUsers(orgNumber)
     dismissAlert()
     try {
-      const response = await fetch(`/api/fetch/users/feide/${orgNumber}/`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      })
+      const response = await fetch(`/api/fetch/users/feide/${orgNumber}/`)
       const result = await response.json()
       if (response.ok && result.status === 'success') {
         alertMessage = `✅ Hentet brukere/medlemskap for ${orgNumber}`
         alertType = 'success'
         rawJsonResult = result
-        readiness = {
-          ...readiness,
-          [orgNumber]: {
-            groups: readiness[orgNumber]?.groups ?? 0,
-            users: result.stepResults?.uniqueUsers ?? 0,
-          },
+        readiness[orgNumber] = {
+          ...(readiness[orgNumber] ?? { groups: 0, users: 0 }),
+          users: result.stepResults?.uniqueUsers ?? 0,
         }
-        loadImportStatusForSchool(orgNumber)
+        //loadImportStatusForSchool(orgNumber)
       } else {
         alertMessage = `❌ Feil ved henting av brukere for ${orgNumber}: ${result.message || 'Ukjent feil'}`
         alertType = 'error'
@@ -178,11 +186,11 @@
       alertMessage = `❌ Nettverksfeil: ${e?.message || e}`
       alertType = 'error'
     } finally {
-      fetchingUsers = new Set([...fetchingUsers].filter(id => id !== orgNumber))
+      stopLoadingUsers(orgNumber)
     }
   }
 
-  const importSchoolFromFeide = async (orgNumber: string) => {
+  const importSchool = async (orgNumber: string) => {
     dismissAlert()
     try {
       const response = await fetch(`/api/import/school/feide/${orgNumber}/`, {
@@ -208,7 +216,7 @@
   const importGroupsAndUsers = async (orgNumber: string) => {
     if (isBusy(orgNumber)) return
     dismissAlert()
-    importingGroupsAndUsers = new Set([...importingGroupsAndUsers, orgNumber])
+    startImporting(orgNumber)
     try {
       const response = await fetch(`/api/import/school_groups_and_users/${orgNumber}/`, {
         method: 'POST',
@@ -224,7 +232,7 @@
         alertMessage = `✅ Grupper og brukere importert for skole ${orgNumber}!`
         alertType = 'success'
         rawJsonResult = result || null
-        loadImportStatusForSchool(orgNumber)
+        //loadImportStatusForSchool(orgNumber)
       } else {
         alertMessage = `❌ Feil ved import av grupper og brukere for skole ${orgNumber}: ${result.message || 'Ukjent feil'}`
         alertType = 'error'
@@ -233,8 +241,8 @@
       alertMessage = `❌ Nettverksfeil: ${e?.message || e}`
       alertType = 'error'
     } finally {
-      importingGroupsAndUsers = new Set([...importingGroupsAndUsers].filter(id => id !== orgNumber))
-      const { [orgNumber]: removed, ...rest } = readiness
+      stopImporting(orgNumber)
+      const { [orgNumber]: _removed, ...rest } = readiness
       readiness = rest
     }
   }
@@ -261,7 +269,7 @@
         <button
           class="btn btn-outline-secondary"
           type="button"
-          onclick={() => importSchoolFromFeide(feideOrgInput.value)}
+          onclick={() => importSchool(feideOrgInput.value)}
         >
           Importer fra Feide
         </button>
@@ -373,9 +381,9 @@
                         </tr>
                         <tr>
                           <td><strong>Medlemskap</strong></td>
-                          <td>{importStatus[school.orgNumber].memeberships.fetchedCount ?? '—'}</td>
-                          <td>{importStatus[school.orgNumber].memeberships.dbCount ?? '—'}</td>
-                          <td>{importStatus[school.orgNumber].memeberships.diff ?? '—'}</td>
+                          <td>{importStatus[school.orgNumber].memberships.fetchedCount ?? '—'}</td>
+                          <td>{importStatus[school.orgNumber].memberships.dbCount ?? '—'}</td>
+                          <td>{importStatus[school.orgNumber].memberships.diff ?? '—'}</td>
                           <td>{formatDate(importStatus[school.orgNumber].users.fetchedAt)}</td>
                         </tr>
                       </tbody>
@@ -389,36 +397,41 @@
               </div>
 
               <div class="d-flex align-items-center gap-2">
+                <!-- Groups -->
                 <button
                   class="btn btn-outline-secondary btn-sm"
-                  onclick={() => feideFetchGroupsForSchool(school.orgNumber)}
-                  disabled={fetchingGroups.has(school.orgNumber)}
+                  onclick={() => handleFetchGroupsForSchool(school.orgNumber)}
+                  disabled={!!isLoadingGroups[school.orgNumber]}
                 >
-                  {#if fetchingGroups.has(school.orgNumber)}
+                  {#if isLoadingGroups[school.orgNumber]}
                     <span class="spinner-border spinner-border-sm me-1"></span>
                     Henter grupper...
                   {:else}
                     🔁 Hent grupper
                   {/if}
                 </button>
+
+                <!-- Users -->
                 <button
                   class="btn btn-outline-secondary btn-sm"
-                  onclick={() => feideFetchUsersForSchool(school.orgNumber)}
-                  disabled={fetchingUsers.has(school.orgNumber)}
+                  onclick={() => fetchUsersForSchool(school.orgNumber)}
+                  disabled={!!isLoadingUsers[school.orgNumber]}
                 >
-                  {#if fetchingUsers.has(school.orgNumber)}
+                  {#if isLoadingUsers[school.orgNumber]}
                     <span class="spinner-border spinner-border-sm me-1"></span>
                     Henter brukere...
                   {:else}
                     👥 Hent brukere
                   {/if}
                 </button>
+
+                <!-- Import -->
                 <button
                   class="btn btn-outline-primary btn-sm"
                   onclick={() => importGroupsAndUsers(school.orgNumber)}
-                  disabled={importingGroupsAndUsers.has(school.orgNumber)}
+                  disabled={!!isImporting[school.orgNumber]}
                 >
-                  {#if importingGroupsAndUsers.has(school.orgNumber)}
+                  {#if isImporting[school.orgNumber]}
                     <span class="spinner-border spinner-border-sm me-1"></span>
                     Importerer...
                   {:else}

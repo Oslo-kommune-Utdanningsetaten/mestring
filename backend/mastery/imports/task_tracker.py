@@ -4,17 +4,15 @@ from .group_importer import import_groups_from_file
 from .user_importer import import_users_from_file
 from .helpers import does_file_exist
 from mastery import models
-import inspect
 
 
 def run_with_task_tracking(
-    job_name,
+    job_name, 
     target_id,
-    func,
-    is_crash_on_error_enabled=False,
-    is_overwrite_enabled=False,
-    *args,
-    **kwargs,
+    func, 
+    org_number,
+    is_crash_on_error_enabled=False, 
+    is_overwrite_enabled=False, 
 ):
     """
     Run a function with DataMaintenanceTask tracking.
@@ -37,16 +35,9 @@ def run_with_task_tracking(
     task.started_at = timezone.now()
     task.save()
 
-    _forward_supported_flags(
-        func,
-        kwargs,
-        is_overwrite_enabled=is_overwrite_enabled,
-        is_crash_on_error_enabled=is_crash_on_error_enabled,
-    )
-
     try:
-        # Refresh connection if needed
-        result = func(*args, **kwargs)
+        # Run the function and capture result 
+        result = func(org_number, is_overwrite_enabled, is_crash_on_error_enabled)
 
         # Finish
         task.status = "finished"
@@ -76,8 +67,6 @@ def run_with_task_tracking(
         }
 
     except Exception as e:
-        # Ensure DB connection is still valid for saving task
-        close_old_connections()
 
         # Mark failed
         task.status = "failed"
@@ -90,20 +79,6 @@ def run_with_task_tracking(
             task.failed_at = timezone.now()
             raise
         raise e
-
-
-def _forward_supported_flags(
-    func, kwargs, *,  is_overwrite_enabled, is_crash_on_error_enabled
-):
-    """Only pass flags the function actually accepts."""
-    params = inspect.signature(func).parameters
-    if "is_overwrite_enabled" in params and "is_overwrite_enabled" not in kwargs:
-        kwargs["is_overwrite_enabled"] = is_overwrite_enabled
-    if (
-        "is_crash_on_error_enabled" in params
-        and "is_crash_on_error_enabled" not in kwargs
-    ):
-        kwargs["is_crash_on_error_enabled"] = is_crash_on_error_enabled
 
 
 def import_groups_and_users(
@@ -126,11 +101,13 @@ def import_groups_and_users(
         print(f"🔄 Importing groups for school {org_number}...")
         groups_result = import_groups_from_file(
             org_number,
-            is_overwrite_enabled=is_overwrite_enabled,
+            is_overwrite_enabled,
+            is_crash_on_error_enabled
         )
         users_result = import_users_from_file(
             org_number,
-            is_overwrite_enabled=is_overwrite_enabled,
+            is_overwrite_enabled,
+            is_crash_on_error_enabled
         )
         results["groups"] = groups_result
         results["users"] = users_result

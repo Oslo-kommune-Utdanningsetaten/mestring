@@ -1,3 +1,4 @@
+from mastery.imports.feide_api import fetch_groups_from_feide
 import names
 import time
 from datetime import timedelta
@@ -71,6 +72,8 @@ def do_work(task):
     org_number = job_params.get("org_number")
     if task.job_name == "update_schools" and org_number:
         yield from school_update(org_number)
+    elif task.job_name == "fetch_groups_from_feide" and org_number:
+        yield from fetch_groups_from_feide(org_number)
     else:
         raise ValueError(f"Unknown job_name '{task.job_name}' or missing org_number")
 
