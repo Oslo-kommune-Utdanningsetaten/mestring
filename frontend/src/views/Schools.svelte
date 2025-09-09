@@ -3,15 +3,15 @@
   import {
     fetchGroupsForSchool,
     fetchMembershipsForSchool,
+    fetchSchoolImportStatus,
+    importGroupsAndUsers,
+    feideImportSchool,
     schoolsList,
     schoolsPartialUpdate,
   } from '../generated/sdk.gen'
   import { setCurrentSchool } from '../stores/data'
 
   let schools = $state<SchoolReadable[]>([])
-  let isLoadingGroups = $state<Record<string, boolean>>({})
-  let isLoadingUsers = $state<Record<string, boolean>>({})
-  let isImporting = $state<Record<string, boolean>>({})
   let alertMessage = $state<string>('')
   let alertType = $state<'success' | 'error' | ''>('')
   let showDetails = $state<boolean>(false)
@@ -40,58 +40,63 @@
       dbCount: number | null
       diff: number | null
     }
-
     lastImportAt: string | null
   }
   let importStatus = $state<Record<string, ImportStatus>>({})
 
   const formatDate = (iso?: string | null) => (iso ? new Date(iso).toLocaleString('nb-NO') : '—')
 
-  // const //loadImportStatusForSchool = async (orgNumber: string) => {
-  //   try {
-  //     const response = await fetch(`/api/fetch/school_import_status/${orgNumber}/`)
-  //     const data = await response.json()
-  //     if (response.ok) {
-  //       importStatus = {
-  //         ...importStatus,
-  //         [orgNumber]: {
-  //           groups: {
-  //             fetchedCount: data.groups?.fetchedCount ?? null,
-  //             fetchedAt: data.groups?.fetchedAt ?? null,
-  //             dbCount: data.groups?.dbCount ?? 0,
-  //             diff: data.groups?.diff ?? null,
-  //           },
-  //           users: {
-  //             fetchedCount: data.users?.fetchedCount ?? null,
-  //             fetchedAt: data.users?.fetchedAt ?? null,
-  //             dbCount: data.users?.dbCount ?? 0,
-  //             diff: data.users?.diff ?? null,
-  //           },
-  //           memberships: {
-  //             fetchedCount: data.memberships?.fetchedCount ?? null,
-  //             fetchedAt: data.memberships?.fetchedAt ?? null,
-  //             dbCount: data.memberships?.dbCount ?? 0,
-  //             diff: data.memberships?.diff ?? null,
-  //           },
-  //           lastImportAt: data.lastImportAt ?? null,
-  //         },
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching import status:', orgNumber, error)
-  //   }
-  // }
-
-  const fetchSchools = async () => {
+  const loadImportStatusForSchool = async (orgNumber: string) => {
     try {
-      const result = await schoolsList()
-      schools = result.data || []
-      // Load status for each school
+      const response = await fetchSchoolImportStatus({
+        path: { org_number: orgNumber },
+      })
+
+      const data = response.data as any 
+
+      if (data?.status === 'success') {
+        importStatus = {
+          ...importStatus,
+          [orgNumber]: {
+            groups: {
+              fetchedCount: data.groups?.fetchedCount ?? null,
+              fetchedAt: data.groups?.fetchedAt ?? null,
+              dbCount: data.groups?.dbCount ?? 0,
+              diff: data.groups?.diff ?? null,
+            },
+            users: {
+              fetchedCount: data.users?.fetchedCount ?? null,
+              fetchedAt: data.users?.fetchedAt ?? null,
+              dbCount: data.users?.dbCount ?? 0,
+              diff: data.users?.diff ?? null,
+            },
+            memberships: {
+              fetchedCount: data.memberships?.fetchedCount ?? null,
+              fetchedAt: data.memberships?.fetchedAt ?? null,
+              dbCount: data.memberships?.dbCount ?? 0,
+              diff: data.memberships?.diff ?? null,
+            },
+            lastImportAt: data.lastImportAt ?? null,
+          },
+        }
+      }
     } catch (error) {
-      console.error('Error fetching schools:', error)
-      schools = []
+      console.error('Error fetching import status:', orgNumber, error)
     }
   }
+
+  const fetchSchools = async () => {
+  try {
+    const result = await schoolsList()
+    schools = result.data || []
+    await Promise.all(
+      schools.map(school => loadImportStatusForSchool(school.orgNumber))
+    )
+  } catch (error) {
+    console.error('Error fetching schools:', error)
+    schools = []
+  }
+}
 
   const toggleServiceEnabled = async (school: SchoolReadable) => {
     try {
@@ -115,147 +120,93 @@
     rawJsonResult = null
   }
 
-  const isBusy = (org: string) =>
-    !!isLoadingGroups[org] || !!isLoadingUsers[org] || !!isImporting[org]
-
-  const startLoadingGroups = (org: string) =>
-    (isLoadingGroups = { ...isLoadingGroups, [org]: true })
-  const stopLoadingGroups = (org: string) => {
-    const { [org]: _, ...rest } = isLoadingGroups
-    isLoadingGroups = rest
-  }
-
-  const startLoadingUsers = (org: string) => (isLoadingUsers = { ...isLoadingUsers, [org]: true })
-  const stopLoadingUsers = (org: string) => {
-    const { [org]: _, ...rest } = isLoadingUsers
-    isLoadingUsers = rest
-  }
-
-  const startImporting = (org: string) => (isImporting = { ...isImporting, [org]: true })
-  const stopImporting = (org: string) => {
-    const { [org]: _, ...rest } = isImporting
-    isImporting = rest
-  }
-
   const handleFetchGroupsForSchool = async (orgNumber: string) => {
-    if (isBusy(orgNumber)) return
-    startLoadingGroups(orgNumber)
-    dismissAlert()
-    // try {
-    const response = await fetchGroupsForSchool({
+  dismissAlert()
+  
+  try {
+    const result = await fetchGroupsForSchool({
       path: { org_number: orgNumber },
     })
-    console.log('response', response)
-    //   if (response.ok && result.status === 'success') {
-    //     alertMessage = `✅ Hentet grupper for ${orgNumber}`
-    //     alertType = 'success'
-    //     rawJsonResult = result
-    //     readiness[orgNumber] = {
-    //       ...(readiness[orgNumber] ?? { groups: 0, users: 0 }),
-    //       groups: result.stepResults?.totalGroups ?? 0,
-    //     }
-    //     //loadImportStatusForSchool(orgNumber)
-    //   } else {
-    //     alertMessage = `❌ Feil ved henting av grupper for ${orgNumber}: ${result.message || 'Ukjent feil'}`
-    //     alertType = 'error'
-    //   }
-    // } catch (e: any) {
-    //   alertMessage = `❌ Nettverksfeil: ${e?.message || e}`
-    //   alertType = 'error'
-    // } finally {
-    //   stopLoadingGroups(orgNumber)
-    // }
+    
+    if (result.response.status === 201) {
+      alertMessage = `✅ Bakgrunnns jobb opprettet for henting av grupper for ${orgNumber} (Task ID: ${result.data.taskId})`
+      alertType = 'success'
+    } else {
+      alertMessage = `❌ Feil ved oppretting av bakgrunnns jobb for ${orgNumber}`
+      alertType = 'error'
+    }
+  } catch (error: any) {
+    alertMessage = `❌ Nettverksfeil: ${error?.message || error}`
+    alertType = 'error'
   }
+}
+
 
   const handleFetchMembershipsForSchool = async (orgNumber: string) => {
-    const response = await fetchMembershipsForSchool({
-      path: { org_number: orgNumber },
-    })
-    console.log('response', response)
-  }
-
-  const fetchUsersForSchool = async (orgNumber: string) => {
-    if (isBusy(orgNumber)) return
-    startLoadingUsers(orgNumber)
     dismissAlert()
     try {
-      const response = await fetch(`/api/fetch/users/feide/${orgNumber}/`)
-      const result = await response.json()
-      if (response.ok && result.status === 'success') {
-        alertMessage = `✅ Hentet brukere/medlemskap for ${orgNumber}`
+      const result = await fetchMembershipsForSchool({
+        path: { org_number: orgNumber },
+      })
+
+      if (result.response.status === 201) {
+        alertMessage = `✅ Bakgrunnns jobb opprettet for henting av medlemskap for ${orgNumber} (Task ID: ${(result.data as any).taskId})`
         alertType = 'success'
-        rawJsonResult = result
-        readiness[orgNumber] = {
-          ...(readiness[orgNumber] ?? { groups: 0, users: 0 }),
-          users: result.stepResults?.uniqueUsers ?? 0,
-        }
-        //loadImportStatusForSchool(orgNumber)
       } else {
-        alertMessage = `❌ Feil ved henting av brukere for ${orgNumber}: ${result.message || 'Ukjent feil'}`
+        alertMessage = `❌ Feil ved oppretting av bakgrunnns jobb for ${orgNumber}`
         alertType = 'error'
       }
-    } catch (e: any) {
-      alertMessage = `❌ Nettverksfeil: ${e?.message || e}`
+    } catch (error: any) {
+      alertMessage = `❌ Nettverksfeil: ${error?.message || error}`
       alertType = 'error'
-    } finally {
-      stopLoadingUsers(orgNumber)
     }
   }
 
-  const importSchool = async (orgNumber: string) => {
+  
+  const handleImportSchool = async (orgNumber: string) => {
     dismissAlert()
+
     try {
-      const response = await fetch(`/api/import/school/feide/${orgNumber}/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const result = await feideImportSchool({
+        path: { org_number: orgNumber },
       })
-      const result = await response.json()
-      if (response.ok && result.status === 'success') {
-        alertMessage = `✅ Skole med org.nr ${orgNumber} importert fra Feide!`
+      if (result.response.status === 201) {
+        alertMessage = `✅ Skole med org nr ${orgNumber} importert fra Feide!`
         alertType = 'success'
-        rawJsonResult = result
+        // Refresh schools list
         await fetchSchools()
       } else {
-        alertMessage = `❌ Feil ved import av skole ${orgNumber}: ${result.message || 'Ukjent feil'}`
+        alertMessage = `❌ Feil ved import av skole ${orgNumber}`
         alertType = 'error'
       }
-    } catch (e: any) {
-      alertMessage = `❌ Nettverksfeil: ${e?.message || e}`
+    } catch (error: any) {
+      alertMessage = `❌ Nettverksfeil: ${error?.message || error}`
       alertType = 'error'
     }
   }
-
-  const importGroupsAndUsers = async (orgNumber: string) => {
-    if (isBusy(orgNumber)) return
+  
+  const handleImportGroupsAndUsers = async (orgNumber: string) => {
     dismissAlert()
-    startImporting(orgNumber)
+
     try {
-      const response = await fetch(`/api/import/school_groups_and_users/${orgNumber}/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const result = await importGroupsAndUsers({
+        path: { org_number: orgNumber },
+        body: {
           is_overwrite_enabled: overwrite,
           is_crash_on_error_enabled: crashOnError,
-        }),
+        },
       })
-      const result = await response.json()
 
-      if (response.ok && result.status === 'success') {
-        alertMessage = `✅ Grupper og brukere importert for skole ${orgNumber}!`
+      if (result.response.status === 201) {
+        alertMessage = `✅ Bakgrunnns jobb opprettet for import av grupper og brukere for ${orgNumber} (Task ID: ${result.data.taskId})`
         alertType = 'success'
-        rawJsonResult = result || null
-        //loadImportStatusForSchool(orgNumber)
       } else {
-        alertMessage = `❌ Feil ved import av grupper og brukere for skole ${orgNumber}: ${result.message || 'Ukjent feil'}`
+        alertMessage = `❌ Feil ved oppretting av importbakgrunnns jobb for ${orgNumber}`
         alertType = 'error'
       }
-    } catch (e: any) {
-      alertMessage = `❌ Nettverksfeil: ${e?.message || e}`
+    } catch (error: any) {
+      alertMessage = `❌ Nettverksfeil: ${error?.message || error}`
       alertType = 'error'
-    } finally {
-      stopImporting(orgNumber)
-      const { [orgNumber]: _removed, ...rest } = readiness
-      readiness = rest
     }
   }
 
@@ -281,7 +232,7 @@
         <button
           class="btn btn-outline-secondary"
           type="button"
-          onclick={() => importSchool(feideOrgInput.value)}
+          onclick={() => handleImportSchool(feideOrgInput.value)}
         >
           Importer fra Feide
         </button>
@@ -413,47 +364,29 @@
                 <button
                   class="btn btn-outline-secondary btn-sm"
                   onclick={() => handleFetchGroupsForSchool(school.orgNumber)}
-                  disabled={!!isLoadingGroups[school.orgNumber]}
                 >
-                  {#if isLoadingGroups[school.orgNumber]}
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                    Henter grupper...
-                  {:else}
-                    🔁 Hent grupper
-                  {/if}
+                  🔁 Hent grupper
                 </button>
 
                 <!-- Memberships -->
                 <button
                   class="btn btn-outline-secondary btn-sm"
                   onclick={() => handleFetchMembershipsForSchool(school.orgNumber)}
-                  disabled={!!isLoadingUsers[school.orgNumber]}
                 >
-                  {#if isLoadingUsers[school.orgNumber]}
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                    Henter medlemskap...
-                  {:else}
-                    👥 Hent medlemskap
-                  {/if}
+                  👥 Hent brukere
                 </button>
 
                 <!-- Import -->
                 <button
                   class="btn btn-outline-primary btn-sm"
-                  onclick={() => importGroupsAndUsers(school.orgNumber)}
-                  disabled={!!isImporting[school.orgNumber]}
+                  onclick={() => handleImportGroupsAndUsers(school.orgNumber)}
                 >
-                  {#if isImporting[school.orgNumber]}
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                    Importerer...
-                  {:else}
-                    📥 Importer
-                    {#if readiness[school.orgNumber]}
-                      <span class="ms-2 text-muted small">
-                        ({readiness[school.orgNumber].groups} grupper, {readiness[school.orgNumber]
-                          .users} brukere)
-                      </span>
-                    {/if}
+                  📥 Importer
+                  {#if readiness[school.orgNumber]}
+                    <span class="ms-2 text-muted small">
+                      ({readiness[school.orgNumber].groups} grupper, {readiness[school.orgNumber]
+                        .users} brukere)
+                    </span>
                   {/if}
                 </button>
 
@@ -485,11 +418,6 @@
 
   .card:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .spinner-border-sm {
-    width: 0.8rem;
-    height: 0.8rem;
   }
 
   .json-display {

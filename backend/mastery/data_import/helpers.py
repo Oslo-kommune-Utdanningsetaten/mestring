@@ -1,3 +1,4 @@
+import json
 import os
 import requests
 
@@ -37,3 +38,67 @@ def create_user_item(member):
 def does_file_exist(org_number, type):  
     school_dir = os.path.join(data_dir, org_number)  
     return os.path.exists(os.path.join(school_dir, f"{type}.json"))  
+
+
+def load_school_data(org_number, file_type):
+    """Load and parse JSON data file for school"""
+    file_path = os.path.join(data_dir, org_number, f"{file_type}.json")
+    
+    if not os.path.exists(file_path):
+        return None
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (json.JSONDecodeError, IOError) as e:
+        print(f"Error reading {file_type}.json for {org_number}: {e}")
+        return None
+
+
+def count_fetched_groups(org_number):
+    """Count groups from fetched data"""
+    groups_data = load_school_data(org_number, 'groups')
+    if not groups_data:
+        return None
+    
+    basis_count = len(groups_data.get('basis', []))
+    teaching_count = len(groups_data.get('teaching', []))
+    return basis_count + teaching_count
+
+
+def count_fetched_memberships_and_users(org_number):
+    """Count unique users and total memberships from fetched data"""
+    memberships_data = load_school_data(org_number, 'memberships')
+    if memberships_data is None:
+        return None, None
+    
+    if not memberships_data:
+        return 0, 0
+    
+    unique_users = set()
+    total_memberships = 0
+    
+    for group_data in memberships_data.values():
+        if not isinstance(group_data, dict):
+            continue
+            
+        # Count all members (teachers + students)
+        for member_list in [group_data.get('teachers', []), group_data.get('students', [])]:
+            for member in member_list:
+                if isinstance(member, dict) and 'feide_id' in member:
+                    unique_users.add(member['feide_id'])
+                    total_memberships += 1
+    
+    return len(unique_users), total_memberships
+
+
+def get_school_fetched_stats(org_number):
+    """Get all fetched statistics for a school"""
+    groups_count = count_fetched_groups(org_number)
+    users_count, memberships_count = count_fetched_memberships_and_users(org_number)
+    
+    return {
+        "groups_count": groups_count,
+        "users_count": users_count,
+        "memberships_count": memberships_count
+    }

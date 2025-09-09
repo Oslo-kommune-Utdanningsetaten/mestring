@@ -8,6 +8,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from mastery.data_import.import_school import import_school_from_feide
 from mastery.data_import.task_tracker import run_with_task_tracking, import_groups_and_users
 from mastery.data_import.feide_api import fetch_memberships_from_feide
+from mastery.data_import.helpers import get_school_fetched_stats
 from mastery.access_policies import ImportAccessPolicy
 from mastery import models
 
@@ -45,36 +46,19 @@ def ping(request):
 )
 @api_view(["POST"])
 @permission_classes([ImportAccessPolicy])
-def feide_import_school(request, org_number):
+def import_school(request, org_number):
     """
     Import a single school by org number from Feide and create/update in our database.
     """
-
     try:
-        result = run_with_task_tracking(
-            job_name="feide_import_school",
-            target_id=org_number,
-            func=import_school_from_feide,
-            org_number=org_number,
-        )
-
-        import_result = result.get("step_results", {})
-        print("Import result:", import_result)
-
-        if import_result.get("status") == "not_found":
-            return Response(
-                {"status": "error", "message": f"School {org_number} not found in Feide"}, status=404
-            )
-
+        import_school_from_feide(org_number)
         return Response(
             {
                 "status": "success",
-                "message": f"School {import_result.get('display_name', org_number)} imported successfully",
-                "school": import_result,
-                "task_id": result.get("task_id"),
-            }
+                "message": f"School with org number {org_number} imported/updated successfully",
+            }, 
+            status=201,
         )
-
     except Exception as e:
         return Response(
             {"status": "error", "message": f"Failed to import school: {str(e)}"},
@@ -230,7 +214,6 @@ def import_groups_and_users(request, org_number):
             status=500,
         )
 
-
 @extend_schema(
     operation_id="fetch_school_import_status",
     summary="Get school import status",
@@ -263,88 +246,73 @@ def fetch_school_import_status(request, org_number):
             status=404,
         )
 
-    # Tasks target id filter
-    target_filter = Q(target_id=org_number) | Q(target_id=school.display_name)
+    fetched_stats = get_school_fetched_stats(org_number)
 
-    # Latest finished tasks
+    # Latest finished tasks (for timestamps only)
     last_groups_task = (
         models.DataMaintenanceTask.objects
-        .filter(job_name="fetch_feide_groups_for_school", status="finished")
-        .filter(target_filter)
+        .filter(job_name="fetch_groups_from_feide", status="finished")
+        .filter(job_params__org_number=org_number)
         .order_by("-finished_at")
         .first()
     )
     last_users_task = (
         models.DataMaintenanceTask.objects
         .filter(job_name="fetch_memberships_from_feide", status="finished")
-        .filter(target_filter)
+        .filter(job_params__org_number=org_number)
         .order_by("-finished_at")
         .first()
     )
     last_import_task = (
         models.DataMaintenanceTask.objects
         .filter(job_name="import_groups_and_users", status="finished")
-        .filter(target_filter)
+        .filter(job_params__org_number=org_number)
         .order_by("-finished_at")
         .first()
     )
 
-    # Extract fetched counts and timestamps
-    groups_fetched_count = (last_groups_task.result or {}).get("total_groups") if last_groups_task else None
-    users_fetched_count = (last_users_task.result or {}).get("unique_users") if last_users_task else None
-    membership_fetched_count = (last_users_task.result or {}).get(
-        "total_memberships") if last_users_task else None
-
-    groups_fetched_at = last_groups_task.finished_at.isoformat(
-    ) if last_groups_task and last_groups_task.finished_at else None
-    users_fetched_at = last_users_task.finished_at.isoformat(
-    ) if last_users_task and last_users_task.finished_at else None
-    last_import_at = last_import_task.finished_at.isoformat(
-    ) if last_import_task and last_import_task.finished_at else None
+    # Extract timestamps from finished_at field
+    groups_fetched_at = last_groups_task.finished_at.isoformat() if last_groups_task and last_groups_task.finished_at else None
+    users_fetched_at = last_users_task.finished_at.isoformat() if last_users_task and last_users_task.finished_at else None
+    last_import_at = last_import_task.finished_at.isoformat() if last_import_task and last_import_task.finished_at else None
 
     # DB counts
-    if school:
-        groups_db_count = models.Group.objects.filter(
-            school=school, type__in=["basis", "teaching"]
-        ).count()
-        users_db_count = models.User.objects.filter(
-            groups__school=school
-        ).distinct().count()
-        user_groups_db_count = models.UserGroup.objects.filter(
-            group__school=school
-        ).count()
-    else:
-        groups_db_count = 0
-        users_db_count = 0
-        user_groups_db_count = 0
+    groups_db_count = models.Group.objects.filter(
+        school=school, type__in=["basis", "teaching"]
+    ).count()
+    users_db_count = models.User.objects.filter(
+        groups__school=school
+    ).distinct().count()
+    user_groups_db_count = models.UserGroup.objects.filter(
+        group__school=school
+    ).count()
 
-    # Diffs
-    groups_diff = (groups_fetched_count - groups_db_count) if isinstance(groups_fetched_count, int) else None
-    users_diff = (users_fetched_count - users_db_count) if isinstance(users_fetched_count, int) else None
-    user_groups_diff = (
-        membership_fetched_count - user_groups_db_count) if isinstance(membership_fetched_count, int) else None
+    # Calculate diffs using helper data
+    groups_diff = (fetched_stats['groups_count'] - groups_db_count) if isinstance(fetched_stats['groups_count'], int) else None
+    users_diff = (fetched_stats['users_count'] - users_db_count) if isinstance(fetched_stats['users_count'], int) else None
+    user_groups_diff = (fetched_stats['memberships_count'] - user_groups_db_count) if isinstance(fetched_stats['memberships_count'], int) else None
 
     return Response({
         "status": "success",
         "orgNumber": org_number,
         "school": {
-            "id": getattr(school, "id", None),
-            "displayName": getattr(school, "display_name", None),
+            "id": school.id,
+            "displayName": school.display_name,
         },
         "groups": {
-            "fetchedCount": groups_fetched_count,
+            "fetchedCount": fetched_stats['groups_count'],
             "fetchedAt": groups_fetched_at,
             "dbCount": groups_db_count,
             "diff": groups_diff,
         },
         "users": {
-            "fetchedCount": users_fetched_count,
+            "fetchedCount": fetched_stats['users_count'],
             "fetchedAt": users_fetched_at,
             "dbCount": users_db_count,
             "diff": users_diff,
         },
         "memberships": {
-            "fetchedCount": membership_fetched_count,
+            "fetchedCount": fetched_stats['memberships_count'],
             "dbCount": user_groups_db_count,
             "diff": user_groups_diff,
         },
