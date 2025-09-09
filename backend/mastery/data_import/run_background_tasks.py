@@ -1,11 +1,11 @@
-from mastery.imports.feide_api import fetch_groups_from_feide
+from mastery.data_import.feide_api import fetch_groups_from_feide
 import names
 import time
 from datetime import timedelta
 from django.db import transaction
 from django.utils import timezone
 from mastery.models import DataMaintenanceTask, generate_nanoid
-from .school_importer import school_update
+from .import_school import school_update
 
 # Retries after initial attempt. Retry in 1, 3, 10 minutes before giving up.
 RETRY_BACKOFF = [1*60, 3*60, 10*60]

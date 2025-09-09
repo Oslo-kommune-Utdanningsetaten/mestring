@@ -2,7 +2,7 @@
 import pytest
 from django.utils import timezone
 from mastery.models import DataMaintenanceTask
-from mastery.imports import background_task_handler
+from mastery.data_import import background_task_handler
 
 
 @pytest.fixture
@@ -32,6 +32,3 @@ def test_group_fetch(groups_fetch_task):
     background_task_handler.run()
     groups_fetch_task.refresh_from_db()
     assert len(groups_fetch_task.result['errors']) == 1
-    
-
-    

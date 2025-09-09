@@ -2,7 +2,7 @@
 import pytest
 from django.utils import timezone
 from mastery.models import DataMaintenanceTask
-from mastery.imports import background_task_handler
+from mastery.data_import import background_task_handler
 
 
 @pytest.fixture
