@@ -32,7 +32,7 @@ urlpatterns = [
     path(
         'api/import/school_groups_and_users/<str:org_number>/',
         custom.import_groups_and_users,
-        name='import-groups-and-users-api'
+        name='import_groups_and_users'
     ),
     path(
         'api/fetch/school_import_status/<str:org_number>/',

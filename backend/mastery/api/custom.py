@@ -6,8 +6,6 @@ from django.db import connection
 from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from mastery.data_import.import_school import import_school_from_feide
-from mastery.data_import.task_tracker import run_with_task_tracking, import_groups_and_users
-from mastery.data_import.feide_api import fetch_memberships_from_feide
 from mastery.data_import.helpers import get_school_fetched_stats
 from mastery.access_policies import ImportAccessPolicy
 from mastery import models
@@ -56,7 +54,7 @@ def import_school(request, org_number):
             {
                 "status": "success",
                 "message": f"School with org number {org_number} imported/updated successfully",
-            }, 
+            },
             status=201,
         )
     except Exception as e:
@@ -151,24 +149,7 @@ def fetch_memberships_for_school(request, org_number):
             type={'type': 'string'},
             location=OpenApiParameter.PATH
         )
-    ],
-    request={
-        "application/json": {
-            "type": "object",
-            "properties": {
-                "is_overwrite_enabled": {
-                    "type": "boolean",
-                    "description": "Whether to overwrite existing data",
-                    "default": False
-                },
-                "is_crash_on_error_enabled": {
-                    "type": "boolean",
-                    "description": "Whether to crash on errors instead of continuing",
-                    "default": False
-                }
-            }
-        }
-    }
+    ]
 )
 @api_view(["POST"])
 @permission_classes([ImportAccessPolicy])
@@ -179,40 +160,25 @@ def import_groups_and_users(request, org_number):
     school = models.School.objects.filter(org_number=org_number).first()
     if not school:
         return Response(
-            {"status": "error", "message": f"School not found for org {org_number}"},
+            {"error": "unknown-school", "message": f"School not found for org {org_number}"},
             status=404,
         )
-    try:
+    task = models.DataMaintenanceTask.objects.create(
+        status="pending",
+        job_name="import_groups",
+        job_params={"org_number": org_number},
+        display_name=f"Import groups for {school.display_name}",
+        earliest_run_at=timezone.now()
+    )
+    task = models.DataMaintenanceTask.objects.create(
+        status="pending",
+        job_name="import_users",
+        job_params={"org_number": org_number},
+        display_name=f"Import users for {school.display_name}",
+        earliest_run_at=timezone.now()
+    )
+    return Response(status=201, data={"status": "task_created", "task_id": task.id})
 
-        is_overwrite_enabled = request.data.get("is_overwrite_enabled", False)
-        is_crash_on_error_enabled = request.data.get("is_crash_on_error_enabled", False)
-
-        result = run_with_task_tracking(
-            job_name="import_groups_and_users",
-            target_id=school.display_name,
-            func=import_groups_and_users,
-            org_number=org_number,
-            is_overwrite_enabled=is_overwrite_enabled,
-            is_crash_on_error_enabled=is_crash_on_error_enabled,
-        )
-
-        return Response(
-            {
-                "status": "success",
-                "message": f"Import of groups and users completed for school {school.display_name}",
-                "org_number": org_number,
-                **result,
-            }
-        )
-    except Exception as e:
-        return Response(
-            {
-                "status": "error",
-                "message": f"Import of groups and users failed: {str(e)}",
-                "org_number": org_number,
-            },
-            status=500,
-        )
 
 @extend_schema(
     operation_id="fetch_school_import_status",
@@ -272,9 +238,12 @@ def fetch_school_import_status(request, org_number):
     )
 
     # Extract timestamps from finished_at field
-    groups_fetched_at = last_groups_task.finished_at.isoformat() if last_groups_task and last_groups_task.finished_at else None
-    users_fetched_at = last_users_task.finished_at.isoformat() if last_users_task and last_users_task.finished_at else None
-    last_import_at = last_import_task.finished_at.isoformat() if last_import_task and last_import_task.finished_at else None
+    groups_fetched_at = last_groups_task.finished_at.isoformat(
+    ) if last_groups_task and last_groups_task.finished_at else None
+    users_fetched_at = last_users_task.finished_at.isoformat(
+    ) if last_users_task and last_users_task.finished_at else None
+    last_import_at = last_import_task.finished_at.isoformat(
+    ) if last_import_task and last_import_task.finished_at else None
 
     # DB counts
     groups_db_count = models.Group.objects.filter(
@@ -288,9 +257,14 @@ def fetch_school_import_status(request, org_number):
     ).count()
 
     # Calculate diffs using helper data
-    groups_diff = (fetched_stats['groups_count'] - groups_db_count) if isinstance(fetched_stats['groups_count'], int) else None
-    users_diff = (fetched_stats['users_count'] - users_db_count) if isinstance(fetched_stats['users_count'], int) else None
-    user_groups_diff = (fetched_stats['memberships_count'] - user_groups_db_count) if isinstance(fetched_stats['memberships_count'], int) else None
+    groups_diff = (
+        fetched_stats['groups_count'] - groups_db_count) if isinstance(fetched_stats['groups_count'], int) else None
+    users_diff = (
+        fetched_stats['users_count'] - users_db_count) if isinstance(fetched_stats['users_count'], int) else None
+    user_groups_diff = (
+        fetched_stats['memberships_count'] - user_groups_db_count) if isinstance(
+        fetched_stats['memberships_count'],
+        int) else None
 
     return Response({
         "status": "success",

@@ -6,6 +6,8 @@ from django.db import transaction
 from django.utils import timezone
 from mastery.models import DataMaintenanceTask, generate_nanoid
 from .import_school import school_update
+from .import_groups import import_groups_from_file
+from .import_users import import_users_from_file
 
 # Retries after initial attempt. Retry in 1, 3, 10 minutes before giving up.
 RETRY_BACKOFF = [1*60, 3*60, 10*60]
@@ -69,14 +71,21 @@ def do_work(task):
     '''
     job_params = task.job_params or {}
     org_number = job_params.get("org_number")
-    if task.job_name == "update_schools" and org_number:
+    if not org_number:
+        raise ValueError(f"Missing org_number for job_name '{task.job_name}'")
+
+    if task.job_name == "update_schools":
         yield from school_update(org_number)
-    elif task.job_name == "fetch_groups_from_feide" and org_number:
+    elif task.job_name == "fetch_groups_from_feide":
         yield from fetch_groups_from_feide(org_number)
-    elif task.job_name == "fetch_memberships_from_feide" and org_number:
+    elif task.job_name == "fetch_memberships_from_feide":
         yield from fetch_memberships_from_feide(org_number)
+    elif task.job_name == "import_groups":
+        yield from import_groups_from_file(org_number)
+    # elif task.job_name == "import_users":
+    #     yield from import_users_from_file(org_number)
     else:
-        raise ValueError(f"Unknown job_name '{task.job_name}' or missing org_number")
+        raise ValueError(f"Unknown job_name '{task.job_name}'")
 
 
 # Used when running as long-lived process
