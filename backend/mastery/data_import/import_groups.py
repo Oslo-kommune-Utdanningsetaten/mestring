@@ -65,7 +65,7 @@ def import_groups_from_file(org_number):
         subject = None
         if "grep" in group_data and "code" in group_data["grep"]:
             grep_code = group_data["grep"]["code"]
-            subject, subject_was_created = ensure_subject(grep_code)
+            subject, subject_was_created = ensure_subject_exists(grep_code)
 
         group, created, error = ensure_group_exists(group_data, "teaching", subject)
         if error:
@@ -141,7 +141,7 @@ def ensure_group_exists(group_data, group_type, subject=None):
         return None, False, f"Failed to create group {feide_id}: {str(error)}"
 
 
-def ensure_subject(grep_code):
+def ensure_subject_exists(grep_code):
     """Ensure a subject exists in the database, fetching from UDIR if necessary.
     Returns the subject instance and a boolean indicating if it was created.
     """

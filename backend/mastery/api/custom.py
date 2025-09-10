@@ -170,14 +170,14 @@ def import_groups_and_users(request, org_number):
         display_name=f"Import groups for {school.display_name}",
         earliest_run_at=timezone.now()
     )
-    task = models.DataMaintenanceTask.objects.create(
+    task2 = models.DataMaintenanceTask.objects.create(
         status="pending",
-        job_name="import_users",
+        job_name="import_memberships",
         job_params={"org_number": org_number},
-        display_name=f"Import users for {school.display_name}",
+        display_name=f"Import memberships for {school.display_name}",
         earliest_run_at=timezone.now()
     )
-    return Response(status=201, data={"status": "task_created", "task_id": task.id})
+    return Response(status=201, data={"status": "tasks_created", "task_ids": [task.id, task2.id]})
 
 
 @extend_schema(

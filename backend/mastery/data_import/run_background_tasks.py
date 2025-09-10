@@ -7,7 +7,7 @@ from django.utils import timezone
 from mastery.models import DataMaintenanceTask, generate_nanoid
 from .import_school import school_update
 from .import_groups import import_groups_from_file
-from .import_users import import_users_from_file
+from .import_users import import_memberships_from_file
 
 # Retries after initial attempt. Retry in 1, 3, 10 minutes before giving up.
 RETRY_BACKOFF = [1*60, 3*60, 10*60]
@@ -82,8 +82,8 @@ def do_work(task):
         yield from fetch_memberships_from_feide(org_number)
     elif task.job_name == "import_groups":
         yield from import_groups_from_file(org_number)
-    # elif task.job_name == "import_users":
-    #     yield from import_users_from_file(org_number)
+    elif task.job_name == "import_memberships":
+        yield from import_memberships_from_file(org_number)
     else:
         raise ValueError(f"Unknown job_name '{task.job_name}'")
 
