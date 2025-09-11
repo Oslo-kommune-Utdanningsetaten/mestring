@@ -218,7 +218,7 @@ def fetch_memberships_from_feide(org_number: str):
 
             yield {
                 "result": {
-                    "entity": "group-membership",
+                    "entity": "membership",
                     "action": "fetch",
                     "total_count": None,
                     "success_count": total_memberships,
@@ -238,7 +238,7 @@ def fetch_memberships_from_feide(org_number: str):
 
     yield {
         "result": {
-            "entity": "group-membership",
+            "entity": "membership",
             "action": "fetch",
             "total_count": None,
             "success_count": total_memberships,
