@@ -22,7 +22,7 @@ def import_memberships_from_file(org_number):
 
     teacher_role, student_role = ensure_roles_exist()
 
-    # count all memberships to process
+    # count all memberships up front, for progress reporting
     total_teachers = sum(len(group.get("teachers", [])) for group in memberships_data.values())
     total_students = sum(len(group.get("students", [])) for group in memberships_data.values())
     total_memberships = total_teachers + total_students

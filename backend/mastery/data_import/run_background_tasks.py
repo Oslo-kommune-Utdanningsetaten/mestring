@@ -11,6 +11,7 @@ from .import_users import import_memberships_from_file
 
 # Retries after initial attempt. Retry in 1, 3, 10 minutes before giving up.
 RETRY_BACKOFF = [1*60, 3*60, 10*60]
+HANDLER_NAME = f"{names.get_first_name()} {generate_nanoid(size=6)}"
 
 
 # Find next pending task, set status to running and return it
@@ -29,7 +30,7 @@ def claim_next_task():
         task.status = "running"
         task.started_at = now
         task.last_heartbeat_at = now
-        task.handler_name = f"{names.get_full_name()} {generate_nanoid(size=6)}"
+        task.handler_name = HANDLER_NAME
         task.attempts = task.attempts + 1
         task.save(update_fields=["status", "started_at", "handler_name",
                   "last_heartbeat_at", "attempts", "updated_at"])
@@ -100,7 +101,7 @@ def run():
     task = claim_next_task()
     if task:
         try:
-            # do work in chunks, update result
+            # do work in chunks, update progress in result
             for chunk in do_work(task):
                 update_progress(task, chunk.get("result"))
                 if chunk.get("is_done"):
@@ -112,25 +113,25 @@ def run():
         except Exception as error:
             with transaction.atomic():
                 # refresh task to avoid stale data
-                fresh_task = (DataMaintenanceTask.objects.select_for_update().only(
+                task = (DataMaintenanceTask.objects.select_for_update().only(
                     "id", "result", "attempts", "status", "handler_name", "earliest_run_at", "updated_at",
                     "failed_at").get(id=task.id))
                 # append error to result
-                fresh_task.result = append_error_to_result(fresh_task, error)
+                task.result = append_error_to_result(task, error)
 
-                if fresh_task.attempts <= len(RETRY_BACKOFF):
+                if task.attempts <= len(RETRY_BACKOFF):
                     # failed, but schedule retry
-                    fresh_task.status = "pending"
-                    fresh_task.handler_name = None
-                    fresh_task.failed_at = None
-                    fresh_task.earliest_run_at = next_execution_time(fresh_task)
+                    task.status = "pending"
+                    task.handler_name = None
+                    task.failed_at = None
+                    task.earliest_run_at = next_execution_time(task)
                 else:
                     # failed, no more retries
-                    fresh_task.status = "failed"
-                    fresh_task.failed_at = timezone.now()
-                    fresh_task.earliest_run_at = None
+                    task.status = "failed"
+                    task.failed_at = timezone.now()
+                    task.earliest_run_at = None
 
-                fresh_task.save(update_fields=[
+                task.save(update_fields=[
                     "result", "attempts", "status", "handler_name",
                     "earliest_run_at", "failed_at", "updated_at"
                 ])
