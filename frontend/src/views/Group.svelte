@@ -58,7 +58,8 @@
     goalWip = {
       ...goal,
       groupId: group?.id,
-      sortOrder: goal?.sortOrder || (goals.length ? goals.length + 1 : 1),
+      isGoalPersonal: false,
+      sortOrder: goal?.sortOrder || (goals?.length ? goals.length + 1 : 1),
       masterySchemaId:
         goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
     }

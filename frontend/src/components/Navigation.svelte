@@ -93,7 +93,12 @@
               <li>
                 <Link to="/subjects" className="dropdown-item">Fag</Link>
               </li>
-              <li><a class="dropdown-item" href="/mastery-schemas">Mastery Schemas</a></li>
+              <li>
+                <Link to="/data-maintenance-tasks" className="dropdown-item">Bakgrunnsjobber</Link>
+              </li>
+              <li>
+                <Link to="/mastery-schemas" className="dropdown-item">Mastery Schemas</Link>
+              </li>
             </ul>
           </li>
         {/if}

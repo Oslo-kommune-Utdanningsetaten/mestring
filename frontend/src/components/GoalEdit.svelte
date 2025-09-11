@@ -1,7 +1,12 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
   import { goalsCreate, goalsUpdate } from '../generated/sdk.gen'
-  import type { GoalWritable, GroupReadable, UserReadable } from '../generated/types.gen'
+  import type {
+    GoalWritable,
+    GroupReadable,
+    UserReadable,
+    SubjectReadable,
+  } from '../generated/types.gen'
   import { setLocalStorageItem } from '../stores/localStorage'
 
   const {
@@ -12,6 +17,7 @@
     isGoalPersonal,
   } = $props<{
     student?: UserReadable | null
+    subject?: SubjectReadable | null
     group?: GroupReadable | null
     goal?: GoalWritable | null
     isGoalPersonal: boolean
@@ -91,17 +97,6 @@
   </div>
 
   <div class="form-group mb-3">
-    <label for="goalTitle" class="form-label">Tittel</label>
-    <input
-      id="goalTitle"
-      type="text"
-      class="form-control rounded-0 border-2 border-primary input-field"
-      bind:value={localGoal.title}
-      placeholder="Tittel på målet"
-    />
-  </div>
-
-  <div class="form-group mb-3">
     <label for="goalSortOrder" class="form-label">Rekkefølge</label>
     <input
       id="goalSortOrder"
@@ -109,6 +104,17 @@
       class="form-control rounded-0 border-2 border-primary input-field"
       bind:value={localGoal.sortOrder}
       placeholder="Rekkefølge (tall)"
+    />
+  </div>
+
+  <div class="form-group mb-3">
+    <label for="goalTitle" class="form-label">Tittel</label>
+    <input
+      id="goalTitle"
+      type="text"
+      class="form-control rounded-0 border-2 border-primary input-field"
+      bind:value={localGoal.title}
+      placeholder="Tittel på målet"
     />
   </div>
 
@@ -128,9 +134,7 @@
         }
       }}
       tabindex="0"
-      disabled={localGoal.masterySchemaId === '' ||
-        localGoal.subjectId === '' ||
-        !localGoal.title?.trim()}
+      disabled={localGoal.masterySchemaId === '' || localGoal.subjectId === ''}
     >
       Lagre
     </pkt-button>

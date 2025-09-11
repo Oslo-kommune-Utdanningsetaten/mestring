@@ -8,6 +8,8 @@ from .mastery_schema import MasterySchemaAccessPolicy
 from .observation import ObservationAccessPolicy
 from .user_school import UserSchoolAccessPolicy
 from .user_group import UserGroupAccessPolicy
+from .data_maintenance_task import DataMaintenanceTaskAccessPolicy
+from .feide_import import ImportAccessPolicy
 
 __all__ = [
     "GroupAccessPolicy",
@@ -19,5 +21,7 @@ __all__ = [
     "MasterySchemaAccessPolicy",
     "ObservationAccessPolicy",
     "UserSchoolAccessPolicy",
-    "UserGroupAccessPolicy"
+    "UserGroupAccessPolicy",
+    "DataMaintenanceTaskAccessPolicy", 
+    "ImportAccessPolicy",
 ]

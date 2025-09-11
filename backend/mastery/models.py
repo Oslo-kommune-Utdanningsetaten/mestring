@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.db import models
 from django.db.models import Q
 from nanoid import generate
@@ -5,8 +6,8 @@ from nanoid import generate
 alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 
-def generate_nanoid():
-    return generate(alphabet, 12)
+def generate_nanoid(size=12):
+    return generate(alphabet, size)
 
 
 class BaseModel(models.Model):
@@ -121,7 +122,7 @@ class User(BaseModel):
         'Group', through='UserGroup', through_fields=('user', 'group'), null=True,
         related_name='members')
     schools = models.ManyToManyField(
-        'School', through='UserSchool', through_fields=('user', 'school'), null=True,
+        'School', through='UserSchool', through_fields=('user', 'school'),
         related_name='staff')
     is_superadmin = models.BooleanField(default=False)  # caution, site-wide admin
 
@@ -338,3 +339,29 @@ class Status(BaseModel):
     mastery_value = models.IntegerField(null=True)
     mastery_description = models.TextField(null=True)
     feedforward = models.TextField(null=True)
+
+
+class DataMaintenanceTask(BaseModel):
+    """
+    A DataMaintenanceTask represents a task that maintains data in the system, such as importing groups for a school.
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('running', 'Running'),
+        ('finished', 'Finished'),
+        ('failed', 'Failed'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    job_name = models.CharField(max_length=200, blank=False)  # e.g. 'fetch_groups_for_school'
+    job_params = models.JSONField(null=True, blank=False)  # JSON field for params the job needs
+    display_name = models.CharField(max_length=200, null=True, blank=False)  # human-readable name of the task
+    handler_name = models.CharField(max_length=200, null=True, blank=False)  # handler instance
+    is_overwrite_enabled = models.BooleanField(default=False)  # overwrite/update existing data
+    is_crash_on_error_enabled = models.BooleanField(default=False)  # should task crash on error
+    started_at = models.DateTimeField(null=True)
+    failed_at = models.DateTimeField(null=True)  # only set if task failed
+    finished_at = models.DateTimeField(null=True)  # only set if successful
+    last_heartbeat_at = models.DateTimeField(null=True)  # last time the task reported progress
+    earliest_run_at = models.DateTimeField(null=True, default=timezone.now)  # earliest execution time
+    result = models.JSONField(null=True, blank=False)  # JSON field to store updated result of task execution
+    attempts = models.IntegerField(default=0)  # number of attempts made (initial + retries)
