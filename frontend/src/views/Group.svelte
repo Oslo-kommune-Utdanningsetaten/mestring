@@ -57,7 +57,7 @@
   const handleEditGoal = (goal: GoalDecorated | null) => {
     goalWip = {
       ...goal,
-      groupId: group?.id,
+      groupId: group?.id || null,
       isGoalPersonal: false,
       sortOrder: goal?.sortOrder || (goals?.length ? goals.length + 1 : 1),
       masterySchemaId:
@@ -190,7 +190,7 @@
 
 <!-- offcanvas for creating/editing goals -->
 <div class="custom-offcanvas" class:visible={!!goalWip}>
-  <GoalEdit {group} goal={goalWip} isGoalPersonal={false} onDone={handleGoalDone} />
+  <GoalEdit goal={goalWip} {group} isGoalPersonal={false} onDone={handleGoalDone} />
 </div>
 
 <style>

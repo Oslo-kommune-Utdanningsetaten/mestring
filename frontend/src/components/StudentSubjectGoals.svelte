@@ -24,6 +24,7 @@
   let observationWip = $state<ObservationReadable | {} | null>(null)
   let expandedGoals = $state<Record<string, boolean>>({})
   let goalsListElement = $state<HTMLElement | null>(null)
+  let subject = $derived($dataStore.subjects.find(s => s.id === subjectId) || null)
 
   const dateFormat = Intl.DateTimeFormat('nb', {
     month: 'long',
@@ -34,11 +35,6 @@
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString)
     return dateFormat.format(date)
-  }
-
-  const getSubjectName = (subjectId: string): string => {
-    const subject = $dataStore.subjects.find(s => s.id === subjectId)
-    return subject ? subject.displayName : 'ukjent'
   }
 
   const fetchGoalsForSubject = async () => {
@@ -53,6 +49,7 @@
     }
   }
 
+  // Remember, we're only editing personal goals here
   const handleEditGoal = (goal: GoalDecorated | null) => {
     goalWip = {
       ...goal,
@@ -153,8 +150,9 @@
   }
 
   $effect(() => {
-    if (!student || !subjectId) return
-    fetchGoalsForSubject()
+    if (student && subjectId) {
+      fetchGoalsForSubject()
+    }
   })
 
   $effect(() => {
@@ -170,7 +168,7 @@
 
 <div class="d-flex align-items-center gap-2 mb-3">
   <h3>
-    {getSubjectName(subjectId)}
+    {subject ? subject.displayName : 'Ukjent'}
   </h3>
   <pkt-button
     size="small"
@@ -386,7 +384,7 @@
 
 <!-- offcanvas for creating/editing goals -->
 <div class="custom-offcanvas" class:visible={!!goalWip}>
-  <GoalEdit {student} goal={goalWip} isGoalPersonal={true} onDone={handleGoalDone} />
+  <GoalEdit goal={goalWip} {student} {subject} isGoalPersonal={true} onDone={handleGoalDone} />
 </div>
 
 <!-- offcanvas for adding an observation -->
