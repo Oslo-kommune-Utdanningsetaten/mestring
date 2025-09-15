@@ -47,9 +47,7 @@
         class="rung flex-grow d-flex align-items-end justify-content-center text-center"
         style="width: {rungWidth}%; height: {calculateRungHeight(
           index
-        )}%; background-color: {(masteryValue ?? 0) >= masteryLevel.minValue
-          ? masteryLevel.color
-          : 'var(--bs-gray)'};"
+        )}%; background-color: {masteryLevel.color};"
       >
         <span class="pb-2 mx-2">
           {masteryLevel.title}

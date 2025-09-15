@@ -64,10 +64,7 @@
       {#each sortedMasteryLevels as masteryLevel, index}
         <span
           class="rung px-2"
-          style="width: {(index + 1) * widthMultiplier}%; background-color: {(masteryValue ?? 0) >=
-          masteryLevel.minValue
-            ? masteryLevel.color
-            : 'var(--bs-gray)'};"
+          style="width: {(index + 1) * widthMultiplier}%; background-color: {masteryLevel.color};"
         >
           {masteryLevel.title}
         </span>
