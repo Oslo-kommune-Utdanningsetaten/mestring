@@ -336,7 +336,7 @@
                 <span class="col-1">Verdi</span>
                 <span class="col-3">Valg</span>
               </div>
-              {#each goal?.observations as observation}
+              {#each goal?.observations as observation, index}
                 <div class="row d-flex gap-4 pt-2 observation-item">
                   <span class="col-3">
                     {formatDate(observation.observedAt)}
@@ -346,21 +346,7 @@
                   </span>
                   <span class="col-3">
                     <pkt-icon
-                      title="Rediger observasjon"
-                      class="hover-glow me-2"
-                      name="edit"
-                      onclick={() => handleEditObservation(goal, observation)}
-                      onkeydown={(e: any) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          handleEditObservation(goal, observation)
-                        }
-                      }}
-                      role="button"
-                      tabindex="0"
-                    ></pkt-icon>
-                    <pkt-icon
-                      title="Slet observasjon"
+                      title="Slett observasjon"
                       class="hover-glow me-2"
                       name="trash-can"
                       onclick={() => handleDeleteObservation(observation.id)}
@@ -373,6 +359,22 @@
                       role="button"
                       tabindex="0"
                     ></pkt-icon>
+                    {#if index === goal?.observations.length - 1}
+                      <pkt-icon
+                        title="Rediger observasjon"
+                        class="hover-glow me-2"
+                        name="edit"
+                        onclick={() => handleEditObservation(goal, observation)}
+                        onkeydown={(e: any) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            handleEditObservation(goal, observation)
+                          }
+                        }}
+                        role="button"
+                        tabindex="0"
+                      ></pkt-icon>
+                    {/if}
                   </span>
                 </div>
               {/each}
