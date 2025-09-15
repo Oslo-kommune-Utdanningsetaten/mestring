@@ -87,7 +87,6 @@
         />
       {/if}
     </div>
-    <h4>{localObservation.masteryValue}</h4>
   {/if}
 
   {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
