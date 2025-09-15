@@ -66,7 +66,15 @@
   }
 
   const handleEditObservation = (goal: GoalDecorated, observation: ObservationReadable | null) => {
-    observationWip = observation || {}
+    if (observation) {
+      // edit observation
+      observationWip = observation
+    } else {
+      // create new observation, prefill with value from previous observation
+      const prevousObservations = goal?.observations || []
+      const previousObservation = prevousObservations[prevousObservations.length - 1]
+      observationWip = { masteryValue: previousObservation?.masteryValue || null }
+    }
     goalForObservation = { ...goal }
   }
 
