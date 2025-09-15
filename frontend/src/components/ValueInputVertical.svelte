@@ -30,11 +30,10 @@
   const sliderValueIncrement = $derived(masterySchema?.config?.inputIncrement || 1)
   const widthMultiplier = $derived(masteryLevels.length ? 100 / masteryLevels.length : 1)
 
-  $effect(() => {
-    if (!isNumber(masteryValue)) {
-      masteryValue = minValue + maxValue / 2
-    }
-  })
+  // Always have a non-null numeric value available for rendering calculations
+  const safeMasteryValue = $derived(
+    isNumber(masteryValue) ? (masteryValue as number) : (minValue + maxValue) / 2
+  )
 </script>
 
 <div class="mb-4">
@@ -42,7 +41,7 @@
     {label}
   </label>
 
-  <div class="d-flex gap-3 position-relative">
+  <div class="d-flex gap-1 position-relative">
     <input
       id="mastery-slider"
       type="range"
@@ -52,15 +51,22 @@
       class="slider"
       bind:value={masteryValue}
     />
-
-    {#if masterySchema?.config?.isIncrementIndicatorEnabled}
+    <div id="valueIndicatorContainer">
       <div
-        id="incrementIndicator"
-        style="top: calc(max(0px, {100 - (masteryValue ?? 0)}% - 3px));"
-      ></div>
-    {/if}
+        id="valueIndicator"
+        style="top: clamp(0px, calc(100% - {safeMasteryValue}% - 0.75em), calc(100% - 1.3em));"
+      >
+        {safeMasteryValue}
+      </div>
+    </div>
 
     <div class="stairs-container">
+      {#if masterySchema?.config?.isIncrementIndicatorEnabled}
+        <div
+          id="incrementIndicator"
+          style="top: clamp(0px, calc(100% - {safeMasteryValue}%), calc(100% - 5px));"
+        ></div>
+      {/if}
       {#each sortedMasteryLevels as masteryLevel, index}
         <span
           class="rung px-2"
@@ -77,12 +83,29 @@
   #incrementIndicator {
     position: absolute;
     top: 0;
-    left: 10%;
-    width: 90%;
+    left: 0%;
+    width: 100%;
     height: 5px;
     background-color: rgba(0, 0, 0, 0.25);
     z-index: 1;
     transition: top 0.2s ease-out;
+  }
+
+  #valueIndicatorContainer {
+    width: 3em;
+    border: 1px solid var(--bs-gray-300);
+  }
+
+  #valueIndicator {
+    position: absolute;
+    top: 0;
+    left: 50px;
+    width: 3em;
+    height: 1.5em;
+    line-height: 1.5em;
+    z-index: 2;
+    text-align: center;
+    transition: left 0.2s ease-out;
   }
 
   .stairs-container {
@@ -104,10 +127,11 @@
 
   .slider {
     margin: 0px 20px 0px 20px;
+    padding-top: 0px;
+    padding-bottom: 0px;
     width: 10px;
     writing-mode: vertical-lr;
     direction: rtl;
-    padding-top: 0px;
     background-color: var(--bs-gray);
     z-index: 2;
   }
