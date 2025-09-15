@@ -106,7 +106,6 @@ def run():
                 update_progress(task, chunk.get("result"))
                 if chunk.get("is_done"):
                     break
-            task.refresh_from_db(fields=["result"])
             task.status = "finished"
             task.finished_at = timezone.now()
             task.save(update_fields=["status", "finished_at", "updated_at"])
