@@ -1,11 +1,12 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-tag.js'
-  import { groupsRetrieve, usersList, goalsList } from '../generated/sdk.gen'
+  import { groupsRetrieve, usersList, goalsList, goalsUpdate } from '../generated/sdk.gen'
   import type { GoalReadable, GroupReadable, UserReadable } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   import GoalEdit from '../components/GoalEdit.svelte'
   import GoalCard from '../components/GoalCard.svelte'
+  import Sortable, { type SortableEvent } from 'sortablejs'
   import { dataStore } from '../stores/data'
   import { getLocalStorageItem } from '../stores/localStorage'
 
@@ -19,6 +20,9 @@
   let goalWip = $state<GoalDecorated | null>(null)
   let isLoading = $state(true)
   let error = $state<string | null>(null)
+  let goalsListElement = $state<HTMLElement | null>(null)
+  let isShowGoalTitleEnabled = $state<boolean>(true)
+  let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 5 : 2)
 
   const fetchGroupData = async () => {
     if (!groupId) return
@@ -82,9 +86,51 @@
     }
   }
 
+  const handleGoalOrderChange = async (event: SortableEvent) => {
+    const { oldIndex, newIndex } = event
+    if (oldIndex === undefined || newIndex === undefined) return
+
+    const localGoals = [...goals]
+    // Remove moved goal and capture it
+    const [movedGoal] = localGoals.splice(oldIndex, 1)
+    // Insert moved goal at new index
+    localGoals.splice(newIndex, 0, movedGoal)
+    // for each goal, update its sortOrder if it has changed
+    const updatePromises: Promise<any>[] = []
+    localGoals.forEach(async (goal, index) => {
+      const newSortOrder = index + 1 // for human readability, sortOrder starts at 1
+      if (goal.sortOrder !== newSortOrder) {
+        goal.sortOrder = newSortOrder
+        updatePromises.push(
+          goalsUpdate({
+            path: { id: goal.id },
+            body: goal,
+          })
+        )
+      }
+    })
+    try {
+      await Promise.all(updatePromises)
+    } catch (error) {
+      console.error('Error updating goal order:', error)
+      // Refetch to restore correct state
+      await fetchGroupData()
+    }
+  }
+
   $effect(() => {
     if (groupId && currentSchool && currentSchool.id) {
       fetchGroupData()
+    }
+  })
+
+  $effect(() => {
+    if (goalsListElement) {
+      const sortable = new Sortable(goalsListElement, {
+        animation: 150,
+        handle: '.row-handle',
+        onEnd: handleGoalOrderChange,
+      })
     }
   })
 </script>
@@ -149,9 +195,30 @@
             Ingen mål for denne gruppa. Trykk pluss (+) for å opprette mål for alle elever i gruppa.
           </div>
         {:else}
-          {#each goals as goal}
-            <GoalCard {goal} />
-          {/each}
+          <div bind:this={goalsListElement} class="list-group">
+            {#each goals as goal, index (goal.id)}
+              <div class="list-group-item goal-list-item">
+                <div class="row d-flex align-items-center">
+                  <span class="col-1">
+                    <pkt-icon
+                      title="Endre rekkefølge"
+                      class="me-2 row-handle"
+                      name="drag"
+                      role="button"
+                      tabindex="0"
+                    ></pkt-icon>
+                  </span>
+                  <span class="col-1">
+                    {goal.sortOrder || index + 1}
+                  </span>
+                  <span class="col-1">ikon</span>
+                  <span class="col-md-9">
+                    {isShowGoalTitleEnabled ? goal.title : '🙊'}
+                  </span>
+                </div>
+              </div>
+            {/each}
+          </div>
         {/if}
       </div>
     </div>
@@ -194,4 +261,21 @@
 </div>
 
 <style>
+  div.observation-item > span {
+    font-family: 'Courier New', Courier, monospace !important;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+  }
+
+  .goal-list-item {
+    background-color: var(--bs-light);
+    row-gap: 0.5rem;
+  }
+
+  .row-handle {
+    cursor: move;
+    vertical-align: -8%;
+  }
 </style>
