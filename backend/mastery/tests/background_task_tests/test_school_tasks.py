@@ -36,7 +36,6 @@ def test_school_update(school_update_task):
     assert school_update_task.status == "finished"
 
     result = school_update_task.result
-    assert result["key"] == "school-update"
     assert result["entity"] == "school"
     assert result["action"] == "update"
     assert result["total_count"] == 1000

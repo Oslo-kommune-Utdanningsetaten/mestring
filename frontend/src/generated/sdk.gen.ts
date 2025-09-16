@@ -240,11 +240,7 @@ export const feideImportSchool = <ThrowOnError extends boolean = false>(options:
 export const importGroupsAndUsers = <ThrowOnError extends boolean = false>(options: Options<ImportGroupsAndUsersData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<unknown, unknown, ThrowOnError>({
         url: '/api/import/school_groups_and_users/{org_number}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options?.headers
-        }
+        ...options
     });
 };
 
