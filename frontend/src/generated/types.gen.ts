@@ -1167,7 +1167,12 @@ export type ImportGroupsAndUsersResponses = {
 export type MasterySchemasListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Filter mastery schemas by School ID
+         */
+        school?: string;
+    };
     url: '/api/mastery-schemas/';
 };
 
