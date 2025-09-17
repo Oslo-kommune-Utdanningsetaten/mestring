@@ -1,3 +1,6 @@
+from mastery import models
+from django.db import connection
+import django
 import os
 import sys
 from dotenv import load_dotenv
@@ -10,11 +13,9 @@ project_root = os.path.abspath(os.path.join(script_dir, '..'))
 sys.path.append(project_root)
 load_dotenv(os.path.join(project_root, '.env'))
 
-import django
-from django.db import connection
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
 django.setup()
-from mastery import models
+
 
 def ensure_test_school():
     """
@@ -50,34 +51,34 @@ def ensure_mastery_schema_exists():
             config={
                 "levels": [
                     {
-                    "text": "Mestrer ikke",
-                    "color": "rgb(229, 50, 43)",
-                    "maxValue": 20,
-                    "minValue": 1
+                        "text": "Mestrer ikke",
+                        "color": "rgb(229, 50, 43)",
+                        "maxValue": 20,
+                        "minValue": 1
                     },
                     {
-                    "text": "Mestrer sjelden",
-                    "color": "rgb(159, 113, 202)",
-                    "maxValue": 40,
-                    "minValue": 21
+                        "text": "Mestrer sjelden",
+                        "color": "rgb(159, 113, 202)",
+                        "maxValue": 40,
+                        "minValue": 21
                     },
                     {
-                    "text": "Mestrer iblant",
-                    "color": "rgb(86, 174, 232)",
-                    "maxValue": 60,
-                    "minValue": 41
+                        "text": "Mestrer iblant",
+                        "color": "rgb(86, 174, 232)",
+                        "maxValue": 60,
+                        "minValue": 41
                     },
                     {
-                    "text": "Mestrer ofte",
-                    "color": "rgb(241, 249, 97)",
-                    "maxValue": 80,
-                    "minValue": 61
+                        "text": "Mestrer ofte",
+                        "color": "rgb(241, 249, 97)",
+                        "maxValue": 80,
+                        "minValue": 61
                     },
                     {
-                    "text": "Mestrer",
-                    "color": "rgb(160, 207, 106)",
-                    "maxValue": 100,
-                    "minValue": 81
+                        "text": "Mestrer",
+                        "color": "rgb(160, 207, 106)",
+                        "maxValue": 100,
+                        "minValue": 81
                     }
                 ],
                 "inputIncrement": 1,
@@ -90,19 +91,30 @@ def ensure_mastery_schema_exists():
 
 
 def ensure_roles_exist():
-    """
-    Ensure that the roles 'teacher' and 'student' exist in the database.
-    If they do not exist, create them.
-    """
-    teacher_role, _ = models.Role.objects.get_or_create(
-        name='teacher',
-        defaults={'maintained_at': timezone.now()}
-    )
-    student_role, _ = models.Role.objects.get_or_create(
-        name='student',
-        defaults={'maintained_at': timezone.now()}
-    )
-    return teacher_role, student_role
+    """Ensure that neccessary roles exist"""
+    teacher_role = models.Role.objects.filter(name="teacher").first()
+    student_role = models.Role.objects.filter(name="student").first()
+    admin_role = models.Role.objects.filter(name="admin").first()
+    staff_role = models.Role.objects.filter(name="staff").first()
+
+    if not teacher_role:
+        teacher_role = models.Role.objects.create(
+            name="teacher", maintained_at=timezone.now()
+        )
+    if not student_role:
+        student_role = models.Role.objects.create(
+            name="student", maintained_at=timezone.now()
+        )
+    if not admin_role:
+        admin_role = models.Role.objects.create(
+            name="admin", maintained_at=timezone.now()
+        )
+    if not staff_role:
+        staff_role = models.Role.objects.create(
+            name="staff", maintained_at=timezone.now()
+        )
+
+    return teacher_role, student_role, admin_role, staff_role
 
 
 def objects_from_sheet(sheet, field_names):
@@ -127,7 +139,7 @@ def objects_from_sheet(sheet, field_names):
 def run_import():
     excel_file_path = os.path.join(script_dir, 'data', 'data_for_import.xlsx')
     excel_file_sheets = get_data(excel_file_path)
-    teacher_role, student_role = ensure_roles_exist()
+    teacher_role, student_role, _, _ = ensure_roles_exist()
 
     # import subjects from kakrafoon.subject sheet
     if 'kakrafoon.subject' in excel_file_sheets:
@@ -154,12 +166,14 @@ def run_import():
     if 'kakrafoon.group' in excel_file_sheets:
         print("Importing groups...")
         sheet = excel_file_sheets['kakrafoon.group']
-        field_names = ['id', 'feide_id', 'display_name', 'type', 'subject_id', 'school_id', 'valid_from', 'valid_to']
+        field_names = ['id', 'feide_id', 'display_name', 'type',
+                       'subject_id', 'school_id', 'valid_from', 'valid_to']
         group_dicts = objects_from_sheet(sheet, field_names)
         results = []
         for group_dict in group_dicts:
             school = models.School.objects.filter(id__exact=group_dict['school_id']).first()
-            subject = models.Subject.objects.filter(id__exact=group_dict['subject_id']).first() if group_dict['subject_id'] is not None else None
+            subject = models.Subject.objects.filter(id__exact=group_dict['subject_id']).first(
+            ) if group_dict['subject_id'] is not None else None
             defaults = {'maintained_at': timezone.now()}
             for k, v in group_dict.items():
                 if k == 'id':
@@ -199,16 +213,16 @@ def run_import():
                     defaults['group'] = group
                 elif k == 'role':
                     defaults['role'] = role
-            user_group, created = models.UserGroup.objects.get_or_create(id=member_dict['id'], defaults=defaults)
+            user_group, created = models.UserGroup.objects.get_or_create(
+                id=member_dict['id'], defaults=defaults)
             results.append({'object': user_group, 'created': created})
         print("UserGroups imported:", len(results))
-
 
     # import goals from kakrafoon.goal sheet
     if 'kakrafoon.goal' in excel_file_sheets:
         print("Importing goals...")
         sheet = excel_file_sheets['kakrafoon.goal']
-        field_names = ['id', 'title', 'subject_id', 'student_feide_id'] # ONLY IMPORTING STUDENT GOALS!
+        field_names = ['id', 'title', 'subject_id', 'student_feide_id']  # ONLY IMPORTING STUDENT GOALS!
         goal_dicts = objects_from_sheet(sheet, field_names)
         results = []
         schema = ensure_mastery_schema_exists()
@@ -233,12 +247,14 @@ def run_import():
     if 'kakrafoon.observation' in excel_file_sheets:
         print("Importing observations...")
         sheet = excel_file_sheets['kakrafoon.observation']
-        field_names = ['id', 'observed_at', 'mastery_value', 'mastery_description', 'feedforward', 'goal_id', 'student_feide_id', 'observer_feide_id']
+        field_names = ['id', 'observed_at', 'mastery_value', 'mastery_description',
+                       'feedforward', 'goal_id', 'student_feide_id', 'observer_feide_id']
         observation_dicts = objects_from_sheet(sheet, field_names)
         results = []
         for observation_dict in observation_dicts:
             student = models.User.objects.filter(feide_id__exact=observation_dict['student_feide_id']).first()
-            observer = models.User.objects.filter(feide_id__exact=observation_dict['observer_feide_id']).first()
+            observer = models.User.objects.filter(
+                feide_id__exact=observation_dict['observer_feide_id']).first()
             goal = models.Goal.objects.filter(id=observation_dict['goal_id']).first()
             defaults = {'maintained_at': timezone.now()}
             for k, v in observation_dict.items():
@@ -252,11 +268,13 @@ def run_import():
                     defaults['goal'] = goal
                 else:
                     defaults[k] = v
-            observation, created = models.Observation.objects.get_or_create(id=observation_dict['id'], defaults=defaults)
+            observation, created = models.Observation.objects.get_or_create(
+                id=observation_dict['id'], defaults=defaults)
             results.append({'object': observation, 'created': created})
         print("Observations imported:", len(results))
 
     print("Excel import all done")
+
 
 if __name__ == '__main__':
     ensure_test_school()

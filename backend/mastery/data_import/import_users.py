@@ -20,7 +20,7 @@ def import_memberships_from_file(org_number):
     with open(memberships_file, "r") as file:
         memberships_data = json.load(file)
 
-    teacher_role, student_role = ensure_roles_exist()
+    teacher_role, student_role, _, _ = ensure_roles_exist()
 
     # count all memberships up front, for progress reporting
     total_teachers = sum(len(group.get("teachers", [])) for group in memberships_data.values())
@@ -79,21 +79,30 @@ def import_memberships_from_file(org_number):
 
 
 def ensure_roles_exist():
-    """Ensure that the roles 'teacher' and 'student' exist"""
+    """Ensure that neccessary roles exist"""
     teacher_role = models.Role.objects.filter(name="teacher").first()
     student_role = models.Role.objects.filter(name="student").first()
+    admin_role = models.Role.objects.filter(name="admin").first()
+    staff_role = models.Role.objects.filter(name="staff").first()
 
     if not teacher_role:
         teacher_role = models.Role.objects.create(
             name="teacher", maintained_at=timezone.now()
         )
-
     if not student_role:
         student_role = models.Role.objects.create(
             name="student", maintained_at=timezone.now()
         )
+    if not admin_role:
+        admin_role = models.Role.objects.create(
+            name="admin", maintained_at=timezone.now()
+        )
+    if not staff_role:
+        staff_role = models.Role.objects.create(
+            name="staff", maintained_at=timezone.now()
+        )
 
-    return teacher_role, student_role
+    return teacher_role, student_role, admin_role, staff_role
 
 
 def ensure_user_exists(user_data):
