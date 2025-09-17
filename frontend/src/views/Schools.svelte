@@ -10,7 +10,9 @@
     schoolsPartialUpdate,
   } from '../generated/sdk.gen'
   import { setCurrentSchool } from '../stores/data'
+  import { useTinyRouter } from 'svelte-tiny-router'
 
+  const router = useTinyRouter()
   let schools = $state<SchoolReadable[]>([])
   let selectedSchoolIds = $state<string[]>([])
   let alertMessage = $state<string>('')
@@ -55,9 +57,9 @@
       ? schools
       : schools.filter(school => selectedSchoolIds.includes(school.id))
   )
+  
 
-  function handleComboChange() {
-    // The component already gives us string IDs directly
+  const handleComboChange = () => {
     selectedSchoolIds = filterCombobox.value || []
   }
 
@@ -141,6 +143,9 @@
       if (result.response.status === 201) {
         alertMessage = `Bakgrunnsjobb opprettet for henting av grupper for ${orgNumber} (Task ID: ${result.data.taskId})`
         alertType = 'success'
+      } else if (result.response.status === 409) {
+        alertMessage = `Kan ikke opprette ny bakgrunnsjobb for ${orgNumber} fordi det allerede finnes en pågående jobb.`
+        alertType = 'error'
       } else {
         alertMessage = `Feil ved oppretting av bakgrunnsjobb for ${orgNumber}`
         alertType = 'error'
@@ -161,6 +166,9 @@
       if (result.response.status === 201) {
         alertMessage = `Bakgrunnsjobb opprettet for henting av medlemskap for ${orgNumber} (Task ID: ${result.data.taskId})`
         alertType = 'success'
+      } else if (result.response.status === 409) {
+        alertMessage = `Kan ikke opprette ny bakgrunnsjobb for ${orgNumber} fordi det allerede finnes en pågående jobb.`
+        alertType = 'error'
       } else {
         alertMessage = `Feil ved oppretting av bakgrunnsjobb for ${orgNumber}`
         alertType = 'error'
@@ -181,6 +189,7 @@
         alertMessage = `Skole med org nr ${orgNumber} importert fra Feide`
         alertType = 'success'
         await fetchSchools()
+        feideOrgInput.value = ''
       } else {
         alertMessage = `Feil ved import av skole ${orgNumber}`
         alertType = 'error'
@@ -196,12 +205,15 @@
     try {
       const result = await importGroupsAndUsers({
         path: { org_number: orgNumber },
-        body: {},
       })
 
       if (result.response.status === 201) {
         alertMessage = `Bakgrunnsjobb opprettet for import av grupper og brukere for ${orgNumber} (Task ID: ${result.data.taskId})`
         alertType = 'success'
+        router.navigate('/data-maintenance-tasks')
+      } else if (result.response.status === 409) {
+        alertMessage = `Kan ikke opprette ny bakgrunnsjobb for ${orgNumber} fordi det allerede finnes en pågående jobb.`
+        alertType = 'error'
       } else {
         alertMessage = `Feil ved oppretting av importbakgrunnsjobb for ${orgNumber}`
         alertType = 'error'
@@ -244,10 +256,18 @@
                 class="mt-2"
                 size="small"
                 type="button"
-                skin="secondary"
+                skin="primary"
                 variant="icon-left"
                 iconName="check"
+                role="button"
+                tabindex="0"
                 onclick={() => handleImportSchool(feideOrgInput.value)}
+                onkeydown={(e: any) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    handleImportSchool(feideOrgInput.value)
+                  }
+                }}
               >
                 Legg til ny skole
               </pkt-button>
@@ -352,7 +372,9 @@
                         <th class="border-0 fw-semibold text-dark small text-center pb-2">
                           Database
                         </th>
-                        <th class="border-0 fw-semibold text-dark small text-center pb-2">Diff</th>
+                        <th class="border-0 fw-semibold text-dark small text-center pb-2">
+                          Forskjell
+                        </th>
                         <th class="border-0 fw-semibold text-dark small text-center pb-2">
                           Sist hentet
                         </th>
@@ -439,27 +461,63 @@
             {/if}
 
             <div class="d-flex flex-wrap gap-2">
-              <button
-                class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2 px-3"
+              <!-- Hent grupper -->
+              <pkt-button
+                size="small"
+                skin="secondary"
+                variant="icon-left"
+                iconName="folder"
+                role="button"
+                tabindex="0"
                 onclick={() => handleFetchGroupsForSchool(school.orgNumber)}
+                onkeydown={(e: any) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    handleFetchGroupsForSchool(school.orgNumber)
+                  }
+                }}
               >
-                <pkt-icon name="folder" size="16"></pkt-icon>
-                <span>Hent grupper</span>
-              </button>
-              <button
-                class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2 px-3"
+                Hent grupper
+              </pkt-button>
+
+              <!-- Hent brukere -->
+              <pkt-button
+                size="small"
+                skin="secondary"
+                variant="icon-left"
+                iconName="two-people-dancing"
+                role="button"
+                tabindex="0"
                 onclick={() => handleFetchMembershipsForSchool(school.orgNumber)}
+                onkeydown={(e: any) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    handleFetchMembershipsForSchool(school.orgNumber)
+                  }
+                }}
               >
-                <pkt-icon name="two-people-dancing" size="16"></pkt-icon>
-                <span>Hent brukere</span>
-              </button>
-              <button
-                class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2 px-3"
+                Hent brukere
+              </pkt-button>
+
+              <!-- Importer -->
+              <pkt-button
+                size="small"
+                skin="secondary"
+                variant="icon-left"
+                iconName="download"
+                role="button"
+                type="button"
                 onclick={() => handleImportGroupsAndUsers(school.orgNumber)}
+                onkeydown={(e: any) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    handleImportGroupsAndUsers(school.orgNumber)
+                  }
+                }}
+                tabindex="0"
               >
-                <pkt-icon name="download" size="16"></pkt-icon>
-                <span>Importer</span>
-              </button>
+                Importer
+              </pkt-button>
             </div>
           </div>
         </div>

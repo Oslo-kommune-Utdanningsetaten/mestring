@@ -27,7 +27,7 @@ urlpatterns = [
     path(
         'api/import/school/feide/<str:org_number>/',
         custom.import_school,
-        name='feide-import-school-api'
+        name='feide_import_school_api'
     ),
     path(
         'api/import/school_groups_and_users/<str:org_number>/',
@@ -37,6 +37,6 @@ urlpatterns = [
     path(
         'api/fetch/school_import_status/<str:org_number>/',
         custom.fetch_school_import_status,
-        name='fetch-school-import-status'
-    ),
+        name='fetch_school_import_status'
+    )
 ]
