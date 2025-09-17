@@ -11,6 +11,8 @@
   import SparklineChart from './SparklineChart.svelte'
   import GoalEdit from './GoalEdit.svelte'
   import ObservationEdit from './ObservationEdit.svelte'
+  import GroupSVG from '../assets/group.svg.svelte'
+  import PersonSVG from '../assets/person.svg.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { getLocalStorageItem } from '../stores/localStorage'
 
@@ -200,12 +202,17 @@
   </pkt-button>
 </div>
 
-{#if goals?.length > 0}
+{#if !goals?.length}
+  <div class="alert alert-info">
+    Trykk pluss (+) for å opprette et personlig mål for eleven i dette faget.
+  </div>
+{:else}
   <div bind:this={goalsListElement} class="list-group">
     {#each goals as goal, index (goal.id)}
-      <div class="list-group-item goal-list-item">
-        <div class="row d-flex align-items-center">
-          <span class="col-1">
+      <div class="list-group-item goal-item">
+        <div class="goal-primary-row">
+          <!-- Drag handle -->
+          <span>
             <pkt-icon
               title="Endre rekkefølge"
               class="me-2 row-handle"
@@ -213,36 +220,46 @@
               role="button"
               tabindex="0"
             ></pkt-icon>
-            <span>
-              {goal.sortOrder || index + 1}
-            </span>
           </span>
-          <span class="col-md-{goalTitleColumns}">
+          <!-- Goal order -->
+          <span>
+            {goal.sortOrder || index + 1}
+          </span>
+          <!-- Goal type icon -->
+          <span class="goal-type-icon">
+            {#if goal.isGroup}
+              <GroupSVG />
+            {:else}
+              <PersonSVG />
+            {/if}
+          </span>
+          <!-- Goal title -->
+          <span>
             {isShowGoalTitleEnabled ? goal.title : '🙊'}
           </span>
-          <span class="col-1">
-            <pkt-button
-              size="small"
-              skin="tertiary"
-              type="button"
-              variant="icon-only"
-              iconName="plus-sign"
-              class="mini-button bordered"
-              title="Legg til ny observasjon"
-              onclick={() => handleEditObservation(goal, null)}
-              onkeydown={(e: any) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  handleEditObservation(goal, null)
-                }
-              }}
-              role="button"
-              tabindex="0"
-            >
-              Ny observasjon
-            </pkt-button>
-          </span>
-          <span class="col-4 d-flex align-items-center gap-3">
+          <!-- New observation button -->
+          <pkt-button
+            size="small"
+            skin="tertiary"
+            type="button"
+            variant="icon-only"
+            iconName="plus-sign"
+            class="mini-button bordered"
+            title="Legg til ny observasjon"
+            onclick={() => handleEditObservation(goal, null)}
+            onkeydown={(e: any) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                handleEditObservation(goal, null)
+              }
+            }}
+            role="button"
+            tabindex="0"
+          >
+            Ny observasjon
+          </pkt-button>
+          <!-- Stats widgets -->
+          <span class="d-flex align-items-center gap-3">
             {#if goal.masteryData}
               <MasteryLevelBadge masteryData={goal.masteryData} />
               <SparklineChart
@@ -252,32 +269,31 @@
               />
             {/if}
           </span>
-          <span class="col-1 d-flex justify-content-end pe-4">
-            <pkt-button
-              size="small"
-              skin="tertiary"
-              type="button"
-              variant="icon-only"
-              iconName="chevron-thin-{expandedGoals[goal.id] ? 'up' : 'down'}"
-              class="mini-button col-1 rounded"
-              title="{expandedGoals[goal.id] ? 'Skjul' : 'Vis'} observasjoner"
-              onclick={() => toggleGoalExpansion(goal.id)}
-              onkeydown={(e: any) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  toggleGoalExpansion(goal.id)
-                }
-              }}
-              role="button"
-              tabindex="0"
-            ></pkt-button>
-          </span>
+          <!-- Expand goal info -->
+          <pkt-button
+            size="small"
+            skin="tertiary"
+            type="button"
+            variant="icon-only"
+            iconName="chevron-thin-{expandedGoals[goal.id] ? 'up' : 'down'}"
+            class="mini-button col-1 rounded"
+            title="{expandedGoals[goal.id] ? 'Skjul' : 'Vis'} observasjoner"
+            onclick={() => toggleGoalExpansion(goal.id)}
+            onkeydown={(e: any) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                toggleGoalExpansion(goal.id)
+              }
+            }}
+            role="button"
+            tabindex="0"
+          ></pkt-button>
         </div>
 
         {#if expandedGoals[goal.id]}
-          <div>
+          <div class="goal-secondary-row">
             {#if goal?.observations.length === 0}
-              <div class="alert alert-info my-3">
+              <div class="my-3">
                 {#if goal.isGroup}
                   <div>
                     Dette målet er ikke personlig, men gitt for en hel gruppe. Du finner guppa <Link
@@ -287,7 +303,10 @@
                     </Link>.
                   </div>
                 {:else}
-                  <p>Ingen observasjoner for dette målet</p>
+                  <p>
+                    Ingen observasjoner for dette målet. Trykk pluss (+) for å opprette en
+                    observasjon.
+                  </p>
 
                   <pkt-button
                     size="small"
@@ -334,7 +353,7 @@
               <div class="row fw-bold d-flex gap-4 mt-2">
                 <span class="col-3">Dato</span>
                 <span class="col-1">Verdi</span>
-                <span class="col-3">Valg</span>
+                <span class="col-3">Handlinger</span>
               </div>
               {#each goal?.observations as observation, index}
                 <div class="row d-flex gap-4 pt-2 observation-item">
@@ -384,10 +403,6 @@
       </div>
     {/each}
   </div>
-{:else}
-  <div class="alert alert-info">
-    Trykk pluss (+) for å opprette et personlig mål for eleven i dette faget.
-  </div>
 {/if}
 
 <svelte:window on:keydown={handleKeydown} />
@@ -416,13 +431,34 @@
     font-size: 1.5rem;
   }
 
-  .goal-list-item {
+  .goal-item {
     background-color: var(--bs-light);
-    row-gap: 0.5rem;
+  }
+
+  .goal-primary-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 10fr 1fr 2fr 1fr;
+    column-gap: 5px;
+  }
+
+  .goal-primary-row > :last-child {
+    justify-self: end; /* aligns last column's content */
+    padding-right: 20px;
+  }
+
+  .goal-secondary-row {
+    margin-top: 10px;
+    margin-left: 6px;
+    padding-left: 30px;
+    border-left: 3px solid var(--bs-secondary);
   }
 
   .row-handle {
     cursor: move;
     vertical-align: -8%;
+  }
+
+  .goal-type-icon > :global(svg) {
+    height: 1.2em;
   }
 </style>

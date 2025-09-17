@@ -1,11 +1,17 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-tag.js'
-  import { groupsRetrieve, usersList, goalsList, goalsUpdate } from '../generated/sdk.gen'
+  import {
+    groupsRetrieve,
+    usersList,
+    goalsList,
+    goalsUpdate,
+    goalsDestroy,
+  } from '../generated/sdk.gen'
   import type { GoalReadable, GroupReadable, UserReadable } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   import GoalEdit from '../components/GoalEdit.svelte'
-  import GoalCard from '../components/GoalCard.svelte'
+  import GroupSVG from '../assets/group.svg.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { dataStore } from '../stores/data'
   import { getLocalStorageItem } from '../stores/localStorage'
@@ -23,6 +29,7 @@
   let goalsListElement = $state<HTMLElement | null>(null)
   let isShowGoalTitleEnabled = $state<boolean>(true)
   let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 5 : 2)
+  let expandedGoals = $state<Record<string, boolean>>({})
 
   const fetchGroupData = async () => {
     if (!groupId) return
@@ -58,6 +65,10 @@
     }
   }
 
+  const toggleGoalExpansion = (goalId: string) => {
+    expandedGoals[goalId] = !expandedGoals[goalId]
+  }
+
   const handleEditGoal = (goal: GoalDecorated | null) => {
     goalWip = {
       ...goal,
@@ -66,6 +77,15 @@
       sortOrder: goal?.sortOrder || (goals?.length ? goals.length + 1 : 1),
       masterySchemaId:
         goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
+    }
+  }
+
+  const handleDeleteGoal = async (goalId: string) => {
+    try {
+      await goalsDestroy({ path: { id: goalId } })
+      await fetchGroupData()
+    } catch (error) {
+      console.error('Error deleting goal:', error)
     }
   }
 
@@ -211,11 +231,77 @@
                   <span class="col-1">
                     {goal.sortOrder || index + 1}
                   </span>
-                  <span class="col-1">ikon</span>
-                  <span class="col-md-9">
+                  <span class="col-1"><GroupSVG /></span>
+                  <span class="col-md-8">
                     {isShowGoalTitleEnabled ? goal.title : '🙊'}
                   </span>
+                  <span class="col-1 d-flex justify-content-end pe-4">
+                    <pkt-button
+                      size="small"
+                      skin="tertiary"
+                      type="button"
+                      variant="icon-only"
+                      iconName="chevron-thin-{expandedGoals[goal.id] ? 'up' : 'down'}"
+                      class="mini-button col-1 rounded"
+                      title="{expandedGoals[goal.id] ? 'Skjul' : 'Vis'} observasjoner"
+                      onclick={() => toggleGoalExpansion(goal.id)}
+                      onkeydown={(e: any) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          toggleGoalExpansion(goal.id)
+                        }
+                      }}
+                      role="button"
+                      tabindex="0"
+                    ></pkt-button>
+                  </span>
                 </div>
+
+                {#if expandedGoals[goal.id]}
+                  <div class="alert alert-info my-3">
+                    <p>Ingen observasjoner for dette målet</p>
+
+                    <pkt-button
+                      size="small"
+                      skin="primary"
+                      variant="icon-left"
+                      iconName="edit"
+                      class="my-2 me-2"
+                      title="Rediger dette gruppemålet"
+                      onclick={() => handleEditGoal(goal)}
+                      onkeydown={(e: any) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          handleEditGoal(goal)
+                        }
+                      }}
+                      role="button"
+                      tabindex="0"
+                    >
+                      Rediger mål
+                    </pkt-button>
+
+                    <pkt-button
+                      size="small"
+                      skin="primary"
+                      variant="icon-left"
+                      iconName="trash-can"
+                      class="my-2"
+                      title="Slett dette gruppemålet"
+                      onclick={() => handleDeleteGoal(goal.id)}
+                      onkeydown={(e: any) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          handleDeleteGoal(goal.id)
+                        }
+                      }}
+                      role="button"
+                      tabindex="0"
+                    >
+                      Slett mål
+                    </pkt-button>
+                  </div>
+                {/if}
               </div>
             {/each}
           </div>
