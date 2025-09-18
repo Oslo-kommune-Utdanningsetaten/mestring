@@ -91,6 +91,19 @@ def fetch_groups_for_school(request, org_number):
             {"status": "error", "message": f"School not found for org {org_number}"},
             status=404,
         )
+
+    # Check if there's already a pending or running task for this job and org_number
+    existing_task = models.DataMaintenanceTask.objects.filter(
+        Q(status="pending") | Q(status="running"),
+        job_name="fetch_groups_from_feide",
+        job_params__org_number=org_number
+    ).first()
+    if existing_task:
+        return Response(
+            {"status": "error", "message": "A fetch groups task is already pending or running for this school."},
+            status=409,
+        )
+
     task = models.DataMaintenanceTask.objects.create(
         status="pending",
         job_name="fetch_groups_from_feide",
@@ -127,6 +140,19 @@ def fetch_memberships_for_school(request, org_number):
             {"error": "unknown-school", "message": f"School not found for org {org_number}"},
             status=404,
         )
+
+    # Check if there's already a pending or running task for this job and org_number
+    existing_task = models.DataMaintenanceTask.objects.filter(
+        Q(status="pending") | Q(status="running"),
+        job_name="fetch_memberships_from_feide",
+        job_params__org_number=org_number
+    ).first()
+    if existing_task:
+        return Response(
+            {"status": "error",
+             "message": "A fetch memberships task is already pending or running for this school."},
+            status=409,)
+
     task = models.DataMaintenanceTask.objects.create(
         status="pending",
         job_name="fetch_memberships_from_feide",
@@ -163,6 +189,19 @@ def import_groups_and_users(request, org_number):
             {"error": "unknown-school", "message": f"School not found for org {org_number}"},
             status=404,
         )
+
+    # Check if there's already a pending or running task for this job and org_number
+    existing_task = models.DataMaintenanceTask.objects.filter(
+        Q(status="pending") | Q(status="running"),
+        job_name__in=["import_groups", "import_memberships"],
+        job_params__org_number=org_number
+    ).first()
+    if existing_task:
+        return Response(
+            {"status": "error",
+             "message": "An import groups or memberships task is already pending or running for this school."},
+            status=409,)
+
     task = models.DataMaintenanceTask.objects.create(
         status="pending",
         job_name="import_groups",
@@ -208,7 +247,7 @@ def fetch_school_import_status(request, org_number):
     school = models.School.objects.filter(org_number=org_number).first()
     if not school:
         return Response(
-            {"status": "error", "message": f"School not found for org {org_number}"},
+            {"message": f"School not found for org {org_number}"},
             status=404,
         )
 
@@ -267,7 +306,6 @@ def fetch_school_import_status(request, org_number):
         int) else None
 
     return Response({
-        "status": "success",
         "orgNumber": org_number,
         "school": {
             "id": school.id,

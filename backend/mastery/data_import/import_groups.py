@@ -21,46 +21,63 @@ def import_groups_from_file(org_number):
             f"Groups file not found for school {org_number}. Fetch groups first."
         )
 
-    with open(groups_file, "r") as file:
+    with open(groups_file, "r", encoding="utf-8") as file:
         groups_data = json.load(file)
 
     school = models.School.objects.filter(org_number=org_number).first()
+    # Progress reporting variables
+    basis_group_created = 0
+    basis_group_maintained = 0
+    basis_group_failed = 0
+    teaching_group_created = 0
+    teaching_group_maintained = 0
+    teaching_group_failed = 0
+    subjects_created = 0
+    subject_maintained = 0
+    subjects_failed = 0
+    errors = []
+
     basis_groups = groups_data.get("basis", [])
     teaching_groups = groups_data.get("teaching", [])
-    groups_successfully_handled = 0
-    errors = []
-    yield {
-        "result": {
-            "entity": "group",
-            "action": "import",
-            "total_count": len(basis_groups) + len(teaching_groups),
-            "success_count": 0,
-            "failure_count": 0,
-            "errors": [],
-        },
-        "is_done": False,
-    }
 
     # Handle basis groups
     for index, group_data in enumerate(basis_groups, start=1):
-        group, created, error = ensure_group_exists(group_data, "basis", None)
+        group, created, group_error = ensure_group_exists(group_data, "basis", None)
         if not group.subject_id:
             subject, _ = ensure_social_subject_exists(school)
             group.subject = subject
             group.save()
-        if error:
-            errors.append({"error": "ensure-basis-group-failed", "message": error})
+        if group_error:
+            errors.append({"error": "ensure-basis-group-failed", "message": group_error})
+            basis_group_failed += 1
+        elif created:
+            basis_group_created += 1
         else:
-            groups_successfully_handled += 1
+            basis_group_maintained += 1
+
         if index % 10 == 0:
             yield {
                 "result": {
                     "entity": "group",
                     "action": "import",
-                    "total_count": len(basis_groups) + len(teaching_groups),
-                    "success_count": groups_successfully_handled,
-                    "failure_count": len(errors),
                     "errors": errors,
+                    "changes": {
+                        "basis_group": {
+                            "created": basis_group_created,
+                            "maintained": basis_group_maintained,
+                            "failed": basis_group_failed,
+                        },
+                        "teaching_group": {
+                            "created": teaching_group_created,
+                            "maintained": teaching_group_maintained,
+                            "failed": teaching_group_failed,
+                        },
+                        "subject": {
+                            "created": subjects_created,
+                            "maintained": subject_maintained,
+                            "failed": subjects_failed,
+                        },
+                    },
                 },
                 "is_done": False,
             }
@@ -70,22 +87,49 @@ def import_groups_from_file(org_number):
         subject = None
         if "grep" in group_data and "code" in group_data["grep"]:
             grep_code = group_data["grep"]["code"]
-            subject, subject_was_created = ensure_subject_exists(grep_code)
+            if grep_code:
+                subject, subject_was_created, subject_error = ensure_subject_exists(grep_code)
 
-        group, created, error = ensure_group_exists(group_data, "teaching", subject)
-        if error:
-            errors.append({"error": "ensure-teaching-group-failed", "message": error})
+                if subject_error:
+                    subjects_failed += 1
+                    errors.append({"error": "ensure-subject-failed", "message": subject_error})
+                elif subject_was_created:
+                    subjects_created += 1
+                else:
+                    subject_maintained += 1
+
+        _, created, group_error = ensure_group_exists(group_data, "teaching", subject)
+        if group_error:
+            errors.append({"error": "ensure-teaching-group-failed", "message": group_error})
+            teaching_group_failed += 1
+        elif created:
+            teaching_group_created += 1
         else:
-            groups_successfully_handled += 1
+            teaching_group_maintained += 1
+
         if index % 10 == 0:
             yield {
                 "result": {
                     "entity": "group",
                     "action": "import",
-                    "total_count": len(basis_groups) + len(teaching_groups),
-                    "success_count": groups_successfully_handled,
-                    "failure_count": len(errors),
                     "errors": errors,
+                    "changes": {
+                        "basis_group": {
+                            "created": basis_group_created,
+                            "maintained": basis_group_maintained,
+                            "failed": basis_group_failed,
+                        },
+                        "teaching_group": {
+                            "created": teaching_group_created,
+                            "maintained": teaching_group_maintained,
+                            "failed": teaching_group_failed,
+                        },
+                        "subject": {
+                            "created": subjects_created,
+                            "maintained": subject_maintained,
+                            "failed": subjects_failed,
+                        },
+                    },
                 },
                 "is_done": False,
             }
@@ -94,10 +138,24 @@ def import_groups_from_file(org_number):
         "result": {
             "entity": "group",
             "action": "import",
-            "total_count": len(basis_groups) + len(teaching_groups),
-            "success_count": groups_successfully_handled,
-            "failure_count": len(errors),
             "errors": errors,
+            "changes": {
+                "basis_group": {
+                    "created": basis_group_created,
+                    "maintained": basis_group_maintained,
+                    "failed": basis_group_failed,
+                },
+                "teaching_group": {
+                    "created": teaching_group_created,
+                    "maintained": teaching_group_maintained,
+                    "failed": teaching_group_failed,
+                },
+                "subject": {
+                    "created": subjects_created,
+                    "maintained": subject_maintained,
+                    "failed": subjects_failed,
+                },
+            },
         },
         "is_done": True,
     }
@@ -105,7 +163,7 @@ def import_groups_from_file(org_number):
 
 def ensure_group_exists(group_data, group_type, subject=None):
     """
-    Create-or-update any group type.
+    Ensure a group exists, maintaining it if it already exists or creating it if not.
     Returns (group, created_bool, error_message)
     """
     feide_id = group_data["id"]
@@ -113,17 +171,16 @@ def ensure_group_exists(group_data, group_type, subject=None):
     # Check if group already exists
     existing_group = models.Group.objects.filter(feide_id__exact=feide_id).first()
     if existing_group:
-        print("Updated group:", feide_id)
         existing_group.display_name = group_data["displayName"]
         existing_group.subject = subject
         existing_group.valid_from = group_data.get("notBefore")
         existing_group.valid_to = group_data.get("notAfter")
         existing_group.maintained_at = timezone.now()
         existing_group.save()
-        print("Updated group:", feide_id)
+        print("Maintained group:", feide_id)
         return existing_group, False, None
 
-    # Find parent school
+    # For a new group, ensure the parent school exists
     school = models.School.objects.filter(feide_id__exact=group_data["parent"]).first()
     if not school:
         return None, False, f"School not found for group {feide_id}"
@@ -143,17 +200,20 @@ def ensure_group_exists(group_data, group_type, subject=None):
         return new_group, True, None
 
     except Exception as error:
-        return None, False, f"Failed to create group {feide_id}: {str(error)}"
+        return None, False, f"Failed to create group {feide_id}: {str(error)[:1000]}"
 
 
 def ensure_subject_exists(grep_code):
-    """Ensure a subject exists in the database, fetching from UDIR if necessary.
-    Returns the subject instance and a boolean indicating if it was created.
+    """
+    Ensure a subject exists in the database, fetching from UDIR if necessary.
+    Returns (subject, created_bool, error_message)
     """
     # Check if subject already exists
     existing_subject = models.Subject.objects.filter(grep_code__exact=grep_code).first()
     if existing_subject:
-        return existing_subject, False
+        existing_subject.maintained_at = timezone.now()
+        existing_subject.save()
+        return existing_subject, False, None
 
     try:
         udir_response = requests.get(f"{UDIR_GREP_URL}/{grep_code}")
@@ -172,15 +232,19 @@ def ensure_subject_exists(grep_code):
                 maintained_at=timezone.now(),
             )
             print("Created subject:", grep_code, display_name)
-            return subject, True
-    except Exception as e:
-        print("🚷Failed to fetch subject from UDIR:", {str(e)})
-        return None, False
+            return subject, True, None
+        else:
+            return None, False, f"UDIR API returned status {
+                udir_response.status_code}  for grep code {grep_code} "
+
+    except Exception as error:
+        return None, False, f"Failed to fetch subject from UDIR for grep code {grep_code}: {
+            str(error)[: 1000]} "
 
 
 # Basis groups need a subject
 def ensure_social_subject_exists(school):
-    social_subject_name = "Sosialt"  # This should probably be configureable for each school
+    social_subject_name = "Sosialt"  # TODO: This should probably be configureable for each school
     subject = models.Subject.objects.filter(
         owned_by_school_id=school.id, short_name=social_subject_name).first()
     if subject:
