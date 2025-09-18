@@ -62,10 +62,9 @@ def do_work(task):
         "result": {
             "entity": "school",
             "action": "update",
-            "total_count": iterations,
-            "success_count": success_count,
-            "failure_count": failure_count,
             "errors": [{error: "...", message: "..."}],
+            "changes": {} # optional, depending on action
+            "counts": {} # optional, depending on action
         },
         "is_done": True|False,
     }

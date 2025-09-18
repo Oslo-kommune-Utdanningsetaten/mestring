@@ -33,8 +33,6 @@ def import_memberships_from_file(org_number):
     memberships_failed = 0
     chunk_size = 10
     errors = []
-
-    # Track users we've already processed to avoid double-counting
     processed_users = set()
 
     for feide_group_id, feide_group_memberships in memberships_data.items():

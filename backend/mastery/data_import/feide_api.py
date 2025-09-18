@@ -84,6 +84,7 @@ def fetch_groups_from_feide(org_number: str):
         "subjects": [],  # fag
     }
 
+    # Page through org-scoped groups using the orgunit filter
     next_url = f"{GROUPS_ENDPOINT}?orgunit={org_number}"
     index = 0
     chunk_size = 10
