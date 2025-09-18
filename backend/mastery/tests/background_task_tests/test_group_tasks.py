@@ -31,4 +31,5 @@ def school_update_task_with_wrong_job_name(db):
 def test_group_fetch(groups_fetch_task):
     run_background_tasks.run()
     groups_fetch_task.refresh_from_db()
-    assert len(groups_fetch_task.result['errors']) == 1
+    assert groups_fetch_task.status == 'finished'
+    assert len(groups_fetch_task.result['errors']) == 0

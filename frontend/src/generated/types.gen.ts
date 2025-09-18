@@ -110,20 +110,22 @@ export type MasterySchemaReadable = {
     readonly createdAt: string;
     readonly updatedAt: string;
     maintainedAt?: string | null;
-    title?: string | null;
+    title?: string;
     description?: string | null;
     config?: unknown;
     createdById?: string;
     updatedById?: string;
+    schoolId?: string;
 };
 
 export type MasterySchemaWritable = {
     maintainedAt?: string | null;
-    title?: string | null;
+    title?: string;
     description?: string | null;
     config?: unknown;
     createdById?: string;
     updatedById?: string;
+    schoolId?: string;
 };
 
 export type NestedUserGroupReadable = {
@@ -311,20 +313,22 @@ export type PatchedMasterySchemaReadable = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     maintainedAt?: string | null;
-    title?: string | null;
+    title?: string;
     description?: string | null;
     config?: unknown;
     createdById?: string;
     updatedById?: string;
+    schoolId?: string;
 };
 
 export type PatchedMasterySchemaWritable = {
     maintainedAt?: string | null;
-    title?: string | null;
+    title?: string;
     description?: string | null;
     config?: unknown;
     createdById?: string;
     updatedById?: string;
+    schoolId?: string;
 };
 
 export type PatchedNestedUserGroupReadable = {
@@ -1142,16 +1146,7 @@ export type FeideImportSchoolResponses = {
 };
 
 export type ImportGroupsAndUsersData = {
-    body?: {
-        /**
-         * Whether to overwrite existing data
-         */
-        is_overwrite_enabled?: boolean;
-        /**
-         * Whether to crash on errors instead of continuing
-         */
-        is_crash_on_error_enabled?: boolean;
-    };
+    body?: never;
     path: {
         /**
          * Organization number of the school
@@ -1172,7 +1167,12 @@ export type ImportGroupsAndUsersResponses = {
 export type MasterySchemasListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Filter mastery schemas by School ID
+         */
+        school?: string;
+    };
     url: '/api/mastery-schemas/';
 };
 

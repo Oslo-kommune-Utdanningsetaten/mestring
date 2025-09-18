@@ -82,7 +82,9 @@ const refreshMasterySchemas = async (hardRefresh: boolean) => {
     return
   }
   try {
-    const result = await masterySchemasList()
+    const result = await masterySchemasList({
+      query: { school: get(dataStore).currentSchool?.id },
+    })
     const schemas = result.data || []
     setMasterySchemas(schemas)
   } catch (error) {

@@ -232,10 +232,45 @@ def goal_personal_other_student(db, subject_without_group, other_student):
 
 
 @pytest.fixture
-def mastery_schema(db):
+def mastery_schema(db, school):
     return MasterySchema.objects.create(
         title="Vurderingsverb",
         description="Gjengi, forklare, se sammenhenger",
+        school=school,
+        config={
+            "levels": [
+                {
+                    "text": "Gjengi",
+                    "color": "rgb(229, 50, 43)",
+                    "maxValue": 33,
+                    "minValue": 1
+                },
+                {
+                    "text": "Forklare",
+                    "color": "rgb(255, 204, 0)",
+                    "maxValue": 66,
+                    "minValue": 34
+                },
+                {
+                    "text": "Se sammenhenger",
+                    "color": "rgb(23, 231, 21)",
+                    "maxValue": 100,
+                    "minValue": 67
+                },
+            ],
+            "inputIncrement": 1,
+            "renderDirection": "horizontal",
+            "isColorGradientEnabled": False
+        },
+    )
+
+
+@pytest.fixture
+def mastery_schema_other_school(db, other_school):
+    return MasterySchema.objects.create(
+        title="Vurderingsverb",
+        description="Gjengi, forklare, se sammenhenger",
+        school=other_school,
         config={
             "levels": [
                 {

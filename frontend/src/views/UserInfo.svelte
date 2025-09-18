@@ -6,23 +6,26 @@
 
   let schools = $state<SchoolReadable[]>([])
   let groups = $state<GroupReadable[]>([])
-  let isLoading = $state(true)
+  let isLoadingSchools = $state(false)
+  let isLoadingGroups = $state(false)
   let currentSchool = $derived($dataStore.currentSchool)
 
   const fetchSchools = async () => {
+    isLoadingSchools = true
     try {
       const result = await schoolsList()
       schools = (result.data ?? []).filter(x => x.isServiceEnabled)
     } catch (err) {
       console.error('Error fetching schools:', err)
       schools = []
+    } finally {
+      isLoadingSchools = false
     }
-    isLoading = false
   }
 
   const fetchUserGroups = async () => {
     if (!$currentUser) return
-
+    isLoadingGroups = true
     try {
       const userGroups: any = await groupsList({
         query: { user: $currentUser.id, roles: 'student', school: $dataStore.currentSchool?.id },
@@ -31,6 +34,8 @@
     } catch (err) {
       console.error('Error fetching user groups:', err)
       groups = []
+    } finally {
+      isLoadingGroups = false
     }
   }
 
@@ -52,7 +57,7 @@
 <section class="container my-4">
   <h2 class="mb-4">Min side</h2>
 
-  {#if isLoading}
+  {#if isLoadingGroups || isLoadingSchools}
     <div class="text-center my-5">
       <div class="spinner-border" role="status"></div>
     </div>
@@ -132,7 +137,9 @@
             {/each}
           </div>
         {:else}
-          <span class="text-muted">Ingen skoler tilgjengelig</span>
+          <span class="text-muted">
+            Du er visst ikke tilknyttet noen skoler som bruker denne tjenesten
+          </span>
         {/if}
       </div>
     </div>

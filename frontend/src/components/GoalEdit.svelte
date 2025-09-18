@@ -9,8 +9,13 @@
   } from '../generated/types.gen'
   import { setLocalStorageItem } from '../stores/localStorage'
 
+  // This component is used for both personal and group goals!
+  // If group is passed, student AND subject should be null
+  // If student is passed, group should be null
+
   const {
     student = null,
+    subject = null,
     group = null,
     goal = null,
     onDone,
@@ -24,7 +29,15 @@
     onDone: () => void
   }>()
   let localGoal = $state<Record<string, any>>({ ...goal })
+  let subjectViaGroup = $derived(
+    group ? $dataStore.subjects.find(s => s.id === group?.subjectId) : null
+  )
   let masterySchemas = $derived($dataStore.masterySchemas)
+
+  // What determines if we can edit the goal?
+  let isFormValid = $derived(
+    !!localGoal.masterySchemaId && (isGoalPersonal ? !!localGoal.subjectId : !!subjectViaGroup)
+  )
 
   const getTitle = () => {
     const action = localGoal.id ? 'Redigerer' : 'Nytt'
@@ -40,7 +53,6 @@
   }
 
   const handleSave = async () => {
-    localGoal.studentId = student?.id
     try {
       if (goal.id) {
         await goalsUpdate({
@@ -57,10 +69,9 @@
       console.error('Error saving goal:', error)
     }
   }
-  // Fetch mastery schemas when component mounts
+
   $effect(() => {
     localGoal = {
-      subjectId: '',
       ...goal,
     }
   })
@@ -68,15 +79,28 @@
 
 <div class="p-4">
   <h3 class="pb-2">{getTitle()}</h3>
+  <hr />
   <div class="form-group mb-3">
     <div class="pkt-inputwrapper">
       <label for="goalSubject" class="form-label">Fag</label>
-      <select class="pkt-input" bind:value={localGoal.subjectId}>
-        <option value="">Velg fag</option>
-        {#each $dataStore.subjects as subject}
-          <option value={subject.id}>{subject.displayName}</option>
-        {/each}
-      </select>
+      {#if isGoalPersonal}
+        <select class="pkt-input" bind:value={localGoal.subjectId}>
+          <option value="">Velg fag</option>
+          {#each $dataStore.subjects as subject}
+            <option value={subject.id}>{subject.displayName}</option>
+          {/each}
+        </select>
+      {:else}
+        <div
+          class="border border-2 rounded-0 border-primary fs-5 p-2 {!subjectViaGroup
+            ? 'alert alert-warning'
+            : ''}"
+        >
+          {subjectViaGroup
+            ? subjectViaGroup.displayName
+            : 'Denne gruppen er ikke tilknyttet et fag'}
+        </div>
+      {/if}
     </div>
   </div>
 
@@ -134,7 +158,7 @@
         }
       }}
       tabindex="0"
-      disabled={localGoal.masterySchemaId === '' || localGoal.subjectId === ''}
+      disabled={!isFormValid}
     >
       Lagre
     </pkt-button>

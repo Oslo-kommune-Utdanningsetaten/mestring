@@ -24,6 +24,7 @@ def import_groups_from_file(org_number):
     with open(groups_file, "r", encoding="utf-8") as file:
         groups_data = json.load(file)
 
+    school = models.School.objects.filter(org_number=org_number).first()
     # Progress reporting variables
     basis_group_created = 0
     basis_group_maintained = 0
@@ -41,7 +42,11 @@ def import_groups_from_file(org_number):
 
     # Handle basis groups
     for index, group_data in enumerate(basis_groups, start=1):
-        _, created, group_error = ensure_group_exists(group_data, "basis", None)
+        group, created, group_error = ensure_group_exists(group_data, "basis", None)
+        if not group.subject_id:
+            subject, _ = ensure_social_subject_exists(school)
+            group.subject = subject
+            group.save()
         if group_error:
             errors.append({"error": "ensure-basis-group-failed", "message": group_error})
             basis_group_failed += 1
@@ -235,3 +240,18 @@ def ensure_subject_exists(grep_code):
     except Exception as error:
         return None, False, f"Failed to fetch subject from UDIR for grep code {grep_code}: {
             str(error)[: 1000]} "
+
+
+# Basis groups need a subject
+def ensure_social_subject_exists(school):
+    social_subject_name = "Sosialt"  # TODO: This should probably be configureable for each school
+    subject = models.Subject.objects.filter(
+        owned_by_school_id=school.id, short_name=social_subject_name).first()
+    if subject:
+        return subject, False
+    subject = models.Subject.objects.create(
+        display_name=social_subject_name,
+        short_name=social_subject_name,
+        owned_by_school=school
+    )
+    return subject, True

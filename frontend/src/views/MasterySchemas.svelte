@@ -1,37 +1,116 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-button.js'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
+
+  import { urlStringFrom } from '../utils/functions'
   import MasterySchemaEdit from '../components/MasterySchemaEdit.svelte'
-  import { masterySchemasDestroy } from '../generated/sdk.gen'
-  import type { MasterySchemaReadable } from '../generated/types.gen'
-  import { dataStore } from '../stores/data'
+  import { masterySchemasDestroy, masterySchemasList, schoolsList } from '../generated/sdk.gen'
+  import type { MasterySchemaReadable, SchoolReadable } from '../generated/types.gen'
+  import { useTinyRouter } from 'svelte-tiny-router'
 
-  let masterySchemas = $derived($dataStore.masterySchemas)
-
+  const router = useTinyRouter()
+  let masterySchemas = $derived<MasterySchemaReadable[]>([])
   let masterySchemaWip: Partial<MasterySchemaReadable> | null =
     $state<Partial<MasterySchemaReadable> | null>(null)
-
   let isJsonVisible = $state<boolean>(false)
+  let schools = $state<SchoolReadable[]>([])
+  let isLoadingSchools = $state<boolean>(false)
+  let selectedSchool = $derived<SchoolReadable | null>(null)
+
+  const fetchSchools = async () => {
+    try {
+      const result = await schoolsList({})
+      schools = result.data || []
+    } catch (error) {
+      console.error('Error fetching schools:', error)
+      schools = []
+    }
+  }
+
+  const fetchMasterySchemas = async () => {
+    const query = selectedSchool ? { school: selectedSchool.id } : {}
+    console.log('fetchMasterySchemas with query', query)
+    const result = await masterySchemasList({ query })
+    masterySchemas = result.data || []
+  }
+
+  const handleSchoolSelect = (schoolId: string): void => {
+    if (schoolId && schoolId !== '0') {
+      router.navigate(
+        urlStringFrom({ school: schoolId }, { path: '/mastery-schemas', mode: 'merge' })
+      )
+    } else {
+      router.navigate('/mastery-schemas')
+    }
+  }
 
   const handleDone = () => {
     masterySchemaWip = null
+    fetchMasterySchemas()
   }
 
   const handleEditMasterySchema = (masterySchema: MasterySchemaReadable | null) => {
-    masterySchemaWip = masterySchema ? { ...masterySchema } : {}
+    if (masterySchema) {
+      masterySchemaWip = { ...masterySchema }
+    } else {
+      masterySchemaWip = selectedSchool ? { schoolId: selectedSchool.id } : {}
+    }
   }
 
   const handleDeleteMasterySchema = async (masterySchemaId: string) => {
     try {
-      await masterySchemasDestroy({ path: { id: masterySchemaId } })
+      await masterySchemasDestroy({
+        path: { id: masterySchemaId },
+      })
     } catch (error) {
       console.error('Error deleting schema:', error)
+    } finally {
+      await fetchMasterySchemas()
     }
   }
+
+  const getSchoolName = (schoolId: string | undefined) => {
+    return schools.find(school => school.id === schoolId)?.displayName || '??'
+  }
+
+  $effect(() => {
+    const schoolId = router.getQueryParam('school') || null
+    fetchSchools().then(() => {
+      selectedSchool = schools.find(school => school.id === schoolId) || null
+      fetchMasterySchemas()
+    })
+  })
 </script>
 
-<section class="py-4">
+<section class="pt-3">
   <h1 class="mb-4">Mastery Schemas</h1>
+  <!-- Filter groups -->
+  <div class="d-flex align-items-center gap-2">
+    {#if isLoadingSchools}
+      <div class="m-4">
+        <div class="spinner-border text-primary" role="status"></div>
+        <span>Henter skoler...</span>
+      </div>
+    {:else}
+      <div class="pkt-inputwrapper">
+        <select
+          class="pkt-input"
+          id="groupSelect"
+          onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
+        >
+          <option value="0" selected={!selectedSchool?.id}>Velg skole</option>
+          {#each schools as school}
+            <option value={school.id} selected={school.id === selectedSchool?.id}>
+              {school.displayName}
+            </option>
+          {/each}
+        </select>
+      </div>
+    {/if}
+  </div>
+</section>
+
+<section class="py-4">
   <pkt-button
     size="small"
     skin="primary"
@@ -45,6 +124,7 @@
       }
     }}
     role="button"
+    disabled={!selectedSchool}
     tabindex="0"
   >
     Nytt mestringsskjema
@@ -68,7 +148,12 @@
       {#each masterySchemas as masterySchema}
         <div class="card shadow-sm">
           <div class="card-body">
-            <h5 class="card-title">{masterySchema.title}</h5>
+            <h3 class="card-title">
+              {masterySchema.title}
+            </h3>
+            <h5 class="card-title">
+              {getSchoolName(masterySchema.schoolId)}
+            </h5>
             <p class="card-text">
               {masterySchema.description || 'Ingen beskrivelse'}
             </p>
@@ -128,7 +213,7 @@
         </div>
       {/each}
     {:else}
-      <div class="alert alert-info">No mastery schemas available.</div>
+      <div class="alert alert-info">No mastery schemas available for the selected school.</div>
     {/if}
   </div>
 </section>

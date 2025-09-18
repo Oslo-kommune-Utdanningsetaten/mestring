@@ -426,13 +426,31 @@ class RoleViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
 
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='school',
+                description='Filter mastery schemas by School ID',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+        ]
+    )
+)
 class MasterySchemaViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.MasterySchema.objects.all()
     serializer_class = serializers.MasterySchemaSerializer
     access_policy = MasterySchemaAccessPolicy
 
     def get_queryset(self):
-        return self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        if self.action == 'list':
+            school_param = get_request_param(self.request.query_params, 'school')
+            if school_param:
+                qs = qs.filter(school_id=school_param)
+        return qs
 
 
 @extend_schema_view(

@@ -127,8 +127,17 @@ def feidecallback(request):
         request.session["feide_user_id"] = feide_user_id
         request.session["user_id"] = user.id
         return redirect(FRONTEND)
-    request.session.clear()
-    return redirect(f'{FRONTEND}?error=login_failed')
+    else:
+        # Is there a superadmin with this feide_id?
+        superadmin_user = User.objects.filter(feide_id=feide_user_id, is_superadmin=True).first()
+        if superadmin_user:
+            request.session["feide_tokens"] = tokens
+            request.session["feide_user_id"] = feide_user_id
+            request.session["user_id"] = superadmin_user.id
+            return redirect(FRONTEND)
+        else:
+            request.session.clear()
+            return redirect(f'{FRONTEND}?error=login_failed')
 
 
 @require_GET

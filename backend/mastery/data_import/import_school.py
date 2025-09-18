@@ -83,10 +83,65 @@ def import_school_from_feide(org_number):
             "owner": owner,
         },
     )
-
+    ensure_default_mastery_schema_exists(school)
     return {
         "status": "created" if created else "updated",
         "org_number": school.org_number,
         "display_name": school.display_name,
         "feide_id": school.feide_id,
     }
+
+
+def ensure_default_mastery_schema_exists(school):
+    mastery_schema = models.MasterySchema.objects.filter(school_id=school.id).first()
+    if mastery_schema:
+        return mastery_schema
+
+    return models.MasterySchema.objects.create(
+        title='Mestringstrappa',
+        description='Mestring angitt med fem nivåer, fra "aldri" til "mestrer".',
+        school=school,
+        maintained_at=timezone.now(),
+        config={
+            "levels": [
+                {
+                    "text": "Mestrer ikke",
+                    "color": "rgb(229, 50, 43)",
+                    "maxValue": 20,
+                    "minValue": 1
+                },
+                {
+                    "text": "Mestrer sjelden",
+                    "color": "rgb(159, 113, 202)",
+                    "maxValue": 40,
+                    "minValue": 21
+                },
+                {
+                    "text": "Mestrer iblant",
+                    "color": "rgb(86, 174, 232)",
+                    "maxValue": 60,
+                    "minValue": 41
+                },
+                {
+                    "text": "Mestrer ofte",
+                    "color": "rgb(241, 249, 97)",
+                    "maxValue": 80,
+                    "minValue": 61
+                },
+                {
+                    "text": "Mestrer",
+                    "color": "rgb(160, 207, 106)",
+                    "maxValue": 100,
+                    "minValue": 81
+                }
+            ],
+            "inputIncrement": 1,
+            "renderDirection": "vertical",
+            "isTitleInputEnabled": True,
+            "isColorGradientEnabled": False,
+            "isFeedforwardInputEnabled": True,
+            "isMasteryValueInputEnabled": True,
+            "isIncrementIndicatorEnabled": True,
+            "isMasteryDescriptionInputEnabled": True
+        }
+    )

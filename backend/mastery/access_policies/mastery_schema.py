@@ -1,8 +1,9 @@
 from .base import BaseAccessPolicy
+import logging
+logger = logging.getLogger(__name__)
 
 
 class MasterySchemaAccessPolicy(BaseAccessPolicy):
-    # Which mastery schemas exist is not a secret
     statements = [
         # Superadmin: full access
         {
@@ -10,7 +11,7 @@ class MasterySchemaAccessPolicy(BaseAccessPolicy):
             "principal": ["role:superadmin"],
             "effect": "allow",
         },
-        # Authenticated users can list and retrieve all mastery schemas
+        # Authenticated users can list and retrieve all mastery schemas for schools they belong to
         {
             "action": ["list", "retrieve"],
             "principal": ["authenticated"],
@@ -21,4 +22,12 @@ class MasterySchemaAccessPolicy(BaseAccessPolicy):
 
     # Scope queryset to all roles
     def scope_queryset(self, request, qs):
-        return qs
+        user = request.user
+        if user.is_superadmin:
+            return qs
+        try:
+            user_schools = user.get_schools()
+            return qs.filter(school_id__in=user_schools.values("id"))
+        except Exception as error:
+            logger.debug("MasterySchemaAccessPolicy.scope_queryset error: %s", error)
+            return qs.none()

@@ -264,9 +264,10 @@ class MasterySchema(BaseModel):
     """
     A MasterySchema models how student mastery, with regards to a specific Goal, is considered.
     """
-    title = models.CharField(max_length=200, null=True)
+    title = models.CharField(max_length=200, null=False, default="Navnløst mestringsskjema")
     description = models.TextField(null=True)
     config = models.JSONField(null=True)
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=True, related_name='mastery_schemas')
 
 
 class Goal(BaseModel):
