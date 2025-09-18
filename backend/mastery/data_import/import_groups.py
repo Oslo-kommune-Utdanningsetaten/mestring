@@ -25,9 +25,12 @@ def import_groups_from_file(org_number):
         groups_data = json.load(file)
 
     # Progress reporting variables
-    groups_created = 0
-    groups_maintained = 0
-    groups_failed = 0
+    basis_group_created = 0
+    basis_group_maintained = 0
+    basis_group_failed = 0
+    teaching_group_created = 0
+    teaching_group_maintained = 0
+    teaching_group_failed = 0
     subjects_created = 0
     subject_maintained = 0
     subjects_failed = 0
@@ -41,11 +44,11 @@ def import_groups_from_file(org_number):
         _, created, group_error = ensure_group_exists(group_data, "basis", None)
         if group_error:
             errors.append({"error": "ensure-basis-group-failed", "message": group_error})
-            groups_failed += 1
+            basis_group_failed += 1
         elif created:
-            groups_created += 1
+            basis_group_created += 1
         else:
-            groups_maintained += 1
+            basis_group_maintained += 1
 
         if index % 10 == 0:
             yield {
@@ -54,10 +57,15 @@ def import_groups_from_file(org_number):
                     "action": "import",
                     "errors": errors,
                     "changes": {
-                        "group": {
-                            "created": groups_created,
-                            "maintained": groups_maintained,
-                            "failed": groups_failed,
+                        "basis_group": {
+                            "created": basis_group_created,
+                            "maintained": basis_group_maintained,
+                            "failed": basis_group_failed,
+                        },
+                        "teaching_group": {
+                            "created": teaching_group_created,
+                            "maintained": teaching_group_maintained,
+                            "failed": teaching_group_failed,
                         },
                         "subject": {
                             "created": subjects_created,
@@ -88,11 +96,11 @@ def import_groups_from_file(org_number):
         _, created, group_error = ensure_group_exists(group_data, "teaching", subject)
         if group_error:
             errors.append({"error": "ensure-teaching-group-failed", "message": group_error})
-            groups_failed += 1
+            teaching_group_failed += 1
         elif created:
-            groups_created += 1
+            teaching_group_created += 1
         else:
-            groups_maintained += 1
+            teaching_group_maintained += 1
 
         if index % 10 == 0:
             yield {
@@ -101,10 +109,15 @@ def import_groups_from_file(org_number):
                     "action": "import",
                     "errors": errors,
                     "changes": {
-                        "group": {
-                            "created": groups_created,
-                            "maintained": groups_maintained,
-                            "failed": groups_failed,
+                        "basis_group": {
+                            "created": basis_group_created,
+                            "maintained": basis_group_maintained,
+                            "failed": basis_group_failed,
+                        },
+                        "teaching_group": {
+                            "created": teaching_group_created,
+                            "maintained": teaching_group_maintained,
+                            "failed": teaching_group_failed,
                         },
                         "subject": {
                             "created": subjects_created,
@@ -122,10 +135,15 @@ def import_groups_from_file(org_number):
             "action": "import",
             "errors": errors,
             "changes": {
-                "group": {
-                    "created": groups_created,
-                    "maintained": groups_maintained,
-                    "failed": groups_failed,
+                "basis_group": {
+                    "created": basis_group_created,
+                    "maintained": basis_group_maintained,
+                    "failed": basis_group_failed,
+                },
+                "teaching_group": {
+                    "created": teaching_group_created,
+                    "maintained": teaching_group_maintained,
+                    "failed": teaching_group_failed,
                 },
                 "subject": {
                     "created": subjects_created,
