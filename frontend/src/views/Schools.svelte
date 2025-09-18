@@ -57,7 +57,6 @@
       ? schools
       : schools.filter(school => selectedSchoolIds.includes(school.id))
   )
-  
 
   const handleComboChange = () => {
     selectedSchoolIds = filterCombobox.value || []
@@ -65,13 +64,12 @@
 
   const loadImportStatusForSchool = async (orgNumber: string) => {
     try {
-      const response = await fetchSchoolImportStatus({
+      const result = await fetchSchoolImportStatus({
         path: { org_number: orgNumber },
       })
 
-      const data = response.data as any
-
-      if (data?.status === 'success') {
+      if (result.response.status === 200 && result.data) {
+        const data = result.data as ImportStatus
         importStatus = {
           ...importStatus,
           [orgNumber]: {

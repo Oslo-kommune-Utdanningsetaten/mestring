@@ -10,7 +10,7 @@ data_dir = os.path.join(script_dir, "data")
 
 
 def import_memberships_from_file(org_number):
-    """Import memberships for ONE school from imports/data/schools/<org>/memeberships.json"""
+    """Import memberships for ONE school from data_import/data/schools/<org>/memeberships.json"""
     print("👉 import_memberships_from_file: BEGIN")
 
     # read memberships file

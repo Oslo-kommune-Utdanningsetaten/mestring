@@ -247,7 +247,7 @@ def fetch_school_import_status(request, org_number):
     school = models.School.objects.filter(org_number=org_number).first()
     if not school:
         return Response(
-            {"status": "error", "message": f"School not found for org {org_number}"},
+            {"message": f"School not found for org {org_number}"},
             status=404,
         )
 
@@ -306,7 +306,6 @@ def fetch_school_import_status(request, org_number):
         int) else None
 
     return Response({
-        "status": "success",
         "orgNumber": org_number,
         "school": {
             "id": school.id,
