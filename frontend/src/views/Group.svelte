@@ -19,6 +19,7 @@
   const { groupId } = $props<{ groupId: string }>()
 
   let currentSchool = $derived($dataStore.currentSchool)
+  let sortableInstance: Sortable | null = null
   let group = $state<GroupReadable | null>(null)
   let teachers = $state<UserReadable[]>([])
   let students = $state<UserReadable[]>([])
@@ -116,21 +117,22 @@
     // Insert moved goal at new index
     localGoals.splice(newIndex, 0, movedGoal)
     // for each goal, update its sortOrder if it has changed
-    const updatePromises: Promise<any>[] = []
-    localGoals.forEach(async (goal, index) => {
+    const updatePromises: Promise<any>[] = localGoals.map(async (goal, index) => {
       const newSortOrder = index + 1 // for human readability, sortOrder starts at 1
+      console.log('goal', goal.title, '-->', newSortOrder)
       if (goal.sortOrder !== newSortOrder) {
         goal.sortOrder = newSortOrder
-        updatePromises.push(
-          goalsUpdate({
-            path: { id: goal.id },
-            body: goal,
-          })
-        )
+        return goalsUpdate({
+          path: { id: goal.id },
+          body: goal,
+        })
+      } else {
+        return Promise.resolve() // no update needed
       }
     })
     try {
       await Promise.all(updatePromises)
+      await fetchGroupData()
     } catch (error) {
       console.error('Error updating goal order:', error)
       // Refetch to restore correct state
@@ -146,11 +148,18 @@
 
   $effect(() => {
     if (goalsListElement) {
-      const sortable = new Sortable(goalsListElement, {
+      sortableInstance = new Sortable(goalsListElement, {
         animation: 150,
         handle: '.row-handle',
         onEnd: handleGoalOrderChange,
       })
+    }
+    return () => {
+      // clean up if element unmounts
+      if (!goalsListElement && sortableInstance) {
+        sortableInstance.destroy()
+        sortableInstance = null
+      }
     }
   })
 </script>

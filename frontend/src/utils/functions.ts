@@ -1,5 +1,10 @@
 import type { Mastery, GoalDecorated } from '../types/models'
-import type { GoalReadable, SubjectReadable, ObservationReadable } from '../generated/types.gen'
+import type {
+  GoalReadable,
+  SubjectReadable,
+  ObservationReadable,
+  GroupReadable,
+} from '../generated/types.gen'
 import { goalsList, observationsList, groupsList } from '../generated/sdk.gen'
 import { dataStore } from '../stores/data'
 
@@ -76,12 +81,6 @@ export const goalsWithCalculatedMastery = async (
   const result = [] as GoalDecorated[]
   studentGoals.forEach((goal, index) => {
     const observations = observationsResults[index]?.data || []
-    const subjectId = goal.subjectId
-    if (!subjectId) {
-      console.error(`Goal ${goal.id} has no subjectId!`)
-      return
-    }
-
     const decoratedGoal: GoalDecorated = { ...goal }
     decoratedGoal.masteryData = inferMastery(goal, observations)
     decoratedGoal.observations = observations
@@ -100,7 +99,7 @@ export const subjectIdsViaGroupOrGoal = async (
   })
   const userGroups = groupsResult.data || []
   userGroups.forEach((group: any) => {
-    if (group.subjectId && ['undervisning', 'teaching'].includes(group.type)) {
+    if (group.subjectId && group.type === 'teaching') {
       subjectsId.add(group.subjectId)
     }
   })
@@ -116,21 +115,35 @@ export const subjectIdsViaGroupOrGoal = async (
 
 export const goalsWithCalculatedMasteryBySubjectId = async (
   studentId: string,
-  studentGoals: GoalReadable[]
+  studentGoals: GoalReadable[],
+  groups: GroupReadable[]
 ) => {
   const decoratedGoals = await goalsWithCalculatedMastery(studentId, studentGoals)
   let goalsBySubjectId: Record<string, GoalDecorated[]> = {}
   decoratedGoals.forEach((goal: GoalDecorated) => {
-    const subjectId = goal.subjectId
+    let subjectId = goal.subjectId
     if (!subjectId) {
-      console.error(`Goal ${goal.id} has no subjectId!`)
-      return
+      if (goal.groupId) {
+        const group = groups.find(g => g.id === goal.groupId)
+        if (group?.subjectId) {
+          subjectId = group.subjectId
+        } else {
+          console.error(`...but we could not find a subjectId via group ${goal.groupId}`)
+          return
+        }
+      }
     }
     goalsBySubjectId[subjectId] = goalsBySubjectId[subjectId] || []
     goalsBySubjectId[subjectId].push(goal)
   })
   Object.keys(goalsBySubjectId).forEach(subjectId => {
-    goalsBySubjectId[subjectId].sort((a, b) => a.sortOrder - b.sortOrder)
+    goalsBySubjectId[subjectId]
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .sort((a, b) => {
+        if (!a.isPersonal && b.isPersonal) return 1
+        if (a.isPersonal && !b.isPersonal) return -1
+        return 0
+      })
   })
   return goalsBySubjectId
 }

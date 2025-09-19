@@ -1013,6 +1013,10 @@ export type GroupsListData = {
     path?: never;
     query: {
         /**
+         * Filter by ids (comma-separated list of group ids, e.g., xyx,123)
+         */
+        ids?: string;
+        /**
          * Filter groups by roles a user has in that group (comma-separated list of role names, e.g., student,teacher)
          */
         roles?: string;
