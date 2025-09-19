@@ -23,10 +23,10 @@
 
   // Update localObservation when observation prop changes
   $effect(() => {
-    if (observation) {
+    if (observation && observation.id) {
       localObservation = {
         ...observation,
-        masteryValue: observation?.masteryValue,
+        masteryValue: observation.masteryValue,
       }
     } else {
       localObservation = {
@@ -46,7 +46,7 @@
     localObservation.goalId = goal?.id
     localObservation.observerId = $currentUser?.id
     localObservation.observedAt = new Date().toISOString()
-
+    console.log('Saving observation:', localObservation)
     try {
       if (localObservation.id) {
         const result = await observationsUpdate({

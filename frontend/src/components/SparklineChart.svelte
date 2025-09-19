@@ -1,19 +1,23 @@
-<script>
-  // @ts-nocheck
+<script lang="ts">
   import { Chart, registerables } from 'chart.js'
   Chart.register(...registerables)
 
-  import { onMount } from 'svelte'
+  interface Props {
+    data: Array<number>
+    lineColor?: string
+    label?: string
+  }
 
-  export let data = []
-  // export let lineColor = 'rgb(75, 192, 192)'
-  export let lineColor = 'rgb(200, 200, 192)'
-  export let label = 'Data'
-  let chartContainer
-  let chart
+  const { data, lineColor = 'rgb(200, 200, 192)', label = 'Data' }: Props = $props()
+  let chartContainer: HTMLCanvasElement | null = $state(null)
+  let chart: Chart | null = null
 
   const updateChart = () => {
     if (!chartContainer) return
+    if (data.some(isNaN)) {
+      console.warn('Data contains non-numeric values, cannot render chart:', data)
+      return
+    }
     if (!chart) {
       chart = new Chart(chartContainer, {
         type: 'line',
@@ -21,7 +25,7 @@
           labels: Array.from({ length: data.length }, (_, i) => i + 1),
           datasets: [
             {
-              data: data.map(point => (typeof point === 'object' ? point.y : point)),
+              data,
               fill: false,
               borderColor: lineColor,
               borderWidth: 1.5,
@@ -82,22 +86,24 @@
         },
       })
     } else {
-      chart.data.datasets[0].data = data.map(point => (typeof point === 'object' ? point.y : point))
+      chart.data.datasets[0].data = data
       chart.data.labels = Array.from({ length: data.length }, (_, i) => i + 1)
       chart.update('none')
     }
   }
 
-  $: if (data) updateChart()
-
-  onMount(() => {
-    updateChart()
+  $effect(() => {
+    if (data?.length) {
+      updateChart()
+    }
   })
 </script>
 
-<div class="chart-container" title={data}>
-  <canvas bind:this={chartContainer}></canvas>
-</div>
+{#if data?.length}
+  <div class="chart-container" title={data.join(', ')}>
+    <canvas bind:this={chartContainer}></canvas>
+  </div>
+{/if}
 
 <style>
   .chart-container {

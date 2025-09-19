@@ -153,10 +153,9 @@
     const [movedGoal] = localGoals.splice(oldIndex, 1)
     // Insert moved goal at new index
     localGoals.splice(newIndex, 0, movedGoal)
-    // for each goal, update its sortOrder if it has changed
+    // update sortOrder for each goal that has changed position
     const updatePromises: Promise<any>[] = localGoals.map(async (goal, index) => {
-      const newSortOrder = index + 1 // for human readability, sortOrder starts at 1
-      console.log('goal', goal.title, '-->', newSortOrder)
+      const newSortOrder = index + 1 // sortOrder starts at 1
       if (goal.sortOrder !== newSortOrder) {
         goal.sortOrder = newSortOrder
         return goalsUpdate({
@@ -243,7 +242,7 @@
       </span>
       <!-- Goal title -->
       <span>
-        {isShowGoalTitleEnabled ? goal.title : '🙊'}
+        {isShowGoalTitleEnabled ? goal.title : '🙊'} [{goal.id}]
       </span>
       <!-- New observation button -->
       <ButtonMini
@@ -333,6 +332,7 @@
               </span>
               <span class="col-1">
                 {observation.masteryValue}
+                {observation.id}
               </span>
               <span class="col-3">
                 <pkt-icon

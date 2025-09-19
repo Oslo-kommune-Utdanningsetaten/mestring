@@ -6,9 +6,9 @@
       iconName?: string
       classes?: string
       title?: string
-      onClick?: () => void
       variant?: string
       skin?: string
+      onClick?: () => void
     }
     children?: any
   }
