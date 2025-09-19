@@ -229,6 +229,13 @@ class UserGroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     list=extend_schema(
         parameters=[
             OpenApiParameter(
+                name='ids',
+                description='Filter by ids (comma-separated list of group ids, e.g., xyx,123)',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='school',
                 description='Filter users by School ID (users in any group of that school)',
                 required=True,
@@ -271,6 +278,7 @@ class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             type_param = get_request_param(self.request.query_params, 'type')
             user_param = get_request_param(self.request.query_params, 'user')
             roles_param = get_request_param(self.request.query_params, 'roles')
+            ids_param = get_request_param(self.request.query_params, 'ids')
 
             if not school_param:
                 raise ValidationError(
@@ -289,7 +297,10 @@ class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                 role_names = [role.strip() for role in roles_param.split(',') if role]
                 if role_names:
                     qs = qs.filter(user_groups__role__name__in=role_names)
-
+            if ids_param:
+                ids = [id.strip() for id in ids_param.split(',') if id]
+                if ids:
+                    qs = qs.filter(id__in=ids)
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs.distinct()
 
@@ -386,11 +397,9 @@ class GoalViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
 
         if self.action == 'list':
-            student_param = get_request_param(
-                self.request.query_params, 'student')
-            subject_param = get_request_param(
-                self.request.query_params, 'subject')
             group_param = get_request_param(self.request.query_params, 'group')
+            student_param = get_request_param(self.request.query_params, 'student')
+            subject_param = get_request_param(self.request.query_params, 'subject')
 
             if (not student_param) and (not subject_param) and (not group_param):
                 raise ValidationError(
@@ -403,16 +412,20 @@ class GoalViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                      'message':
                      'group and subject parameters cannot be used together (goals are either personal or group).'})
 
+            if group_param:
+                qs = qs.filter(group_id=group_param)
             if student_param:
+                # Student can be either the owner of a personal goal or a member of a group goal
                 qs = qs.filter(
                     Q(student_id=student_param) |
                     Q(group__user_groups__user_id=student_param)
                 )
-            if group_param:
-                qs = qs.filter(group_id=group_param)
             if subject_param:
-                qs = qs.filter(subject_id=subject_param)
-
+                # Subject can be either on a personal goal or a group goal
+                qs = qs.filter(
+                    Q(subject_id=subject_param) |
+                    Q(group__subject_id=subject_param)
+                )
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs
 
