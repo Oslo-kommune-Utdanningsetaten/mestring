@@ -242,7 +242,7 @@
       </span>
       <!-- Goal title -->
       <span>
-        {isShowGoalTitleEnabled ? goal.title : '🙊'} [{goal.id}]
+        {isShowGoalTitleEnabled ? goal.title : '🙊'}
       </span>
       <!-- New observation button -->
       <ButtonMini
@@ -332,7 +332,6 @@
               </span>
               <span class="col-1">
                 {observation.masteryValue}
-                {observation.id}
               </span>
               <span class="col-3">
                 <pkt-icon

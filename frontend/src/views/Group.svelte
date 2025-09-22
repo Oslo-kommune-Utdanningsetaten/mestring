@@ -12,9 +12,11 @@
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   import GoalEdit from '../components/GoalEdit.svelte'
   import GroupSVG from '../assets/group.svg.svelte'
+  import ButtonMini from '../components/ButtonMini.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { dataStore } from '../stores/data'
   import { getLocalStorageItem } from '../stores/localStorage'
+  import { goalsWithCalculatedMastery } from '../utils/functions'
 
   const { groupId } = $props<{ groupId: string }>()
 
@@ -29,8 +31,9 @@
   let error = $state<string | null>(null)
   let goalsListElement = $state<HTMLElement | null>(null)
   let isShowGoalTitleEnabled = $state<boolean>(true)
-  let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 5 : 2)
   let expandedGoals = $state<Record<string, boolean>>({})
+  let goalsWithCalculatedMasteryByStudentId = $state<Record<string, GoalDecorated[]>>({})
+  let isGoalInUse = $derived<Record<string, boolean>>({}) // keyed by goalId, if true, goal has at least one observation
 
   const fetchGroupData = async () => {
     if (!groupId) return
@@ -52,12 +55,32 @@
       const studentsResult = await usersList({
         query: { groups: groupId, school: currentSchool.id, roles: STUDENT_ROLE },
       })
+
+      // Fetch goals for the group
       const goalsResult = await goalsList({
         query: { group: groupId },
       })
       teachers = teachersResult.data || []
       students = studentsResult.data || []
       goals = goalsResult.data || []
+
+      // for each student, fetch their goals with calculated mastery
+      const studentPromises = students.map(async student => {
+        return goalsWithCalculatedMastery(student.id, goals).then(calculatedGoals => {
+          goalsWithCalculatedMasteryByStudentId[student.id] = calculatedGoals
+        })
+      })
+      await Promise.all(studentPromises)
+
+      // Determine if goals are in use (have observations) by any student in the group
+      goals.forEach(goal => {
+        students.forEach(student => {
+          const studentGoals = goalsWithCalculatedMasteryByStudentId[student.id] || []
+          isGoalInUse[goal.id] = studentGoals.some(
+            studentGoal => studentGoal.id === goal.id && studentGoal.observations?.length > 0
+          )
+        })
+      })
     } catch (error) {
       console.error('Error fetching group:', error)
       error = 'Kunne ikke hente gruppeinformasjon'
@@ -150,7 +173,7 @@
     if (goalsListElement) {
       sortableInstance = new Sortable(goalsListElement, {
         animation: 150,
-        handle: '.row-handle',
+        handle: '.row-handle-draggable',
         onEnd: handleGoalOrderChange,
       })
     }
@@ -226,89 +249,73 @@
         {:else}
           <div bind:this={goalsListElement} class="list-group">
             {#each goals as goal, index (goal.id)}
-              <div class="list-group-item goal-list-item">
-                <div class="row d-flex align-items-center">
-                  <span class="col-1">
+              <div class="list-group-item goal-item">
+                <div class="goal-primary-row">
+                  <!-- Drag handle -->
+                  <span>
                     <pkt-icon
                       title="Endre rekkefølge"
-                      class="me-2 row-handle"
+                      class="me-2 row-handle-draggable"
                       name="drag"
                       role="button"
                       tabindex="0"
                     ></pkt-icon>
                   </span>
-                  <span class="col-1">
+                  <!-- Numbering -->
+                  <span>
                     {goal.sortOrder || index + 1}
                   </span>
-                  <span class="col-1"><GroupSVG /></span>
-                  <span class="col-md-8">
+                  <!-- Goal type icon -->
+                  <span class="goal-type-icon"><GroupSVG /></span>
+                  <!-- Goal title -->
+                  <span>
                     {isShowGoalTitleEnabled ? goal.title : '🙊'}
                   </span>
-                  <span class="col-1 d-flex justify-content-end pe-4">
-                    <pkt-button
-                      size="small"
-                      skin="tertiary"
-                      type="button"
-                      variant="icon-only"
-                      iconName="chevron-thin-{expandedGoals[goal.id] ? 'up' : 'down'}"
-                      class="mini-button col-1 rounded"
-                      title="{expandedGoals[goal.id] ? 'Skjul' : 'Vis'} observasjoner"
-                      onclick={() => toggleGoalExpansion(goal.id)}
-                      onkeydown={(e: any) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          toggleGoalExpansion(goal.id)
-                        }
-                      }}
-                      role="button"
-                      tabindex="0"
-                    ></pkt-button>
-                  </span>
+                  <!-- Expand goal info -->
+                  <ButtonMini
+                    options={{
+                      iconName: `chevron-thin-${expandedGoals[goal.id] ? 'up' : 'down'}`,
+                      classes: 'mini-button rounded justify-end',
+                      title: `${expandedGoals[goal.id] ? 'Skjul' : 'Vis'} observasjoner`,
+                      onClick: () => toggleGoalExpansion(goal.id),
+                    }}
+                  />
                 </div>
 
                 {#if expandedGoals[goal.id]}
-                  <div class="alert alert-info my-3">
-                    <p>Ingen observasjoner for dette målet</p>
+                  <div class="goal-secondary-row">
+                    <div class="my-3">
+                      <p>
+                        Ingen observasjoner for dette målet. Trykk pluss (+) for å opprette en
+                        observasjon.
+                      </p>
 
-                    <pkt-button
-                      size="small"
-                      skin="primary"
-                      variant="icon-left"
-                      iconName="edit"
-                      class="my-2 me-2"
-                      title="Rediger dette gruppemålet"
-                      onclick={() => handleEditGoal(goal)}
-                      onkeydown={(e: any) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          handleEditGoal(goal)
-                        }
-                      }}
-                      role="button"
-                      tabindex="0"
-                    >
-                      Rediger mål
-                    </pkt-button>
+                      <ButtonMini
+                        options={{
+                          iconName: 'edit',
+                          classes: 'my-2 me-2',
+                          title: 'Rediger personlig mål',
+                          onClick: () => handleEditGoal(goal),
+                          variant: 'icon-left',
+                          skin: 'primary',
+                        }}
+                      >
+                        Rediger personlig mål
+                      </ButtonMini>
 
-                    <pkt-button
-                      size="small"
-                      skin="primary"
-                      variant="icon-left"
-                      iconName="trash-can"
-                      class="my-2"
-                      title="Slett dette gruppemålet"
-                      onclick={() => handleDeleteGoal(goal.id)}
-                      onkeydown={(e: any) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          handleDeleteGoal(goal.id)
-                        }
-                      }}
-                      role="button"
-                      tabindex="0"
-                    >
-                      Slett mål
-                    </pkt-button>
+                      <ButtonMini
+                        options={{
+                          iconName: 'trash-can',
+                          classes: 'my-2',
+                          title: 'Slett personlig mål',
+                          onClick: () => handleDeleteGoal(goal.id),
+                          variant: 'icon-left',
+                          skin: 'primary',
+                        }}
+                      >
+                        Slett mål
+                      </ButtonMini>
+                    </div>
                   </div>
                 {/if}
               </div>
@@ -364,13 +371,29 @@
     font-size: 1.5rem;
   }
 
-  .goal-list-item {
+  .goal-item {
     background-color: var(--bs-light);
-    row-gap: 0.5rem;
   }
 
-  .row-handle {
+  .goal-primary-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 15fr 1fr;
+    column-gap: 5px;
+  }
+
+  .goal-secondary-row {
+    margin-top: 10px;
+    margin-left: 6px;
+    padding-left: 30px;
+    border-left: 3px solid var(--bs-secondary);
+  }
+
+  .row-handle-draggable {
     cursor: move;
     vertical-align: -8%;
+  }
+
+  .goal-type-icon > :global(svg) {
+    height: 1.2em;
   }
 </style>

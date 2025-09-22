@@ -113,6 +113,9 @@ export const subjectIdsViaGroupOrGoal = async (
   return Array.from(subjectsId)
 }
 
+// For a single student, output goals grouped by subjectId, with mastery data calculated
+// If a goal does not have a subjectId, look up via the groupId
+// Goals are sorted by sortOrder, then personal goals first
 export const goalsWithCalculatedMasteryBySubjectId = async (
   studentId: string,
   studentGoals: GoalReadable[],
