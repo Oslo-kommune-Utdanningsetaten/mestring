@@ -1,5 +1,4 @@
 <script lang="ts">
-  import ButtonMini from '../components/ButtonMini.svelte'
   import { type SchoolReadable } from '../generated/types.gen'
   import {
     fetchGroupsForSchool,
@@ -11,6 +10,7 @@
     schoolsPartialUpdate,
   } from '../generated/sdk.gen'
   import { useTinyRouter } from 'svelte-tiny-router'
+  import ButtonMini from '../components/ButtonMini.svelte'
 
   const router = useTinyRouter()
   let schools = $state<SchoolReadable[]>([])
@@ -431,11 +431,4 @@
 </section>
 
 <style>
-  .card {
-    transition: box-shadow 0.15s ease-in-out;
-  }
-
-  .card:hover {
-    box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08) !important;
-  }
 </style>

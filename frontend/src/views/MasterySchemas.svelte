@@ -1,13 +1,11 @@
 <script lang="ts">
-  // Use ButtonMini wrapper instead of raw pkt-button
-  import ButtonMini from '../components/ButtonMini.svelte'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
-
-  import { urlStringFrom } from '../utils/functions'
-  import MasterySchemaEdit from '../components/MasterySchemaEdit.svelte'
   import { masterySchemasDestroy, masterySchemasList, schoolsList } from '../generated/sdk.gen'
   import type { MasterySchemaReadable, SchoolReadable } from '../generated/types.gen'
   import { useTinyRouter } from 'svelte-tiny-router'
+  import { urlStringFrom } from '../utils/functions'
+  import ButtonMini from '../components/ButtonMini.svelte'
+  import MasterySchemaEdit from '../components/MasterySchemaEdit.svelte'
 
   const router = useTinyRouter()
   let masterySchemas = $derived<MasterySchemaReadable[]>([])

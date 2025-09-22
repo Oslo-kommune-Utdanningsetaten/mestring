@@ -1,11 +1,11 @@
 <script lang="ts">
-  import ButtonMini from './ButtonMini.svelte'
-  import { dataStore, currentUser } from '../stores/data'
+  import type { ObservationReadable, GoalReadable, UserReadable } from '../generated/types.gen'
   import { observationsCreate, observationsUpdate } from '../generated/sdk.gen'
+  import type { GoalDecorated, MasterySchemaWithConfig } from '../types/models'
+  import { dataStore, currentUser } from '../stores/data'
+  import ButtonMini from './ButtonMini.svelte'
   import ValueInputVertical from './ValueInputVertical.svelte'
   import ValueInputHorizontal from './ValueInputHorizontal.svelte'
-  import type { ObservationReadable, GoalReadable, UserReadable } from '../generated/types.gen'
-  import type { GoalDecorated, MasterySchemaWithConfig } from '../types/models'
 
   const { student, goal, observation, onDone } = $props<{
     student: UserReadable | null

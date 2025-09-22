@@ -1,6 +1,4 @@
 <script lang="ts">
-  import ButtonMini from './ButtonMini.svelte'
-  import { dataStore } from '../stores/data'
   import { goalsCreate, goalsUpdate } from '../generated/sdk.gen'
   import type {
     GoalWritable,
@@ -8,7 +6,9 @@
     UserReadable,
     SubjectReadable,
   } from '../generated/types.gen'
+  import { dataStore } from '../stores/data'
   import { setLocalStorageItem } from '../stores/localStorage'
+  import ButtonMini from './ButtonMini.svelte'
 
   // This component is used for both personal and group goals!
   // If group is passed, student AND subject should be null

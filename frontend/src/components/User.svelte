@@ -1,8 +1,6 @@
 <script lang="ts">
-  import ButtonMini from './ButtonMini.svelte'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
-
   import type {
     UserReadable,
     NestedUserGroupReadable,
@@ -18,6 +16,7 @@
   } from '../generated/sdk.gen'
   import { SCHOOL_ADMIN_ROLE } from '../utils/constants'
   import { dataStore } from '../stores/data'
+  import ButtonMini from './ButtonMini.svelte'
 
   const { user, school } = $props<{ user: UserReadable; school: SchoolReadable }>()
   const adminRole = $derived<RoleReadable>(

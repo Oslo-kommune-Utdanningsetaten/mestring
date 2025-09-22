@@ -1,5 +1,4 @@
 <script lang="ts">
-  // Remove pkt-button import since ButtonMini handles it
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { dataStore } from '../stores/data'
   import type { UserReadable, ObservationReadable, GoalReadable } from '../generated/types.gen'
