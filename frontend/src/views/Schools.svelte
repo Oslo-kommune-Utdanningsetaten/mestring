@@ -10,7 +10,6 @@
     schoolsList,
     schoolsPartialUpdate,
   } from '../generated/sdk.gen'
-  import { setCurrentSchool } from '../stores/data'
   import { useTinyRouter } from 'svelte-tiny-router'
 
   const router = useTinyRouter()

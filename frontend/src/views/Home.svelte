@@ -1,5 +1,6 @@
 <script lang="ts">
-  import '@oslokommune/punkt-elements/dist/pkt-button.js'
+  // Replaced direct pkt-button usage with ButtonMini wrapper
+  import ButtonMini from '../components/ButtonMini.svelte'
   import { currentUser } from '../stores/data'
   import Groups from './Groups.svelte'
   import { login } from '../stores/auth'
@@ -12,23 +13,18 @@
     <h2 class="mb-4">Hei på deg!</h2>
     <p class="d-flex align-items-center gap-2">Du er visst ikke logget inn.</p>
     <p>
-      <pkt-button
-        size="small"
-        skin="primary"
-        type="button"
-        variant="label-only"
-        onclick={login}
-        onkeydown={(e: any) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            login()
-          }
+      <ButtonMini
+        options={{
+          title: 'Logg inn!',
+          iconName: 'login',
+          skin: 'primary',
+          variant: 'label-only',
+          classes: '',
+          onClick: () => login(),
         }}
-        role="button"
-        tabindex="0"
       >
         Logg inn!
-      </pkt-button>
+      </ButtonMini>
     </p>
   {/if}
 </section>

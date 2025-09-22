@@ -15,7 +15,7 @@
 
   const { options, children }: Props = $props()
   const iconName = options.iconName || 'plus-sign'
-  const classes = options.classes || 'mini-button bordered'
+  const classes = options.classes || 'me-2'
   const title = options.title || 'TITTEL MANGLER'
   const variant = options.variant || 'icon-only'
   const skin = options.skin || 'tertiary'

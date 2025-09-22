@@ -1,5 +1,5 @@
 <script lang="ts">
-  import '@oslokommune/punkt-elements/dist/pkt-button.js'
+  import ButtonMini from './ButtonMini.svelte'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
 
@@ -107,27 +107,18 @@
       ></pkt-checkbox>
     {:else}
       <div class="pkt-input-check">
-        <pkt-button
-          size="small"
-          skin="secondary"
-          type="button"
-          variant="icon-only"
-          iconName="process-back"
-          title="Hent tilknytninger"
-          alt="Hent tilknytninger"
-          disabled={isLoadingData}
-          onclick={fetchUserAffiliations}
-          onkeydown={(e: any) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              fetchUserAffiliations()
-            }
+        <ButtonMini
+          options={{
+            title: 'Hent tilknytninger',
+            iconName: 'process-back',
+            skin: 'secondary',
+            variant: 'icon-only',
+            classes: '',
+            onClick: () => fetchUserAffiliations(),
           }}
-          role="button"
-          tabindex="0"
         >
           Hent tilknytninger
-        </pkt-button>
+        </ButtonMini>
       </div>
     {/if}
   </div>

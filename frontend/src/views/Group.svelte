@@ -220,26 +220,18 @@
     <div class="mb-4">
       <div class="d-flex align-items-center gap-2 mb-3">
         <h3 class="mb-0">Mål</h3>
-        <pkt-button
-          size="small"
-          skin="tertiary"
-          type="button"
-          variant="icon-only"
-          iconName="plus-sign"
-          title="Legg til nytt gruppemål for {group.displayName}"
-          class="mini-button bordered"
-          onclick={() => handleEditGoal(null)}
-          onkeydown={(e: any) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              handleEditGoal(null)
-            }
+        <ButtonMini
+          options={{
+            iconName: 'plus-sign',
+            classes: 'mini-button bordered',
+            title: `Legg til nytt gruppemål for ${group.displayName}`,
+            variant: 'icon-only',
+            skin: 'tertiary',
+            onClick: () => handleEditGoal(null),
           }}
-          role="button"
-          tabindex="0"
         >
           Nytt gruppemål
-        </pkt-button>
+        </ButtonMini>
       </div>
       <div>
         {#if goals.length === 0}

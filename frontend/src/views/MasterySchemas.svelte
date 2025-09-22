@@ -1,5 +1,6 @@
 <script lang="ts">
-  import '@oslokommune/punkt-elements/dist/pkt-button.js'
+  // Use ButtonMini wrapper instead of raw pkt-button
+  import ButtonMini from '../components/ButtonMini.svelte'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
 
   import { urlStringFrom } from '../utils/functions'
@@ -111,24 +112,18 @@
 </section>
 
 <section class="py-4">
-  <pkt-button
-    size="small"
-    skin="primary"
-    type="button"
-    variant="label-only"
-    onclick={() => handleEditMasterySchema(null)}
-    onkeydown={(e: any) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault()
-        handleEditMasterySchema(null)
-      }
+  <ButtonMini
+    options={{
+      title: 'Nytt mestringsskjema',
+      iconName: 'plus-sign',
+      skin: 'primary',
+      variant: 'label-only',
+      classes: '',
+      onClick: () => handleEditMasterySchema(null),
     }}
-    role="button"
-    disabled={!selectedSchool}
-    tabindex="0"
   >
     Nytt mestringsskjema
-  </pkt-button>
+  </ButtonMini>
 
   <div class="pkt-input-check mt-3">
     <div class="pkt-input-check__input">
@@ -172,43 +167,31 @@
               </div>
             {/if}
 
-            <pkt-button
-              size="small"
-              skin="secondary"
-              variant="icon-left"
-              iconName="edit"
-              class="my-2 me-2"
-              onclick={() => handleEditMasterySchema(masterySchema)}
-              onkeydown={(e: any) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  handleEditMasterySchema(masterySchema)
-                }
+            <ButtonMini
+              options={{
+                title: 'Rediger',
+                iconName: 'edit',
+                skin: 'secondary',
+                variant: 'icon-left',
+                classes: 'my-2 me-2',
+                onClick: () => handleEditMasterySchema(masterySchema),
               }}
-              role="button"
-              tabindex="0"
             >
               Rediger
-            </pkt-button>
+            </ButtonMini>
 
-            <pkt-button
-              size="small"
-              skin="secondary"
-              variant="icon-left"
-              iconName="trash-can"
-              class="my-2"
-              onclick={() => handleDeleteMasterySchema(masterySchema.id)}
-              onkeydown={(e: any) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  handleDeleteMasterySchema(masterySchema.id)
-                }
+            <ButtonMini
+              options={{
+                title: 'Slett',
+                iconName: 'trash-can',
+                skin: 'secondary',
+                variant: 'icon-left',
+                classes: 'my-2',
+                onClick: () => handleDeleteMasterySchema(masterySchema.id),
               }}
-              role="button"
-              tabindex="0"
             >
               Slett
-            </pkt-button>
+            </ButtonMini>
           </div>
         </div>
       {/each}
