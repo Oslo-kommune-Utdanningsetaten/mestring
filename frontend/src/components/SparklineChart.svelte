@@ -1,115 +1,79 @@
 <script lang="ts">
-  import { Chart, registerables } from 'chart.js'
-  Chart.register(...registerables)
+  /* SVG Sparkline Component */
 
   interface Props {
-    data: Array<number>
+    data: number[]
+    width?: number
+    height?: number
+    min?: number | null
+    max?: number | null
     lineColor?: string
-    label?: string
+    strokeWidth?: number
+    title?: string
   }
 
-  const { data, lineColor = 'rgb(200, 200, 192)', label = 'Data' }: Props = $props()
-  let chartContainer: HTMLCanvasElement | null = $state(null)
-  let chart: Chart | null = null
+  const {
+    data,
+    width = 28,
+    height = 28,
+    min = 0,
+    max = 100,
+    lineColor = 'rgb(100, 100, 100)',
+    strokeWidth = 1.6,
+  }: Props = $props()
 
-  const updateChart = () => {
-    if (!chartContainer) return
-    if (data.some(isNaN)) {
-      console.warn('Data contains non-numeric values, cannot render chart:', data)
-      return
-    }
-    if (!chart) {
-      chart = new Chart(chartContainer, {
-        type: 'line',
-        data: {
-          labels: Array.from({ length: data.length }, (_, i) => i + 1),
-          datasets: [
-            {
-              data,
-              fill: false,
-              borderColor: lineColor,
-              borderWidth: 1.5,
-              label: label,
-              pointRadius: 0,
-              tension: 0.1,
-            },
-          ],
-        },
-        options: {
-          scales: {
-            x: {
-              display: true,
-              grid: {
-                display: false,
-              },
-              border: {
-                display: true,
-                width: 1,
-                color: '#e0e0e0',
-              },
-              ticks: {
-                display: false,
-              },
-            },
-            y: {
-              display: true,
-              grid: {
-                display: false,
-              },
-              border: {
-                display: true,
-                width: 1,
-                color: '#e0e0e0',
-              },
-              min: 0,
-              max: 100,
-              ticks: {
-                display: false,
-              },
-            },
-          },
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false,
-            },
-            tooltip: {
-              enabled: false,
-            },
-          },
-          elements: {
-            line: {
-              tension: 0.2,
-            },
-          },
-        },
+  const hasData = () =>
+    Array.isArray(data) && data.length > 0 && data.every(n => Number.isFinite(n))
+  const effectiveMin = () => min ?? (hasData() ? Math.min(...data) : 0)
+  const effectiveMax = () => max ?? (hasData() ? Math.max(...data) : 1)
+  const title = $derived(hasData() ? data.join(', ') : 'Mangler data')
+
+  const calculatePoints = () => {
+    const valueCount = data.length
+    if (!hasData() || valueCount === 1) return ''
+    const low = effectiveMin()
+    const high = effectiveMax()
+    const span = high - low || 1
+
+    const stepX = width / (valueCount - 1)
+    return data
+      .map((value, index) => {
+        const normalized = (value - low) / span
+        const x = index * stepX
+        const y = (1 - normalized) * height
+        return `${x.toFixed(2)},${y.toFixed(2)}`
       })
-    } else {
-      chart.data.datasets[0].data = data
-      chart.data.labels = Array.from({ length: data.length }, (_, i) => i + 1)
-      chart.update('none')
-    }
+      .join(' ')
   }
-
-  $effect(() => {
-    if (data?.length) {
-      updateChart()
-    }
-  })
 </script>
 
-{#if data?.length}
-  <div class="chart-container" title={data.join(', ')}>
-    <canvas bind:this={chartContainer}></canvas>
-  </div>
+{#if hasData()}
+  <svg
+    class="sparkline-chart"
+    {width}
+    {height}
+    viewBox={`0 0 ${width} ${height}`}
+    role="img"
+    aria-label={title}
+  >
+    <title>{title}</title>
+    <polyline
+      points={calculatePoints()}
+      fill="none"
+      stroke={lineColor}
+      stroke-width={strokeWidth}
+      vector-effect="non-scaling-stroke"
+      stroke-linejoin="round"
+      stroke-linecap="round"
+    />
+  </svg>
 {/if}
 
 <style>
-  .chart-container {
-    width: 35px;
-    height: 30px;
-    margin-left: -5px;
-    margin-bottom: -5px;
+  .sparkline-chart {
+    display: inline-block;
+  }
+  .sparkline-chart.empty {
+    opacity: 0.3;
   }
 </style>

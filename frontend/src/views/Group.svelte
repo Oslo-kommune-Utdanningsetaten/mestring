@@ -7,12 +7,20 @@
     goalsUpdate,
     goalsDestroy,
   } from '../generated/sdk.gen'
-  import type { GoalReadable, GroupReadable, UserReadable } from '../generated/types.gen'
+  import type {
+    GoalReadable,
+    GroupReadable,
+    UserReadable,
+    ObservationReadable,
+  } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   import GoalEdit from '../components/GoalEdit.svelte'
   import GroupSVG from '../assets/group.svg.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
+  import ObservationEdit from '../components/ObservationEdit.svelte'
+  import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
+  import SparklineChart from '../components/SparklineChart.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { dataStore } from '../stores/data'
   import { getLocalStorageItem } from '../stores/localStorage'
@@ -34,6 +42,9 @@
   let expandedGoals = $state<Record<string, boolean>>({})
   let goalsWithCalculatedMasteryByStudentId = $state<Record<string, GoalDecorated[]>>({})
   let isGoalInUse = $derived<Record<string, boolean>>({}) // keyed by goalId, if true, goal has at least one observation
+  let observationWip = $state<ObservationReadable | {} | null>(null)
+  let goalForObservation = $state<GoalDecorated | null>(null)
+  let studentForObservation = $state<UserReadable | null>(null)
 
   const fetchGroupData = async () => {
     if (!groupId) return
@@ -118,14 +129,46 @@
     await fetchGroupData()
   }
 
+  const handleObservationDone = async () => {
+    handleCloseEditObservation()
+    fetchGroupData()
+  }
+
   const handleCloseEditGoal = () => {
     goalWip = null
+  }
+
+  const handleCloseEditObservation = () => {
+    observationWip = null
   }
 
   const handleKeydown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
       if (goalWip) {
         handleCloseEditGoal()
+      }
+    }
+  }
+
+  const handleEditObservation = (
+    goal: GoalDecorated,
+    observation: ObservationReadable | null,
+    student: UserReadable
+  ) => {
+    goalForObservation = goal
+    studentForObservation = student
+    if (observation) {
+      // edit observation
+      observationWip = observation
+    } else {
+      // create new observation, prefill with value from previous observation
+      const prevousObservations = goal?.observations || []
+      const previousObservation = prevousObservations[prevousObservations.length - 1]
+      observationWip = {
+        masteryValue: previousObservation?.masteryValue || null,
+        studentId: student.id,
+        goalId: goal.id,
+        observerId: $dataStore.currentUser.id,
       }
     }
   }
@@ -274,42 +317,76 @@
                   />
                 </div>
 
-                {#if expandedGoals[goal.id]}
-                  <div class="goal-secondary-row">
-                    <div class="my-3">
-                      <p>
-                        Ingen observasjoner for dette målet. Trykk pluss (+) for å opprette en
-                        observasjon.
-                      </p>
+                <div class="goal-secondary-row">
+                  {#if expandedGoals[goal.id] || true}
+                    {#if isGoalInUse[goal.id]}
+                      GOAL IN USE
+                    {:else}
+                      <div class="my-3">
+                        <p>
+                          Ingen observasjoner for dette målet. Trykk pluss (+) for å opprette en
+                          observasjon.
+                        </p>
 
-                      <ButtonMini
-                        options={{
-                          iconName: 'edit',
-                          classes: 'my-2 me-2',
-                          title: 'Rediger personlig mål',
-                          onClick: () => handleEditGoal(goal),
-                          variant: 'icon-left',
-                          skin: 'primary',
-                        }}
-                      >
-                        Rediger personlig mål
-                      </ButtonMini>
+                        <ButtonMini
+                          options={{
+                            iconName: 'edit',
+                            classes: 'my-2 me-2',
+                            title: 'Rediger personlig mål',
+                            onClick: () => handleEditGoal(goal),
+                            variant: 'icon-left',
+                            skin: 'primary',
+                          }}
+                        >
+                          Rediger personlig mål
+                        </ButtonMini>
 
-                      <ButtonMini
-                        options={{
-                          iconName: 'trash-can',
-                          classes: 'my-2',
-                          title: 'Slett personlig mål',
-                          onClick: () => handleDeleteGoal(goal.id),
-                          variant: 'icon-left',
-                          skin: 'primary',
-                        }}
-                      >
-                        Slett mål
-                      </ButtonMini>
-                    </div>
-                  </div>
-                {/if}
+                        <ButtonMini
+                          options={{
+                            iconName: 'trash-can',
+                            classes: 'my-2',
+                            title: 'Slett personlig mål',
+                            onClick: () => handleDeleteGoal(goal.id),
+                            variant: 'icon-left',
+                            skin: 'primary',
+                          }}
+                        >
+                          Slett mål
+                        </ButtonMini>
+                      </div>
+                    {/if}
+                    {#each students as student, index (student.id)}
+                      <div class="student-observations-in-goal mb-2 align-items-center">
+                        <span>
+                          {student.name}
+                        </span>
+
+                        <!-- Stats widgets -->
+                        <span class="d-flex gap-2 align-items-center">
+                          <MasteryLevelBadge
+                            masteryData={goalsWithCalculatedMasteryByStudentId[student.id].find(
+                              g => g.id === goal.id
+                            ).masteryData}
+                          />
+                          <SparklineChart
+                            data={goalsWithCalculatedMasteryByStudentId[student.id]
+                              .find(g => g.id === goal.id)
+                              ?.observations?.map((o: ObservationReadable) => o.masteryValue)}
+                          />
+                        </span>
+                        <!-- New observation button -->
+                        <ButtonMini
+                          options={{
+                            iconName: 'plus-sign',
+                            classes: 'mini-button bordered',
+                            title: 'Ny observasjon',
+                            onClick: () => handleEditObservation(goal, null, student),
+                          }}
+                        />
+                      </div>
+                    {/each}
+                  {/if}
+                </div>
               </div>
             {/each}
           </div>
@@ -354,6 +431,16 @@
   <GoalEdit goal={goalWip} {group} isGoalPersonal={false} onDone={handleGoalDone} />
 </div>
 
+<!-- offcanvas for adding an observation -->
+<div class="custom-offcanvas" class:visible={!!observationWip}>
+  <ObservationEdit
+    student={studentForObservation}
+    observation={observationWip}
+    goal={goalForObservation}
+    onDone={handleObservationDone}
+  />
+</div>
+
 <style>
   div.observation-item > span {
     font-family: 'Courier New', Courier, monospace !important;
@@ -361,6 +448,13 @@
 
   h3 {
     font-size: 1.5rem;
+  }
+
+  .student-observations-in-goal {
+    border-bottom: 1px solid rgb(from var(--bs-secondary) r g b / 25%);
+    display: grid;
+    grid-template-columns: 8fr 3fr 1fr;
+    column-gap: 5px;
   }
 
   .goal-item {
@@ -377,7 +471,7 @@
     margin-top: 10px;
     margin-left: 6px;
     padding-left: 30px;
-    border-left: 3px solid var(--bs-secondary);
+    border-left: 3px solid rgb(from var(--bs-secondary) r g b / 25%);
   }
 
   .row-handle-draggable {

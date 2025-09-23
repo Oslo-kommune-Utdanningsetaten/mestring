@@ -253,13 +253,11 @@
         }}
       />
       <!-- Stats widgets -->
-      <span class="d-flex align-items-center gap-3">
+      <span class="d-flex align-items-center gap-3 align-items-center">
         {#if goal.masteryData}
           <MasteryLevelBadge masteryData={goal.masteryData} />
           <SparklineChart
             data={goal.observations?.map((o: ObservationReadable) => o.masteryValue)}
-            lineColor="rgb(100, 100, 100)"
-            label={goal.title}
           />
         {/if}
       </span>
@@ -377,12 +375,12 @@
     Trykk pluss (+) for å opprette et personlig mål for eleven i dette faget.
   </div>
 {:else}
-  <div bind:this={goalsListElement} class="list-group">
+  <div bind:this={goalsListElement} class="list-group mt-2">
     {#each goalsForSubject.filter(goal => goal.isPersonal) as goal, index (goal.id)}
       {@render goalInList(goal, index)}
     {/each}
   </div>
-  <div class="list-group my-2">
+  <div class="list-group mt-4">
     {#each goalsForSubject.filter(goal => !goal.isPersonal) as goal, index (goal.id)}
       {@render goalInList(goal, index)}
     {/each}
