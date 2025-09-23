@@ -85,16 +85,15 @@
 
       // Determine if goals are in use (have observations) by any student in the group
       goals.forEach(goal => {
-        students.forEach(student => {
+        isGoalInUse[goal.id] = students.some(student => {
           const studentGoals = goalsWithCalculatedMasteryByStudentId[student.id] || []
-          isGoalInUse[goal.id] = studentGoals.some(
+          return studentGoals.some(
             studentGoal => studentGoal.id === goal.id && studentGoal.observations?.length > 0
           )
         })
       })
     } catch (error) {
       console.error('Error fetching group:', error)
-      error = 'Kunne ikke hente gruppeinformasjon'
     } finally {
       isLoading = false
     }
@@ -235,11 +234,6 @@
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Henter data...</span>
     </div>
-  {:else if error}
-    <div class="alert alert-danger">
-      <h4>Noe gikk galt</h4>
-      <p>{error}</p>
-    </div>
   {:else if group}
     <!-- Group Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -284,7 +278,11 @@
         {:else}
           <div bind:this={goalsListElement} class="list-group">
             {#each goals as goal, index (goal.id)}
-              <div class="list-group-item goal-item">
+              <div
+                class="list-group-item goal-item {expandedGoals[goal.id]
+                  ? 'shadow border-2 z-1'
+                  : ''}"
+              >
                 <div class="goal-primary-row">
                   <!-- Drag handle -->
                   <span>
@@ -317,45 +315,43 @@
                   />
                 </div>
 
-                <div class="goal-secondary-row">
-                  {#if expandedGoals[goal.id] || true}
-                    {#if isGoalInUse[goal.id]}
-                      GOAL IN USE
-                    {:else}
-                      <div class="my-3">
-                        <p>
-                          Ingen observasjoner for dette målet. Trykk pluss (+) for å opprette en
-                          observasjon.
-                        </p>
+                {#if expandedGoals[goal.id]}
+                  {#if !isGoalInUse[goal.id]}
+                    <div class="my-3">
+                      <p>
+                        Ingen observasjoner for dette målet. Trykk pluss (+) for å opprette en
+                        observasjon.
+                      </p>
 
-                        <ButtonMini
-                          options={{
-                            iconName: 'edit',
-                            classes: 'my-2 me-2',
-                            title: 'Rediger personlig mål',
-                            onClick: () => handleEditGoal(goal),
-                            variant: 'icon-left',
-                            skin: 'primary',
-                          }}
-                        >
-                          Rediger personlig mål
-                        </ButtonMini>
+                      <ButtonMini
+                        options={{
+                          iconName: 'edit',
+                          classes: 'my-2 me-2',
+                          title: 'Rediger personlig mål',
+                          onClick: () => handleEditGoal(goal),
+                          variant: 'icon-left',
+                          skin: 'primary',
+                        }}
+                      >
+                        Rediger personlig mål
+                      </ButtonMini>
 
-                        <ButtonMini
-                          options={{
-                            iconName: 'trash-can',
-                            classes: 'my-2',
-                            title: 'Slett personlig mål',
-                            onClick: () => handleDeleteGoal(goal.id),
-                            variant: 'icon-left',
-                            skin: 'primary',
-                          }}
-                        >
-                          Slett mål
-                        </ButtonMini>
-                      </div>
-                    {/if}
-                    {#each students as student, index (student.id)}
+                      <ButtonMini
+                        options={{
+                          iconName: 'trash-can',
+                          classes: 'my-2',
+                          title: 'Slett personlig mål',
+                          onClick: () => handleDeleteGoal(goal.id),
+                          variant: 'icon-left',
+                          skin: 'primary',
+                        }}
+                      >
+                        Slett mål
+                      </ButtonMini>
+                    </div>
+                  {/if}
+                  <div class="goal-secondary-row">
+                    {#each students as student (student.id)}
                       <div class="student-observations-in-goal mb-2 align-items-center">
                         <span>
                           {student.name}
@@ -385,8 +381,8 @@
                         />
                       </div>
                     {/each}
-                  {/if}
-                </div>
+                  </div>
+                {/if}
               </div>
             {/each}
           </div>
@@ -459,6 +455,7 @@
 
   .goal-item {
     background-color: var(--bs-light);
+    line-height: normal;
   }
 
   .goal-primary-row {

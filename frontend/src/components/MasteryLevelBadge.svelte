@@ -1,7 +1,10 @@
 <script lang="ts">
   import type { Mastery } from '../types/models'
 
-  const { masteryData } = $props<{ masteryData: Mastery | null }>()
+  const { masteryData, isEmptyBadgeVisible = false } = $props<{
+    masteryData: Mastery | null
+    isEmptyBadgeVisible: boolean
+  }>()
 
   const mastery = $derived(masteryData?.mastery ?? 0)
   const trend = $derived(masteryData?.trend ?? 0)
@@ -44,7 +47,7 @@
         )}px; border-color: {trendColor}; height: {masteryIndicatorHeight}px; width: {masteryIndicatorWidth}px; left: {-masteryIndicatorOutcrop}px;"
       ></span>
     </span>
-  {:else}
+  {:else if isEmptyBadgeVisible}
     <span
       class="trend-box missing-mastery"
       style="width: {trendBoxSize}px; height: {trendBoxSize}px;"
@@ -52,7 +55,7 @@
     >
       &nbsp;
     </span>
-  {/if}
+  {:else}{/if}
 </span>
 
 <style>

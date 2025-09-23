@@ -12,30 +12,32 @@
     title?: string
   }
 
+  // Props with sane defaults
   const {
     data,
-    width = 28,
-    height = 28,
+    width = 26,
+    height = 26,
     min = 0,
     max = 100,
     lineColor = 'rgb(100, 100, 100)',
     strokeWidth = 1.6,
   }: Props = $props()
 
-  const hasData = () =>
-    Array.isArray(data) && data.length > 0 && data.every(n => Number.isFinite(n))
-  const effectiveMin = () => min ?? (hasData() ? Math.min(...data) : 0)
-  const effectiveMax = () => max ?? (hasData() ? Math.max(...data) : 1)
-  const title = $derived(hasData() ? data.join(', ') : 'Mangler data')
+  const hasSufficientData = $derived(
+    Array.isArray(data) && data.length > 1 && data.every(n => Number.isFinite(n))
+  )
+  const effectiveMin = $derived(min ?? (hasSufficientData ? Math.min(...data) : 0))
+  const effectiveMax = $derived(max ?? (hasSufficientData ? Math.max(...data) : 1))
+  const title = $derived(hasSufficientData ? data.join(', ') : 'Mangler data')
 
   const calculatePoints = () => {
-    const valueCount = data.length
-    if (!hasData() || valueCount === 1) return ''
-    const low = effectiveMin()
-    const high = effectiveMax()
-    const span = high - low || 1
+    if (!hasSufficientData) return ''
 
-    const stepX = width / (valueCount - 1)
+    const low = effectiveMin
+    const high = effectiveMax
+    const span = high - low || 1
+    const stepX = width / (data.length - 1)
+
     return data
       .map((value, index) => {
         const normalized = (value - low) / span
@@ -47,7 +49,7 @@
   }
 </script>
 
-{#if hasData()}
+{#if hasSufficientData}
   <svg
     class="sparkline-chart"
     {width}
@@ -72,8 +74,5 @@
 <style>
   .sparkline-chart {
     display: inline-block;
-  }
-  .sparkline-chart.empty {
-    opacity: 0.3;
   }
 </style>
