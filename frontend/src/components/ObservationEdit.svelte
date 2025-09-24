@@ -24,15 +24,8 @@
 
   // Update localObservation when observation prop changes
   $effect(() => {
-    if (observation && observation.id) {
-      localObservation = {
-        ...observation,
-        masteryValue: observation.masteryValue,
-      }
-    } else {
-      localObservation = {
-        masteryValue: null,
-      }
+    localObservation = {
+      ...observation,
     }
   })
 

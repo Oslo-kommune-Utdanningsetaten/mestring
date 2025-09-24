@@ -161,7 +161,10 @@
       observationWip = observation
     } else {
       // create new observation, prefill with value from previous observation
-      const prevousObservations = goal?.observations || []
+      const studentGoal = goalsWithCalculatedMasteryByStudentId[student.id].find(
+        g => g.id === goal.id
+      )
+      const prevousObservations = studentGoal?.observations || []
       const previousObservation = prevousObservations[prevousObservations.length - 1]
       observationWip = {
         masteryValue: previousObservation?.masteryValue || null,

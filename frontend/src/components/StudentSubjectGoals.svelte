@@ -84,14 +84,15 @@
   }
 
   const handleEditObservation = (goal: GoalDecorated, observation: ObservationReadable | null) => {
-    if (observation) {
-      // edit observation
+    if (observation?.id) {
+      // edit existing observation
       observationWip = observation
     } else {
       // create new observation, prefill with value from previous observation
       const prevousObservations = goal?.observations || []
       const previousObservation = prevousObservations[prevousObservations.length - 1]
       observationWip = { masteryValue: previousObservation?.masteryValue || null }
+      console.log('Creating new observation, prefilled with:', observationWip)
     }
     goalForObservation = { ...goal }
   }
@@ -213,7 +214,7 @@
 </div>
 
 {#snippet goalInList(goal: GoalDecorated, index: number)}
-  <div class="list-group-item goal-item">
+  <div class="list-group-item goal-item {expandedGoals[goal.id] ? 'shadow border-2 z-1' : ''}">
     <div class="goal-primary-row">
       <!-- Drag handle -->
       <span>
@@ -273,64 +274,62 @@
     </div>
 
     {#if expandedGoals[goal.id]}
-      <div class="goal-secondary-row">
-        {#if goal?.observations.length === 0}
-          <div class="my-3">
-            {#if goal.isGroup}
-              <div>
-                Dette målet er ikke personlig, men gitt for en hel gruppe. Du finner guppa <Link
-                  to={`/groups/${goal.groupId}/`}
-                >
-                  her
-                </Link>.
-              </div>
-            {:else}
-              <p>
-                Ingen observasjoner for dette målet. Trykk pluss (+) for å opprette en observasjon.
-              </p>
+      {#if goal?.observations.length === 0}
+        <div class="my-3">
+          {#if goal.isGroup}
+            <p>
+              Dette målet er ikke personlig, men gitt for <Link to={`/groups/${goal.groupId}/`}>
+                hele gruppa
+              </Link>.
+            </p>
+          {:else}
+            <p>
+              Ingen observasjoner for dette målet. Trykk pluss (+) for å opprette en observasjon.
+            </p>
 
-              <ButtonMini
-                options={{
-                  iconName: 'edit',
-                  classes: 'my-2 me-2',
-                  title: 'Rediger personlig mål',
-                  onClick: () => handleEditGoal(goal),
-                  variant: 'icon-left',
-                  skin: 'primary',
-                }}
-              >
-                Rediger personlig mål
-              </ButtonMini>
+            <ButtonMini
+              options={{
+                iconName: 'edit',
+                classes: 'my-2 me-2',
+                title: 'Rediger personlig mål',
+                onClick: () => handleEditGoal(goal),
+                variant: 'icon-left',
+                skin: 'primary',
+              }}
+            >
+              Rediger personlig mål
+            </ButtonMini>
 
-              <ButtonMini
-                options={{
-                  iconName: 'trash-can',
-                  classes: 'my-2',
-                  title: 'Slett personlig mål',
-                  onClick: () => handleDeleteGoal(goal.id),
-                  variant: 'icon-left',
-                  skin: 'primary',
-                }}
-              >
-                Slett mål
-              </ButtonMini>
-            {/if}
-          </div>
-        {:else}
-          <div class="row d-flex gap-5 mt-2">
-            <span class="col-3">Dato</span>
-            <span class="col-1">Verdi</span>
-            <span class="col-3">Handlinger</span>
+            <ButtonMini
+              options={{
+                iconName: 'trash-can',
+                classes: 'my-2',
+                title: 'Slett personlig mål',
+                onClick: () => handleDeleteGoal(goal.id),
+                variant: 'icon-left',
+                skin: 'primary',
+              }}
+            >
+              Slett mål
+            </ButtonMini>
+          {/if}
+        </div>
+      {:else}
+        <div class="goal-secondary-row">
+          <div class="student-observations-row">
+            <span>Dato</span>
+            <span>Verdi</span>
+            <span>Handlinger</span>
           </div>
           {#each goal?.observations as observation, index}
-            <div class="row d-flex gap-5 pt-2 observation-item">
-              <span class="col-3">
+            <div class="student-observations-row observation-item">
+              <span>
                 {formatDate(observation.observedAt)}
               </span>
-              <span class="col-1">
+              <span>
                 {observation.masteryValue}
               </span>
-              <span class="col-3">
+              <span>
                 <pkt-icon
                   title="Slett observasjon"
                   class="hover-glow me-2"
@@ -364,8 +363,8 @@
               </span>
             </div>
           {/each}
-        {/if}
-      </div>
+        </div>
+      {/if}
     {/if}
   </div>
 {/snippet}
@@ -428,6 +427,13 @@
     margin-left: 6px;
     padding-left: 30px;
     border-left: 3px solid var(--bs-secondary);
+  }
+
+  .student-observations-row {
+    display: grid;
+    grid-template-columns: 5fr 3fr 5fr;
+    column-gap: 5px;
+    align-items: center;
   }
 
   .row-handle-draggable {
