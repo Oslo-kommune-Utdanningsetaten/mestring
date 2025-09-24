@@ -21,6 +21,7 @@
   import ObservationEdit from '../components/ObservationEdit.svelte'
   import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
   import SparklineChart from '../components/SparklineChart.svelte'
+  import GroupTypeTag from '../components/GroupTypeTag.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { dataStore } from '../stores/data'
   import { getLocalStorageItem } from '../stores/localStorage'
@@ -244,9 +245,7 @@
         <h1>{group.displayName}</h1>
 
         <div>
-          <pkt-tag iconName="two-people-dancing" skin="blue" class="me-1">
-            <span>{group.type == 'basis' ? 'Basisgruppe' : 'Undervisningsgruppe'}</span>
-          </pkt-tag>
+          <GroupTypeTag {group} />
           {#each teachers as teacher}
             <pkt-tag iconName="lecture" skin="green" class="me-2">
               <span>{teacher.name}</span>

@@ -75,12 +75,12 @@
   }
 </script>
 
-<div class="row p-2 border-bottom mx-0">
-  <div class="col-4">
+<div class="user-grid-row">
+  <div>
     <div class="fw-semibold">{user.name}</div>
     <div class="text-muted small">{user.email || 'Ingen e-post'}</div>
   </div>
-  <div class="col-6">
+  <div>
     {#if hasLoadedData}
       <div class="small">
         <div>
@@ -94,7 +94,7 @@
       </div>
     {/if}
   </div>
-  <div class="col-2">
+  <div>
     {#if userSchools.length > 0 || userGroups.length > 0}
       <pkt-checkbox
         label="Admin"

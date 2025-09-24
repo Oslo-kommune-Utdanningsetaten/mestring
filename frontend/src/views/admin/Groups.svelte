@@ -1,27 +1,27 @@
 <script lang="ts">
-  import type { UserReadable, SchoolReadable } from '../../generated/types.gen'
-  import { usersList, schoolsList } from '../../generated/sdk.gen'
+  import { useTinyRouter } from 'svelte-tiny-router'
+  import type { GroupReadable, SchoolReadable } from '../../generated/types.gen'
+  import { groupsList, schoolsList } from '../../generated/sdk.gen'
   import { urlStringFrom } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
-  import { useTinyRouter } from 'svelte-tiny-router'
-  import User from '../../components/User.svelte'
+  import GroupTypeTag from '../../components/GroupTypeTag.svelte'
 
   const router = useTinyRouter()
-  let users = $state<UserReadable[]>([])
+  let groups = $state<GroupReadable[]>([])
   let schools = $state<SchoolReadable[]>([])
   let isLoadingSchools = $state<boolean>(false)
-  let isLoadingUsers = $state<boolean>(false)
+  let isLoadingGroups = $state<boolean>(false)
   let selectedSchool = $state<SchoolReadable | null>($dataStore.currentSchool)
   let nameFilter = $state<string>('')
-  let filteredUsers = $derived(
+  let filteredGroups = $derived(
     nameFilter
-      ? users.filter(user => user.name.toLowerCase().includes(nameFilter.toLowerCase()))
-      : users
+      ? groups.filter(group => group.displayName.toLowerCase().includes(nameFilter.toLowerCase()))
+      : groups
   )
 
   let headerText = $derived.by(() => {
-    let text = selectedSchool ? `Brukere ved: ${selectedSchool.displayName}` : 'Alle brukere'
-    text = nameFilter ? `${text} med navn som inneholder "${nameFilter}"` : text
+    let text = selectedSchool ? `Grupper ved ${selectedSchool.displayName}` : 'Alle grupper'
+    text = nameFilter ? `${text} som inneholder "${nameFilter}"` : text
     return text
   })
 
@@ -35,26 +35,26 @@
     }
   }
 
-  const fetchUsers = async () => {
+  const fetchGroups = async () => {
     if (!selectedSchool) return
     try {
-      isLoadingUsers = true
-      const result = await usersList({ query: { school: selectedSchool.id } })
-      users = result.data || []
+      isLoadingGroups = true
+      const result = await groupsList({ query: { school: selectedSchool.id } })
+      groups = result.data || []
     } catch (error) {
-      console.error('Error fetching users:', error)
-      users = []
+      console.error('Error fetching groups:', error)
+      groups = []
     } finally {
-      isLoadingUsers = false
+      isLoadingGroups = false
     }
   }
 
   const handleSchoolSelect = (schoolId: string): void => {
     console.log('Selected school ID:', schoolId)
     if (schoolId && schoolId !== '0') {
-      router.navigate(urlStringFrom({ school: schoolId }, { path: '/users', mode: 'merge' }))
+      router.navigate(urlStringFrom({ school: schoolId }, { path: '/admin/groups', mode: 'merge' }))
     } else {
-      router.navigate('/users')
+      router.navigate('/admin/groups')
     }
   }
 
@@ -66,9 +66,11 @@
     const selectedSchoolId = router.getQueryParam('school')
     if (selectedSchoolId) {
       selectedSchool = schools.find(school => school.id === selectedSchoolId) || null
+    } else {
+      selectedSchool = null
     }
     if (selectedSchool && selectedSchool.id) {
-      fetchUsers()
+      fetchGroups()
     }
   })
 </script>
@@ -99,8 +101,8 @@
       </div>
       <input
         type="text"
-        class="user-filter-input"
-        placeholder="Navn på bruker"
+        class="group-filter-input"
+        placeholder="Navn på gruppe"
         bind:value={nameFilter}
       />
     {/if}
@@ -108,40 +110,62 @@
 </section>
 
 <section class="py-3">
-  <div class="d-flex align-items-center gap-2">
-    {#if selectedSchool}
-      <div class="card shadow-sm w-100">
-        {#if isLoadingUsers}
-          <div class="m-4">
-            <div class="spinner-border text-primary" role="status"></div>
-            <span>Henter brukere...</span>
+  {#if selectedSchool}
+    <div class="card shadow-sm w-100">
+      {#if isLoadingGroups}
+        <div class="m-4">
+          <div class="spinner-border text-primary" role="status"></div>
+          <span>Henter grupper...</span>
+        </div>
+      {:else if filteredGroups.length === 0}
+        <div class="m-4">Ingen grupper funnet</div>
+      {:else}
+        <!-- Header row -->
+        <div class="group-grid-row header">
+          <span>Gruppe</span>
+          <span>Type</span>
+          <span>Aktivert</span>
+        </div>
+        <!-- Data rows -->
+        {#each filteredGroups as group}
+          <div class="group-grid-row">
+            <span>{group.displayName}</span>
+            <GroupTypeTag {group} />
+            <span>{group.isEnabled ? 'Ja' : 'Nei'}</span>
           </div>
-        {:else if filteredUsers.length === 0}
-          <div class="m-4">Ingen brukere funnet</div>
-        {:else}
-          <!-- Header row -->
-          <div class="row fw-bold header p-2 bg-light mx-0">
-            <div class="col-4">Bruker</div>
-            <div class="col-6">Tilknytninger</div>
-            <div class="col-2"></div>
-          </div>
-          <!-- Data rows -->
-          {#each filteredUsers as user}
-            <User {user} school={selectedSchool} />
-          {/each}
-        {/if}
-      </div>
-    {/if}
-  </div>
+        {/each}
+      {/if}
+    </div>
+  {:else}
+    Velg skole for å se grupper
+  {/if}
 </section>
 
 <style>
-  .user-filter-input {
+  .group-filter-input {
     border: 2px solid var(--bs-primary);
     border-radius: 0;
     height: 48px;
     margin-top: 0px;
     padding-left: 15px;
     margin-left: 10px;
+  }
+
+  .group-grid-row {
+    display: grid;
+    grid-template-columns: 4fr 4fr 1fr;
+    column-gap: 1rem;
+    padding: 0.5rem 0.5rem;
+    align-items: center;
+    justify-items: start;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .group-grid-row.header {
+    font-weight: bold;
+    background-color: var(--bs-light);
+    border-top-right-radius: inherit;
+    border-top-left-radius: inherit;
+    align-items: start;
   }
 </style>
