@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { UserReadable, SchoolReadable } from '../generated/types.gen'
-  import { usersList, schoolsList } from '../generated/sdk.gen'
-  import { urlStringFrom } from '../utils/functions'
-  import { dataStore } from '../stores/data'
+  import type { UserReadable, SchoolReadable } from '../../generated/types.gen'
+  import { usersList, schoolsList } from '../../generated/sdk.gen'
+  import { urlStringFrom } from '../../utils/functions'
+  import { dataStore } from '../../stores/data'
   import { useTinyRouter } from 'svelte-tiny-router'
-  import User from '../components/User.svelte'
+  import User from '../../components/User.svelte'
 
   const router = useTinyRouter()
   let users = $state<UserReadable[]>([])
@@ -52,9 +52,9 @@
   const handleSchoolSelect = (schoolId: string): void => {
     console.log('Selected school ID:', schoolId)
     if (schoolId && schoolId !== '0') {
-      router.navigate(urlStringFrom({ school: schoolId }, { path: '/users', mode: 'merge' }))
+      router.navigate(urlStringFrom({ school: schoolId }, { path: '/admin/users', mode: 'merge' }))
     } else {
-      router.navigate('/users')
+      router.navigate('/admin/users')
     }
   }
 

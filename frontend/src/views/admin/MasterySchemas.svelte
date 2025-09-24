@@ -1,11 +1,11 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
-  import { masterySchemasDestroy, masterySchemasList, schoolsList } from '../generated/sdk.gen'
-  import type { MasterySchemaReadable, SchoolReadable } from '../generated/types.gen'
+  import { masterySchemasDestroy, masterySchemasList, schoolsList } from '../../generated/sdk.gen'
+  import type { MasterySchemaReadable, SchoolReadable } from '../../generated/types.gen'
   import { useTinyRouter } from 'svelte-tiny-router'
-  import { urlStringFrom } from '../utils/functions'
-  import ButtonMini from '../components/ButtonMini.svelte'
-  import MasterySchemaEdit from '../components/MasterySchemaEdit.svelte'
+  import { urlStringFrom } from '../../utils/functions'
+  import ButtonMini from '../../components/ButtonMini.svelte'
+  import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
 
   const router = useTinyRouter()
   let masterySchemas = $derived<MasterySchemaReadable[]>([])
@@ -36,10 +36,10 @@
   const handleSchoolSelect = (schoolId: string): void => {
     if (schoolId && schoolId !== '0') {
       router.navigate(
-        urlStringFrom({ school: schoolId }, { path: '/mastery-schemas', mode: 'merge' })
+        urlStringFrom({ school: schoolId }, { path: '/admin/mastery-schemas', mode: 'merge' })
       )
     } else {
-      router.navigate('/mastery-schemas')
+      router.navigate('/admin/mastery-schemas')
     }
   }
 

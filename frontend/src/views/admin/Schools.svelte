@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { type SchoolReadable } from '../generated/types.gen'
+  import { useTinyRouter } from 'svelte-tiny-router'
+  import { type SchoolReadable } from '../../generated/types.gen'
   import {
     fetchGroupsForSchool,
     fetchMembershipsForSchool,
@@ -8,9 +9,8 @@
     feideImportSchool,
     schoolsList,
     schoolsPartialUpdate,
-  } from '../generated/sdk.gen'
-  import { useTinyRouter } from 'svelte-tiny-router'
-  import ButtonMini from '../components/ButtonMini.svelte'
+  } from '../../generated/sdk.gen'
+  import ButtonMini from '../../components/ButtonMini.svelte'
 
   const router = useTinyRouter()
   let schools = $state<SchoolReadable[]>([])
