@@ -3,7 +3,7 @@
 
   const { masteryData, isEmptyBadgeVisible = false } = $props<{
     masteryData: Mastery | null
-    isEmptyBadgeVisible: boolean
+    isEmptyBadgeVisible?: boolean
   }>()
 
   const mastery = $derived(masteryData?.mastery ?? 0)
