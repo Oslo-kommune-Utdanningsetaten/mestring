@@ -3,6 +3,9 @@ import json
 from django.utils import timezone
 from .helpers import does_file_exist
 from mastery import models
+import logging
+
+logger = logging.getLogger('mastery.data_import.import_users')
 
 # Get data directory path
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -11,10 +14,11 @@ data_dir = os.path.join(script_dir, "data")
 
 def import_memberships_from_file(org_number):
     """Import memberships for ONE school from data_import/data/schools/<org>/memeberships.json"""
-    print("👉 import_memberships_from_file: BEGIN")
+    logger.info("Starting membership import for organization: %s", org_number)
 
     # read memberships file
     if not does_file_exist(org_number, "memberships"):
+        logger.error("Memberships file not found for school %s", org_number)
         raise Exception(f"Memberships file not found for school {org_number}")
 
     memberships_file = os.path.join(data_dir, org_number, "memberships.json")
@@ -38,6 +42,7 @@ def import_memberships_from_file(org_number):
     for feide_group_id, feide_group_memberships in memberships_data.items():
         group = models.Group.objects.filter(feide_id__exact=feide_group_id).first()
         if not group:
+            logger.warning("Expected group not found: %s", feide_group_id)
             errors.append({"error": "missing-group", "group_id": feide_group_id,
                           "message": f"Expected group not found: {feide_group_id}"})
             continue
@@ -48,6 +53,7 @@ def import_memberships_from_file(org_number):
             for member_data in feide_group_memberships.get(role_key, []):
                 user, user_was_created, user_error = ensure_user_exists(member_data)
                 if user_error:
+                    logger.warning("Failed to ensure user exists: %s", user_error)
                     errors.append(
                         {"error": "ensure-user-failed", "feide_id": member_data.get("feide_id"),
                          "group_id": feide_group_id, "message": user_error})
@@ -66,6 +72,7 @@ def import_memberships_from_file(org_number):
                 # If we're here, user exists, now ensure membership
                 _, membership_created, membership_error = ensure_membership_exists(user, group, role_obj)
                 if membership_error:
+                    logger.warning("Failed to ensure membership exists: %s", membership_error)
                     errors.append(
                         {"error": "ensure-membership-failed", "feide_id": member_data.get("feide_id"),
                          "group_id": feide_group_id, "message": membership_error})
@@ -99,6 +106,10 @@ def import_memberships_from_file(org_number):
                         },
                         "is_done": False,
                     }
+
+    logger.info("Membership import completed for organization %s - Users: %d created, %d maintained, %d failed | Memberships: %d created, %d maintained, %d failed",
+                org_number, users_created, users_maintained, users_failed,
+                memberships_created, memberships_maintained, memberships_failed)
 
     yield {
         "result": {
@@ -162,7 +173,7 @@ def ensure_user_exists(user_data):
             user.email = user_data.get("email", user.email)
             user.maintained_at = timezone.now()
             user.save()
-            print(f"User maintained: {user.email}")
+            logger.debug("User maintained: %s", user.email)
             return user, False, None
 
         user = models.User.objects.create(
@@ -171,11 +182,12 @@ def ensure_user_exists(user_data):
             email=user_data.get("email", ""),
             maintained_at=timezone.now(),
         )
-        print(f"User created: {user.email}")
+        logger.debug("User created: %s", user.email)
         return user, True, None
 
     except Exception as error:
         error_message = f"Ensure user failed {user_data.get('feide_id', '??')}: {str(error)[:1000]}"
+        logger.error("User creation/maintenance failed: %s", error_message)
         return None, False, error_message
 
 
@@ -194,16 +206,17 @@ def ensure_membership_exists(user, group, role):
             existing_membership.role = role
             existing_membership.maintained_at = timezone.now()
             existing_membership.save()
-            print(f"Membership maintained: {user.email} in {group.display_name} as {role.name}")
+            logger.debug("Membership maintained: %s in %s as %s", user.email, group.display_name, role.name)
             return existing_membership, False, None
 
         # Create new membership
         new_membership = models.UserGroup.objects.create(
             user=user, group=group, role=role, maintained_at=timezone.now()
         )
-        print(f"Membership created: {user.email} in {group.display_name} as {role.name}")
+        logger.debug("Membership created: %s in %s as %s", user.email, group.display_name, role.name)
         return new_membership, True, None
 
     except Exception as error:
         error_message = f"Ensure membership failed for user {user.email}: {str(error)[:1000]}"
+        logger.error("Membership creation/maintenance failed: %s", error_message)
         return None, False, error_message

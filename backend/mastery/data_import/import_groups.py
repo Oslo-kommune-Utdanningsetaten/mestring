@@ -3,8 +3,13 @@ import json
 from django.utils import timezone
 import requests
 from mastery import models
+import logging
 
 UDIR_GREP_URL = os.environ.get('UDIR_GREP_URL')
+
+logger = logging.getLogger('mastery.data_import.import_groups')
+
+
 
 # Get data directory path
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13,10 +18,11 @@ data_dir = os.path.join(script_dir, "data")
 
 def import_groups_from_file(org_number):
     """Import groups for ONE school from data_import/data/schools/<org>/groups.json"""
-    print("👉 import_groups_from_file: BEGIN")
+    logger.info("Starting group import for organization: %s", org_number)
 
     groups_file = os.path.join(data_dir, org_number, "groups.json")
     if not os.path.exists(groups_file):
+        logger.error("Groups file not found for school %s at path: %s", org_number, groups_file)
         raise Exception(
             f"Groups file not found for school {org_number}. Fetch groups first."
         )
@@ -48,6 +54,7 @@ def import_groups_from_file(org_number):
             group.subject = subject
             group.save()
         if group_error:
+            logger.warning("Failed to ensure basis group exists: %s", group_error)
             errors.append({"error": "ensure-basis-group-failed", "message": group_error})
             basis_group_failed += 1
         elif created:
@@ -91,6 +98,7 @@ def import_groups_from_file(org_number):
                 subject, subject_was_created, subject_error = ensure_subject_exists(grep_code)
 
                 if subject_error:
+                    logger.warning("Failed to ensure subject exists: %s", subject_error)
                     subjects_failed += 1
                     errors.append({"error": "ensure-subject-failed", "message": subject_error})
                 elif subject_was_created:
@@ -100,6 +108,7 @@ def import_groups_from_file(org_number):
 
         _, created, group_error = ensure_group_exists(group_data, "teaching", subject)
         if group_error:
+            logger.warning("Failed to ensure teaching group exists: %s", group_error)
             errors.append({"error": "ensure-teaching-group-failed", "message": group_error})
             teaching_group_failed += 1
         elif created:
@@ -133,6 +142,11 @@ def import_groups_from_file(org_number):
                 },
                 "is_done": False,
             }
+
+    logger.info("Group import completed for organization %s - Basis: %d created, %d maintained, %d failed | Teaching: %d created, %d maintained, %d failed | Subjects: %d created, %d maintained, %d failed",
+                org_number, basis_group_created, basis_group_maintained, basis_group_failed,
+                teaching_group_created, teaching_group_maintained, teaching_group_failed,
+                subjects_created, subject_maintained, subjects_failed)
 
     yield {
         "result": {
@@ -177,12 +191,13 @@ def ensure_group_exists(group_data, group_type, subject=None):
         existing_group.valid_to = group_data.get("notAfter")
         existing_group.maintained_at = timezone.now()
         existing_group.save()
-        print("Maintained group:", feide_id)
+        logger.debug("Maintained existing group: %s", feide_id)
         return existing_group, False, None
 
     # For a new group, ensure the parent school exists
     school = models.School.objects.filter(feide_id__exact=group_data["parent"]).first()
     if not school:
+        logger.error("School not found for group %s with parent %s", feide_id, group_data["parent"])
         return None, False, f"School not found for group {feide_id}"
 
     try:
@@ -196,10 +211,11 @@ def ensure_group_exists(group_data, group_type, subject=None):
             valid_to=group_data.get("notAfter"),
             maintained_at=timezone.now(),
         )
-        print("Created group:", feide_id)
+        logger.debug("Created new group: %s", feide_id)
         return new_group, True, None
 
     except Exception as error:
+        logger.error("Failed to create group %s: %s", feide_id, str(error)[:1000])
         return None, False, f"Failed to create group {feide_id}: {str(error)[:1000]}"
 
 
@@ -231,13 +247,14 @@ def ensure_subject_exists(grep_code):
                 grep_group_code=grep_group_code,
                 maintained_at=timezone.now(),
             )
-            print("Created subject:", grep_code, display_name)
+            logger.debug("Created new subject: %s (%s)", grep_code, display_name)
             return subject, True, None
         else:
             return None, False, f"UDIR API returned status {
                 udir_response.status_code}  for grep code {grep_code} "
 
     except Exception as error:
+        logger.error("Failed to fetch subject from UDIR for grep code %s: %s", grep_code, str(error)[:1000])
         return None, False, f"Failed to fetch subject from UDIR for grep code {grep_code}: {
             str(error)[: 1000]} "
 

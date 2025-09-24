@@ -39,7 +39,7 @@ class GroupAccessPolicy(BaseAccessPolicy):
                 Q(id__in=student_groups.values("id"))
             ).distinct()
         except Exception as error:
-            logger.debug("GroupAccessPolicy.scope_queryset error: %s", error)
+            logger.error("GroupAccessPolicy.scope_queryset error: %s", error)
             return qs.none()
 
     # True if requester is member of the group
@@ -49,5 +49,6 @@ class GroupAccessPolicy(BaseAccessPolicy):
             requester = request.user
             target_group = view.get_object()
             return requester.groups.filter(id=target_group.id).exists()
-        except Exception:
+        except Exception as error:
+            logger.error("GroupAccessPolicy.is_member_of_group error", error)
             return False

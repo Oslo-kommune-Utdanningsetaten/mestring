@@ -6,6 +6,9 @@ from requests.structures import CaseInsensitiveDict
 from mastery import models
 from .helpers import create_user_item, get_feide_access_token
 from urllib.parse import quote
+import logging
+
+logger = logging.getLogger('mastery.data_import.feide_api')
 
 # API Configuration
 GROUPS_ENDPOINT = os.environ.get('GROUPS_ENDPOINT')
@@ -21,8 +24,10 @@ def _fetch_groups(url, token):
     """Helper function for pagination """
     try:
         groups_response = requests.get(url, headers={"Authorization": "Bearer " + token})
+        groups_response.raise_for_status()
         groups = groups_response.json()
     except Exception as error:
+        logger.error("Failed to fetch groups from Feide API: %s", str(error)[:1000])
         raise Exception(
             {"error": "fetch-error", "message": f"Failed to fetch groups from Feide: {str(error)[:1000]}"})
 
@@ -94,6 +99,7 @@ def fetch_groups_from_feide(org_number: str):
         try:
             result, next_url = _fetch_groups(next_url, token)
         except Exception as error:
+            logger.error("Error during group fetch iteration: %s", str(error)[:1000])
             errors.append({"error": "fetch-error", "message": str(error)[:1000]})
 
         # Accumulate results
@@ -137,7 +143,7 @@ def fetch_groups_from_feide(org_number: str):
         json.dump(all_results, f, indent=2, ensure_ascii=False)
 
     for group_type in all_results:
-        print(f"{group_type}: {len(all_results[group_type])}")
+        logger.info("Fetched %d %s groups", len(all_results[group_type]), group_type)
 
     yield {
         "result": {
@@ -156,13 +162,14 @@ def fetch_groups_from_feide(org_number: str):
 
 def fetch_memberships_from_feide(org_number: str):
     """Fetch memberships for one school by reading its groups.json and hitting Feide members API."""
-    print(f"👉 fetch_memberships_from_feide({org_number})")
+    logger.info("Starting membership fetch for organization: %s", org_number)
     token = get_feide_access_token()
 
     # Ensure per-school groups file exists
     school_dir = os.path.join(data_dir, org_number)
     groups_file = os.path.join(school_dir, 'groups.json')
     if not os.path.exists(groups_file):
+        logger.error("Groups file not found for school %s at path: %s", org_number, groups_file)
         raise Exception(f"Groups file not found for school {org_number}. Fetch groups first.")
 
     # Load per-school groups
@@ -183,16 +190,17 @@ def fetch_memberships_from_feide(org_number: str):
 
     # Progress tracking
     total_group_count = len(all_groups)
-    print(f"📊 Processing memberships for {total_group_count} groups")
+    logger.info("Processing memberships for %d groups", total_group_count)
 
     for index, group in enumerate(all_groups):
         group_id = group.get('id')
         if not group_id:
             group_name = group.get('displayName', 'unknown')
+            logger.warning("Group without ID found: %s", group_name)
             errors.append({"error": "data-error", "message": f"Group without id {group_name}"})
             continue
 
-        print(f"{index}/{total_group_count}")
+        logger.debug("Processing group %d/%d: %s", index + 1, total_group_count, group_id)
 
         # Percent-encode the full Feide id when placing in the URL path
         group_members_url = f"{MEMEBERS_URL}/{quote(group_id, safe='')}/members"
@@ -200,6 +208,7 @@ def fetch_memberships_from_feide(org_number: str):
         members_response = requests.get(group_members_url, headers={"Authorization": "Bearer " + token})
 
         if members_response.status_code != 200:
+            logger.error("Failed to fetch members for group %s: HTTP %d", group_id, members_response.status_code)
             errors.append({"error": "fetch-error", "message": f"Failed to fetch members for group {group_id}"})
             continue
 
@@ -246,6 +255,9 @@ def fetch_memberships_from_feide(org_number: str):
     memberships_file = os.path.join(school_dir, 'memberships.json')
     with open(memberships_file, "w", encoding="utf-8") as file:
         json.dump(memberships, file, indent=2, ensure_ascii=False)
+
+    logger.info("Membership fetch completed for organization %s - Teachers: %d, Students: %d, Unique users: %d, Total memberships: %d",
+                org_number, total_teacher_memberships, total_student_memberships, len(unique_users), total_memberships)
 
     yield {
         "result": {

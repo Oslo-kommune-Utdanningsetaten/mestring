@@ -95,7 +95,8 @@ class ObservationAccessPolicy(BaseAccessPolicy):
                 filters |= Q(student__groups__id__in=teacher_basis_group_ids)
 
             return qs.filter(filters).distinct()
-        except Exception:
+        except Exception as error:
+            logger.error(f"Observation query failed : {error}")
             return qs.none()
 
     def is_user_creator_or_observer(self, request, view, action):
@@ -104,7 +105,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             observation = view.get_object()
             return (observation.created_by_id == requester.id) or (observation.observer_id == requester.id)
         except Exception as error:
-            logger.debug("ObservationAccessPolicy.is_user_creator_or_observer error: %s", error)
+            logger.error("ObservationAccessPolicy.is_user_creator_or_observer error: %s", error)
             return False
 
     def is_user_target(self, request, view, action):
@@ -113,7 +114,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             observation = view.get_object()
             return observation.student_id == requester.id
         except Exception as error:
-            logger.debug("ObservationAccessPolicy.is_user_target error: %s", error)
+            logger.error("ObservationAccessPolicy.is_user_target error: %s", error)
             return False
 
     def is_observation_not_visible_to_student(self, request, view, action):
@@ -122,7 +123,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             return not bool(
                 observation.is_visible_to_student)
         except Exception as error:
-            logger.debug("ObservationAccessPolicy.is_observation_not_visible_to_student error: %s", error)
+            logger.error("ObservationAccessPolicy.is_observation_not_visible_to_student error: %s", error)
             return False
 
     def is_user_teacher_of_student(self, request, view, action):
@@ -147,5 +148,5 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             )
             return observation.student.groups.filter(id__in=basis_groups_taught_ids).exists()
         except Exception as error:
-            logger.debug("ObservationAccessPolicy.is_user_teacher_of_student error: %s", error)
+            logger.error("ObservationAccessPolicy.is_user_teacher_of_student error: %s", error)
             return False
