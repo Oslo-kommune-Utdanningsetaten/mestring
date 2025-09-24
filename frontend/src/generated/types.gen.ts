@@ -59,7 +59,6 @@ export type GoalReadable = {
     previousGoalId?: string;
     masterySchemaId?: string;
     readonly isPersonal: boolean;
-    readonly isGroup: boolean;
 };
 
 export type GoalWritable = {
@@ -262,7 +261,6 @@ export type PatchedGoalReadable = {
     previousGoalId?: string;
     masterySchemaId?: string;
     readonly isPersonal?: boolean;
-    readonly isGroup?: boolean;
 };
 
 export type PatchedGoalWritable = {

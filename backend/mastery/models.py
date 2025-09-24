@@ -296,10 +296,6 @@ class Goal(BaseModel):
     def is_personal(self):
         return self.group is None and self.student is not None
 
-    @property
-    def is_group(self):
-        return self.student is None and self.group is not None
-
 
 class Situation(BaseModel):
     """

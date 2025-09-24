@@ -234,10 +234,10 @@
       </span>
       <!-- Goal type icon -->
       <span class="goal-type-icon">
-        {#if goal.isGroup}
-          <GroupSVG />
-        {:else}
+        {#if goal.isPersonal}
           <PersonSVG />
+        {:else}
+          <GroupSVG />
         {/if}
       </span>
       <!-- Goal title -->
@@ -276,7 +276,7 @@
     {#if expandedGoals[goal.id]}
       {#if goal?.observations.length === 0}
         <div class="my-3">
-          {#if goal.isGroup}
+          {#if !goal.isPersonal}
             <p>
               Dette målet er ikke personlig, men gitt for <Link to={`/groups/${goal.groupId}/`}>
                 hele gruppa
