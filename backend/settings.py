@@ -189,7 +189,7 @@ LOGGING = {
             'style': '{',
         },
         'detailed': {
-            'format': '{asctime} [{levelname}] {name}: {message}',
+            'format': '[{levelname}] {asctime} {name}: {message}',
             'style': '{',
         }
     },
@@ -225,12 +225,12 @@ LOGGING = {
         },
         'mastery.data_import': {
             'handlers': ['console', 'data_import_file'],
-            'level': 'DEBUG',
+            'level': 'DEBUG', # TODO: discuss if need to changed to INFO when in production
             'propagate': False,
         },
         'mastery.access_policies': {
             'handlers': ['console', 'access_policies_file'],
-            'level': 'DEBUG',
+            'level': 'DEBUG', # TODO: discuss if need to changed to INFO when in production
             'propagate': True,
         },
     },

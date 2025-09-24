@@ -8,7 +8,7 @@ from .helpers import create_user_item, get_feide_access_token
 from urllib.parse import quote
 import logging
 
-logger = logging.getLogger('mastery.data_import.feide_api')
+logger = logging.getLogger(__name__)
 
 # API Configuration
 GROUPS_ENDPOINT = os.environ.get('GROUPS_ENDPOINT')
@@ -143,7 +143,7 @@ def fetch_groups_from_feide(org_number: str):
         json.dump(all_results, f, indent=2, ensure_ascii=False)
 
     for group_type in all_results:
-        logger.info("Fetched %d %s groups", len(all_results[group_type]), group_type)
+        logger.debug("Fetched %d %s groups", len(all_results[group_type]), group_type)
 
     yield {
         "result": {
@@ -162,7 +162,7 @@ def fetch_groups_from_feide(org_number: str):
 
 def fetch_memberships_from_feide(org_number: str):
     """Fetch memberships for one school by reading its groups.json and hitting Feide members API."""
-    logger.info("Starting membership fetch for organization: %s", org_number)
+    logger.debug("Starting membership fetch for organization: %s", org_number)
     token = get_feide_access_token()
 
     # Ensure per-school groups file exists
@@ -190,7 +190,6 @@ def fetch_memberships_from_feide(org_number: str):
 
     # Progress tracking
     total_group_count = len(all_groups)
-    logger.info("Processing memberships for %d groups", total_group_count)
 
     for index, group in enumerate(all_groups):
         group_id = group.get('id')
@@ -255,9 +254,6 @@ def fetch_memberships_from_feide(org_number: str):
     memberships_file = os.path.join(school_dir, 'memberships.json')
     with open(memberships_file, "w", encoding="utf-8") as file:
         json.dump(memberships, file, indent=2, ensure_ascii=False)
-
-    logger.info("Membership fetch completed for organization %s - Teachers: %d, Students: %d, Unique users: %d, Total memberships: %d",
-                org_number, total_teacher_memberships, total_student_memberships, len(unique_users), total_memberships)
 
     yield {
         "result": {

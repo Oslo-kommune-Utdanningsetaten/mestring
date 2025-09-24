@@ -1,6 +1,7 @@
 import json
 import os
 import requests
+import logging
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(script_dir, "data")
@@ -8,6 +9,8 @@ data_dir = os.path.join(script_dir, "data")
 FEIDE_CLIENT_ID = os.environ.get("FEIDE_CLIENT_ID")
 FEIDE_CLIENT_SECRET = os.environ.get("FEIDE_CLIENT_SECRET")
 TOKEN_URL = os.environ.get("TOKEN_URL")
+
+logger = logging.getLogger(__name__)
 
 
 def get_feide_access_token():
@@ -51,7 +54,7 @@ def load_school_data(org_number, file_type):
         with open(file_path, 'r', encoding='utf-8') as f:
             return json.load(f)
     except (json.JSONDecodeError, IOError) as e:
-        print(f"Error reading {file_type}.json for {org_number}: {e}")
+        logger.error(f"Failed to read {file_type}.json for {org_number}: {e}")
         return None
 
 

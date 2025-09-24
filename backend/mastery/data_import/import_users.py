@@ -5,7 +5,7 @@ from .helpers import does_file_exist
 from mastery import models
 import logging
 
-logger = logging.getLogger('mastery.data_import.import_users')
+logger = logging.getLogger(__name__)
 
 # Get data directory path
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,7 +14,7 @@ data_dir = os.path.join(script_dir, "data")
 
 def import_memberships_from_file(org_number):
     """Import memberships for ONE school from data_import/data/schools/<org>/memeberships.json"""
-    logger.info("Starting membership import for organization: %s", org_number)
+    logger.debug("Starting membership import for organization: %s", org_number)
 
     # read memberships file
     if not does_file_exist(org_number, "memberships"):
@@ -106,10 +106,6 @@ def import_memberships_from_file(org_number):
                         },
                         "is_done": False,
                     }
-
-    logger.info("Membership import completed for organization %s - Users: %d created, %d maintained, %d failed | Memberships: %d created, %d maintained, %d failed",
-                org_number, users_created, users_maintained, users_failed,
-                memberships_created, memberships_maintained, memberships_failed)
 
     yield {
         "result": {

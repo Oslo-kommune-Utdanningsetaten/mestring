@@ -7,7 +7,7 @@ import logging
 
 UDIR_GREP_URL = os.environ.get('UDIR_GREP_URL')
 
-logger = logging.getLogger('mastery.data_import.import_groups')
+logger = logging.getLogger(__name__)
 
 
 
@@ -18,7 +18,7 @@ data_dir = os.path.join(script_dir, "data")
 
 def import_groups_from_file(org_number):
     """Import groups for ONE school from data_import/data/schools/<org>/groups.json"""
-    logger.info("Starting group import for organization: %s", org_number)
+    logger.debug("Starting group import for organization: %s", org_number)
 
     groups_file = os.path.join(data_dir, org_number, "groups.json")
     if not os.path.exists(groups_file):
@@ -142,11 +142,6 @@ def import_groups_from_file(org_number):
                 },
                 "is_done": False,
             }
-
-    logger.info("Group import completed for organization %s - Basis: %d created, %d maintained, %d failed | Teaching: %d created, %d maintained, %d failed | Subjects: %d created, %d maintained, %d failed",
-                org_number, basis_group_created, basis_group_maintained, basis_group_failed,
-                teaching_group_created, teaching_group_maintained, teaching_group_failed,
-                subjects_created, subject_maintained, subjects_failed)
 
     yield {
         "result": {

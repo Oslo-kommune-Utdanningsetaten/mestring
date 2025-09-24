@@ -1,6 +1,7 @@
 from mastery.data_import.feide_api import fetch_groups_from_feide, fetch_memberships_from_feide
 import names
 import time
+import logging
 from datetime import timedelta
 from django.db import transaction
 from django.utils import timezone
@@ -8,6 +9,8 @@ from mastery.models import DataMaintenanceTask, generate_nanoid
 from .import_school import school_update
 from .import_groups import import_groups_from_file
 from .import_users import import_memberships_from_file
+
+logger = logging.getLogger(__name__)
 
 # Retries after initial attempt. Retry in 1, 3, 10 minutes before giving up.
 RETRY_BACKOFF = [1*60, 3*60, 10*60]
@@ -109,6 +112,7 @@ def run():
             task.finished_at = timezone.now()
             task.save(update_fields=["status", "finished_at", "updated_at"])
         except Exception as error:
+            logger.error(f"Task {task.job_name} (id: {task.id}) failed: {error}")
             with transaction.atomic():
                 # refresh task to avoid stale data
                 task = (DataMaintenanceTask.objects.select_for_update().only(
@@ -125,6 +129,7 @@ def run():
                     task.earliest_run_at = next_execution_time(task)
                 else:
                     # failed, no more retries
+                    logger.error(f"Task {task.job_name} (id: {task.id}) permanently failed after {task.attempts} attempts")
                     task.status = "failed"
                     task.failed_at = timezone.now()
                     task.earliest_run_at = None
