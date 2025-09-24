@@ -80,7 +80,6 @@
     height: 5px;
     background-color: rgba(0, 0, 0, 0.25);
     z-index: 1;
-    transition: top 0.2s ease-out;
   }
 
   #valueIndicatorContainer {
