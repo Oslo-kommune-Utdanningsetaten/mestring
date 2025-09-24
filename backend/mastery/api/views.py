@@ -11,16 +11,22 @@ from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, Subje
 
 def get_request_param(query_params, name: str):
     """
-    Return the stripped string value of a query parameter, or None if
-    the parameter is missing, empty, or only whitespace.
+    Return a tuple:
+    The python value of a query parameter, or None if the parameter is missing, empty, or only whitespace.
+    A boolean indicating whether the parameter was present in the query parameters.
     """
+    is_key_present = name in query_params
     value = query_params.get(name)
     if value is None:
-        return None
+        return None, is_key_present
     value = value.strip()
     if value == '':
-        return None
-    return value
+        return None, is_key_present
+    if value == 'false':
+        return False, is_key_present
+    if value == 'true':
+        return True, is_key_present
+    return value, is_key_present
 
 
 @extend_schema_view(
@@ -81,9 +87,9 @@ class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
         if self.action == 'list':
-            school_param = get_request_param(self.request.query_params, 'school')
-            roles_param = get_request_param(self.request.query_params, 'roles')
-            groups_param = get_request_param(self.request.query_params, 'groups')
+            school_param, _ = get_request_param(self.request.query_params, 'school')
+            roles_param, _ = get_request_param(self.request.query_params, 'roles')
+            groups_param, _ = get_request_param(self.request.query_params, 'groups')
 
             if not school_param:
                 raise ValidationError(
@@ -143,9 +149,9 @@ class UserSchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
 
         if self.action == 'list':
-            school_param = get_request_param(self.request.query_params, 'school')
-            user_param = get_request_param(self.request.query_params, 'user')
-            role_param = get_request_param(self.request.query_params, 'role')
+            school_param, _ = get_request_param(self.request.query_params, 'school')
+            user_param, _ = get_request_param(self.request.query_params, 'user')
+            role_param, _ = get_request_param(self.request.query_params, 'role')
 
             if not school_param:
                 raise ValidationError({'error': 'missing-parameter',
@@ -204,10 +210,10 @@ class UserGroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
 
         if self.action == 'list':
-            school_param = get_request_param(self.request.query_params, 'school')
-            group_param = get_request_param(self.request.query_params, 'group')
-            user_param = get_request_param(self.request.query_params, 'user')
-            role_param = get_request_param(self.request.query_params, 'role')
+            school_param, _ = get_request_param(self.request.query_params, 'school')
+            group_param, _ = get_request_param(self.request.query_params, 'group')
+            user_param, _ = get_request_param(self.request.query_params, 'user')
+            role_param, _ = get_request_param(self.request.query_params, 'role')
 
             if not school_param:
                 raise ValidationError({'error': 'missing-parameter',
@@ -263,6 +269,13 @@ class UserGroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
+            OpenApiParameter(
+                name='is_enabled',
+                description='Filter groups by whether they are enabled',
+                required=False,
+                type={'type': 'boolean'},
+                location=OpenApiParameter.QUERY
+            )
         ]
     )
 )
@@ -274,11 +287,12 @@ class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
         if self.action == 'list':
-            school_param = get_request_param(self.request.query_params, 'school')
-            type_param = get_request_param(self.request.query_params, 'type')
-            user_param = get_request_param(self.request.query_params, 'user')
-            roles_param = get_request_param(self.request.query_params, 'roles')
-            ids_param = get_request_param(self.request.query_params, 'ids')
+            school_param, _ = get_request_param(self.request.query_params, 'school')
+            type_param, _ = get_request_param(self.request.query_params, 'type')
+            user_param, _ = get_request_param(self.request.query_params, 'user')
+            roles_param, _ = get_request_param(self.request.query_params, 'roles')
+            ids_param, _ = get_request_param(self.request.query_params, 'ids')
+            is_enabled_param, is_enabled_set = get_request_param(self.request.query_params, 'is_enabled')
 
             if not school_param:
                 raise ValidationError(
@@ -301,6 +315,8 @@ class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                 ids = [id.strip() for id in ids_param.split(',') if id]
                 if ids:
                     qs = qs.filter(id__in=ids)
+            if is_enabled_set:
+                qs = qs.filter(is_enabled=is_enabled_param)
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs.distinct()
 
@@ -334,10 +350,8 @@ class SubjectViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
 
         if self.action == 'list':
-            school_param = get_request_param(
-                self.request.query_params, 'school')
-            owned_by_school_param = get_request_param(
-                self.request.query_params, 'owned_by')
+            school_param, _ = get_request_param(self.request.query_params, 'school')
+            owned_by_school_param, _ = get_request_param(self.request.query_params, 'owned_by')
 
             # Require at least one of the two parameters (school OR owned_by)
             if (not school_param) and (not owned_by_school_param):
@@ -397,9 +411,9 @@ class GoalViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
 
         if self.action == 'list':
-            group_param = get_request_param(self.request.query_params, 'group')
-            student_param = get_request_param(self.request.query_params, 'student')
-            subject_param = get_request_param(self.request.query_params, 'subject')
+            group_param, _ = get_request_param(self.request.query_params, 'group')
+            student_param, _ = get_request_param(self.request.query_params, 'student')
+            subject_param, _ = get_request_param(self.request.query_params, 'subject')
 
             if (not student_param) and (not subject_param) and (not group_param):
                 raise ValidationError(
@@ -460,7 +474,7 @@ class MasterySchemaViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
         if self.action == 'list':
-            school_param = get_request_param(self.request.query_params, 'school')
+            school_param, _ = get_request_param(self.request.query_params, 'school')
             if school_param:
                 qs = qs.filter(school_id=school_param)
         return qs
@@ -502,11 +516,9 @@ class ObservationViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
 
         if self.action == 'list':
-            student_param = get_request_param(
-                self.request.query_params, 'student')
-            observer_param = get_request_param(
-                self.request.query_params, 'observer')
-            goal_param = get_request_param(self.request.query_params, 'goal')
+            student_param, _ = get_request_param(self.request.query_params, 'student')
+            observer_param, _ = get_request_param(self.request.query_params, 'observer')
+            goal_param, _ = get_request_param(self.request.query_params, 'goal')
 
             if (not student_param) and (not observer_param) and (not goal_param):
                 raise ValidationError(
@@ -548,7 +560,7 @@ class DataMaintenanceTaskViewSet(viewsets.ModelViewSet):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
 
         if self.action == 'list':
-            statuts_param = get_request_param(self.request.query_params, 'status')
+            statuts_param, _ = get_request_param(self.request.query_params, 'status')
 
             if statuts_param:
                 qs = qs.filter(statuts=statuts_param)

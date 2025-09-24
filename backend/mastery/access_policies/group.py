@@ -23,7 +23,7 @@ class GroupAccessPolicy(BaseAccessPolicy):
             "action": ["retrieve"],
             "principal": ["role:student", "role:teacher"],
             "effect": "allow",
-            "condition": "is_member_of_group",
+            "condition": "is_member_of_enabled_group",
         },
     ]
 
@@ -35,19 +35,18 @@ class GroupAccessPolicy(BaseAccessPolicy):
             teacher_groups = user.teacher_groups
             student_groups = user.student_groups
             return qs.filter(
-                Q(id__in=teacher_groups.values("id")) |
-                Q(id__in=student_groups.values("id"))
+                Q(id__in=teacher_groups.values("id"), is_enabled=True) |
+                Q(id__in=student_groups.values("id"), is_enabled=True)
             ).distinct()
         except Exception as error:
             logger.debug("GroupAccessPolicy.scope_queryset error: %s", error)
             return qs.none()
 
-    # True if requester is member of the group
-
-    def is_member_of_group(self, request, view, action):
+    # True if requester is member of enabled group
+    def is_member_of_enabled_group(self, request, view, action):
         try:
             requester = request.user
             target_group = view.get_object()
-            return requester.groups.filter(id=target_group.id).exists()
+            return requester.groups.filter(id=target_group.id, is_enabled=True).exists()
         except Exception:
             return False

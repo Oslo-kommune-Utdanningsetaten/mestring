@@ -148,7 +148,8 @@ def test_teacher_subject_access(school, roles, subject_with_group, subject_witho
         feide_id="fc:group:some-basis-group",
         display_name="7a",
         type="basis",
-        school=school
+        school=school,
+        is_enabled=True
     )
     basis_group.add_member(a_student, student_role)
     basis_group.add_member(teacher, teacher_role)

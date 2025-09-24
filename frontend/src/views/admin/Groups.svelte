@@ -52,7 +52,6 @@
   }
 
   const handleSchoolSelect = (schoolId: string): void => {
-    console.log('Selected school ID:', schoolId)
     if (schoolId && schoolId !== '0') {
       router.navigate(urlStringFrom({ school: schoolId }, { path: '/admin/groups', mode: 'merge' }))
     } else {
@@ -64,7 +63,7 @@
     try {
       await groupsUpdate({
         path: { id: group.id },
-        body: { ...group, isEnabled: !group.isEnabled } as any,
+        body: { ...group, isEnabled: !group.isEnabled } as GroupReadable,
       })
     } catch (error) {
       console.error('Error toggling group endabled status:', error)

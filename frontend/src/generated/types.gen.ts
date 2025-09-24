@@ -1019,6 +1019,10 @@ export type GroupsListData = {
          */
         ids?: string;
         /**
+         * Filter groups by whether they are enabled
+         */
+        isEnabled?: boolean;
+        /**
          * Filter groups by roles a user has in that group (comma-separated list of role names, e.g., student,teacher)
          */
         roles?: string;

@@ -112,7 +112,19 @@ def teaching_group(db, school):
         feide_id="fc:group:some-teaching-group",
         display_name="Engelsk 7a",
         type="teaching",
-        school=school
+        school=school,
+        is_enabled=True
+    )
+
+
+@pytest.fixture
+def disabled_group(db, school):
+    return Group.objects.create(
+        feide_id="fc:group:disable-teaching-group",
+        display_name="Engelsk 7x",
+        type="teaching",
+        school=school,
+        is_enabled=False
     )
 
 
@@ -122,7 +134,8 @@ def basis_group(db, school):
         feide_id="fc:group:some-basis-group",
         display_name="Klasse 7a",
         type="basis",
-        school=school
+        school=school,
+        is_enabled=True
     )
 
 
@@ -140,7 +153,8 @@ def other_teaching_group(db, school):
         feide_id="fc:group:other-teaching-group",
         display_name="Engelsk 8a",
         type="teaching",
-        school=school
+        school=school,
+        is_enabled=True
     )
 
 
@@ -150,7 +164,8 @@ def other_school_teaching_group(db, other_school):
         feide_id="fc:group:some-teaching-group-at-other-school",
         display_name="Engelsk 1a",
         type="teaching",
-        school=other_school
+        school=other_school,
+        is_enabled=True
     )
 
 
@@ -177,7 +192,8 @@ def teaching_group_without_members(db, school):
         feide_id="fc:group:teaching-group-no-members",
         display_name="Other Group",
         type="teaching",
-        school=school
+        school=school,
+        is_enabled=True
     )
 
 
