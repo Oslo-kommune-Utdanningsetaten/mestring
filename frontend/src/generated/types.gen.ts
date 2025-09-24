@@ -85,6 +85,7 @@ export type GroupReadable = {
     type: string;
     validFrom?: string | null;
     validTo?: string | null;
+    isEnabled?: boolean;
     createdById?: string;
     updatedById?: string;
     subjectId?: string;
@@ -98,6 +99,7 @@ export type GroupWritable = {
     type: string;
     validFrom?: string | null;
     validTo?: string | null;
+    isEnabled?: boolean;
     createdById?: string;
     updatedById?: string;
     subjectId?: string;
@@ -287,6 +289,7 @@ export type PatchedGroupReadable = {
     type?: string;
     validFrom?: string | null;
     validTo?: string | null;
+    isEnabled?: boolean;
     createdById?: string;
     updatedById?: string;
     subjectId?: string;
@@ -300,6 +303,7 @@ export type PatchedGroupWritable = {
     type?: string;
     validFrom?: string | null;
     validTo?: string | null;
+    isEnabled?: boolean;
     createdById?: string;
     updatedById?: string;
     subjectId?: string;

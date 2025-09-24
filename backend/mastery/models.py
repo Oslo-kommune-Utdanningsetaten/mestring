@@ -185,13 +185,12 @@ class Group(BaseModel):
     """
     feide_id = models.CharField(max_length=200, unique=True)
     display_name = models.CharField(max_length=200)
-    # either 'basis' or 'teaching' for now
-    type = models.CharField(max_length=200)
+    type = models.CharField(max_length=200)  # either 'basis' or 'teaching' for now
     subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True, related_name='groups')
     school = models.ForeignKey(School, on_delete=models.RESTRICT, null=False, related_name='groups')
     valid_from = models.DateTimeField(null=True)
     valid_to = models.DateTimeField(null=True)
-    # members attribute added via User.groups reverse relation
+    is_enabled = models.BooleanField(default=False)  # whether the group is active in the system
 
     def get_members(self, role=None):
         """
