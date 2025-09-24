@@ -1,7 +1,7 @@
 <script lang="ts">
   import { useTinyRouter } from 'svelte-tiny-router'
   import type { GroupReadable, SchoolReadable } from '../../generated/types.gen'
-  import { groupsList, schoolsList } from '../../generated/sdk.gen'
+  import { groupsList, schoolsList, groupsUpdate } from '../../generated/sdk.gen'
   import { urlStringFrom } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
   import GroupTypeTag from '../../components/GroupTypeTag.svelte'
@@ -40,7 +40,9 @@
     try {
       isLoadingGroups = true
       const result = await groupsList({ query: { school: selectedSchool.id } })
-      groups = result.data || []
+      groups = (result.data || []).sort((a, b) =>
+        a.displayName.localeCompare(b.displayName, 'no', { sensitivity: 'base' })
+      )
     } catch (error) {
       console.error('Error fetching groups:', error)
       groups = []
@@ -55,6 +57,19 @@
       router.navigate(urlStringFrom({ school: schoolId }, { path: '/admin/groups', mode: 'merge' }))
     } else {
       router.navigate('/admin/groups')
+    }
+  }
+
+  const handleToggleGroupEnabledStatus = async (group: GroupReadable) => {
+    try {
+      await groupsUpdate({
+        path: { id: group.id },
+        body: { ...group, isEnabled: !group.isEnabled } as any,
+      })
+    } catch (error) {
+      console.error('Error toggling group endabled status:', error)
+    } finally {
+      fetchGroups()
     }
   }
 
@@ -131,7 +146,16 @@
           <div class="group-grid-row">
             <span>{group.displayName}</span>
             <GroupTypeTag {group} />
-            <span>{group.isEnabled ? 'Ja' : 'Nei'}</span>
+            <span>
+              <pkt-checkbox
+                label="Aktivert"
+                labelPosition="hidden"
+                isSwitch="true"
+                aria-checked={group.isEnabled}
+                checked={group.isEnabled}
+                onchange={() => handleToggleGroupEnabledStatus(group)}
+              ></pkt-checkbox>
+            </span>
           </div>
         {/each}
       {/if}
