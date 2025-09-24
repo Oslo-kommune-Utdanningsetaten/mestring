@@ -171,6 +171,7 @@ def ensure_group_exists(group_data, group_type, subject=None):
     # Check if group already exists
     existing_group = models.Group.objects.filter(feide_id__exact=feide_id).first()
     if existing_group:
+        # Do not touch the is_enabled flag on existing groups
         existing_group.display_name = group_data["displayName"]
         existing_group.subject = subject
         existing_group.valid_from = group_data.get("notBefore")
