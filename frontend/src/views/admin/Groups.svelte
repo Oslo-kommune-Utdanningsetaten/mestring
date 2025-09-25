@@ -12,7 +12,7 @@
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingGroups = $state<boolean>(false)
   let groupFetchSelection = $state<string>('all') // all, only-enabled, only-disabled
-  let selectedSchool = $state<SchoolReadable | null>($dataStore.currentSchool)
+  let selectedSchool = $state<SchoolReadable | null>(null)
   let nameFilter = $state<string>('')
 
   // Radio options for group filtering
@@ -95,13 +95,24 @@
   })
 
   $effect(() => {
-    const selectedSchoolId = router.getQueryParam('school')
-    if (selectedSchoolId) {
-      selectedSchool = schools.find(school => school.id === selectedSchoolId) || null
-    } else {
-      selectedSchool = null
+    if (!router.getQueryParam('school') && $dataStore.currentSchool) {
+      handleSchoolSelect($dataStore.currentSchool.id)
     }
-    if (selectedSchool && selectedSchool.id) {
+  })
+
+  $effect(() => {
+    const schoolIdFromUrl = router.getQueryParam('school')
+    const nextSchool = schoolIdFromUrl
+      ? (schools.find(school => school.id === schoolIdFromUrl) ?? null)
+      : null
+    // Only assign school if it changed
+    if (nextSchool?.id !== selectedSchool?.id) {
+      selectedSchool = nextSchool
+    }
+  })
+
+  $effect(() => {
+    if (selectedSchool) {
       fetchGroups()
     }
   })
