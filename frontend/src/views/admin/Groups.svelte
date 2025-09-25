@@ -1,5 +1,4 @@
 <script lang="ts">
-  import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
   import { useTinyRouter } from 'svelte-tiny-router'
   import type { GroupReadable, SchoolReadable } from '../../generated/types.gen'
   import { groupsList, schoolsList, groupsUpdate } from '../../generated/sdk.gen'
@@ -12,14 +11,29 @@
   let schools = $state<SchoolReadable[]>([])
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingGroups = $state<boolean>(false)
-  let isEnabledIncluded = $state<boolean>(true)
-  let isDisabledIncluded = $state<boolean>(true)
+  let groupFetchSelection = $state<string>('all') // all, only-enabled, only-disabled
   let selectedSchool = $state<SchoolReadable | null>($dataStore.currentSchool)
   let nameFilter = $state<string>('')
+
+  // Radio options for group filtering
+  const groupFetchOptions = [
+    { value: 'all', label: 'Alle grupper' },
+    { value: 'only-enabled', label: 'Aktiverte grupper' },
+    { value: 'only-disabled', label: 'Deaktiverte grupper' },
+  ] as const
+
   let filteredGroups = $derived(
     nameFilter
       ? groups.filter(group => group.displayName.toLowerCase().includes(nameFilter.toLowerCase()))
       : groups
+  )
+
+  let groupFetchOption = $derived(
+    groupFetchSelection === 'all'
+      ? {}
+      : groupFetchSelection === 'only-enabled'
+        ? { isEnabled: true }
+        : { isEnabled: false }
   )
 
   let headerText = $derived.by(() => {
@@ -42,7 +56,8 @@
     if (!selectedSchool) return
     try {
       isLoadingGroups = true
-      const result = await groupsList({ query: { school: selectedSchool.id } })
+      const queryOption = { ...groupFetchOption, school: selectedSchool.id }
+      const result = await groupsList({ query: queryOption })
       groups = (result.data || []).sort((a, b) =>
         a.displayName.localeCompare(b.displayName, 'no', { sensitivity: 'base' })
       )
@@ -124,20 +139,21 @@
       />
     {/if}
   </div>
-  <div>
-    <pkt-checkbox
-      id="checkbox-1"
-      name="gruppe1"
-      label="Inkludér aktive"
-      value="vilkar"
-    ></pkt-checkbox>
-    <pkt-checkbox
-      id="checkbox-1"
-      name="gruppe1"
-      label="Inkludér inaktive"
-      value="vilkar"
-    ></pkt-checkbox>
-  </div>
+  <!-- Radio buttons for filtering groups -->
+  <fieldset>
+    <legend class="visually-hidden">Filtrer grupper</legend>
+    {#each groupFetchOptions as option}
+      <label class="my-2 ms-1 d-block">
+        <input
+          type="radio"
+          name="groupFetchInclusion"
+          value={option.value}
+          bind:group={groupFetchSelection}
+        />
+        <span class="ms-2">{option.label}</span>
+      </label>
+    {/each}
+  </fieldset>
 </section>
 
 <section class="py-3">
