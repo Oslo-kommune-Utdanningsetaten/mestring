@@ -1,4 +1,5 @@
 <script lang="ts">
+  import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
   import { useTinyRouter } from 'svelte-tiny-router'
   import type { GroupReadable, SchoolReadable } from '../../generated/types.gen'
   import { groupsList, schoolsList, groupsUpdate } from '../../generated/sdk.gen'
@@ -11,6 +12,8 @@
   let schools = $state<SchoolReadable[]>([])
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingGroups = $state<boolean>(false)
+  let isEnabledIncluded = $state<boolean>(true)
+  let isDisabledIncluded = $state<boolean>(true)
   let selectedSchool = $state<SchoolReadable | null>($dataStore.currentSchool)
   let nameFilter = $state<string>('')
   let filteredGroups = $derived(
@@ -120,6 +123,20 @@
         bind:value={nameFilter}
       />
     {/if}
+  </div>
+  <div>
+    <pkt-checkbox
+      id="checkbox-1"
+      name="gruppe1"
+      label="Inkludér aktive"
+      value="vilkar"
+    ></pkt-checkbox>
+    <pkt-checkbox
+      id="checkbox-1"
+      name="gruppe1"
+      label="Inkludér inaktive"
+      value="vilkar"
+    ></pkt-checkbox>
   </div>
 </section>
 
