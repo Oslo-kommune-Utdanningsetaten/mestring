@@ -10,7 +10,6 @@ UDIR_GREP_URL = os.environ.get('UDIR_GREP_URL')
 logger = logging.getLogger(__name__)
 
 
-
 # Get data directory path
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(script_dir, "data")
@@ -47,17 +46,13 @@ def import_groups_from_file(org_number):
     teaching_groups = groups_data.get("teaching", [])
 
     # Handle basis groups
-    for index, group_data in enumerate(basis_groups, start=1):
-        group, created, group_error = ensure_group_exists(group_data, "basis", None)
+    for index, group_data in enumerate(basis_groups):
+        group, created = ensure_group_exists(group_data, "basis", None)
         if not group.subject_id:
             subject, _ = ensure_social_subject_exists(school)
             group.subject = subject
             group.save()
-        if group_error:
-            logger.warning("Failed to ensure basis group exists: %s", group_error)
-            errors.append({"error": "ensure-basis-group-failed", "message": group_error})
-            basis_group_failed += 1
-        elif created:
+        if created:
             basis_group_created += 1
         else:
             basis_group_maintained += 1
@@ -90,15 +85,13 @@ def import_groups_from_file(org_number):
             }
 
     # Handle teaching groups
-    for index, group_data in enumerate(teaching_groups, start=1):
+    for index, group_data in enumerate(teaching_groups):
         subject = None
         if "grep" in group_data and "code" in group_data["grep"]:
             grep_code = group_data["grep"]["code"]
             if grep_code:
                 subject, subject_was_created, subject_error = ensure_subject_exists(grep_code)
-
                 if subject_error:
-                    logger.warning("Failed to ensure subject exists: %s", subject_error)
                     subjects_failed += 1
                     errors.append({"error": "ensure-subject-failed", "message": subject_error})
                 elif subject_was_created:
@@ -106,12 +99,8 @@ def import_groups_from_file(org_number):
                 else:
                     subject_maintained += 1
 
-        _, created, group_error = ensure_group_exists(group_data, "teaching", subject)
-        if group_error:
-            logger.warning("Failed to ensure teaching group exists: %s", group_error)
-            errors.append({"error": "ensure-teaching-group-failed", "message": group_error})
-            teaching_group_failed += 1
-        elif created:
+        _, created = ensure_group_exists(group_data, "teaching", subject)
+        if created:
             teaching_group_created += 1
         else:
             teaching_group_maintained += 1
@@ -173,7 +162,7 @@ def import_groups_from_file(org_number):
 def ensure_group_exists(group_data, group_type, subject=None):
     """
     Ensure a group exists, maintaining it if it already exists or creating it if not.
-    Returns (group, created_bool, error_message)
+    Returns (group, created_bool)
     """
     feide_id = group_data["id"]
 
@@ -187,31 +176,23 @@ def ensure_group_exists(group_data, group_type, subject=None):
         existing_group.maintained_at = timezone.now()
         existing_group.save()
         logger.debug("Maintained existing group: %s", feide_id)
-        return existing_group, False, None
+        return existing_group, False
 
     # For a new group, ensure the parent school exists
     school = models.School.objects.filter(feide_id__exact=group_data["parent"]).first()
-    if not school:
-        logger.error("School not found for group %s with parent %s", feide_id, group_data["parent"])
-        return None, False, f"School not found for group {feide_id}"
 
-    try:
-        new_group = models.Group.objects.create(
-            display_name=group_data["displayName"],
-            type=group_type,
-            school=school,
-            subject=subject,
-            feide_id=feide_id,
-            valid_from=group_data.get("notBefore"),
-            valid_to=group_data.get("notAfter"),
-            maintained_at=timezone.now(),
-        )
-        logger.debug("Created new group: %s", feide_id)
-        return new_group, True, None
-
-    except Exception as error:
-        logger.error("Failed to create group %s: %s", feide_id, str(error)[:1000])
-        return None, False, f"Failed to create group {feide_id}: {str(error)[:1000]}"
+    new_group = models.Group.objects.create(
+        display_name=group_data["displayName"],
+        type=group_type,
+        school=school,
+        subject=subject,
+        feide_id=feide_id,
+        valid_from=group_data.get("notBefore"),
+        valid_to=group_data.get("notAfter"),
+        maintained_at=timezone.now(),
+    )
+    logger.debug("Created new group: %s", feide_id)
+    return new_group, True
 
 
 def ensure_subject_exists(grep_code):
@@ -223,35 +204,33 @@ def ensure_subject_exists(grep_code):
     existing_subject = models.Subject.objects.filter(grep_code__exact=grep_code).first()
     if existing_subject:
         existing_subject.maintained_at = timezone.now()
+        # TODO - maybe not save, to avoid bumping updated_at
         existing_subject.save()
         return existing_subject, False, None
 
-    try:
-        udir_response = requests.get(f"{UDIR_GREP_URL}/{grep_code}")
-        if udir_response.status_code == 200 and udir_response.text:
-            udir_subject = udir_response.json()
-            display_name = udir_subject['tittel'][0]['verdi']
-            short_name = udir_subject['kortform'][0]['verdi']
-            grep_group_code = udir_subject['opplaeringsfag'][0]['kode'] if udir_subject.get(
-                'opplaeringsfag') and len(udir_subject['opplaeringsfag']) > 0 else None
+    udir_response = requests.get(f"{UDIR_GREP_URL}/{grep_code}")
+    # TODO - .text??
+    if udir_response.status_code == 200 and udir_response.text:
+        udir_subject = udir_response.json()
+        # TODO use .get and handle missing fields more gracefully
+        display_name = udir_subject['tittel'][0]['verdi']
+        short_name = udir_subject['kortform'][0]['verdi']
+        grep_group_code = udir_subject['opplaeringsfag'][0]['kode'] if udir_subject.get(
+            'opplaeringsfag') and len(udir_subject['opplaeringsfag']) > 0 else None
 
-            subject = models.Subject.objects.create(
-                display_name=display_name,
-                short_name=short_name,
-                grep_code=grep_code,
-                grep_group_code=grep_group_code,
-                maintained_at=timezone.now(),
-            )
-            logger.debug("Created new subject: %s (%s)", grep_code, display_name)
-            return subject, True, None
-        else:
-            return None, False, f"UDIR API returned status {
-                udir_response.status_code}  for grep code {grep_code} "
-
-    except Exception as error:
-        logger.error("Failed to fetch subject from UDIR for grep code %s: %s", grep_code, str(error)[:1000])
-        return None, False, f"Failed to fetch subject from UDIR for grep code {grep_code}: {
-            str(error)[: 1000]} "
+        subject = models.Subject.objects.create(
+            display_name=display_name,
+            short_name=short_name,
+            grep_code=grep_code,
+            grep_group_code=grep_group_code,
+            maintained_at=timezone.now(),
+        )
+        logger.debug("Created new subject: %s (%s)", grep_code, display_name)
+        return subject, True, None
+    else:
+        message = f"UDIR http trouble: {udir_response.status_code} for grep_code {grep_code}"
+        logger.warning(message)
+        return None, False, message
 
 
 # Basis groups need a subject
