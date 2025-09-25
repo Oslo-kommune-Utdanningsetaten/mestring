@@ -79,9 +79,33 @@ def test_superadmin_group_access(
 
 
 @pytest.mark.django_db
+def test_school_admin_group_access(
+        school, other_school, school_admin, teaching_group, other_school_teaching_group):
+    client = APIClient()
+    client.force_authenticate(user=school_admin)
+
+    # Can list groups in affiliated school
+    resp = client.get('/api/groups/', {'school': school.id})
+    assert resp.status_code == 200
+    data = resp.json()
+    expected_ids = {teaching_group.id}
+    received_ids = {group['id'] for group in data}
+    assert len(received_ids) == len(expected_ids)
+    assert expected_ids.issubset(received_ids)
+    # Will not include groups from other school
+    assert other_school_teaching_group.id not in received_ids
+
+    # Will not list groups from non-affiliated school
+    resp = client.get('/api/groups/', {'school': other_school.id})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 0
+
+
+@pytest.mark.django_db
 def test_teacher_group_access(
     teaching_group_with_members, other_teaching_group_with_members, disabled_group, teacher, school,
-        roles):
+        teacher_role):
     client = APIClient()
     client.force_authenticate(user=teacher)
 
@@ -99,7 +123,6 @@ def test_teacher_group_access(
     assert expected_ids.issubset(received_ids)
 
     # Teacher cannot see disabled groups even if they are a member
-    _, teacher_role = roles
     disabled_group.add_member(teacher, teacher_role)
     resp = client.get('/api/groups/', {'school': school.id})
     assert resp.status_code == 200
@@ -118,9 +141,8 @@ def test_teacher_group_access(
 
 @pytest.mark.django_db
 def test_student_group_access(
-        teaching_group_with_members, other_teaching_group_with_members, disabled_group, school, roles):
+        teaching_group_with_members, other_teaching_group_with_members, disabled_group, school, student_role):
     student = teaching_group_with_members.get_students().first()
-    student_role, _ = roles
     client = APIClient()
     client.force_authenticate(user=student)
 

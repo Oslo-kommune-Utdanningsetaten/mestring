@@ -139,7 +139,7 @@ def test_teacher_user_access(
 
 @pytest.mark.django_db
 def test_student_user_access(
-        school, roles, teaching_group_with_members, other_teaching_group_with_members,
+        school, student_role, teaching_group_with_members, other_teaching_group_with_members,
         other_school_teaching_group_with_members):
     teacher = teaching_group_with_members.get_teachers().first()
     student = teaching_group_with_members.get_students().first()
@@ -177,7 +177,6 @@ def test_student_user_access(
     assert resp.status_code == 403
 
     # Student can retrieve student if in group
-    student_role, _ = roles
     teaching_group_with_members.add_member(other_student, student_role)
     resp = client.get(f'/api/users/{other_student.id}/')
     assert resp.status_code == 200
