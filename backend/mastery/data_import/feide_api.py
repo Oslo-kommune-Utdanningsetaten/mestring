@@ -1,9 +1,7 @@
 import os
 import json
 import requests
-from django.utils import timezone
 from requests.structures import CaseInsensitiveDict
-from mastery import models
 from .helpers import create_user_item, get_feide_access_token
 from urllib.parse import quote
 import logging
@@ -22,14 +20,12 @@ data_dir = os.path.join(script_dir, 'data')
 
 def _fetch_groups(url, token):
     """Helper function for pagination """
-    try:
-        groups_response = requests.get(url, headers={"Authorization": "Bearer " + token})
-        groups_response.raise_for_status()
-        groups = groups_response.json()
-    except Exception as error:
-        logger.error("Failed to fetch groups from Feide API: %s", str(error)[:1000])
-        raise Exception(
-            {"error": "fetch-error", "message": f"Failed to fetch groups from Feide: {str(error)[:1000]}"})
+    groups_response = requests.get(url, headers={"Authorization": "Bearer " + token})
+    if groups_response.status_code != 200:
+        logger.error("Failed to fetch groups: %d %s", groups_response.status_code, groups_response.text)
+        raise Exception(f"Failed to fetch groups: {groups_response.status_code}: {groups_response.text}")
+    
+    groups = groups_response.json()
 
     result = {
         "owners": [],   # skoleeiere
@@ -96,11 +92,7 @@ def fetch_groups_from_feide(org_number: str):
     errors = []
 
     while next_url:
-        try:
-            result, next_url = _fetch_groups(next_url, token)
-        except Exception as error:
-            logger.error("Error during group fetch iteration: %s", str(error)[:1000])
-            errors.append({"error": "fetch-error", "message": str(error)[:1000]})
+        result, next_url = _fetch_groups(next_url, token)
 
         # Accumulate results
         all_results["basis"].extend(result.get("basis", []))
@@ -209,7 +201,7 @@ def fetch_memberships_from_feide(org_number: str):
         if members_response.status_code != 200:
             logger.error("Failed to fetch members for group %s: HTTP %d", group_id, members_response.status_code)
             errors.append({"error": "fetch-error", "message": f"Failed to fetch members for group {group_id}"})
-            continue
+            raise Exception(f"Failed to fetch members for group {group_id}: HTTP {members_response.status_code}")
 
         memberships[group_id] = {"teachers": [], "students": [], "other": []}
         feide_group_members = members_response.json() or []

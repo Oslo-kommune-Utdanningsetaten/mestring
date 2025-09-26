@@ -31,10 +31,8 @@ def import_memberships_from_file(org_number):
     processed_count = 0
     users_created = 0
     users_maintained = 0
-    users_failed = 0
     memberships_created = 0
     memberships_maintained = 0
-    memberships_failed = 0
     chunk_size = 10
     errors = []
     processed_users = set()
@@ -51,14 +49,8 @@ def import_memberships_from_file(org_number):
         for role_key, role_obj in [("teachers", teacher_role), ("students", student_role)]:
             # Ensure user and membership for each member in this role
             for member_data in feide_group_memberships.get(role_key, []):
-                user, user_was_created, user_error = ensure_user_exists(member_data)
-                if user_error:
-                    logger.warning("Failed to ensure user exists: %s", user_error)
-                    errors.append(
-                        {"error": "ensure-user-failed", "feide_id": member_data.get("feide_id"),
-                         "group_id": feide_group_id, "message": user_error})
-                    users_failed += 1
-                    continue
+
+                user, user_was_created = ensure_user_exists(member_data)
 
                 # Only count user creation/maintain once per unique user
                 user_id = user.feide_id
@@ -70,14 +62,9 @@ def import_memberships_from_file(org_number):
                         users_maintained += 1
 
                 # If we're here, user exists, now ensure membership
-                _, membership_created, membership_error = ensure_membership_exists(user, group, role_obj)
-                if membership_error:
-                    logger.warning("Failed to ensure membership exists: %s", membership_error)
-                    errors.append(
-                        {"error": "ensure-membership-failed", "feide_id": member_data.get("feide_id"),
-                         "group_id": feide_group_id, "message": membership_error})
-                    memberships_failed += 1
-                elif membership_created:
+                _, membership_created = ensure_membership_exists(user, group, role_obj)
+
+                if membership_created:
                     memberships_created += 1
                 else:
                     memberships_maintained += 1
@@ -94,12 +81,10 @@ def import_memberships_from_file(org_number):
                                 "user": {
                                     "created": users_created,
                                     "maintained": users_maintained,
-                                    "failed": users_failed,
                                 },
                                 "membership": {
                                     "created": memberships_created,
                                     "maintained": memberships_maintained,
-                                    "failed": memberships_failed,
                                 },
                             },
                             "errors": errors,
@@ -115,12 +100,10 @@ def import_memberships_from_file(org_number):
                 "user": {
                     "created": users_created,
                     "maintained": users_maintained,
-                    "failed": users_failed,
                 },
                 "membership": {
                     "created": memberships_created,
                     "maintained": memberships_maintained,
-                    "failed": memberships_failed,
                 },
             },
             "errors": errors,
@@ -159,60 +142,48 @@ def ensure_roles_exist():
 def ensure_user_exists(user_data):
     """
     Ensure a user exists, maintaining it if it already exists or creating it if not.
-    Returns (user, created_bool, error_message) 
+    Returns (user, created_bool)
     """
-    try:
-        user = models.User.objects.filter(feide_id__exact=user_data["feide_id"]).first()
+    user = models.User.objects.filter(feide_id__exact=user_data["feide_id"]).first()
 
-        if user:
-            user.name = user_data.get("name", user.name)
-            user.email = user_data.get("email", user.email)
-            user.maintained_at = timezone.now()
-            user.save()
-            logger.debug("User maintained: %s", user.email)
-            return user, False, None
+    if user:
+        user.name = user_data.get("name", user.name)
+        user.email = user_data.get("email", user.email)
+        user.maintained_at = timezone.now()
+        user.save()
+        logger.debug("User maintained: %s", user.email)
+        return user, False
 
-        user = models.User.objects.create(
-            feide_id=user_data["feide_id"],
-            name=user_data.get("name", ""),
-            email=user_data.get("email", ""),
-            maintained_at=timezone.now(),
-        )
-        logger.debug("User created: %s", user.email)
-        return user, True, None
-
-    except Exception as error:
-        error_message = f"Ensure user failed {user_data.get('feide_id', '??')}: {str(error)[:1000]}"
-        logger.error("User creation/maintenance failed: %s", error_message)
-        return None, False, error_message
+    user = models.User.objects.create(
+        feide_id=user_data["feide_id"],
+        name=user_data.get("name", ""),
+        email=user_data.get("email", ""),
+        maintained_at=timezone.now(),
+    )
+    logger.debug("User created: %s", user.email)
+    return user, True
 
 
 def ensure_membership_exists(user, group, role):
     """
     Ensure membership exists for user in group with role, create if not existing or maintain if existing
-    Returns (membership, created_bool, error_message)
+    Returns (membership, created_bool)
     """
-    try:
-        # Check if membership exists for this user
-        existing_membership = models.UserGroup.objects.filter(
-            user=user, group=group
-        ).first()
 
-        if existing_membership:
-            existing_membership.role = role
-            existing_membership.maintained_at = timezone.now()
-            existing_membership.save()
-            logger.debug("Membership maintained: %s in %s as %s", user.email, group.display_name, role.name)
-            return existing_membership, False, None
+    # Check if membership exists for this user
+    existing_membership = models.UserGroup.objects.filter(
+        user=user, group=group, role=role
+    ).first()
 
-        # Create new membership
-        new_membership = models.UserGroup.objects.create(
-            user=user, group=group, role=role, maintained_at=timezone.now()
-        )
-        logger.debug("Membership created: %s in %s as %s", user.email, group.display_name, role.name)
-        return new_membership, True, None
+    if existing_membership:
+        existing_membership.maintained_at = timezone.now()
+        existing_membership.save(update_fields=['maintained_at'])
+        logger.debug("Membership maintained: %s in %s as %s", user.email, group.display_name, role.name)
+        return existing_membership, False
 
-    except Exception as error:
-        error_message = f"Ensure membership failed for user {user.email}: {str(error)[:1000]}"
-        logger.error("Membership creation/maintenance failed: %s", error_message)
-        return None, False, error_message
+    # Create new membership
+    new_membership = models.UserGroup.objects.create(
+        user=user, group=group, role=role, maintained_at=timezone.now()
+    )
+    logger.debug("Membership created: %s in %s as %s", user.email, group.display_name, role.name)
+    return new_membership, True

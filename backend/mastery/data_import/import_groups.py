@@ -19,6 +19,11 @@ def import_groups_from_file(org_number):
     """Import groups for ONE school from data_import/data/schools/<org>/groups.json"""
     logger.debug("Starting group import for organization: %s", org_number)
 
+    school = models.School.objects.filter(org_number=org_number).first()
+    if not school:
+        logger.error("School with org number %s not found in database.", org_number)
+        raise Exception(f"School with org number {org_number} not found in database.")
+
     groups_file = os.path.join(data_dir, org_number, "groups.json")
     if not os.path.exists(groups_file):
         logger.error("Groups file not found for school %s at path: %s", org_number, groups_file)
@@ -29,14 +34,11 @@ def import_groups_from_file(org_number):
     with open(groups_file, "r", encoding="utf-8") as file:
         groups_data = json.load(file)
 
-    school = models.School.objects.filter(org_number=org_number).first()
     # Progress reporting variables
     basis_group_created = 0
     basis_group_maintained = 0
-    basis_group_failed = 0
     teaching_group_created = 0
     teaching_group_maintained = 0
-    teaching_group_failed = 0
     subjects_created = 0
     subject_maintained = 0
     subjects_failed = 0
@@ -67,12 +69,10 @@ def import_groups_from_file(org_number):
                         "basis_group": {
                             "created": basis_group_created,
                             "maintained": basis_group_maintained,
-                            "failed": basis_group_failed,
                         },
                         "teaching_group": {
                             "created": teaching_group_created,
                             "maintained": teaching_group_maintained,
-                            "failed": teaching_group_failed,
                         },
                         "subject": {
                             "created": subjects_created,
@@ -115,12 +115,10 @@ def import_groups_from_file(org_number):
                         "basis_group": {
                             "created": basis_group_created,
                             "maintained": basis_group_maintained,
-                            "failed": basis_group_failed,
                         },
                         "teaching_group": {
                             "created": teaching_group_created,
                             "maintained": teaching_group_maintained,
-                            "failed": teaching_group_failed,
                         },
                         "subject": {
                             "created": subjects_created,
@@ -141,12 +139,10 @@ def import_groups_from_file(org_number):
                 "basis_group": {
                     "created": basis_group_created,
                     "maintained": basis_group_maintained,
-                    "failed": basis_group_failed,
                 },
                 "teaching_group": {
                     "created": teaching_group_created,
                     "maintained": teaching_group_maintained,
-                    "failed": teaching_group_failed,
                 },
                 "subject": {
                     "created": subjects_created,
@@ -198,23 +194,21 @@ def ensure_group_exists(group_data, group_type, subject=None):
 def ensure_subject_exists(grep_code):
     """
     Ensure a subject exists in the database, fetching from UDIR if necessary.
-    Returns (subject, created_bool, error_message)
+    Returns (subject, created_bool)
     """
     # Check if subject already exists
     existing_subject = models.Subject.objects.filter(grep_code__exact=grep_code).first()
     if existing_subject:
         existing_subject.maintained_at = timezone.now()
-        # TODO - maybe not save, to avoid bumping updated_at
-        existing_subject.save()
+        existing_subject.save(update_fields=['maintained_at'])
         return existing_subject, False, None
 
     udir_response = requests.get(f"{UDIR_GREP_URL}/{grep_code}")
-    # TODO - .text??
-    if udir_response.status_code == 200 and udir_response.text:
+
+    if udir_response.status_code == 200:
         udir_subject = udir_response.json()
-        # TODO use .get and handle missing fields more gracefully
-        display_name = udir_subject['tittel'][0]['verdi']
-        short_name = udir_subject['kortform'][0]['verdi']
+        display_name = udir_subject.get('tittel', [{}])[0].get('verdi')
+        short_name = udir_subject.get('kortform', [{}])[0].get('verdi')
         grep_group_code = udir_subject['opplaeringsfag'][0]['kode'] if udir_subject.get(
             'opplaeringsfag') and len(udir_subject['opplaeringsfag']) > 0 else None
 
