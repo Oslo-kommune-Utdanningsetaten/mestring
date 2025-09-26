@@ -1,11 +1,5 @@
 <script lang="ts">
-  import type { MasteryConfigLevel, MasterySchemaConfig } from '../types/models'
-  import type { MasterySchemaReadable } from '../generated/types.gen'
-  import { isNumber } from '../utils/functions'
-
-  type MasterySchemaWithConfig = MasterySchemaReadable & {
-    config?: MasterySchemaConfig
-  }
+  import { useMasteryCalculations, type MasterySchemaWithConfig } from '../utils/masteryHelpers'
 
   let {
     masterySchema,
@@ -17,20 +11,21 @@
     label?: string
   } = $props()
 
-  const masteryLevels: MasteryConfigLevel[] = $derived(masterySchema?.config?.levels || [])
-  const minValue = $derived(masteryLevels.length ? masteryLevels[0].minValue : 1)
-  const maxValue = $derived(
-    masteryLevels.length ? masteryLevels[masteryLevels.length - 1].maxValue : 100
+  const calculations = $derived(useMasteryCalculations(masterySchema))
+  const rungWidth = $derived(
+    calculations.masteryLevels.length ? 100 / calculations.masteryLevels.length : 100
   )
-  const sliderValueIncrement = $derived(masterySchema?.config?.inputIncrement || 1)
-  const rungWidth = $derived(masteryLevels.length ? 100 / masteryLevels.length : 100)
-  // Always have a non-null numeric value available for rendering calculations
-  const safeMasteryValue = $derived(
-    isNumber(masteryValue) ? (masteryValue as number) : (minValue + maxValue) / 2
-  )
+  const safeMasteryValue = $derived(calculations.calculateSafeMasteryValue(masteryValue))
+
+  // Set default value when masteryValue is null/undefined and schema is available
+  $effect(() => {
+    if ((masteryValue === null || masteryValue === undefined) && calculations.hasLevels) {
+      masteryValue = calculations.defaultValue
+    }
+  })
 
   const calculateRungHeight = (index: number) => {
-    return (index + 1) * (100 / masteryLevels.length)
+    return (index + 1) * (100 / calculations.masteryLevels.length)
   }
 </script>
 
@@ -40,7 +35,7 @@
   </label>
 
   <div class="stairs-container d-flex align-items-end mb-3">
-    {#each masteryLevels as masteryLevel, index}
+    {#each calculations.masteryLevels as masteryLevel, index}
       <span
         class="rung flex-grow d-flex align-items-end justify-content-center text-center"
         style="width: {rungWidth}%; height: {calculateRungHeight(
@@ -64,9 +59,9 @@
     <input
       id="mastery-slider"
       type="range"
-      min={minValue}
-      max={maxValue}
-      step={sliderValueIncrement}
+      min={calculations.minValue}
+      max={calculations.maxValue}
+      step={calculations.sliderValueIncrement}
       class="slider"
       bind:value={masteryValue}
     />
@@ -100,7 +95,6 @@
     width: 5px;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.25);
-    transition: left 0.2s ease-out;
   }
 
   #valueIndicator {
@@ -108,7 +102,6 @@
     bottom: 1.2em;
     left: 0;
     text-align: center;
-    transition: left 0.2s ease-out;
   }
 
   .rung {

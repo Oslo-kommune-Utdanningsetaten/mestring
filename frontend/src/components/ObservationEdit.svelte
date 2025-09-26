@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { dataStore, currentUser } from '../stores/data'
+  import type { ObservationReadable, GoalReadable, UserReadable } from '../generated/types.gen'
   import { observationsCreate, observationsUpdate } from '../generated/sdk.gen'
+  import type { GoalDecorated, MasterySchemaWithConfig } from '../types/models'
+  import { dataStore, currentUser } from '../stores/data'
+  import ButtonMini from './ButtonMini.svelte'
   import ValueInputVertical from './ValueInputVertical.svelte'
   import ValueInputHorizontal from './ValueInputHorizontal.svelte'
-  import type { ObservationReadable, GoalReadable, UserReadable } from '../generated/types.gen'
-  import type { GoalDecorated, MasterySchemaWithConfig } from '../types/models'
 
   const { student, goal, observation, onDone } = $props<{
     student: UserReadable | null
@@ -23,15 +24,8 @@
 
   // Update localObservation when observation prop changes
   $effect(() => {
-    if (observation) {
-      localObservation = {
-        ...observation,
-        masteryValue: observation?.masteryValue,
-      }
-    } else {
-      localObservation = {
-        masteryValue: null,
-      }
+    localObservation = {
+      ...observation,
     }
   })
 
@@ -46,7 +40,6 @@
     localObservation.goalId = goal?.id
     localObservation.observerId = $currentUser?.id
     localObservation.observedAt = new Date().toISOString()
-
     try {
       if (localObservation.id) {
         const result = await observationsUpdate({
@@ -116,43 +109,31 @@
   {/if}
 
   <div class="d-flex gap-2 justify-content-start mt-4">
-    <pkt-button
-      size="medium"
-      skin="primary"
-      type="button"
-      variant="label-only"
-      class="m-2"
-      onclick={() => handleSave()}
-      onkeydown={(e: any) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          handleSave()
-        }
+    <ButtonMini
+      options={{
+        title: 'Lagre',
+        iconName: 'check',
+        skin: 'primary',
+        variant: 'label-only',
+        classes: 'm-2',
+        onClick: () => handleSave(),
       }}
-      role="button"
-      tabindex="0"
     >
       Lagre
-    </pkt-button>
+    </ButtonMini>
 
-    <pkt-button
-      size="medium"
-      skin="secondary"
-      type="button"
-      variant="label-only"
-      class="m-2"
-      onclick={() => onDone()}
-      onkeydown={(e: any) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onDone()
-        }
+    <ButtonMini
+      options={{
+        title: 'Avbryt',
+        iconName: 'close',
+        skin: 'secondary',
+        variant: 'label-only',
+        classes: 'm-2',
+        onClick: () => onDone(),
       }}
-      role="button"
-      tabindex="0"
     >
       Avbryt
-    </pkt-button>
+    </ButtonMini>
   </div>
 </div>
 

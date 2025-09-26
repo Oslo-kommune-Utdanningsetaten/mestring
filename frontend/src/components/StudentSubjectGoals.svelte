@@ -1,10 +1,15 @@
 <script lang="ts">
-  import '@oslokommune/punkt-elements/dist/pkt-button.js'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { dataStore } from '../stores/data'
-  import type { UserReadable, ObservationReadable } from '../generated/types.gen'
+  import type { UserReadable, ObservationReadable, GoalReadable } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
-  import { observationsDestroy, goalsDestroy, goalsUpdate, goalsList } from '../generated/sdk.gen'
+  import {
+    observationsDestroy,
+    goalsDestroy,
+    goalsUpdate,
+    goalsList,
+    groupsList,
+  } from '../generated/sdk.gen'
   import { goalsWithCalculatedMasteryBySubjectId } from '../utils/functions'
   import Link from './Link.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
@@ -13,14 +18,15 @@
   import ObservationEdit from './ObservationEdit.svelte'
   import GroupSVG from '../assets/group.svg.svelte'
   import PersonSVG from '../assets/person.svg.svelte'
+  import ButtonMini from './ButtonMini.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { getLocalStorageItem } from '../stores/localStorage'
 
   const { subjectId, student } = $props<{ subjectId: string; student: UserReadable }>()
 
-  let goals = $state<GoalDecorated[]>([])
+  let goalsForSubject = $state<GoalDecorated[]>([])
+  let sortableInstance: Sortable | null = null
   let isShowGoalTitleEnabled = $state<boolean>(true)
-  let goalTitleColumns = $derived(isShowGoalTitleEnabled ? 5 : 2)
   let goalWip = $state<GoalDecorated | null>(null)
   let goalForObservation = $state<GoalDecorated | null>(null)
   let observationWip = $state<ObservationReadable | {} | null>(null)
@@ -41,13 +47,23 @@
 
   const fetchGoalsForSubject = async () => {
     try {
-      const result = await goalsList({ query: { student: student.id, subject: subjectId } })
-      const studentGoals = result.data || []
-      const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(student.id, studentGoals)
-      goals = goalsBySubjectId[subjectId]
+      const goalsResult = await goalsList({ query: { student: student.id, subject: subjectId } })
+      //const studentGoals = (goalsResult.data || []).filter(g => g.isPersonal)
+      const goals = goalsResult.data || []
+      const groupIds = goals.map(goal => goal.groupId).filter(Boolean) as string[]
+      const groupsResult = await groupsList({
+        query: { ids: groupIds.join(','), school: $dataStore.currentSchool.id },
+      })
+      const groups = groupsResult.data || []
+      const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(
+        student.id,
+        goals,
+        groups
+      )
+      goalsForSubject = goalsBySubjectId[subjectId]
     } catch (error) {
       console.error('Error fetching goals:', error)
-      goals = []
+      goalsForSubject = []
     }
   }
 
@@ -57,7 +73,7 @@
       ...goal,
       subjectId,
       studentId: student.id,
-      sortOrder: goal?.sortOrder || (goals?.length ? goals.length + 1 : 1),
+      sortOrder: goal?.sortOrder || (goalsForSubject?.length ? goalsForSubject.length + 1 : 1),
       masterySchemaId:
         goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
     }
@@ -68,14 +84,15 @@
   }
 
   const handleEditObservation = (goal: GoalDecorated, observation: ObservationReadable | null) => {
-    if (observation) {
-      // edit observation
+    if (observation?.id) {
+      // edit existing observation
       observationWip = observation
     } else {
       // create new observation, prefill with value from previous observation
       const prevousObservations = goal?.observations || []
       const previousObservation = prevousObservations[prevousObservations.length - 1]
       observationWip = { masteryValue: previousObservation?.masteryValue || null }
+      console.log('Creating new observation, prefilled with:', observationWip)
     }
     goalForObservation = { ...goal }
   }
@@ -131,30 +148,29 @@
     const { oldIndex, newIndex } = event
     if (oldIndex === undefined || newIndex === undefined) return
 
-    const localGoals = [...goals]
+    const localGoals = [...goalsForSubject.filter(g => g.isPersonal)] // only personal goals are draggable
     // Remove moved goal and capture it
     const [movedGoal] = localGoals.splice(oldIndex, 1)
     // Insert moved goal at new index
     localGoals.splice(newIndex, 0, movedGoal)
-    // for each goal, update its sortOrder if it has changed
-    const updatePromises: Promise<any>[] = []
-    localGoals.forEach(async (goal, index) => {
-      const newSortOrder = index + 1 // for human readability, sortOrder starts at 1
+    // update sortOrder for each goal that has changed position
+    const updatePromises: Promise<any>[] = localGoals.map(async (goal, index) => {
+      const newSortOrder = index + 1 // sortOrder starts at 1
       if (goal.sortOrder !== newSortOrder) {
         goal.sortOrder = newSortOrder
-        updatePromises.push(
-          goalsUpdate({
-            path: { id: goal.id },
-            body: goal,
-          })
-        )
+        return goalsUpdate({
+          path: { id: goal.id },
+          body: goal,
+        })
+      } else {
+        return Promise.resolve() // no update needed
       }
     })
     try {
       await Promise.all(updatePromises)
     } catch (error) {
       console.error('Error updating goal order:', error)
-      // Refetch to restore correct state
+    } finally {
       await fetchGoalsForSubject()
     }
   }
@@ -166,12 +182,19 @@
   })
 
   $effect(() => {
-    if (goalsListElement) {
-      const sortable = new Sortable(goalsListElement, {
+    if (goalsListElement && !sortableInstance) {
+      sortableInstance = new Sortable(goalsListElement, {
         animation: 150,
-        handle: '.row-handle',
+        handle: '.row-handle-draggable',
         onEnd: handleGoalOrderChange,
       })
+    }
+    return () => {
+      // clean up if element unmounts
+      if (!goalsListElement && sortableInstance) {
+        sortableInstance.destroy()
+        sortableInstance = null
+      }
     }
   })
 </script>
@@ -180,227 +203,185 @@
   <h3>
     {subject ? subject.displayName : 'Ukjent'}
   </h3>
-  <pkt-button
-    size="small"
-    skin="tertiary"
-    type="button"
-    variant="icon-only"
-    iconName="plus-sign"
-    title="Legg til nytt personlig mål"
-    class="mini-button bordered"
-    onclick={() => handleEditGoal(null)}
-    onkeydown={(e: any) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault()
-        handleEditGoal(null)
-      }
+  <ButtonMini
+    options={{
+      iconName: 'plus-sign',
+      classes: 'mini-button bordered',
+      title: 'Legg til nytt personlig mål',
+      onClick: () => handleEditGoal(null),
     }}
-    role="button"
-    tabindex="0"
-  >
-    Nytt personlig mål
-  </pkt-button>
+  />
 </div>
 
-{#if !goals?.length}
+{#snippet goalInList(goal: GoalDecorated, index: number)}
+  <div class="list-group-item goal-item {expandedGoals[goal.id] ? 'shadow border-2 z-1' : ''}">
+    <div class="goal-primary-row">
+      <!-- Drag handle -->
+      <span>
+        {#if goal.isPersonal}
+          <pkt-icon
+            title="Endre rekkefølge"
+            class="me-2 row-handle-draggable"
+            name="drag"
+            role="button"
+            tabindex="0"
+          ></pkt-icon>
+        {/if}
+      </span>
+      <!-- Goal order -->
+      <span>
+        {goal.sortOrder || index + 1}
+      </span>
+      <!-- Goal type icon -->
+      <span class="goal-type-icon">
+        {#if goal.isPersonal}
+          <PersonSVG />
+        {:else}
+          <GroupSVG />
+        {/if}
+      </span>
+      <!-- Goal title -->
+      <span>
+        {isShowGoalTitleEnabled ? goal.title : '🙊'}
+      </span>
+      <!-- New observation button -->
+      <ButtonMini
+        options={{
+          iconName: 'plus-sign',
+          classes: 'mini-button bordered',
+          title: 'Ny observasjon',
+          onClick: () => handleEditObservation(goal, null),
+        }}
+      />
+      <!-- Stats widgets -->
+      <span class="d-flex align-items-center gap-3 align-items-center">
+        {#if goal.masteryData}
+          <MasteryLevelBadge masteryData={goal.masteryData} />
+          <SparklineChart
+            data={goal.observations?.map((o: ObservationReadable) => o.masteryValue)}
+          />
+        {/if}
+      </span>
+      <!-- Expand goal info -->
+      <ButtonMini
+        options={{
+          iconName: `chevron-thin-${expandedGoals[goal.id] ? 'up' : 'down'}`,
+          classes: 'mini-button rounded justify-end',
+          title: `${expandedGoals[goal.id] ? 'Skjul' : 'Vis'} observasjoner`,
+          onClick: () => toggleGoalExpansion(goal.id),
+        }}
+      />
+    </div>
+
+    {#if expandedGoals[goal.id]}
+      {#if goal?.observations.length === 0}
+        <div class="my-3">
+          {#if !goal.isPersonal}
+            <p>
+              Dette målet er ikke personlig, men gitt for <Link to={`/groups/${goal.groupId}/`}>
+                hele gruppa
+              </Link>.
+            </p>
+          {:else}
+            <p>
+              Ingen observasjoner for dette målet. Trykk pluss (+) for å opprette en observasjon.
+            </p>
+
+            <ButtonMini
+              options={{
+                iconName: 'edit',
+                classes: 'my-2 me-2',
+                title: 'Rediger personlig mål',
+                onClick: () => handleEditGoal(goal),
+                variant: 'icon-left',
+                skin: 'primary',
+              }}
+            >
+              Rediger personlig mål
+            </ButtonMini>
+
+            <ButtonMini
+              options={{
+                iconName: 'trash-can',
+                classes: 'my-2',
+                title: 'Slett personlig mål',
+                onClick: () => handleDeleteGoal(goal.id),
+                variant: 'icon-left',
+                skin: 'primary',
+              }}
+            >
+              Slett mål
+            </ButtonMini>
+          {/if}
+        </div>
+      {:else}
+        <div class="goal-secondary-row">
+          <div class="student-observations-row">
+            <span>Dato</span>
+            <span>Verdi</span>
+            <span>Handlinger</span>
+          </div>
+          {#each goal?.observations as observation, index}
+            <div class="student-observations-row observation-item">
+              <span>
+                {formatDate(observation.observedAt)}
+              </span>
+              <span>
+                {observation.masteryValue}
+              </span>
+              <span>
+                <pkt-icon
+                  title="Slett observasjon"
+                  class="hover-glow me-2"
+                  name="trash-can"
+                  onclick={() => handleDeleteObservation(observation.id)}
+                  onkeydown={(e: any) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleDeleteObservation(observation.id)
+                    }
+                  }}
+                  role="button"
+                  tabindex="0"
+                ></pkt-icon>
+                {#if index === goal?.observations.length - 1}
+                  <pkt-icon
+                    title="Rediger observasjon"
+                    class="hover-glow me-2"
+                    name="edit"
+                    onclick={() => handleEditObservation(goal, observation)}
+                    onkeydown={(e: any) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleEditObservation(goal, observation)
+                      }
+                    }}
+                    role="button"
+                    tabindex="0"
+                  ></pkt-icon>
+                {/if}
+              </span>
+            </div>
+          {/each}
+        </div>
+      {/if}
+    {/if}
+  </div>
+{/snippet}
+
+{#if !goalsForSubject?.length}
   <div class="alert alert-info">
     Trykk pluss (+) for å opprette et personlig mål for eleven i dette faget.
   </div>
 {:else}
-  <div bind:this={goalsListElement} class="list-group">
-    {#each goals as goal, index (goal.id)}
-      <div class="list-group-item goal-item">
-        <div class="goal-primary-row">
-          <!-- Drag handle -->
-          <span>
-            <pkt-icon
-              title="Endre rekkefølge"
-              class="me-2 row-handle"
-              name="drag"
-              role="button"
-              tabindex="0"
-            ></pkt-icon>
-          </span>
-          <!-- Goal order -->
-          <span>
-            {goal.sortOrder || index + 1}
-          </span>
-          <!-- Goal type icon -->
-          <span class="goal-type-icon">
-            {#if goal.isGroup}
-              <GroupSVG />
-            {:else}
-              <PersonSVG />
-            {/if}
-          </span>
-          <!-- Goal title -->
-          <span>
-            {isShowGoalTitleEnabled ? goal.title : '🙊'}
-          </span>
-          <!-- New observation button -->
-          <pkt-button
-            size="small"
-            skin="tertiary"
-            type="button"
-            variant="icon-only"
-            iconName="plus-sign"
-            class="mini-button bordered"
-            title="Legg til ny observasjon"
-            onclick={() => handleEditObservation(goal, null)}
-            onkeydown={(e: any) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                handleEditObservation(goal, null)
-              }
-            }}
-            role="button"
-            tabindex="0"
-          >
-            Ny observasjon
-          </pkt-button>
-          <!-- Stats widgets -->
-          <span class="d-flex align-items-center gap-3">
-            {#if goal.masteryData}
-              <MasteryLevelBadge masteryData={goal.masteryData} />
-              <SparklineChart
-                data={goal.observations?.map((o: ObservationReadable) => o.masteryValue)}
-                lineColor="rgb(100, 100, 100)"
-                label={goal.title}
-              />
-            {/if}
-          </span>
-          <!-- Expand goal info -->
-          <pkt-button
-            size="small"
-            skin="tertiary"
-            type="button"
-            variant="icon-only"
-            iconName="chevron-thin-{expandedGoals[goal.id] ? 'up' : 'down'}"
-            class="mini-button col-1 rounded"
-            title="{expandedGoals[goal.id] ? 'Skjul' : 'Vis'} observasjoner"
-            onclick={() => toggleGoalExpansion(goal.id)}
-            onkeydown={(e: any) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                toggleGoalExpansion(goal.id)
-              }
-            }}
-            role="button"
-            tabindex="0"
-          ></pkt-button>
-        </div>
-
-        {#if expandedGoals[goal.id]}
-          <div class="goal-secondary-row">
-            {#if goal?.observations.length === 0}
-              <div class="my-3">
-                {#if goal.isGroup}
-                  <div>
-                    Dette målet er ikke personlig, men gitt for en hel gruppe. Du finner guppa <Link
-                      to={`/groups/${goal.groupId}/`}
-                    >
-                      her
-                    </Link>.
-                  </div>
-                {:else}
-                  <p>
-                    Ingen observasjoner for dette målet. Trykk pluss (+) for å opprette en
-                    observasjon.
-                  </p>
-
-                  <pkt-button
-                    size="small"
-                    skin="primary"
-                    variant="icon-left"
-                    iconName="edit"
-                    class="my-2 me-2"
-                    title="Rediger personlig mål"
-                    onclick={() => handleEditGoal(goal)}
-                    onkeydown={(e: any) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        handleEditGoal(goal)
-                      }
-                    }}
-                    role="button"
-                    tabindex="0"
-                  >
-                    Rediger personlig mål
-                  </pkt-button>
-
-                  <pkt-button
-                    size="small"
-                    skin="primary"
-                    variant="icon-left"
-                    iconName="trash-can"
-                    class="my-2"
-                    title="Slett personlig mål"
-                    onclick={() => handleDeleteGoal(goal.id)}
-                    onkeydown={(e: any) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        handleDeleteGoal(goal.id)
-                      }
-                    }}
-                    role="button"
-                    tabindex="0"
-                  >
-                    Slett mål
-                  </pkt-button>
-                {/if}
-              </div>
-            {:else}
-              <div class="row fw-bold d-flex gap-4 mt-2">
-                <span class="col-3">Dato</span>
-                <span class="col-1">Verdi</span>
-                <span class="col-3">Handlinger</span>
-              </div>
-              {#each goal?.observations as observation, index}
-                <div class="row d-flex gap-4 pt-2 observation-item">
-                  <span class="col-3">
-                    {formatDate(observation.observedAt)}
-                  </span>
-                  <span class="col-1 d-flex justify-content-end pe-4">
-                    {observation.masteryValue}
-                  </span>
-                  <span class="col-3">
-                    <pkt-icon
-                      title="Slett observasjon"
-                      class="hover-glow me-2"
-                      name="trash-can"
-                      onclick={() => handleDeleteObservation(observation.id)}
-                      onkeydown={(e: any) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          handleDeleteObservation(observation.id)
-                        }
-                      }}
-                      role="button"
-                      tabindex="0"
-                    ></pkt-icon>
-                    {#if index === goal?.observations.length - 1}
-                      <pkt-icon
-                        title="Rediger observasjon"
-                        class="hover-glow me-2"
-                        name="edit"
-                        onclick={() => handleEditObservation(goal, observation)}
-                        onkeydown={(e: any) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault()
-                            handleEditObservation(goal, observation)
-                          }
-                        }}
-                        role="button"
-                        tabindex="0"
-                      ></pkt-icon>
-                    {/if}
-                  </span>
-                </div>
-              {/each}
-            {/if}
-          </div>
-        {/if}
-      </div>
+  <div bind:this={goalsListElement} class="list-group mt-2">
+    {#each goalsForSubject.filter(goal => goal.isPersonal) as goal, index (goal.id)}
+      {@render goalInList(goal, index)}
+    {/each}
+  </div>
+  <div class="list-group mt-4">
+    {#each goalsForSubject.filter(goal => !goal.isPersonal) as goal, index (goal.id)}
+      {@render goalInList(goal, index)}
     {/each}
   </div>
 {/if}
@@ -441,11 +422,6 @@
     column-gap: 5px;
   }
 
-  .goal-primary-row > :last-child {
-    justify-self: end; /* aligns last column's content */
-    padding-right: 20px;
-  }
-
   .goal-secondary-row {
     margin-top: 10px;
     margin-left: 6px;
@@ -453,7 +429,14 @@
     border-left: 3px solid var(--bs-secondary);
   }
 
-  .row-handle {
+  .student-observations-row {
+    display: grid;
+    grid-template-columns: 5fr 3fr 5fr;
+    column-gap: 5px;
+    align-items: center;
+  }
+
+  .row-handle-draggable {
     cursor: move;
     vertical-align: -8%;
   }

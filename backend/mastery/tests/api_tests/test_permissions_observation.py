@@ -90,8 +90,8 @@ def test_user_observation_access(
 
 @pytest.mark.django_db
 def test_teacher_observation_access(
-        teacher, student, roles, observation_on_personal_goal, observation_on_group_goal, basis_group,
-        other_teaching_group_with_members):
+        teacher, student, student_role, teacher_role, observation_on_personal_goal, observation_on_group_goal,
+        basis_group, other_teaching_group_with_members):
     client = APIClient()
     client.force_authenticate(user=teacher)
 
@@ -118,7 +118,6 @@ def test_teacher_observation_access(
     assert resp.status_code == 200
 
     # Teacher cannot retrieve a students observation in from a different group
-    student_role, teacher_role = roles
     other_teaching_group_with_members.add_member(student, student_role)
     goal = Goal.objects.create(
         title="Lese 2 bøker",

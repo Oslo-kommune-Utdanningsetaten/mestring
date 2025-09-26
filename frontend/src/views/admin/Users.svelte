@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { UserReadable, SchoolReadable } from '../generated/types.gen'
-  import { usersList, schoolsList } from '../generated/sdk.gen'
-  import { urlStringFrom } from '../utils/functions'
-  import { dataStore } from '../stores/data'
+  import type { UserReadable, SchoolReadable } from '../../generated/types.gen'
+  import { usersList, schoolsList } from '../../generated/sdk.gen'
+  import { urlStringFrom } from '../../utils/functions'
+  import { dataStore } from '../../stores/data'
   import { useTinyRouter } from 'svelte-tiny-router'
-  import User from '../components/User.svelte'
+  import User from '../../components/User.svelte'
 
   const router = useTinyRouter()
   let users = $state<UserReadable[]>([])
@@ -52,9 +52,9 @@
   const handleSchoolSelect = (schoolId: string): void => {
     console.log('Selected school ID:', schoolId)
     if (schoolId && schoolId !== '0') {
-      router.navigate(urlStringFrom({ school: schoolId }, { path: '/users', mode: 'merge' }))
+      router.navigate(urlStringFrom({ school: schoolId }, { path: '/admin/users', mode: 'merge' }))
     } else {
-      router.navigate('/users')
+      router.navigate('/admin/users')
     }
   }
 
@@ -66,6 +66,8 @@
     const selectedSchoolId = router.getQueryParam('school')
     if (selectedSchoolId) {
       selectedSchool = schools.find(school => school.id === selectedSchoolId) || null
+    } else {
+      selectedSchool = null
     }
     if (selectedSchool && selectedSchool.id) {
       fetchUsers()
@@ -108,31 +110,31 @@
 </section>
 
 <section class="py-3">
-  <div class="d-flex align-items-center gap-2">
-    {#if selectedSchool}
-      <div class="card shadow-sm w-100">
-        {#if isLoadingUsers}
-          <div class="m-4">
-            <div class="spinner-border text-primary" role="status"></div>
-            <span>Henter brukere...</span>
-          </div>
-        {:else if filteredUsers.length === 0}
-          <div class="m-4">Ingen brukere funnet</div>
-        {:else}
-          <!-- Header row -->
-          <div class="row fw-bold header p-2 bg-light mx-0">
-            <div class="col-4">Bruker</div>
-            <div class="col-6">Tilknytninger</div>
-            <div class="col-2"></div>
-          </div>
-          <!-- Data rows -->
-          {#each filteredUsers as user}
-            <User {user} school={selectedSchool} />
-          {/each}
-        {/if}
+  {#if selectedSchool}
+    {#if isLoadingUsers}
+      <div class="m-4">
+        <div class="spinner-border text-primary" role="status"></div>
+        <span>Henter brukere...</span>
+      </div>
+    {:else if filteredUsers.length === 0}
+      <div class="m-4">Ingen brukere funnet</div>
+    {:else}
+      <div class="card shadow-sm">
+        <!-- Header row -->
+        <div class="user-grid-row header fw-bold">
+          <span>Bruker</span>
+          <span>Tilknytninger</span>
+          <span></span>
+        </div>
+        <!-- Data rows -->
+        {#each filteredUsers as user}
+          <User {user} school={selectedSchool} />
+        {/each}
       </div>
     {/if}
-  </div>
+  {:else}
+    Velg skole for å se brukere
+  {/if}
 </section>
 
 <style>

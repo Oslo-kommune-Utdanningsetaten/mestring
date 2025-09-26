@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { dataStore } from '../stores/data'
   import { goalsCreate, goalsUpdate } from '../generated/sdk.gen'
   import type {
     GoalWritable,
@@ -7,7 +6,9 @@
     UserReadable,
     SubjectReadable,
   } from '../generated/types.gen'
+  import { dataStore } from '../stores/data'
   import { setLocalStorageItem } from '../stores/localStorage'
+  import ButtonMini from './ButtonMini.svelte'
 
   // This component is used for both personal and group goals!
   // If group is passed, student AND subject should be null
@@ -143,44 +144,31 @@
   </div>
 
   <div class="d-flex gap-2 justify-content-start mt-4">
-    <pkt-button
-      size="medium"
-      skin="primary"
-      type="button"
-      variant="label-only"
-      class="m-2"
-      role="button"
-      onclick={() => handleSave()}
-      onkeydown={(e: any) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          handleSave()
-        }
+    <ButtonMini
+      options={{
+        title: 'Lagre',
+        iconName: 'check',
+        skin: 'primary',
+        variant: 'label-only',
+        classes: 'm-2',
+        onClick: () => handleSave(),
       }}
-      tabindex="0"
-      disabled={!isFormValid}
     >
       Lagre
-    </pkt-button>
+    </ButtonMini>
 
-    <pkt-button
-      size="medium"
-      skin="secondary"
-      type="button"
-      variant="label-only"
-      class="m-2"
-      onclick={() => onDone()}
-      onkeydown={(e: any) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onDone()
-        }
+    <ButtonMini
+      options={{
+        title: 'Avbryt',
+        iconName: 'close',
+        skin: 'secondary',
+        variant: 'label-only',
+        classes: 'm-2',
+        onClick: () => onDone(),
       }}
-      role="button"
-      tabindex="0"
     >
       Avbryt
-    </pkt-button>
+    </ButtonMini>
   </div>
 </div>
 

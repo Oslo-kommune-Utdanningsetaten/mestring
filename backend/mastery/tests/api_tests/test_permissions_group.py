@@ -32,16 +32,25 @@ def test_school_id_requirement(school, superadmin, teaching_group_with_members):
 
 @pytest.mark.django_db
 def test_superadmin_group_access(
-        school, teaching_group_with_members, other_teaching_group_with_members, superadmin):
+        school, teaching_group_with_members, other_teaching_group_with_members, disabled_group, superadmin):
     client = APIClient()
     client.force_authenticate(user=superadmin)
 
-    # Can list groups
+    # Can list all groups, including disabled ones
     resp = client.get('/api/groups/', {'school': school.id})
     assert resp.status_code == 200
     data = resp.json()
     expected_ids = {teaching_group_with_members.id,
-                    other_teaching_group_with_members.id}
+                    other_teaching_group_with_members.id, disabled_group.id}
+    received_ids = {group['id'] for group in data}
+    assert len(received_ids) == len(expected_ids)
+    assert expected_ids.issubset(received_ids)
+
+    # Can list only disabled groups
+    resp = client.get('/api/groups/', {'school': school.id, 'isEnabled': False})
+    assert resp.status_code == 200
+    data = resp.json()
+    expected_ids = {disabled_group.id}
     received_ids = {group['id'] for group in data}
     assert len(received_ids) == len(expected_ids)
     assert expected_ids.issubset(received_ids)
@@ -51,14 +60,15 @@ def test_superadmin_group_access(
         feide_id="fc:group:other",
         display_name="Nother Group",
         type="basis",
-        school=school
+        school=school,
+        is_enabled=True
     )
     # Group listing should include new group
     resp = client.get('/api/groups/', {'school': school.id})
     assert resp.status_code == 200
     data = resp.json()
     expected_ids = {teaching_group_with_members.id,
-                    other_teaching_group_with_members.id, a_group.id}
+                    other_teaching_group_with_members.id, disabled_group.id, a_group.id}
     received_ids = {group['id'] for group in data}
     assert len(received_ids) == len(expected_ids)
     assert expected_ids.issubset(received_ids)
@@ -69,8 +79,33 @@ def test_superadmin_group_access(
 
 
 @pytest.mark.django_db
+def test_school_admin_group_access(
+        school, other_school, school_admin, teaching_group, other_school_teaching_group):
+    client = APIClient()
+    client.force_authenticate(user=school_admin)
+
+    # Can list groups in affiliated school
+    resp = client.get('/api/groups/', {'school': school.id})
+    assert resp.status_code == 200
+    data = resp.json()
+    expected_ids = {teaching_group.id}
+    received_ids = {group['id'] for group in data}
+    assert len(received_ids) == len(expected_ids)
+    assert expected_ids.issubset(received_ids)
+    # Will not include groups from other school
+    assert other_school_teaching_group.id not in received_ids
+
+    # Will not list groups from non-affiliated school
+    resp = client.get('/api/groups/', {'school': other_school.id})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 0
+
+
+@pytest.mark.django_db
 def test_teacher_group_access(
-        teaching_group_with_members, other_teaching_group_with_members, teacher, school):
+    teaching_group_with_members, other_teaching_group_with_members, disabled_group, teacher, school,
+        teacher_role):
     client = APIClient()
     client.force_authenticate(user=teacher)
 
@@ -82,8 +117,18 @@ def test_teacher_group_access(
     resp = client.get('/api/groups/', {'school': school.id})
     assert resp.status_code == 200
     data = resp.json()
-    assert len(data) == 1
-    assert all(group['id'] == teaching_group_with_members.id for group in data)
+    expected_ids = {teaching_group_with_members.id}
+    received_ids = {group['id'] for group in data}
+    assert len(received_ids) == len(expected_ids)
+    assert expected_ids.issubset(received_ids)
+
+    # Teacher cannot see disabled groups even if they are a member
+    disabled_group.add_member(teacher, teacher_role)
+    resp = client.get('/api/groups/', {'school': school.id})
+    assert resp.status_code == 200
+    data = resp.json()
+    received_ids = {group['id'] for group in data}
+    assert disabled_group.id not in received_ids
 
     # Teacher can retrieve own group
     resp = client.get(f'/api/groups/{teaching_group_with_members.id}/')
@@ -95,9 +140,9 @@ def test_teacher_group_access(
 
 
 @pytest.mark.django_db
-def test_student_group_access(teaching_group_with_members, other_teaching_group_with_members, school, roles):
+def test_student_group_access(
+        teaching_group_with_members, other_teaching_group_with_members, disabled_group, school, student_role):
     student = teaching_group_with_members.get_students().first()
-    student_role, _ = roles
     client = APIClient()
     client.force_authenticate(user=student)
 
@@ -117,7 +162,8 @@ def test_student_group_access(teaching_group_with_members, other_teaching_group_
         feide_id="fc:group:other",
         display_name="Other Group",
         type="basis",
-        school=school
+        school=school,
+        is_enabled=True
     )
     a_group.add_member(student, student_role)
     resp = client.get('/api/groups/', {'school': school.id})
@@ -126,6 +172,14 @@ def test_student_group_access(teaching_group_with_members, other_teaching_group_
     received_ids = {group['id'] for group in data}
     assert len(received_ids) == len(expected_ids)
     assert expected_ids.issubset(received_ids)
+
+    # Student cannot see disabled groups even if they are a member
+    disabled_group.add_member(student, student_role)
+    resp = client.get('/api/groups/', {'school': school.id})
+    assert resp.status_code == 200
+    data = resp.json()
+    received_ids = {group['id'] for group in data}
+    assert disabled_group.id not in received_ids
 
     # Student can retrieve own group
     resp = client.get(f'/api/groups/{teaching_group_with_members.id}/')

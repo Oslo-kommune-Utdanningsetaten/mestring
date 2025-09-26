@@ -85,19 +85,24 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
               <li>
-                <Link to="/schools" className="dropdown-item">Skoler</Link>
+                <Link to="/admin/schools" className="dropdown-item">Skoler</Link>
               </li>
               <li>
-                <Link to="/users" className="dropdown-item">Brukere</Link>
+                <Link to="/admin/users" className="dropdown-item">Brukere</Link>
               </li>
               <li>
-                <Link to="/subjects" className="dropdown-item">Fag</Link>
+                <Link to="/admin/subjects" className="dropdown-item">Fag</Link>
               </li>
               <li>
-                <Link to="/data-maintenance-tasks" className="dropdown-item">Bakgrunnsjobber</Link>
+                <Link to="/admin/groups" className="dropdown-item">Grupper</Link>
               </li>
               <li>
-                <Link to="/mastery-schemas" className="dropdown-item">Mastery Schemas</Link>
+                <Link to="/admin/data-maintenance-tasks" className="dropdown-item">
+                  Bakgrunnsjobber
+                </Link>
+              </li>
+              <li>
+                <Link to="/admin/mastery-schemas" className="dropdown-item">Mastery Schemas</Link>
               </li>
             </ul>
           </li>

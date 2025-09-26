@@ -34,7 +34,6 @@
   })
   let isLoadingGroups = $state<boolean>(false)
   let isLoadingStudents = $state<boolean>(false)
-  let isLoadingSubjects = $state<boolean>(false)
 
   const fetchAllStudentsInSchool = async () => {
     if (!currentSchool) return

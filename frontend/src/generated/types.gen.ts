@@ -59,7 +59,6 @@ export type GoalReadable = {
     previousGoalId?: string;
     masterySchemaId?: string;
     readonly isPersonal: boolean;
-    readonly isGroup: boolean;
 };
 
 export type GoalWritable = {
@@ -86,6 +85,7 @@ export type GroupReadable = {
     type: string;
     validFrom?: string | null;
     validTo?: string | null;
+    isEnabled?: boolean;
     createdById?: string;
     updatedById?: string;
     subjectId?: string;
@@ -99,6 +99,7 @@ export type GroupWritable = {
     type: string;
     validFrom?: string | null;
     validTo?: string | null;
+    isEnabled?: boolean;
     createdById?: string;
     updatedById?: string;
     subjectId?: string;
@@ -262,7 +263,6 @@ export type PatchedGoalReadable = {
     previousGoalId?: string;
     masterySchemaId?: string;
     readonly isPersonal?: boolean;
-    readonly isGroup?: boolean;
 };
 
 export type PatchedGoalWritable = {
@@ -289,6 +289,7 @@ export type PatchedGroupReadable = {
     type?: string;
     validFrom?: string | null;
     validTo?: string | null;
+    isEnabled?: boolean;
     createdById?: string;
     updatedById?: string;
     subjectId?: string;
@@ -302,6 +303,7 @@ export type PatchedGroupWritable = {
     type?: string;
     validFrom?: string | null;
     validTo?: string | null;
+    isEnabled?: boolean;
     createdById?: string;
     updatedById?: string;
     subjectId?: string;
@@ -1012,6 +1014,14 @@ export type GroupsListData = {
     body?: never;
     path?: never;
     query: {
+        /**
+         * Filter by ids (comma-separated list of group ids, e.g., xyx,123)
+         */
+        ids?: string;
+        /**
+         * Filter groups by whether they are enabled
+         */
+        isEnabled?: boolean;
         /**
          * Filter groups by roles a user has in that group (comma-separated list of role names, e.g., student,teacher)
          */

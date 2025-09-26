@@ -35,11 +35,18 @@ def other_school(db):
 
 
 @pytest.fixture
-def roles(db):
-    # Student and teacher roles
-    student_role = Role.objects.create(name="student")
-    teacher_role = Role.objects.create(name="teacher")
-    return student_role, teacher_role
+def student_role(db):
+    return Role.objects.create(name="student")
+
+
+@pytest.fixture
+def teacher_role(db):
+    return Role.objects.create(name="teacher")
+
+
+@pytest.fixture
+def admin_role(db):
+    return Role.objects.create(name="admin")
 
 
 @pytest.fixture
@@ -50,6 +57,28 @@ def superadmin(db) -> User:
         email="superadmin001@kakrafoon.kommune.no",
         is_superadmin=True
     )
+
+
+@pytest.fixture
+def school_admin(db, school, admin_role) -> User:
+    user = User.objects.create(
+        name="School admin",
+        feide_id="schooladmin001@kakrafoon.kommune.no",
+        email="schooladmin001@kakrafoon.kommune.no",
+    )
+    school.set_affiliated_user(user, admin_role)
+    return user
+
+
+@pytest.fixture
+def other_school_admin(db, other_school, admin_role) -> User:
+    user = User.objects.create(
+        name="Other School admin",
+        feide_id="otherschooladmin001@kakrafoon.kommune.no",
+        email="otherschooladmin001@kakrafoon.kommune.no",
+    )
+    other_school.set_affiliated_user(user, admin_role)
+    return user
 
 
 @pytest.fixture
@@ -112,7 +141,19 @@ def teaching_group(db, school):
         feide_id="fc:group:some-teaching-group",
         display_name="Engelsk 7a",
         type="teaching",
-        school=school
+        school=school,
+        is_enabled=True
+    )
+
+
+@pytest.fixture
+def disabled_group(db, school):
+    return Group.objects.create(
+        feide_id="fc:group:disable-teaching-group",
+        display_name="Engelsk 7x",
+        type="teaching",
+        school=school,
+        is_enabled=False
     )
 
 
@@ -122,13 +163,13 @@ def basis_group(db, school):
         feide_id="fc:group:some-basis-group",
         display_name="Klasse 7a",
         type="basis",
-        school=school
+        school=school,
+        is_enabled=True
     )
 
 
 @pytest.fixture
-def teaching_group_with_members(db, roles, teacher, student, teaching_group):
-    student_role, teacher_role = roles
+def teaching_group_with_members(db, teacher, student, teaching_group, teacher_role, student_role):
     teaching_group.add_member(teacher, teacher_role)
     teaching_group.add_member(student, student_role)
     return teaching_group
@@ -140,7 +181,8 @@ def other_teaching_group(db, school):
         feide_id="fc:group:other-teaching-group",
         display_name="Engelsk 8a",
         type="teaching",
-        school=school
+        school=school,
+        is_enabled=True
     )
 
 
@@ -150,22 +192,23 @@ def other_school_teaching_group(db, other_school):
         feide_id="fc:group:some-teaching-group-at-other-school",
         display_name="Engelsk 1a",
         type="teaching",
-        school=other_school
+        school=other_school,
+        is_enabled=True
     )
 
 
 @pytest.fixture
 def other_school_teaching_group_with_members(
-        db, roles, other_school_teacher, other_school_student, other_school_teaching_group):
-    student_role, teacher_role = roles
+        db, other_school_teacher, other_school_student, other_school_teaching_group, teacher_role,
+        student_role):
     other_school_teaching_group.add_member(other_school_teacher, teacher_role)
     other_school_teaching_group.add_member(other_school_student, student_role)
     return other_school_teaching_group
 
 
 @pytest.fixture
-def other_teaching_group_with_members(db, roles, other_teaching_group, other_teacher, other_student):
-    student_role, teacher_role = roles
+def other_teaching_group_with_members(
+        db, other_teaching_group, other_teacher, other_student, teacher_role, student_role):
     other_teaching_group.add_member(other_teacher, teacher_role)
     other_teaching_group.add_member(other_student, student_role)
     return other_teaching_group
@@ -177,7 +220,8 @@ def teaching_group_without_members(db, school):
         feide_id="fc:group:teaching-group-no-members",
         display_name="Other Group",
         type="teaching",
-        school=school
+        school=school,
+        is_enabled=True
     )
 
 

@@ -3,8 +3,7 @@ from rest_framework.test import APIClient
 
 
 @pytest.mark.django_db
-def test_non_user_role_access(roles):
-    student_role, teacher_role = roles
+def test_non_user_role_access(student_role, teacher_role):
     client = APIClient()
     # Non-authenticated user cannot access roles
     resp = client.get(f'/api/roles/')
@@ -16,8 +15,7 @@ def test_non_user_role_access(roles):
 
 
 @pytest.mark.django_db
-def test_superadmin_role_access(superadmin, roles):
-    student_role, teacher_role = roles
+def test_superadmin_role_access(superadmin, student_role, teacher_role):
     client = APIClient()
     client.force_authenticate(user=superadmin)
 
@@ -37,8 +35,7 @@ def test_superadmin_role_access(superadmin, roles):
 
 
 @pytest.mark.django_db
-def test_user_role_access(roles, teacher, student):
-    student_role, teacher_role = roles
+def test_user_role_access(student_role, teacher_role, teacher, student):
     client = APIClient()
     for user in [teacher, student]:
         client.force_authenticate(user=user)

@@ -1,6 +1,4 @@
 <script lang="ts">
-  import '@oslokommune/punkt-elements/dist/pkt-button.js'
-  import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import type { GroupReadable, UserReadable, SubjectReadable } from '../generated/types.gen'
   import { usersRetrieve, groupsList } from '../generated/sdk.gen'
   import { subjectIdsViaGroupOrGoal } from '../utils/functions'

@@ -1,8 +1,6 @@
 <script lang="ts">
-  import '@oslokommune/punkt-elements/dist/pkt-button.js'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
-
   import type {
     UserReadable,
     NestedUserGroupReadable,
@@ -18,6 +16,7 @@
   } from '../generated/sdk.gen'
   import { SCHOOL_ADMIN_ROLE } from '../utils/constants'
   import { dataStore } from '../stores/data'
+  import ButtonMini from './ButtonMini.svelte'
 
   const { user, school } = $props<{ user: UserReadable; school: SchoolReadable }>()
   const adminRole = $derived<RoleReadable>(
@@ -76,12 +75,12 @@
   }
 </script>
 
-<div class="row p-2 border-bottom mx-0">
-  <div class="col-4">
+<div class="user-grid-row">
+  <div>
     <div class="fw-semibold">{user.name}</div>
     <div class="text-muted small">{user.email || 'Ingen e-post'}</div>
   </div>
-  <div class="col-6">
+  <div>
     {#if hasLoadedData}
       <div class="small">
         <div>
@@ -95,7 +94,7 @@
       </div>
     {/if}
   </div>
-  <div class="col-2">
+  <div>
     {#if userSchools.length > 0 || userGroups.length > 0}
       <pkt-checkbox
         label="Admin"
@@ -107,27 +106,18 @@
       ></pkt-checkbox>
     {:else}
       <div class="pkt-input-check">
-        <pkt-button
-          size="small"
-          skin="secondary"
-          type="button"
-          variant="icon-only"
-          iconName="process-back"
-          title="Hent tilknytninger"
-          alt="Hent tilknytninger"
-          disabled={isLoadingData}
-          onclick={fetchUserAffiliations}
-          onkeydown={(e: any) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              fetchUserAffiliations()
-            }
+        <ButtonMini
+          options={{
+            title: 'Hent tilknytninger',
+            iconName: 'process-back',
+            skin: 'secondary',
+            variant: 'icon-only',
+            classes: '',
+            onClick: () => fetchUserAffiliations(),
           }}
-          role="button"
-          tabindex="0"
         >
           Hent tilknytninger
-        </pkt-button>
+        </ButtonMini>
       </div>
     {/if}
   </div>

@@ -1,11 +1,5 @@
 <script lang="ts">
-  import type { MasteryConfigLevel, MasterySchemaConfig } from '../types/models'
-  import type { MasterySchemaReadable } from '../generated/types.gen'
-  import { isNumber } from '../utils/functions'
-
-  type MasterySchemaWithConfig = MasterySchemaReadable & {
-    config?: MasterySchemaConfig
-  }
+  import { useMasteryCalculations, type MasterySchemaWithConfig } from '../utils/masteryHelpers'
 
   let {
     masterySchema,
@@ -17,23 +11,21 @@
     label?: string
   } = $props()
 
-  const masteryLevels: MasteryConfigLevel[] = $derived(masterySchema?.config?.levels || [])
-  const sortedMasteryLevels: MasteryConfigLevel[] = $derived(
-    [...masteryLevels].sort((a, b) => b.minValue - a.minValue)
+  const calculations = $derived(useMasteryCalculations(masterySchema))
+  const sortedMasteryLevels = $derived(
+    [...calculations.masteryLevels].sort((a, b) => b.minValue - a.minValue)
   )
-  const minValue = $derived(
-    Math.min(...masteryLevels.map((lev: MasteryConfigLevel) => lev.minValue))
+  const widthMultiplier = $derived(
+    calculations.masteryLevels.length ? 100 / calculations.masteryLevels.length : 1
   )
-  const maxValue = $derived(
-    Math.max(...masteryLevels.map((lev: MasteryConfigLevel) => lev.maxValue))
-  )
-  const sliderValueIncrement = $derived(masterySchema?.config?.inputIncrement || 1)
-  const widthMultiplier = $derived(masteryLevels.length ? 100 / masteryLevels.length : 1)
+  const safeMasteryValue = $derived(calculations.calculateSafeMasteryValue(masteryValue))
 
-  // Always have a non-null numeric value available for rendering calculations
-  const safeMasteryValue = $derived(
-    isNumber(masteryValue) ? (masteryValue as number) : (minValue + maxValue) / 2
-  )
+  // Set default value when masteryValue is null/undefined and schema is available
+  $effect(() => {
+    if ((masteryValue === null || masteryValue === undefined) && calculations.hasLevels) {
+      masteryValue = calculations.defaultValue
+    }
+  })
 </script>
 
 <div class="mb-4">
@@ -45,9 +37,9 @@
     <input
       id="mastery-slider"
       type="range"
-      min={minValue}
-      max={maxValue}
-      step={sliderValueIncrement}
+      min={calculations.minValue}
+      max={calculations.maxValue}
+      step={calculations.sliderValueIncrement}
       class="slider"
       bind:value={masteryValue}
     />
@@ -88,7 +80,6 @@
     height: 5px;
     background-color: rgba(0, 0, 0, 0.25);
     z-index: 1;
-    transition: top 0.2s ease-out;
   }
 
   #valueIndicatorContainer {

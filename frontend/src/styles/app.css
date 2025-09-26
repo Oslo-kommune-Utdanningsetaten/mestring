@@ -146,6 +146,23 @@ a:hover {
   align-items: start;
 }
 
+.user-grid-row {
+  display: grid;
+  grid-template-columns: 4fr 4fr 1fr;
+  column-gap: 1rem;
+  padding: 0.5rem 0.5rem;
+  align-items: center;
+  justify-items: start;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.user-grid-row.header {
+  background-color: var(--bs-light);
+  border-top-right-radius: inherit;
+  border-top-left-radius: inherit;
+  align-items: start;
+}
+
 .group-grid-columns {
   display: grid;
   grid-template-columns: var(--grid-template-group-columns);

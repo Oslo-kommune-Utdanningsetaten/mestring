@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { type DataMaintenanceTaskReadable } from '../generated/types.gen'
-  import { dataMaintenanceTasksList } from '../generated/sdk.gen'
+  import { type DataMaintenanceTaskReadable } from '../../generated/types.gen'
+  import { dataMaintenanceTasksList } from '../../generated/sdk.gen'
 
   let tasks = $state<DataMaintenanceTaskReadable[]>([])
   let isLoading = $state<boolean>(false)

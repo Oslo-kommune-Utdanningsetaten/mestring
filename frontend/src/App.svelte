@@ -1,24 +1,28 @@
 <script lang="ts">
   import { Router, Route } from 'svelte-tiny-router'
-  import Home from './views/Home.svelte'
-  import About from './views/About.svelte'
-  import Student from './views/Student.svelte'
-  import Group from './views/Group.svelte'
-  import Schools from './views/Schools.svelte'
-  import Students from './views/Students.svelte'
-  import Users from './views/Users.svelte'
-  import Subjects from './views/Subjects.svelte'
-  import Navigation from './components/Navigation.svelte'
-  import MasterySchemas from './views/MasterySchemas.svelte'
-  import DataMaintenanceTask from './views/DataMaintenanceTask.svelte'
-  import UserInfo from './views/UserInfo.svelte'
   import { checkAuth, isLoggingInUser } from './stores/auth'
-  import { loadData, dataStore, currentUser } from './stores/data'
+  import { loadData, currentUser } from './stores/data'
   import { onMount } from 'svelte'
   import 'bootstrap/dist/css/bootstrap.min.css'
   import './styles/bootstrap-overrides.css'
   import 'bootstrap/dist/js/bootstrap.min.js'
   import './styles/app.css'
+  // Views
+  import Home from './views/Home.svelte'
+  import About from './views/About.svelte'
+  import Student from './views/Student.svelte'
+  import Group from './views/Group.svelte'
+  import Groups from './views/Groups.svelte'
+  import Students from './views/Students.svelte'
+  import Navigation from './components/Navigation.svelte'
+  import UserInfo from './views/UserInfo.svelte'
+  // Admin views
+  import Users from './views/admin/Users.svelte'
+  import AdminGroups from './views/admin/Groups.svelte'
+  import Subjects from './views/admin/Subjects.svelte'
+  import MasterySchemas from './views/admin/MasterySchemas.svelte'
+  import DataMaintenanceTask from './views/admin/DataMaintenanceTask.svelte'
+  import Schools from './views/admin/Schools.svelte'
 
   // Defer side-effect network calls until after component mount
   onMount(async () => {
@@ -48,12 +52,14 @@
       <Route path="/students/:studentId" component={Student} />
       <Route path="/groups/:groupId" component={Group} />
       <Route path="/students" component={Students} />
+      <Route path="/groups" component={Groups} />
       <Route path="/user-info" component={UserInfo} />
-      <Route path="/subjects" component={Subjects} />
-      <Route path="/users" component={Users} />
-      <Route path="/mastery-schemas" component={MasterySchemas} />
-      <Route path="/data-maintenance-tasks" component={DataMaintenanceTask} />
-      <Route path="/schools" component={Schools} />
+      <Route path="/admin/subjects" component={Subjects} />
+      <Route path="/admin/users" component={Users} />
+      <Route path="/admin/groups" component={AdminGroups} />
+      <Route path="/admin/mastery-schemas" component={MasterySchemas} />
+      <Route path="/admin/data-maintenance-tasks" component={DataMaintenanceTask} />
+      <Route path="/admin/schools" component={Schools} />
     {/if}
 
     <!-- Fallback route: no "path" prop means it always matches -->
