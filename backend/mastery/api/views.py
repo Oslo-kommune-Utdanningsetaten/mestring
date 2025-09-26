@@ -22,9 +22,9 @@ def get_request_param(query_params, name: str):
     value = value.strip()
     if value == '':
         return None, is_key_present
-    if value == 'false':
+    if value.lower() == 'false':
         return False, is_key_present
-    if value == 'true':
+    if value.lower() == 'true':
         return True, is_key_present
     return value, is_key_present
 
@@ -275,6 +275,13 @@ class UserGroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                 required=False,
                 type={'type': 'boolean'},
                 location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='subject',
+                description='Filter groups by the subject their subject',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
             )
         ]
     )
@@ -290,6 +297,7 @@ class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
             school_param, _ = get_request_param(self.request.query_params, 'school')
             type_param, _ = get_request_param(self.request.query_params, 'type')
             user_param, _ = get_request_param(self.request.query_params, 'user')
+            subject_param, _ = get_request_param(self.request.query_params, 'subject')
             roles_param, _ = get_request_param(self.request.query_params, 'roles')
             ids_param, _ = get_request_param(self.request.query_params, 'ids')
             is_enabled_param, is_enabled_set = get_request_param(self.request.query_params, 'is_enabled')
@@ -307,6 +315,8 @@ class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                 qs = qs.filter(type=type_param.lower())
             if user_param:
                 qs = qs.filter(user_groups__user_id=user_param)
+            if subject_param:
+                qs = qs.filter(subject_id=subject_param)
             if roles_param:
                 role_names = [role.strip() for role in roles_param.split(',') if role]
                 if role_names:
@@ -326,16 +336,16 @@ class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         parameters=[
             OpenApiParameter(
                 name='school',
-                description='Filter subject by subject.groups belonging to school',
+                description='All subjects belonging to school, either directly via owned_by_school or via groups belonging to school',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='owned_by',
-                description='Filter subject by owned_by_school (school ID)',
+                name='is_owned_by_school',
+                description='Filter subjects on whether they are owned by the given school',
                 required=False,
-                type={'type': 'string'},
+                type={'type': 'boolean'},
                 location=OpenApiParameter.QUERY
             )
         ]
@@ -351,23 +361,25 @@ class SubjectViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
-            owned_by_school_param, _ = get_request_param(self.request.query_params, 'owned_by')
+            is_owned_by_school_param, is_owned_set = get_request_param(
+                self.request.query_params, 'is_owned_by_school')
 
-            # Require at least one of the two parameters (school OR owned_by)
-            if (not school_param) and (not owned_by_school_param):
+            # Require school
+            if not school_param:
                 raise ValidationError(
-                    {'error': 'missing-parameter',
-                     'message': 'At least one of "school" or "owned_by" parameters are required.'})
+                    {'error': 'missing-parameter', 'message': 'The "school" query parameter is required.'})
 
-            # Build a union of the selected filters instead of constraining sequentially
-            result_qs = qs.none()
-            if school_param:
-                result_qs = qs.filter(groups__school_id=school_param)
-            if owned_by_school_param:
-                result_qs = result_qs | qs.filter(
-                    owned_by_school_id=owned_by_school_param)
+            qs = qs.filter(
+                Q(groups__school_id=school_param) |
+                Q(owned_by_school_id=school_param)
+            )
 
-            return result_qs.distinct()
+            if is_owned_set:
+                if is_owned_by_school_param:
+                    qs = qs.filter(owned_by_school_id=school_param)
+                else:
+                    qs = qs.filter(owned_by_school_id=None)
+            return qs.distinct()
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs
 

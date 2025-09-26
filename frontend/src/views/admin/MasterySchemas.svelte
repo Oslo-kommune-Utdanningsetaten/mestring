@@ -2,14 +2,15 @@
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { masterySchemasDestroy, masterySchemasList, schoolsList } from '../../generated/sdk.gen'
   import type { MasterySchemaReadable, SchoolReadable } from '../../generated/types.gen'
+  import type { MasterySchemaWithConfig } from '../../types/models'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { urlStringFrom } from '../../utils/functions'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
 
   const router = useTinyRouter()
-  let masterySchemas = $derived<MasterySchemaReadable[]>([])
-  let masterySchemaWip: Partial<MasterySchemaReadable> | null =
+  let masterySchemas = $derived<MasterySchemaWithConfig[]>([])
+  let masterySchemaWip: Partial<MasterySchemaWithConfig> | null =
     $state<Partial<MasterySchemaReadable> | null>(null)
   let isJsonVisible = $state<boolean>(false)
   let schools = $state<SchoolReadable[]>([])
@@ -152,7 +153,7 @@
             </p>
 
             <div class="mb-4">
-              {#each masterySchema?.config?.levels as level}
+              {#each masterySchema?.config?.levels || [] as level}
                 <span class="p-2" style="background-color: {level.color || 'white'};">
                   {level.title}
                 </span>

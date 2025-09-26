@@ -1,6 +1,6 @@
 from .base import BaseAccessPolicy
 from django.db.models import Q
-from mastery.models import UserSchool
+from mastery.models import UserSchool, Group
 import logging
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ class GroupAccessPolicy(BaseAccessPolicy):
             "principal": ["role:superadmin"],
             "effect": "allow",
         },
-        # School admins can list groups in their school
+        # School admins have full access to groups belonging to their school
         {
             "action": ["*"],
             "principal": ["role:admin"],
@@ -57,8 +57,8 @@ class GroupAccessPolicy(BaseAccessPolicy):
     def is_admin_at_school(self, request, view, action):
         try:
             target_group = view.get_object()
-            # Reuse the queryset logic to check if user is admin at the group's school <3
-            return self.scope_queryset(request, UserSchool.objects).filter(id=target_group.id).exists()
+            # Reuse the queryset logic to check if user is granted access via school admin privileges
+            return self.scope_queryset(request, Group.objects).filter(id=target_group.id).exists()
         except Exception:
             return False
 

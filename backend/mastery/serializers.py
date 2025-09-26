@@ -2,10 +2,9 @@ from rest_framework import serializers
 from mastery import models
 from django.db.models import ForeignKey
 
-# Base serializer that rewrites foreign key fields
-
 
 class BaseModelSerializer(serializers.ModelSerializer):
+    # Base serializer that rewrites foreign key fields
     def get_fields(self):
         fields = super().get_fields()
 

@@ -1,8 +1,10 @@
 from .base import BaseAccessPolicy
 from django.db.models import Q
+from mastery.models import Subject, UserSchool
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class SubjectAccessPolicy(BaseAccessPolicy):
     statements = [
@@ -11,6 +13,13 @@ class SubjectAccessPolicy(BaseAccessPolicy):
             "action": ["*"],
             "principal": ["role:superadmin"],
             "effect": "allow",
+        },
+        # School admins have full access to subjects belonging to their school
+        {
+            "action": ["*"],
+            "principal": ["role:admin"],
+            "effect": "allow",
+            "condition": "is_admin_at_school_which_owns_subject",
         },
         # Authenticated users can list subjects according to scope_queryset
         {
@@ -55,7 +64,6 @@ class SubjectAccessPolicy(BaseAccessPolicy):
         },
     ]
 
-
     def scope_queryset(self, request, qs):
         requester = request.user
         if requester.is_superadmin:
@@ -65,6 +73,8 @@ class SubjectAccessPolicy(BaseAccessPolicy):
             basis_groups_taught_ids = list(
                 requester.teacher_groups.filter(type='basis').values_list('id', flat=True)
             )
+            school_admin_ids = UserSchool.objects.filter(
+                user_id=requester.id, role__name="admin").values_list("school_id", flat=True).distinct()
             return qs.filter(
                 # subjects via any group membership
                 Q(groups__in=user_groups_qs) |
@@ -72,15 +82,34 @@ class SubjectAccessPolicy(BaseAccessPolicy):
                 Q(created_by=requester) |
                 # subjects with goals created by requester
                 Q(goals__created_by=requester) |
-                # subjects with goals for requester as student
+                # subjects with goals where requester is the student
                 Q(goals__student=requester) |
                 # subjects with goals whose student is in a basis group taught by requester
-                Q(goals__student__groups__id__in=basis_groups_taught_ids)
+                Q(goals__student__groups__id__in=basis_groups_taught_ids) |
+                # subjects attached to groups which belong to a school where the requester is admin
+                Q(groups__school_id__in=school_admin_ids) |
+                # subjects owned by schools where requester is admin
+                Q(owned_by_school_id__in=school_admin_ids)
             ).distinct()
         except Exception as error:
             logger.error("SubjectAccessPolicy.scope_queryset error: %s", error)
             return qs.none()
 
+    # True if requester is admin at the school which owns the subject
+    def is_admin_at_school_which_owns_subject(self, request, view, action):
+        try:
+            requester = request.user
+            target_subject = view.get_object()
+            school_admin_ids = UserSchool.objects.filter(
+                user_id=requester.id, role__name="admin").values_list("school_id", flat=True).distinct()
+
+            return self.scope_queryset(
+                request, Subject.objects).filter(
+                id=target_subject.id, owned_by_school_id__in=school_admin_ids).exists()
+
+        except Exception as error:
+            logger.debug("SubjectAccessPolicy.belongs_to_group error: %s", error)
+            return False
 
     # True if requester is member of any group that uses this subject
     def belongs_to_group(self, request, view, action):
@@ -129,7 +158,8 @@ class SubjectAccessPolicy(BaseAccessPolicy):
         try:
             requester = request.user
             subject = view.get_object()
-            basis_groups_taught_ids = requester.teacher_groups.filter(type='basis').values_list('id', flat=True)
+            basis_groups_taught_ids = requester.teacher_groups.filter(
+                type='basis').values_list('id', flat=True)
             return subject.goals.filter(student__groups__id__in=basis_groups_taught_ids).exists()
         except Exception as error:
             logger.error("SubjectAccessPolicy.is_goal_student_in_basis_group_taught_by_user error: %s", error)

@@ -62,7 +62,7 @@
 
     <!-- Groups -->
     <div class="card shadow-sm">
-      <h2 class="card-header">Grupper</h2>
+      <h2 class="card-header">Medlem av</h2>
       <div class="card-body">
         {#if groups}
           <ul class="mb-0">

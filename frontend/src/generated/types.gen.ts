@@ -1031,6 +1031,10 @@ export type GroupsListData = {
          */
         school: string;
         /**
+         * Filter groups by the subject their subject
+         */
+        subject?: string;
+        /**
          * Filter groups by type (e.g., teaching, basis)
          */
         type?: string;
@@ -1822,11 +1826,11 @@ export type SubjectsListData = {
     path?: never;
     query?: {
         /**
-         * Filter subject by owned_by_school (school ID)
+         * Filter subjects on whether they are owned by the given school
          */
-        ownedBy?: string;
+        isOwnedBySchool?: boolean;
         /**
-         * Filter subject by subject.groups belonging to school
+         * All subjects belonging to school, either directly via owned_by_school or via groups belonging to school
          */
         school?: string;
     };

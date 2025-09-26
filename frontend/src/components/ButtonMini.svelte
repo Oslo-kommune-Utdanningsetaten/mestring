@@ -8,6 +8,7 @@
       title?: string
       variant?: string
       skin?: string
+      disabled?: boolean
       onClick?: () => void
     }
     children?: any
@@ -19,6 +20,7 @@
   const title = options.title || 'TITTEL MANGLER'
   const variant = options.variant || 'icon-only'
   const skin = options.skin || 'tertiary'
+  const disabled = options.disabled || false
   const onClick =
     options.onClick ||
     (() => {
@@ -35,6 +37,7 @@
   {iconName}
   {title}
   onclick={() => onClick()}
+  {disabled}
   onkeydown={(e: any) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
