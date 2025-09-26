@@ -29,5 +29,5 @@ class MasterySchemaAccessPolicy(BaseAccessPolicy):
             user_schools = user.get_schools()
             return qs.filter(school_id__in=user_schools.values("id"))
         except Exception as error:
-            logger.debug("MasterySchemaAccessPolicy.scope_queryset error: %s", error)
+            logger.error("MasterySchemaAccessPolicy.scope_queryset error: %s", error)
             return qs.none()

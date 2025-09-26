@@ -84,7 +84,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
 
             return qs.filter(filters).distinct()
         except Exception as error:
-            logger.debug("GoalAccessPolicy.scope_queryset error: %s", error)
+            logger.error("GoalAccessPolicy.scope_queryset error: %s", error)
             return qs.none()
 
     def is_user_creator(self, request, view, action):
@@ -93,7 +93,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
             goal = view.get_object()
             return goal.created_by_id == requester.id
         except Exception as error:
-            logger.debug("GoalAccessPolicy.is_user_creator error: %s", error)
+            logger.error("GoalAccessPolicy.is_user_creator error: %s", error)
             return False
 
     def is_goal_in_group_where_user_is_teacher(self, request, view, action):
@@ -104,7 +104,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
                 return False
             return requester.teacher_groups.filter(id=goal.group_id).exists()
         except Exception as error:
-            logger.debug(
+            logger.error(
                 "GoalAccessPolicy.is_goal_in_group_where_user_is_teacher error: %s", error)
             return False
 
@@ -118,7 +118,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
                 'id', flat=True)
             return goal.student.groups.filter(id__in=taught_group_ids).exists()
         except Exception as error:
-            logger.debug(
+            logger.error(
                 "GoalAccessPolicy.is_goal_student_in_group_taught_by_user error: %s", error)
             return False
 
@@ -128,7 +128,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
             goal = view.get_object()
             return goal.student_id == requester.id
         except Exception as error:
-            logger.debug("GoalAccessPolicy.is_user_owner error: %s", error)
+            logger.error("GoalAccessPolicy.is_user_owner error: %s", error)
             return False
 
     def is_goal_in_group_where_user_is_student(self, request, view, action):
@@ -139,6 +139,6 @@ class GoalAccessPolicy(BaseAccessPolicy):
                 return False
             return requester.student_groups.filter(id=goal.group_id).exists()
         except Exception as error:
-            logger.debug(
+            logger.error(
                 "GoalAccessPolicy.is_goal_in_group_where_user_is_student error: %s", error)
             return False

@@ -183,9 +183,34 @@ SPECTACULAR_SETTINGS = {
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+        'detailed': {
+            'format': '[{levelname}] {asctime} {name}: {message}',
+            'style': '{',
+        }
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'data_import_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'backend', 'mastery', 'logs', 'data_import.log'),
+            'maxBytes': 10 * 1024 * 1024,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'detailed',
+        },
+        'access_policies_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'backend', 'mastery', 'logs', 'access_policies.log'),
+            'maxBytes': 10 * 1024 * 1024,  # 10 MB
+            'backupCount': 10,
+            'formatter': 'detailed',
         },
     },
     'root': {
@@ -197,6 +222,16 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False,
+        },
+        'mastery.data_import': {
+            'handlers': ['console', 'data_import_file'],
+            'level': 'DEBUG', # TODO: discuss if need to changed to INFO when in production
+            'propagate': False,
+        },
+        'mastery.access_policies': {
+            'handlers': ['console', 'access_policies_file'],
+            'level': 'DEBUG', # TODO: discuss if need to changed to INFO when in production
+            'propagate': True,
         },
     },
 }
