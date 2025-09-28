@@ -3,32 +3,29 @@
   import type { SubjectReadable, SchoolReadable } from '../generated/types.gen'
   import ButtonMini from './ButtonMini.svelte'
 
-  const {
-    subject = null,
-    school = null,
-    onDone,
-  } = $props<{
+  const { subject, school, onDone } = $props<{
     subject: SubjectReadable | null
     school: SchoolReadable | null
     onDone: () => void
   }>()
-  let localSubject = $derived<Partial<SubjectReadable>>({ ...subject })
-
-  // What determines if we can edit the subject?
-  let isFormValid = $derived(
-    !!localSubject.displayName && !!localSubject.shortName && !!localSubject.ownedBySchoolId
-  )
+  let displayName = $state<string | null>(null)
+  let shortName = $state<string | null>(null)
+  let isFormValid = $derived(!!displayName?.trim() && !!shortName?.trim())
 
   const handleSave = async () => {
     try {
-      if (localSubject.id) {
+      if (subject?.id) {
         await subjectsUpdate({
-          path: { id: localSubject.id },
-          body: localSubject,
+          path: { id: subject.id },
+          body: { ...subject, displayName, shortName },
         })
       } else {
+        if (displayName === null || shortName === null || school === null) {
+          console.error('Missing required fields to create subject')
+          return
+        }
         await subjectsCreate({
-          body: localSubject,
+          body: { displayName, shortName, ownedBySchoolId: school.id },
         })
       }
       onDone()
@@ -38,20 +35,16 @@
   }
 
   $effect(() => {
-    localSubject = {
-      ...subject,
+    if (subject) {
+      displayName = subject.displayName ?? null
+      shortName = subject.shortName ?? null
     }
   })
 </script>
 
 <div class="p-4">
-  <h3 class="pb-2">{localSubject.id ? 'Redigerer' : 'Nytt'} mål for {school?.displayName}</h3>
+  <h3 class="pb-2">{subject?.id ? 'Redigerer' : 'Nytt'} mål for {school?.displayName}</h3>
   <hr />
-
-  <pre>
-    {JSON.stringify(localSubject, null, 2)}
-    {JSON.stringify(school, null, 2)}
-  </pre>
 
   <div class="form-group mb-3">
     <label for="subjectName" class="form-label">Navn</label>
@@ -59,7 +52,8 @@
       id="subjectName"
       type="text"
       class="form-control rounded-0 border-2 border-primary input-field"
-      bind:value={localSubject.displayName}
+      name="displayName"
+      bind:value={displayName}
       placeholder="Engelsk 3. årstrinn"
     />
 
@@ -68,7 +62,8 @@
       id="subjectShortName"
       type="text"
       class="form-control rounded-0 border-2 border-primary input-field"
-      bind:value={localSubject.shortName}
+      name="shortName"
+      bind:value={shortName}
       placeholder="Engelsk"
     />
   </div>
@@ -95,7 +90,6 @@
         skin: 'secondary',
         variant: 'label-only',
         classes: 'm-2',
-        disabled: !isFormValid,
         onClick: () => onDone(),
       }}
     >

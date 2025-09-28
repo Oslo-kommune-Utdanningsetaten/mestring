@@ -69,6 +69,14 @@
     }
   }
 
+  const handleKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      if (masterySchemaWip) {
+        handleDone()
+      }
+    }
+  }
+
   const getSchoolName = (schoolId: string | undefined) => {
     return schools.find(school => school.id === schoolId)?.displayName || '??'
   }
@@ -200,13 +208,15 @@
   </div>
 </section>
 
+<svelte:window on:keydown={handleKeydown} />
+
 <!-- offcanvas for creating/editing goals -->
-<div class="custom-offcanvas shadow-sm" class:visible={!!masterySchemaWip}>
+<div class="offcanvas-edit custom-offcanvas-edit shadow-sm" class:visible={!!masterySchemaWip}>
   <MasterySchemaEdit masterySchema={masterySchemaWip} onDone={handleDone} />
 </div>
 
 <style>
-  .custom-offcanvas {
+  .custom-offcanvas-edit {
     right: -70vw;
     width: 70vw;
     overflow-y: auto;

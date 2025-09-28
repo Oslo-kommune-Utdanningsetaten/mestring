@@ -98,7 +98,7 @@
   }
 
   const handleEditSubject = (subject: SubjectReadable | null) => {
-    if (subject) {
+    if (subject?.id) {
       subjectWip = { ...subject }
     } else {
       subjectWip = { ownedBySchoolId: selectedSchool?.id } as SubjectReadable
@@ -114,6 +114,14 @@
       console.error('Error deleting schema:', error)
     } finally {
       await fetchSubjects()
+    }
+  }
+
+  const handleKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      if (subjectWip) {
+        handleDone()
+      }
     }
   }
 
@@ -280,8 +288,10 @@
   </div>
 </section>
 
+<svelte:window on:keydown={handleKeydown} />
+
 <!-- offcanvas for creating/editing subjects -->
-<div class="custom-offcanvas" class:visible={!!subjectWip && !!selectedSchool}>
+<div class="offcanvas-edit" class:visible={!!subjectWip && !!selectedSchool}>
   <SubjectEdit subject={subjectWip} school={selectedSchool} onDone={handleDone} />
 </div>
 

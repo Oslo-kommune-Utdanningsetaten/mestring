@@ -425,12 +425,12 @@
 <svelte:window on:keydown={handleKeydown} />
 
 <!-- offcanvas for creating/editing goals -->
-<div class="custom-offcanvas" class:visible={!!goalWip}>
+<div class="offcanvas-edit" class:visible={!!goalWip}>
   <GoalEdit goal={goalWip} {group} isGoalPersonal={false} onDone={handleGoalDone} />
 </div>
 
 <!-- offcanvas for adding an observation -->
-<div class="custom-offcanvas" class:visible={!!observationWip}>
+<div class="offcanvas-edit" class:visible={!!observationWip}>
   <ObservationEdit
     student={studentForObservation}
     observation={observationWip}
