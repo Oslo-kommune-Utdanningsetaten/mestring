@@ -57,7 +57,7 @@
       placeholder="Engelsk 3. årstrinn"
     />
 
-    <label for="subjectShortName" class="form-label">Kortnavn</label>
+    <label for="subjectShortName" class="form-label pt-3">Kortnavn</label>
     <input
       id="subjectShortName"
       type="text"

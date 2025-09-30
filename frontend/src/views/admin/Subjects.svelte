@@ -170,6 +170,11 @@
         <div class="spinner-border text-primary" role="status"></div>
         <span>Henter skoler...</span>
       </div>
+    {:else if isLoadingSubjects}
+      <div class="m-4">
+        <div class="spinner-border text-primary" role="status"></div>
+        <span>Henter fag...</span>
+      </div>
     {:else}
       <div class="pkt-inputwrapper">
         <select
