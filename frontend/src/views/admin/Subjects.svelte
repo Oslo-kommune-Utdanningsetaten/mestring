@@ -246,7 +246,11 @@
               <div class="row">
                 <span class="col-2">Grupper</span>
                 <span class="col-10">
-                  {@render groupsInfo(groupsBySubjectId[subject.id] || [])}
+                  {#if groupsBySubjectId[subject.id].length > 0}
+                    {@render groupsInfo(groupsBySubjectId[subject.id])}
+                  {:else}
+                    ingen
+                  {/if}
                 </span>
               </div>
               <div class="row">
