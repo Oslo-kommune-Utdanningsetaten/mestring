@@ -17,6 +17,7 @@
   let isLoadingSchools = $state<boolean>(false)
   let subjectFetchSelection = $state<string>('only-school-owned')
   let groupsBySubjectId = $state<Record<string, GroupReadable[]>>({})
+  let nameFilter = $state<string>('')
 
   // Radio options for subject filtering
   const subjectFetchOptions = [
@@ -32,6 +33,20 @@
         ? { isOwnedBySchool: false }
         : { isOwnedBySchool: true }
   )
+
+  let filteredSubjects = $derived(
+    nameFilter
+      ? subjects.filter(subject =>
+          subject.displayName.toLowerCase().includes(nameFilter.toLowerCase())
+        )
+      : subjects
+  )
+
+  let headerText = $derived.by(() => {
+    let text = selectedSchool ? `Fag ved ${selectedSchool.displayName}` : 'Alle fag'
+    text = nameFilter ? `${text} som inneholder "${nameFilter}"` : text
+    return text
+  })
 
   const fetchSchools = async () => {
     isLoadingSchools = true
@@ -162,7 +177,7 @@
 {/snippet}
 
 <section class="pt-3">
-  <h1 class="mb-4">Subjects</h1>
+  <h2 class="py-3">{headerText}</h2>
   <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">
     {#if isLoadingSchools}
@@ -190,6 +205,12 @@
           {/each}
         </select>
       </div>
+      <input
+        type="text"
+        class="group-filter-input"
+        placeholder="Navn på fag"
+        bind:value={nameFilter}
+      />
     {/if}
   </div>
 
@@ -225,10 +246,10 @@
   </ButtonMini>
 
   <div class="mt-4">
-    {#if !subjects.length}
+    {#if !filteredSubjects.length}
       <div class="alert alert-info">No subjects available for the selected school.</div>
     {:else}
-      {#each subjects as subject}
+      {#each filteredSubjects as subject}
         <div class="card shadow-sm">
           <div class="card-body">
             <h3 class="card-title">
@@ -310,5 +331,13 @@
   }
   .compact-grid .row {
     font-size: small;
+  }
+  .group-filter-input {
+    border: 2px solid var(--bs-primary);
+    border-radius: 0;
+    height: 48px;
+    margin-top: 0px;
+    padding-left: 15px;
+    margin-left: 10px;
   }
 </style>

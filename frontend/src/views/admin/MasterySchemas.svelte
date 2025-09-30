@@ -91,7 +91,7 @@
 </script>
 
 <section class="pt-3">
-  <h1 class="mb-4">Mastery Schemas</h1>
+  <h2 class="mb-4">Mastery Schemas</h2>
   <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">
     {#if isLoadingSchools}

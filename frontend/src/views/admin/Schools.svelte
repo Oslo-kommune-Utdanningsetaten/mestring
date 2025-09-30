@@ -218,10 +218,10 @@
 </script>
 
 <section class="container py-3">
-  <h1>Dataimport for skoler</h1>
+  <h2>Dataimport for skoler</h2>
 
   <!-- Import school by org number -->
-  <div class="shadow-sm p-4 mb-4">
+  <div class="py-4">
     <pkt-textinput
       label="Legg til ny skole"
       placeholder="Organisasjonsnummer"
