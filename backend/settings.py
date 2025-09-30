@@ -180,6 +180,10 @@ SPECTACULAR_SETTINGS = {
     'SCHEMA_PATH_PREFIX': '/api',
 }
 
+# Ensure logs directory exists
+logs_dir = os.path.join(BASE_DIR, 'logs')
+os.makedirs(logs_dir, exist_ok=True)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -200,14 +204,14 @@ LOGGING = {
         },
         'data_import_file': {
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'backend', 'mastery', 'logs', 'data_import.log'),
+            'filename': os.path.join(logs_dir, 'data_import.log'),
             'maxBytes': 10 * 1024 * 1024,  # 10 MB
             'backupCount': 5,
             'formatter': 'detailed',
         },
         'access_policies_file': {
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'backend', 'mastery', 'logs', 'access_policies.log'),
+            'filename': os.path.join(logs_dir, 'access_policies.log'),
             'maxBytes': 10 * 1024 * 1024,  # 10 MB
             'backupCount': 10,
             'formatter': 'detailed',
