@@ -2,7 +2,7 @@
   import type { Snippet } from 'svelte'
 
   interface OffcanvasProps {
-    open?: boolean
+    isOpen: boolean
     width?: string
     side?: 'right' | 'left'
     ariaLabel?: string
@@ -11,7 +11,7 @@
   }
 
   let {
-    open = false,
+    isOpen = $bindable(false),
     width = '50vw',
     side = 'right',
     ariaLabel = 'Panel',
@@ -22,15 +22,15 @@
   type PanelState = 'closed' | 'opening' | 'open' | 'closing'
   let panelState = $state<PanelState>('closed')
 
-  // State machine (panelState) depends on external `open` prop
+  // State machine (panelState) depends on external `isOpen` prop
   $effect(() => {
-    if (open) {
+    if (isOpen) {
       if (panelState === 'closed') {
         panelState = 'opening'
         // Double requestAnimationFrame to ensure mount + initial transform paint before switching to 'open'
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            if (open && panelState === 'opening') {
+            if (isOpen && panelState === 'opening') {
               panelState = 'open'
             }
           })
@@ -55,9 +55,8 @@
     if (panelState === 'closed' || panelState === 'closing') return
     if (e.key === 'Escape') {
       e.stopPropagation()
-      if (panelState === 'open' || panelState === 'opening') {
-        panelState = 'closing'
-      }
+      // Trigger close by mutating bound prop; state machine reacts in effect.
+      isOpen = false
     }
   }
 </script>
@@ -83,16 +82,15 @@
     position: fixed;
     top: 0;
     bottom: 0;
-    background: #fff;
+    background-color: #fff;
     z-index: 1050;
     overflow-y: auto;
     box-shadow: -10px 0px 20px 5px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     max-width: 100%;
-    outline: none;
     transform: translateX(var(--initial-shift));
-    transition: transform 260ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    transition: transform 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
   }
   .offcanvas-panel.right {
     right: 0;

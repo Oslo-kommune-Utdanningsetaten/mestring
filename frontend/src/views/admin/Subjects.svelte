@@ -306,10 +306,9 @@
 
 <!-- Offcanvas panel to create/edit subject -->
 <Offcanvas
-  open={isSubjectEditorOpen}
+  bind:isOpen={isSubjectEditorOpen}
   ariaLabel="Rediger fag"
   onClosed={() => {
-    isSubjectEditorOpen = false
     subjectWip = null
     fetchSubjects()
   }}
