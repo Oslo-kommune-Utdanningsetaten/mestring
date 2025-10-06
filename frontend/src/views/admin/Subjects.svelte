@@ -6,11 +6,13 @@
   import { urlStringFrom } from '../../utils/functions'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import SubjectEdit from '../../components/SubjectEdit.svelte'
+  import Offcanvas from '../../components/Offcanvas.svelte'
   import { dataStore } from '../../stores/data'
 
   const router = useTinyRouter()
   let subjects = $derived<SubjectReadable[]>([])
   let subjectWip = $state<SubjectReadable | null>(null)
+  let isSubjectEditorOpen = $state(false)
   let schools = $state<SchoolReadable[]>([])
   let selectedSchool = $derived<SchoolReadable | null>(null)
   let isLoadingSubjects = $state<boolean>(false)
@@ -107,9 +109,8 @@
     }
   }
 
-  const handleDone = () => {
-    subjectWip = null
-    fetchSubjects()
+  const closeEditor = () => {
+    isSubjectEditorOpen = false
   }
 
   const handleEditSubject = (subject: SubjectReadable | null) => {
@@ -118,6 +119,7 @@
     } else {
       subjectWip = { ownedBySchoolId: selectedSchool?.id } as SubjectReadable
     }
+    isSubjectEditorOpen = true
   }
 
   const handleDeleteSubject = async (subjectId: string) => {
@@ -129,14 +131,6 @@
       console.error('Error deleting schema:', error)
     } finally {
       await fetchSubjects()
-    }
-  }
-
-  const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      if (subjectWip) {
-        handleDone()
-      }
     }
   }
 
@@ -180,38 +174,26 @@
   <h2 class="py-3">{headerText}</h2>
   <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">
-    {#if isLoadingSchools}
-      <div class="m-4">
-        <div class="spinner-border text-primary" role="status"></div>
-        <span>Henter skoler...</span>
-      </div>
-    {:else if isLoadingSubjects}
-      <div class="m-4">
-        <div class="spinner-border text-primary" role="status"></div>
-        <span>Henter fag...</span>
-      </div>
-    {:else}
-      <div class="pkt-inputwrapper">
-        <select
-          class="pkt-input"
-          id="groupSelect"
-          onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
-        >
-          <option value="0" selected={!selectedSchool?.id}>Velg skole</option>
-          {#each schools as school}
-            <option value={school.id} selected={school.id === selectedSchool?.id}>
-              {school.displayName}
-            </option>
-          {/each}
-        </select>
-      </div>
-      <input
-        type="text"
-        class="group-filter-input"
-        placeholder="Navn på fag"
-        bind:value={nameFilter}
-      />
-    {/if}
+    <div class="pkt-inputwrapper">
+      <select
+        class="pkt-input"
+        id="groupSelect"
+        onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
+      >
+        <option value="0" selected={!selectedSchool?.id}>Velg skole</option>
+        {#each schools as school}
+          <option value={school.id} selected={school.id === selectedSchool?.id}>
+            {school.displayName}
+          </option>
+        {/each}
+      </select>
+    </div>
+    <input
+      type="text"
+      class="group-filter-input"
+      placeholder="Navn på fag"
+      bind:value={nameFilter}
+    />
   </div>
 
   <!-- Radio buttons for filtering subjects -->
@@ -270,17 +252,21 @@
                   {#if groupsBySubjectId[subject.id].length > 0}
                     {@render groupsInfo(groupsBySubjectId[subject.id])}
                   {:else}
-                    ingen
+                    <span class="fst-italic">ingen</span>
                   {/if}
                 </span>
               </div>
               <div class="row">
                 <span class="col-2">Grepkode</span>
-                <span class="col-10">{subject.grepCode || 'ukjent'}</span>
+                <span class="col-10 {subject.grepCode ? '' : 'fst-italic'}">
+                  {subject.grepCode || 'ukjent'}
+                </span>
               </div>
               <div class="row">
                 <span class="col-2">Opplæringsfag</span>
-                <span class="col-10">{subject.grepGroupCode || 'ukjent'}</span>
+                <span class="col-10 {subject.grepGroupCode ? '' : 'fst-italic'}">
+                  {subject.grepGroupCode || 'ukjent'}
+                </span>
               </div>
             </div>
 
@@ -318,12 +304,20 @@
   </div>
 </section>
 
-<svelte:window on:keydown={handleKeydown} />
-
-<!-- offcanvas for creating/editing subjects -->
-<div class="offcanvas-edit" class:visible={!!subjectWip && !!selectedSchool}>
-  <SubjectEdit subject={subjectWip} school={selectedSchool} onDone={handleDone} />
-</div>
+<!-- Offcanvas panel to create/edit subject -->
+<Offcanvas
+  open={isSubjectEditorOpen}
+  ariaLabel="Rediger fag"
+  onClose={closeEditor}
+  onClosed={() => {
+    subjectWip = null
+    fetchSubjects()
+  }}
+>
+  {#if subjectWip && selectedSchool}
+    <SubjectEdit subject={subjectWip} school={selectedSchool} onDone={closeEditor} />
+  {/if}
+</Offcanvas>
 
 <style>
   .compact-grid {
