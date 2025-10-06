@@ -214,94 +214,101 @@
 </section>
 
 <section class="py-4">
-  <ButtonMini
-    options={{
-      title: 'Nytt fag',
-      iconName: 'plus-sign',
-      skin: 'primary',
-      variant: 'label-only',
-      classes: '',
-      onClick: () => handleEditSubject(null),
-    }}
-  >
-    Nytt fag
-  </ButtonMini>
-
-  <div class="mt-4">
-    {#if !filteredSubjects.length}
-      <div class="alert alert-info">No subjects available for the selected school.</div>
-    {:else}
-      {#each filteredSubjects as subject}
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h3 class="card-title">
-              {subject.displayName}
-            </h3>
-            <div class="compact-grid">
-              {#if subject.ownedBySchoolId}
-                <div class="row">
-                  <span class="col-2">Eies av</span>
-                  <span class="col-10">
-                    {schools.find(s => s.id === subject.ownedBySchoolId)?.displayName}
-                  </span>
-                </div>
-              {/if}
-              <div class="row">
-                <span class="col-2">Grupper</span>
-                <span class="col-10">
-                  {#if groupsBySubjectId[subject.id].length > 0}
-                    {@render groupsInfo(groupsBySubjectId[subject.id])}
-                  {:else}
-                    <span class="fst-italic">ingen</span>
-                  {/if}
-                </span>
-              </div>
-              <div class="row">
-                <span class="col-2">Grepkode</span>
-                <span class="col-10 {subject.grepCode ? '' : 'fst-italic'}">
-                  {subject.grepCode || 'ukjent'}
-                </span>
-              </div>
-              <div class="row">
-                <span class="col-2">Opplæringsfag</span>
-                <span class="col-10 {subject.grepGroupCode ? '' : 'fst-italic'}">
-                  {subject.grepGroupCode || 'ukjent'}
-                </span>
-              </div>
-            </div>
-
-            {#if subject.ownedBySchoolId}
-              <ButtonMini
-                options={{
-                  title: 'Rediger',
-                  iconName: 'edit',
-                  skin: 'secondary',
-                  variant: 'icon-left',
-                  classes: 'my-2 me-2',
-                  onClick: () => handleEditSubject(subject),
-                }}
-              >
-                Rediger
-              </ButtonMini>
-
-              <ButtonMini
-                options={{
-                  title: 'Slett',
-                  iconName: 'trash-can',
-                  skin: 'secondary',
-                  variant: 'icon-left',
-                  classes: 'my-2',
-                  onClick: () => handleDeleteSubject(subject.id),
-                }}
-              >
-                Slett
-              </ButtonMini>
-            {/if}
-          </div>
-        </div>
-      {/each}
-    {/if}
+  <div class="d-flex align-items-center mt-2 mb-3 gap-2">
+    <ButtonMini
+      options={{
+        title: 'Nytt fag',
+        iconName: 'plus-sign',
+        skin: 'primary',
+        variant: 'icon-left',
+        classes: 'add-subject-btn',
+        onClick: () => handleEditSubject(null),
+      }}
+    />
   </div>
+
+  {#if !filteredSubjects.length}
+    <div class="alert alert-info mt-3">Ingen fag for valgt filter.</div>
+  {:else}
+    <div class="subjects-grid-wrapper mt-4">
+      <div class="subjects-grid" role="table" aria-label="Fagliste">
+        <div class="grid-header" role="row">
+          <div role="columnheader">Fag</div>
+          <div role="columnheader">Eies av</div>
+          <div role="columnheader">Grupper</div>
+          <div role="columnheader">Grepkode</div>
+          <div role="columnheader">Opplæringsfag</div>
+          <div role="columnheader" class="text-end">Handlinger</div>
+        </div>
+
+        {#each filteredSubjects as subject (subject.id)}
+          <div class="grid-row" role="row">
+            <!-- Fag navn -->
+            <div class="cell subject-name" role="cell">{subject.displayName}</div>
+            <!-- Eies av -->
+            <div class="cell" role="cell">
+              {#if subject.ownedBySchoolId}
+                {schools.find(s => s.id === subject.ownedBySchoolId)?.displayName}
+              {:else}
+                <span class="fst-italic">Globalt</span>
+              {/if}
+            </div>
+            <!-- Grupper -->
+            <div class="cell groups-cell" role="cell">
+              {#if (groupsBySubjectId[subject.id] || []).length > 0}
+                {@render groupsInfo(groupsBySubjectId[subject.id])}
+              {:else}
+                <span class="fst-italic">ingen</span>
+              {/if}
+            </div>
+            <!-- Grepkode -->
+            <div class="cell" role="cell">
+              {#if subject.grepCode}
+                {subject.grepCode}
+              {:else}
+                <span class="fst-italic">ukjent</span>
+              {/if}
+            </div>
+            <!-- Opplæringsfag / grepGroupCode -->
+            <div class="cell" role="cell">
+              {#if subject.grepGroupCode}
+                {subject.grepGroupCode}
+              {:else}
+                <span class="fst-italic">ukjent</span>
+              {/if}
+            </div>
+            <!-- Actions -->
+            <div class="cell actions text-end" role="cell">
+              {#if subject.ownedBySchoolId}
+                <ButtonMini
+                  options={{
+                    title: 'Rediger',
+                    iconName: 'edit',
+                    skin: 'secondary',
+                    variant: 'icon-only',
+                    size: 'tiny',
+                    classes: 'me-1',
+                    onClick: () => handleEditSubject(subject),
+                  }}
+                />
+                <ButtonMini
+                  options={{
+                    title: 'Slett',
+                    iconName: 'trash-can',
+                    skin: 'secondary',
+                    variant: 'icon-only',
+                    size: 'tiny',
+                    classes: 'me-0',
+                    onClick: () => handleDeleteSubject(subject.id),
+                  }}
+                />
+              {/if}
+            </div>
+          </div>
+        {/each}
+      </div>
+    </div>
+  {/if}
 </section>
 
 <!-- Offcanvas panel to create/edit subject -->
@@ -319,18 +326,94 @@
 </Offcanvas>
 
 <style>
-  .compact-grid {
-    margin-bottom: 1rem;
-  }
-  .compact-grid .row {
-    font-size: small;
-  }
   .group-filter-input {
     border: 2px solid var(--bs-primary);
-    border-radius: 0;
     height: 48px;
-    margin-top: 0px;
-    padding-left: 15px;
+    padding: 0 15px;
     margin-left: 10px;
+  }
+
+  .subjects-grid-wrapper {
+    overflow-x: auto;
+  }
+
+  .subjects-grid {
+    display: grid;
+    gap: 0.5rem 1rem;
+  }
+
+  .subjects-grid > .grid-header,
+  .subjects-grid > .grid-row {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 2fr 0.9fr 1fr auto;
+    min-height: 2.1rem;
+    align-items: center;
+  }
+
+  .subjects-grid > .grid-header {
+    font-weight: 600;
+    border-bottom: 1px solid var(--bs-border-color, #ccc);
+    background: var(--bs-body-bg, #fff);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .subjects-grid > .grid-header > *,
+  .subjects-grid .cell {
+    padding: 0.25rem;
+    text-align: left !important;
+  }
+
+  .subjects-grid > .grid-header > :first-child,
+  .subjects-grid .grid-row > .cell:first-child {
+    padding-left: 0;
+  }
+
+  .subjects-grid .cell {
+    font-size: 0.85rem;
+  }
+
+  .subjects-grid .subject-name {
+    font-weight: 500;
+  }
+
+  .subjects-grid .grid-row {
+    border-bottom: 1px solid var(--bs-border-color, #e2e2e2);
+  }
+
+  .subjects-grid .grid-row:hover .cell {
+    background: var(--bs-light, #f8f9fa);
+  }
+
+  .subjects-grid .actions,
+  .subjects-grid > .grid-header > .text-end {
+    text-align: right;
+  }
+
+  .groups-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .groups-cell a {
+    background: var(--bs-info-bg-subtle, #e7f5ff);
+    padding: 2px 4px;
+    border-radius: 2px;
+    white-space: nowrap;
+    font-size: inherit;
+  }
+
+  @media (max-width: 780px) {
+    .subjects-grid > .grid-header,
+    .subjects-grid > .grid-row {
+      grid-template-columns: 2fr 1.2fr 2fr 0.9fr auto;
+    }
+
+    .subjects-grid > .grid-header > :nth-child(5),
+    .subjects-grid > .grid-row > :nth-child(5) {
+      display: none;
+    }
   }
 </style>

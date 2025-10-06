@@ -219,13 +219,15 @@
       <!-- Drag handle -->
       <span>
         {#if goal.isPersonal}
-          <pkt-icon
-            title="Endre rekkefølge"
-            class="me-2 row-handle-draggable"
-            name="drag"
-            role="button"
-            tabindex="0"
-          ></pkt-icon>
+          <ButtonMini
+            options={{
+              size: 'tiny',
+              iconName: 'drag',
+              title: 'Endre rekkefølge',
+              classes: 'me-2 row-handle-draggable',
+              onClick: () => {}, // drag handle only
+            }}
+          />
         {/if}
       </span>
       <!-- Goal order -->
@@ -316,7 +318,7 @@
         </div>
       {:else}
         <div class="goal-secondary-row">
-          <div class="student-observations-row">
+          <div class="student-observations-row mb-2">
             <span>Dato</span>
             <span>Verdi</span>
             <span>Handlinger</span>
@@ -330,35 +332,25 @@
                 {observation.masteryValue}
               </span>
               <span>
-                <pkt-icon
-                  title="Slett observasjon"
-                  class="hover-glow me-2"
-                  name="trash-can"
-                  onclick={() => handleDeleteObservation(observation.id)}
-                  onkeydown={(e: any) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      handleDeleteObservation(observation.id)
-                    }
+                <ButtonMini
+                  options={{
+                    size: 'tiny',
+                    iconName: 'trash-can',
+                    title: 'Slett observasjon',
+                    classes: 'hover-glow me-2',
+                    onClick: () => handleDeleteObservation(observation.id),
                   }}
-                  role="button"
-                  tabindex="0"
-                ></pkt-icon>
+                />
                 {#if index === goal?.observations.length - 1}
-                  <pkt-icon
-                    title="Rediger observasjon"
-                    class="hover-glow me-2"
-                    name="edit"
-                    onclick={() => handleEditObservation(goal, observation)}
-                    onkeydown={(e: any) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        handleEditObservation(goal, observation)
-                      }
+                  <ButtonMini
+                    options={{
+                      size: 'tiny',
+                      iconName: 'edit',
+                      title: 'Rediger observasjon',
+                      classes: 'hover-glow me-2',
+                      onClick: () => handleEditObservation(goal, observation),
                     }}
-                    role="button"
-                    tabindex="0"
-                  ></pkt-icon>
+                  />
                 {/if}
               </span>
             </div>
@@ -436,7 +428,7 @@
     align-items: center;
   }
 
-  .row-handle-draggable {
+  :global(.row-handle-draggable) {
     cursor: move;
     vertical-align: -8%;
   }
