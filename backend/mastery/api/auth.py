@@ -18,7 +18,7 @@ FEIDE_USER_INFO_URL = os.environ.get("FEIDE_USER_INFO_URL")
 FEIDE_CALLBACK = os.environ.get("FEIDE_CALLBACK")
 FEIDE_LOGOUT_REDIR = os.environ.get("FEIDE_LOGOUT_REDIR")
 FEIDE_REALM = os.environ.get("FEIDE_REALM")
-FRONTEND = "http://localhost:5173"
+FRONTEND = os.environ.get("FRONTEND")
 
 logger = logging.getLogger(__name__)
 client = WebApplicationClient(FEIDE_CLIENT_ID)
