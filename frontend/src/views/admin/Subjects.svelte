@@ -308,8 +308,8 @@
 <Offcanvas
   open={isSubjectEditorOpen}
   ariaLabel="Rediger fag"
-  onClose={closeEditor}
   onClosed={() => {
+    isSubjectEditorOpen = false
     subjectWip = null
     fetchSubjects()
   }}

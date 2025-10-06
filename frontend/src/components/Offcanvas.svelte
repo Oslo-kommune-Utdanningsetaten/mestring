@@ -1,20 +1,12 @@
 <script lang="ts">
   import type { Snippet } from 'svelte'
 
-  /*
-    Simplified Offcanvas component using a single finite state variable:
-    panelState: 'closed' | 'opening' | 'open' | 'closing'
-      External control: `open` prop (controlled). ESC invokes onClose (parent may ignore).
-      Backdrop removed per request to avoid interaction issues.
-    Removed closeOnBackdrop / closeOnEscape to minimize props and keep behavior consistent & predictable.
-  */
   interface OffcanvasProps {
     open?: boolean
     width?: string
     side?: 'right' | 'left'
     ariaLabel?: string
-    onClose?: () => void // user intent (ESC/backdrop)
-    onClosed?: () => void // after animation + unmount
+    onClosed?: () => void
     children?: Snippet
   }
 
@@ -23,7 +15,6 @@
     width = '50vw',
     side = 'right',
     ariaLabel = 'Panel',
-    onClose = () => {},
     onClosed = () => {},
     children,
   }: OffcanvasProps = $props()
@@ -64,8 +55,9 @@
     if (panelState === 'closed' || panelState === 'closing') return
     if (e.key === 'Escape') {
       e.stopPropagation()
-      onClose?.()
-      return
+      if (panelState === 'open' || panelState === 'opening') {
+        panelState = 'closing'
+      }
     }
   }
 </script>
