@@ -19,6 +19,7 @@
   import GroupSVG from '../assets/group.svg.svelte'
   import PersonSVG from '../assets/person.svg.svelte'
   import ButtonMini from './ButtonMini.svelte'
+  import Offcanvas from './Offcanvas.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { getLocalStorageItem } from '../stores/localStorage'
 
@@ -33,6 +34,8 @@
   let expandedGoals = $state<Record<string, boolean>>({})
   let goalsListElement = $state<HTMLElement | null>(null)
   let subject = $derived($dataStore.subjects.find(s => s.id === subjectId) || null)
+  let isGoalEditorOpen = $state<boolean>(false)
+  let isObservationEditorOpen = $state<boolean>(false)
 
   const dateFormat = Intl.DateTimeFormat('nb', {
     month: 'long',
@@ -77,10 +80,12 @@
       masterySchemaId:
         goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
     }
+    isGoalEditorOpen = true
   }
 
   const handleCloseEditGoal = () => {
-    goalWip = null
+    isGoalEditorOpen = false
+    // Don't clear goalWip here - let onClosed handle it after animation
   }
 
   const handleEditObservation = (goal: GoalDecorated, observation: ObservationReadable | null) => {
@@ -92,34 +97,25 @@
       const prevousObservations = goal?.observations || []
       const previousObservation = prevousObservations[prevousObservations.length - 1]
       observationWip = { masteryValue: previousObservation?.masteryValue || null }
-      console.log('Creating new observation, prefilled with:', observationWip)
     }
     goalForObservation = { ...goal }
+    isObservationEditorOpen = true
   }
 
   const handleCloseEditObservation = () => {
-    observationWip = null
-  }
-
-  const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      if (goalWip) {
-        handleCloseEditGoal()
-      } else if (observationWip) {
-        handleCloseEditObservation()
-      }
-    }
+    isObservationEditorOpen = false
+    // Don't clear observationWip here - let onClosed handle it after animation
   }
 
   const handleGoalDone = async () => {
     goalForObservation = null
     handleCloseEditGoal()
-    await fetchGoalsForSubject()
+    // fetchGoalsForSubject will be called in onClosed
   }
 
   const handleObservationDone = async () => {
     handleCloseEditObservation()
-    await fetchGoalsForSubject()
+    // fetchGoalsForSubject will be called in onClosed
   }
 
   const handleDeleteObservation = async (observationId: string) => {
@@ -378,22 +374,38 @@
   </div>
 {/if}
 
-<svelte:window on:keydown={handleKeydown} />
-
 <!-- offcanvas for creating/editing goals -->
-<div class="offcanvas-edit" class:visible={!!goalWip}>
-  <GoalEdit goal={goalWip} {student} {subject} isGoalPersonal={true} onDone={handleGoalDone} />
-</div>
+<Offcanvas
+  bind:isOpen={isGoalEditorOpen}
+  ariaLabel="Rediger mål"
+  onClosed={() => {
+    goalWip = null
+    fetchGoalsForSubject()
+  }}
+>
+  {#if goalWip}
+    <GoalEdit goal={goalWip} {student} {subject} isGoalPersonal={true} onDone={handleGoalDone} />
+  {/if}
+</Offcanvas>
 
-<!-- offcanvas for adding an observation -->
-<div class="offcanvas-edit" class:visible={!!observationWip}>
-  <ObservationEdit
-    {student}
-    observation={observationWip}
-    goal={goalForObservation}
-    onDone={handleObservationDone}
-  />
-</div>
+<!-- offcanvas for creating/editing observations -->
+<Offcanvas
+  bind:isOpen={isObservationEditorOpen}
+  ariaLabel="Rediger observasjon"
+  onClosed={() => {
+    observationWip = null
+    fetchGoalsForSubject()
+  }}
+>
+  {#if observationWip}
+    <ObservationEdit
+      {student}
+      observation={observationWip}
+      goal={goalForObservation}
+      onDone={handleObservationDone}
+    />
+  {/if}
+</Offcanvas>
 
 <style>
   div.observation-item > span {
