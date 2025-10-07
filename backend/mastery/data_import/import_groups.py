@@ -49,11 +49,7 @@ def import_groups_from_file(org_number):
 
     # Handle basis groups
     for index, group_data in enumerate(basis_groups):
-        group, created = ensure_group_exists(group_data, "basis", None)
-        if not group.subject_id:
-            subject, _ = ensure_social_subject_exists(school)
-            group.subject = subject
-            group.save()
+        _, created = ensure_group_exists(group_data, "basis", None)
         if created:
             basis_group_created += 1
         else:
@@ -165,7 +161,8 @@ def ensure_group_exists(group_data, group_type, subject=None):
     # Check if group already exists
     existing_group = models.Group.objects.filter(feide_id__exact=feide_id).first()
     if existing_group:
-        # Do not touch the is_enabled flag on existing groups
+        # Do not touch the is_enabled field on existing groups
+        # Do not touch the type field on existing groups
         existing_group.display_name = group_data["displayName"]
         existing_group.subject = subject
         existing_group.valid_from = group_data.get("notBefore")
@@ -226,18 +223,3 @@ def ensure_subject_exists(grep_code):
         message = f"UDIR http trouble: {udir_response.status_code} for grep_code {grep_code}"
         logger.warning(message)
         return None, False, message
-
-
-# Basis groups need a subject
-def ensure_social_subject_exists(school):
-    social_subject_name = "Sosialt"  # TODO: This should probably be configureable for each school
-    subject = models.Subject.objects.filter(
-        owned_by_school_id=school.id, short_name=social_subject_name).first()
-    if subject:
-        return subject, False
-    subject = models.Subject.objects.create(
-        display_name=social_subject_name,
-        short_name=social_subject_name,
-        owned_by_school=school
-    )
-    return subject, True
