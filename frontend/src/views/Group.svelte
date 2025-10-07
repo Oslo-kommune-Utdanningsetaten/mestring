@@ -19,6 +19,7 @@
   import GroupSVG from '../assets/group.svg.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
   import ObservationEdit from '../components/ObservationEdit.svelte'
+  import Offcanvas from '../components/Offcanvas.svelte'
   import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
   import SparklineChart from '../components/SparklineChart.svelte'
   import GroupTypeTag from '../components/GroupTypeTag.svelte'
@@ -46,6 +47,8 @@
   let observationWip = $state<ObservationReadable | {} | null>(null)
   let goalForObservation = $state<GoalDecorated | null>(null)
   let studentForObservation = $state<UserReadable | null>(null)
+  let isGoalEditorOpen = $state<boolean>(false)
+  let isObservationEditorOpen = $state<boolean>(false)
 
   const fetchGroupData = async () => {
     if (!groupId) return
@@ -113,6 +116,7 @@
       masterySchemaId:
         goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
     }
+    isGoalEditorOpen = true
   }
 
   const handleDeleteGoal = async (goalId: string) => {
@@ -125,29 +129,13 @@
   }
 
   const handleGoalDone = async () => {
-    handleCloseEditGoal()
+    isGoalEditorOpen = false
     await fetchGroupData()
   }
 
   const handleObservationDone = async () => {
-    handleCloseEditObservation()
+    isObservationEditorOpen = false
     fetchGroupData()
-  }
-
-  const handleCloseEditGoal = () => {
-    goalWip = null
-  }
-
-  const handleCloseEditObservation = () => {
-    observationWip = null
-  }
-
-  const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      if (goalWip) {
-        handleCloseEditGoal()
-      }
-    }
   }
 
   const handleEditObservation = (
@@ -174,6 +162,7 @@
         observerId: $dataStore.currentUser.id,
       }
     }
+    isObservationEditorOpen = true
   }
 
   const handleGoalOrderChange = async (event: SortableEvent) => {
@@ -422,22 +411,38 @@
   {/if}
 </section>
 
-<svelte:window on:keydown={handleKeydown} />
+<!-- Offcanvas for creating/editing goals -->
+<Offcanvas
+  bind:isOpen={isGoalEditorOpen}
+  ariaLabel="Rediger mål"
+  onClosed={() => {
+    goalWip = null
+    fetchGroupData()
+  }}
+>
+  {#if goalWip}
+    <GoalEdit goal={goalWip} {group} isGoalPersonal={false} onDone={handleGoalDone} />
+  {/if}
+</Offcanvas>
 
-<!-- offcanvas for creating/editing goals -->
-<div class="offcanvas-edit" class:visible={!!goalWip}>
-  <GoalEdit goal={goalWip} {group} isGoalPersonal={false} onDone={handleGoalDone} />
-</div>
-
-<!-- offcanvas for adding an observation -->
-<div class="offcanvas-edit" class:visible={!!observationWip}>
-  <ObservationEdit
-    student={studentForObservation}
-    observation={observationWip}
-    goal={goalForObservation}
-    onDone={handleObservationDone}
-  />
-</div>
+<!-- Offcanvas for adding an observation -->
+<Offcanvas
+  bind:isOpen={isObservationEditorOpen}
+  ariaLabel="Rediger observasjon"
+  onClosed={() => {
+    observationWip = null
+    fetchGroupData()
+  }}
+>
+  {#if observationWip}
+    <ObservationEdit
+      student={studentForObservation}
+      observation={observationWip}
+      goal={goalForObservation}
+      onDone={handleObservationDone}
+    />
+  {/if}
+</Offcanvas>
 
 <style>
   div.observation-item > span {
