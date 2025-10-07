@@ -391,6 +391,7 @@
 <!-- offcanvas for creating/editing observations -->
 <Offcanvas
   bind:isOpen={isObservationEditorOpen}
+  width="60vw"
   ariaLabel="Rediger observasjon"
   onClosed={() => {
     observationWip = null

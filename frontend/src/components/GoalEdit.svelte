@@ -78,7 +78,7 @@
   })
 </script>
 
-<div class="p-4">
+<div class="goal-edit p-4">
   <h3 class="pb-2">{getTitle()}</h3>
   <hr />
   <div class="form-group mb-3">
@@ -173,6 +173,11 @@
 </div>
 
 <style>
+  .goal-edit {
+    width: 100%;
+    max-width: 100%;
+  }
+
   label {
     font-weight: 800;
   }

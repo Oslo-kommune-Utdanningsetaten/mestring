@@ -42,7 +42,7 @@
   })
 </script>
 
-<div class="p-4">
+<div class="subject-edit p-4">
   <h3 class="pb-2">{subject?.id ? 'Redigerer' : 'Nytt'} mål for {school?.displayName}</h3>
   <hr />
 
@@ -99,6 +99,11 @@
 </div>
 
 <style>
+  .subject-edit {
+    width: 100%;
+    max-width: 100%;
+  }
+
   label {
     font-weight: 800;
   }
