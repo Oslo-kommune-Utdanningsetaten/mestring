@@ -164,10 +164,29 @@
 
 {#snippet groupsInfo(groups: GroupReadable[])}
   {#each groups as group, index (group.id)}
-    <a class="bg-info px-1 me-1" href="/groups/{group.id}">
+    <a class="bg-info px-1 group-link" href="/groups/{group.id}">
       {group.displayName}
     </a>
   {/each}
+{/snippet}
+
+{#snippet subjectCodes(subject: SubjectReadable)}
+  {#if !subject.grepCode && !subject.grepGroupCode}
+    <span class="fst-italic">mangler</span>
+  {:else}
+    <!-- grep code -->
+    {#if subject.grepCode}
+      <span title="grepCode">{subject.grepCode}</span>
+    {:else}
+      <span class="fst-italic">mangler</span>
+    {/if}
+    <!-- Opplæringsfag / grepGroupCode -->
+    {#if subject.grepGroupCode}
+      <span title="grepGroupCode">{subject.grepGroupCode}</span>
+    {:else}
+      <span class="fst-italic">mangler</span>
+    {/if}
+  {/if}
 {/snippet}
 
 <section class="pt-3">
@@ -230,83 +249,72 @@
   {#if !filteredSubjects.length}
     <div class="alert alert-info mt-3">Ingen fag for valgt filter.</div>
   {:else}
-    <div class="subjects-grid-wrapper mt-4">
-      <div class="subjects-grid" role="table" aria-label="Fagliste">
-        <div class="grid-header" role="row">
-          <div role="columnheader">Fag</div>
-          <div role="columnheader">Eies av</div>
-          <div role="columnheader">Grupper</div>
-          <div role="columnheader">Grepkode</div>
-          <div role="columnheader">Opplæringsfag</div>
-          <div role="columnheader" class="text-end">Handlinger</div>
-        </div>
+    <div class="subjects-grid" aria-label="Fagliste">
+      <span class="item header header-row">Fag</span>
+      <span class="item header header-row">Eies av</span>
+      <span class="item header header-row">Elever</span>
+      <span class="item header header-row">Grupper</span>
+      <span class="item header header-row">Fagkoder</span>
+      <span class="item header header-row">Handlinger</span>
+      {#each filteredSubjects as subject (subject.id)}
+        <!-- Fag navn -->
+        <span class="item header">{subject.displayName}</span>
 
-        {#each filteredSubjects as subject (subject.id)}
-          <div class="grid-row" role="row">
-            <!-- Fag navn -->
-            <div class="cell subject-name" role="cell">{subject.displayName}</div>
-            <!-- Eies av -->
-            <div class="cell" role="cell">
-              {#if subject.ownedBySchoolId}
-                {schools.find(s => s.id === subject.ownedBySchoolId)?.displayName}
-              {:else}
-                <span class="fst-italic">Globalt</span>
-              {/if}
-            </div>
-            <!-- Grupper -->
-            <div class="cell groups-cell" role="cell">
-              {#if (groupsBySubjectId[subject.id] || []).length > 0}
-                {@render groupsInfo(groupsBySubjectId[subject.id])}
-              {:else}
-                <span class="fst-italic">ingen</span>
-              {/if}
-            </div>
-            <!-- Grepkode -->
-            <div class="cell" role="cell">
-              {#if subject.grepCode}
-                {subject.grepCode}
-              {:else}
-                <span class="fst-italic">ukjent</span>
-              {/if}
-            </div>
-            <!-- Opplæringsfag / grepGroupCode -->
-            <div class="cell" role="cell">
-              {#if subject.grepGroupCode}
-                {subject.grepGroupCode}
-              {:else}
-                <span class="fst-italic">ukjent</span>
-              {/if}
-            </div>
-            <!-- Actions -->
-            <div class="cell actions text-end" role="cell">
-              {#if subject.ownedBySchoolId}
-                <ButtonMini
-                  options={{
-                    title: 'Rediger',
-                    iconName: 'edit',
-                    skin: 'secondary',
-                    variant: 'icon-only',
-                    size: 'tiny',
-                    classes: 'me-1',
-                    onClick: () => handleEditSubject(subject),
-                  }}
-                />
-                <ButtonMini
-                  options={{
-                    title: 'Slett',
-                    iconName: 'trash-can',
-                    skin: 'secondary',
-                    variant: 'icon-only',
-                    size: 'tiny',
-                    classes: 'me-0',
-                    onClick: () => handleDeleteSubject(subject.id),
-                  }}
-                />
-              {/if}
-            </div>
-          </div>
-        {/each}
-      </div>
+        <!-- Eies av -->
+        <span class="item">
+          {#if subject.ownedBySchoolId}
+            {schools.find(s => s.id === subject.ownedBySchoolId)?.displayName}
+          {:else}
+            <span class="fst-italic">Globalt</span>
+          {/if}
+        </span>
+
+        <span class="item">
+          <span class="fst-italic">0</span>
+        </span>
+
+        <!-- Grupper -->
+        <span class="item">
+          {#if (groupsBySubjectId[subject.id] || []).length > 0}
+            {@render groupsInfo(groupsBySubjectId[subject.id])}
+          {:else}
+            <span class="fst-italic">ingen</span>
+          {/if}
+        </span>
+
+        <!-- Grep code stuff -->
+        <span class="item">
+          {@render subjectCodes(subject)}
+        </span>
+
+        <!-- Actions -->
+        <span class="item">
+          {#if subject.ownedBySchoolId}
+            <ButtonMini
+              options={{
+                title: 'Rediger',
+                iconName: 'edit',
+                skin: 'secondary',
+                variant: 'icon-only',
+                size: 'tiny',
+                classes: 'me-1',
+                onClick: () => handleEditSubject(subject),
+              }}
+            />
+            <ButtonMini
+              options={{
+                title: 'Slett',
+                iconName: 'trash-can',
+                skin: 'secondary',
+                variant: 'icon-only',
+                size: 'tiny',
+                classes: 'me-0',
+                onClick: () => handleDeleteSubject(subject.id),
+              }}
+            />
+          {/if}
+        </span>
+      {/each}
     </div>
   {/if}
 </section>
@@ -333,87 +341,35 @@
     margin-left: 10px;
   }
 
-  .subjects-grid-wrapper {
-    overflow-x: auto;
-  }
-
   .subjects-grid {
     display: grid;
-    gap: 0.5rem 1rem;
+    grid-template-columns: 1.5fr 2fr 0.5fr 1.5fr 1fr 0.5fr;
+    align-items: start;
+    gap: 0;
   }
 
-  .subjects-grid > .grid-header,
-  .subjects-grid > .grid-row {
-    display: grid;
-    grid-template-columns: 2fr 1.2fr 2fr 0.9fr 1fr auto;
-    min-height: 2.1rem;
-    align-items: center;
+  .item.header-row {
+    background-color: var(--bs-light);
   }
 
-  .subjects-grid > .grid-header {
-    font-weight: 600;
-    border-bottom: 1px solid var(--bs-border-color, #ccc);
-    background: var(--bs-body-bg, #fff);
-    position: sticky;
-    top: 0;
-    z-index: 1;
+  .item {
+    padding: 0.5rem;
+    border-top: 1px solid var(--bs-border-color);
+    min-height: 2.8rem;
   }
 
-  .subjects-grid > .grid-header > *,
-  .subjects-grid .cell {
-    padding: 0.25rem;
-    text-align: left !important;
+  .item:nth-last-child(-n + 6) {
+    border-bottom: 1px solid var(--bs-border-color);
   }
 
-  .subjects-grid > .grid-header > :first-child,
-  .subjects-grid .grid-row > .cell:first-child {
-    padding-left: 0;
+  .item.header {
+    font-weight: 800;
   }
 
-  .subjects-grid .cell {
-    font-size: 0.85rem;
-  }
-
-  .subjects-grid .subject-name {
-    font-weight: 500;
-  }
-
-  .subjects-grid .grid-row {
-    border-bottom: 1px solid var(--bs-border-color, #e2e2e2);
-  }
-
-  .subjects-grid .grid-row:hover .cell {
-    background: var(--bs-light, #f8f9fa);
-  }
-
-  .subjects-grid .actions,
-  .subjects-grid > .grid-header > .text-end {
-    text-align: right;
-  }
-
-  .groups-cell {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-
-  .groups-cell a {
-    background: var(--bs-info-bg-subtle, #e7f5ff);
-    padding: 2px 4px;
-    border-radius: 2px;
+  .group-link {
+    display: inline-block;
     white-space: nowrap;
-    font-size: inherit;
-  }
-
-  @media (max-width: 780px) {
-    .subjects-grid > .grid-header,
-    .subjects-grid > .grid-row {
-      grid-template-columns: 2fr 1.2fr 2fr 0.9fr auto;
-    }
-
-    .subjects-grid > .grid-header > :nth-child(5),
-    .subjects-grid > .grid-row > :nth-child(5) {
-      display: none;
-    }
+    font-size: 0.875rem;
+    margin-right: 0.25rem;
   }
 </style>
