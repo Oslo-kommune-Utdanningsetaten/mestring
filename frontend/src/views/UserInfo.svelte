@@ -73,13 +73,13 @@
         <div class="row">
           <div class="col-md-6">
             <div class="mb-2">
-              <strong>Navn:</strong>
+              <strong>Navn</strong>
               <div class="text-muted">{$currentUser?.name}</div>
             </div>
           </div>
           <div class="col-md-6">
             <div class="mb-2">
-              <strong>E-post:</strong>
+              <strong>E-post</strong>
               <div class="text-muted">{$currentUser?.email}</div>
             </div>
           </div>
