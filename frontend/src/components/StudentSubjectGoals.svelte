@@ -22,6 +22,7 @@
   import Offcanvas from './Offcanvas.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { getLocalStorageItem } from '../stores/localStorage'
+  import { formatDate } from '../utils/functions'
 
   const { subjectId, student } = $props<{ subjectId: string; student: UserReadable }>()
 
@@ -42,11 +43,6 @@
     day: 'numeric',
     year: 'numeric',
   })
-
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString)
-    return dateFormat.format(date)
-  }
 
   const fetchGoalsForSubject = async () => {
     try {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
   import { useTinyRouter } from 'svelte-tiny-router'
-  import type { GroupReadable, SchoolReadable } from '../../generated/types.gen'
+  import type { GroupReadable, SchoolReadable, SubjectReadable } from '../../generated/types.gen'
   import { groupsList, schoolsList, groupsUpdate } from '../../generated/sdk.gen'
   import { urlStringFrom } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
@@ -37,11 +37,26 @@
         : { isEnabled: false }
   )
 
+  const subjectsById: Record<string, SubjectReadable> = $derived(
+    $dataStore.subjects.reduce(
+      (acc, subject) => {
+        acc[subject.id] = subject
+        return acc
+      },
+      {} as Record<string, SubjectReadable>
+    )
+  )
+
   let headerText = $derived.by(() => {
     let text = selectedSchool ? `Grupper ved ${selectedSchool.displayName}` : 'Alle grupper'
     text = nameFilter ? `${text} som inneholder "${nameFilter}"` : text
     return text
   })
+
+  const getSubjectForGroup = (group: GroupReadable): string => {
+    const subject = group.subjectId ? subjectsById[group.subjectId] : null
+    return subject?.displayName || ''
+  }
 
   const fetchSchools = async () => {
     try {
@@ -194,6 +209,12 @@
   </fieldset>
 </section>
 
+<pre>{JSON.stringify(
+    $dataStore.subjects?.map(s => s.displayName),
+    null,
+    2
+  )}</pre>
+
 <section class="py-3">
   {#if selectedSchool}
     <div class="card shadow-sm w-100">
@@ -221,7 +242,13 @@
               onclick={() => handleGroupTypeToggle(group)}
               isTypeWarningEnabled={true}
             />
-            <span>Fagja</span>
+            <span>
+              {#if group.type === 'basis'}
+                {getSubjectForGroup(group)}
+              {:else}
+                {getSubjectForGroup(group)}
+              {/if}
+            </span>
             <pkt-checkbox
               label="Aktivert"
               labelPosition="hidden"

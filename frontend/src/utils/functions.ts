@@ -197,3 +197,14 @@ export const findAverage = (numbers: number[]): number => {
 export const isNumber = (value: any) => {
   return typeof value === 'number'
 }
+
+// returns YYYY-MM-DD HH:MM
+export const formatDate = (isoDate?: string | null) => {
+  if (!isoDate) return ''
+  const aDate = new Date(isoDate)
+  return (
+    aDate.toLocaleDateString('no-NO', { year: '2-digit', month: '2-digit', day: '2-digit' }) +
+    ' ' +
+    aDate.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' })
+  )
+}

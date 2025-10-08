@@ -7,6 +7,7 @@ import {
   setLocalStorageItem,
   removeLocalStorageItem,
 } from '../stores/localStorage'
+import { SUBJECTS_ALLOWED_ALL, SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
 import type { AppData } from '../types/models'
 
 let masterySchemasCache = null as MasterySchemaReadable[] | null
@@ -19,7 +20,7 @@ export const setCurrentSchool = (school: SchoolReadable) => {
       return { ...data, currentSchool: school }
     })
     if (school?.id) {
-      loadSubjectsForSchool(school.id)
+      loadSubjects(school)
     }
   }
 }
@@ -94,14 +95,23 @@ const refreshMasterySchemas = async (hardRefresh: boolean) => {
   }
 }
 
-const loadSubjectsForSchool = async (schoolId: string): Promise<void> => {
+const loadSubjects = async (school: SchoolReadable): Promise<void> => {
   try {
     const result = await subjectsList({
       query: {
-        school: schoolId,
+        school: school.id,
       },
     })
-    const subjects = result.data || []
+    const subjects = (result.data || []).filter(subject => {
+      if (school.subjectsAllowed == SUBJECTS_ALLOWED_ALL) return true
+      if (school.subjectsAllowed == SUBJECTS_ALLOWED_CUSTOM) {
+        return !!subject.ownedBySchoolId
+      } else {
+        // 'only-group'
+        return !subject.ownedBySchoolId
+      }
+    })
+    console.log('subjects for school', school.displayName, { school, subjects })
     dataStore.update(data => {
       return { ...data, subjects }
     })

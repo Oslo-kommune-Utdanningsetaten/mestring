@@ -1,6 +1,7 @@
 <script lang="ts">
   import { type DataMaintenanceTaskReadable } from '../../generated/types.gen'
   import { dataMaintenanceTasksList } from '../../generated/sdk.gen'
+  import { formatDate } from '../../utils/functions'
 
   let tasks = $state<DataMaintenanceTaskReadable[]>([])
   let isLoading = $state<boolean>(false)
@@ -11,17 +12,6 @@
     running: 'primary',
     finished: 'success',
     failed: 'danger',
-  }
-
-  // YYYY-MM-DD HH:MM
-  const formatDate = (isoDate?: string | null) => {
-    if (!isoDate) return ''
-    const d = new Date(isoDate)
-    return (
-      d.toLocaleDateString('no-NO', { year: '2-digit', month: '2-digit', day: '2-digit' }) +
-      ' ' +
-      d.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' })
-    )
   }
 
   const handleRowClick = (taskId: string) => {

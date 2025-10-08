@@ -38,6 +38,8 @@ class School(BaseModel):
     org_number = models.CharField(max_length=50)
     owner = models.CharField(max_length=200, null=True)
     is_service_enabled = models.BooleanField(default=False)
+    # which subjects can be used: 'only-custom' (owned by school), 'only-group', 'all'
+    subjects_allowed = models.CharField(max_length=50, null=False, default='all')
 
     def ensure_short_name(self, short_name):
         """Update short_name (used by import)"""
