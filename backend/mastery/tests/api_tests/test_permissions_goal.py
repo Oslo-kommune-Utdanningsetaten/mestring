@@ -6,7 +6,7 @@ from mastery.models import User, Goal
 @pytest.mark.django_db
 def test_non_user_goal_access(goal_with_group):
     client = APIClient()
-    # Non-authenticated user cannot access goals
+    # Non-authenticated user can't access goals
     resp = client.get(f'/api/goals/')
     assert resp.status_code == 403
     resp = client.get(f'/api/goals/{goal_with_group.id}/')
@@ -110,7 +110,7 @@ def test_student_goal_access(
     assert len(received_ids) == 1
     assert goal_with_group.id in received_ids
 
-    # Studen cannot list by other group (out of scope)
+    # Studen can't list by other group (out of scope)
     resp = client.get(
         '/api/goals/', {'group': other_teaching_group_with_members.id})
     assert resp.status_code == 200
@@ -133,68 +133,70 @@ def test_student_goal_access(
     resp = client.get(f'/api/goals/{goal_with_group.id}/')
     assert resp.status_code == 200
 
-    # Student cannot retrieve other student's personal goal
+    # Student can't retrieve other student's personal goal
     resp = client.get(f'/api/goals/{personal_goal_other.id}/')
     assert resp.status_code == 404
 
-    # Student cannot retrieve foreign group goal -> 403
+    # Student can't retrieve foreign group goal -> 404
     resp = client.get(f'/api/goals/{group_goal_other.id}/')
     assert resp.status_code == 404
 
-    personal_goal_data = {
-        'title': "My new personal goal",
+    # Can CREATE personal goal for themselves
+    resp = client.post('/api/goals/', {
         'student_id': student.id,
+        'title': 'My new personal goal',
         'subject_id': subject_without_group.id
-    }
-
-    # Student can create a personal goal for themself
-    resp = client.post('/api/goals/', personal_goal_data)
+    })
     assert resp.status_code == 201
+    created_goal_id = resp.json()['id']
 
-    # Student cannot create a personal goal for another student
-    other_student_goal_data = {
-        'title': "Goal for another student",
+    # Can't CREATE personal goal for other students
+    resp = client.post('/api/goals/', {
         'student_id': other_student.id,
+        'title': 'Goal for other student',
         'subject_id': subject_without_group.id
-    }
-    resp = client.post('/api/goals/', other_student_goal_data)
+    })
     assert resp.status_code == 403
 
-    # student cannot create a group goal
-    group_goal_data = {
-        'title': "Group goal I should not create",
-        'group_id': goal_with_group.group.id
-    }
-    resp = client.post('/api/goals/', group_goal_data)
+    # Can't CREATE group goal
+    resp = client.post('/api/goals/', {
+        'group_id': goal_with_group.group.id,
+        'title': 'Group goal attempt'
+    })
     assert resp.status_code == 403
 
-    # Student can update personal goal they own
-    resp = client.put(f'/api/goals/{personal_goal_self.id}/', {
-        'title': "Updated title"
+    # Can UPDATE their own personal goal
+    resp = client.put(f'/api/goals/{created_goal_id}/', {
+        'student_id': student.id,
+        'title': 'Updated personal goal',
+        'subject_id': subject_without_group.id
     })
     assert resp.status_code == 200
 
-    # Student cannot update personal goal owned by another student
+    # Can't UPDATE other student's personal goal
     resp = client.put(f'/api/goals/{personal_goal_other.id}/', {
-        'title': "Updated title for other student",
+        'student_id': other_student.id,
+        'title': 'Can't update this',
+        'subject_id': subject_without_group.id
     })
     assert resp.status_code == 403
 
-    # Student cannot update group goal even if in the group
+    # Can't UPDATE group goal
     resp = client.put(f'/api/goals/{goal_with_group.id}/', {
-        'title': "Updated title for group goal",
+        'group_id': goal_with_group.group.id,
+        'title': 'Can't update group goal'
     })
     assert resp.status_code == 403
 
-    # Student can delete personal goal they own
-    resp = client.delete(f'/api/goals/{personal_goal_self.id}/')
+    # Can DELETE their own personal goal
+    resp = client.delete(f'/api/goals/{created_goal_id}/')
     assert resp.status_code == 204
 
-    # Student cannot delete personal goal owned by another student
+    # Can't DELETE other student's personal goal
     resp = client.delete(f'/api/goals/{personal_goal_other.id}/')
     assert resp.status_code == 403
 
-    # Student cannot delete group goal even if in the group
+    # Can't DELETE group goal
     resp = client.delete(f'/api/goals/{goal_with_group.id}/')
     assert resp.status_code == 403
 
@@ -207,19 +209,22 @@ def test_teacher_goal_access(
     subject_without_group,
     teacher,
     student,
+    student_role,
+    teacher_role,
     other_student,
+    basis_group,
 ):
     """
-    Teacher visibility rules (GoalAccessPolicy.scope_queryset):
-      - Goals created_by teacher
-      - Group goals in groups they teach
-      - Student personal goals where the student is in a group they teach
-    Retrieval mirrors those (plus created_by).
+    Tests teacher access in two phases:
+    PART 1: Teaching group teacher (limited access to group goals only)
+    PART 2: Same teacher becomes basis group teacher (full access to personal goals too)
     """
     client = APIClient()
     client.force_authenticate(user=teacher)
 
-    # Personal goal for a student they teach
+    # === PART 1: Teaching group teacher ===
+
+    # Personal goal for student (teacher not in basis group yet)
     personal_goal = Goal.objects.create(
         title="Student's personal goal",
         student=student,
@@ -261,7 +266,7 @@ def test_teacher_goal_access(
         '/api/goals/', {'group': teaching_group_with_members.id, 'subject': subject_without_group.id})
     assert resp.status_code == 400
 
-    # Teacher can list goals by group they teach
+    # Can list goals in groups they teach
     resp = client.get('/api/goals/', {'group': teaching_group_with_members.id})
     assert resp.status_code == 200
     received_ids = {group['id'] for group in resp.json()}
@@ -269,25 +274,22 @@ def test_teacher_goal_access(
     assert group_goal_other.id not in received_ids
     assert personal_goal.id not in received_ids
 
-    # Teacher cannot list goals for groups they don't teach => empty
+    # Teacher can't list goals for groups they don't teach => empty
     resp = client.get(
         '/api/goals/', {'group': other_teaching_group_with_members.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
-    # Teacher can list goals for students they teach
-    #    - personal_goal
-    #    - goal_with_group (group goal in a teaching group where student is member)
+    # Can list goals for students (group goals only, not personal)
     resp = client.get('/api/goals/', {'student': student.id})
     assert resp.status_code == 200
-    received_ids = {group['id'] for group in resp.json()}
-    assert personal_goal.id in received_ids
-    assert goal_with_group.id in received_ids
-    # Should not include: personal_goal_other, group_goal_other
+    received_ids = {goal['id'] for goal in resp.json()}
+    assert goal_with_group.id in received_ids  # Can see group goal
+    assert personal_goal.id not in received_ids  # Can't see personal goal yet
     assert personal_goal_other.id not in received_ids
     assert group_goal_other.id not in received_ids
 
-    # Teacher cannot list goals of unaffiliated students
+    # Teacher can't list goals of unaffiliated students
     resp = client.get('/api/goals/', {'student': other_student.id})
     assert resp.status_code == 200
     assert resp.json() == []
@@ -300,99 +302,104 @@ def test_teacher_goal_access(
     assert personal_goal_other.id not in received_ids
     assert goal_with_group.id not in received_ids
 
-    # Teacher can retrieve a group goal in a group they teach
+    # Can retrieve group goals they teach
     resp = client.get(f'/api/goals/{goal_with_group.id}/')
     assert resp.status_code == 200
 
-    # Teacher cannot retrieve goal created by teacher for unrelated student
+    # Can't retrieve personal goals yet
+    resp = client.get(f'/api/goals/{personal_goal.id}/')
+    assert resp.status_code == 404
+
+    # Can retrieve goals they created
     resp = client.get(f'/api/goals/{created_personal_goal.id}/')
     assert resp.status_code == 200
 
-    # Teacher can retrieve personal goal for taught student
-    resp = client.get(f'/api/goals/{personal_goal.id}/')
-    assert resp.status_code == 200
-
-    # Teacher cannot retrieve group goal for other group they do not teach
+    # Can't retrieve goals in groups they don't teach
     resp = client.get(f'/api/goals/{group_goal_other.id}/')
     assert resp.status_code == 404
 
-    # Teacher cannot retrieve personal goal for non-taught student
+    # Can't retrieve other student's personal goals
     resp = client.get(f'/api/goals/{personal_goal_other.id}/')
     assert resp.status_code == 404
 
-    personal_goal_data = {
-        'title': "New personal goal for student",
+    # Can CREATE goals in groups they teach
+    resp = client.post('/api/goals/', {
+        'group_id': teaching_group_with_members.id,
+        'title': 'New group goal by teaching teacher'
+    })
+    assert resp.status_code == 201
+    created_group_goal_id = resp.json()['id']
+
+    # Can't CREATE personal goals yet
+    resp = client.post('/api/goals/', {
         'student_id': student.id,
+        'title': 'Personal goal attempt',
         'subject_id': subject_without_group.id
-    }
-
-    # Teacher can create a personal goal for a student they teach
-    resp = client.post('/api/goals/', personal_goal_data)
-    assert resp.status_code == 201
-
-    # Teacher cannot create a personal goal for a student they do not teach
-    other_student_goal_data = {
-        'title': "Goal for another student",
-        'student_id': other_student.id,
-        'subject_id': subject_without_group.id
-    }
-    resp = client.post('/api/goals/', other_student_goal_data)
+    })
     assert resp.status_code == 403
 
-    # Teacher can create a group goal in a group they teach
-    group_goal_data = {
-        'title': "Group goal I should create",
-        'group_id': goal_with_group.group.id
-    }
-    resp = client.post('/api/goals/', group_goal_data)
-    assert resp.status_code == 201
-
-    # Teacher cannot create a group goal in a group they do not teach
-    other_group_goal_data = {
-        'title': "Group goal I should not create",
-        'group_id': other_teaching_group_with_members.id
-    }
-    resp = client.post('/api/goals/', other_group_goal_data)
-    assert resp.status_code == 403
-
-    # Teacher can update group goal in a group they teach
+    # Can UPDATE group goals they teach
     resp = client.put(f'/api/goals/{goal_with_group.id}/', {
-        'title': "Updated title for group goal",
+        'group_id': teaching_group_with_members.id,
+        'title': 'Updated group goal'
     })
     assert resp.status_code == 200
-    assert resp.json()['title'] == "Updated title for group goal"
 
-    # Teacher cannot update group goal in a group they do not teach
-    resp = client.put(f'/api/goals/{group_goal_other.id}/', {
-        'title': "Updated title for other group",
-    })
-    assert resp.status_code == 403
-
-    # Teacher can update personal goal for a student they teach
+    # Can't UPDATE personal goals yet
     resp = client.put(f'/api/goals/{personal_goal.id}/', {
-        'title': "Updated title for personal goal",
+        'student_id': student.id,
+        'title': 'Updated personal goal attempt',
+        'subject_id': subject_without_group.id
+    })
+    assert resp.status_code == 403
+
+    # Can DELETE group goals they created
+    resp = client.delete(f'/api/goals/{created_group_goal_id}/')
+    assert resp.status_code == 204
+
+    # Can't DELETE personal goals yet
+    resp = client.delete(f'/api/goals/{personal_goal.id}/')
+    assert resp.status_code == 403
+
+    # === PART 2: Same teacher becomes basis group teacher (full access) ===
+
+    # Can't see goals in groups they don't teach yet
+    other_teaching_group_with_members.add_member(student, student_role)
+    goal_in_other_group = Goal.objects.create(
+        title="Goal in other teaching group",
+        group=other_teaching_group_with_members
+    )
+    resp = client.get(f'/api/goals/{goal_in_other_group.id}/')
+    assert resp.status_code == 404
+
+    # Now can see it after becoming basis teacher
+    basis_group.add_member(student, student_role)
+    basis_group.add_member(teacher, teacher_role)
+    resp = client.get(f'/api/goals/{goal_in_other_group.id}/')
+    assert resp.status_code == 200
+
+    # But can't modify goals in groups they don't teach
+    resp = client.put(f'/api/goals/{goal_in_other_group.id}/', {
+        'group_id': other_teaching_group_with_members.id,
+        'title': 'Can't update this'
+    })
+    assert resp.status_code == 403
+
+    # Can now CRUD personal goals for their students
+    resp = client.post('/api/goals/', {
+        'student_id': student.id,
+        'title': 'Personal goal by basis teacher',
+        'subject_id': subject_without_group.id
+    })
+    assert resp.status_code == 201
+    created_personal_goal_id = resp.json()['id']
+
+    resp = client.put(f'/api/goals/{created_personal_goal_id}/', {
+        'student_id': student.id,
+        'title': 'Updated personal goal',
+        'subject_id': subject_without_group.id
     })
     assert resp.status_code == 200
-    assert resp.json()['title'] == "Updated title for personal goal"
 
-    # Teacher cannot update personal goal for a student they do not teach
-    resp = client.put(f'/api/goals/{personal_goal_other.id}/', {
-        'title': "Updated title for other student",
-    })
-    assert resp.status_code == 403
-
-    # Teacher can delete group goal in a group they teach
-    resp = client.delete(f'/api/goals/{goal_with_group.id}/')
+    resp = client.delete(f'/api/goals/{created_personal_goal_id}/')
     assert resp.status_code == 204
-
-    # Teacher cannot delete group goal in a group they do not teach
-    resp = client.delete(f'/api/goals/{group_goal_other.id}/')
-    assert resp.status_code == 403
-
-    # Teacher can delete personal goal for a student they teach
-    resp = client.delete(f'/api/goals/{personal_goal.id}/')
-    assert resp.status_code == 204
-
-    # Teacher cannot delete personal goal for a student they do not teach
-    resp = client.delete(f'/api/goals/{personal_goal_other.id}/')
-    assert resp.status_code == 403
