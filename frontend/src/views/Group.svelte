@@ -229,25 +229,23 @@
     </div>
   {:else if group}
     <!-- Group Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1>{group.displayName}</h1>
+    <div class="">
+      <h1>{group.displayName}</h1>
 
-        <div>
-          <GroupTypeTag {group} />
-          {#each teachers as teacher}
-            <pkt-tag iconName="lecture" skin="green" class="me-2">
-              <span>{teacher.name}</span>
-            </pkt-tag>
-          {/each}
-        </div>
+      <div class="d-flex align-items-center gap-2">
+        <GroupTypeTag {group} />
+        {#each teachers as teacher}
+          <pkt-tag iconName="lecture" skin="yellow">
+            <span>{teacher.name}</span>
+          </pkt-tag>
+        {/each}
       </div>
     </div>
 
     <!-- Goals Section -->
-    <div class="mb-4">
+    <div class="my-4">
       <div class="d-flex align-items-center gap-2 mb-3">
-        <h3 class="mb-0">Mål</h3>
+        <h2 class="mb-0">Mål</h2>
         <ButtonMini
           options={{
             iconName: 'plus-sign',

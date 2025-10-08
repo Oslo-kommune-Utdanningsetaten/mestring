@@ -1,4 +1,5 @@
 <script lang="ts">
+  import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
   import { useTinyRouter } from 'svelte-tiny-router'
   import type { GroupReadable, SchoolReadable } from '../../generated/types.gen'
   import { groupsList, schoolsList, groupsUpdate } from '../../generated/sdk.gen'
@@ -74,6 +75,32 @@
       router.navigate(urlStringFrom({ school: schoolId }, { path: '/admin/groups', mode: 'merge' }))
     } else {
       router.navigate('/admin/groups')
+    }
+  }
+
+  const handleGroupTypeToggle = async (group: GroupReadable) => {
+    const currentTypeName = group.type === 'basis' ? 'Basisgruppe' : 'Undervisningsgruppe'
+    const newTypeName = group.type === 'basis' ? 'Undervisningsgruppe' : 'Basisgruppe'
+
+    const confirmed = confirm(
+      `Er du sikker på at du vil endre gruppe ${group.displayName} fra ${currentTypeName} til ${newTypeName}?`
+    )
+
+    if (!confirmed) {
+      // Refetch to flip back radio buttons
+      fetchGroups()
+      return
+    }
+
+    const newType = group.type === 'basis' ? 'teaching' : 'basis'
+    try {
+      await groupsUpdate({
+        path: { id: group.id },
+        body: { ...group, type: newType } as GroupReadable,
+      })
+      fetchGroups()
+    } catch (error) {
+      console.error('Error toggling group type:', error)
     }
   }
 
@@ -182,23 +209,27 @@
         <div class="group-grid-row header">
           <span>Gruppe</span>
           <span>Type</span>
+          <span>Fag</span>
           <span>Aktivert</span>
         </div>
         <!-- Data rows -->
         {#each filteredGroups as group}
           <div class="group-grid-row">
             <span>{group.displayName}</span>
-            <GroupTypeTag {group} />
-            <span>
-              <pkt-checkbox
-                label="Aktivert"
-                labelPosition="hidden"
-                isSwitch="true"
-                aria-checked={group.isEnabled}
-                checked={group.isEnabled}
-                onchange={() => handleToggleGroupEnabledStatus(group)}
-              ></pkt-checkbox>
-            </span>
+            <GroupTypeTag
+              {group}
+              onclick={() => handleGroupTypeToggle(group)}
+              isTypeWarningEnabled={true}
+            />
+            <span>Fagja</span>
+            <pkt-checkbox
+              label="Aktivert"
+              labelPosition="hidden"
+              isSwitch="true"
+              aria-checked={group.isEnabled}
+              checked={group.isEnabled}
+              onchange={() => handleToggleGroupEnabledStatus(group)}
+            ></pkt-checkbox>
           </div>
         {/each}
       {/if}
@@ -220,7 +251,7 @@
 
   .group-grid-row {
     display: grid;
-    grid-template-columns: 4fr 4fr 1fr;
+    grid-template-columns: 2fr 2fr 1fr 0.5fr;
     column-gap: 1rem;
     padding: 0.5rem 0.5rem;
     align-items: center;
@@ -233,6 +264,6 @@
     background-color: var(--bs-light);
     border-top-right-radius: inherit;
     border-top-left-radius: inherit;
-    align-items: start;
+    align-items: center;
   }
 </style>
