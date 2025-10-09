@@ -1,5 +1,6 @@
 from rest_access_policy import AccessPolicy
 from django.contrib.auth.models import AnonymousUser
+from rest_access_policy.access_policy import AnonymousUser as DRFAnonymousUser
 
 
 class BaseAccessPolicy(AccessPolicy):
@@ -9,7 +10,7 @@ class BaseAccessPolicy(AccessPolicy):
     # Does not include info about where these roles are held (e.g. which school or group)
     def get_user_group_values(self, user) -> list[str]:
         # shorcircuit AnonymousUser
-        if isinstance(user, AnonymousUser):
+        if isinstance(user, AnonymousUser) or isinstance(user, DRFAnonymousUser):
             return []
 
         values = []
