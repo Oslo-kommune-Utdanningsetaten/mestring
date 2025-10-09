@@ -97,7 +97,7 @@ def test_teacher_observation_access(
 
     # === PART 1: Teaching group teacher (limited access) ===
 
-    # Can list observations for students (group goals only, not personal)
+    # Teacher can list observations for students (group goals only, not personal)
     resp = client.get("/api/observations/", {"student": observation_on_group_goal.student.id})
     assert resp.status_code == 200
     data = resp.json()
@@ -105,21 +105,21 @@ def test_teacher_observation_access(
     expected_ids = {observation_on_group_goal.id}
     assert expected_ids.issubset({role["id"] for role in data})
 
-    # Can retrieve group goal observations
+    # Teacher can retrieve group goal observations
     resp = client.get(f"/api/observations/{observation_on_group_goal.id}/")
     assert resp.status_code == 200
 
-    # Can't retrieve personal goal observations yet
+    # Teacher cannot retrieve personal goal observations yet
     resp = client.get(f"/api/observations/{observation_on_personal_goal.id}/")
     assert resp.status_code == 404
 
-    # Can retrieve if they're the observer
+    # Teacher can retrieve if they're the observer
     observation_on_personal_goal.observer = teacher
     observation_on_personal_goal.save()
     resp = client.get(f"/api/observations/{observation_on_personal_goal.id}/")
     assert resp.status_code == 200
 
-    # Can CREATE observations on group goals
+    # Teacher can create observations on group goals
     resp = client.post("/api/observations/", {
         "student_id": student.id,
         "goal_id": observation_on_group_goal.goal.id,
@@ -128,7 +128,7 @@ def test_teacher_observation_access(
     assert resp.status_code == 201
     created_group_obs_id = resp.json()["id"]
 
-    # Can't CREATE observations on personal goals yet
+    # Teacher cannot create observations on personal goals yet
     resp = client.post("/api/observations/", {
         "student_id": student.id,
         "goal_id": observation_on_personal_goal.goal.id,
@@ -136,7 +136,7 @@ def test_teacher_observation_access(
     })
     assert resp.status_code == 403
 
-    # Can UPDATE observations on group goals
+    # Teacher can update observations on group goals
     resp = client.put(f"/api/observations/{observation_on_group_goal.id}/", {
         "student_id": observation_on_group_goal.student.id,
         "goal_id": observation_on_group_goal.goal.id,
@@ -144,7 +144,7 @@ def test_teacher_observation_access(
     })
     assert resp.status_code == 200
 
-    # Can't UPDATE observations on personal goals yet
+    # Teacher cannot update observations on personal goals yet
     resp = client.put(f"/api/observations/{observation_on_personal_goal.id}/", {
         "student_id": observation_on_personal_goal.student.id,
         "goal_id": observation_on_personal_goal.goal.id,
@@ -152,15 +152,15 @@ def test_teacher_observation_access(
     })
     assert resp.status_code == 403
 
-    # Can DELETE observations on group goals
+    # Teacher can delete observations on group goals
     resp = client.delete(f"/api/observations/{created_group_obs_id}/")
     assert resp.status_code == 204
 
-    # Can't DELETE observations on personal goals yet
+    # Teacher cannot delete observations on personal goals yet
     resp = client.delete(f"/api/observations/{observation_on_personal_goal.id}/")
     assert resp.status_code == 403
 
-    # Can see invisible observations in groups they teach
+    # Teacher can see invisible observations in groups they teach
     observation_on_group_goal.is_visible_to_student = False
     observation_on_group_goal.save()
     resp = client.get(f"/api/observations/{observation_on_group_goal.id}/")
@@ -168,7 +168,7 @@ def test_teacher_observation_access(
 
     # === PART 2: Same teacher becomes basis group teacher (full access) ===
 
-    # Can't see observations in groups they don't teach yet
+    # Teacher cannot see observations in groups they don't teach yet
     other_teaching_group_with_members.add_member(student, student_role)
     goal = Goal.objects.create(
         title="Lese 2 bøker",
@@ -184,7 +184,7 @@ def test_teacher_observation_access(
     resp = client.get(f"/api/observations/{observation.id}/")
     assert resp.status_code == 200
 
-    # But can't modify observations in groups they don't teach
+    # But cannot modify observations in groups they don't teach
     resp = client.put(f"/api/observations/{observation.id}/", {
         "student_id": observation.student.id,
         "goal_id": observation.goal.id,
@@ -234,7 +234,7 @@ def test_student_observation_access(student, observation_on_personal_goal, obser
     resp = client.get(f"/api/observations/{observation_on_personal_goal.id}/")
     assert resp.status_code == 404
 
-    # Not visible takes precedent over created_by student
+    # Student can access if they are the creator
     observation_on_personal_goal.is_visible_to_student = False
     observation_on_personal_goal.created_by = student
     observation_on_personal_goal.save()
