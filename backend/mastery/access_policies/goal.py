@@ -13,73 +13,76 @@ class GoalAccessPolicy(BaseAccessPolicy):
             "principal": ["role:superadmin"],
             "effect": "allow",
         },
-        # Authenticated users can list goals according to scope_queryset
+        # Authenticated users can list and retrieve goals (filtered by scope_queryset)
         {
-            "action": ["list"],
+            "action": ["list", "retrieve"],
             "principal": ["authenticated"],
             "effect": "allow",
         },
-        # Authenticated users can retrieve goals they have created
+        # Students can create personal goals for themselves
         {
-            "action": ["retrieve"],
-            "principal": ["authenticated"],
-            "effect": "allow",
-            "condition": "is_user_creator"
-        },
-        # Teacher can retrieve group goals for the groups they teach
-        {
-            "action": ["retrieve"],
-            "principal": ["role:teacher"],
-            "effect": "allow",
-            "condition": "is_goal_in_group_where_user_is_teacher"
-        },
-        # Teacher can retrieve personal goals where the student is in a group they teach
-        {
-            "action": ["retrieve"],
-            "principal": ["role:teacher"],
-            "effect": "allow",
-            "condition": "is_goal_student_in_group_taught_by_user"
-        },
-        # Student can retrieve personal goals they own
-        {
-            "action": ["retrieve"],
+            "action": ["create"],
             "principal": ["role:student"],
             "effect": "allow",
-            "condition": "is_user_owner"
+            "condition": "can_student_create_goal"
         },
-        # Student can retrieve group goals where they are a student
+        # Teachers can create goals
         {
-            "action": ["retrieve"],
+            "action": ["create"],
+            "principal": ["role:teacher"],
+            "effect": "allow",
+            "condition": "can_teacher_create_goal"
+        },
+        # Students can only modify their own personal goals
+        {
+            "action": ["update", "partial_update", "destroy"],
             "principal": ["role:student"],
             "effect": "allow",
-            "condition": "is_goal_in_group_where_user_is_student"
+            "condition": "can_student_modify_goal"
+        },
+        # Teachers can modify goals in their scope
+        {
+            "action": ["update", "partial_update", "destroy"],
+            "principal": ["role:teacher"],
+            "effect": "allow",
+            "condition": "can_teacher_modify_goal"
         }
     ]
 
     def scope_queryset(self, request, qs):
+        """
+        Filter goals based on who can see them:
+        - Everyone: Goals they created
+        - Teaching group teachers: Group goals in groups they teach
+        - Basis group teachers: Personal goals + group goals for students in their basis group
+        - Students: Their own personal goals + group goals in groups they're in
+        """
         requester = request.user
         if requester.is_superadmin:
             return qs
         try:
             teacher_group_ids = list(
                 requester.teacher_groups.values_list('id', flat=True))
+            teacher_basis_group_ids = list(
+                requester.teacher_groups.filter(type='basis').values_list('id', flat=True))
             student_group_ids = list(
                 requester.student_groups.values_list('id', flat=True))
-            # All users can see goals created by self
+
+            # Everyone can see goals they created
             filters = Q(created_by=requester)
 
-            # Teacher-related visibility
+            # Teaching group teachers: Group goals in groups they teach
             if teacher_group_ids:
-                # group goals in groups they teach
                 filters |= Q(group_id__in=teacher_group_ids)
-                # personal goals where student in taught group
-                filters |= Q(student__groups__id__in=teacher_group_ids)
 
-            # Student-related visibility
+            # Basis group teachers: All goals for students in their basis group
+            if teacher_basis_group_ids:
+                filters |= Q(student__groups__id__in=teacher_basis_group_ids)
+                filters |= Q(group__members__groups__id__in=teacher_basis_group_ids)
+
+            # Students: Own personal goals + group goals in their groups
             if student_group_ids:
-                # Personal goals they own
                 filters |= Q(student=requester)
-                # Group goals where they are a (student) member
                 filters |= Q(group_id__in=student_group_ids)
 
             return qs.filter(filters).distinct()
@@ -87,58 +90,77 @@ class GoalAccessPolicy(BaseAccessPolicy):
             logger.error("GoalAccessPolicy.scope_queryset error: %s", error)
             return qs.none()
 
-    def is_user_creator(self, request, view, action):
+    def can_student_create_goal(self, request, view, action):
+        """Students can only create personal goals for themselves."""
         try:
             requester = request.user
-            goal = view.get_object()
-            return goal.created_by_id == requester.id
-        except Exception as error:
-            logger.error("GoalAccessPolicy.is_user_creator error: %s", error)
-            return False
+            student_id = request.data.get('student_id') or request.data.get('student')
+            group_id = request.data.get('group_id') or request.data.get('group')
 
-    def is_goal_in_group_where_user_is_teacher(self, request, view, action):
-        try:
-            requester = request.user
-            goal = view.get_object()
-            if goal.group_id is None:
+            # Must be creating a personal goal
+            if group_id is not None:
                 return False
-            return requester.teacher_groups.filter(id=goal.group_id).exists()
+
+            # Must be creating for themselves
+            return str(student_id) == str(requester.id)
         except Exception as error:
-            logger.error(
-                "GoalAccessPolicy.is_goal_in_group_where_user_is_teacher error: %s", error)
+            logger.error("GoalAccessPolicy.can_student_create_goal error: %s", error)
             return False
 
-    def is_goal_student_in_group_taught_by_user(self, request, view, action):
+    def can_teacher_create_goal(self, request, view, action):
+        """
+        Teachers can create goals based on goal type:
+        - Group goals: Must teach that group
+        - Personal goals: Must be basis group teacher for that student
+        """
         try:
             requester = request.user
-            goal = view.get_object()
-            if goal.student_id is None:
-                return False
-            taught_group_ids = requester.teacher_groups.values_list(
-                'id', flat=True)
-            return goal.student.groups.filter(id__in=taught_group_ids).exists()
+            student_id = request.data.get('student_id') or request.data.get('student')
+            group_id = request.data.get('group_id') or request.data.get('group')
+
+            # Group goal: Must teach that group
+            if group_id is not None:
+                return requester.teacher_groups.filter(id=group_id).exists()
+
+            # Personal goal: Must be basis group teacher
+            if student_id is not None:
+                return requester.teacher_groups.filter(
+                    type='basis',
+                    members__id=student_id
+                ).exists()
+
+            return False
         except Exception as error:
-            logger.error(
-                "GoalAccessPolicy.is_goal_student_in_group_taught_by_user error: %s", error)
+            logger.error("GoalAccessPolicy.can_teacher_create_goal error: %s", error)
             return False
 
-    def is_user_owner(self, request, view, action):
+    def can_student_modify_goal(self, request, view, action):
+        """Students can only modify their own personal goals."""
         try:
+            target_goal = view.get_object()
             requester = request.user
-            goal = view.get_object()
-            return goal.student_id == requester.id
+            return target_goal.student_id == requester.id and target_goal.group_id is None
         except Exception as error:
-            logger.error("GoalAccessPolicy.is_user_owner error: %s", error)
+            logger.error("GoalAccessPolicy.can_student_modify_goal error: %s", error)
             return False
 
-    def is_goal_in_group_where_user_is_student(self, request, view, action):
+    def can_teacher_modify_goal(self, request, view, action):
+        """
+        Teachers can modify goals based on goal type:
+        - Group goals: Must teach that group
+        - Personal goals: Must be basis group teacher for that student
+        """
         try:
+            target_goal = view.get_object()
             requester = request.user
-            goal = view.get_object()
-            if goal.group_id is None:
-                return False
-            return requester.student_groups.filter(id=goal.group_id).exists()
+
+            # Group goal: Must teach that group
+            if target_goal.group_id:
+                return requester.teacher_groups.filter(id=target_goal.group_id).exists()
+
+            # Personal goal: Must be basis group teacher
+            basis_group_ids = requester.teacher_groups.filter(type='basis').values_list('id', flat=True)
+            return target_goal.student.groups.filter(id__in=basis_group_ids).exists()
         except Exception as error:
-            logger.error(
-                "GoalAccessPolicy.is_goal_in_group_where_user_is_student error: %s", error)
+            logger.error("GoalAccessPolicy.can_teacher_modify_goal error: %s", error)
             return False
