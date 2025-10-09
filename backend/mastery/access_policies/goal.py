@@ -1,5 +1,6 @@
 from .base import BaseAccessPolicy
 from django.db.models import Q
+from mastery.models import Goal
 import logging
 
 logger = logging.getLogger(__name__)
@@ -83,17 +84,19 @@ class GoalAccessPolicy(BaseAccessPolicy):
                 filters |= Q(group_id__in=student_group_ids)
 
             return qs.filter(filters).distinct()
-        except Exception as error:
-            logger.error("GoalAccessPolicy.scope_queryset error: %s", error)
+        except Exception:
+            logger.exception("GoalAccessPolicy.scope_queryset error")
             return qs.none()
 
     def is_user_creator(self, request, view, action):
         try:
-            requester = request.user
-            goal = view.get_object()
-            return goal.created_by_id == requester.id
-        except Exception as error:
-            logger.error("GoalAccessPolicy.is_user_creator error: %s", error)
+            goal_id = self.get_target_id(view)
+            if not goal_id:
+                return False
+            qs = self.scope_queryset(request, Goal.objects)
+            return qs.filter(id=goal_id, created_by_id=request.user.id).exists()
+        except Exception:
+            logger.exception("GoalAccessPolicy.is_user_creator error")
             return False
 
     def is_goal_in_group_where_user_is_teacher(self, request, view, action):
@@ -103,9 +106,8 @@ class GoalAccessPolicy(BaseAccessPolicy):
             if goal.group_id is None:
                 return False
             return requester.teacher_groups.filter(id=goal.group_id).exists()
-        except Exception as error:
-            logger.error(
-                "GoalAccessPolicy.is_goal_in_group_where_user_is_teacher error: %s", error)
+        except Exception:
+            logger.exception("GoalAccessPolicy.is_goal_in_group_where_user_is_teacher error")
             return False
 
     def is_goal_student_in_group_taught_by_user(self, request, view, action):
@@ -117,18 +119,20 @@ class GoalAccessPolicy(BaseAccessPolicy):
             taught_group_ids = requester.teacher_groups.values_list(
                 'id', flat=True)
             return goal.student.groups.filter(id__in=taught_group_ids).exists()
-        except Exception as error:
-            logger.error(
-                "GoalAccessPolicy.is_goal_student_in_group_taught_by_user error: %s", error)
+        except Exception:
+            logger.exception("GoalAccessPolicy.is_goal_student_in_group_taught_by_user error")
             return False
 
     def is_user_owner(self, request, view, action):
         try:
-            requester = request.user
-            goal = view.get_object()
-            return goal.student_id == requester.id
-        except Exception as error:
-            logger.error("GoalAccessPolicy.is_user_owner error: %s", error)
+            goal_id = self.get_target_id(view)
+            if not goal_id:
+                return False
+
+            qs = self.scope_queryset(request, Goal.objects)
+            return qs.filter(id=goal_id, student_id=request.user.id).exists()
+        except Exception:
+            logger.exception("GoalAccessPolicy.is_user_owner error")
             return False
 
     def is_goal_in_group_where_user_is_student(self, request, view, action):
@@ -138,7 +142,6 @@ class GoalAccessPolicy(BaseAccessPolicy):
             if goal.group_id is None:
                 return False
             return requester.student_groups.filter(id=goal.group_id).exists()
-        except Exception as error:
-            logger.error(
-                "GoalAccessPolicy.is_goal_in_group_where_user_is_student error: %s", error)
+        except Exception:
+            logger.exception("GoalAccessPolicy.is_goal_in_group_where_user_is_student error")
             return False

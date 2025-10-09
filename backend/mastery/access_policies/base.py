@@ -24,3 +24,15 @@ class BaseAccessPolicy(AccessPolicy):
         except Exception:
             pass
         return values
+
+    # --- Helper utilities -------------------------------------------------
+    def get_target_id(self, view):
+        """Return the object lookup value from the URL path.
+
+        Works for custom lookup_url_kwarg or lookup_field (default 'pk'). Returns
+        None for list actions or if the kwarg is absent.
+        """
+        lookup_url_kwarg = getattr(view, 'lookup_url_kwarg', None)
+        lookup_field = getattr(view, 'lookup_field', 'pk')
+        key = lookup_url_kwarg or lookup_field
+        return view.kwargs.get(key)

@@ -91,8 +91,8 @@ class SubjectAccessPolicy(BaseAccessPolicy):
                 # subjects owned by schools where requester is admin
                 Q(owned_by_school_id__in=school_admin_ids)
             ).distinct()
-        except Exception as error:
-            logger.error("SubjectAccessPolicy.scope_queryset error: %s", error)
+        except Exception:
+            logger.exception("SubjectAccessPolicy.scope_queryset error")
             return qs.none()
 
     # True if requester is admin at the school which owns the subject
@@ -119,8 +119,8 @@ class SubjectAccessPolicy(BaseAccessPolicy):
             requester_group_ids = set(requester.groups.values_list("id", flat=True))
             subject_group_ids = set(subject.groups.values_list("id", flat=True))
             return len(requester_group_ids.intersection(subject_group_ids)) > 0
-        except Exception as error:
-            logger.error("SubjectAccessPolicy.belongs_to_group error: %s", error)
+        except Exception:
+            logger.exception("SubjectAccessPolicy.belongs_to_group error")
             return False
 
     # True if requester created the subject
@@ -129,8 +129,8 @@ class SubjectAccessPolicy(BaseAccessPolicy):
             requester = request.user
             subject = view.get_object()
             return subject.created_by == requester
-        except Exception as error:
-            logger.error("SubjectAccessPolicy.is_user_creator error: %s", error)
+        except Exception:
+            logger.exception("SubjectAccessPolicy.is_user_creator error")
             return False
 
     # True if requester is 'owner' via being the student of any goal on this subject.
@@ -139,8 +139,8 @@ class SubjectAccessPolicy(BaseAccessPolicy):
             requester = request.user
             subject = view.get_object()
             return subject.goals.filter(student=requester).exists()
-        except Exception as error:
-            logger.error("SubjectAccessPolicy.is_user_owner error: %s", error)
+        except Exception:
+            logger.exception("SubjectAccessPolicy.is_user_owner error")
             return False
 
     # True if requester created at least one goal attached to this subject
@@ -149,8 +149,8 @@ class SubjectAccessPolicy(BaseAccessPolicy):
             requester = request.user
             subject = view.get_object()
             return subject.goals.filter(created_by=requester).exists()
-        except Exception as error:
-            logger.error("SubjectAccessPolicy.is_user_creator_of_goal error: %s", error)
+        except Exception:
+            logger.exception("SubjectAccessPolicy.is_user_creator_of_goal error")
             return False
 
     # True if any goal on the subject has a student who is in a basis group taught by requester
@@ -161,6 +161,6 @@ class SubjectAccessPolicy(BaseAccessPolicy):
             basis_groups_taught_ids = requester.teacher_groups.filter(
                 type='basis').values_list('id', flat=True)
             return subject.goals.filter(student__groups__id__in=basis_groups_taught_ids).exists()
-        except Exception as error:
-            logger.error("SubjectAccessPolicy.is_goal_student_in_basis_group_taught_by_user error: %s", error)
+        except Exception:
+            logger.exception("SubjectAccessPolicy.is_goal_student_in_basis_group_taught_by_user error")
             return False
