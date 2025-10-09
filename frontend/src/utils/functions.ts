@@ -126,12 +126,12 @@ export const goalsWithCalculatedMasteryBySubjectId = async (
   decoratedGoals.forEach((goal: GoalDecorated) => {
     let subjectId = goal.subjectId
     if (!subjectId) {
+      // goal is not personal, look up subject via group
       if (goal.groupId) {
         const group = groups.find(g => g.id === goal.groupId)
         if (group?.subjectId) {
           subjectId = group.subjectId
         } else {
-          console.error(`...but we could not find a subjectId via group ${goal.groupId}`)
           return
         }
       }

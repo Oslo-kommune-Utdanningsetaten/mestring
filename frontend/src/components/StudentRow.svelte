@@ -1,11 +1,15 @@
 <script lang="ts">
   import type { Mastery, GoalDecorated } from '../types/models'
-  import type { UserReadable, SubjectReadable } from '../generated/types.gen'
+  import type { UserReadable, SubjectReadable, GroupReadable } from '../generated/types.gen'
   import { goalsList } from '../generated/sdk.gen'
   import { goalsWithCalculatedMasteryBySubjectId, aggregateMasterys } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
 
-  let { student, subjects } = $props<{ student: UserReadable; subjects: SubjectReadable[] }>()
+  let { student, subjects, groups } = $props<{
+    student: UserReadable
+    subjects: SubjectReadable[]
+    groups: GroupReadable[]
+  }>()
   let masteryBySubjectId = $state<Record<string, Mastery | null>>({})
 
   $effect(() => {
@@ -13,7 +17,7 @@
     goalsList({ query: { student: student.id } }).then(result => {
       studentGoals = result.data || []
       if (studentGoals.length > 0) {
-        goalsWithCalculatedMasteryBySubjectId(student.id, studentGoals).then(result => {
+        goalsWithCalculatedMasteryBySubjectId(student.id, studentGoals, groups).then(result => {
           let goalsBySubjectId: Record<string, GoalDecorated[]> = result
           subjects.forEach((subject: SubjectReadable) => {
             const goals = goalsBySubjectId[subject.id] || []
