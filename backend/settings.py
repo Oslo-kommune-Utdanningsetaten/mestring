@@ -153,8 +153,6 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer',
     ),
     'DEFAULT_PARSER_CLASSES': (
-        'djangorestframework_camel_case.parser.CamelCaseFormParser',
-        'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
         'djangorestframework_camel_case.parser.CamelCaseJSONParser',
     ),
     'DEFAULT_FILTER_BACKENDS': [
@@ -229,12 +227,12 @@ LOGGING = {
         },
         'mastery.data_import': {
             'handlers': ['console', 'data_import_file'],
-            'level': 'DEBUG', # TODO: discuss if need to changed to INFO when in production
+            'level': 'DEBUG',  # TODO: discuss if need to changed to INFO when in production
             'propagate': False,
         },
         'mastery.access_policies': {
             'handlers': ['console', 'access_policies_file'],
-            'level': 'DEBUG', # TODO: discuss if need to changed to INFO when in production
+            'level': 'DEBUG',  # TODO: discuss if need to changed to INFO when in production
             'propagate': True,
         },
     },

@@ -47,7 +47,6 @@
   const fetchGoalsForSubject = async () => {
     try {
       const goalsResult = await goalsList({ query: { student: student.id, subject: subjectId } })
-      //const studentGoals = (goalsResult.data || []).filter(g => g.isPersonal)
       const goals = goalsResult.data || []
       const groupIds = goals.map(goal => goal.groupId).filter(Boolean) as string[]
       const groupsResult = await groupsList({
@@ -81,7 +80,6 @@
 
   const handleCloseEditGoal = () => {
     isGoalEditorOpen = false
-    // Don't clear goalWip here - let onClosed handle it after animation
   }
 
   const handleEditObservation = (goal: GoalDecorated, observation: ObservationReadable | null) => {
@@ -100,18 +98,15 @@
 
   const handleCloseEditObservation = () => {
     isObservationEditorOpen = false
-    // Don't clear observationWip here - let onClosed handle it after animation
   }
 
   const handleGoalDone = async () => {
     goalForObservation = null
     handleCloseEditGoal()
-    // fetchGoalsForSubject will be called in onClosed
   }
 
   const handleObservationDone = async () => {
     handleCloseEditObservation()
-    // fetchGoalsForSubject will be called in onClosed
   }
 
   const handleDeleteObservation = async (observationId: string) => {

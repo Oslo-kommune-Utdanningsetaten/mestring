@@ -111,7 +111,6 @@ const loadSubjects = async (school: SchoolReadable): Promise<void> => {
         return !subject.ownedBySchoolId
       }
     })
-    console.log('subjects for school', school.displayName, { school, subjects })
     dataStore.update(data => {
       return { ...data, subjects }
     })

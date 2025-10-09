@@ -23,14 +23,19 @@
 {#if group}
   {#if onclick}
     <span class="button-container">
-      <button type="button" class="p-0 m-0 border-0" {onclick} aria-label={label}>
+      <button
+        type="button"
+        class="p-0 m-0 border-0"
+        title="Endre gruppetype"
+        {onclick}
+        aria-label={label}
+      >
         <pkt-tag iconName="group" {skin}>
           <span>{label}</span>
           {#if isGroupTypeChanged && isTypeWarningEnabled}
             <span class="colored-icon">
               <pkt-icon
                 name="alert-warning"
-                title="Gruppetype er endret"
                 class="pkt-icon--medium warning-icon"
                 aria-label="advarsel"
               ></pkt-icon>

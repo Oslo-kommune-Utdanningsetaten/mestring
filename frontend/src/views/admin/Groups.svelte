@@ -1,11 +1,13 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
+  import '@oslokommune/punkt-elements/dist/pkt-select.js'
   import { useTinyRouter } from 'svelte-tiny-router'
   import type { GroupReadable, SchoolReadable, SubjectReadable } from '../../generated/types.gen'
   import { groupsList, schoolsList, groupsUpdate } from '../../generated/sdk.gen'
   import { urlStringFrom } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
   import GroupTypeTag from '../../components/GroupTypeTag.svelte'
+  import { NONE_FIELD_VALUE } from '../../utils/constants'
 
   const router = useTinyRouter()
   let groups = $state<GroupReadable[]>([])
@@ -47,6 +49,20 @@
     )
   )
 
+  // Subjects available for the currently selected school (if subjects are school scoped)
+  const subjectsForSelectedSchool = $derived(
+    (() => {
+      const currentSchoolId = selectedSchool?.id
+      if (!currentSchoolId) return []
+      return $dataStore.subjects
+        .filter(s => {
+          const subjSchoolId = (s as any).schoolId
+          return subjSchoolId ? subjSchoolId === currentSchoolId : true
+        })
+        .sort((a, b) => a.displayName.localeCompare(b.displayName, 'no', { sensitivity: 'base' }))
+    })()
+  )
+
   let headerText = $derived.by(() => {
     let text = selectedSchool ? `Grupper ved ${selectedSchool.displayName}` : 'Alle grupper'
     text = nameFilter ? `${text} som inneholder "${nameFilter}"` : text
@@ -54,8 +70,9 @@
   })
 
   const getSubjectForGroup = (group: GroupReadable): string => {
-    const subject = group.subjectId ? subjectsById[group.subjectId] : null
-    return subject?.displayName || ''
+    if (!group.subjectId) return 'ikke valgt'
+    const subject = subjectsById[group.subjectId] || null
+    return subject?.displayName || `skolen har ikke fag ${group.subjectId}`
   }
 
   const fetchSchools = async () => {
@@ -127,6 +144,23 @@
       })
     } catch (error) {
       console.error('Error toggling group endabled status:', error)
+    } finally {
+      fetchGroups()
+    }
+  }
+
+  const handleGroupUpdate = async (
+    group: GroupReadable,
+    newFieldsAndValues: Partial<GroupReadable>
+  ): Promise<void> => {
+    try {
+      const updatedGroup: GroupReadable = { ...group, ...newFieldsAndValues }
+      await groupsUpdate({
+        path: { id: group.id },
+        body: updatedGroup,
+      })
+    } catch (error) {
+      console.error('Error updating group subject:', error)
     } finally {
       fetchGroups()
     }
@@ -209,12 +243,6 @@
   </fieldset>
 </section>
 
-<pre>{JSON.stringify(
-    $dataStore.subjects?.map(s => s.displayName),
-    null,
-    2
-  )}</pre>
-
 <section class="py-3">
   {#if selectedSchool}
     <div class="card shadow-sm w-100">
@@ -244,7 +272,24 @@
             />
             <span>
               {#if group.type === 'basis'}
-                {getSubjectForGroup(group)}
+                <select
+                  class="pkt-input"
+                  id="subjectsAllowedSelect"
+                  onchange={(e: Event) => {
+                    const target = e.target as HTMLSelectElement | null
+                    const changes = {
+                      subjectId: target?.value === NONE_FIELD_VALUE ? null : target?.value,
+                    }
+                    handleGroupUpdate(group, changes)
+                  }}
+                >
+                  <option value={NONE_FIELD_VALUE} selected={!group.subjectId}>Ikke valgt</option>
+                  {#each subjectsForSelectedSchool as subject}
+                    <option value={subject.id} selected={subject.id === group.subjectId}>
+                      {subject.displayName}
+                    </option>
+                  {/each}
+                </select>
               {:else}
                 {getSubjectForGroup(group)}
               {/if}
