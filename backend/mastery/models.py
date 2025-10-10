@@ -3,11 +3,11 @@ from django.db import models
 from django.db.models import Q
 from nanoid import generate
 
-alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 
 def generate_nanoid(size=12):
-    return generate(alphabet, size)
+    return generate(ALPHABET, size)
 
 
 class BaseModel(models.Model):
