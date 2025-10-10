@@ -415,6 +415,8 @@ export type PatchedSchoolReadable = {
     orgNumber?: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
+    isGroupGoalEnabled?: boolean;
+    isStudentListEnabled?: boolean;
     subjectsAllowed?: string;
     createdById?: string | null;
     updatedById?: string | null;
@@ -428,6 +430,8 @@ export type PatchedSchoolWritable = {
     orgNumber?: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
+    isGroupGoalEnabled?: boolean;
+    isStudentListEnabled?: boolean;
     subjectsAllowed?: string;
     createdById?: string | null;
     updatedById?: string | null;
@@ -584,6 +588,8 @@ export type SchoolReadable = {
     orgNumber: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
+    isGroupGoalEnabled?: boolean;
+    isStudentListEnabled?: boolean;
     subjectsAllowed?: string;
     createdById?: string | null;
     updatedById?: string | null;
@@ -597,6 +603,8 @@ export type SchoolWritable = {
     orgNumber: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
+    isGroupGoalEnabled?: boolean;
+    isStudentListEnabled?: boolean;
     subjectsAllowed?: string;
     createdById?: string | null;
     updatedById?: string | null;

@@ -97,6 +97,40 @@
     }
   }
 
+  // Toggle whether group goals can be created at the school
+  const toggleGroupGoalEnabled = async (school: SchoolReadable) => {
+    try {
+      const current = (school as any).isGroupGoalEnabled ?? false
+      const result = await schoolsPartialUpdate({
+        path: { id: school.id },
+        body: { isGroupGoalEnabled: !current },
+      })
+      const index = schools.findIndex(s => s.id === school.id)
+      if (index >= 0 && result.data) {
+        schools[index] = result.data
+      }
+    } catch (error) {
+      console.error('Error updating isGroupGoalEnabled:', error)
+    }
+  }
+
+  // Toggle whether teachers can see the students list menu item
+  const toggleStudentListEnabled = async (school: SchoolReadable) => {
+    try {
+      const current = (school as any).isStudentListEnabled ?? false
+      const result = await schoolsPartialUpdate({
+        path: { id: school.id },
+        body: { isStudentListEnabled: !current },
+      })
+      const index = schools.findIndex(s => s.id === school.id)
+      if (index >= 0 && result.data) {
+        schools[index] = result.data
+      }
+    } catch (error) {
+      console.error('Error updating isStudentListEnabled:', error)
+    }
+  }
+
   type SubjectsAllowed = 'only-custom' | 'only-group' | 'all'
 
   const updateSubjectsAllowed = async (school: SchoolReadable, value: SubjectsAllowed) => {
@@ -277,9 +311,9 @@
             <h5>{school.displayName}</h5>
             <pkt-checkbox
               id={'service-' + school.id}
-              class="mb-0 ms-auto"
-              label={school.isServiceEnabled ? 'Aktiv' : 'Inaktiv'}
-              labelPosition="left"
+              class="ms-auto"
+              label={school.isServiceEnabled ? 'Aktivert' : 'Deaktivert'}
+              labelPosition="right"
               isSwitch="true"
               aria-checked={school.isServiceEnabled}
               checked={school.isServiceEnabled}
@@ -306,6 +340,34 @@
             ></pkt-radiobutton>
           {/each}
         </fieldset>
+        <div>
+          <pkt-checkbox
+            id={'group-goal-' + school.id}
+            class="mb-0 ms-3"
+            label={(school as any).isGroupGoalEnabled
+              ? 'Gruppemål tilgjengelig'
+              : 'Gruppemål ikke tilgjgengelig'}
+            labelPosition="right"
+            isSwitch="true"
+            aria-checked={(school as any).isGroupGoalEnabled}
+            checked={(school as any).isGroupGoalEnabled}
+            onchange={() => toggleGroupGoalEnabled(school)}
+          ></pkt-checkbox>
+        </div>
+        <div>
+          <pkt-checkbox
+            id={'student-list-' + school.id}
+            class="mb-0 ms-3"
+            label={(school as any).isStudentListEnabled
+              ? 'Elevliste synlig'
+              : 'Elevliste ikke synlig'}
+            labelPosition="right"
+            isSwitch="true"
+            aria-checked={(school as any).isStudentListEnabled}
+            checked={(school as any).isStudentListEnabled}
+            onchange={() => toggleStudentListEnabled(school)}
+          ></pkt-checkbox>
+        </div>
 
         {#if importStatus[school.orgNumber]}
           <div class="my-4">
