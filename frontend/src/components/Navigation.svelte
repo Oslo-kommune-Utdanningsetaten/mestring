@@ -61,11 +61,13 @@
           <li class="nav-item">
             <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
           </li>
-          <li class="nav-item">
-            <Link to="/students" className={`nav-link ${isStudentsActive ? 'active' : ''}`}>
-              Elever
-            </Link>
-          </li>
+          {#if $currentUser?.isSuperadmin || currentSchool?.isStudentListEnabled}
+            <li class="nav-item">
+              <Link to="/students" className={`nav-link ${isStudentsActive ? 'active' : ''}`}>
+                Elever
+              </Link>
+            </li>
+          {/if}
         {/if}
         <li class="nav-item">
           <Link to="/about" className={`nav-link ${isAboutActive ? 'active' : ''}`}>

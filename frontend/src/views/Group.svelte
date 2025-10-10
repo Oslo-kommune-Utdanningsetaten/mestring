@@ -246,18 +246,20 @@
     <div class="my-4">
       <div class="d-flex align-items-center gap-2 mb-3">
         <h2 class="mb-0">Mål</h2>
-        <ButtonMini
-          options={{
-            iconName: 'plus-sign',
-            classes: 'mini-button bordered',
-            title: `Legg til nytt gruppemål for ${group.displayName}`,
-            variant: 'icon-only',
-            skin: 'tertiary',
-            onClick: () => handleEditGoal(null),
-          }}
-        >
-          Nytt gruppemål
-        </ButtonMini>
+        {#if currentSchool?.isGroupGoalEnabled}
+          <ButtonMini
+            options={{
+              iconName: 'plus-sign',
+              classes: 'mini-button bordered',
+              title: `Legg til nytt gruppemål for ${group.displayName}`,
+              variant: 'icon-only',
+              skin: 'tertiary',
+              onClick: () => handleEditGoal(null),
+            }}
+          >
+            Nytt gruppemål
+          </ButtonMini>
+        {/if}
       </div>
       <div>
         {#if goals.length === 0}
