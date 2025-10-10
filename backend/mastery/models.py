@@ -38,6 +38,8 @@ class School(BaseModel):
     org_number = models.CharField(max_length=50)
     owner = models.CharField(max_length=200, null=True)
     is_service_enabled = models.BooleanField(default=False)
+    is_group_goal_enabled = models.BooleanField(default=True)  # can group goals can be created
+    is_student_list_enabled = models.BooleanField(default=False)  # can teachers see the /students menu item
     # which subjects can be used: 'only-custom' (owned by school), 'only-group', 'all'
     subjects_allowed = models.CharField(max_length=50, null=False, default='all')
 
