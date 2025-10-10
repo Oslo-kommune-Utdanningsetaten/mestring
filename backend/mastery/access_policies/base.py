@@ -27,12 +27,20 @@ class BaseAccessPolicy(AccessPolicy):
 
     # --- Helper utilities -------------------------------------------------
     def get_target_id(self, view):
-        """Return the object lookup value from the URL path.
-
-        Works for custom lookup_url_kwarg or lookup_field (default 'pk'). Returns
-        None for list actions or if the kwarg is absent.
+        """Return ID of the target objevt (from the URL kwargs) only if the object is visible to the user.
         """
         lookup_url_kwarg = getattr(view, 'lookup_url_kwarg', None)
         lookup_field = getattr(view, 'lookup_field', 'pk')
         key = lookup_url_kwarg or lookup_field
-        return view.kwargs.get(key)
+        target_id = view.kwargs.get(key)
+        if not target_id:
+            return None
+        # Try to verify visibility
+        try:
+            qs = view.get_queryset()
+            if not qs.filter(**{lookup_field: target_id}).exists():
+                return None
+        except Exception:
+            # Not a considered crash, object is not visible to the user
+            pass
+        return target_id

@@ -60,6 +60,8 @@ class ObservationAccessPolicy(BaseAccessPolicy):
 
     def scope_queryset(self, request, qs):
         requester = request.user
+        if not requester:
+            return qs.none()
         if requester.is_superadmin:
             return qs
         try:
@@ -102,33 +104,44 @@ class ObservationAccessPolicy(BaseAccessPolicy):
     def is_user_creator_or_observer(self, request, view, action):
         try:
             requester = request.user
+            target_observation_id = self.get_target_id(view)
+            if not target_observation_id:
+                return False
             observation = view.get_object()
             return (observation.created_by_id == requester.id) or (observation.observer_id == requester.id)
         except Exception:
-            logger.exception("ObservationAccessPolicy.is_user_creator_or_observer error")
+            logger.exception("ObservationAccessPolicy.is_user_creator_or_observer")
             return False
 
     def is_user_target(self, request, view, action):
         try:
             requester = request.user
+            target_observation_id = self.get_target_id(view)
+            if not target_observation_id:
+                return False
             observation = view.get_object()
             return observation.student_id == requester.id
         except Exception:
-            logger.exception("ObservationAccessPolicy.is_user_target error")
+            logger.exception("ObservationAccessPolicy.is_user_target")
             return False
 
     def is_observation_not_visible_to_student(self, request, view, action):
         try:
+            target_observation_id = self.get_target_id(view)
+            if not target_observation_id:
+                return False
             observation = view.get_object()
-            return not bool(
-                observation.is_visible_to_student)
+            return not bool(observation.is_visible_to_student)
         except Exception:
-            logger.exception("ObservationAccessPolicy.is_observation_not_visible_to_student error")
+            logger.exception("ObservationAccessPolicy.is_observation_not_visible_to_student")
             return False
 
     def is_user_teacher_of_student(self, request, view, action):
         try:
             requester = request.user
+            target_observation_id = self.get_target_id(view)
+            if not target_observation_id:
+                return False
             observation = view.get_object()
             # Teacher of the relevant teaching/basis group for a group goal
             teacher_group_ids = set(
@@ -148,5 +161,5 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             )
             return observation.student.groups.filter(id__in=basis_groups_taught_ids).exists()
         except Exception:
-            logger.exception("ObservationAccessPolicy.is_user_teacher_of_student error")
+            logger.exception("ObservationAccessPolicy.is_user_teacher_of_student")
             return False
