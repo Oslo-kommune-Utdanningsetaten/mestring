@@ -60,15 +60,11 @@ export const setCurrentUser = (user: UserReadable | null) => {
 
 export const registerUserStatus = async (school: SchoolReadable) => {
   const user = get(dataStore).currentUser
-  const schoolsResult = await userSchoolsList({
+  const userSchoolsResult = await userSchoolsList({
     query: { user: user.id, school: school.id },
   })
-  const userSchools = schoolsResult.data || []
-  let isSchooladmin = !!userSchools.some(us => {
-    console.log('userSchool', us)
-    return us.role.name === SCHOOL_ADMIN_ROLE
-  })
-  console.log('isSchooladmin', isSchooladmin)
+  const userSchools = userSchoolsResult.data || []
+  let isSchooladmin = !!userSchools.some(userSchool => userSchool.role.name === SCHOOL_ADMIN_ROLE)
   dataStore.update(d => ({ ...d, isSchooladmin, isSuperadmin: user.isSuperadmin }))
 }
 
