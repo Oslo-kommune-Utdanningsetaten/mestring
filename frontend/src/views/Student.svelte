@@ -26,7 +26,7 @@
   const fetchGroupsForStudent = async (studentId: string) => {
     try {
       const userGroups: any = await groupsList({
-        query: { user: studentId, roles: 'student', school: currentSchool.id },
+        query: { user: studentId, roles: 'student', school: currentSchool.id, isEnabled: true },
       })
       groups = userGroups.data || []
     } catch (error) {
