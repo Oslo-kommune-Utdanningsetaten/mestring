@@ -59,8 +59,6 @@
 
 <section class="py-3">
   <h2>Mine grupper</h2>
-  <pre>{JSON.stringify(currentSchool, null, 2)}</pre>
-  <pre>{JSON.stringify($dataStore.isSchooladmin, null, 2)}</pre>
 
   {#if groups.length === 0}
     <div class="alert alert-info">Du har visst ikke tilgang til noen grupper</div>
