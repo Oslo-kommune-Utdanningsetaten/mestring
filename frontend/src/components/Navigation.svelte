@@ -61,7 +61,7 @@
           <li class="nav-item">
             <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
           </li>
-          {#if $currentUser?.isSuperadmin || currentSchool?.isStudentListEnabled}
+          {#if $dataStore.isSchooladmin || $dataStore.isSuperadmin || currentSchool?.isStudentListEnabled}
             <li class="nav-item">
               <Link to="/students" className={`nav-link ${isStudentsActive ? 'active' : ''}`}>
                 Elever

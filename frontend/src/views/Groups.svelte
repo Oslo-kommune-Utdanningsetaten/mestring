@@ -93,7 +93,7 @@
         <!-- students -->
         <div class="mt-3 mb-1">
           {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
-            {#if $dataStore.isSchooladmin || currentSchool.isStudentListEnabled}
+            {#if $dataStore.isSuperadmin || $dataStore.isSchooladmin || currentSchool.isStudentListEnabled}
               <a
                 href={urlStringFrom(
                   { groupId: group.id },
