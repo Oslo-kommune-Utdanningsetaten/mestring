@@ -1,9 +1,9 @@
 import logging
 
-from django.db.models import Q
+from django.db.models import Q, Exists, OuterRef
 
 from .base import BaseAccessPolicy
-from mastery.models import Goal
+from mastery.models import Goal, UserGroup
 
 logger = logging.getLogger(__name__)
 
@@ -53,11 +53,27 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         # Everyone else: implicitly denied
     ]
 
+    @classmethod
+    def scope_fields(cls, request, fields, instance=None):
+        """
+        Students cannot control visibility
+        """
+        
+        # If user has student groups, remove the visibility field
+        has_student_groups = hasattr(request.user, 'student_groups') and request.user.student_groups.exists()
+
+        if has_student_groups:
+            fields.pop('is_visible_to_student', None)
+
+        return fields
+
     def scope_queryset(self, request, qs):
         """
         Filter observations based on who can see them:
         - Everyone: Observations they created or observed (if visible)
-        - Teaching group teachers: Observations on group goals in groups they teach
+        - Teaching group teachers:
+          - Observations on group goals in groups they teach
+          - Observations on personal goals for students they teach in that subject
         - Basis group teachers: All observations for students in their basis group
         - Students: Observations about themselves (if visible)
         """
@@ -74,9 +90,19 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             filters = Q(created_by=requester)
             filters |= Q(observer=requester, is_visible_to_student=True)
 
-            # Teaching group teachers: Observations on group goals in groups they teach
+            # Teaching group teachers: Observations on group goals + personal goals for students they teach
             if teacher_group_ids:
+                # Observations on group goals in groups they teach
                 filters |= Q(goal__group_id__in=teacher_group_ids)
+
+                # Observations on personal goals where teacher teaches that subject to that student
+                student_in_teacher_subject = UserGroup.objects.filter(
+                    user_id=OuterRef('goal__student_id'),
+                    group_id__in=teacher_group_ids,
+                    group__subject_id=OuterRef('goal__subject_id'),
+                )
+                qs = qs.annotate(teacher_teaches_student_subject=Exists(student_in_teacher_subject))
+                filters |= Q(goal__student__isnull=False, teacher_teaches_student_subject=True)
 
             # Basis teachers: All observations for students in their basis group
             if teacher_basis_group_ids:
@@ -95,7 +121,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         """
         Teachers can create observations based on goal type:
         - Group goal observations: Must teach that group
-        - Personal goal observations: Must be basis group teacher for that student
+        - Personal goal observations: Must be basis group teacher OR teach that subject to that student
         """
         try:
             goal_id = request.data.get("goal") or request.data.get("goal_id")
@@ -110,12 +136,19 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             if goal.group_id:
                 return requester.teacher_groups.filter(id=goal.group_id).exists()
 
-            # Personal goal: Must be basis group teacher
+            # Personal goal: Basis group teacher OR teaches that subject to that student
             if goal.student_id:
-                return requester.teacher_groups.filter(
+                is_basis_teacher = requester.teacher_groups.filter(
                     type='basis',
                     members__id=goal.student_id
                 ).exists()
+
+                teaches_subject = requester.teacher_groups.filter(
+                    subject_id=goal.subject_id,
+                    members__id=goal.student_id
+                ).exists()
+
+                return is_basis_teacher or teaches_subject
 
             return False
 
@@ -148,21 +181,33 @@ class ObservationAccessPolicy(BaseAccessPolicy):
 
     def can_teacher_modify_observation(self, request, view, action):
         """
-        Teachers can modify observations based on goal type:
+        Teachers can modify observations based on goal type and ownership:
+        - Must be the creator of the observation OR have created_by is None
         - Group goal observations: Must teach that group
-        - Personal goal observations: Must be basis group teacher for that student
+        - Personal goal observations: Must be basis group teacher OR teach that subject to that student
         """
         try:
             target_observation = view.get_object()
             requester = request.user
 
+            # Teachers can only modify observations they created or observations with no creator
+            if target_observation.created_by_id is not None and target_observation.created_by_id != requester.id:
+                return False
+
             # Group goal: Must teach that group
             if target_observation.goal and target_observation.goal.group_id:
                 return requester.teacher_groups.filter(id=target_observation.goal.group_id).exists()
 
-            # Personal goal: Must be basis group teacher
+            # Personal goal: Basis group teacher OR teaches that subject to that student
             basis_group_ids = requester.teacher_groups.filter(type='basis').values_list('id', flat=True)
-            return target_observation.student.groups.filter(id__in=basis_group_ids).exists()
+            is_basis_teacher = target_observation.student.groups.filter(id__in=basis_group_ids).exists()
+
+            teaches_subject = requester.teacher_groups.filter(
+                subject=target_observation.goal.subject,
+                members__id=target_observation.student_id
+            ).exists()
+
+            return is_basis_teacher or teaches_subject
 
         except Exception as error:
             logger.error("ObservationAccessPolicy.can_teacher_modify_observation error: %s", error)

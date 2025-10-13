@@ -1,5 +1,6 @@
 from .base import BaseAccessPolicy
-from django.db.models import Q
+from mastery.models import UserGroup
+from django.db.models import Q, Exists, OuterRef
 import logging
 
 logger = logging.getLogger(__name__)
@@ -53,7 +54,9 @@ class GoalAccessPolicy(BaseAccessPolicy):
         """
         Filter goals based on who can see them:
         - Everyone: Goals they created
-        - Teaching group teachers: Group goals in groups they teach
+        - Teaching group teachers:
+          - Group goals in groups they teach
+          - Personal goals for students they teach in that subject
         - Basis group teachers: Personal goals + group goals for students in their basis group
         - Students: Their own personal goals + group goals in groups they're in
         """
@@ -71,9 +74,20 @@ class GoalAccessPolicy(BaseAccessPolicy):
             # Everyone can see goals they created
             filters = Q(created_by=requester)
 
-            # Teaching group teachers: Group goals in groups they teach
+            # Teaching group teachers: Group goals + personal goals for students they teach
             if teacher_group_ids:
+                # Group goals in groups they teach
                 filters |= Q(group_id__in=teacher_group_ids)
+
+                # Check if teacher teaches the subject to the student
+                student_in_teacher_subject = UserGroup.objects.filter(
+                    user_id=OuterRef('student_id'),  # Student from the goal
+                    group_id__in=teacher_group_ids,  # Groups the teacher teaches
+                    group__subject_id=OuterRef('subject_id'),  # Subject from the goal
+                )
+
+                qs = qs.annotate(teacher_teaches_student_subject=Exists(student_in_teacher_subject))
+                filters |= Q(student__isnull=False, teacher_teaches_student_subject=True)
 
             # Basis group teachers: All goals for students in their basis group
             if teacher_basis_group_ids:
@@ -111,7 +125,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
         """
         Teachers can create goals based on goal type:
         - Group goals: Must teach that group
-        - Personal goals: Must be basis group teacher for that student
+        - Personal goals: Must be basis group teacher OR teach that subject to that student
         """
         try:
             requester = request.user
@@ -122,12 +136,23 @@ class GoalAccessPolicy(BaseAccessPolicy):
             if group_id is not None:
                 return requester.teacher_groups.filter(id=group_id).exists()
 
-            # Personal goal: Must be basis group teacher
+            # Personal goal: Basis group teacher OR teaches that subject to that student
             if student_id is not None:
-                return requester.teacher_groups.filter(
+                subject_id = request.data.get('subject_id') or request.data.get('subject')
+
+                # Check if basis group teacher for this student
+                is_basis_teacher = requester.teacher_groups.filter(
                     type='basis',
                     members__id=student_id
                 ).exists()
+
+                # Check if teaches this subject to this student
+                teaches_subject = requester.teacher_groups.filter(
+                    subject_id=subject_id,
+                    members__id=student_id
+                ).exists()
+
+                return is_basis_teacher or teaches_subject
 
             return False
         except Exception as error:
@@ -135,11 +160,13 @@ class GoalAccessPolicy(BaseAccessPolicy):
             return False
 
     def can_student_modify_goal(self, request, view, action):
-        """Students can only modify their own personal goals."""
+        """Students can only modify their own personal goals as long as they have created them."""
         try:
             target_goal = view.get_object()
             requester = request.user
-            return target_goal.student_id == requester.id and target_goal.group_id is None
+            return (target_goal.student_id == requester.id and
+                    target_goal.group_id is None and
+                    target_goal.created_by_id == requester.id)
         except Exception as error:
             logger.error("GoalAccessPolicy.can_student_modify_goal error: %s", error)
             return False
@@ -148,19 +175,31 @@ class GoalAccessPolicy(BaseAccessPolicy):
         """
         Teachers can modify goals based on goal type:
         - Group goals: Must teach that group
-        - Personal goals: Must be basis group teacher for that student
+        - Personal goals: Must be basis group teacher OR teach that subject to that student
         """
         try:
             target_goal = view.get_object()
             requester = request.user
 
+            if target_goal.created_by_id is not None and target_goal.created_by_id != requester.id:
+                # Teachers can only modify goals they created
+                return False
+
             # Group goal: Must teach that group
             if target_goal.group_id:
                 return requester.teacher_groups.filter(id=target_goal.group_id).exists()
 
-            # Personal goal: Must be basis group teacher
+            # Personal goal: Basis group teacher OR teaches that subject to that student
             basis_group_ids = requester.teacher_groups.filter(type='basis').values_list('id', flat=True)
-            return target_goal.student.groups.filter(id__in=basis_group_ids).exists()
+            is_basis_teacher = target_goal.student.groups.filter(id__in=basis_group_ids).exists()
+
+            # Check if teaches this subject to this student
+            teaches_subject = requester.teacher_groups.filter(
+                subject=target_goal.subject,
+                members__id=target_goal.student_id
+            ).exists()
+
+            return is_basis_teacher or teaches_subject
         except Exception as error:
             logger.error("GoalAccessPolicy.can_teacher_modify_goal error: %s", error)
             return False
