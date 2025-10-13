@@ -58,7 +58,6 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         """
         Students cannot control visibility
         """
-        
         # If user has student groups, remove the visibility field
         has_student_groups = hasattr(request.user, 'student_groups') and request.user.student_groups.exists()
 
@@ -78,6 +77,8 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         - Students: Observations about themselves (if visible)
         """
         requester = request.user
+        if not requester:
+            return qs.none()
         if requester.is_superadmin:
             return qs
         try:
@@ -113,8 +114,8 @@ class ObservationAccessPolicy(BaseAccessPolicy):
                 filters |= Q(student=requester, is_visible_to_student=True)
 
             return qs.filter(filters).distinct()
-        except Exception as error:
-            logger.error("ObservationAccessPolicy.scope_queryset error: %s", error)
+        except Exception:
+            logger.exception("ObservationAccessPolicy.scope_queryset error")
             return qs.none()
 
     def can_teacher_create_observation(self, request, view, action):
@@ -152,8 +153,8 @@ class ObservationAccessPolicy(BaseAccessPolicy):
 
             return False
 
-        except Exception as error:
-            logger.error("ObservationAccessPolicy.can_teacher_create_observation error: %s", error)
+        except Exception:
+            logger.exception("ObservationAccessPolicy.can_teacher_create_observation error:")
             return False
 
     def can_student_create_observation(self, request, view, action):
@@ -163,8 +164,8 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             requester = request.user
 
             return str(student_id) == str(requester.id)
-        except Exception as error:
-            logger.error("ObservationAccessPolicy.can_student_create_observation error: %s", error)
+        except Exception:
+            logger.exception("ObservationAccessPolicy.can_student_create_observation error")
             return False
 
     def can_student_modify_observation(self, request, view, action):
@@ -175,8 +176,8 @@ class ObservationAccessPolicy(BaseAccessPolicy):
 
             return (target_observation.created_by_id == requester.id and
                     target_observation.student_id == requester.id)
-        except Exception as error:
-            logger.error("ObservationAccessPolicy.can_student_modify_observation error: %s", error)
+        except Exception:
+            logger.exception("ObservationAccessPolicy.can_student_modify_observation error")
             return False
 
     def can_teacher_modify_observation(self, request, view, action):
@@ -209,6 +210,6 @@ class ObservationAccessPolicy(BaseAccessPolicy):
 
             return is_basis_teacher or teaches_subject
 
-        except Exception as error:
-            logger.error("ObservationAccessPolicy.can_teacher_modify_observation error: %s", error)
+        except Exception:
+            logger.exception("ObservationAccessPolicy.can_teacher_modify_observation error")
             return False

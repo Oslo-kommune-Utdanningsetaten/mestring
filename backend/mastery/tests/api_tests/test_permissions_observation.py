@@ -151,7 +151,7 @@ def test_teaching_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": observation_on_group_goal.goal.id,
         "is_visible_to_student": True,
-    })
+    }, format='json')
     assert resp.status_code == 201
     created_group_obs_id = resp.json()["id"]
 
@@ -160,7 +160,7 @@ def test_teaching_group_teacher_observation_access(
         "student_id": observation_on_group_goal.student.id,
         "goal_id": observation_on_group_goal.goal.id,
         "is_visible_to_student": False,
-    })
+    }, format='json')
     assert resp.status_code == 200
 
     # Teacher can delete observations on group goals tehy teach
@@ -188,7 +188,7 @@ def test_teaching_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": goal_other_group.id,
         "is_visible_to_student": True,
-    })
+    }, format='json')
     assert resp.status_code == 403
 
     # Teacher cannot update observation in group they don't teach
@@ -196,7 +196,7 @@ def test_teaching_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": goal_other_group.id,
         "is_visible_to_student": False,
-    })
+    }, format='json')
     assert resp.status_code == 403
 
     # Teacher cannot delete observation in group they don't teach
@@ -208,7 +208,7 @@ def test_teaching_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": personal_goal_in_taught_subject.id,
         "is_visible_to_student": True,
-    })
+    }, format='json')
     assert resp.status_code == 201
     created_taught_subject_obs_id = resp.json()["id"]
 
@@ -217,7 +217,7 @@ def test_teaching_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": personal_goal_untaught_subject.id,
         "is_visible_to_student": True,
-    })
+    }, format='json')
     assert resp.status_code == 403
 
     # Teacher can update observations on personal goals in subjects they teach
@@ -225,7 +225,7 @@ def test_teaching_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": personal_goal_in_taught_subject.id,
         "is_visible_to_student": False,
-    })
+    }, format='json')
     assert resp.status_code == 200
 
     # Teacher cannot update observations on personal goals in subjects they don't teach
@@ -233,7 +233,7 @@ def test_teaching_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": personal_goal_untaught_subject.id,
         "is_visible_to_student": False,
-    })
+    }, format='json')
     assert resp.status_code == 403
 
     # Teacher can delete observations on personal goals in subjects they teach
@@ -286,7 +286,7 @@ def test_basis_group_teacher_observation_access(
         "student_id": observation.student.id,
         "goal_id": observation.goal.id,
         "is_visible_to_student": True,
-    })
+    }, format='json')
     assert resp.status_code == 403
 
     # Teacher can access invisible observations for their students
@@ -300,7 +300,7 @@ def test_basis_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": observation_on_personal_goal.goal.id,
         "is_visible_to_student": True,
-    })
+    }, format='json')
     assert resp.status_code == 201
     created_personal_obs_id = resp.json()["id"]
 
@@ -308,7 +308,7 @@ def test_basis_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": observation_on_personal_goal.goal.id,
         "is_visible_to_student": False,
-    })
+    }, format='json')
     assert resp.status_code == 200
 
     resp = client.delete(f"/api/observations/{created_personal_obs_id}/")
@@ -331,7 +331,7 @@ def test_basis_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": observation_on_personal_goal.goal.id,
         "is_visible_to_student": False,
-    })
+    }, format='json')
     assert resp.status_code == 403
 
     # And cannot delete it
@@ -368,7 +368,7 @@ def test_student_observation_access(
         "goal_id": observation_on_personal_goal.goal.id,
         "is_visible_to_student": True,
         "created_by_id": student.id,
-    })
+    }, format='json')
     assert resp.status_code == 201
     created_obs_id = resp.json()["id"]
 
@@ -378,7 +378,7 @@ def test_student_observation_access(
         "goal_id": observation_on_personal_goal.goal.id,
         "is_visible_to_student": False,
         "created_by_id": student.id,
-    })
+    }, format='json')
     assert resp.status_code == 201
     created_invisible_attempt_id = resp.json()["id"]
     forced_visible_observation = Observation.objects.get(id=created_invisible_attempt_id)
@@ -390,7 +390,7 @@ def test_student_observation_access(
         "goal_id": observation_on_personal_goal.goal.id,
         "is_visible_to_student": True,
         "created_by_id": student.id,
-    })
+    }, format='json')
     assert resp.status_code == 403
 
     # Can UPDATE observation they created about themselves
@@ -401,7 +401,7 @@ def test_student_observation_access(
         "mastery_value": 41,
         "mastery_description": "Good job, keep up the good work",
         "feedforward": "You can do it"
-    })
+    }, format='json')
     assert resp.status_code == 200
     updated_obs = Observation.objects.get(id=created_obs_id)
     assert updated_obs.mastery_value == 41
@@ -416,7 +416,7 @@ def test_student_observation_access(
         "mastery_value": 72,
         "mastery_description": "Trying to cheat the system it don't work",
         "feedforward": "You can't do it",
-    })
+    }, format='json')
     assert resp.status_code == 403
 
     # Can DELETE observation they created about themselves

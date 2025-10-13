@@ -61,6 +61,8 @@ class GoalAccessPolicy(BaseAccessPolicy):
         - Students: Their own personal goals + group goals in groups they're in
         """
         requester = request.user
+        if not requester:
+            return qs.none()
         if requester.is_superadmin:
             return qs
         try:
@@ -100,8 +102,8 @@ class GoalAccessPolicy(BaseAccessPolicy):
                 filters |= Q(group_id__in=student_group_ids)
 
             return qs.filter(filters).distinct()
-        except Exception as error:
-            logger.error("GoalAccessPolicy.scope_queryset error: %s", error)
+        except Exception:
+            logger.exception("GoalAccessPolicy.scope_queryset error")
             return qs.none()
 
     def can_student_create_goal(self, request, view, action):
@@ -117,8 +119,8 @@ class GoalAccessPolicy(BaseAccessPolicy):
 
             # Must be creating for themselves
             return str(student_id) == str(requester.id)
-        except Exception as error:
-            logger.error("GoalAccessPolicy.can_student_create_goal error: %s", error)
+        except Exception:
+            logger.exception("GoalAccessPolicy.can_student_create_goal error")
             return False
 
     def can_teacher_create_goal(self, request, view, action):
@@ -155,8 +157,8 @@ class GoalAccessPolicy(BaseAccessPolicy):
                 return is_basis_teacher or teaches_subject
 
             return False
-        except Exception as error:
-            logger.error("GoalAccessPolicy.can_teacher_create_goal error: %s", error)
+        except Exception:
+            logger.exception("GoalAccessPolicy.can_teacher_create_goal error")
             return False
 
     def can_student_modify_goal(self, request, view, action):
@@ -168,7 +170,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
                     target_goal.group_id is None and
                     target_goal.created_by_id == requester.id)
         except Exception as error:
-            logger.error("GoalAccessPolicy.can_student_modify_goal error: %s", error)
+            logger.exception("GoalAccessPolicy.can_student_modify_goal error")
             return False
 
     def can_teacher_modify_goal(self, request, view, action):
@@ -201,5 +203,5 @@ class GoalAccessPolicy(BaseAccessPolicy):
 
             return is_basis_teacher or teaches_subject
         except Exception as error:
-            logger.error("GoalAccessPolicy.can_teacher_modify_goal error: %s", error)
+            logger.exception("GoalAccessPolicy.can_teacher_modify_goal error")
             return False
