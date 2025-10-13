@@ -15,7 +15,11 @@
   let nameFilter = $state<string>('')
   let filteredUsers = $derived(
     nameFilter
-      ? users.filter(user => user.name.toLowerCase().includes(nameFilter.toLowerCase()))
+      ? users.filter(
+          user =>
+            user.name.toLowerCase().includes(nameFilter.toLowerCase()) ||
+            user.feideId.toLowerCase().includes(nameFilter.toLowerCase())
+        )
       : users
   )
 

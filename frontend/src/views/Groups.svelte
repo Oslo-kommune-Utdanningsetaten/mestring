@@ -4,6 +4,7 @@
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   import { groupsList, usersList } from '../generated/sdk.gen'
   import type { GroupReadable, UserReadable } from '../generated/types.gen'
+  import GroupTypeTag from '../components/GroupTypeTag.svelte'
 
   let currentSchool = $derived($dataStore.currentSchool)
   let groups = $state<GroupReadable[]>([])
@@ -42,6 +43,11 @@
     })
   }
 
+  const getSubjectName = (subjectId: string) => {
+    const subject = $dataStore.subjects.find(subj => subj.id === subjectId)
+    return subject ? subject.displayName : 'Ukjent fag'
+  }
+
   $effect(() => {
     if (currentSchool) {
       fetchGroups().then(() => {
@@ -53,60 +59,68 @@
 
 <section class="py-3">
   <h2>Mine grupper</h2>
-  <section class="py-2">
-    {#if groups.length === 0}
-      <div class="alert alert-info">Du har visst ikke tilgang til noen grupper</div>
-    {:else}
-      <div class="card shadow-sm">
-        <!-- Header row -->
-        <div class="group-card-header row fw-bold bg-light border-bottom p-3 mx-0">
-          <div class="col-3">Gruppe</div>
-          <div class="col-3">Elever</div>
-          <div class="col-6">Lærere</div>
+  <pre>{JSON.stringify(currentSchool, null, 2)}</pre>
+  <pre>{JSON.stringify($dataStore.isSchooladmin, null, 2)}</pre>
+
+  {#if groups.length === 0}
+    <div class="alert alert-info">Du har visst ikke tilgang til noen grupper</div>
+  {:else}
+    {#each groups as group}
+      <div class="card shadow-sm p-3">
+        <h3 class="mt-1 mb-3">
+          <a href="/groups/{group.id}">
+            {group.displayName}
+          </a>
+        </h3>
+
+        <div class="d-flex align-items-center gap-2">
+          <GroupTypeTag {group} />
+
+          <!-- teachers -->
+          {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
+            {#each groupMembers[group.id].teachers as teacher}
+              <pkt-tag iconName="lecture" skin="yellow">
+                <span>{teacher.name}</span>
+              </pkt-tag>
+            {/each}
+          {/if}
         </div>
 
-        <!-- Student rows -->
-        {#each groups as group}
-          <div class="row align-items-center border-bottom p-3 mx-0">
-            <div class="col-3">
-              <a href="/groups/{group.id}">
-                {group.displayName}
-              </a>
-            </div>
-            <div class="col-3">
-              {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
-                <a
-                  href={urlStringFrom(
-                    { groupId: group.id },
-                    {
-                      path: '/students',
-                      mode: 'replace',
-                    }
-                  )}
-                >
-                  {groupMembers[group.id].students.length}
-                  {groupMembers[group.id].students.length === 1 ? 'elev' : 'elever'}
-                </a>
-              {:else}
-                <div class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Henter data...</span>
-                </div>
-              {/if}
-            </div>
-            <div class="col-6">
-              {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
-                {groupMembers[group.id].teachers.map(m => m.name).join(', ')}
-              {:else}
-                <div class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Henter data...</span>
-                </div>
-              {/if}
-            </div>
+        {#if group.subjectId}
+          <div class="mt-3">
+            {getSubjectName(group.subjectId)}
           </div>
-        {/each}
+        {/if}
+
+        <!-- students -->
+        <div class="mt-3 mb-1">
+          {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
+            {#if $dataStore.isSchooladmin || currentSchool.isStudentListEnabled}
+              <a
+                href={urlStringFrom(
+                  { groupId: group.id },
+                  {
+                    path: '/students',
+                    mode: 'replace',
+                  }
+                )}
+              >
+                {groupMembers[group.id].students.length}
+                {groupMembers[group.id].students.length === 1 ? 'elev' : 'elever'}
+              </a>
+            {:else}
+              {groupMembers[group.id].students.length}
+              {groupMembers[group.id].students.length === 1 ? 'elev' : 'elever'}
+            {/if}
+          {:else}
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">Henter data...</span>
+            </div>
+          {/if}
+        </div>
       </div>
-    {/if}
-  </section>
+    {/each}
+  {/if}
 </section>
 
 <style>

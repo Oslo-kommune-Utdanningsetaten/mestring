@@ -12,6 +12,8 @@ export type AppData = {
   currentUser: BasicUserReadable | null
   masterySchemas: MasterySchemaReadable[]
   roles?: RoleReadable[]
+  isSchooladmin?: boolean
+  isSuperadmin?: boolean
 }
 
 export type GoalDecorated = GoalReadable & {
