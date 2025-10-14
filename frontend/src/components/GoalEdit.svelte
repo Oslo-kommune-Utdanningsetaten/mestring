@@ -96,13 +96,15 @@
   <hr />
   <div class="form-group mb-3">
     <div class="pkt-inputwrapper">
-      <label for="goalSubject" class="form-label">Fag</label>
       {#if isGoalPersonal}
-        <select
-          class="pkt-input"
+        <pkt-select
+          label="Fag"
+          name="goalSubject"
+          hasError={!localGoal.subjectId}
+          requiredText="Du må velge et fag"
           onchange={(e: Event) => {
             const target = e.target as HTMLSelectElement | null
-            const subjectId = target?.value || null
+            const subjectId = target?.value === NONE_FIELD_VALUE ? null : target?.value || null
             handleChangeSubject(subjectId)
           }}
         >
@@ -112,7 +114,7 @@
               {aSubject.displayName}
             </option>
           {/each}
-        </select>
+        </pkt-select>
       {:else}
         <div
           class="border border-2 rounded-0 border-primary fs-5 p-2 {!subjectViaGroup
@@ -134,6 +136,7 @@
         class="pkt-input"
         bind:value={localGoal.masterySchemaId}
         onchange={handleUpdatePreferredMasterySchema}
+        required={true}
       >
         <option value="" disabled>Velg mestringsskjema</option>
         {#each masterySchemas as masterySchema}
