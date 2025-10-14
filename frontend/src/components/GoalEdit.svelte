@@ -29,8 +29,9 @@
     group?: GroupReadable | null
     goal?: GoalWritable | null
     isGoalPersonal: boolean
-    onDone: () => void
+    onDone?: () => void | Promise<void>
   }>()
+
   let localGoal = $state<Partial<GoalReadable>>({})
   let subjectViaGroup = $derived(
     group ? $dataStore.subjects.find(s => s.id === group?.subjectId) : null
@@ -74,7 +75,9 @@
           body: localGoal,
         })
       }
-      onDone()
+      if (onDone) {
+        await onDone()
+      }
     } catch (error) {
       console.error('Error saving goal:', error)
     }

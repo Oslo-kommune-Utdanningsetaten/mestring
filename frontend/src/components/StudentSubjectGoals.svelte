@@ -24,7 +24,11 @@
   import { getLocalStorageItem } from '../stores/localStorage'
   import { formatDate } from '../utils/functions'
 
-  const { subjectId, student } = $props<{ subjectId: string; student: UserReadable }>()
+  const { subjectId, student, onRefreshRequired } = $props<{
+    subjectId: string
+    student: UserReadable
+    onRefreshRequired?: Function
+  }>()
 
   let goalsForSubject = $state<GoalDecorated[]>([])
   let sortableInstance: Sortable | null = null
@@ -74,6 +78,7 @@
 
   const handleCloseEditGoal = () => {
     isGoalEditorOpen = false
+    if (onRefreshRequired) onRefreshRequired()
   }
 
   const handleEditObservation = (goal: GoalDecorated, observation: ObservationReadable | null) => {

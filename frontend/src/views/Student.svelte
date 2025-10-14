@@ -71,6 +71,7 @@
 
   const handleCloseEditGoal = () => {
     isGoalEditorOpen = false
+    fetchStudentData(studentId)
   }
 
   const handleGoalDone = async () => {
@@ -87,7 +88,6 @@
 <section class="py-3">
   {#if student}
     <h1>Elev: {student.name}</h1>
-
     <!-- Goals and mastery -->
     <div class="card shadow-sm">
       <div class="d-flex align-items-center gap-2 mb-3 card-header">
@@ -105,7 +105,11 @@
         <ul class="list-group list-group-flush">
           {#each subjects as subject (subject.id)}
             <li class="list-group-item py-3">
-              <StudentSubjectGoals subjectId={subject.id} {student} />
+              <StudentSubjectGoals
+                subjectId={subject.id}
+                {student}
+                onRefreshRequired={() => fetchStudentData(studentId)}
+              />
             </li>
           {/each}
         </ul>

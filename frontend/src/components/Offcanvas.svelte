@@ -6,7 +6,7 @@
     width?: string
     side?: 'right' | 'left'
     ariaLabel?: string
-    onClosed?: () => void
+    onClosed: () => void
     children?: Snippet
   }
 
@@ -15,7 +15,7 @@
     width = '50vw',
     side = 'right',
     ariaLabel = 'Panel',
-    onClosed = () => {},
+    onClosed,
     children,
   }: OffcanvasProps = $props()
 

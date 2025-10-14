@@ -160,11 +160,11 @@ export const inferMastery = (
   }
   const firstValue = observationsForGoal[0]?.masteryValue
   const lastValue = observationsForGoal[observationsForGoal.length - 1]?.masteryValue
-  const trend = isNumber(lastValue) && isNumber(firstValue) ? lastValue - firstValue : null
+  const trend = isNumber(lastValue) && isNumber(firstValue) ? lastValue - firstValue : 0
   return {
     mastery: lastValue || 0,
-    trend: trend || 0,
-    title: `${goal.title}: ${lastValue}`,
+    trend: trend,
+    title: `Siste verdi: ${lastValue}. Trend: ${trend}.`,
   }
 }
 
