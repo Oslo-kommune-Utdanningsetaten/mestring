@@ -49,7 +49,7 @@
   }
 
   const handleSave = async () => {
-    localMasterySchema.config = JSON.stringify(localJson)
+    localMasterySchema.config = localJson
     try {
       if (localMasterySchema.id) {
         await masterySchemasUpdate({
