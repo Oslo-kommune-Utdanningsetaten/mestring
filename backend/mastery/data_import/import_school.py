@@ -137,7 +137,6 @@ def ensure_default_mastery_schema_exists(school):
             ],
             "inputIncrement": 1,
             "renderDirection": "vertical",
-            "isTitleInputEnabled": True,
             "isColorGradientEnabled": False,
             "isFeedforwardInputEnabled": True,
             "isMasteryValueInputEnabled": True,
