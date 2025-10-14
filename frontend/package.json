@@ -33,7 +33,7 @@
     "date-fns": "^4.1.0",
     "lodash": "^4.17.21",
     "sortablejs": "^1.15.6",
-    "svelte-jsoneditor": "^3.5.0",
+    "svelte-jsoneditor": "^3.10.0",
     "svelte-tiny-router": "^1.0.8"
   }
 }
