@@ -116,6 +116,8 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             return qs.filter(filters).distinct()
         except Exception:
             logger.exception("ObservationAccessPolicy.scope_queryset error")
+        except Exception:
+            logger.exception("ObservationAccessPolicy.scope_queryset error")
             return qs.none()
 
     def can_teacher_create_observation(self, request, view, action):

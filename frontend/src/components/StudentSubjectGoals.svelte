@@ -19,8 +19,10 @@
   import GroupSVG from '../assets/group.svg.svelte'
   import PersonSVG from '../assets/person.svg.svelte'
   import ButtonMini from './ButtonMini.svelte'
+  import Offcanvas from './Offcanvas.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { getLocalStorageItem } from '../stores/localStorage'
+  import { formatDate } from '../utils/functions'
 
   const { subjectId, student } = $props<{ subjectId: string; student: UserReadable }>()
 
@@ -33,6 +35,8 @@
   let expandedGoals = $state<Record<string, boolean>>({})
   let goalsListElement = $state<HTMLElement | null>(null)
   let subject = $derived($dataStore.subjects.find(s => s.id === subjectId) || null)
+  let isGoalEditorOpen = $state<boolean>(false)
+  let isObservationEditorOpen = $state<boolean>(false)
 
   const dateFormat = Intl.DateTimeFormat('nb', {
     month: 'long',
@@ -40,15 +44,9 @@
     year: 'numeric',
   })
 
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString)
-    return dateFormat.format(date)
-  }
-
   const fetchGoalsForSubject = async () => {
     try {
       const goalsResult = await goalsList({ query: { student: student.id, subject: subjectId } })
-      //const studentGoals = (goalsResult.data || []).filter(g => g.isPersonal)
       const goals = goalsResult.data || []
       const groupIds = goals.map(goal => goal.groupId).filter(Boolean) as string[]
       const groupsResult = await groupsList({
@@ -77,10 +75,11 @@
       masterySchemaId:
         goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
     }
+    isGoalEditorOpen = true
   }
 
   const handleCloseEditGoal = () => {
-    goalWip = null
+    isGoalEditorOpen = false
   }
 
   const handleEditObservation = (goal: GoalDecorated, observation: ObservationReadable | null) => {
@@ -92,34 +91,22 @@
       const prevousObservations = goal?.observations || []
       const previousObservation = prevousObservations[prevousObservations.length - 1]
       observationWip = { masteryValue: previousObservation?.masteryValue || null }
-      console.log('Creating new observation, prefilled with:', observationWip)
     }
     goalForObservation = { ...goal }
+    isObservationEditorOpen = true
   }
 
   const handleCloseEditObservation = () => {
-    observationWip = null
-  }
-
-  const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      if (goalWip) {
-        handleCloseEditGoal()
-      } else if (observationWip) {
-        handleCloseEditObservation()
-      }
-    }
+    isObservationEditorOpen = false
   }
 
   const handleGoalDone = async () => {
     goalForObservation = null
     handleCloseEditGoal()
-    await fetchGoalsForSubject()
   }
 
   const handleObservationDone = async () => {
     handleCloseEditObservation()
-    await fetchGoalsForSubject()
   }
 
   const handleDeleteObservation = async (observationId: string) => {
@@ -219,13 +206,15 @@
       <!-- Drag handle -->
       <span>
         {#if goal.isPersonal}
-          <pkt-icon
-            title="Endre rekkefølge"
-            class="me-2 row-handle-draggable"
-            name="drag"
-            role="button"
-            tabindex="0"
-          ></pkt-icon>
+          <ButtonMini
+            options={{
+              size: 'tiny',
+              iconName: 'drag',
+              title: 'Endre rekkefølge',
+              classes: 'me-2 row-handle-draggable',
+              onClick: () => {}, // drag handle only
+            }}
+          />
         {/if}
       </span>
       <!-- Goal order -->
@@ -316,7 +305,7 @@
         </div>
       {:else}
         <div class="goal-secondary-row">
-          <div class="student-observations-row">
+          <div class="student-observations-row mb-2">
             <span>Dato</span>
             <span>Verdi</span>
             <span>Handlinger</span>
@@ -330,35 +319,25 @@
                 {observation.masteryValue}
               </span>
               <span>
-                <pkt-icon
-                  title="Slett observasjon"
-                  class="hover-glow me-2"
-                  name="trash-can"
-                  onclick={() => handleDeleteObservation(observation.id)}
-                  onkeydown={(e: any) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      handleDeleteObservation(observation.id)
-                    }
+                <ButtonMini
+                  options={{
+                    size: 'tiny',
+                    iconName: 'trash-can',
+                    title: 'Slett observasjon',
+                    classes: 'hover-glow me-2',
+                    onClick: () => handleDeleteObservation(observation.id),
                   }}
-                  role="button"
-                  tabindex="0"
-                ></pkt-icon>
+                />
                 {#if index === goal?.observations.length - 1}
-                  <pkt-icon
-                    title="Rediger observasjon"
-                    class="hover-glow me-2"
-                    name="edit"
-                    onclick={() => handleEditObservation(goal, observation)}
-                    onkeydown={(e: any) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        handleEditObservation(goal, observation)
-                      }
+                  <ButtonMini
+                    options={{
+                      size: 'tiny',
+                      iconName: 'edit',
+                      title: 'Rediger observasjon',
+                      classes: 'hover-glow me-2',
+                      onClick: () => handleEditObservation(goal, observation),
                     }}
-                    role="button"
-                    tabindex="0"
-                  ></pkt-icon>
+                  />
                 {/if}
               </span>
             </div>
@@ -386,22 +365,39 @@
   </div>
 {/if}
 
-<svelte:window on:keydown={handleKeydown} />
-
 <!-- offcanvas for creating/editing goals -->
-<div class="offcanvas-edit" class:visible={!!goalWip}>
-  <GoalEdit goal={goalWip} {student} {subject} isGoalPersonal={true} onDone={handleGoalDone} />
-</div>
+<Offcanvas
+  bind:isOpen={isGoalEditorOpen}
+  ariaLabel="Rediger mål"
+  onClosed={() => {
+    goalWip = null
+    fetchGoalsForSubject()
+  }}
+>
+  {#if goalWip}
+    <GoalEdit goal={goalWip} {student} {subject} isGoalPersonal={true} onDone={handleGoalDone} />
+  {/if}
+</Offcanvas>
 
-<!-- offcanvas for adding an observation -->
-<div class="offcanvas-edit" class:visible={!!observationWip}>
-  <ObservationEdit
-    {student}
-    observation={observationWip}
-    goal={goalForObservation}
-    onDone={handleObservationDone}
-  />
-</div>
+<!-- offcanvas for creating/editing observations -->
+<Offcanvas
+  bind:isOpen={isObservationEditorOpen}
+  width="60vw"
+  ariaLabel="Rediger observasjon"
+  onClosed={() => {
+    observationWip = null
+    fetchGoalsForSubject()
+  }}
+>
+  {#if observationWip}
+    <ObservationEdit
+      {student}
+      observation={observationWip}
+      goal={goalForObservation}
+      onDone={handleObservationDone}
+    />
+  {/if}
+</Offcanvas>
 
 <style>
   div.observation-item > span {
@@ -436,7 +432,7 @@
     align-items: center;
   }
 
-  .row-handle-draggable {
+  :global(.row-handle-draggable) {
     cursor: move;
     vertical-align: -8%;
   }

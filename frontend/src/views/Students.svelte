@@ -180,11 +180,11 @@
 </section>
 
 <section class="py-3">
-  {#if isLoadingStudents}
+  {#if isLoadingStudents || isLoadingGroups}
     <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Henter elever...</span>
+      <span class="visually-hidden">Henter data...</span>
     </div>
-    <span>Henter elever...</span>
+    <span>Henter data...</span>
   {:else if students.length > 0}
     <div class="card shadow-sm">
       <!-- Header row -->
@@ -199,7 +199,7 @@
 
       <!-- Student rows -->
       {#each filteredStudents as student}
-        <StudentRow {student} {subjects} />
+        <StudentRow {student} {subjects} groups={allGroups} />
       {/each}
     </div>
   {:else if !isLoadingStudents && !isLoadingGroups}

@@ -26,7 +26,7 @@
   const fetchGroupsForStudent = async (studentId: string) => {
     try {
       const userGroups: any = await groupsList({
-        query: { user: studentId, roles: 'student', school: currentSchool.id },
+        query: { user: studentId, roles: 'student', school: currentSchool.id, isEnabled: true },
       })
       groups = userGroups.data || []
     } catch (error) {
@@ -60,6 +60,23 @@
   {#if student}
     <h1>Elev: {student.name}</h1>
 
+    <!-- Goals and mastery -->
+    <div class="card shadow-sm">
+      <h2 class="card-header">Mål</h2>
+
+      {#if subjects.length > 0}
+        <ul class="list-group list-group-flush">
+          {#each subjects as subject (subject.id)}
+            <li class="list-group-item py-3">
+              <StudentSubjectGoals subjectId={subject.id} {student} />
+            </li>
+          {/each}
+        </ul>
+      {:else}
+        <div class="alert alert-info m-2">Ingen mål for denne eleven</div>
+      {/if}
+    </div>
+
     <!-- Groups -->
     <div class="card shadow-sm">
       <h2 class="card-header">Medlem av</h2>
@@ -78,23 +95,6 @@
           <div class="alert alert-danger">Ikke medlem av noen grupper</div>
         {/if}
       </div>
-    </div>
-
-    <!-- Goals and mastery -->
-    <div class="card shadow-sm">
-      <h2 class="card-header">Mål</h2>
-
-      {#if subjects.length > 0}
-        <ul class="list-group list-group-flush">
-          {#each subjects as subject (subject.id)}
-            <li class="list-group-item py-3">
-              <StudentSubjectGoals subjectId={subject.id} {student} />
-            </li>
-          {/each}
-        </ul>
-      {:else}
-        <div class="alert alert-info m-2">Ingen mål for denne eleven</div>
-      {/if}
     </div>
   {:else}
     <div class="m-2">Fant ikke eleven</div>

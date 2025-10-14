@@ -22,11 +22,13 @@ class SchoolAccessPolicy(BaseAccessPolicy):
 
     def scope_queryset(self, request, qs):
         user = request.user
+        if not user:
+            return qs.none()
         if user.is_superadmin:
             return qs
         try:
             user_schools = user.get_schools()
             return qs.filter(id__in=user_schools.values("id"))
-        except Exception as error:
-            logger.error("SchoolAccessPolicy.scope_queryset error: %s", error)
+        except Exception:
+            logger.exception("SchoolAccessPolicy.scope_queryset error")
             return qs.none()

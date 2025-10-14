@@ -1,10 +1,13 @@
 <script lang="ts">
+  import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
+  import '@oslokommune/punkt-elements/dist/pkt-select.js'
   import { useTinyRouter } from 'svelte-tiny-router'
-  import type { GroupReadable, SchoolReadable } from '../../generated/types.gen'
+  import type { GroupReadable, SchoolReadable, SubjectReadable } from '../../generated/types.gen'
   import { groupsList, schoolsList, groupsUpdate } from '../../generated/sdk.gen'
   import { urlStringFrom } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
   import GroupTypeTag from '../../components/GroupTypeTag.svelte'
+  import { NONE_FIELD_VALUE } from '../../utils/constants'
 
   const router = useTinyRouter()
   let groups = $state<GroupReadable[]>([])
@@ -36,11 +39,41 @@
         : { isEnabled: false }
   )
 
+  const subjectsById: Record<string, SubjectReadable> = $derived(
+    $dataStore.subjects.reduce(
+      (acc, subject) => {
+        acc[subject.id] = subject
+        return acc
+      },
+      {} as Record<string, SubjectReadable>
+    )
+  )
+
+  // Subjects available for the currently selected school (if subjects are school scoped)
+  const subjectsForSelectedSchool = $derived(
+    (() => {
+      const currentSchoolId = selectedSchool?.id
+      if (!currentSchoolId) return []
+      return $dataStore.subjects
+        .filter(s => {
+          const subjSchoolId = (s as any).schoolId
+          return subjSchoolId ? subjSchoolId === currentSchoolId : true
+        })
+        .sort((a, b) => a.displayName.localeCompare(b.displayName, 'no', { sensitivity: 'base' }))
+    })()
+  )
+
   let headerText = $derived.by(() => {
     let text = selectedSchool ? `Grupper ved ${selectedSchool.displayName}` : 'Alle grupper'
     text = nameFilter ? `${text} som inneholder "${nameFilter}"` : text
     return text
   })
+
+  const getSubjectForGroup = (group: GroupReadable): string => {
+    if (!group.subjectId) return 'ikke valgt'
+    const subject = subjectsById[group.subjectId] || null
+    return subject?.displayName || `skolen har ikke fag ${group.subjectId}`
+  }
 
   const fetchSchools = async () => {
     try {
@@ -77,6 +110,32 @@
     }
   }
 
+  const handleGroupTypeToggle = async (group: GroupReadable) => {
+    const currentTypeName = group.type === 'basis' ? 'Basisgruppe' : 'Undervisningsgruppe'
+    const newTypeName = group.type === 'basis' ? 'Undervisningsgruppe' : 'Basisgruppe'
+
+    const confirmed = confirm(
+      `Er du sikker på at du vil endre gruppe ${group.displayName} fra ${currentTypeName} til ${newTypeName}?`
+    )
+
+    if (!confirmed) {
+      // Refetch to flip back radio buttons
+      fetchGroups()
+      return
+    }
+
+    const newType = group.type === 'basis' ? 'teaching' : 'basis'
+    try {
+      await groupsUpdate({
+        path: { id: group.id },
+        body: { ...group, type: newType } as GroupReadable,
+      })
+      fetchGroups()
+    } catch (error) {
+      console.error('Error toggling group type:', error)
+    }
+  }
+
   const handleToggleGroupEnabledStatus = async (group: GroupReadable) => {
     try {
       await groupsUpdate({
@@ -85,6 +144,23 @@
       })
     } catch (error) {
       console.error('Error toggling group endabled status:', error)
+    } finally {
+      fetchGroups()
+    }
+  }
+
+  const handleGroupUpdate = async (
+    group: GroupReadable,
+    newFieldsAndValues: Partial<GroupReadable>
+  ): Promise<void> => {
+    try {
+      const updatedGroup: GroupReadable = { ...group, ...newFieldsAndValues }
+      await groupsUpdate({
+        path: { id: group.id },
+        body: updatedGroup,
+      })
+    } catch (error) {
+      console.error('Error updating group subject:', error)
     } finally {
       fetchGroups()
     }
@@ -182,23 +258,50 @@
         <div class="group-grid-row header">
           <span>Gruppe</span>
           <span>Type</span>
+          <span>Fag</span>
           <span>Aktivert</span>
         </div>
         <!-- Data rows -->
         {#each filteredGroups as group}
           <div class="group-grid-row">
             <span>{group.displayName}</span>
-            <GroupTypeTag {group} />
+            <GroupTypeTag
+              {group}
+              onclick={() => handleGroupTypeToggle(group)}
+              isTypeWarningEnabled={true}
+            />
             <span>
-              <pkt-checkbox
-                label="Aktivert"
-                labelPosition="hidden"
-                isSwitch="true"
-                aria-checked={group.isEnabled}
-                checked={group.isEnabled}
-                onchange={() => handleToggleGroupEnabledStatus(group)}
-              ></pkt-checkbox>
+              {#if group.type === 'basis'}
+                <select
+                  class="pkt-input"
+                  id="subjectsAllowedSelect"
+                  onchange={(e: Event) => {
+                    const target = e.target as HTMLSelectElement | null
+                    const changes = {
+                      subjectId: target?.value === NONE_FIELD_VALUE ? null : target?.value,
+                    }
+                    handleGroupUpdate(group, changes)
+                  }}
+                >
+                  <option value={NONE_FIELD_VALUE} selected={!group.subjectId}>Ikke valgt</option>
+                  {#each subjectsForSelectedSchool as subject}
+                    <option value={subject.id} selected={subject.id === group.subjectId}>
+                      {subject.displayName}
+                    </option>
+                  {/each}
+                </select>
+              {:else}
+                {getSubjectForGroup(group)}
+              {/if}
             </span>
+            <pkt-checkbox
+              label="Aktivert"
+              labelPosition="hidden"
+              isSwitch="true"
+              aria-checked={group.isEnabled}
+              checked={group.isEnabled}
+              onchange={() => handleToggleGroupEnabledStatus(group)}
+            ></pkt-checkbox>
           </div>
         {/each}
       {/if}
@@ -220,7 +323,7 @@
 
   .group-grid-row {
     display: grid;
-    grid-template-columns: 4fr 4fr 1fr;
+    grid-template-columns: 2fr 2fr 1fr 0.5fr;
     column-gap: 1rem;
     padding: 0.5rem 0.5rem;
     align-items: center;
@@ -233,6 +336,6 @@
     background-color: var(--bs-light);
     border-top-right-radius: inherit;
     border-top-left-radius: inherit;
-    align-items: start;
+    align-items: center;
   }
 </style>

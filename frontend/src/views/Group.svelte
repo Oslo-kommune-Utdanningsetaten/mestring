@@ -19,6 +19,7 @@
   import GroupSVG from '../assets/group.svg.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
   import ObservationEdit from '../components/ObservationEdit.svelte'
+  import Offcanvas from '../components/Offcanvas.svelte'
   import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
   import SparklineChart from '../components/SparklineChart.svelte'
   import GroupTypeTag from '../components/GroupTypeTag.svelte'
@@ -46,6 +47,8 @@
   let observationWip = $state<ObservationReadable | {} | null>(null)
   let goalForObservation = $state<GoalDecorated | null>(null)
   let studentForObservation = $state<UserReadable | null>(null)
+  let isGoalEditorOpen = $state<boolean>(false)
+  let isObservationEditorOpen = $state<boolean>(false)
 
   const fetchGroupData = async () => {
     if (!groupId) return
@@ -113,6 +116,7 @@
       masterySchemaId:
         goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
     }
+    isGoalEditorOpen = true
   }
 
   const handleDeleteGoal = async (goalId: string) => {
@@ -125,29 +129,13 @@
   }
 
   const handleGoalDone = async () => {
-    handleCloseEditGoal()
+    isGoalEditorOpen = false
     await fetchGroupData()
   }
 
   const handleObservationDone = async () => {
-    handleCloseEditObservation()
+    isObservationEditorOpen = false
     fetchGroupData()
-  }
-
-  const handleCloseEditGoal = () => {
-    goalWip = null
-  }
-
-  const handleCloseEditObservation = () => {
-    observationWip = null
-  }
-
-  const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      if (goalWip) {
-        handleCloseEditGoal()
-      }
-    }
   }
 
   const handleEditObservation = (
@@ -174,6 +162,7 @@
         observerId: $dataStore.currentUser.id,
       }
     }
+    isObservationEditorOpen = true
   }
 
   const handleGoalOrderChange = async (event: SortableEvent) => {
@@ -240,157 +229,158 @@
     </div>
   {:else if group}
     <!-- Group Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1>{group.displayName}</h1>
+    <div class="">
+      <h1>{group.displayName}</h1>
 
-        <div>
-          <GroupTypeTag {group} />
-          {#each teachers as teacher}
-            <pkt-tag iconName="lecture" skin="green" class="me-2">
-              <span>{teacher.name}</span>
-            </pkt-tag>
-          {/each}
-        </div>
+      <div class="d-flex align-items-center gap-2">
+        <GroupTypeTag {group} />
+        {#each teachers as teacher}
+          <pkt-tag iconName="lecture" skin="yellow">
+            <span>{teacher.name}</span>
+          </pkt-tag>
+        {/each}
       </div>
     </div>
 
     <!-- Goals Section -->
-    <div class="mb-4">
-      <div class="d-flex align-items-center gap-2 mb-3">
-        <h3 class="mb-0">Mål</h3>
-        <ButtonMini
-          options={{
-            iconName: 'plus-sign',
-            classes: 'mini-button bordered',
-            title: `Legg til nytt gruppemål for ${group.displayName}`,
-            variant: 'icon-only',
-            skin: 'tertiary',
-            onClick: () => handleEditGoal(null),
-          }}
-        >
-          Nytt gruppemål
-        </ButtonMini>
-      </div>
-      <div>
-        {#if goals.length === 0}
-          <div class="alert alert-info">
-            Ingen mål for denne gruppa. Trykk pluss (+) for å opprette mål for alle elever i gruppa.
-          </div>
-        {:else}
-          <div bind:this={goalsListElement} class="list-group">
-            {#each goals as goal, index (goal.id)}
-              <div
-                class="list-group-item goal-item {expandedGoals[goal.id]
-                  ? 'shadow border-2 z-1'
-                  : ''}"
-              >
-                <div class="goal-primary-row">
-                  <!-- Drag handle -->
-                  <span>
-                    <pkt-icon
-                      title="Endre rekkefølge"
-                      class="me-2 row-handle-draggable"
-                      name="drag"
-                      role="button"
-                      tabindex="0"
-                    ></pkt-icon>
-                  </span>
-                  <!-- Numbering -->
-                  <span>
-                    {goal.sortOrder || index + 1}
-                  </span>
-                  <!-- Goal type icon -->
-                  <span class="goal-type-icon"><GroupSVG /></span>
-                  <!-- Goal title -->
-                  <span>
-                    {isShowGoalTitleEnabled ? goal.title : '🙊'}
-                  </span>
-                  <!-- Expand goal info -->
-                  <ButtonMini
-                    options={{
-                      iconName: `chevron-thin-${expandedGoals[goal.id] ? 'up' : 'down'}`,
-                      classes: 'mini-button rounded justify-end',
-                      title: `${expandedGoals[goal.id] ? 'Skjul' : 'Vis'} observasjoner`,
-                      onClick: () => toggleGoalExpansion(goal.id),
-                    }}
-                  />
-                </div>
+    {#if currentSchool?.isGroupGoalEnabled}
+      <div class="my-4">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <h2 class="mb-0">Mål</h2>
+          <ButtonMini
+            options={{
+              iconName: 'plus-sign',
+              classes: 'mini-button bordered',
+              title: `Legg til nytt gruppemål for ${group.displayName}`,
+              variant: 'icon-only',
+              skin: 'tertiary',
+              onClick: () => handleEditGoal(null),
+            }}
+          >
+            Nytt gruppemål
+          </ButtonMini>
+        </div>
+        <div>
+          {#if goals.length === 0}
+            <div class="alert alert-info">
+              Ingen mål for denne gruppa. Trykk pluss (+) for å opprette mål for alle elever i
+              gruppa.
+            </div>
+          {:else}
+            <div bind:this={goalsListElement} class="list-group">
+              {#each goals as goal, index (goal.id)}
+                <div
+                  class="list-group-item goal-item {expandedGoals[goal.id]
+                    ? 'shadow border-2 z-1'
+                    : ''}"
+                >
+                  <div class="goal-primary-row">
+                    <!-- Drag handle -->
+                    <span>
+                      <pkt-icon
+                        title="Endre rekkefølge"
+                        class="me-2 row-handle-draggable"
+                        name="drag"
+                        role="button"
+                        tabindex="0"
+                      ></pkt-icon>
+                    </span>
+                    <!-- Numbering -->
+                    <span>
+                      {goal.sortOrder || index + 1}
+                    </span>
+                    <!-- Goal type icon -->
+                    <span class="goal-type-icon"><GroupSVG /></span>
+                    <!-- Goal title -->
+                    <span>
+                      {isShowGoalTitleEnabled ? goal.title : '🙊'}
+                    </span>
+                    <!-- Expand goal info -->
+                    <ButtonMini
+                      options={{
+                        iconName: `chevron-thin-${expandedGoals[goal.id] ? 'up' : 'down'}`,
+                        classes: 'mini-button rounded justify-end',
+                        title: `${expandedGoals[goal.id] ? 'Skjul' : 'Vis'} observasjoner`,
+                        onClick: () => toggleGoalExpansion(goal.id),
+                      }}
+                    />
+                  </div>
 
-                {#if expandedGoals[goal.id]}
-                  {#if !isGoalInUse[goal.id]}
-                    <div class="my-3">
-                      <p>
-                        Ingen observasjoner for dette målet. Trykk pluss (+) for å opprette en
-                        observasjon.
-                      </p>
+                  {#if expandedGoals[goal.id]}
+                    {#if !isGoalInUse[goal.id]}
+                      <div class="my-3">
+                        <p>
+                          Ingen observasjoner for dette målet. Trykk pluss (+) for å opprette en
+                          observasjon.
+                        </p>
 
-                      <ButtonMini
-                        options={{
-                          iconName: 'edit',
-                          classes: 'my-2 me-2',
-                          title: 'Rediger personlig mål',
-                          onClick: () => handleEditGoal(goal),
-                          variant: 'icon-left',
-                          skin: 'primary',
-                        }}
-                      >
-                        Rediger personlig mål
-                      </ButtonMini>
-
-                      <ButtonMini
-                        options={{
-                          iconName: 'trash-can',
-                          classes: 'my-2',
-                          title: 'Slett personlig mål',
-                          onClick: () => handleDeleteGoal(goal.id),
-                          variant: 'icon-left',
-                          skin: 'primary',
-                        }}
-                      >
-                        Slett mål
-                      </ButtonMini>
-                    </div>
-                  {/if}
-                  <div class="goal-secondary-row">
-                    {#each students as student (student.id)}
-                      <div class="student-observations-in-goal mb-2 align-items-center">
-                        <span>
-                          {student.name}
-                        </span>
-
-                        <!-- Stats widgets -->
-                        <span class="d-flex gap-2 align-items-center">
-                          <MasteryLevelBadge
-                            masteryData={goalsWithCalculatedMasteryByStudentId[student.id].find(
-                              g => g.id === goal.id
-                            ).masteryData}
-                          />
-                          <SparklineChart
-                            data={goalsWithCalculatedMasteryByStudentId[student.id]
-                              .find(g => g.id === goal.id)
-                              ?.observations?.map((o: ObservationReadable) => o.masteryValue)}
-                          />
-                        </span>
-                        <!-- New observation button -->
                         <ButtonMini
                           options={{
-                            iconName: 'plus-sign',
-                            classes: 'mini-button bordered',
-                            title: 'Ny observasjon',
-                            onClick: () => handleEditObservation(goal, null, student),
+                            iconName: 'edit',
+                            classes: 'my-2 me-2',
+                            title: 'Rediger personlig mål',
+                            onClick: () => handleEditGoal(goal),
+                            variant: 'icon-left',
+                            skin: 'primary',
                           }}
-                        />
+                        >
+                          Rediger personlig mål
+                        </ButtonMini>
+
+                        <ButtonMini
+                          options={{
+                            iconName: 'trash-can',
+                            classes: 'my-2',
+                            title: 'Slett personlig mål',
+                            onClick: () => handleDeleteGoal(goal.id),
+                            variant: 'icon-left',
+                            skin: 'primary',
+                          }}
+                        >
+                          Slett mål
+                        </ButtonMini>
                       </div>
-                    {/each}
-                  </div>
-                {/if}
-              </div>
-            {/each}
-          </div>
-        {/if}
+                    {/if}
+                    <div class="goal-secondary-row">
+                      {#each students as student (student.id)}
+                        <div class="student-observations-in-goal mb-2 align-items-center">
+                          <span>
+                            {student.name}
+                          </span>
+
+                          <!-- Stats widgets -->
+                          <span class="d-flex gap-2 align-items-center">
+                            <MasteryLevelBadge
+                              masteryData={goalsWithCalculatedMasteryByStudentId[student.id].find(
+                                g => g.id === goal.id
+                              ).masteryData}
+                            />
+                            <SparklineChart
+                              data={goalsWithCalculatedMasteryByStudentId[student.id]
+                                .find(g => g.id === goal.id)
+                                ?.observations?.map((o: ObservationReadable) => o.masteryValue)}
+                            />
+                          </span>
+                          <!-- New observation button -->
+                          <ButtonMini
+                            options={{
+                              iconName: 'plus-sign',
+                              classes: 'mini-button bordered',
+                              title: 'Ny observasjon',
+                              onClick: () => handleEditObservation(goal, null, student),
+                            }}
+                          />
+                        </div>
+                      {/each}
+                    </div>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </div>
       </div>
-    </div>
+    {/if}
 
     <!-- Students Section -->
     {#if students}
@@ -422,22 +412,38 @@
   {/if}
 </section>
 
-<svelte:window on:keydown={handleKeydown} />
+<!-- Offcanvas for creating/editing goals -->
+<Offcanvas
+  bind:isOpen={isGoalEditorOpen}
+  ariaLabel="Rediger mål"
+  onClosed={() => {
+    goalWip = null
+    fetchGroupData()
+  }}
+>
+  {#if goalWip}
+    <GoalEdit goal={goalWip} {group} isGoalPersonal={false} onDone={handleGoalDone} />
+  {/if}
+</Offcanvas>
 
-<!-- offcanvas for creating/editing goals -->
-<div class="offcanvas-edit" class:visible={!!goalWip}>
-  <GoalEdit goal={goalWip} {group} isGoalPersonal={false} onDone={handleGoalDone} />
-</div>
-
-<!-- offcanvas for adding an observation -->
-<div class="offcanvas-edit" class:visible={!!observationWip}>
-  <ObservationEdit
-    student={studentForObservation}
-    observation={observationWip}
-    goal={goalForObservation}
-    onDone={handleObservationDone}
-  />
-</div>
+<!-- Offcanvas for adding an observation -->
+<Offcanvas
+  bind:isOpen={isObservationEditorOpen}
+  ariaLabel="Rediger observasjon"
+  onClosed={() => {
+    observationWip = null
+    fetchGroupData()
+  }}
+>
+  {#if observationWip}
+    <ObservationEdit
+      student={studentForObservation}
+      observation={observationWip}
+      goal={goalForObservation}
+      onDone={handleObservationDone}
+    />
+  {/if}
+</Offcanvas>
 
 <style>
   div.observation-item > span {

@@ -7,12 +7,14 @@
   import { urlStringFrom } from '../../utils/functions'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
+  import Offcanvas from '../../components/Offcanvas.svelte'
 
   const router = useTinyRouter()
   let masterySchemas = $derived<MasterySchemaWithConfig[]>([])
   let masterySchemaWip: Partial<MasterySchemaWithConfig> | null =
     $state<Partial<MasterySchemaReadable> | null>(null)
   let isJsonVisible = $state<boolean>(false)
+  let isEditorOpen = $state<boolean>(false)
   let schools = $state<SchoolReadable[]>([])
   let isLoadingSchools = $state<boolean>(false)
   let selectedSchool = $derived<SchoolReadable | null>(null)
@@ -29,7 +31,6 @@
 
   const fetchMasterySchemas = async () => {
     const query = selectedSchool ? { school: selectedSchool.id } : {}
-    console.log('fetchMasterySchemas with query', query)
     const result = await masterySchemasList({ query })
     masterySchemas = result.data || []
   }
@@ -45,7 +46,7 @@
   }
 
   const handleDone = () => {
-    masterySchemaWip = null
+    isEditorOpen = false
     fetchMasterySchemas()
   }
 
@@ -55,6 +56,7 @@
     } else {
       masterySchemaWip = selectedSchool ? { schoolId: selectedSchool.id } : {}
     }
+    isEditorOpen = true
   }
 
   const handleDeleteMasterySchema = async (masterySchemaId: string) => {
@@ -66,14 +68,6 @@
       console.error('Error deleting schema:', error)
     } finally {
       await fetchMasterySchemas()
-    }
-  }
-
-  const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      if (masterySchemaWip) {
-        handleDone()
-      }
     }
   }
 
@@ -208,17 +202,17 @@
   </div>
 </section>
 
-<svelte:window on:keydown={handleKeydown} />
-
-<!-- offcanvas for creating/editing goals -->
-<div class="offcanvas-edit custom-offcanvas-edit shadow-sm" class:visible={!!masterySchemaWip}>
-  <MasterySchemaEdit masterySchema={masterySchemaWip} onDone={handleDone} />
-</div>
-
-<style>
-  .custom-offcanvas-edit {
-    right: -70vw;
-    width: 70vw;
-    overflow-y: auto;
-  }
-</style>
+<!-- Offcanvas for creating/editing mastery schemas -->
+<Offcanvas
+  bind:isOpen={isEditorOpen}
+  width="70vw"
+  ariaLabel="Rediger mestringsskjema"
+  onClosed={() => {
+    masterySchemaWip = null
+    fetchMasterySchemas()
+  }}
+>
+  {#if masterySchemaWip}
+    <MasterySchemaEdit masterySchema={masterySchemaWip} onDone={handleDone} />
+  {/if}
+</Offcanvas>

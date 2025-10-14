@@ -6,11 +6,13 @@
   import { urlStringFrom } from '../../utils/functions'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import SubjectEdit from '../../components/SubjectEdit.svelte'
+  import Offcanvas from '../../components/Offcanvas.svelte'
   import { dataStore } from '../../stores/data'
 
   const router = useTinyRouter()
   let subjects = $derived<SubjectReadable[]>([])
   let subjectWip = $state<SubjectReadable | null>(null)
+  let isSubjectEditorOpen = $state(false)
   let schools = $state<SchoolReadable[]>([])
   let selectedSchool = $derived<SchoolReadable | null>(null)
   let isLoadingSubjects = $state<boolean>(false)
@@ -107,9 +109,8 @@
     }
   }
 
-  const handleDone = () => {
-    subjectWip = null
-    fetchSubjects()
+  const closeEditor = () => {
+    isSubjectEditorOpen = false
   }
 
   const handleEditSubject = (subject: SubjectReadable | null) => {
@@ -118,6 +119,7 @@
     } else {
       subjectWip = { ownedBySchoolId: selectedSchool?.id } as SubjectReadable
     }
+    isSubjectEditorOpen = true
   }
 
   const handleDeleteSubject = async (subjectId: string) => {
@@ -129,14 +131,6 @@
       console.error('Error deleting schema:', error)
     } finally {
       await fetchSubjects()
-    }
-  }
-
-  const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      if (subjectWip) {
-        handleDone()
-      }
     }
   }
 
@@ -170,48 +164,55 @@
 
 {#snippet groupsInfo(groups: GroupReadable[])}
   {#each groups as group, index (group.id)}
-    <a class="bg-info px-1 me-1" href="/groups/{group.id}">
+    <a class="bg-info px-1 group-link" href="/groups/{group.id}">
       {group.displayName}
     </a>
   {/each}
+{/snippet}
+
+{#snippet subjectCodes(subject: SubjectReadable)}
+  {#if !subject.grepCode && !subject.grepGroupCode}
+    <span class="fst-italic">mangler</span>
+  {:else}
+    <!-- grep code -->
+    {#if subject.grepCode}
+      <span title="grepCode">{subject.grepCode}</span>
+    {:else}
+      <span class="fst-italic">mangler</span>
+    {/if}
+    <!-- Opplæringsfag / grepGroupCode -->
+    {#if subject.grepGroupCode}
+      <span title="grepGroupCode">{subject.grepGroupCode}</span>
+    {:else}
+      <span class="fst-italic">mangler</span>
+    {/if}
+  {/if}
 {/snippet}
 
 <section class="pt-3">
   <h2 class="py-3">{headerText}</h2>
   <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">
-    {#if isLoadingSchools}
-      <div class="m-4">
-        <div class="spinner-border text-primary" role="status"></div>
-        <span>Henter skoler...</span>
-      </div>
-    {:else if isLoadingSubjects}
-      <div class="m-4">
-        <div class="spinner-border text-primary" role="status"></div>
-        <span>Henter fag...</span>
-      </div>
-    {:else}
-      <div class="pkt-inputwrapper">
-        <select
-          class="pkt-input"
-          id="groupSelect"
-          onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
-        >
-          <option value="0" selected={!selectedSchool?.id}>Velg skole</option>
-          {#each schools as school}
-            <option value={school.id} selected={school.id === selectedSchool?.id}>
-              {school.displayName}
-            </option>
-          {/each}
-        </select>
-      </div>
-      <input
-        type="text"
-        class="group-filter-input"
-        placeholder="Navn på fag"
-        bind:value={nameFilter}
-      />
-    {/if}
+    <div class="pkt-inputwrapper">
+      <select
+        class="pkt-input"
+        id="groupSelect"
+        onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
+      >
+        <option value="0" selected={!selectedSchool?.id}>Velg skole</option>
+        {#each schools as school}
+          <option value={school.id} selected={school.id === selectedSchool?.id}>
+            {school.displayName}
+          </option>
+        {/each}
+      </select>
+    </div>
+    <input
+      type="text"
+      class="group-filter-input"
+      placeholder="Navn på fag"
+      bind:value={nameFilter}
+    />
   </div>
 
   <!-- Radio buttons for filtering subjects -->
@@ -232,112 +233,143 @@
 </section>
 
 <section class="py-4">
-  <ButtonMini
-    options={{
-      title: 'Nytt fag',
-      iconName: 'plus-sign',
-      skin: 'primary',
-      variant: 'label-only',
-      classes: '',
-      onClick: () => handleEditSubject(null),
-    }}
-  >
-    Nytt fag
-  </ButtonMini>
-
-  <div class="mt-4">
-    {#if !filteredSubjects.length}
-      <div class="alert alert-info">No subjects available for the selected school.</div>
-    {:else}
-      {#each filteredSubjects as subject}
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h3 class="card-title">
-              {subject.displayName}
-            </h3>
-            <div class="compact-grid">
-              {#if subject.ownedBySchoolId}
-                <div class="row">
-                  <span class="col-2">Eies av</span>
-                  <span class="col-10">
-                    {schools.find(s => s.id === subject.ownedBySchoolId)?.displayName}
-                  </span>
-                </div>
-              {/if}
-              <div class="row">
-                <span class="col-2">Grupper</span>
-                <span class="col-10">
-                  {#if groupsBySubjectId[subject.id].length > 0}
-                    {@render groupsInfo(groupsBySubjectId[subject.id])}
-                  {:else}
-                    ingen
-                  {/if}
-                </span>
-              </div>
-              <div class="row">
-                <span class="col-2">Grepkode</span>
-                <span class="col-10">{subject.grepCode || 'ukjent'}</span>
-              </div>
-              <div class="row">
-                <span class="col-2">Opplæringsfag</span>
-                <span class="col-10">{subject.grepGroupCode || 'ukjent'}</span>
-              </div>
-            </div>
-
-            {#if subject.ownedBySchoolId}
-              <ButtonMini
-                options={{
-                  title: 'Rediger',
-                  iconName: 'edit',
-                  skin: 'secondary',
-                  variant: 'icon-left',
-                  classes: 'my-2 me-2',
-                  onClick: () => handleEditSubject(subject),
-                }}
-              >
-                Rediger
-              </ButtonMini>
-
-              <ButtonMini
-                options={{
-                  title: 'Slett',
-                  iconName: 'trash-can',
-                  skin: 'secondary',
-                  variant: 'icon-left',
-                  classes: 'my-2',
-                  onClick: () => handleDeleteSubject(subject.id),
-                }}
-              >
-                Slett
-              </ButtonMini>
-            {/if}
-          </div>
-        </div>
-      {/each}
-    {/if}
+  <div class="d-flex align-items-center mt-2 mb-3 gap-2">
+    <ButtonMini
+      options={{
+        title: 'Nytt fag',
+        iconName: 'plus-sign',
+        skin: 'primary',
+        variant: 'icon-left',
+        classes: 'add-subject-btn',
+        onClick: () => handleEditSubject(null),
+      }}
+    />
   </div>
+
+  {#if !filteredSubjects.length}
+    <div class="alert alert-info mt-3">Ingen fag for valgt filter.</div>
+  {:else}
+    <div class="subjects-grid" aria-label="Fagliste">
+      <span class="item header header-row">Fag</span>
+      <span class="item header header-row">Eies av</span>
+      <span class="item header header-row">Elever</span>
+      <span class="item header header-row">Grupper</span>
+      <span class="item header header-row">Fagkoder</span>
+      <span class="item header header-row">Handlinger</span>
+      {#each filteredSubjects as subject (subject.id)}
+        <!-- Fag navn -->
+        <span class="item header">{subject.displayName}</span>
+
+        <!-- Eies av -->
+        <span class="item">
+          {#if subject.ownedBySchoolId}
+            {schools.find(s => s.id === subject.ownedBySchoolId)?.displayName}
+          {:else}
+            <span class="fst-italic">Globalt</span>
+          {/if}
+        </span>
+
+        <span class="item">
+          <span class="fst-italic">0</span>
+        </span>
+
+        <!-- Grupper -->
+        <span class="item">
+          {#if (groupsBySubjectId[subject.id] || []).length > 0}
+            {@render groupsInfo(groupsBySubjectId[subject.id])}
+          {:else}
+            <span class="fst-italic">ingen</span>
+          {/if}
+        </span>
+
+        <!-- Grep code stuff -->
+        <span class="item">
+          {@render subjectCodes(subject)}
+        </span>
+
+        <!-- Actions -->
+        <span class="item">
+          {#if subject.ownedBySchoolId}
+            <ButtonMini
+              options={{
+                title: 'Rediger',
+                iconName: 'edit',
+                skin: 'secondary',
+                variant: 'icon-only',
+                size: 'tiny',
+                classes: 'me-1',
+                onClick: () => handleEditSubject(subject),
+              }}
+            />
+            <ButtonMini
+              options={{
+                title: 'Slett',
+                iconName: 'trash-can',
+                skin: 'secondary',
+                variant: 'icon-only',
+                size: 'tiny',
+                classes: 'me-0',
+                onClick: () => handleDeleteSubject(subject.id),
+              }}
+            />
+          {/if}
+        </span>
+      {/each}
+    </div>
+  {/if}
 </section>
 
-<svelte:window on:keydown={handleKeydown} />
-
-<!-- offcanvas for creating/editing subjects -->
-<div class="offcanvas-edit" class:visible={!!subjectWip && !!selectedSchool}>
-  <SubjectEdit subject={subjectWip} school={selectedSchool} onDone={handleDone} />
-</div>
+<!-- Offcanvas panel to create/edit subject -->
+<Offcanvas
+  bind:isOpen={isSubjectEditorOpen}
+  ariaLabel="Rediger fag"
+  onClosed={() => {
+    subjectWip = null
+    fetchSubjects()
+  }}
+>
+  {#if subjectWip && selectedSchool}
+    <SubjectEdit subject={subjectWip} school={selectedSchool} onDone={closeEditor} />
+  {/if}
+</Offcanvas>
 
 <style>
-  .compact-grid {
-    margin-bottom: 1rem;
-  }
-  .compact-grid .row {
-    font-size: small;
-  }
   .group-filter-input {
     border: 2px solid var(--bs-primary);
-    border-radius: 0;
     height: 48px;
-    margin-top: 0px;
-    padding-left: 15px;
+    padding: 0 15px;
     margin-left: 10px;
+  }
+
+  .subjects-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 0.5fr 1.5fr 1fr 0.5fr;
+    align-items: start;
+    gap: 0;
+  }
+
+  .item.header-row {
+    background-color: var(--bs-light);
+  }
+
+  .item {
+    padding: 0.5rem;
+    border-top: 1px solid var(--bs-border-color);
+    min-height: 2.8rem;
+  }
+
+  .item:nth-last-child(-n + 6) {
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+
+  .item.header {
+    font-weight: 800;
+  }
+
+  .group-link {
+    display: inline-block;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    margin-right: 0.25rem;
   }
 </style>

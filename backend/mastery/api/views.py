@@ -85,7 +85,7 @@ class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     access_policy = UserAccessPolicy
 
     def get_queryset(self):
-        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('name')
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
             roles_param, _ = get_request_param(self.request.query_params, 'roles')
@@ -292,7 +292,7 @@ class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     access_policy = GroupAccessPolicy
 
     def get_queryset(self):
-        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('display_name')
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
             type_param, _ = get_request_param(self.request.query_params, 'type')
@@ -357,7 +357,7 @@ class SubjectViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     access_policy = SubjectAccessPolicy
 
     def get_queryset(self):
-        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('display_name')
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
@@ -420,7 +420,7 @@ class GoalViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     access_policy = GoalAccessPolicy
 
     def get_queryset(self):
-        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('sort_order')
 
         if self.action == 'list':
             group_param, _ = get_request_param(self.request.query_params, 'group')
@@ -462,7 +462,7 @@ class RoleViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     access_policy = RoleAccessPolicy
 
     def get_queryset(self):
-        return self.access_policy().scope_queryset(self.request, super().get_queryset())
+        return self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('name')
 
 
 @extend_schema_view(
@@ -525,7 +525,7 @@ class ObservationViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     access_policy = ObservationAccessPolicy
 
     def get_queryset(self):
-        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('observed_at')
 
         if self.action == 'list':
             student_param, _ = get_request_param(self.request.query_params, 'student')

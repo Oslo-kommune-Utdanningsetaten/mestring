@@ -2,6 +2,7 @@ from .base import BaseAccessPolicy
 from django.db.models import Q
 from mastery.models import User
 
+
 class UserAccessPolicy(BaseAccessPolicy):
     statements = [
         # Superadmin: full access
@@ -34,6 +35,8 @@ class UserAccessPolicy(BaseAccessPolicy):
 
     def scope_queryset(self, request, qs):
         user = request.user
+        if not user:
+            return qs.none()
         if user.is_superadmin:
             return qs
         try:
@@ -55,8 +58,8 @@ class UserAccessPolicy(BaseAccessPolicy):
         except Exception:
             return qs.none()
 
+    # True if requester is the target user
 
-    # True if requester is the target user  
     def is_user_self(self, request, view, action):
         try:
             target_user = view.get_object()
@@ -64,8 +67,8 @@ class UserAccessPolicy(BaseAccessPolicy):
         except Exception:
             return False
 
-
     # True if requester and target share any group (any role)
+
     def is_in_same_group(self, request, view, action):
         try:
             requester = request.user
@@ -76,8 +79,8 @@ class UserAccessPolicy(BaseAccessPolicy):
         except Exception:
             return False
 
-
     # True if target user is a teacher at any school the requester belongs to
+
     def is_target_teacher_at_my_school(self, request, view, action):
         try:
             requester = request.user

@@ -14,7 +14,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
             "principal": ["role:superadmin"],
             "effect": "allow",
         },
-        # Authenticated users can list and retrieve goals (filtered by scope_queryset)
+        # Authenticated users can list and retrieve goals filtered by scope_queryset
         {
             "action": ["list", "retrieve"],
             "principal": ["authenticated"],
@@ -202,6 +202,6 @@ class GoalAccessPolicy(BaseAccessPolicy):
             ).exists()
 
             return is_basis_teacher or teaches_subject
-        except Exception as error:
+        except Exception:
             logger.exception("GoalAccessPolicy.can_teacher_modify_goal error")
             return False

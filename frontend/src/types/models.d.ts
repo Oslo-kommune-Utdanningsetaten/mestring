@@ -12,6 +12,8 @@ export type AppData = {
   currentUser: BasicUserReadable | null
   masterySchemas: MasterySchemaReadable[]
   roles?: RoleReadable[]
+  isSchooladmin?: boolean
+  isSuperadmin?: boolean
 }
 
 export type GoalDecorated = GoalReadable & {
@@ -47,4 +49,26 @@ export type MasterySchemaConfig = {
 
 export type MasterySchemaWithConfig = MasterySchemaReadable & {
   config?: MasterySchemaConfig
+}
+
+export type SchoolImportStatus = {
+  groups: {
+    fetchedCount: number | null
+    fetchedAt: string | null
+    dbCount: number | null
+    diff: number | null
+  }
+  users: {
+    fetchedCount: number | null
+    fetchedAt: string | null
+    dbCount: number | null
+    diff: number | null
+  }
+  memberships: {
+    fetchedCount: number | null
+    fetchedAt: string | null
+    dbCount: number | null
+    diff: number | null
+  }
+  lastImportAt: string | null
 }

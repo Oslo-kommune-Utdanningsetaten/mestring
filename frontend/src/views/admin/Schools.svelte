@@ -1,4 +1,5 @@
 <script lang="ts">
+  import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { type SchoolReadable } from '../../generated/types.gen'
   import {
@@ -10,6 +11,9 @@
     schoolsList,
     schoolsPartialUpdate,
   } from '../../generated/sdk.gen'
+  import type { SchoolImportStatus } from '../../types/models'
+  import { formatDate } from '../../utils/functions'
+
   import ButtonMini from '../../components/ButtonMini.svelte'
 
   const router = useTinyRouter()
@@ -18,46 +22,23 @@
   let alertType = $state<'success' | 'error' | ''>('')
   let feideOrgInput: HTMLInputElement
 
-  type ImportStatus = {
-    groups: {
-      fetchedCount: number | null
-      fetchedAt: string | null
-      dbCount: number | null
-      diff: number | null
-    }
-    users: {
-      fetchedCount: number | null
-      fetchedAt: string | null
-      dbCount: number | null
-      diff: number | null
-    }
-    memberships: {
-      fetchedCount: number | null
-      fetchedAt: string | null
-      dbCount: number | null
-      diff: number | null
-    }
-    lastImportAt: string | null
-  }
-  let importStatus = $state<Record<string, ImportStatus>>({})
+  // Radio options for subject config
+  const subjectOptions = [
+    { value: 'all', label: 'Alle fag' },
+    { value: 'only-group', label: 'Kun fag via Feide-grupper' },
+    { value: 'only-custom', label: 'Kun egendefinerte fag' },
+  ] as const
 
-  const formatDate = (iso?: string | null) => (iso ? new Date(iso).toLocaleString('nb-NO') : '—')
-
-  const schoolOptions = $derived(
-    schools.map(school => ({
-      label: school.displayName,
-      value: school.id,
-    }))
-  )
+  let importStatus = $state<Record<string, SchoolImportStatus>>({})
 
   const loadImportStatusForSchool = async (orgNumber: string) => {
     try {
       const result = await fetchSchoolImportStatus({
         path: { org_number: orgNumber },
-      })
+      } as any)
 
       if (result.response.status === 200 && result.data) {
-        const data = result.data as ImportStatus
+        const data = result.data as SchoolImportStatus
         importStatus = {
           ...importStatus,
           [orgNumber]: {
@@ -116,6 +97,58 @@
     }
   }
 
+  // Toggle whether group goals can be created at the school
+  const toggleGroupGoalEnabled = async (school: SchoolReadable) => {
+    try {
+      const current = (school as any).isGroupGoalEnabled ?? false
+      const result = await schoolsPartialUpdate({
+        path: { id: school.id },
+        body: { isGroupGoalEnabled: !current },
+      })
+      const index = schools.findIndex(s => s.id === school.id)
+      if (index >= 0 && result.data) {
+        schools[index] = result.data
+      }
+    } catch (error) {
+      console.error('Error updating isGroupGoalEnabled:', error)
+    }
+  }
+
+  // Toggle whether teachers can see the students list menu item
+  const toggleStudentListEnabled = async (school: SchoolReadable) => {
+    try {
+      const current = (school as any).isStudentListEnabled ?? false
+      const result = await schoolsPartialUpdate({
+        path: { id: school.id },
+        body: { isStudentListEnabled: !current },
+      })
+      const index = schools.findIndex(s => s.id === school.id)
+      if (index >= 0 && result.data) {
+        schools[index] = result.data
+      }
+    } catch (error) {
+      console.error('Error updating isStudentListEnabled:', error)
+    }
+  }
+
+  type SubjectsAllowed = 'only-custom' | 'only-group' | 'all'
+
+  const updateSubjectsAllowed = async (school: SchoolReadable, value: SubjectsAllowed) => {
+    if (school.subjectsAllowed === value) return
+    try {
+      const result = await schoolsPartialUpdate({
+        path: { id: school.id },
+        body: { subjectsAllowed: value },
+      })
+      const index = schools.findIndex(s => s.id === school.id)
+      if (index >= 0 && result.data) {
+        schools[index] = result.data
+      }
+    } catch (error) {
+      console.error('Error updating subjectsAllowed:', error)
+    }
+  }
+
   const dismissAlert = () => {
     alertMessage = ''
     alertType = ''
@@ -126,9 +159,10 @@
     try {
       const result = await fetchGroupsForSchool({
         path: { org_number: orgNumber },
-      })
+      } as any)
 
       if (result.response.status === 201) {
+        // @ts-expect-error result.data typed as unknown by generator
         alertMessage = `Bakgrunnsjobb opprettet for henting av grupper for ${orgNumber} (Task ID: ${result.data.taskId})`
         alertType = 'success'
       } else if (result.response.status === 409) {
@@ -149,9 +183,10 @@
     try {
       const result = await fetchMembershipsForSchool({
         path: { org_number: orgNumber },
-      })
+      } as any)
 
       if (result.response.status === 201) {
+        // @ts-expect-error result.data typed as unknown by generator
         alertMessage = `Bakgrunnsjobb opprettet for henting av medlemskap for ${orgNumber} (Task ID: ${result.data.taskId})`
         alertType = 'success'
       } else if (result.response.status === 409) {
@@ -172,7 +207,7 @@
     try {
       const result = await feideImportSchool({
         path: { org_number: orgNumber },
-      })
+      } as any)
       if (result.response.status === 201) {
         alertMessage = `Skole med org nr ${orgNumber} importert fra Feide`
         alertType = 'success'
@@ -193,9 +228,10 @@
     try {
       const result = await importGroupsAndUsers({
         path: { org_number: orgNumber },
-      })
+      } as any)
 
       if (result.response.status === 201) {
+        // @ts-expect-error result.data typed as unknown by generator
         alertMessage = `Bakgrunnsjobb opprettet for import av grupper og brukere for ${orgNumber} (Task ID: ${result.data.taskId})`
         alertType = 'success'
         router.navigate('/data-maintenance-tasks')
@@ -218,7 +254,7 @@
 </script>
 
 <section class="container py-3">
-  <h2>Dataimport for skoler</h2>
+  <h2>Dataimport og konfig for skoler</h2>
 
   <!-- Import school by org number -->
   <div class="py-4">
@@ -275,9 +311,9 @@
             <h5>{school.displayName}</h5>
             <pkt-checkbox
               id={'service-' + school.id}
-              class="mb-0 ms-auto"
-              label={school.isServiceEnabled ? 'Aktiv' : 'Inaktiv'}
-              labelPosition="left"
+              class="ms-auto"
+              label={school.isServiceEnabled ? 'Aktivert' : 'Deaktivert'}
+              labelPosition="right"
               isSwitch="true"
               aria-checked={school.isServiceEnabled}
               checked={school.isServiceEnabled}
@@ -290,8 +326,51 @@
           </div>
         </div>
 
+        <div class="mb-2">Hvilke fag er tilgjengelige på skolen</div>
+
+        <!-- Radio buttons for filtering groups -->
+        <fieldset class="d-flex flex-wrap gap-4">
+          {#each subjectOptions as option}
+            <pkt-radiobutton
+              name={'subjectsAllowed-' + school.id}
+              value={option.value}
+              label={option.label}
+              checked={school.subjectsAllowed === option.value}
+              onchange={() => updateSubjectsAllowed(school, option.value)}
+            ></pkt-radiobutton>
+          {/each}
+        </fieldset>
+        <div>
+          <pkt-checkbox
+            id={'group-goal-' + school.id}
+            class="mb-0 ms-3"
+            label={(school as any).isGroupGoalEnabled
+              ? 'Gruppemål tilgjengelig'
+              : 'Gruppemål ikke tilgjgengelig'}
+            labelPosition="right"
+            isSwitch="true"
+            aria-checked={(school as any).isGroupGoalEnabled}
+            checked={(school as any).isGroupGoalEnabled}
+            onchange={() => toggleGroupGoalEnabled(school)}
+          ></pkt-checkbox>
+        </div>
+        <div>
+          <pkt-checkbox
+            id={'student-list-' + school.id}
+            class="mb-0 ms-3"
+            label={(school as any).isStudentListEnabled
+              ? 'Elevliste synlig'
+              : 'Elevliste ikke synlig'}
+            labelPosition="right"
+            isSwitch="true"
+            aria-checked={(school as any).isStudentListEnabled}
+            checked={(school as any).isStudentListEnabled}
+            onchange={() => toggleStudentListEnabled(school)}
+          ></pkt-checkbox>
+        </div>
+
         {#if importStatus[school.orgNumber]}
-          <div class="mb-4">
+          <div class="my-4">
             <div class="table-responsive">
               <table class="table table-sm align-middle mb-0">
                 <thead>

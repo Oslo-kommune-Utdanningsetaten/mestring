@@ -19,8 +19,8 @@ export type DataMaintenanceTaskReadable = {
     earliestRunAt?: string | null;
     result?: unknown;
     attempts?: number;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type DataMaintenanceTaskWritable = {
@@ -39,8 +39,8 @@ export type DataMaintenanceTaskWritable = {
     earliestRunAt?: string | null;
     result?: unknown;
     attempts?: number;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type GoalReadable = {
@@ -51,13 +51,13 @@ export type GoalReadable = {
     title?: string | null;
     description?: string | null;
     sortOrder?: number | null;
-    createdById?: string;
-    updatedById?: string;
-    groupId?: string;
-    studentId?: string;
-    subjectId?: string;
-    previousGoalId?: string;
-    masterySchemaId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    groupId?: string | null;
+    studentId?: string | null;
+    subjectId?: string | null;
+    previousGoalId?: string | null;
+    masterySchemaId?: string | null;
     readonly isPersonal: boolean;
 };
 
@@ -66,13 +66,13 @@ export type GoalWritable = {
     title?: string | null;
     description?: string | null;
     sortOrder?: number | null;
-    createdById?: string;
-    updatedById?: string;
-    groupId?: string;
-    studentId?: string;
-    subjectId?: string;
-    previousGoalId?: string;
-    masterySchemaId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    groupId?: string | null;
+    studentId?: string | null;
+    subjectId?: string | null;
+    previousGoalId?: string | null;
+    masterySchemaId?: string | null;
 };
 
 export type GroupReadable = {
@@ -86,9 +86,9 @@ export type GroupReadable = {
     validFrom?: string | null;
     validTo?: string | null;
     isEnabled?: boolean;
-    createdById?: string;
-    updatedById?: string;
-    subjectId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    subjectId?: string | null;
     schoolId: string;
 };
 
@@ -100,9 +100,9 @@ export type GroupWritable = {
     validFrom?: string | null;
     validTo?: string | null;
     isEnabled?: boolean;
-    createdById?: string;
-    updatedById?: string;
-    subjectId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    subjectId?: string | null;
     schoolId: string;
 };
 
@@ -114,9 +114,9 @@ export type MasterySchemaReadable = {
     title?: string;
     description?: string | null;
     config?: unknown;
-    createdById?: string;
-    updatedById?: string;
-    schoolId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    schoolId?: string | null;
 };
 
 export type MasterySchemaWritable = {
@@ -124,9 +124,9 @@ export type MasterySchemaWritable = {
     title?: string;
     description?: string | null;
     config?: unknown;
-    createdById?: string;
-    updatedById?: string;
-    schoolId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    schoolId?: string | null;
 };
 
 export type NestedUserGroupReadable = {
@@ -137,8 +137,8 @@ export type NestedUserGroupReadable = {
     readonly createdAt: string;
     readonly updatedAt: string;
     maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type NestedUserGroupWritable = {
@@ -146,8 +146,8 @@ export type NestedUserGroupWritable = {
     group: GroupWritable;
     role: RoleWritable;
     maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type NestedUserSchoolReadable = {
@@ -158,8 +158,8 @@ export type NestedUserSchoolReadable = {
     readonly createdAt: string;
     readonly updatedAt: string;
     maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type NestedUserSchoolWritable = {
@@ -167,8 +167,8 @@ export type NestedUserSchoolWritable = {
     school: SchoolWritable;
     role: RoleWritable;
     maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type ObservationReadable = {
@@ -181,12 +181,12 @@ export type ObservationReadable = {
     feedforward?: string | null;
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
     goalId: string;
     studentId: string;
-    observerId?: string;
-    situationId?: string;
+    observerId?: string | null;
+    situationId?: string | null;
 };
 
 export type ObservationWritable = {
@@ -196,12 +196,12 @@ export type ObservationWritable = {
     feedforward?: string | null;
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
     goalId: string;
     studentId: string;
-    observerId?: string;
-    situationId?: string;
+    observerId?: string | null;
+    situationId?: string | null;
 };
 
 export type PatchedDataMaintenanceTaskReadable = {
@@ -223,8 +223,8 @@ export type PatchedDataMaintenanceTaskReadable = {
     earliestRunAt?: string | null;
     result?: unknown;
     attempts?: number;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type PatchedDataMaintenanceTaskWritable = {
@@ -243,8 +243,8 @@ export type PatchedDataMaintenanceTaskWritable = {
     earliestRunAt?: string | null;
     result?: unknown;
     attempts?: number;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type PatchedGoalReadable = {
@@ -255,13 +255,13 @@ export type PatchedGoalReadable = {
     title?: string | null;
     description?: string | null;
     sortOrder?: number | null;
-    createdById?: string;
-    updatedById?: string;
-    groupId?: string;
-    studentId?: string;
-    subjectId?: string;
-    previousGoalId?: string;
-    masterySchemaId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    groupId?: string | null;
+    studentId?: string | null;
+    subjectId?: string | null;
+    previousGoalId?: string | null;
+    masterySchemaId?: string | null;
     readonly isPersonal?: boolean;
 };
 
@@ -270,13 +270,13 @@ export type PatchedGoalWritable = {
     title?: string | null;
     description?: string | null;
     sortOrder?: number | null;
-    createdById?: string;
-    updatedById?: string;
-    groupId?: string;
-    studentId?: string;
-    subjectId?: string;
-    previousGoalId?: string;
-    masterySchemaId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    groupId?: string | null;
+    studentId?: string | null;
+    subjectId?: string | null;
+    previousGoalId?: string | null;
+    masterySchemaId?: string | null;
 };
 
 export type PatchedGroupReadable = {
@@ -290,9 +290,9 @@ export type PatchedGroupReadable = {
     validFrom?: string | null;
     validTo?: string | null;
     isEnabled?: boolean;
-    createdById?: string;
-    updatedById?: string;
-    subjectId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    subjectId?: string | null;
     schoolId?: string;
 };
 
@@ -304,9 +304,9 @@ export type PatchedGroupWritable = {
     validFrom?: string | null;
     validTo?: string | null;
     isEnabled?: boolean;
-    createdById?: string;
-    updatedById?: string;
-    subjectId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    subjectId?: string | null;
     schoolId?: string;
 };
 
@@ -318,9 +318,9 @@ export type PatchedMasterySchemaReadable = {
     title?: string;
     description?: string | null;
     config?: unknown;
-    createdById?: string;
-    updatedById?: string;
-    schoolId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    schoolId?: string | null;
 };
 
 export type PatchedMasterySchemaWritable = {
@@ -328,9 +328,9 @@ export type PatchedMasterySchemaWritable = {
     title?: string;
     description?: string | null;
     config?: unknown;
-    createdById?: string;
-    updatedById?: string;
-    schoolId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    schoolId?: string | null;
 };
 
 export type PatchedNestedUserGroupReadable = {
@@ -341,8 +341,8 @@ export type PatchedNestedUserGroupReadable = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type PatchedNestedUserGroupWritable = {
@@ -350,8 +350,8 @@ export type PatchedNestedUserGroupWritable = {
     group?: GroupWritable;
     role?: RoleWritable;
     maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type PatchedObservationReadable = {
@@ -364,12 +364,12 @@ export type PatchedObservationReadable = {
     feedforward?: string | null;
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
     goalId?: string;
     studentId?: string;
-    observerId?: string;
-    situationId?: string;
+    observerId?: string | null;
+    situationId?: string | null;
 };
 
 export type PatchedObservationWritable = {
@@ -379,12 +379,12 @@ export type PatchedObservationWritable = {
     feedforward?: string | null;
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
     goalId?: string;
     studentId?: string;
-    observerId?: string;
-    situationId?: string;
+    observerId?: string | null;
+    situationId?: string | null;
 };
 
 export type PatchedRoleReadable = {
@@ -393,15 +393,15 @@ export type PatchedRoleReadable = {
     readonly updatedAt?: string;
     maintainedAt?: string | null;
     name?: string;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type PatchedRoleWritable = {
     maintainedAt?: string | null;
     name?: string;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type PatchedSchoolReadable = {
@@ -415,8 +415,11 @@ export type PatchedSchoolReadable = {
     orgNumber?: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
-    createdById?: string;
-    updatedById?: string;
+    isGroupGoalEnabled?: boolean;
+    isStudentListEnabled?: boolean;
+    subjectsAllowed?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type PatchedSchoolWritable = {
@@ -427,8 +430,11 @@ export type PatchedSchoolWritable = {
     orgNumber?: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
-    createdById?: string;
-    updatedById?: string;
+    isGroupGoalEnabled?: boolean;
+    isStudentListEnabled?: boolean;
+    subjectsAllowed?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type PatchedSituationReadable = {
@@ -439,8 +445,8 @@ export type PatchedSituationReadable = {
     title?: string;
     description?: string | null;
     happensAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type PatchedSituationWritable = {
@@ -448,8 +454,8 @@ export type PatchedSituationWritable = {
     title?: string;
     description?: string | null;
     happensAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type PatchedStatusReadable = {
@@ -461,8 +467,8 @@ export type PatchedStatusReadable = {
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
     studentId?: string;
     subjectId?: string;
 };
@@ -473,8 +479,8 @@ export type PatchedStatusWritable = {
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
     studentId?: string;
     subjectId?: string;
 };
@@ -488,9 +494,9 @@ export type PatchedSubjectReadable = {
     shortName?: string;
     grepCode?: string | null;
     grepGroupCode?: string | null;
-    createdById?: string;
-    updatedById?: string;
-    ownedBySchoolId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    ownedBySchoolId?: string | null;
 };
 
 export type PatchedSubjectWritable = {
@@ -499,9 +505,9 @@ export type PatchedSubjectWritable = {
     shortName?: string;
     grepCode?: string | null;
     grepGroupCode?: string | null;
-    createdById?: string;
-    updatedById?: string;
-    ownedBySchoolId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    ownedBySchoolId?: string | null;
 };
 
 export type PatchedUserReadable = {
@@ -517,8 +523,8 @@ export type PatchedUserReadable = {
     isSuperadmin?: boolean;
     readonly groups?: Array<string | null>;
     readonly schools?: Array<string>;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type PatchedUserWritable = {
@@ -529,8 +535,8 @@ export type PatchedUserWritable = {
     lastActivityAt?: string | null;
     disabledAt?: string | null;
     isSuperadmin?: boolean;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type PatchedUserSchoolReadable = {
@@ -538,8 +544,8 @@ export type PatchedUserSchoolReadable = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
     userId?: string;
     schoolId?: string;
     roleId?: string;
@@ -547,8 +553,8 @@ export type PatchedUserSchoolReadable = {
 
 export type PatchedUserSchoolWritable = {
     maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
     userId?: string;
     schoolId?: string;
     roleId?: string;
@@ -560,15 +566,15 @@ export type RoleReadable = {
     readonly updatedAt: string;
     maintainedAt?: string | null;
     name: string;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type RoleWritable = {
     maintainedAt?: string | null;
     name: string;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type SchoolReadable = {
@@ -582,8 +588,11 @@ export type SchoolReadable = {
     orgNumber: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
-    createdById?: string;
-    updatedById?: string;
+    isGroupGoalEnabled?: boolean;
+    isStudentListEnabled?: boolean;
+    subjectsAllowed?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type SchoolWritable = {
@@ -594,8 +603,11 @@ export type SchoolWritable = {
     orgNumber: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
-    createdById?: string;
-    updatedById?: string;
+    isGroupGoalEnabled?: boolean;
+    isStudentListEnabled?: boolean;
+    subjectsAllowed?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type SituationReadable = {
@@ -606,8 +618,8 @@ export type SituationReadable = {
     title: string;
     description?: string | null;
     happensAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type SituationWritable = {
@@ -615,8 +627,8 @@ export type SituationWritable = {
     title: string;
     description?: string | null;
     happensAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type StatusReadable = {
@@ -628,8 +640,8 @@ export type StatusReadable = {
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
     studentId: string;
     subjectId: string;
 };
@@ -640,8 +652,8 @@ export type StatusWritable = {
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
     studentId: string;
     subjectId: string;
 };
@@ -663,9 +675,9 @@ export type SubjectReadable = {
     shortName: string;
     grepCode?: string | null;
     grepGroupCode?: string | null;
-    createdById?: string;
-    updatedById?: string;
-    ownedBySchoolId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    ownedBySchoolId?: string | null;
 };
 
 export type SubjectWritable = {
@@ -674,9 +686,9 @@ export type SubjectWritable = {
     shortName: string;
     grepCode?: string | null;
     grepGroupCode?: string | null;
-    createdById?: string;
-    updatedById?: string;
-    ownedBySchoolId?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
+    ownedBySchoolId?: string | null;
 };
 
 export type UserReadable = {
@@ -692,8 +704,8 @@ export type UserReadable = {
     isSuperadmin?: boolean;
     readonly groups: Array<string | null>;
     readonly schools: Array<string>;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type UserWritable = {
@@ -704,8 +716,8 @@ export type UserWritable = {
     lastActivityAt?: string | null;
     disabledAt?: string | null;
     isSuperadmin?: boolean;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
 };
 
 export type UserSchoolReadable = {
@@ -713,8 +725,8 @@ export type UserSchoolReadable = {
     readonly createdAt: string;
     readonly updatedAt: string;
     maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
     userId: string;
     schoolId: string;
     roleId: string;
@@ -722,8 +734,8 @@ export type UserSchoolReadable = {
 
 export type UserSchoolWritable = {
     maintainedAt?: string | null;
-    createdById?: string;
-    updatedById?: string;
+    createdById?: string | null;
+    updatedById?: string | null;
     userId: string;
     schoolId: string;
     roleId: string;

@@ -32,7 +32,8 @@ class BaseModelSerializer(serializers.ModelSerializer):
                 fields[f"{name}_id"] = serializers.PrimaryKeyRelatedField(
                     source=name,
                     queryset=qs,
-                    required=not field.null
+                    required=not field.null,
+                    allow_null=field.null
                 )
                 # Remove the original field to avoid duplication
                 if name in fields:

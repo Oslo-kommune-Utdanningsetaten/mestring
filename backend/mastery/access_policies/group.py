@@ -37,6 +37,8 @@ class GroupAccessPolicy(BaseAccessPolicy):
 
     def scope_queryset(self, request, qs):
         user = request.user
+        if not user:
+            return qs.none()
         if user.is_superadmin:
             return qs
         try:
@@ -49,25 +51,30 @@ class GroupAccessPolicy(BaseAccessPolicy):
                 Q(id__in=student_groups.values("id"), is_enabled=True) |
                 Q(school_id__in=school_admin_ids)
             ).distinct()
-        except Exception as error:
-            logger.error("GroupAccessPolicy.scope_queryset error: %s", error)
+        except Exception:
+            logger.exception("GroupAccessPolicy.scope_queryset error")
             return qs.none()
 
     # True if requester is admin at the group's school
     def is_admin_at_school(self, request, view, action):
-        try:
-            target_group = view.get_object()
-            # Reuse the queryset logic to check if user is granted access via school admin privileges
-            return self.scope_queryset(request, Group.objects).filter(id=target_group.id).exists()
-        except Exception:
+        group_id = self.get_target_id(view)
+        if not group_id:
             return False
+        # Get the school id cheaply (None if group absent)
+        school_id = (
+            Group.objects.filter(id=group_id)
+            .values_list('school_id', flat=True)
+            .first()
+        )
+        if not school_id:
+            return False
+        return UserSchool.objects.filter(
+            user_id=request.user.id,
+            school_id=school_id,
+            role__name="admin"
+        ).exists()
 
     # True if requester is member of enabled group
     def is_member_of_enabled_group(self, request, view, action):
-        try:
-            requester = request.user
-            target_group = view.get_object()
-            return requester.groups.filter(id=target_group.id, is_enabled=True).exists()
-        except Exception as error:
-            logger.error("GroupAccessPolicy.is_member_of_group error", error)
-            return False
+        group_id = self.get_target_id(view)
+        return bool(group_id) and request.user.groups.filter(id=group_id, is_enabled=True).exists()

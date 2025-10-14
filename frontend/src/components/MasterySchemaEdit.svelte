@@ -73,7 +73,7 @@
   })
 </script>
 
-<div class="p-4">
+<div class="p-4 mastery-schema-edit">
   <h3 class="pb-2">{localMasterySchema.id ? 'Redigerer mestringskjema' : 'Nytt mestringskjema'}</h3>
   <div class="form-group mb-3">
     <label for="masterySchemaTitle" class="form-label">Tittel</label>
@@ -129,6 +129,11 @@
 </div>
 
 <style>
+  .mastery-schema-edit {
+    width: 100%;
+    max-width: 100%;
+  }
+
   input {
     height: 47px;
   }

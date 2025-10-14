@@ -126,12 +126,12 @@ export const goalsWithCalculatedMasteryBySubjectId = async (
   decoratedGoals.forEach((goal: GoalDecorated) => {
     let subjectId = goal.subjectId
     if (!subjectId) {
+      // goal is not personal, look up subject via group
       if (goal.groupId) {
         const group = groups.find(g => g.id === goal.groupId)
         if (group?.subjectId) {
           subjectId = group.subjectId
         } else {
-          console.error(`...but we could not find a subjectId via group ${goal.groupId}`)
           return
         }
       }
@@ -196,4 +196,15 @@ export const findAverage = (numbers: number[]): number => {
 
 export const isNumber = (value: any) => {
   return typeof value === 'number'
+}
+
+// returns YYYY-MM-DD HH:MM
+export const formatDate = (isoDate?: string | null) => {
+  if (!isoDate) return ''
+  const aDate = new Date(isoDate)
+  return (
+    aDate.toLocaleDateString('no-NO', { year: '2-digit', month: '2-digit', day: '2-digit' }) +
+    ' ' +
+    aDate.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' })
+  )
 }

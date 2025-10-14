@@ -16,6 +16,8 @@ class UserGroupAccessPolicy(BaseAccessPolicy):
 
     def scope_queryset(self, request, qs):
         user = request.user
+        if not user:
+            return qs.none()
         if user.is_superadmin:
             return qs
         return qs.none()

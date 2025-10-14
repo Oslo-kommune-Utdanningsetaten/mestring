@@ -3,11 +3,11 @@ from django.db import models
 from django.db.models import Q
 from nanoid import generate
 
-alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 
 def generate_nanoid(size=12):
-    return generate(alphabet, size)
+    return generate(ALPHABET, size)
 
 
 class BaseModel(models.Model):
@@ -38,6 +38,10 @@ class School(BaseModel):
     org_number = models.CharField(max_length=50)
     owner = models.CharField(max_length=200, null=True)
     is_service_enabled = models.BooleanField(default=False)
+    is_group_goal_enabled = models.BooleanField(default=True)  # can group goals can be created
+    is_student_list_enabled = models.BooleanField(default=False)  # can teachers see the /students menu item
+    # which subjects can be used: 'only-custom' (owned by school), 'only-group', 'all'
+    subjects_allowed = models.CharField(max_length=50, null=False, default='all')
 
     def ensure_short_name(self, short_name):
         """Update short_name (used by import)"""

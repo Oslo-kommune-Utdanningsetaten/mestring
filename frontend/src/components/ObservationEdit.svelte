@@ -138,4 +138,8 @@
 </div>
 
 <style>
+  .observation-edit {
+    width: 100%;
+    max-width: 100%;
+  }
 </style>
