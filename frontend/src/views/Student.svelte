@@ -3,13 +3,20 @@
   import { usersRetrieve, groupsList } from '../generated/sdk.gen'
   import { subjectIdsViaGroupOrGoal } from '../utils/functions'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
+  import GoalEdit from '../components/GoalEdit.svelte'
+  import ButtonMini from '../components/ButtonMini.svelte'
+  import Offcanvas from '../components/Offcanvas.svelte'
+  import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
+  import { getLocalStorageItem } from '../stores/localStorage'
 
   const { studentId } = $props<{ studentId: string }>()
   let student = $state<UserReadable | null>(null)
   let groups = $state<GroupReadable[] | []>([])
   let subjects = $state<SubjectReadable[]>([])
   let currentSchool = $derived($dataStore.currentSchool)
+  let goalWip = $state<GoalDecorated | null>(null)
+  let isGoalEditorOpen = $state<boolean>(false)
 
   const fetchStudentData = async (userId: string) => {
     try {
@@ -49,6 +56,27 @@
     }
   }
 
+  // Add personal goals
+  const handleEditGoal = (goal: GoalDecorated | null) => {
+    goalWip = {
+      ...goal,
+      subjectId: null,
+      studentId: student?.id,
+      sortOrder: goal?.sortOrder || 1,
+      masterySchemaId:
+        goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
+    }
+    isGoalEditorOpen = true
+  }
+
+  const handleCloseEditGoal = () => {
+    isGoalEditorOpen = false
+  }
+
+  const handleGoalDone = async () => {
+    handleCloseEditGoal()
+  }
+
   $effect(() => {
     if (currentSchool && currentSchool.id) {
       fetchStudentData(studentId)
@@ -62,8 +90,17 @@
 
     <!-- Goals and mastery -->
     <div class="card shadow-sm">
-      <h2 class="card-header">Mål</h2>
-
+      <div class="d-flex align-items-center gap-2 mb-3 card-header">
+        <h2>Mål</h2>
+        <ButtonMini
+          options={{
+            iconName: 'plus-sign',
+            classes: 'mini-button bordered',
+            title: 'Legg til nytt personlig mål',
+            onClick: () => handleEditGoal(null),
+          }}
+        />
+      </div>
       {#if subjects.length > 0}
         <ul class="list-group list-group-flush">
           {#each subjects as subject (subject.id)}
@@ -100,6 +137,26 @@
     <div class="m-2">Fant ikke eleven</div>
   {/if}
 </section>
+
+<!-- offcanvas for creating/editing goals -->
+<Offcanvas
+  bind:isOpen={isGoalEditorOpen}
+  ariaLabel="Rediger mål"
+  onClosed={() => {
+    goalWip = null
+    fetchStudentData(studentId)
+  }}
+>
+  {#if goalWip}
+    <GoalEdit
+      goal={goalWip}
+      {student}
+      subject={null}
+      isGoalPersonal={true}
+      onDone={handleGoalDone}
+    />
+  {/if}
+</Offcanvas>
 
 <style>
 </style>

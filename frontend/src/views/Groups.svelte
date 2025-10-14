@@ -65,7 +65,7 @@
   {:else}
     {#each groups as group}
       <div class="card shadow-sm p-3">
-        <h3 class="mt-1 mb-3">
+        <h3 class="mt-1 mb-3" title={group.feideId}>
           <a href="/groups/{group.id}">
             {group.displayName}
           </a>
@@ -78,7 +78,7 @@
           {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
             {#each groupMembers[group.id].teachers as teacher}
               <pkt-tag iconName="lecture" skin="yellow">
-                <span>{teacher.name}</span>
+                <span title={teacher.feideId}>{teacher.name}</span>
               </pkt-tag>
             {/each}
           {/if}

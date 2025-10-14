@@ -38,12 +38,6 @@
   let isGoalEditorOpen = $state<boolean>(false)
   let isObservationEditorOpen = $state<boolean>(false)
 
-  const dateFormat = Intl.DateTimeFormat('nb', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  })
-
   const fetchGoalsForSubject = async () => {
     try {
       const goalsResult = await goalsList({ query: { student: student.id, subject: subjectId } })
@@ -204,46 +198,49 @@
   <div class="list-group-item goal-item {expandedGoals[goal.id] ? 'shadow border-2 z-1' : ''}">
     <div class="goal-primary-row">
       <!-- Drag handle -->
-      <span>
+      <span class="item mt-1">
         {#if goal.isPersonal}
           <ButtonMini
             options={{
               size: 'tiny',
               iconName: 'drag',
               title: 'Endre rekkefølge',
-              classes: 'me-2 row-handle-draggable',
-              onClick: () => {}, // drag handle only
+              classes: 'row-handle-draggable',
             }}
           />
         {/if}
       </span>
       <!-- Goal order -->
-      <span>
+      <span class="item">
         {goal.sortOrder || index + 1}
       </span>
       <!-- Goal type icon -->
-      <span class="goal-type-icon">
-        {#if goal.isPersonal}
+      {#if goal.isPersonal}
+        <span class="goal-type-icon item" title="Personlig mål">
           <PersonSVG />
-        {:else}
+        </span>
+      {:else}
+        <span class="goal-type-icon item" title="Gruppemål">
           <GroupSVG />
-        {/if}
-      </span>
+        </span>
+      {/if}
       <!-- Goal title -->
-      <span>
+      <span class="item">
         {isShowGoalTitleEnabled ? goal.title : '🙊'}
       </span>
       <!-- New observation button -->
-      <ButtonMini
-        options={{
-          iconName: 'plus-sign',
-          classes: 'mini-button bordered',
-          title: 'Ny observasjon',
-          onClick: () => handleEditObservation(goal, null),
-        }}
-      />
+      <span class="item">
+        <ButtonMini
+          options={{
+            iconName: 'plus-sign',
+            classes: 'mini-button bordered',
+            title: 'Ny observasjon',
+            onClick: () => handleEditObservation(goal, null),
+          }}
+        />
+      </span>
       <!-- Stats widgets -->
-      <span class="d-flex align-items-center gap-3 align-items-center">
+      <span class="item d-flex align-items-center gap-3 align-items-center">
         {#if goal.masteryData}
           <MasteryLevelBadge masteryData={goal.masteryData} />
           <SparklineChart
@@ -348,11 +345,7 @@
   </div>
 {/snippet}
 
-{#if !goalsForSubject?.length}
-  <div class="alert alert-info">
-    Trykk pluss (+) for å opprette et personlig mål for eleven i dette faget.
-  </div>
-{:else}
+{#if goalsForSubject?.length}
   <div bind:this={goalsListElement} class="list-group mt-2">
     {#each goalsForSubject.filter(goal => goal.isPersonal) as goal, index (goal.id)}
       {@render goalInList(goal, index)}
@@ -416,6 +409,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 10fr 1fr 2fr 1fr;
     column-gap: 5px;
+  }
+
+  .goal-primary-row > .item {
+    align-self: center;
   }
 
   .goal-secondary-row {

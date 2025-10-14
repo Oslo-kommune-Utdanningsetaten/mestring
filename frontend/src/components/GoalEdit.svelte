@@ -5,10 +5,12 @@
     GroupReadable,
     UserReadable,
     SubjectReadable,
+    GoalReadable,
   } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
   import { setLocalStorageItem } from '../stores/localStorage'
   import ButtonMini from './ButtonMini.svelte'
+  import { NONE_FIELD_VALUE } from '../utils/constants'
 
   // This component is used for both personal and group goals!
   // If group is passed, student AND subject should be null
@@ -29,7 +31,7 @@
     isGoalPersonal: boolean
     onDone: () => void
   }>()
-  let localGoal = $state<Record<string, any>>({ ...goal })
+  let localGoal = $state<Partial<GoalReadable>>({})
   let subjectViaGroup = $derived(
     group ? $dataStore.subjects.find(s => s.id === group?.subjectId) : null
   )
@@ -53,9 +55,16 @@
     }
   }
 
+  const handleChangeSubject = (subjectId: string | null) => {
+    localGoal = {
+      ...goal,
+      subjectId,
+    }
+  }
+
   const handleSave = async () => {
     try {
-      if (goal.id) {
+      if (localGoal.id) {
         await goalsUpdate({
           path: { id: localGoal.id },
           body: localGoal,
@@ -71,6 +80,7 @@
     }
   }
 
+  // Update localGoal when goal prop changes
   $effect(() => {
     localGoal = {
       ...goal,
@@ -85,10 +95,19 @@
     <div class="pkt-inputwrapper">
       <label for="goalSubject" class="form-label">Fag</label>
       {#if isGoalPersonal}
-        <select class="pkt-input" bind:value={localGoal.subjectId}>
-          <option value="">Velg fag</option>
-          {#each $dataStore.subjects as subject}
-            <option value={subject.id}>{subject.displayName}</option>
+        <select
+          class="pkt-input"
+          onchange={(e: Event) => {
+            const target = e.target as HTMLSelectElement | null
+            const subjectId = target?.value || null
+            handleChangeSubject(subjectId)
+          }}
+        >
+          <option value={NONE_FIELD_VALUE} selected={!localGoal.subjectId}>Velg fag</option>
+          {#each $dataStore.subjects as aSubject}
+            <option value={aSubject.id} selected={localGoal.subjectId === aSubject.id}>
+              {aSubject.displayName}
+            </option>
           {/each}
         </select>
       {:else}
@@ -151,6 +170,7 @@
         skin: 'primary',
         variant: 'label-only',
         classes: 'm-2',
+        disabled: !isFormValid,
         onClick: () => handleSave(),
       }}
     >
