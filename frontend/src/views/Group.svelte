@@ -99,6 +99,7 @@
           )
         })
       })
+      await fetchAllGroups()
     } catch (error) {
       console.error('Error fetching group:', error)
     } finally {
@@ -112,6 +113,7 @@
       const result = await groupsList({
         query: {
           school: currentSchool?.id,
+          isEnabled: true,
         },
       })
       allGroups = result.data || []
