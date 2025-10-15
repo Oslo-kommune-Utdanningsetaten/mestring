@@ -58,6 +58,7 @@
       const result = await groupsList({
         query: {
           school: currentSchool?.id,
+          isEnabled: true,
         },
       })
       allGroups = result.data || []
@@ -186,19 +187,16 @@
     </div>
     <span>Henter data...</span>
   {:else if students.length > 0}
-    <div class="card shadow-sm">
-      <!-- Header row -->
-      <div class="student-grid-row fw-bold header">
-        <div>Navn</div>
-        <div class="group-grid-columns">
-          {#each subjects as subject}
-            <span>{subject.displayName}</span>
-          {/each}
-        </div>
-      </div>
-
-      <!-- Student rows -->
-      {#each filteredStudents as student}
+    <div class="students-grid" aria-label="Elevliste">
+      <span class="item header header-row">Elev</span>
+      {#each subjects as subject (subject.id)}
+        <span class="item header header-row">
+          <span class="subject-label-header">
+            {subject.shortName}
+          </span>
+        </span>
+      {/each}
+      {#each filteredStudents as student (student.id)}
         <StudentRow {student} {subjects} groups={allGroups} />
       {/each}
     </div>
@@ -215,5 +213,46 @@
     margin-top: 0px;
     padding-left: 15px;
     margin-left: 10px;
+  }
+
+  .students-grid {
+    display: grid;
+    grid-template-columns: 2fr repeat(8, 1fr);
+    align-items: start;
+    gap: 0;
+  }
+
+  .students-grid :global(.item.header-row) {
+    background-color: var(--bs-light);
+  }
+
+  .students-grid :global(.item) {
+    padding: 0.5rem;
+    border-top: 1px solid var(--bs-border-color);
+    min-height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .students-grid :global(.item:nth-last-child(-n + 9)) {
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+
+  .students-grid :global(.item.header) {
+    font-weight: 800;
+  }
+
+  .students-grid .item.header:first-child {
+    justify-content: flex-start;
+  }
+
+  .subject-label-header {
+    transform: rotate(-60deg);
+    font-size: 0.8rem;
+  }
+
+  .students-grid :global(.item.student-name) {
+    justify-content: flex-start;
   }
 </style>
