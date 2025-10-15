@@ -1,12 +1,9 @@
 import logging
 
-from django.db.models import (
-    Q,
-)
+from django.db.models import Q, Exists, OuterRef
 
-from .base import (
-    BaseAccessPolicy,
-)
+from .base import BaseAccessPolicy
+from mastery.models import Goal, UserGroup
 
 logger = logging.getLogger(__name__)
 
@@ -19,147 +16,192 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             "principal": ["role:superadmin"],
             "effect": "allow",
         },
-        # Users can list observations according to scope_queryset
+        # Users can list and retrieve observations according to scope_queryset
         {
-            "action": ["list"],
+            "action": ["list", "retrieve"],
             "principal": ["authenticated"],
             "effect": "allow",
         },
-        # Users can retrieve observations they have created
+        # Teachers can create observations for students they teach
         {
-            "action": ["retrieve"],
-            "principal": [
-                "authenticated",
-            ],
-            "effect": "allow",
-            "condition": "is_user_creator_or_observer",
-        },
-        # Students can retrieve observations they are the target of
-        {
-            "action": ["retrieve"],
-            "principal": ["role:student"],
-            "effect": "allow",
-            "condition": "is_user_target",
-        },
-        # Students cannot retrieve observations that are not visible to them
-        {
-            "action": ["retrieve"],
-            "principal": ["role:student"],
-            "effect": "deny",
-            "condition": "is_observation_not_visible_to_student",
-        },
-        # Teachers can retrieve observations for students they teach (basis or the relevant teaching group)
-        {
-            "action": ["retrieve"],
+            "action": ["create"],
             "principal": ["role:teacher"],
             "effect": "allow",
-            "condition": "is_user_teacher_of_student",
+            "condition": "can_teacher_create_observation"
+        },
+        # Students can create observations about themselves
+        {
+            "action": ["create"],
+            "principal": ["role:student"],
+            "effect": "allow",
+            "condition": "can_student_create_observation"
+        },
+        # Students can only modify observations they created about themselves
+        {
+            "action": ["update", "partial_update", "destroy"],
+            "principal": ["role:student"],
+            "effect": "allow",
+            "condition": "can_student_modify_observation"
+        },
+        # Teachers can modify observations they created and according to goal type and students they teach
+        {
+            "action": ["update", "partial_update", "destroy"],
+            "principal": ["role:teacher"],
+            "effect": "allow",
+            "condition": "can_teacher_modify_observation"
         },
         # Everyone else: implicitly denied
     ]
 
     def scope_queryset(self, request, qs):
+        """
+        Filter observations based on who can see them:
+        - Everyone: Observations they created or observed (if visible)
+        - Teaching group teachers:
+          - Observations on group goals in groups they teach
+          - Observations on personal goals for students they teach in that subject
+        - Basis group teachers: All observations for students in their basis group
+        - Students: Observations about themselves (if visible)
+        """
         requester = request.user
         if not requester:
             return qs.none()
         if requester.is_superadmin:
             return qs
         try:
-            # Groups (any type) where requester is a teacher
-            teacher_group_ids = list(
-                requester.teacher_groups.values_list(
-                    "id",
-                    flat=True,
-                )
-            )
-            # Basis groups where requester is a teacher
-            teacher_basis_group_ids = list(
-                requester.teacher_groups.filter(type="basis").values_list(
-                    "id",
-                    flat=True,
-                )
-            )
+            teacher_group_ids = list(requester.teacher_groups.values_list('id', flat=True))
+            teacher_basis_group_ids = list(requester.teacher_groups.filter(
+                type='basis').values_list('id', flat=True))
+            student_group_ids = list(requester.student_groups.values_list('id', flat=True))
 
-            filters = (
-                # Creator or observer
-                Q(created_by_id=requester.id) |
-                Q(observer_id=requester.id) |
-                # Students: own observations that are visible to them
-                Q(student_id=requester.id, is_visible_to_student=True)
-            )
+            # Everyone can see observations they created or observed
+            filters = Q(created_by=requester)
+            filters |= Q(observer=requester, is_visible_to_student=True)
 
-            # Teachers: observations on group goals in groups they teach (basis or teaching)
+            # Teaching group teachers: Observations on group goals + personal goals for students they teach
             if teacher_group_ids:
+                # Observations on group goals in groups they teach
                 filters |= Q(goal__group_id__in=teacher_group_ids)
 
-            # Teachers: any observations for students in basis groups they teach
+                # Observations on personal goals where teacher teaches that subject to that student
+                student_in_teacher_subject = UserGroup.objects.filter(
+                    user_id=OuterRef('goal__student_id'),
+                    group_id__in=teacher_group_ids,
+                    group__subject_id=OuterRef('goal__subject_id'),
+                )
+                qs = qs.annotate(teacher_teaches_student_subject=Exists(student_in_teacher_subject))
+                filters |= Q(goal__student__isnull=False, teacher_teaches_student_subject=True)
+
+            # Basis teachers: All observations for students in their basis group
             if teacher_basis_group_ids:
                 filters |= Q(student__groups__id__in=teacher_basis_group_ids)
+
+            # Students: Observations about themselves (if visible)
+            if student_group_ids:
+                filters |= Q(student=requester, is_visible_to_student=True)
 
             return qs.filter(filters).distinct()
         except Exception:
             logger.exception("ObservationAccessPolicy.scope_queryset error")
+        except Exception:
+            logger.exception("ObservationAccessPolicy.scope_queryset error")
             return qs.none()
 
-    def is_user_creator_or_observer(self, request, view, action):
+    def can_teacher_create_observation(self, request, view, action):
+        """
+        Teachers can create observations based on goal type:
+        - Group goal observations: Must teach that group
+        - Personal goal observations: Must be basis group teacher OR teach that subject to that student
+        """
         try:
+            goal_id = request.data.get("goal") or request.data.get("goal_id")
             requester = request.user
-            target_observation_id = self.get_target_id(view)
-            if not target_observation_id:
+
+            if not goal_id:
                 return False
-            observation = view.get_object()
-            return (observation.created_by_id == requester.id) or (observation.observer_id == requester.id)
-        except Exception:
-            logger.exception("ObservationAccessPolicy.is_user_creator_or_observer")
+
+            goal = Goal.objects.get(id=goal_id)
+
+            # Group goal: Must teach that group
+            if goal.group_id:
+                return requester.teacher_groups.filter(id=goal.group_id).exists()
+
+            # Personal goal: Basis group teacher OR teaches that subject to that student
+            if goal.student_id:
+                is_basis_teacher = requester.teacher_groups.filter(
+                    type='basis',
+                    members__id=goal.student_id
+                ).exists()
+
+                teaches_subject = requester.teacher_groups.filter(
+                    subject_id=goal.subject_id,
+                    members__id=goal.student_id
+                ).exists()
+
+                return is_basis_teacher or teaches_subject
+
             return False
 
-    def is_user_target(self, request, view, action):
-        try:
-            requester = request.user
-            target_observation_id = self.get_target_id(view)
-            if not target_observation_id:
-                return False
-            observation = view.get_object()
-            return observation.student_id == requester.id
         except Exception:
-            logger.exception("ObservationAccessPolicy.is_user_target")
+            logger.exception("ObservationAccessPolicy.can_teacher_create_observation error:")
             return False
 
-    def is_observation_not_visible_to_student(self, request, view, action):
+    def can_student_create_observation(self, request, view, action):
+        """Students can only create observations about themselves."""
         try:
-            target_observation_id = self.get_target_id(view)
-            if not target_observation_id:
-                return False
-            observation = view.get_object()
-            return not bool(observation.is_visible_to_student)
+            student_id = request.data.get("student") or request.data.get("student_id")
+            requester = request.user
+
+            # Force it so that students cannot create invisible observations
+            request.data['is_visible_to_student'] = True 
+
+            return str(student_id) == str(requester.id)
         except Exception:
-            logger.exception("ObservationAccessPolicy.is_observation_not_visible_to_student")
+            logger.exception("ObservationAccessPolicy.can_student_create_observation error")
             return False
 
-    def is_user_teacher_of_student(self, request, view, action):
+    def can_student_modify_observation(self, request, view, action):
+        """Students can only modify observations they created about themselves."""
         try:
+            target_observation = view.get_object()
             requester = request.user
-            target_observation_id = self.get_target_id(view)
-            if not target_observation_id:
-                return False
-            observation = view.get_object()
-            # Teacher of the relevant teaching/basis group for a group goal
-            teacher_group_ids = set(
-                requester.teacher_groups.values_list(
-                    "id",
-                    flat=True,
-                )
-            )
-            if observation.goal.group_id and observation.goal.group_id in teacher_group_ids:
-                return True
-            # Teacher of any basis group the student belongs to
-            basis_groups_taught_ids = set(
-                requester.teacher_groups.filter(type="basis").values_list(
-                    "id",
-                    flat=True,
-                )
-            )
-            return observation.student.groups.filter(id__in=basis_groups_taught_ids).exists()
+
+            return (target_observation.created_by_id == requester.id and
+                    target_observation.student_id == requester.id)
         except Exception:
-            logger.exception("ObservationAccessPolicy.is_user_teacher_of_student")
+            logger.exception("ObservationAccessPolicy.can_student_modify_observation error")
+            return False
+
+    def can_teacher_modify_observation(self, request, view, action):
+        """
+        Teachers can modify observations based on goal type and ownership:
+        - Must be the creator of the observation OR have created_by is None
+        - Group goal observations: Must teach that group
+        - Personal goal observations: Must be basis group teacher OR teach that subject to that student
+        """
+        try:
+            target_observation = view.get_object()
+            requester = request.user
+
+            # Teachers can only modify observations they created or observations with no creator
+            if target_observation.created_by_id != requester.id:
+                return False
+
+            # Group goal: Must teach that group
+            if target_observation.goal and target_observation.goal.group_id:
+                return requester.teacher_groups.filter(id=target_observation.goal.group_id).exists()
+
+            # Personal goal: Basis group teacher OR teaches that subject to that student
+            basis_group_ids = requester.teacher_groups.filter(type='basis').values_list('id', flat=True)
+            is_basis_teacher = target_observation.student.groups.filter(id__in=basis_group_ids).exists()
+
+            teaches_subject = requester.teacher_groups.filter(
+                subject=target_observation.goal.subject,
+                members__id=target_observation.student_id
+            ).exists()
+
+            return is_basis_teacher or teaches_subject
+
+        except Exception:
+            logger.exception("ObservationAccessPolicy.can_teacher_modify_observation error")
             return False

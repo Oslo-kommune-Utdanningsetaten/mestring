@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from mastery import models
 from django.db.models import ForeignKey
+from mastery.access_policies.observation import ObservationAccessPolicy
 
 
 class BaseModelSerializer(serializers.ModelSerializer):
