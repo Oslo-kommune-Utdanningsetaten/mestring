@@ -29,6 +29,32 @@ def get_request_param(query_params, name: str):
     return value, is_key_present
 
 
+class FingerprintViewSetMixin:
+    """
+    Adds created_by/updated_by fingerprints.
+
+    Implementation notes:
+    - We call super().perform_create/update first to preserve behavior from
+      upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
+    - Then we patch the instance to set created_by/updated_by and save only
+      the changed fields.
+    """
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        instance = getattr(serializer, "instance", None)
+        instance.created_by = self.request.user
+        instance.updated_by = self.request.user
+        instance.save(update_fields=["created_by", "updated_by"])
+
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+
+        instance = getattr(serializer, "instance", None)
+        instance.updated_by = self.request.user
+        instance.save(update_fields=["updated_by"])
+
+
 @extend_schema_view(
     list=extend_schema(
         parameters=[
@@ -42,7 +68,7 @@ def get_request_param(query_params, name: str):
         ]
     )
 )
-class SchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+class SchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.School.objects.all()
     serializer_class = serializers.SchoolSerializer
     filterset_fields = ['is_service_enabled']
@@ -79,7 +105,7 @@ class SchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         ]
     )
 )
-class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
     access_policy = UserAccessPolicy
@@ -135,7 +161,7 @@ class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         ]
     )
 )
-class UserSchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+class UserSchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.UserSchool.objects.all()
     serializer_class = serializers.NestedUserSchoolSerializer
     access_policy = UserSchoolAccessPolicy
@@ -201,7 +227,7 @@ class UserSchoolViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         ]
     )
 )
-class UserGroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.UserGroup.objects.all()
     serializer_class = serializers.NestedUserGroupSerializer
     access_policy = UserGroupAccessPolicy
@@ -286,7 +312,7 @@ class UserGroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         ]
     )
 )
-class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Group.objects.all()
     serializer_class = serializers.GroupSerializer
     access_policy = GroupAccessPolicy
@@ -351,7 +377,7 @@ class GroupViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         ]
     )
 )
-class SubjectViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Subject.objects.all()
     serializer_class = serializers.SubjectSerializer
     access_policy = SubjectAccessPolicy
@@ -411,7 +437,7 @@ class SubjectViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         ]
     )
 )
-class GoalViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Goal.objects.all()
     serializer_class = serializers.GoalSerializer
     filter_backends = [OrderingFilter]
@@ -456,7 +482,7 @@ class GoalViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         return qs
 
 
-class RoleViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+class RoleViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Role.objects.all()
     serializer_class = serializers.RoleSerializer
     access_policy = RoleAccessPolicy
@@ -478,7 +504,7 @@ class RoleViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         ]
     )
 )
-class MasterySchemaViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.MasterySchema.objects.all()
     serializer_class = serializers.MasterySchemaSerializer
     access_policy = MasterySchemaAccessPolicy
@@ -519,7 +545,7 @@ class MasterySchemaViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         ]
     )
 )
-class ObservationViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Observation.objects.all()
     serializer_class = serializers.ObservationSerializer
     access_policy = ObservationAccessPolicy
@@ -563,7 +589,7 @@ class ObservationViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
         ]
     )
 )
-class DataMaintenanceTaskViewSet(viewsets.ModelViewSet):
+class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.DataMaintenanceTask.objects.all()
     serializer_class = serializers.DataMaintenanceTaskSerializer
     access_policy = DataMaintenanceTaskAccessPolicy
@@ -581,11 +607,11 @@ class DataMaintenanceTaskViewSet(viewsets.ModelViewSet):
         return qs
 
 
-class SituationViewSet(viewsets.ModelViewSet):
+class SituationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Situation.objects.all()
     serializer_class = serializers.SituationSerializer
 
 
-class StatusViewSet(viewsets.ModelViewSet):
+class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Status.objects.all()
     serializer_class = serializers.StatusSerializer
