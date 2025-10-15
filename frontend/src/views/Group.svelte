@@ -52,6 +52,7 @@
   let studentForObservation = $state<UserReadable | null>(null)
   let isGoalEditorOpen = $state<boolean>(false)
   let isObservationEditorOpen = $state<boolean>(false)
+  let studentsGridElement = $state<HTMLElement | null>(null)
 
   const fetchGroupData = async () => {
     if (!groupId) return
@@ -222,6 +223,27 @@
   $effect(() => {
     if (groupId && currentSchool && currentSchool.id) {
       fetchGroupData()
+    }
+  })
+
+  // Effect to apply last-row class to the last row of grid items
+  $effect(() => {
+    if (studentsGridElement && students.length > 0 && $dataStore.subjects.length > 0) {
+      // Remove existing last-row classes
+      const allItems = studentsGridElement.querySelectorAll('.item')
+      allItems.forEach(item => item.classList.remove('last-row'))
+
+      // Calculate how many items are in the last row
+      const totalColumns = $dataStore.subjects.length + 1 // +1 for student name column
+      const totalItems = allItems.length
+      const itemsInLastRow = totalColumns
+
+      // Apply last-row class to the last row items
+      for (let i = totalItems - itemsInLastRow; i < totalItems; i++) {
+        if (allItems[i]) {
+          allItems[i].classList.add('last-row')
+        }
+      }
     }
   })
 
@@ -407,7 +429,12 @@
     {#if students}
       <div class="my-4">
         <h2 class="mb-3">Elever</h2>
-        <div class="students-grid" aria-label="Elevliste">
+        <div
+          bind:this={studentsGridElement}
+          class="students-grid"
+          aria-label="Elevliste"
+          style="--subject-count: {$dataStore.subjects.length}"
+        >
           <span class="item header header-row">Elev</span>
           {#each $dataStore.subjects as subject, index (subject.id)}
             <span class="item header header-row">
@@ -486,8 +513,7 @@
   }
 
   .goal-secondary-row {
-    margin-top: 10px;
-    margin-left: 6px;
+    margin: 10px 0 0 6px;
     padding-left: 30px;
     border-left: 3px solid rgb(from var(--bs-secondary) r g b / 25%);
   }
@@ -503,13 +529,9 @@
 
   .students-grid {
     display: grid;
-    grid-template-columns: 2fr repeat(8, 1fr);
+    grid-template-columns: 2fr repeat(var(--subject-count, 8), 1fr);
     align-items: start;
     gap: 0;
-  }
-
-  .students-grid :global(.item.header-row) {
-    background-color: var(--bs-light);
   }
 
   .students-grid :global(.item) {
@@ -521,24 +543,22 @@
     justify-content: center;
   }
 
-  .students-grid :global(.item:nth-last-child(-n + 9)) {
-    border-bottom: 1px solid var(--bs-border-color);
-  }
-
-  .students-grid :global(.item.header) {
+  .students-grid :global(.item.header-row) {
+    background-color: var(--bs-light);
     font-weight: 800;
   }
 
-  .students-grid .item.header:first-child {
+  .students-grid :global(.item.last-row) {
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+
+  .students-grid :global(.item.header:first-child),
+  .students-grid :global(.item.student-name) {
     justify-content: flex-start;
   }
 
   .subject-label-header {
     transform: rotate(-60deg);
     font-size: 0.8rem;
-  }
-
-  .students-grid :global(.item.student-name) {
-    justify-content: flex-start;
   }
 </style>
