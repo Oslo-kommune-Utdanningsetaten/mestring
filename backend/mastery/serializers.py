@@ -98,16 +98,6 @@ class ObservationSerializer(BaseModelSerializer):
     class Meta:
         model = models.Observation
         fields = '__all__'
-    def get_fields(self):
-        # Get the base fields (with FK transformations)
-        fields = super().get_fields()
-        
-        # Apply access policy field scoping
-        request = self.context.get('request')
-        if request:
-            fields = ObservationAccessPolicy.scope_fields(request, fields, self.instance)
-        
-        return fields
 
 
 class StatusSerializer(BaseModelSerializer):

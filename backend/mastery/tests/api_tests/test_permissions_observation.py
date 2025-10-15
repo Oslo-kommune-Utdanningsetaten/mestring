@@ -151,17 +151,20 @@ def test_teaching_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": observation_on_group_goal.goal.id,
         "is_visible_to_student": True,
+        "created_by_id": teacher.id
     }, format='json')
     assert resp.status_code == 201
     created_group_obs_id = resp.json()["id"]
 
     # Teacher can update observations on group goals they teach
-    resp = client.put(f"/api/observations/{observation_on_group_goal.id}/", {
-        "student_id": observation_on_group_goal.student.id,
+    resp = client.put(f"/api/observations/{created_group_obs_id}/", {
+        "student_id": student.id,
         "goal_id": observation_on_group_goal.goal.id,
         "is_visible_to_student": False,
+        "feedforward": "Keep up the good work!",
     }, format='json')
     assert resp.status_code == 200
+    assert resp.json()['feedforward'] == "Keep up the good work!"
 
     # Teacher can delete observations on group goals tehy teach
     resp = client.delete(f"/api/observations/{created_group_obs_id}/")
@@ -196,6 +199,7 @@ def test_teaching_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": goal_other_group.id,
         "is_visible_to_student": False,
+        "feedforward": "Great effort!",
     }, format='json')
     assert resp.status_code == 403
 
@@ -208,6 +212,7 @@ def test_teaching_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": personal_goal_in_taught_subject.id,
         "is_visible_to_student": True,
+        "created_by_id": teacher.id
     }, format='json')
     assert resp.status_code == 201
     created_taught_subject_obs_id = resp.json()["id"]
@@ -225,14 +230,17 @@ def test_teaching_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": personal_goal_in_taught_subject.id,
         "is_visible_to_student": False,
+        "feedforward": "Great effort on reading!",
     }, format='json')
     assert resp.status_code == 200
+    assert resp.json()['feedforward'] == "Great effort on reading!"
 
     # Teacher cannot update observations on personal goals in subjects they don't teach
     resp = client.put(f"/api/observations/{observation_untaught_subject.id}/", {
         "student_id": student.id,
         "goal_id": personal_goal_untaught_subject.id,
         "is_visible_to_student": False,
+        "feedforward": "You can do it!",
     }, format='json')
     assert resp.status_code == 403
 
@@ -300,6 +308,7 @@ def test_basis_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": observation_on_personal_goal.goal.id,
         "is_visible_to_student": True,
+        "created_by_id": teacher.id
     }, format='json')
     assert resp.status_code == 201
     created_personal_obs_id = resp.json()["id"]
@@ -308,8 +317,10 @@ def test_basis_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": observation_on_personal_goal.goal.id,
         "is_visible_to_student": False,
+        "feedforward": "You can do it!",
     }, format='json')
     assert resp.status_code == 200
+    assert resp.json()['feedforward'] == "You can do it!"
 
     resp = client.delete(f"/api/observations/{created_personal_obs_id}/")
     assert resp.status_code == 204
@@ -331,6 +342,7 @@ def test_basis_group_teacher_observation_access(
         "student_id": student.id,
         "goal_id": observation_on_personal_goal.goal.id,
         "is_visible_to_student": False,
+        "feedforward": "Do your best!",
     }, format='json')
     assert resp.status_code == 403
 

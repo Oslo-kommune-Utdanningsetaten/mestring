@@ -41,7 +41,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
             "effect": "allow",
             "condition": "can_student_modify_goal"
         },
-        # Teachers can modify goals in their scope
+        # Teachers can modify goals they have created and according to students and groups they teach
         {
             "action": ["update", "partial_update", "destroy"],
             "principal": ["role:teacher"],
@@ -97,8 +97,8 @@ class GoalAccessPolicy(BaseAccessPolicy):
                 filters |= Q(group__members__groups__id__in=teacher_basis_group_ids)
 
             # Students: Own personal goals + group goals in their groups
+            filters |= Q(student=requester)
             if student_group_ids:
-                filters |= Q(student=requester)
                 filters |= Q(group_id__in=student_group_ids)
 
             return qs.filter(filters).distinct()
@@ -183,7 +183,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
             target_goal = view.get_object()
             requester = request.user
 
-            if target_goal.created_by_id is not None and target_goal.created_by_id != requester.id:
+            if target_goal.created_by_id != requester.id:
                 # Teachers can only modify goals they created
                 return False
 

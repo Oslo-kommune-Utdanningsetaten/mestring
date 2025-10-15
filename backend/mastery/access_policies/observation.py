@@ -43,7 +43,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             "effect": "allow",
             "condition": "can_student_modify_observation"
         },
-        # Teachers can modify observations in their scope
+        # Teachers can modify observations they created and according to goal type and students they teach
         {
             "action": ["update", "partial_update", "destroy"],
             "principal": ["role:teacher"],
@@ -52,19 +52,6 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         },
         # Everyone else: implicitly denied
     ]
-
-    @classmethod
-    def scope_fields(cls, request, fields, instance=None):
-        """
-        Students cannot control visibility
-        """
-        # If user has student groups, remove the visibility field
-        has_student_groups = hasattr(request.user, 'student_groups') and request.user.student_groups.exists()
-
-        if has_student_groups:
-            fields.pop('is_visible_to_student', None)
-
-        return fields
 
     def scope_queryset(self, request, qs):
         """
@@ -165,6 +152,9 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             student_id = request.data.get("student") or request.data.get("student_id")
             requester = request.user
 
+            # Force it so that students cannot create invisible observations
+            request.data['is_visible_to_student'] = True 
+
             return str(student_id) == str(requester.id)
         except Exception:
             logger.exception("ObservationAccessPolicy.can_student_create_observation error")
@@ -194,7 +184,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             requester = request.user
 
             # Teachers can only modify observations they created or observations with no creator
-            if target_observation.created_by_id is not None and target_observation.created_by_id != requester.id:
+            if target_observation.created_by_id != requester.id:
                 return False
 
             # Group goal: Must teach that group
