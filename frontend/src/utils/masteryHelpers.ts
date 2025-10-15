@@ -16,8 +16,11 @@ export function useMasteryCalculations(masterySchema: MasterySchemaWithConfig | 
   const defaultValue = (minValue + maxValue) / 2
 
   const calculateSafeMasteryValue = (value: number | null | undefined): number => {
-    if (value !== null && value !== undefined && isNumber(value)) return value as number
-    return defaultValue
+    let result: number = defaultValue
+    if (value !== null && value !== undefined && isNumber(value)) {
+      result = value
+    }
+    return Number(result.toFixed(0))
   }
 
   return {
