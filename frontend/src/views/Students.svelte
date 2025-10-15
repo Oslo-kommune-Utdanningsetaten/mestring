@@ -34,6 +34,7 @@
   })
   let isLoadingGroups = $state<boolean>(false)
   let isLoadingStudents = $state<boolean>(false)
+  let studentsGridElement = $state<HTMLElement | null>(null)
 
   const fetchAllStudentsInSchool = async () => {
     if (!currentSchool) return
@@ -149,6 +150,27 @@
       })
     }
   })
+
+  // Effect to apply last-row class to the last row of grid items
+  $effect(() => {
+    if (studentsGridElement && filteredStudents.length > 0 && subjects.length > 0) {
+      // Remove existing last-row classes
+      const allItems = studentsGridElement.querySelectorAll('.item')
+      allItems.forEach(item => item.classList.remove('last-row'))
+
+      // Calculate how many items are in the last row
+      const totalColumns = subjects.length + 1 // +1 for student name column
+      const totalItems = allItems.length
+      const itemsInLastRow = totalColumns
+
+      // Apply last-row class to the last row items
+      for (let i = totalItems - itemsInLastRow; i < totalItems; i++) {
+        if (allItems[i]) {
+          allItems[i].classList.add('last-row')
+        }
+      }
+    }
+  })
 </script>
 
 <section class="pt-3">
@@ -187,7 +209,12 @@
     </div>
     <span>Henter data...</span>
   {:else if students.length > 0}
-    <div class="students-grid" aria-label="Elevliste">
+    <div
+      bind:this={studentsGridElement}
+      class="students-grid"
+      aria-label="Elevliste"
+      style="--subject-count: {subjects.length}"
+    >
       <span class="item header header-row">Elev</span>
       {#each subjects as subject (subject.id)}
         <span class="item header header-row">
@@ -217,13 +244,9 @@
 
   .students-grid {
     display: grid;
-    grid-template-columns: 2fr repeat(8, 1fr);
+    grid-template-columns: 2fr repeat(var(--subject-count, 8), 1fr);
     align-items: start;
     gap: 0;
-  }
-
-  .students-grid :global(.item.header-row) {
-    background-color: var(--bs-light);
   }
 
   .students-grid :global(.item) {
@@ -235,24 +258,22 @@
     justify-content: center;
   }
 
-  .students-grid :global(.item:nth-last-child(-n + 9)) {
-    border-bottom: 1px solid var(--bs-border-color);
-  }
-
-  .students-grid :global(.item.header) {
+  .students-grid :global(.item.header-row) {
+    background-color: var(--bs-light);
     font-weight: 800;
   }
 
-  .students-grid .item.header:first-child {
+  .students-grid :global(.item.last-row) {
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+
+  .students-grid :global(.item.header:first-child),
+  .students-grid :global(.item.student-name) {
     justify-content: flex-start;
   }
 
   .subject-label-header {
     transform: rotate(-60deg);
     font-size: 0.8rem;
-  }
-
-  .students-grid :global(.item.student-name) {
-    justify-content: flex-start;
   }
 </style>
