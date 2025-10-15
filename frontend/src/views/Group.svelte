@@ -272,17 +272,15 @@
     </div>
   {:else if group}
     <!-- Group Header -->
-    <div class="">
-      <h1>{group.displayName}</h1>
+    <h1>{group.displayName}</h1>
 
-      <div class="d-flex align-items-center gap-2">
-        <GroupTypeTag {group} />
-        {#each teachers as teacher}
-          <pkt-tag iconName="lecture" skin="yellow">
-            <span>{teacher.name}</span>
-          </pkt-tag>
-        {/each}
-      </div>
+    <div class="d-flex align-items-center gap-2">
+      <GroupTypeTag {group} />
+      {#each teachers as teacher}
+        <pkt-tag iconName="lecture" skin="yellow">
+          <span>{teacher.name}</span>
+        </pkt-tag>
+      {/each}
     </div>
 
     <!-- Goals Section -->
@@ -427,7 +425,7 @@
 
     <!-- Students Section -->
     {#if students}
-      <div class="my-4">
+      <div class="mt-4">
         <h2 class="mb-3">Elever</h2>
         <div
           bind:this={studentsGridElement}
