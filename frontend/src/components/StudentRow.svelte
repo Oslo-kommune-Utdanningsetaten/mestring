@@ -31,16 +31,18 @@
   })
 </script>
 
-<div class="student-grid-row">
-  <a href={`/students/${student.id}`}>{student.name}</a>
-  <div class="group-grid-columns">
-    {#each subjects as subject}
-      {#if masteryBySubjectId[subject.id]}
-        <MasteryLevelBadge masteryData={masteryBySubjectId[subject.id]} />
-      {/if}
-    {/each}
-  </div>
-</div>
+<span class="item student-name">
+  <a href={`/students/${student.id}`}>
+    {student.name}
+  </a>
+</span>
+{#each subjects as subject}
+  <span class="item">
+    {#if masteryBySubjectId[subject.id]}
+      <MasteryLevelBadge masteryData={masteryBySubjectId[subject.id]} />
+    {/if}
+  </span>
+{/each}
 
 <style>
 </style>

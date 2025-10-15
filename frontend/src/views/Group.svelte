@@ -6,6 +6,7 @@
     goalsList,
     goalsUpdate,
     goalsDestroy,
+    groupsList,
   } from '../generated/sdk.gen'
   import type {
     GoalReadable,
@@ -23,6 +24,7 @@
   import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
   import SparklineChart from '../components/SparklineChart.svelte'
   import GroupTypeTag from '../components/GroupTypeTag.svelte'
+  import StudentRow from '../components/StudentRow.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { dataStore } from '../stores/data'
   import { getLocalStorageItem } from '../stores/localStorage'
@@ -33,6 +35,7 @@
   let currentSchool = $derived($dataStore.currentSchool)
   let sortableInstance: Sortable | null = null
   let group = $state<GroupReadable | null>(null)
+  let allGroups = $state<GroupReadable[]>([])
   let teachers = $state<UserReadable[]>([])
   let students = $state<UserReadable[]>([])
   let goals = $state<GoalReadable[]>([])
@@ -100,6 +103,22 @@
       console.error('Error fetching group:', error)
     } finally {
       isLoading = false
+    }
+  }
+
+  const fetchAllGroups = async () => {
+    if (!currentSchool) return
+    try {
+      const result = await groupsList({
+        query: {
+          school: currentSchool?.id,
+        },
+      })
+      allGroups = result.data || []
+    } catch (error) {
+      console.error('Error fetching groups:', error)
+      allGroups = []
+    } finally {
     }
   }
 
@@ -384,20 +403,20 @@
 
     <!-- Students Section -->
     {#if students}
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h3 class="mb-0">Elever</h3>
-        </div>
-        <div class="card-body mb-0">
-          <ul>
-            {#each students as student}
-              <li>
-                <a href={`/students/${student.id}`} class="col-md-6">
-                  {student.name}
-                </a>
-              </li>
-            {/each}
-          </ul>
+      <div class="my-4">
+        <h2 class="mb-3">Elever</h2>
+        <div class="students-grid" aria-label="Elevliste">
+          <span class="item header header-row">Elev</span>
+          {#each $dataStore.subjects as subject, index (subject.id)}
+            <span class="item header header-row">
+              <span class="subject-label-header">
+                {subject.shortName}
+              </span>
+            </span>
+          {/each}
+          {#each students as student (student.id)}
+            <StudentRow {student} subjects={$dataStore.subjects} groups={allGroups} />
+          {/each}
         </div>
       </div>
     {/if}
@@ -446,14 +465,6 @@
 </Offcanvas>
 
 <style>
-  div.observation-item > span {
-    font-family: 'Courier New', Courier, monospace !important;
-  }
-
-  h3 {
-    font-size: 1.5rem;
-  }
-
   .student-observations-in-goal {
     border-bottom: 1px solid rgb(from var(--bs-secondary) r g b / 25%);
     display: grid;
@@ -486,5 +497,46 @@
 
   .goal-type-icon > :global(svg) {
     height: 1.2em;
+  }
+
+  .students-grid {
+    display: grid;
+    grid-template-columns: 2fr repeat(8, 1fr);
+    align-items: start;
+    gap: 0;
+  }
+
+  .students-grid :global(.item.header-row) {
+    background-color: var(--bs-light);
+  }
+
+  .students-grid :global(.item) {
+    padding: 0.5rem;
+    border-top: 1px solid var(--bs-border-color);
+    min-height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .students-grid :global(.item:nth-last-child(-n + 9)) {
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+
+  .students-grid :global(.item.header) {
+    font-weight: 800;
+  }
+
+  .students-grid .item.header:first-child {
+    justify-content: flex-start;
+  }
+
+  .subject-label-header {
+    transform: rotate(-60deg);
+    font-size: 0.8rem;
+  }
+
+  .students-grid :global(.item.student-name) {
+    justify-content: flex-start;
   }
 </style>
