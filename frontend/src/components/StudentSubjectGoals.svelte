@@ -67,11 +67,10 @@
   const handleEditGoal = (goal: GoalDecorated | null) => {
     goalWip = {
       ...goal,
-      subjectId,
+      subjectId: goal?.subjectId || getLocalStorageItem('preferredSubjectId'),
       studentId: student.id,
       sortOrder: goal?.sortOrder || (goalsForSubject?.length ? goalsForSubject.length + 1 : 1),
-      masterySchemaId:
-        goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
+      masterySchemaId: goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId'),
     }
     isGoalEditorOpen = true
   }

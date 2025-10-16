@@ -50,16 +50,20 @@
     return `${action} ${goalType}mål for ${target}`
   }
 
-  const handleUpdatePreferredMasterySchema = () => {
-    if (localGoal.masterySchemaId) {
-      setLocalStorageItem('preferredMasterySchemaId', localGoal.masterySchemaId)
+  const handleChangeMasterySchema = (masterySchemaId: string) => {
+    if (masterySchemaId !== NONE_FIELD_VALUE) {
+      localGoal = { ...localGoal, masterySchemaId }
+      setLocalStorageItem('preferredMasterySchemaId', masterySchemaId)
     }
   }
 
-  const handleChangeSubject = (subjectId: string | null) => {
-    localGoal = {
-      ...goal,
-      subjectId,
+  const handleChangeSubject = (subjectId: string) => {
+    if (subjectId !== NONE_FIELD_VALUE) {
+      localGoal = {
+        ...goal,
+        subjectId,
+      }
+      setLocalStorageItem('preferredSubjectId', subjectId)
     }
   }
 
@@ -100,17 +104,18 @@
         <pkt-select
           label="Fag"
           name="goalSubject"
-          hasError={!localGoal.subjectId}
-          requiredText="Du må velge et fag"
+          value={localGoal.subjectId || NONE_FIELD_VALUE}
+          hasError={!localGoal.subjectId || localGoal.subjectId === NONE_FIELD_VALUE}
+          requiredText="Velg et fag"
           onchange={(e: Event) => {
             const target = e.target as HTMLSelectElement | null
-            const subjectId = target?.value === NONE_FIELD_VALUE ? null : target?.value || null
+            const subjectId = target?.value || NONE_FIELD_VALUE
             handleChangeSubject(subjectId)
           }}
         >
-          <option value={NONE_FIELD_VALUE} selected={!localGoal.subjectId}>Velg fag</option>
+          <option disabled value={NONE_FIELD_VALUE}>Velg fag</option>
           {#each $dataStore.subjects as aSubject}
-            <option value={aSubject.id} selected={localGoal.subjectId === aSubject.id}>
+            <option value={aSubject.id}>
               {aSubject.displayName}
             </option>
           {/each}
@@ -131,18 +136,25 @@
 
   <div class="form-group mb-3">
     <div class="pkt-inputwrapper">
-      <label for="goalSubject" class="form-label">Mestringsskjema</label>
-      <select
-        class="pkt-input"
-        bind:value={localGoal.masterySchemaId}
-        onchange={handleUpdatePreferredMasterySchema}
-        required={true}
+      <pkt-select
+        label="Mestringsskjema"
+        name="goalMasterySchema"
+        value={localGoal.masterySchemaId || NONE_FIELD_VALUE}
+        hasError={!localGoal.masterySchemaId || localGoal.masterySchemaId === NONE_FIELD_VALUE}
+        requiredText="Velg et mestringsskjema"
+        onchange={(e: Event) => {
+          const target = e.target as HTMLSelectElement | null
+          const msid = target?.value || NONE_FIELD_VALUE
+          handleChangeMasterySchema(msid)
+        }}
       >
-        <option value="" disabled>Velg mestringsskjema</option>
+        <option disabled value={NONE_FIELD_VALUE}>Velg mestringsskjema</option>
         {#each masterySchemas as masterySchema}
-          <option value={masterySchema.id}>{masterySchema.title}</option>
+          <option value={masterySchema.id}>
+            {masterySchema.title}
+          </option>
         {/each}
-      </select>
+      </pkt-select>
     </div>
   </div>
 
