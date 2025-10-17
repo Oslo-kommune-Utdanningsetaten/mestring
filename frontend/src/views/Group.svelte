@@ -16,6 +16,7 @@
     SubjectReadable,
   } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
+  import Sortable, { type SortableEvent } from 'sortablejs'
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   import GoalEdit from '../components/GoalEdit.svelte'
   import GroupSVG from '../assets/group.svg.svelte'
@@ -26,10 +27,9 @@
   import SparklineChart from '../components/SparklineChart.svelte'
   import GroupTypeTag from '../components/GroupTypeTag.svelte'
   import StudentRow from '../components/StudentRow.svelte'
-  import Sortable, { type SortableEvent } from 'sortablejs'
   import { dataStore } from '../stores/data'
   import { getLocalStorageItem } from '../stores/localStorage'
-  import { goalsWithCalculatedMastery } from '../utils/functions'
+  import { goalsWithCalculatedMastery, fetchSubjectsForStudents } from '../utils/functions'
 
   const { groupId } = $props<{ groupId: string }>()
 
@@ -54,8 +54,9 @@
   let isGoalEditorOpen = $state<boolean>(false)
   let isObservationEditorOpen = $state<boolean>(false)
   let studentsGridElement = $state<HTMLElement | null>(null)
-  const subject = $derived<SubjectReadable | null>(
-    $dataStore.subjects.find(s => s.id === group?.subjectId) || null
+  let subjects = $state<SubjectReadable[]>([])
+  let subject = $derived<SubjectReadable | null>(
+    subjects.find(s => s.id === group?.subjectId) || null
   )
 
   const fetchGroupData = async () => {
@@ -105,6 +106,7 @@
         })
       })
       await fetchAllGroups()
+      subjects = await fetchSubjectsForStudents(students, $dataStore.subjects, currentSchool.id)
     } catch (error) {
       console.error('Error fetching group:', error)
     } finally {
@@ -227,27 +229,6 @@
   $effect(() => {
     if (groupId && currentSchool && currentSchool.id) {
       fetchGroupData()
-    }
-  })
-
-  // Effect to apply last-row class to the last row of grid items
-  $effect(() => {
-    if (studentsGridElement && students.length > 0 && $dataStore.subjects.length > 0) {
-      // Remove existing last-row classes
-      const allItems = studentsGridElement.querySelectorAll('.item')
-      allItems.forEach(item => item.classList.remove('last-row'))
-
-      // Calculate how many items are in the last row
-      const totalColumns = $dataStore.subjects.length + 1 // +1 for student name column
-      const totalItems = allItems.length
-      const itemsInLastRow = totalColumns
-
-      // Apply last-row class to the last row items
-      for (let i = totalItems - itemsInLastRow; i < totalItems; i++) {
-        if (allItems[i]) {
-          allItems[i].classList.add('last-row')
-        }
-      }
     }
   })
 

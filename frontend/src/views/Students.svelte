@@ -3,7 +3,7 @@
   import '@oslokommune/punkt-elements/dist/pkt-textinput.js'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { dataStore } from '../stores/data'
-  import { urlStringFrom } from '../utils/functions'
+  import { urlStringFrom, fetchSubjectsForStudents } from '../utils/functions'
   import StudentRow from '../components/StudentRow.svelte'
   import { STUDENT_ROLE } from '../utils/constants'
   import { groupsList, usersList, goalsList } from '../generated/sdk.gen'
@@ -87,50 +87,6 @@
     }
   }
 
-  // Fetch subjects for all students to build the grid headers
-  // based on subjects linked to their goals and groups
-  const fetchSubjectsForStudents = async (students: UserReadable[]) => {
-    const subjectIds = new Set(subjects.map(s => s.id))
-    const allStudentSubjects: SubjectReadable[] = []
-
-    const data = await Promise.all(
-      students.map(async student => {
-        const goalsResult = await goalsList({
-          query: { student: student.id },
-        })
-        const goals: GoalReadable[] = goalsResult.data || []
-        const groupsResult: any = await groupsList({
-          query: { user: student.id, school: currentSchool.id },
-        })
-        const groups: GroupReadable[] = groupsResult.data || []
-        return { goals, groups }
-      })
-    )
-
-    data.forEach(({ goals, groups }) => {
-      goals.forEach(goal => {
-        if (goal.subjectId && !subjectIds.has(goal.subjectId)) {
-          const subject = $dataStore.subjects.find(s => s.id === goal.subjectId)
-          if (subject) {
-            subjectIds.add(subject.id)
-            allStudentSubjects.push(subject)
-          }
-        }
-      })
-      groups.forEach(group => {
-        if (group.subjectId && !subjectIds.has(group.subjectId)) {
-          const subject = $dataStore.subjects.find(s => s.id === group.subjectId)
-          if (subject) {
-            subjectIds.add(subject.id)
-            allStudentSubjects.push(subject)
-          }
-        }
-      })
-    })
-
-    subjects = [...allStudentSubjects]
-  }
-
   const handleGroupSelect = (groupId: string): void => {
     if (groupId && groupId !== '0') {
       router.navigate(urlStringFrom({ groupId }, { path: '/students', mode: 'merge' }))
@@ -141,7 +97,11 @@
 
   $effect(() => {
     if (students.length > 0) {
-      fetchSubjectsForStudents(students)
+      fetchSubjectsForStudents(students, $dataStore.subjects, currentSchool.id).then(
+        fetchedSubjects => {
+          subjects = fetchedSubjects
+        }
+      )
     }
   })
 

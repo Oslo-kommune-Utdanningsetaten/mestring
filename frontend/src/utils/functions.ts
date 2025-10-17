@@ -4,6 +4,7 @@ import type {
   SubjectReadable,
   ObservationReadable,
   GroupReadable,
+  UserReadable,
 } from '../generated/types.gen'
 import { goalsList, observationsList, groupsList } from '../generated/sdk.gen'
 import { dataStore } from '../stores/data'
@@ -52,6 +53,45 @@ export const urlStringFrom = (
       .map(key => `${key}=${finalParams[key] ?? ''}`)
       .join('&')
   )
+}
+
+// Fetch subjects for the given students to build the grid headers
+// based on subjects linked to their goals and groups
+export const fetchSubjectsForStudents = async (
+  students: UserReadable[],
+  allSubjects: SubjectReadable[],
+  schoolId: string
+): Promise<SubjectReadable[]> => {
+  const subjectIds = new Set()
+
+  const data = await Promise.all(
+    students.map(async student => {
+      const goalsResult = await goalsList({
+        query: { student: student.id },
+      })
+      const goals: GoalReadable[] = goalsResult.data || []
+      const groupsResult: any = await groupsList({
+        query: { user: student.id, school: schoolId },
+      })
+      const groups: GroupReadable[] = groupsResult.data || []
+      return { goals, groups }
+    })
+  )
+
+  data.forEach(({ goals, groups }) => {
+    goals.forEach(goal => {
+      if (goal.subjectId) subjectIds.add(goal.subjectId)
+    })
+    groups.forEach(group => {
+      if (group.subjectId) subjectIds.add(group.subjectId)
+    })
+  })
+
+  return Array.from(subjectIds)
+    .map(subjectId => {
+      return allSubjects.find(s => s.id === subjectId)
+    })
+    .filter(Boolean)
 }
 
 export const subjectNamesFromStudentGoals = (
