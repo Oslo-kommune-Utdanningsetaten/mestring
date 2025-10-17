@@ -87,34 +87,48 @@
     }
   }
 
+  // Fetch subjects for all students to build the grid headers
+  // based on subjects linked to their goals and groups
   const fetchSubjectsForStudents = async (students: UserReadable[]) => {
     const subjectIds = new Set(subjects.map(s => s.id))
+    const allStudentSubjects: SubjectReadable[] = []
 
-    const goalsArrays = await Promise.all(
-      students.map(async (student): Promise<GoalReadable[]> => {
-        const result = await goalsList({
+    const data = await Promise.all(
+      students.map(async student => {
+        const goalsResult = await goalsList({
           query: { student: student.id },
         })
-        return result.data || []
+        const goals: GoalReadable[] = goalsResult.data || []
+        const groupsResult: any = await groupsList({
+          query: { user: student.id, school: currentSchool.id },
+        })
+        const groups: GroupReadable[] = groupsResult.data || []
+        return { goals, groups }
       })
     )
 
-    const newSubjects: SubjectReadable[] = []
-    goalsArrays.forEach(goals => {
-      goals?.forEach(goal => {
+    data.forEach(({ goals, groups }) => {
+      goals.forEach(goal => {
         if (goal.subjectId && !subjectIds.has(goal.subjectId)) {
           const subject = $dataStore.subjects.find(s => s.id === goal.subjectId)
           if (subject) {
-            newSubjects.push(subject)
             subjectIds.add(subject.id)
+            allStudentSubjects.push(subject)
+          }
+        }
+      })
+      groups.forEach(group => {
+        if (group.subjectId && !subjectIds.has(group.subjectId)) {
+          const subject = $dataStore.subjects.find(s => s.id === group.subjectId)
+          if (subject) {
+            subjectIds.add(subject.id)
+            allStudentSubjects.push(subject)
           }
         }
       })
     })
 
-    if (newSubjects.length > 0) {
-      subjects = [...subjects, ...newSubjects]
-    }
+    subjects = [...allStudentSubjects]
   }
 
   const handleGroupSelect = (groupId: string): void => {
