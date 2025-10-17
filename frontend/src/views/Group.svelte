@@ -13,6 +13,7 @@
     GroupReadable,
     UserReadable,
     ObservationReadable,
+    SubjectReadable,
   } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
@@ -53,6 +54,9 @@
   let isGoalEditorOpen = $state<boolean>(false)
   let isObservationEditorOpen = $state<boolean>(false)
   let studentsGridElement = $state<HTMLElement | null>(null)
+  const subject = $derived<SubjectReadable | null>(
+    $dataStore.subjects.find(s => s.id === group?.subjectId) || null
+  )
 
   const fetchGroupData = async () => {
     if (!groupId) return
@@ -273,7 +277,9 @@
   {:else if group}
     <!-- Group Header -->
     <h1>{group.displayName}</h1>
-
+    {#if subject}
+      <h4 class="text-secondary mb-3" title={subject.grepCode}>Fag: {subject.displayName}</h4>
+    {/if}
     <div class="d-flex align-items-center gap-2">
       <GroupTypeTag {group} />
       {#each teachers as teacher}
