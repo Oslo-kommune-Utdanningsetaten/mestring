@@ -11,6 +11,7 @@
   import GoalEdit from '../components/GoalEdit.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
+  import StudentSVG from '../assets/education.svg.svelte'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
   import { getLocalStorageItem } from '../stores/localStorage'
@@ -108,21 +109,17 @@
 
 <section class="py-3">
   {#if student}
-    <div class="d-flex align-items-center gap-3 mb-4">
-      <pkt-icon
-        name="education"
-        title="Elev"
-        aria-label="Elev"
-        class="student-icon"
-        style="height: 100px;"
-      ></pkt-icon>
+    <div class="d-flex align-items-center gap-3">
+      <div class="student-svg" title="Elev">
+        <StudentSVG />
+      </div>
       <div>
         <h1 class="mb-0" title="Fornavn">
           {student.name.split(' ')[0]}
         </h1>
-        <h3 class="mt-0 text-secondary" title="Etternavn">
+        <h5 class="mt-0 text-secondary" title="Etternavn">
           {student.name.split(' ').slice(1).join(' ')}
-        </h3>
+        </h5>
       </div>
     </div>
     <!-- Goals and mastery -->
@@ -194,7 +191,7 @@
 </Offcanvas>
 
 <style>
-  :global(.student-icon svg) {
-    height: 100%;
+  .student-svg > :global(svg) {
+    height: 7rem;
   }
 </style>

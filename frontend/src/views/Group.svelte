@@ -276,11 +276,22 @@
     </div>
   {:else if group}
     <!-- Group Header -->
-    <h1>{group.displayName}</h1>
-    {#if subject}
-      <h4 class="text-secondary mb-3" title={subject.grepCode}>Fag: {subject.displayName}</h4>
-    {/if}
-    <div class="d-flex align-items-center gap-2">
+    <div class="d-flex align-items-center gap-3 mb-1">
+      <div class="group-svg" title="Gruppe">
+        <GroupSVG />
+      </div>
+      <div>
+        <h1 class="mb-2" title="Gruppe">
+          {group.displayName}
+        </h1>
+        {#if subject}
+          <h5 class="text-secondary" title={subject.grepCode}>{subject.displayName}</h5>
+        {:else}
+          <h5 class="text-secondary">Ikke tilknyttet et fag</h5>
+        {/if}
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-2 mt-1">
       <GroupTypeTag {group} />
       {#each teachers as teacher}
         <pkt-tag iconName="lecture" skin="yellow">
@@ -498,6 +509,10 @@
 </Offcanvas>
 
 <style>
+  .group-svg > :global(svg) {
+    height: 7rem;
+  }
+
   .student-observations-in-goal {
     border-bottom: 1px solid rgb(from var(--bs-secondary) r g b / 25%);
     display: grid;
