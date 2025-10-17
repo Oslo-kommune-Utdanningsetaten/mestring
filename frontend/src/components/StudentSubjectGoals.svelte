@@ -65,12 +65,24 @@
 
   // Remember, we're only editing personal goals here
   const handleEditGoal = (goal: GoalDecorated | null) => {
-    goalWip = {
-      ...goal,
-      subjectId: goal?.subjectId || getLocalStorageItem('preferredSubjectId'),
-      studentId: student.id,
-      sortOrder: goal?.sortOrder || (goalsForSubject?.length ? goalsForSubject.length + 1 : 1),
-      masterySchemaId: goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId'),
+    if (goal.id) {
+      goalWip = {
+        ...goal,
+        subjectId: goal?.subjectId || getLocalStorageItem('preferredSubjectId'),
+        studentId: student.id,
+        sortOrder: goal?.sortOrder || (goalsForSubject?.length ? goalsForSubject.length + 1 : 1),
+        masterySchemaId: goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId'),
+      }
+    } else {
+      const personalGoalsCount = goalsForSubject?.filter(g => g.isPersonal).length
+      goalWip = {
+        subjectId: subjectId,
+        studentId: student.id,
+        isPersonal: true,
+        sortOrder: personalGoalsCount + 1,
+        masterySchemaId:
+          getLocalStorageItem('preferredMasterySchemaId') || $dataStore.masterySchemas[0]?.id,
+      }
     }
     isGoalEditorOpen = true
   }
@@ -193,7 +205,7 @@
       iconName: 'plus-sign',
       classes: 'mini-button bordered',
       title: 'Legg til nytt personlig mål',
-      onClick: () => handleEditGoal(null),
+      onClick: () => handleEditGoal({}),
     }}
   />
 </div>
