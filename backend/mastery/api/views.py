@@ -95,11 +95,18 @@ class UserViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
                 raise ValidationError(
                     {'error': 'missing-parameter', 'message': 'The "school" query parameter is required.'})
 
-            qs = qs.filter(user_groups__group__school_id=school_param)
+            # Filter by school: include users in groups OR users directly affiliated via UserSchool
+            qs = qs.filter(
+                Q(user_groups__group__school_id=school_param) |
+                Q(user_schools__school_id=school_param)
+            )
             if roles_param:
                 role_names = [role.strip() for role in roles_param.split(',') if role]
                 if role_names:
-                    qs = qs.filter(user_groups__role__name__in=role_names)
+                    qs = qs.filter(
+                        Q(user_groups__role__name__in=role_names) |
+                        Q(user_schools__role__name__in=role_names)
+                    )
             if groups_param:
                 group_ids = [group.strip() for group in groups_param.split(',') if group]
                 if group_ids:
