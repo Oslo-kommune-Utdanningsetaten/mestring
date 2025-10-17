@@ -108,7 +108,23 @@
 
 <section class="py-3">
   {#if student}
-    <h1>Elev: {student.name}</h1>
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <pkt-icon
+        name="education"
+        title="Elev"
+        aria-label="Elev"
+        class="student-icon"
+        style="height: 100px;"
+      ></pkt-icon>
+      <div>
+        <h1 class="mb-0" title="Fornavn">
+          {student.name.split(' ')[0]}
+        </h1>
+        <h3 class="mt-0 text-secondary" title="Etternavn">
+          {student.name.split(' ').slice(1).join(' ')}
+        </h3>
+      </div>
+    </div>
     <!-- Goals and mastery -->
     <div class="card shadow-sm">
       <div class="d-flex align-items-center gap-2 mb-3 card-header">
@@ -178,4 +194,7 @@
 </Offcanvas>
 
 <style>
+  :global(.student-icon svg) {
+    height: 100%;
+  }
 </style>
