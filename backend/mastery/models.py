@@ -93,6 +93,10 @@ class School(BaseModel):
             )
         return User.objects.filter(user_schools__school=self)
 
+    def get_userschool_users(self):
+        """Get all users directly affiliated with this school via UserSchool."""
+        return User.objects.filter(user_schools__school=self).distinct()
+
 
 class Subject(BaseModel):
     """

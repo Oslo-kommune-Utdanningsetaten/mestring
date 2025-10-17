@@ -377,3 +377,17 @@ def observation_on_personal_goal_other_student(db, other_student, goal_personal_
         goal=goal_personal_other_student,
         is_visible_to_student=True
     )
+
+@pytest.fixture
+def other_school_group_goal(db, other_school_teaching_group_with_members):
+    return Goal.objects.create(
+        title="Lese 2 bøker",
+        group=other_school_teaching_group_with_members,
+    )
+
+@pytest.fixture
+def other_school_personal_goal(db, other_school_student):
+    return Goal.objects.create(
+        title="Lese 2 bøker",
+        student=other_school_student,
+    )
