@@ -191,26 +191,6 @@ def test_school_admin_goal_access(
     resp = client.delete(f'/api/goals/{goal_personal.id}/')
     assert resp.status_code == 403
 
-    ################### User School affiliation ###################
-
-    # Student directly affiliated with school via UserSchool
-    student_via_user_school = User.objects.create(
-        name="Direct Affiliated Student",
-        feide_id="direct-student@example.com",
-        email="direct-student@example.com",
-    )
-    school.set_affiliated_user(student_via_user_school, student_role)
-    personal_goal_direct_student = Goal.objects.create(
-        title="Personal goal for directly affiliated student",
-        student=student_via_user_school,
-        subject=subject_without_group,
-    )
-
-    # School admin should be able to see this goal
-    resp = client.get('/api/goals/', {'student': student_via_user_school.id})
-    assert resp.status_code == 200
-    assert personal_goal_direct_student.id in {goal['id'] for goal in resp.json()}
-
 
 @pytest.mark.django_db
 def test_student_goal_access(

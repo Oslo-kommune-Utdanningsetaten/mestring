@@ -86,8 +86,6 @@ class ObservationAccessPolicy(BaseAccessPolicy):
                 filters |= Q(goal__group__school_id__in=school_admin_ids)
                 # Observations on personal goals for students at their schools
                 filters |= Q(student__groups__school_id__in=school_admin_ids)
-                # Observations on personal goals for students at their schools without groups
-                filters |= Q(student__user_schools__school_id__in=school_admin_ids)
 
             # Teaching group teachers: Observations on group goals + personal goals for students they teach
             if teacher_group_ids:

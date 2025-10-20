@@ -97,7 +97,7 @@ def test_school_admin_user_access(
     expected_ids = (
         {user.id for user in teaching_group_with_members.get_members()} |
         {user.id for user in other_teaching_group_with_members.get_members()} |
-        {user.id for user in school.get_userschool_users()}   
+        {user.id for user in school.get_affiliated_user(None)}
     )
     received_ids = {user['id'] for user in data}
     assert len(received_ids) == len(expected_ids)
@@ -167,25 +167,7 @@ def test_school_admin_user_access(
 
     ################### UserSchool affiliated student ###################
 
-    # Student directly affiliated with school via UserSchool no groups
-    student_via_user_school = User.objects.create(
-        name="Direct Affiliated Student",
-        feide_id="direct-student@example.com",
-        email="direct-student@example.com",
-    )
-    school.set_affiliated_user(student_via_user_school, student_role)
-
-    # School admin can see this student even without group membership
-    resp = client.get('/api/users/', {'school': school.id})
-    assert resp.status_code == 200
-    received_ids = {user['id'] for user in resp.json()}
-    assert student_via_user_school.id in received_ids
-
-    # School admin can retrieve this student
-    resp = client.get(f'/api/users/{student_via_user_school.id}/')
-    assert resp.status_code == 200
-
-    # Teacher becomes school admin 
+    # Teacher becomes school admin
     teacher_becomes_school_admin = UserSchool.objects.create(
         user=teacher, school=school, role=admin_role
     )
@@ -198,7 +180,7 @@ def test_school_admin_user_access(
     expected_ids = (
         {user.id for user in teaching_group_with_members.get_members()} |
         {user.id for user in other_teaching_group_with_members.get_members()} |
-        {user.id for user in school.get_userschool_users()}  
+        {user.id for user in school.get_affiliated_user(None)}
     )
     received_ids = {user['id'] for user in data}
     assert len(received_ids) == len(expected_ids)

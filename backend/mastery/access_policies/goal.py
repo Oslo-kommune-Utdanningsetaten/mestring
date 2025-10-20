@@ -85,8 +85,6 @@ class GoalAccessPolicy(BaseAccessPolicy):
                 filters |= Q(group__school_id__in=school_admin_ids)
                 # Personal goals for students at their schools
                 filters |= Q(student__groups__school_id__in=school_admin_ids)
-                # Personal goals for students directly affiliated with the school without groups
-                filters |= Q(student__user_schools__school_id__in=school_admin_ids)
 
             # Teaching group teachers: Group goals + personal goals for students they teach
             if teacher_group_ids:
