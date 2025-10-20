@@ -62,7 +62,7 @@ export const fetchSubjectsForStudents = async (
   allSubjects: SubjectReadable[],
   schoolId: string
 ): Promise<SubjectReadable[]> => {
-  const subjectIds = new Set()
+  const subjectIds = new Set<string>()
 
   const data = await Promise.all(
     students.map(async student => {
@@ -87,11 +87,11 @@ export const fetchSubjectsForStudents = async (
     })
   })
 
-  return Array.from(subjectIds)
-    .map(subjectId => {
-      return allSubjects.find(s => s.id === subjectId)
-    })
-    .filter(Boolean)
+  const subjects: SubjectReadable[] = Array.from(subjectIds)
+    .map(subjectId => allSubjects.find(s => s.id === subjectId))
+    .filter((s): s is SubjectReadable => s !== undefined)
+
+  return subjects
 }
 
 export const subjectNamesFromStudentGoals = (
