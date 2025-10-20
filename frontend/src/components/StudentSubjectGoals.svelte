@@ -262,6 +262,8 @@
           <SparklineChart
             data={goal.observations?.map((o: ObservationReadable) => o.masteryValue)}
           />
+        {:else}
+          <MasteryLevelBadge isBadgeEmpty={true} />
         {/if}
       </span>
       <!-- Expand goal info -->

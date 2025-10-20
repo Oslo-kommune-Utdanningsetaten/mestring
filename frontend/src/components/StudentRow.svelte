@@ -4,29 +4,40 @@
   import { goalsList } from '../generated/sdk.gen'
   import { goalsWithCalculatedMasteryBySubjectId, aggregateMasterys } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
+  import { MISSING_REASON_NO_OBSERVATIONS, MISSING_REASON_NO_GOALS } from '../utils/constants'
 
   let { student, subjects, groups } = $props<{
     student: UserReadable
     subjects: SubjectReadable[]
     groups: GroupReadable[]
   }>()
-  let masteryBySubjectId = $state<Record<string, Mastery | null>>({})
+
+  type MasteryState = {
+    mastery?: Mastery
+    missingReason?: typeof MISSING_REASON_NO_OBSERVATIONS | typeof MISSING_REASON_NO_GOALS
+  }
+  let masteryBySubjectId = $state<Record<string, MasteryState>>({})
 
   $effect(() => {
     let studentGoals: GoalDecorated[] = []
     goalsList({ query: { student: student.id } }).then(result => {
       studentGoals = result.data || []
-      if (studentGoals.length > 0) {
-        goalsWithCalculatedMasteryBySubjectId(student.id, studentGoals, groups).then(result => {
-          let goalsBySubjectId: Record<string, GoalDecorated[]> = result
-          subjects.forEach((subject: SubjectReadable) => {
-            const goals = goalsBySubjectId[subject.id] || []
-            if (goals.length > 0) {
-              masteryBySubjectId[subject.id] = aggregateMasterys(goals)
+      goalsWithCalculatedMasteryBySubjectId(student.id, studentGoals, groups).then(result => {
+        let goalsBySubjectId: Record<string, GoalDecorated[]> = result
+        subjects.forEach((subject: SubjectReadable) => {
+          const goals = goalsBySubjectId[subject.id] || []
+          if (goals.length > 0) {
+            const masteryAggregate = aggregateMasterys(goals)
+            if (masteryAggregate) {
+              masteryBySubjectId[subject.id] = { mastery: masteryAggregate }
+            } else {
+              masteryBySubjectId[subject.id] = { missingReason: MISSING_REASON_NO_OBSERVATIONS }
             }
-          })
+          } else {
+            masteryBySubjectId[subject.id] = { missingReason: MISSING_REASON_NO_GOALS }
+          }
         })
-      }
+      })
     })
   })
 </script>
@@ -38,8 +49,14 @@
 </span>
 {#each subjects as subject}
   <span class="item">
-    {#if masteryBySubjectId[subject.id]}
-      <MasteryLevelBadge masteryData={masteryBySubjectId[subject.id]} />
+    {#if masteryBySubjectId[subject.id]?.mastery}
+      <MasteryLevelBadge masteryData={masteryBySubjectId[subject.id].mastery!} />
+    {:else if masteryBySubjectId[subject.id]?.missingReason === MISSING_REASON_NO_OBSERVATIONS}
+      <MasteryLevelBadge isBadgeEmpty={true} />
+    {:else if masteryBySubjectId[subject.id]?.missingReason === MISSING_REASON_NO_GOALS}
+      <MasteryLevelBadge isBadgeVoid={true} />
+    {:else}
+      hmm
     {/if}
   </span>
 {/each}

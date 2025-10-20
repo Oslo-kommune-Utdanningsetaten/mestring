@@ -382,6 +382,9 @@
                     {/if}
                     <div class="goal-secondary-row">
                       {#each students as student (student.id)}
+                        {@const studentGoal = goalsWithCalculatedMasteryByStudentId[
+                          student.id
+                        ].find(g => g.id === goal.id)}
                         <div class="student-observations-in-goal mb-2 align-items-center">
                           <span>
                             {student.name}
@@ -389,16 +392,14 @@
 
                           <!-- Stats widgets -->
                           <span class="d-flex gap-2 align-items-center">
-                            <MasteryLevelBadge
-                              masteryData={goalsWithCalculatedMasteryByStudentId[student.id].find(
-                                g => g.id === goal.id
-                              ).masteryData}
-                            />
-                            <SparklineChart
-                              data={goalsWithCalculatedMasteryByStudentId[student.id]
-                                .find(g => g.id === goal.id)
-                                ?.observations?.map((o: ObservationReadable) => o.masteryValue)}
-                            />
+                            {#if studentGoal?.masteryData}
+                              <MasteryLevelBadge masteryData={studentGoal.masteryData} />
+                              <SparklineChart
+                                data={studentGoal.observations?.map(
+                                  (o: ObservationReadable) => o.masteryValue
+                                )}
+                              />
+                            {:else}<MasteryLevelBadge isBadgeEmpty={true} />{/if}
                           </span>
                           <!-- New observation button -->
                           <ButtonMini
