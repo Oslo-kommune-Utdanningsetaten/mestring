@@ -6,6 +6,8 @@ from .goal import GoalAccessPolicy
 from .role import RoleAccessPolicy
 from .mastery_schema import MasterySchemaAccessPolicy
 from .observation import ObservationAccessPolicy
+from .situation import SituationAccessPolicy
+from .status import StatusAccessPolicy
 from .user_school import UserSchoolAccessPolicy
 from .user_group import UserGroupAccessPolicy
 from .data_maintenance_task import DataMaintenanceTaskAccessPolicy
@@ -22,6 +24,8 @@ __all__ = [
     "ObservationAccessPolicy",
     "UserSchoolAccessPolicy",
     "UserGroupAccessPolicy",
-    "DataMaintenanceTaskAccessPolicy", 
+    "SituationAccessPolicy",
+    "StatusAccessPolicy",
+    "DataMaintenanceTaskAccessPolicy",
     "ImportAccessPolicy",
 ]
