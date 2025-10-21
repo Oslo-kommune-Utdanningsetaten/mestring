@@ -234,7 +234,7 @@
         // @ts-expect-error result.data typed as unknown by generator
         alertMessage = `Bakgrunnsjobb opprettet for import av grupper og brukere for ${orgNumber} (Task ID: ${result.data.taskId})`
         alertType = 'success'
-        router.navigate('/data-maintenance-tasks')
+        router.navigate('/admin/data-maintenance-tasks')
       } else if (result.response.status === 409) {
         alertMessage = `Kan ikke opprette ny bakgrunnsjobb for ${orgNumber} fordi det allerede finnes en pågående jobb.`
         alertType = 'error'

@@ -129,7 +129,8 @@ def run():
                     task.earliest_run_at = next_execution_time(task)
                 else:
                     # failed, no more retries
-                    logger.error(f"Task {task.job_name} (id: {task.id}) permanently failed after {task.attempts} attempts")
+                    logger.error(
+                        f"Task {task.job_name} (id: {task.id}) permanently failed after {task.attempts} attempts")
                     task.status = "failed"
                     task.failed_at = timezone.now()
                     task.earliest_run_at = None
@@ -138,5 +139,6 @@ def run():
                     "result", "attempts", "status", "handler_name",
                     "earliest_run_at", "failed_at", "updated_at"
                 ])
+        logger.info(f"Task {task.job_name} '{task.id})' completed with status '{task.status}'")
         return task
     return None
