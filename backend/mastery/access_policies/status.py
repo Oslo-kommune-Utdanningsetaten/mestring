@@ -1,6 +1,4 @@
 from .base import BaseAccessPolicy
-import logging
-logger = logging.getLogger(__name__)
 
 # Placeholder, implement this later
 
