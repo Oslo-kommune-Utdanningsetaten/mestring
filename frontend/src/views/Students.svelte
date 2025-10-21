@@ -7,26 +7,21 @@
   import StudentRow from '../components/StudentRow.svelte'
   import { STUDENT_ROLE } from '../utils/constants'
   import { groupsList, usersList, goalsList } from '../generated/sdk.gen'
-  import type {
-    GroupReadable,
-    GoalReadable,
-    UserReadable,
-    SubjectReadable,
-  } from '../generated/types.gen'
+  import type { GroupType, GoalType, UserType, SubjectType } from '../generated/types.gen'
 
   const router = useTinyRouter()
   let currentSchool = $derived($dataStore.currentSchool)
   let selectedGroupId = $state<string | undefined>(undefined)
-  let selectedGroup = $state<GroupReadable | undefined>(undefined)
-  let allGroups = $state<GroupReadable[]>([])
-  let students = $state<UserReadable[]>([])
+  let selectedGroup = $state<GroupType | undefined>(undefined)
+  let allGroups = $state<GroupType[]>([])
+  let students = $state<UserType[]>([])
   let nameFilter = $state<string>('')
   let filteredStudents = $derived(
     nameFilter
       ? students.filter(student => student.name.toLowerCase().includes(nameFilter.toLowerCase()))
       : students
   )
-  let subjects = $state<SubjectReadable[]>([])
+  let subjects = $state<SubjectType[]>([])
   let headerText = $derived.by(() => {
     let text = selectedGroup ? `Elever i gruppe: ${selectedGroup.displayName}` : 'Alle elever'
     text = nameFilter ? `${text} med navn som inneholder "${nameFilter}"` : text

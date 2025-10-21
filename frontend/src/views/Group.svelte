@@ -9,11 +9,11 @@
     groupsList,
   } from '../generated/sdk.gen'
   import type {
-    GoalReadable,
-    GroupReadable,
-    UserReadable,
-    ObservationReadable,
-    SubjectReadable,
+    GoalType,
+    GroupType,
+    UserType,
+    ObservationType,
+    SubjectType,
   } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import Sortable, { type SortableEvent } from 'sortablejs'
@@ -35,11 +35,11 @@
 
   let currentSchool = $derived($dataStore.currentSchool)
   let sortableInstance: Sortable | null = null
-  let group = $state<GroupReadable | null>(null)
-  let allGroups = $state<GroupReadable[]>([])
-  let teachers = $state<UserReadable[]>([])
-  let students = $state<UserReadable[]>([])
-  let goals = $state<GoalReadable[]>([])
+  let group = $state<GroupType | null>(null)
+  let allGroups = $state<GroupType[]>([])
+  let teachers = $state<UserType[]>([])
+  let students = $state<UserType[]>([])
+  let goals = $state<GoalType[]>([])
   let goalWip = $state<GoalDecorated | null>(null)
   let isLoading = $state(true)
   let error = $state<string | null>(null)
@@ -48,16 +48,14 @@
   let expandedGoals = $state<Record<string, boolean>>({})
   let goalsWithCalculatedMasteryByStudentId = $state<Record<string, GoalDecorated[]>>({})
   let isGoalInUse = $derived<Record<string, boolean>>({}) // keyed by goalId, if true, goal has at least one observation
-  let observationWip = $state<ObservationReadable | {} | null>(null)
+  let observationWip = $state<ObservationType | {} | null>(null)
   let goalForObservation = $state<GoalDecorated | null>(null)
-  let studentForObservation = $state<UserReadable | null>(null)
+  let studentForObservation = $state<UserType | null>(null)
   let isGoalEditorOpen = $state<boolean>(false)
   let isObservationEditorOpen = $state<boolean>(false)
   let studentsGridElement = $state<HTMLElement | null>(null)
-  let subjects = $state<SubjectReadable[]>([])
-  let subject = $derived<SubjectReadable | null>(
-    subjects.find(s => s.id === group?.subjectId) || null
-  )
+  let subjects = $state<SubjectType[]>([])
+  let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
 
   const fetchGroupData = async () => {
     if (!groupId) return
@@ -168,8 +166,8 @@
 
   const handleEditObservation = (
     goal: GoalDecorated,
-    observation: ObservationReadable | null,
-    student: UserReadable
+    observation: ObservationType | null,
+    student: UserType
   ) => {
     goalForObservation = goal
     studentForObservation = student
@@ -396,7 +394,7 @@
                               <MasteryLevelBadge masteryData={studentGoal.masteryData} />
                               <SparklineChart
                                 data={studentGoal.observations?.map(
-                                  (o: ObservationReadable) => o.masteryValue
+                                  (o: ObservationType) => o.masteryValue
                                 )}
                               />
                             {:else}<MasteryLevelBadge isBadgeEmpty={true} />{/if}

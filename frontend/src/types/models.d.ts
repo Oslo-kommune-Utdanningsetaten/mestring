@@ -7,18 +7,18 @@ export type Mastery = {
 }
 
 export type AppData = {
-  subjects: SubjectReadable[]
-  currentSchool: SchoolReadable | null
-  currentUser: BasicUserReadable | null
-  masterySchemas: MasterySchemaReadable[]
-  roles?: RoleReadable[]
+  subjects: SubjectType[]
+  currentSchool: SchoolType | null
+  currentUser: BasicUserType | null
+  masterySchemas: MasterySchemaType[]
+  roles?: RoleType[]
   isSchooladmin?: boolean
   isSuperadmin?: boolean
 }
 
-export type GoalDecorated = GoalReadable & {
+export type GoalDecorated = GoalType & {
   masteryData?: Mastery | null
-  observations?: ObservationReadable[]
+  observations?: ObservationType[]
 }
 
 export type MasteryLevel = {
@@ -47,7 +47,7 @@ export type MasterySchemaConfig = {
   isFeedforwardInputEnabled?: boolean
 }
 
-export type MasterySchemaWithConfig = MasterySchemaReadable & {
+export type MasterySchemaWithConfig = MasterySchemaType & {
   config?: MasterySchemaConfig
 }
 

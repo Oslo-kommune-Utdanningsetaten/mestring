@@ -3,7 +3,7 @@
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { JSONEditor } from 'svelte-jsoneditor'
   import { masterySchemasUpdate, masterySchemasCreate } from '../generated/sdk.gen'
-  import type { MasterySchemaReadable } from '../generated/types.gen'
+  import type { MasterySchemaType } from '../generated/types.gen'
   import type { MasterySchemaConfig } from '../types/models'
 
   const defaultConfig = {
@@ -32,10 +32,10 @@
   }
 
   const { masterySchema, onDone } = $props<{
-    masterySchema: Partial<MasterySchemaReadable> | null
+    masterySchema: Partial<MasterySchemaType> | null
     onDone: () => void
   }>()
-  let localMasterySchema = $state<Partial<MasterySchemaReadable>>({ ...masterySchema })
+  let localMasterySchema = $state<Partial<MasterySchemaType>>({ ...masterySchema })
   let localJson = $derived<Partial<MasterySchemaConfig>>(
     localMasterySchema?.config || defaultConfig
   )

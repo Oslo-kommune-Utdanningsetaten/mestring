@@ -2,7 +2,7 @@
   import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
   import '@oslokommune/punkt-elements/dist/pkt-select.js'
   import { useTinyRouter } from 'svelte-tiny-router'
-  import type { GroupReadable, SchoolReadable, SubjectReadable } from '../../generated/types.gen'
+  import type { GroupType, SchoolType, SubjectType } from '../../generated/types.gen'
   import { groupsList, schoolsList, groupsUpdate } from '../../generated/sdk.gen'
   import { urlStringFrom } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
@@ -10,12 +10,12 @@
   import { NONE_FIELD_VALUE } from '../../utils/constants'
 
   const router = useTinyRouter()
-  let groups = $state<GroupReadable[]>([])
-  let schools = $state<SchoolReadable[]>([])
+  let groups = $state<GroupType[]>([])
+  let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingGroups = $state<boolean>(false)
   let groupFetchSelection = $state<string>('all') // all, only-enabled, only-disabled
-  let selectedSchool = $state<SchoolReadable | null>(null)
+  let selectedSchool = $state<SchoolType | null>(null)
   let nameFilter = $state<string>('')
 
   // Radio options for group filtering
@@ -39,13 +39,13 @@
         : { isEnabled: false }
   )
 
-  const subjectsById: Record<string, SubjectReadable> = $derived(
+  const subjectsById: Record<string, SubjectType> = $derived(
     $dataStore.subjects.reduce(
       (acc, subject) => {
         acc[subject.id] = subject
         return acc
       },
-      {} as Record<string, SubjectReadable>
+      {} as Record<string, SubjectType>
     )
   )
 
@@ -69,7 +69,7 @@
     return text
   })
 
-  const getSubjectForGroup = (group: GroupReadable): string => {
+  const getSubjectForGroup = (group: GroupType): string => {
     if (!group.subjectId) return 'ikke valgt'
     const subject = subjectsById[group.subjectId] || null
     return subject?.displayName || `skolen har ikke fag ${group.subjectId}`
@@ -110,7 +110,7 @@
     }
   }
 
-  const handleGroupTypeToggle = async (group: GroupReadable) => {
+  const handleGroupTypeToggle = async (group: GroupType) => {
     const currentTypeName = group.type === 'basis' ? 'Basisgruppe' : 'Undervisningsgruppe'
     const newTypeName = group.type === 'basis' ? 'Undervisningsgruppe' : 'Basisgruppe'
 
@@ -128,7 +128,7 @@
     try {
       await groupsUpdate({
         path: { id: group.id },
-        body: { ...group, type: newType } as GroupReadable,
+        body: { ...group, type: newType } as GroupType,
       })
       fetchGroups()
     } catch (error) {
@@ -136,11 +136,11 @@
     }
   }
 
-  const handleToggleGroupEnabledStatus = async (group: GroupReadable) => {
+  const handleToggleGroupEnabledStatus = async (group: GroupType) => {
     try {
       await groupsUpdate({
         path: { id: group.id },
-        body: { ...group, isEnabled: !group.isEnabled } as GroupReadable,
+        body: { ...group, isEnabled: !group.isEnabled } as GroupType,
       })
     } catch (error) {
       console.error('Error toggling group endabled status:', error)
@@ -150,11 +150,11 @@
   }
 
   const handleGroupUpdate = async (
-    group: GroupReadable,
-    newFieldsAndValues: Partial<GroupReadable>
+    group: GroupType,
+    newFieldsAndValues: Partial<GroupType>
   ): Promise<void> => {
     try {
-      const updatedGroup: GroupReadable = { ...group, ...newFieldsAndValues }
+      const updatedGroup: GroupType = { ...group, ...newFieldsAndValues }
       await groupsUpdate({
         path: { id: group.id },
         body: updatedGroup,

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { type DataMaintenanceTaskReadable } from '../../generated/types.gen'
+  import { type DataMaintenanceTaskType } from '../../generated/types.gen'
   import { dataMaintenanceTasksList } from '../../generated/sdk.gen'
   import { formatDate } from '../../utils/functions'
 
-  let tasks = $state<DataMaintenanceTaskReadable[]>([])
+  let tasks = $state<DataMaintenanceTaskType[]>([])
   let isLoading = $state<boolean>(false)
   let openRows = $state<Record<string, boolean>>({})
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ObservationReadable, GoalReadable, UserReadable } from '../generated/types.gen'
+  import type { ObservationType, GoalType, UserType } from '../generated/types.gen'
   import { observationsCreate, observationsUpdate } from '../generated/sdk.gen'
   import type { GoalDecorated, MasterySchemaWithConfig } from '../types/models'
   import { dataStore, currentUser } from '../stores/data'
@@ -8,9 +8,9 @@
   import ValueInputHorizontal from './ValueInputHorizontal.svelte'
 
   const { student, goal, observation, onDone } = $props<{
-    student: UserReadable | null
-    goal: GoalReadable | null
-    observation: ObservationReadable | {} | null
+    student: UserType | null
+    goal: GoalType | null
+    observation: ObservationType | {} | null
     onDone: () => void
   }>()
 
@@ -18,7 +18,7 @@
     $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
   )
 
-  let localObservation = $state<Partial<ObservationReadable>>({
+  let localObservation = $state<Partial<ObservationType>>({
     masteryValue: null,
   })
 

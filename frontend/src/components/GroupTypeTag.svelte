@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { GroupReadable } from '../generated/types.gen'
+  import type { GroupType } from '../generated/types.gen'
 
   const { group, onclick, isTypeWarningEnabled } = $props<{
-    group: GroupReadable | null
+    group: GroupType | null
     isTypeWarningEnabled?: boolean
     onclick?: () => void
   }>()

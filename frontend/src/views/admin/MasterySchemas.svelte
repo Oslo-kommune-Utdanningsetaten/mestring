@@ -1,7 +1,7 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { masterySchemasDestroy, masterySchemasList, schoolsList } from '../../generated/sdk.gen'
-  import type { MasterySchemaReadable, SchoolReadable } from '../../generated/types.gen'
+  import type { MasterySchemaType, SchoolType } from '../../generated/types.gen'
   import type { MasterySchemaWithConfig } from '../../types/models'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { urlStringFrom } from '../../utils/functions'
@@ -12,12 +12,12 @@
   const router = useTinyRouter()
   let masterySchemas = $derived<MasterySchemaWithConfig[]>([])
   let masterySchemaWip: Partial<MasterySchemaWithConfig> | null =
-    $state<Partial<MasterySchemaReadable> | null>(null)
+    $state<Partial<MasterySchemaType> | null>(null)
   let isJsonVisible = $state<boolean>(false)
   let isEditorOpen = $state<boolean>(false)
-  let schools = $state<SchoolReadable[]>([])
+  let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
-  let selectedSchool = $derived<SchoolReadable | null>(null)
+  let selectedSchool = $derived<SchoolType | null>(null)
 
   const fetchSchools = async () => {
     try {
@@ -50,7 +50,7 @@
     fetchMasterySchemas()
   }
 
-  const handleEditMasterySchema = (masterySchema: MasterySchemaReadable | null) => {
+  const handleEditMasterySchema = (masterySchema: MasterySchemaType | null) => {
     if (masterySchema) {
       masterySchemaWip = { ...masterySchema }
     } else {

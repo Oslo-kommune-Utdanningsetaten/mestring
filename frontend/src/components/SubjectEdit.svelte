@@ -1,11 +1,11 @@
 <script lang="ts">
   import { subjectsCreate, subjectsUpdate } from '../generated/sdk.gen'
-  import type { SubjectReadable, SchoolReadable } from '../generated/types.gen'
+  import type { SubjectType, SchoolType } from '../generated/types.gen'
   import ButtonMini from './ButtonMini.svelte'
 
   const { subject, school, onDone } = $props<{
-    subject: SubjectReadable | null
-    school: SchoolReadable | null
+    subject: SubjectType | null
+    school: SchoolType | null
     onDone: () => void
   }>()
   let displayName = $state<string | null>(null)
