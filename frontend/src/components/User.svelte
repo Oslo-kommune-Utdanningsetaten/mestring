@@ -2,11 +2,11 @@
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
   import type {
-    UserReadable,
-    NestedUserGroupReadable,
-    NestedUserSchoolReadable,
-    RoleReadable,
-    SchoolReadable,
+    UserType,
+    NestedUserGroupType,
+    NestedUserSchoolType,
+    RoleType,
+    SchoolType,
   } from '../generated/types.gen'
   import {
     userGroupsList,
@@ -18,12 +18,12 @@
   import { dataStore } from '../stores/data'
   import ButtonMini from './ButtonMini.svelte'
 
-  const { user, school } = $props<{ user: UserReadable; school: SchoolReadable }>()
-  const adminRole = $derived<RoleReadable>(
+  const { user, school } = $props<{ user: UserType; school: SchoolType }>()
+  const adminRole = $derived<RoleType>(
     $dataStore.roles?.find(role => role.name === SCHOOL_ADMIN_ROLE)
   )
-  let userGroups = $state<NestedUserGroupReadable[]>([])
-  let userSchools = $state<NestedUserSchoolReadable[]>([])
+  let userGroups = $state<NestedUserGroupType[]>([])
+  let userSchools = $state<NestedUserSchoolType[]>([])
   let isLoadingData = $state<boolean>(false)
   let hasLoadedData = $state<boolean>(false)
   let isSchoolAdmin = $derived(!!userSchools.find(us => us.role.id === adminRole?.id))

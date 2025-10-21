@@ -1,7 +1,7 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { dataStore } from '../stores/data'
-  import type { UserReadable, ObservationReadable, GoalReadable } from '../generated/types.gen'
+  import type { UserType, ObservationType, GoalType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import {
     observationsDestroy,
@@ -26,7 +26,7 @@
 
   const { subjectId, student, onRefreshRequired } = $props<{
     subjectId: string
-    student: UserReadable
+    student: UserType
     onRefreshRequired?: Function
   }>()
 
@@ -35,7 +35,7 @@
   let isShowGoalTitleEnabled = $state<boolean>(true)
   let goalWip = $state<GoalDecorated | null>(null)
   let goalForObservation = $state<GoalDecorated | null>(null)
-  let observationWip = $state<ObservationReadable | {} | null>(null)
+  let observationWip = $state<ObservationType | {} | null>(null)
   let expandedGoals = $state<Record<string, boolean>>({})
   let goalsListElement = $state<HTMLElement | null>(null)
   let subject = $derived($dataStore.subjects.find(s => s.id === subjectId) || null)
@@ -92,7 +92,7 @@
     if (onRefreshRequired) onRefreshRequired()
   }
 
-  const handleEditObservation = (goal: GoalDecorated, observation: ObservationReadable | null) => {
+  const handleEditObservation = (goal: GoalDecorated, observation: ObservationType | null) => {
     if (observation?.id) {
       // edit existing observation
       observationWip = observation
@@ -259,9 +259,7 @@
       <span class="item d-flex align-items-center gap-3 align-items-center">
         {#if goal.masteryData}
           <MasteryLevelBadge masteryData={goal.masteryData} />
-          <SparklineChart
-            data={goal.observations?.map((o: ObservationReadable) => o.masteryValue)}
-          />
+          <SparklineChart data={goal.observations?.map((o: ObservationType) => o.masteryValue)} />
         {:else}
           <MasteryLevelBadge isBadgeEmpty={true} />
         {/if}

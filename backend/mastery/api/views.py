@@ -6,7 +6,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_access_policy import AccessViewSetMixin
-from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy
+from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy, SituationAccessPolicy, StatusAccessPolicy
 
 
 def get_request_param(query_params, name: str):
@@ -610,8 +610,16 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
 class SituationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Situation.objects.all()
     serializer_class = serializers.SituationSerializer
+    access_policy = SituationAccessPolicy
+
+    def get_queryset(self):
+        return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
 
 class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Status.objects.all()
     serializer_class = serializers.StatusSerializer
+    access_policy = StatusAccessPolicy
+
+    def get_queryset(self):
+        return self.access_policy().scope_queryset(self.request, super().get_queryset())

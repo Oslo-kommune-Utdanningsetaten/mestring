@@ -3,14 +3,12 @@
   import { urlStringFrom } from '../utils/functions'
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   import { groupsList, usersList } from '../generated/sdk.gen'
-  import type { GroupReadable, UserReadable } from '../generated/types.gen'
+  import type { GroupType, UserType } from '../generated/types.gen'
   import GroupTypeTag from '../components/GroupTypeTag.svelte'
 
   let currentSchool = $derived($dataStore.currentSchool)
-  let groups = $state<GroupReadable[]>([])
-  let groupMembers = $state<Record<string, { teachers: UserReadable[]; students: UserReadable[] }>>(
-    {}
-  )
+  let groups = $state<GroupType[]>([])
+  let groupMembers = $state<Record<string, { teachers: UserType[]; students: UserType[] }>>({})
 
   const fetchGroups = async () => {
     try {

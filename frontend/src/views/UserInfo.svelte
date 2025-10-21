@@ -2,10 +2,10 @@
   import { dataStore, setCurrentSchool, currentUser } from '../stores/data'
   import { schoolsList, groupsList } from '../generated/sdk.gen'
   import { urlStringFrom } from '../utils/functions'
-  import type { GroupReadable, SchoolReadable } from '../generated/types.gen'
+  import type { GroupType, SchoolType } from '../generated/types.gen'
 
-  let schools = $state<SchoolReadable[]>([])
-  let groups = $state<GroupReadable[]>([])
+  let schools = $state<SchoolType[]>([])
+  let groups = $state<GroupType[]>([])
   let isLoadingSchools = $state(false)
   let isLoadingGroups = $state(false)
   let currentSchool = $derived($dataStore.currentSchool)
@@ -39,7 +39,7 @@
     }
   }
 
-  const selectSchool = (school: SchoolReadable) => {
+  const selectSchool = (school: SchoolType) => {
     setCurrentSchool(school)
   }
 

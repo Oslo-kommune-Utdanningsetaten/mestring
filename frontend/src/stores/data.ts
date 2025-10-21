@@ -1,5 +1,4 @@
 import { get, writable, derived } from 'svelte/store'
-import type { Writable as WritableType } from 'svelte/store'
 import {
   subjectsList,
   schoolsList,
@@ -7,7 +6,7 @@ import {
   rolesList,
   userSchoolsList,
 } from '../generated/sdk.gen'
-import type { SchoolReadable, MasterySchemaReadable, UserReadable } from '../generated/types.gen'
+import type { SchoolType, MasterySchemaType, UserType } from '../generated/types.gen'
 import {
   getLocalStorageItem,
   setLocalStorageItem,
@@ -20,11 +19,11 @@ import {
 } from '../utils/constants'
 import type { AppData } from '../types/models'
 
-let masterySchemasCache = null as MasterySchemaReadable[] | null
+let masterySchemasCache = null as MasterySchemaType[] | null
 
 // When school changes, reload subjects, user status, and mastery schemas
-export const setCurrentSchool = (school: SchoolReadable) => {
-  const currentData = get(dataStore)
+export const setCurrentSchool = (school: SchoolType) => {
+  const currentData = get(dataStore) as AppData
   if (currentData.currentSchool?.id !== school?.id) {
     setLocalStorageItem('currentSchool', school)
     dataStore.update(data => {
@@ -38,14 +37,14 @@ export const setCurrentSchool = (school: SchoolReadable) => {
   }
 }
 
-const setMasterySchemas = (schemas: MasterySchemaReadable[]) => {
+const setMasterySchemas = (schemas: MasterySchemaType[]) => {
   masterySchemasCache = schemas
   dataStore.update(data => {
     return { ...data, masterySchemas: schemas }
   })
 }
 
-export const dataStore: WritableType<AppData> = writable({
+export const dataStore = writable<AppData>({
   subjects: [],
   currentSchool: null,
   currentUser: null,
@@ -54,22 +53,22 @@ export const dataStore: WritableType<AppData> = writable({
 
 export const currentUser = derived(dataStore, d => d.currentUser)
 
-export const setCurrentUser = (user: UserReadable | null) => {
-  dataStore.update(d => ({ ...d, currentUser: user }))
+export const setCurrentUser = (user: UserType | null) => {
+  dataStore.update(data => ({ ...data, currentUser: user }))
 }
 
-export const registerUserStatus = async (school: SchoolReadable) => {
+export const registerUserStatus = async (school: SchoolType) => {
   const user = get(dataStore).currentUser
   const userSchoolsResult = await userSchoolsList({
     query: { user: user.id, school: school.id },
   })
   const userSchools = userSchoolsResult.data || []
   let isSchooladmin = !!userSchools.some(userSchool => userSchool.role.name === SCHOOL_ADMIN_ROLE)
-  dataStore.update(d => ({ ...d, isSchooladmin, isSuperadmin: user.isSuperadmin }))
+  dataStore.update(data => ({ ...data, isSchooladmin, isSuperadmin: user.isSuperadmin }))
 }
 
 const loadSchool = async () => {
-  let schools: SchoolReadable[] = []
+  let schools: SchoolType[] = []
   try {
     const result = await schoolsList()
     schools = result.data || []
@@ -78,8 +77,8 @@ const loadSchool = async () => {
     return null
   }
 
-  let localStorageSchool = getLocalStorageItem('currentSchool') as SchoolReadable | null
-  const previousSchool: SchoolReadable | undefined = schools.find(
+  let localStorageSchool = getLocalStorageItem('currentSchool') as SchoolType | null
+  const previousSchool: SchoolType | undefined = schools.find(
     school => school.id === localStorageSchool?.id && school.isServiceEnabled
   )
 
@@ -118,7 +117,7 @@ const registerMasterySchemas = async (hardRefresh: boolean) => {
   }
 }
 
-const registerSubjects = async (school: SchoolReadable): Promise<void> => {
+const registerSubjects = async (school: SchoolType): Promise<void> => {
   try {
     const result = await subjectsList({
       query: {

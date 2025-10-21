@@ -1,7 +1,7 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
   import { useTinyRouter } from 'svelte-tiny-router'
-  import { type SchoolReadable } from '../../generated/types.gen'
+  import { type SchoolType } from '../../generated/types.gen'
   import {
     fetchGroupsForSchool,
     fetchMembershipsForSchool,
@@ -17,7 +17,7 @@
   import ButtonMini from '../../components/ButtonMini.svelte'
 
   const router = useTinyRouter()
-  let schools = $state<SchoolReadable[]>([])
+  let schools = $state<SchoolType[]>([])
   let alertMessage = $state<string>('')
   let alertType = $state<'success' | 'error' | ''>('')
   let feideOrgInput: HTMLInputElement
@@ -82,7 +82,7 @@
     }
   }
 
-  const toggleServiceEnabled = async (school: SchoolReadable) => {
+  const toggleServiceEnabled = async (school: SchoolType) => {
     try {
       const result = await schoolsPartialUpdate({
         path: { id: school.id },
@@ -98,7 +98,7 @@
   }
 
   // Toggle whether group goals can be created at the school
-  const toggleGroupGoalEnabled = async (school: SchoolReadable) => {
+  const toggleGroupGoalEnabled = async (school: SchoolType) => {
     try {
       const current = (school as any).isGroupGoalEnabled ?? false
       const result = await schoolsPartialUpdate({
@@ -115,7 +115,7 @@
   }
 
   // Toggle whether teachers can see the students list menu item
-  const toggleStudentListEnabled = async (school: SchoolReadable) => {
+  const toggleStudentListEnabled = async (school: SchoolType) => {
     try {
       const current = (school as any).isStudentListEnabled ?? false
       const result = await schoolsPartialUpdate({
@@ -133,7 +133,7 @@
 
   type SubjectsAllowed = 'only-custom' | 'only-group' | 'all'
 
-  const updateSubjectsAllowed = async (school: SchoolReadable, value: SubjectsAllowed) => {
+  const updateSubjectsAllowed = async (school: SchoolType, value: SubjectsAllowed) => {
     if (school.subjectsAllowed === value) return
     try {
       const result = await schoolsPartialUpdate({

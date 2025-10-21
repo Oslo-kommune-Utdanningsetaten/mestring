@@ -1,8 +1,8 @@
 import type { MasteryConfigLevel, MasterySchemaConfig } from '../types/models'
-import type { MasterySchemaReadable } from '../generated/types.gen'
+import type { MasterySchemaType } from '../generated/types.gen'
 import { isNumber } from './functions'
 
-export type MasterySchemaWithConfig = MasterySchemaReadable & {
+export type MasterySchemaWithConfig = MasterySchemaType & {
   config?: MasterySchemaConfig
 }
 

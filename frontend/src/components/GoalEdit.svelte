@@ -1,12 +1,6 @@
 <script lang="ts">
   import { goalsCreate, goalsUpdate } from '../generated/sdk.gen'
-  import type {
-    GoalWritable,
-    GroupReadable,
-    UserReadable,
-    SubjectReadable,
-    GoalReadable,
-  } from '../generated/types.gen'
+  import type { GoalType, GroupType, UserType, SubjectType } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
   import { setLocalStorageItem } from '../stores/localStorage'
   import ButtonMini from './ButtonMini.svelte'
@@ -24,15 +18,15 @@
     onDone,
     isGoalPersonal,
   } = $props<{
-    student?: UserReadable | null
-    subject?: SubjectReadable | null
-    group?: GroupReadable | null
-    goal?: GoalWritable | null
+    student?: UserType | null
+    subject?: SubjectType | null
+    group?: GroupType | null
+    goal?: GoalType | null
     isGoalPersonal: boolean
     onDone?: () => void | Promise<void>
   }>()
 
-  let localGoal = $state<Partial<GoalReadable>>({})
+  let localGoal = $state<Partial<GoalType>>({})
   let subjectViaGroup = $derived(
     group ? $dataStore.subjects.find(s => s.id === group?.subjectId) : null
   )

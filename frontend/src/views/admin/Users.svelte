@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { UserReadable, SchoolReadable } from '../../generated/types.gen'
+  import type { UserType, SchoolType } from '../../generated/types.gen'
   import { usersList, schoolsList } from '../../generated/sdk.gen'
   import { urlStringFrom } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
@@ -7,11 +7,11 @@
   import User from '../../components/User.svelte'
 
   const router = useTinyRouter()
-  let users = $state<UserReadable[]>([])
-  let schools = $state<SchoolReadable[]>([])
+  let users = $state<UserType[]>([])
+  let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingUsers = $state<boolean>(false)
-  let selectedSchool = $state<SchoolReadable | null>($dataStore.currentSchool)
+  let selectedSchool = $state<SchoolType | null>($dataStore.currentSchool)
   let nameFilter = $state<string>('')
   let filteredUsers = $derived(
     nameFilter

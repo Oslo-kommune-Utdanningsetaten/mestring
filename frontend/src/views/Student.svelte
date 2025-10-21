@@ -1,10 +1,5 @@
 <script lang="ts">
-  import type {
-    GroupReadable,
-    UserReadable,
-    SubjectReadable,
-    GoalWritable,
-  } from '../generated/types.gen'
+  import type { GoalType, UserType, SubjectType } from '../generated/types.gen'
   import { usersRetrieve, goalsCreate, goalsList } from '../generated/sdk.gen'
   import { subjectIdsViaGroupOrGoal } from '../utils/functions'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
@@ -17,8 +12,8 @@
   import { getLocalStorageItem } from '../stores/localStorage'
 
   const { studentId } = $props<{ studentId: string }>()
-  let student = $state<UserReadable | null>(null)
-  let subjects = $state<SubjectReadable[]>([])
+  let student = $state<UserType | null>(null)
+  let subjects = $state<SubjectType[]>([])
   let currentSchool = $derived($dataStore.currentSchool)
   let goalWip = $state<GoalDecorated | null>(null)
   let isGoalEditorOpen = $state<boolean>(false)
@@ -40,7 +35,7 @@
     try {
       const subjectIds = await subjectIdsViaGroupOrGoal(studentId, currentSchool.id)
       if (subjectIds.length > 0) {
-        subjects = $dataStore.subjects.filter((subject: SubjectReadable) =>
+        subjects = $dataStore.subjects.filter((subject: SubjectType) =>
           subjectIds.includes(subject.id)
         )
       }
@@ -63,7 +58,7 @@
     const schoolSubjects = $dataStore.subjects
     schoolSubjects.forEach(async (subject, index) => {
       for (let i = 0; i < 3; i++) {
-        const goal: GoalWritable = {
+        const goal: GoalType = {
           studentId: student?.id,
           subjectId: subject.id,
           sortOrder: i + 1,

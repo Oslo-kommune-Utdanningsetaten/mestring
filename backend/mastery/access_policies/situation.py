@@ -1,0 +1,24 @@
+from .base import BaseAccessPolicy
+
+
+# Placeholder, implement this later
+
+
+class SituationAccessPolicy(BaseAccessPolicy):
+    statements = [
+        # Superadmin: full access
+        {
+            "action": ["*"],
+            "principal": ["role:superadmin"],
+            "effect": "allow",
+        },
+        # Everyone else: implicitly denied
+    ]
+
+    def scope_queryset(self, request, qs):
+        user = request.user
+        if not user:
+            return qs.none()
+        if user.is_superadmin:
+            return qs
+        return qs.none()

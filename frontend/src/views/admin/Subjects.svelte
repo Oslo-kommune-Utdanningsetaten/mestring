@@ -2,7 +2,7 @@
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { subjectsDestroy, subjectsList, schoolsList, groupsList } from '../../generated/sdk.gen'
-  import type { SubjectReadable, SchoolReadable, GroupReadable } from '../../generated/types.gen'
+  import type { SubjectType, SchoolType, GroupType } from '../../generated/types.gen'
   import { urlStringFrom } from '../../utils/functions'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import SubjectEdit from '../../components/SubjectEdit.svelte'
@@ -10,15 +10,15 @@
   import { dataStore } from '../../stores/data'
 
   const router = useTinyRouter()
-  let subjects = $derived<SubjectReadable[]>([])
-  let subjectWip = $state<SubjectReadable | null>(null)
+  let subjects = $derived<SubjectType[]>([])
+  let subjectWip = $state<SubjectType | null>(null)
   let isSubjectEditorOpen = $state(false)
-  let schools = $state<SchoolReadable[]>([])
-  let selectedSchool = $derived<SchoolReadable | null>(null)
+  let schools = $state<SchoolType[]>([])
+  let selectedSchool = $derived<SchoolType | null>(null)
   let isLoadingSubjects = $state<boolean>(false)
   let isLoadingSchools = $state<boolean>(false)
   let subjectFetchSelection = $state<string>('only-school-owned')
-  let groupsBySubjectId = $state<Record<string, GroupReadable[]>>({})
+  let groupsBySubjectId = $state<Record<string, GroupType[]>>({})
   let nameFilter = $state<string>('')
 
   // Radio options for subject filtering
@@ -113,11 +113,11 @@
     isSubjectEditorOpen = false
   }
 
-  const handleEditSubject = (subject: SubjectReadable | null) => {
+  const handleEditSubject = (subject: SubjectType | null) => {
     if (subject?.id) {
       subjectWip = { ...subject }
     } else {
-      subjectWip = { ownedBySchoolId: selectedSchool?.id } as SubjectReadable
+      subjectWip = { ownedBySchoolId: selectedSchool?.id } as SubjectType
     }
     isSubjectEditorOpen = true
   }
@@ -162,7 +162,7 @@
   })
 </script>
 
-{#snippet groupsInfo(groups: GroupReadable[])}
+{#snippet groupsInfo(groups: GroupType[])}
   {#each groups as group, index (group.id)}
     <a class="bg-info px-1 group-link" href="/groups/{group.id}">
       {group.displayName}
@@ -170,7 +170,7 @@
   {/each}
 {/snippet}
 
-{#snippet subjectCodes(subject: SubjectReadable)}
+{#snippet subjectCodes(subject: SubjectType)}
   {#if !subject.grepCode && !subject.grepGroupCode}
     <span class="fst-italic">mangler</span>
   {:else}

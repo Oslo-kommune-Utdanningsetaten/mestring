@@ -1,13 +1,13 @@
 import type { Mastery, GoalDecorated } from '../types/models'
 import type {
-  GoalReadable,
-  SubjectReadable,
-  ObservationReadable,
-  GroupReadable,
-  UserReadable,
+  GoalType,
+  SubjectType,
+  ObservationType,
+  GroupType,
+  UserType,
 } from '../generated/types.gen'
 import { goalsList, observationsList, groupsList } from '../generated/sdk.gen'
-import { dataStore } from '../stores/data'
+import { format } from 'date-fns'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
   [key: string]: string
@@ -58,10 +58,10 @@ export const urlStringFrom = (
 // Fetch subjects for the given students to build the grid headers
 // based on subjects linked to their goals and groups
 export const fetchSubjectsForStudents = async (
-  students: UserReadable[],
-  allSubjects: SubjectReadable[],
+  students: UserType[],
+  allSubjects: SubjectType[],
   schoolId: string
-): Promise<SubjectReadable[]> => {
+): Promise<SubjectType[]> => {
   const subjectIds = new Set<string>()
 
   const data = await Promise.all(
@@ -69,11 +69,11 @@ export const fetchSubjectsForStudents = async (
       const goalsResult = await goalsList({
         query: { student: student.id },
       })
-      const goals: GoalReadable[] = goalsResult.data || []
+      const goals: GoalType[] = goalsResult.data || []
       const groupsResult: any = await groupsList({
         query: { user: student.id, school: schoolId },
       })
-      const groups: GroupReadable[] = groupsResult.data || []
+      const groups: GroupType[] = groupsResult.data || []
       return { goals, groups }
     })
   )
@@ -87,20 +87,20 @@ export const fetchSubjectsForStudents = async (
     })
   })
 
-  const subjects: SubjectReadable[] = Array.from(subjectIds)
+  const subjects: SubjectType[] = Array.from(subjectIds)
     .map(subjectId => allSubjects.find(s => s.id === subjectId))
-    .filter((s): s is SubjectReadable => s !== undefined)
+    .filter((s): s is SubjectType => s !== undefined)
 
   return subjects
 }
 
 export const subjectNamesFromStudentGoals = (
-  goals: GoalReadable[],
-  allSubjects: SubjectReadable[]
+  goals: GoalType[],
+  allSubjects: SubjectType[]
 ): string[] => {
   const result = new Set<string>()
-  goals.forEach((goal: GoalReadable) => {
-    const subject = allSubjects.find((subject: SubjectReadable) => subject.id === goal.subjectId)
+  goals.forEach((goal: GoalType) => {
+    const subject = allSubjects.find((subject: SubjectType) => subject.id === goal.subjectId)
     if (subject) {
       result.add(subject.displayName)
     }
@@ -110,7 +110,7 @@ export const subjectNamesFromStudentGoals = (
 
 export const goalsWithCalculatedMastery = async (
   studentId: string,
-  studentGoals: GoalReadable[]
+  studentGoals: GoalType[]
 ): Promise<GoalDecorated[]> => {
   const observationsPromises = studentGoals.map(goal =>
     observationsList({
@@ -145,7 +145,7 @@ export const subjectIdsViaGroupOrGoal = async (
   })
   const goalsResult: any = await goalsList({ query: { student: studentId } })
   const userGoals = goalsResult.data || []
-  userGoals.forEach((goal: GoalReadable) => {
+  userGoals.forEach((goal: GoalType) => {
     if (goal.subjectId) {
       subjectsId.add(goal.subjectId)
     }
@@ -158,8 +158,8 @@ export const subjectIdsViaGroupOrGoal = async (
 // Goals are sorted by sortOrder, then personal goals first
 export const goalsWithCalculatedMasteryBySubjectId = async (
   studentId: string,
-  studentGoals: GoalReadable[],
-  groups: GroupReadable[]
+  studentGoals: GoalType[],
+  groups: GroupType[]
 ) => {
   const decoratedGoals = await goalsWithCalculatedMastery(studentId, studentGoals)
   let goalsBySubjectId: Record<string, GoalDecorated[]> = {}
@@ -192,8 +192,8 @@ export const goalsWithCalculatedMasteryBySubjectId = async (
 }
 
 export const inferMastery = (
-  goal: GoalReadable,
-  observationsForGoal: ObservationReadable[]
+  goal: GoalType,
+  observationsForGoal: ObservationType[]
 ): Mastery | null => {
   if (observationsForGoal.length === 0) {
     return null
@@ -238,13 +238,7 @@ export const isNumber = (value: any) => {
   return typeof value === 'number'
 }
 
-// returns YYYY-MM-DD HH:MM
 export const formatDate = (isoDate?: string | null) => {
-  if (!isoDate) return ''
-  const aDate = new Date(isoDate)
-  return (
-    aDate.toLocaleDateString('no-NO', { year: '2-digit', month: '2-digit', day: '2-digit' }) +
-    ' ' +
-    aDate.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' })
-  )
+  if (!isoDate) return null
+  return format(new Date(isoDate), 'yyyy-MM-dd HH:mm')
 }
