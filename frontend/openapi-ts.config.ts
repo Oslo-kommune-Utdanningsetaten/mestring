@@ -5,7 +5,10 @@ export default {
   output: 'src/generated',
   parser: {
     transforms: {
-      readWrite: false,
+      readWrite: {
+        responses: '{{name}}',
+        requests: '{{name}}Create',
+      },
     },
   },
   plugins: [

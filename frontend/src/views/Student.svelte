@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { GoalType, UserType, SubjectType } from '../generated/types.gen'
+  import type { GoalCreateType, UserType, SubjectType } from '../generated/types.gen'
   import { usersRetrieve, goalsCreate, goalsList } from '../generated/sdk.gen'
   import { subjectIdsViaGroupOrGoal } from '../utils/functions'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
@@ -58,7 +58,7 @@
     const schoolSubjects = $dataStore.subjects
     schoolSubjects.forEach(async (subject, index) => {
       for (let i = 0; i < 3; i++) {
-        const goal: GoalType = {
+        const goal: GoalCreateType = {
           studentId: student?.id,
           subjectId: subject.id,
           sortOrder: i + 1,

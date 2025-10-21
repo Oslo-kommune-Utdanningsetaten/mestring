@@ -8,7 +8,7 @@ export type DataMaintenanceTaskType = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt: string | null;
     status?: StatusEnumType;
     jobName: string;
     jobParams?: unknown;
@@ -23,20 +23,20 @@ export type DataMaintenanceTaskType = {
     earliestRunAt?: string | null;
     result?: unknown;
     attempts?: number;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
 };
 
 export type GoalType = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt: string | null;
     title?: string | null;
     description?: string | null;
     sortOrder?: number | null;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
     groupId?: string | null;
     studentId?: string | null;
     subjectId?: string | null;
@@ -49,15 +49,15 @@ export type GroupType = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt: string | null;
     feideId: string;
     displayName: string;
     type: string;
     validFrom?: string | null;
     validTo?: string | null;
     isEnabled?: boolean;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
     subjectId?: string | null;
     schoolId: string;
 };
@@ -66,12 +66,12 @@ export type MasterySchemaType = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt: string | null;
     title?: string;
     description?: string | null;
     config?: unknown;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
     schoolId?: string | null;
 };
 
@@ -82,9 +82,9 @@ export type NestedUserGroupType = {
     role: RoleType;
     readonly createdAt: string;
     readonly updatedAt: string;
-    maintainedAt?: string | null;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly maintainedAt: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
 };
 
 export type NestedUserSchoolType = {
@@ -94,23 +94,23 @@ export type NestedUserSchoolType = {
     role: RoleType;
     readonly createdAt: string;
     readonly updatedAt: string;
-    maintainedAt?: string | null;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly maintainedAt: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
 };
 
 export type ObservationType = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
     goalId: string;
     studentId: string;
     observerId?: string | null;
@@ -121,7 +121,7 @@ export type PatchedDataMaintenanceTaskType = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt?: string | null;
     status?: StatusEnumType;
     jobName?: string;
     jobParams?: unknown;
@@ -136,20 +136,20 @@ export type PatchedDataMaintenanceTaskType = {
     earliestRunAt?: string | null;
     result?: unknown;
     attempts?: number;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById?: string;
+    readonly updatedById?: string;
 };
 
 export type PatchedGoalType = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt?: string | null;
     title?: string | null;
     description?: string | null;
     sortOrder?: number | null;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById?: string;
+    readonly updatedById?: string;
     groupId?: string | null;
     studentId?: string | null;
     subjectId?: string | null;
@@ -162,15 +162,15 @@ export type PatchedGroupType = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt?: string | null;
     feideId?: string;
     displayName?: string;
     type?: string;
     validFrom?: string | null;
     validTo?: string | null;
     isEnabled?: boolean;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById?: string;
+    readonly updatedById?: string;
     subjectId?: string | null;
     schoolId?: string;
 };
@@ -179,12 +179,12 @@ export type PatchedMasterySchemaType = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt?: string | null;
     title?: string;
     description?: string | null;
     config?: unknown;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById?: string;
+    readonly updatedById?: string;
     schoolId?: string | null;
 };
 
@@ -195,23 +195,23 @@ export type PatchedNestedUserGroupType = {
     role?: RoleType;
     readonly createdAt?: string;
     readonly updatedAt?: string;
-    maintainedAt?: string | null;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly maintainedAt?: string | null;
+    readonly createdById?: string;
+    readonly updatedById?: string;
 };
 
 export type PatchedObservationType = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById?: string;
+    readonly updatedById?: string;
     goalId?: string;
     studentId?: string;
     observerId?: string | null;
@@ -222,17 +222,17 @@ export type PatchedRoleType = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt?: string | null;
     name?: string;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById?: string;
+    readonly updatedById?: string;
 };
 
 export type PatchedSchoolType = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt?: string | null;
     feideId?: string;
     displayName?: string;
     shortName?: string | null;
@@ -242,33 +242,33 @@ export type PatchedSchoolType = {
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     subjectsAllowed?: string;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById?: string;
+    readonly updatedById?: string;
 };
 
 export type PatchedSituationType = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt?: string | null;
     title?: string;
     description?: string | null;
     happensAt?: string | null;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById?: string;
+    readonly updatedById?: string;
 };
 
 export type PatchedStatusType = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt?: string | null;
     estimatedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById?: string;
+    readonly updatedById?: string;
     studentId?: string;
     subjectId?: string;
 };
@@ -277,13 +277,13 @@ export type PatchedSubjectType = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt?: string | null;
     displayName?: string;
     shortName?: string;
     grepCode?: string | null;
     grepGroupCode?: string | null;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById?: string;
+    readonly updatedById?: string;
     ownedBySchoolId?: string | null;
 };
 
@@ -291,7 +291,7 @@ export type PatchedUserType = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt?: string | null;
     name?: string;
     feideId?: string;
     email?: string;
@@ -300,17 +300,17 @@ export type PatchedUserType = {
     isSuperadmin?: boolean;
     readonly groups?: Array<string | null>;
     readonly schools?: Array<string>;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById?: string;
+    readonly updatedById?: string;
 };
 
 export type PatchedUserSchoolType = {
     readonly id?: string;
     readonly createdAt?: string;
     readonly updatedAt?: string;
-    maintainedAt?: string | null;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly maintainedAt?: string | null;
+    readonly createdById?: string;
+    readonly updatedById?: string;
     userId?: string;
     schoolId?: string;
     roleId?: string;
@@ -320,17 +320,17 @@ export type RoleType = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt: string | null;
     name: string;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
 };
 
 export type SchoolType = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt: string | null;
     feideId: string;
     displayName: string;
     shortName?: string | null;
@@ -340,33 +340,33 @@ export type SchoolType = {
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     subjectsAllowed?: string;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
 };
 
 export type SituationType = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt: string | null;
     title: string;
     description?: string | null;
     happensAt?: string | null;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
 };
 
 export type StatusType = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt: string | null;
     estimatedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
     studentId: string;
     subjectId: string;
 };
@@ -383,13 +383,13 @@ export type SubjectType = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt: string | null;
     displayName: string;
     shortName: string;
     grepCode?: string | null;
     grepGroupCode?: string | null;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
     ownedBySchoolId?: string | null;
 };
 
@@ -397,7 +397,7 @@ export type UserType = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    maintainedAt?: string | null;
+    readonly maintainedAt: string | null;
     name: string;
     feideId: string;
     email: string;
@@ -406,17 +406,253 @@ export type UserType = {
     isSuperadmin?: boolean;
     readonly groups: Array<string | null>;
     readonly schools: Array<string>;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
 };
 
 export type UserSchoolType = {
     readonly id: string;
     readonly createdAt: string;
     readonly updatedAt: string;
-    maintainedAt?: string | null;
-    createdById?: string | null;
-    updatedById?: string | null;
+    readonly maintainedAt: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
+    userId: string;
+    schoolId: string;
+    roleId: string;
+};
+
+export type DataMaintenanceTaskCreateType = {
+    status?: StatusEnumType;
+    jobName: string;
+    jobParams?: unknown;
+    displayName?: string | null;
+    handlerName?: string | null;
+    isOverwriteEnabled?: boolean;
+    isCrashOnErrorEnabled?: boolean;
+    startedAt?: string | null;
+    failedAt?: string | null;
+    finishedAt?: string | null;
+    lastHeartbeatAt?: string | null;
+    earliestRunAt?: string | null;
+    result?: unknown;
+    attempts?: number;
+};
+
+export type GoalCreateType = {
+    title?: string | null;
+    description?: string | null;
+    sortOrder?: number | null;
+    groupId?: string | null;
+    studentId?: string | null;
+    subjectId?: string | null;
+    previousGoalId?: string | null;
+    masterySchemaId?: string | null;
+};
+
+export type GroupCreateType = {
+    feideId: string;
+    displayName: string;
+    type: string;
+    validFrom?: string | null;
+    validTo?: string | null;
+    isEnabled?: boolean;
+    subjectId?: string | null;
+    schoolId: string;
+};
+
+export type MasterySchemaCreateType = {
+    title?: string;
+    description?: string | null;
+    config?: unknown;
+    schoolId?: string | null;
+};
+
+export type NestedUserGroupCreateType = {
+    [key: string]: unknown;
+};
+
+export type NestedUserSchoolCreateType = {
+    [key: string]: unknown;
+};
+
+export type ObservationCreateType = {
+    masteryValue?: number | null;
+    masteryDescription?: string | null;
+    feedforward?: string | null;
+    observedAt?: string | null;
+    isVisibleToStudent?: boolean;
+    goalId: string;
+    studentId: string;
+    observerId?: string | null;
+    situationId?: string | null;
+};
+
+export type PatchedDataMaintenanceTaskCreateType = {
+    status?: StatusEnumType;
+    jobName?: string;
+    jobParams?: unknown;
+    displayName?: string | null;
+    handlerName?: string | null;
+    isOverwriteEnabled?: boolean;
+    isCrashOnErrorEnabled?: boolean;
+    startedAt?: string | null;
+    failedAt?: string | null;
+    finishedAt?: string | null;
+    lastHeartbeatAt?: string | null;
+    earliestRunAt?: string | null;
+    result?: unknown;
+    attempts?: number;
+};
+
+export type PatchedGoalCreateType = {
+    title?: string | null;
+    description?: string | null;
+    sortOrder?: number | null;
+    groupId?: string | null;
+    studentId?: string | null;
+    subjectId?: string | null;
+    previousGoalId?: string | null;
+    masterySchemaId?: string | null;
+};
+
+export type PatchedGroupCreateType = {
+    feideId?: string;
+    displayName?: string;
+    type?: string;
+    validFrom?: string | null;
+    validTo?: string | null;
+    isEnabled?: boolean;
+    subjectId?: string | null;
+    schoolId?: string;
+};
+
+export type PatchedMasterySchemaCreateType = {
+    title?: string;
+    description?: string | null;
+    config?: unknown;
+    schoolId?: string | null;
+};
+
+export type PatchedNestedUserGroupCreateType = {
+    [key: string]: unknown;
+};
+
+export type PatchedObservationCreateType = {
+    masteryValue?: number | null;
+    masteryDescription?: string | null;
+    feedforward?: string | null;
+    observedAt?: string | null;
+    isVisibleToStudent?: boolean;
+    goalId?: string;
+    studentId?: string;
+    observerId?: string | null;
+    situationId?: string | null;
+};
+
+export type PatchedRoleCreateType = {
+    name?: string;
+};
+
+export type PatchedSchoolCreateType = {
+    feideId?: string;
+    displayName?: string;
+    shortName?: string | null;
+    orgNumber?: string;
+    owner?: string | null;
+    isServiceEnabled?: boolean;
+    isGroupGoalEnabled?: boolean;
+    isStudentListEnabled?: boolean;
+    subjectsAllowed?: string;
+};
+
+export type PatchedSituationCreateType = {
+    title?: string;
+    description?: string | null;
+    happensAt?: string | null;
+};
+
+export type PatchedStatusCreateType = {
+    estimatedAt?: string | null;
+    masteryValue?: number | null;
+    masteryDescription?: string | null;
+    feedforward?: string | null;
+    studentId?: string;
+    subjectId?: string;
+};
+
+export type PatchedSubjectCreateType = {
+    displayName?: string;
+    shortName?: string;
+    grepCode?: string | null;
+    grepGroupCode?: string | null;
+    ownedBySchoolId?: string | null;
+};
+
+export type PatchedUserCreateType = {
+    name?: string;
+    feideId?: string;
+    email?: string;
+    lastActivityAt?: string | null;
+    disabledAt?: string | null;
+    isSuperadmin?: boolean;
+};
+
+export type PatchedUserSchoolCreateType = {
+    userId?: string;
+    schoolId?: string;
+    roleId?: string;
+};
+
+export type RoleCreateType = {
+    name: string;
+};
+
+export type SchoolCreateType = {
+    feideId: string;
+    displayName: string;
+    shortName?: string | null;
+    orgNumber: string;
+    owner?: string | null;
+    isServiceEnabled?: boolean;
+    isGroupGoalEnabled?: boolean;
+    isStudentListEnabled?: boolean;
+    subjectsAllowed?: string;
+};
+
+export type SituationCreateType = {
+    title: string;
+    description?: string | null;
+    happensAt?: string | null;
+};
+
+export type StatusCreateType = {
+    estimatedAt?: string | null;
+    masteryValue?: number | null;
+    masteryDescription?: string | null;
+    feedforward?: string | null;
+    studentId: string;
+    subjectId: string;
+};
+
+export type SubjectCreateType = {
+    displayName: string;
+    shortName: string;
+    grepCode?: string | null;
+    grepGroupCode?: string | null;
+    ownedBySchoolId?: string | null;
+};
+
+export type UserCreateType = {
+    name: string;
+    feideId: string;
+    email: string;
+    lastActivityAt?: string | null;
+    disabledAt?: string | null;
+    isSuperadmin?: boolean;
+};
+
+export type UserSchoolCreateType = {
     userId: string;
     schoolId: string;
     roleId: string;
@@ -441,7 +677,7 @@ export type DataMaintenanceTasksListResponses = {
 export type DataMaintenanceTasksListResponse = DataMaintenanceTasksListResponses[keyof DataMaintenanceTasksListResponses];
 
 export type DataMaintenanceTasksCreateData = {
-    body: DataMaintenanceTaskType;
+    body: DataMaintenanceTaskCreateType;
     path?: never;
     query?: never;
     url: '/api/data-maintenance-tasks/';
@@ -493,7 +729,7 @@ export type DataMaintenanceTasksRetrieveResponses = {
 export type DataMaintenanceTasksRetrieveResponse = DataMaintenanceTasksRetrieveResponses[keyof DataMaintenanceTasksRetrieveResponses];
 
 export type DataMaintenanceTasksPartialUpdateData = {
-    body?: PatchedDataMaintenanceTaskType;
+    body?: PatchedDataMaintenanceTaskCreateType;
     path: {
         /**
          * A unique value identifying this data maintenance task.
@@ -511,7 +747,7 @@ export type DataMaintenanceTasksPartialUpdateResponses = {
 export type DataMaintenanceTasksPartialUpdateResponse = DataMaintenanceTasksPartialUpdateResponses[keyof DataMaintenanceTasksPartialUpdateResponses];
 
 export type DataMaintenanceTasksUpdateData = {
-    body: DataMaintenanceTaskType;
+    body: DataMaintenanceTaskCreateType;
     path: {
         /**
          * A unique value identifying this data maintenance task.
@@ -616,7 +852,7 @@ export type GoalsListResponses = {
 export type GoalsListResponse = GoalsListResponses[keyof GoalsListResponses];
 
 export type GoalsCreateData = {
-    body?: GoalType;
+    body?: GoalCreateType;
     path?: never;
     query?: never;
     url: '/api/goals/';
@@ -668,7 +904,7 @@ export type GoalsRetrieveResponses = {
 export type GoalsRetrieveResponse = GoalsRetrieveResponses[keyof GoalsRetrieveResponses];
 
 export type GoalsPartialUpdateData = {
-    body?: PatchedGoalType;
+    body?: PatchedGoalCreateType;
     path: {
         /**
          * A unique value identifying this goal.
@@ -686,7 +922,7 @@ export type GoalsPartialUpdateResponses = {
 export type GoalsPartialUpdateResponse = GoalsPartialUpdateResponses[keyof GoalsPartialUpdateResponses];
 
 export type GoalsUpdateData = {
-    body?: GoalType;
+    body?: GoalCreateType;
     path: {
         /**
          * A unique value identifying this goal.
@@ -746,7 +982,7 @@ export type GroupsListResponses = {
 export type GroupsListResponse = GroupsListResponses[keyof GroupsListResponses];
 
 export type GroupsCreateData = {
-    body: GroupType;
+    body: GroupCreateType;
     path?: never;
     query?: never;
     url: '/api/groups/';
@@ -798,7 +1034,7 @@ export type GroupsRetrieveResponses = {
 export type GroupsRetrieveResponse = GroupsRetrieveResponses[keyof GroupsRetrieveResponses];
 
 export type GroupsPartialUpdateData = {
-    body?: PatchedGroupType;
+    body?: PatchedGroupCreateType;
     path: {
         /**
          * A unique value identifying this group.
@@ -816,7 +1052,7 @@ export type GroupsPartialUpdateResponses = {
 export type GroupsPartialUpdateResponse = GroupsPartialUpdateResponses[keyof GroupsPartialUpdateResponses];
 
 export type GroupsUpdateData = {
-    body: GroupType;
+    body: GroupCreateType;
     path: {
         /**
          * A unique value identifying this group.
@@ -890,7 +1126,7 @@ export type MasterySchemasListResponses = {
 export type MasterySchemasListResponse = MasterySchemasListResponses[keyof MasterySchemasListResponses];
 
 export type MasterySchemasCreateData = {
-    body?: MasterySchemaType;
+    body?: MasterySchemaCreateType;
     path?: never;
     query?: never;
     url: '/api/mastery-schemas/';
@@ -942,7 +1178,7 @@ export type MasterySchemasRetrieveResponses = {
 export type MasterySchemasRetrieveResponse = MasterySchemasRetrieveResponses[keyof MasterySchemasRetrieveResponses];
 
 export type MasterySchemasPartialUpdateData = {
-    body?: PatchedMasterySchemaType;
+    body?: PatchedMasterySchemaCreateType;
     path: {
         /**
          * A unique value identifying this mastery schema.
@@ -960,7 +1196,7 @@ export type MasterySchemasPartialUpdateResponses = {
 export type MasterySchemasPartialUpdateResponse = MasterySchemasPartialUpdateResponses[keyof MasterySchemasPartialUpdateResponses];
 
 export type MasterySchemasUpdateData = {
-    body?: MasterySchemaType;
+    body?: MasterySchemaCreateType;
     path: {
         /**
          * A unique value identifying this mastery schema.
@@ -1004,7 +1240,7 @@ export type ObservationsListResponses = {
 export type ObservationsListResponse = ObservationsListResponses[keyof ObservationsListResponses];
 
 export type ObservationsCreateData = {
-    body: ObservationType;
+    body: ObservationCreateType;
     path?: never;
     query?: never;
     url: '/api/observations/';
@@ -1056,7 +1292,7 @@ export type ObservationsRetrieveResponses = {
 export type ObservationsRetrieveResponse = ObservationsRetrieveResponses[keyof ObservationsRetrieveResponses];
 
 export type ObservationsPartialUpdateData = {
-    body?: PatchedObservationType;
+    body?: PatchedObservationCreateType;
     path: {
         /**
          * A unique value identifying this observation.
@@ -1074,7 +1310,7 @@ export type ObservationsPartialUpdateResponses = {
 export type ObservationsPartialUpdateResponse = ObservationsPartialUpdateResponses[keyof ObservationsPartialUpdateResponses];
 
 export type ObservationsUpdateData = {
-    body: ObservationType;
+    body: ObservationCreateType;
     path: {
         /**
          * A unique value identifying this observation.
@@ -1119,7 +1355,7 @@ export type RolesListResponses = {
 export type RolesListResponse = RolesListResponses[keyof RolesListResponses];
 
 export type RolesCreateData = {
-    body: RoleType;
+    body: RoleCreateType;
     path?: never;
     query?: never;
     url: '/api/roles/';
@@ -1171,7 +1407,7 @@ export type RolesRetrieveResponses = {
 export type RolesRetrieveResponse = RolesRetrieveResponses[keyof RolesRetrieveResponses];
 
 export type RolesPartialUpdateData = {
-    body?: PatchedRoleType;
+    body?: PatchedRoleCreateType;
     path: {
         /**
          * A unique value identifying this role.
@@ -1189,7 +1425,7 @@ export type RolesPartialUpdateResponses = {
 export type RolesPartialUpdateResponse = RolesPartialUpdateResponses[keyof RolesPartialUpdateResponses];
 
 export type RolesUpdateData = {
-    body: RoleType;
+    body: RoleCreateType;
     path: {
         /**
          * A unique value identifying this role.
@@ -1225,7 +1461,7 @@ export type SchoolsListResponses = {
 export type SchoolsListResponse = SchoolsListResponses[keyof SchoolsListResponses];
 
 export type SchoolsCreateData = {
-    body: SchoolType;
+    body: SchoolCreateType;
     path?: never;
     query?: never;
     url: '/api/schools/';
@@ -1277,7 +1513,7 @@ export type SchoolsRetrieveResponses = {
 export type SchoolsRetrieveResponse = SchoolsRetrieveResponses[keyof SchoolsRetrieveResponses];
 
 export type SchoolsPartialUpdateData = {
-    body?: PatchedSchoolType;
+    body?: PatchedSchoolCreateType;
     path: {
         /**
          * A unique value identifying this school.
@@ -1295,7 +1531,7 @@ export type SchoolsPartialUpdateResponses = {
 export type SchoolsPartialUpdateResponse = SchoolsPartialUpdateResponses[keyof SchoolsPartialUpdateResponses];
 
 export type SchoolsUpdateData = {
-    body: SchoolType;
+    body: SchoolCreateType;
     path: {
         /**
          * A unique value identifying this school.
@@ -1326,7 +1562,7 @@ export type SituationsListResponses = {
 export type SituationsListResponse = SituationsListResponses[keyof SituationsListResponses];
 
 export type SituationsCreateData = {
-    body: SituationType;
+    body: SituationCreateType;
     path?: never;
     query?: never;
     url: '/api/situations/';
@@ -1378,7 +1614,7 @@ export type SituationsRetrieveResponses = {
 export type SituationsRetrieveResponse = SituationsRetrieveResponses[keyof SituationsRetrieveResponses];
 
 export type SituationsPartialUpdateData = {
-    body?: PatchedSituationType;
+    body?: PatchedSituationCreateType;
     path: {
         /**
          * A unique value identifying this situation.
@@ -1396,7 +1632,7 @@ export type SituationsPartialUpdateResponses = {
 export type SituationsPartialUpdateResponse = SituationsPartialUpdateResponses[keyof SituationsPartialUpdateResponses];
 
 export type SituationsUpdateData = {
-    body: SituationType;
+    body: SituationCreateType;
     path: {
         /**
          * A unique value identifying this situation.
@@ -1427,7 +1663,7 @@ export type StatusListResponses = {
 export type StatusListResponse = StatusListResponses[keyof StatusListResponses];
 
 export type StatusCreateData = {
-    body: StatusType;
+    body: StatusCreateType;
     path?: never;
     query?: never;
     url: '/api/status/';
@@ -1479,7 +1715,7 @@ export type StatusRetrieveResponses = {
 export type StatusRetrieveResponse = StatusRetrieveResponses[keyof StatusRetrieveResponses];
 
 export type StatusPartialUpdateData = {
-    body?: PatchedStatusType;
+    body?: PatchedStatusCreateType;
     path: {
         /**
          * A unique value identifying this status.
@@ -1497,7 +1733,7 @@ export type StatusPartialUpdateResponses = {
 export type StatusPartialUpdateResponse = StatusPartialUpdateResponses[keyof StatusPartialUpdateResponses];
 
 export type StatusUpdateData = {
-    body: StatusType;
+    body: StatusCreateType;
     path: {
         /**
          * A unique value identifying this status.
@@ -1537,7 +1773,7 @@ export type SubjectsListResponses = {
 export type SubjectsListResponse = SubjectsListResponses[keyof SubjectsListResponses];
 
 export type SubjectsCreateData = {
-    body: SubjectType;
+    body: SubjectCreateType;
     path?: never;
     query?: never;
     url: '/api/subjects/';
@@ -1589,7 +1825,7 @@ export type SubjectsRetrieveResponses = {
 export type SubjectsRetrieveResponse = SubjectsRetrieveResponses[keyof SubjectsRetrieveResponses];
 
 export type SubjectsPartialUpdateData = {
-    body?: PatchedSubjectType;
+    body?: PatchedSubjectCreateType;
     path: {
         /**
          * A unique value identifying this subject.
@@ -1607,7 +1843,7 @@ export type SubjectsPartialUpdateResponses = {
 export type SubjectsPartialUpdateResponse = SubjectsPartialUpdateResponses[keyof SubjectsPartialUpdateResponses];
 
 export type SubjectsUpdateData = {
-    body: SubjectType;
+    body: SubjectCreateType;
     path: {
         /**
          * A unique value identifying this subject.
@@ -1655,7 +1891,7 @@ export type UserGroupsListResponses = {
 export type UserGroupsListResponse = UserGroupsListResponses[keyof UserGroupsListResponses];
 
 export type UserGroupsCreateData = {
-    body?: NestedUserGroupType;
+    body?: NestedUserGroupCreateType;
     path?: never;
     query?: never;
     url: '/api/user-groups/';
@@ -1707,7 +1943,7 @@ export type UserGroupsRetrieveResponses = {
 export type UserGroupsRetrieveResponse = UserGroupsRetrieveResponses[keyof UserGroupsRetrieveResponses];
 
 export type UserGroupsPartialUpdateData = {
-    body?: PatchedNestedUserGroupType;
+    body?: PatchedNestedUserGroupCreateType;
     path: {
         /**
          * A unique value identifying this user group.
@@ -1725,7 +1961,7 @@ export type UserGroupsPartialUpdateResponses = {
 export type UserGroupsPartialUpdateResponse = UserGroupsPartialUpdateResponses[keyof UserGroupsPartialUpdateResponses];
 
 export type UserGroupsUpdateData = {
-    body?: NestedUserGroupType;
+    body?: NestedUserGroupCreateType;
     path: {
         /**
          * A unique value identifying this user group.
@@ -1769,7 +2005,7 @@ export type UserSchoolsListResponses = {
 export type UserSchoolsListResponse = UserSchoolsListResponses[keyof UserSchoolsListResponses];
 
 export type UserSchoolsCreateData = {
-    body: UserSchoolType;
+    body: UserSchoolCreateType;
     path?: never;
     query?: never;
     url: '/api/user-schools/';
@@ -1821,7 +2057,7 @@ export type UserSchoolsRetrieveResponses = {
 export type UserSchoolsRetrieveResponse = UserSchoolsRetrieveResponses[keyof UserSchoolsRetrieveResponses];
 
 export type UserSchoolsPartialUpdateData = {
-    body?: PatchedUserSchoolType;
+    body?: PatchedUserSchoolCreateType;
     path: {
         /**
          * A unique value identifying this user school.
@@ -1839,7 +2075,7 @@ export type UserSchoolsPartialUpdateResponses = {
 export type UserSchoolsPartialUpdateResponse = UserSchoolsPartialUpdateResponses[keyof UserSchoolsPartialUpdateResponses];
 
 export type UserSchoolsUpdateData = {
-    body: UserSchoolType;
+    body: UserSchoolCreateType;
     path: {
         /**
          * A unique value identifying this user school.
@@ -1883,7 +2119,7 @@ export type UsersListResponses = {
 export type UsersListResponse = UsersListResponses[keyof UsersListResponses];
 
 export type UsersCreateData = {
-    body: UserType;
+    body: UserCreateType;
     path?: never;
     query?: never;
     url: '/api/users/';
@@ -1935,7 +2171,7 @@ export type UsersRetrieveResponses = {
 export type UsersRetrieveResponse = UsersRetrieveResponses[keyof UsersRetrieveResponses];
 
 export type UsersPartialUpdateData = {
-    body?: PatchedUserType;
+    body?: PatchedUserCreateType;
     path: {
         /**
          * A unique value identifying this user.
@@ -1953,7 +2189,7 @@ export type UsersPartialUpdateResponses = {
 export type UsersPartialUpdateResponse = UsersPartialUpdateResponses[keyof UsersPartialUpdateResponses];
 
 export type UsersUpdateData = {
-    body: UserType;
+    body: UserCreateType;
     path: {
         /**
          * A unique value identifying this user.

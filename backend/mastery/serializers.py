@@ -5,6 +5,18 @@ from mastery.access_policies.observation import ObservationAccessPolicy
 
 
 class BaseModelSerializer(serializers.ModelSerializer):
+    READ_ONLY_BASE_FIELDS = (
+        'id',
+        'created_at',
+        'updated_at',
+        'maintained_at',
+    )
+
+    READ_ONLY_FK_FIELDS = (
+        'created_by',
+        'updated_by',
+    )
+
     # Base serializer that rewrites foreign key fields
     def get_fields(self):
         fields = super().get_fields()
@@ -29,15 +41,31 @@ class BaseModelSerializer(serializers.ModelSerializer):
 
                 qs = field.remote_field.model.objects.all()
                 # Add the ID field
-                fields[f"{name}_id"] = serializers.PrimaryKeyRelatedField(
-                    source=name,
-                    queryset=qs,
-                    required=not field.null,
-                    allow_null=field.null
-                )
+                if name in self.READ_ONLY_FK_FIELDS:
+                    fields[f"{name}_id"] = serializers.PrimaryKeyRelatedField(
+                        source=name,
+                        read_only=True
+                    )
+                else:
+                    fields[f"{name}_id"] = serializers.PrimaryKeyRelatedField(
+                        source=name,
+                        queryset=qs,
+                        required=not field.null,
+                        allow_null=field.null
+                    )
                 # Remove the original field to avoid duplication
                 if name in fields:
                     del fields[name]
+
+        # Ensure base model metadata fields are read-only when present
+        for field_name in self.READ_ONLY_BASE_FIELDS:
+            if field_name in fields:
+                fields[field_name].read_only = True
+
+        for field_name in self.READ_ONLY_FK_FIELDS:
+            lookup_name = f"{field_name}_id"
+            if lookup_name in fields:
+                fields[lookup_name].read_only = True
         return fields
 
     def to_representation(self, instance):
