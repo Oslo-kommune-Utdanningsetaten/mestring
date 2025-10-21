@@ -286,7 +286,7 @@
     >
       <div class="d-flex align-items-start">
         <pkt-icon
-          name={alertType === 'success' ? 'checkmark-circle' : 'error-circle'}
+          name={alertType === 'success' ? 'check-circle' : 'alert-circle'}
           size="20"
           class="me-2 mt-0 flex-shrink-0"
         ></pkt-icon>
