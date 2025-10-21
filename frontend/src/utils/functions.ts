@@ -7,7 +7,8 @@ import type {
   UserType,
 } from '../generated/types.gen'
 import { goalsList, observationsList, groupsList } from '../generated/sdk.gen'
-import { format } from 'date-fns'
+import { nb as noLocale } from 'date-fns/locale'
+import { format, formatDistanceToNow } from 'date-fns'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
   [key: string]: string
@@ -241,4 +242,9 @@ export const isNumber = (value: any) => {
 export const formatDate = (isoDate?: string | null) => {
   if (!isoDate) return null
   return format(new Date(isoDate), 'yyyy-MM-dd HH:mm')
+}
+
+export const formatDateDistance = (isoDate?: string | null) => {
+  if (!isoDate) return null
+  return formatDistanceToNow(new Date(isoDate), { addSuffix: true, locale: noLocale })
 }

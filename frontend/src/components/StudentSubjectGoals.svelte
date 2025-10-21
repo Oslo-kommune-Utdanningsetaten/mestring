@@ -22,7 +22,7 @@
   import Offcanvas from './Offcanvas.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { getLocalStorageItem } from '../stores/localStorage'
-  import { formatDate } from '../utils/functions'
+  import { formatDateDistance } from '../utils/functions'
 
   const { subjectId, student, onRefreshRequired } = $props<{
     subjectId: string
@@ -319,14 +319,14 @@
       {:else}
         <div class="goal-secondary-row">
           <div class="student-observations-row mb-2">
-            <span>Dato</span>
+            <span>Når</span>
             <span>Verdi</span>
             <span>Handlinger</span>
           </div>
           {#each goal?.observations as observation, index}
             <div class="student-observations-row observation-item">
               <span>
-                {formatDate(observation.observedAt)}
+                {formatDateDistance(observation.observedAt)}
               </span>
               <span>
                 {observation.masteryValue}
