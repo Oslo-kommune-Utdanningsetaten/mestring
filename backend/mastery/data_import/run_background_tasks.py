@@ -2,6 +2,7 @@ from mastery.data_import.feide_api import fetch_groups_from_feide, fetch_members
 import names
 import time
 import logging
+import threading
 from datetime import timedelta
 from django.db import transaction
 from django.utils import timezone
@@ -91,13 +92,6 @@ def do_work(task):
         raise ValueError(f"Unknown job_name '{task.job_name}'")
 
 
-# Used when running as long-lived process
-def run_indefinitely():
-    while True:
-        run()
-        time.sleep(2)
-
-
 # Used on manual one-off tasks, or in tests
 def run():
     task = claim_next_task()
@@ -139,6 +133,24 @@ def run():
                     "result", "attempts", "status", "handler_name",
                     "earliest_run_at", "failed_at", "updated_at"
                 ])
-        logger.info(f"Task {task.job_name} '{task.id})' completed with status '{task.status}'")
+        logger.info(f"Task {task.job_name} (id: {task.id}) completed with status '{task.status}'")
         return task
     return None
+
+
+class BackgroundTaskRunner:
+    def __init__(self, sleep_seconds: int = 2):
+        self.sleep_seconds = sleep_seconds
+        self._shutdown_event = threading.Event()
+
+    def shutdown(self):
+        self._shutdown_event.set()
+
+    def run_once(self):
+        return run()
+
+    def run_forever(self):
+        while not self._shutdown_event.is_set():
+            self.run_once()
+            if self._shutdown_event.wait(timeout=self.sleep_seconds):
+                break

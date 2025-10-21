@@ -89,6 +89,30 @@ services:
     profiles:
       - prod
 
+  taskrunner:
+    build: ./backend
+    command:
+      - bash
+      - -c
+      - |
+        python manage.py run_background_tasks
+    volumes:
+      - ./backend:/code
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_HOST: 'postgres'
+      DJANGO_DEBUG: 'False'
+      LOG_FILE: 'debug-taskrunner.log'
+      DB_CONN_MAX_AGE: 0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+    profiles:
+      - prod
+      - dev
+
 volumes:
   postgres-data:
     driver: local
