@@ -388,19 +388,27 @@
         {/each}
         {#each students as student (student.id)}
           <span class="item">
-            {student.name}
+            <a href={`/students/${student.id}`}>
+              {student.name}
+            </a>
           </span>
           {#each groupGoals as goal (goal.id)}
             {@const decoGoal = getDecoratedGoalFor(student.id, goal.id)}
             <span class="item">
-              {#if decoGoal?.masteryData}
-                <MasteryLevelBadge masteryData={decoGoal.masteryData} />
-                <SparklineChart
-                  data={decoGoal.observations?.map((o: ObservationType) => o.masteryValue)}
-                />
-              {:else}
-                <MasteryLevelBadge isBadgeEmpty={true} />
-              {/if}
+              <button
+                title="Legg til observasjon"
+                class="new-observation-button"
+                onclick={() => handleEditObservation(goal, null, student)}
+              >
+                {#if decoGoal?.masteryData}
+                  <MasteryLevelBadge masteryData={decoGoal.masteryData} />
+                  <SparklineChart
+                    data={decoGoal.observations?.map((o: ObservationType) => o.masteryValue)}
+                  />
+                {:else}
+                  <MasteryLevelBadge isBadgeEmpty={true} />
+                {/if}
+              </button>
             </span>
           {/each}
         {/each}
@@ -497,5 +505,22 @@
 
   .goal-type-icon > :global(svg) {
     height: 1.2em;
+  }
+
+  .new-observation-button {
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    border: none;
+    background: none;
+    padding: 4px;
+    margin: none;
+  }
+
+  .new-observation-button:hover {
+    border: 2px solid var(--bs-border-color);
+    margin-left: -2px;
   }
 </style>
