@@ -4,9 +4,8 @@
     groupsRetrieve,
     usersList,
     goalsList,
-    goalsUpdate,
     goalsDestroy,
-    groupsList,
+    goalsUpdate,
   } from '../generated/sdk.gen'
   import type {
     GoalType,
@@ -16,53 +15,54 @@
     SubjectType,
   } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
+  import {
+    TEACHER_ROLE,
+    STUDENT_ROLE,
+    GROUP_TYPE_BASIS,
+    GROUP_TYPE_TEACHING,
+  } from '../utils/constants'
   import Sortable, { type SortableEvent } from 'sortablejs'
-  import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
-  import GoalEdit from '../components/GoalEdit.svelte'
   import GroupSVG from '../assets/group.svg.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
   import ObservationEdit from '../components/ObservationEdit.svelte'
+  import GoalEdit from '../components/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
   import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
   import SparklineChart from '../components/SparklineChart.svelte'
   import GroupTypeTag from '../components/GroupTypeTag.svelte'
   import StudentRow from '../components/StudentRow.svelte'
   import { dataStore } from '../stores/data'
+
   import { getLocalStorageItem } from '../stores/localStorage'
+
   import { goalsWithCalculatedMastery, fetchSubjectsForStudents } from '../utils/functions'
 
   const { groupId } = $props<{ groupId: string }>()
 
-  let currentSchool = $derived($dataStore.currentSchool)
-  let sortableInstance: Sortable | null = null
+  let isLoading = $state(true)
+  let goalsListElement = $state<HTMLElement | null>(null)
   let group = $state<GroupType | null>(null)
+  let sortableInstance: Sortable | null = null
   let allGroups = $state<GroupType[]>([])
   let teachers = $state<UserType[]>([])
   let students = $state<UserType[]>([])
-  let goals = $state<GoalType[]>([])
+  let groupGoals = $state<GoalType[]>([])
   let goalWip = $state<GoalDecorated | null>(null)
-  let isLoading = $state(true)
-  let error = $state<string | null>(null)
-  let goalsListElement = $state<HTMLElement | null>(null)
-  let isShowGoalTitleEnabled = $state<boolean>(true)
-  let expandedGoals = $state<Record<string, boolean>>({})
   let goalsWithCalculatedMasteryByStudentId = $state<Record<string, GoalDecorated[]>>({})
-  let isGoalInUse = $derived<Record<string, boolean>>({}) // keyed by goalId, if true, goal has at least one observation
   let observationWip = $state<ObservationType | {} | null>(null)
   let goalForObservation = $state<GoalDecorated | null>(null)
   let studentForObservation = $state<UserType | null>(null)
-  let isGoalEditorOpen = $state<boolean>(false)
   let isObservationEditorOpen = $state<boolean>(false)
-  let studentsGridElement = $state<HTMLElement | null>(null)
-  let subjects = $state<SubjectType[]>([])
+  let isGoalEditorOpen = $state<boolean>(false)
+  let isShowGoalTitleEnabled = $state<boolean>(true)
+  let expandedGoals = $state<Record<string, boolean>>({})
+  let currentSchool = $derived($dataStore.currentSchool)
+  let subjects = $derived<SubjectType[]>($dataStore.subjects)
   let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
 
   const fetchGroupData = async () => {
-    if (!groupId) return
-
     try {
       isLoading = true
-      error = null
 
       // Fetch group details
       const groupResult = await groupsRetrieve({
@@ -84,27 +84,16 @@
       })
       teachers = teachersResult.data || []
       students = studentsResult.data || []
-      goals = goalsResult.data || []
+      groupGoals = goalsResult.data || []
 
       // for each student, fetch their goals with calculated mastery
-      const studentPromises = students.map(async student => {
-        return goalsWithCalculatedMastery(student.id, goals).then(calculatedGoals => {
-          goalsWithCalculatedMasteryByStudentId[student.id] = calculatedGoals
+      await Promise.all(
+        students.map(async student => {
+          return goalsWithCalculatedMastery(student.id, groupGoals).then(calculatedGoals => {
+            goalsWithCalculatedMasteryByStudentId[student.id] = calculatedGoals
+          })
         })
-      })
-      await Promise.all(studentPromises)
-
-      // Determine if goals are in use (have observations) by any student in the group
-      goals.forEach(goal => {
-        isGoalInUse[goal.id] = students.some(student => {
-          const studentGoals = goalsWithCalculatedMasteryByStudentId[student.id] || []
-          return studentGoals.some(
-            studentGoal => studentGoal.id === goal.id && studentGoal.observations?.length > 0
-          )
-        })
-      })
-      await fetchAllGroups()
-      subjects = await fetchSubjectsForStudents(students, $dataStore.subjects, currentSchool.id)
+      )
     } catch (error) {
       console.error('Error fetching group:', error)
     } finally {
@@ -112,25 +101,18 @@
     }
   }
 
-  const fetchAllGroups = async () => {
-    if (!currentSchool) return
-    try {
-      const result = await groupsList({
-        query: {
-          school: currentSchool?.id,
-          isEnabled: true,
-        },
-      })
-      allGroups = result.data || []
-    } catch (error) {
-      console.error('Error fetching groups:', error)
-      allGroups = []
-    } finally {
-    }
+  // Get the calculated mastery for a specific student's goal
+  const getDecoratedGoalFor = (studentId: string, goalId: string) => {
+    const studentGoals = goalsWithCalculatedMasteryByStudentId[studentId] || []
+    const goal = studentGoals.find(g => g.id === goalId)
+    return goal || null
   }
 
-  const toggleGoalExpansion = (goalId: string) => {
-    expandedGoals[goalId] = !expandedGoals[goalId]
+  // Does any student have observations for this goal
+  const isGoalInUse = (goalId: string): boolean => {
+    return Object.values(goalsWithCalculatedMasteryByStudentId).some(studentGoals =>
+      studentGoals.some(g => g.id === goalId && g.observations && g.observations.length > 0)
+    )
   }
 
   const handleEditGoal = (goal: GoalDecorated | null) => {
@@ -138,7 +120,7 @@
       ...goal,
       groupId: group?.id || null,
       isGoalPersonal: false,
-      sortOrder: goal?.sortOrder || (goals?.length ? goals.length + 1 : 1),
+      sortOrder: goal?.sortOrder || (groupGoals?.length ? groupGoals.length + 1 : 1),
       masterySchemaId:
         goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
     }
@@ -195,7 +177,7 @@
     const { oldIndex, newIndex } = event
     if (oldIndex === undefined || newIndex === undefined) return
 
-    const localGoals = [...goals]
+    const localGoals = [...groupGoals]
     // Remove moved goal and capture it
     const [movedGoal] = localGoals.splice(oldIndex, 1)
     // Insert moved goal at new index
@@ -248,14 +230,22 @@
   })
 </script>
 
-<section class="py-3">
-  {#if isLoading}
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Henter data...</span>
-    </div>
-  {:else if group}
-    <!-- Group Header -->
-    <div class="d-flex align-items-center gap-3 mb-1">
+{#if isLoading}
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Henter data...</span>
+  </div>
+{:else if !group}
+  <div class="alert alert-warning">
+    <h4>Fant ikke gruppen</h4>
+    <p>
+      Gruppe <span class="fw-bold">{groupId}</span>
+      eksisterer ikke, eller du mangler tilgang.
+    </p>
+  </div>
+{:else}
+  <!-- Group Header -->
+  <section>
+    <div class="d-flex align-items-center gap-3 mb-3">
       <div class="group-svg" title="Gruppe">
         <GroupSVG />
       </div>
@@ -278,182 +268,148 @@
         </pkt-tag>
       {/each}
     </div>
+  </section>
 
-    <!-- Goals Section -->
-    {#if currentSchool?.isGroupGoalEnabled}
-      <div class="my-4">
-        <div class="d-flex align-items-center gap-2 mb-3">
-          <h2 class="mb-0">Mål</h2>
-          <ButtonMini
-            options={{
-              iconName: 'plus-sign',
-              classes: 'mini-button bordered',
-              title: `Legg til nytt gruppemål for ${group.displayName}`,
-              variant: 'icon-only',
-              skin: 'tertiary',
-              onClick: () => handleEditGoal(null),
-            }}
-          >
-            Nytt gruppemål
-          </ButtonMini>
-        </div>
-        <div>
-          {#if goals.length === 0}
-            <div class="alert alert-info">
-              Ingen mål for denne gruppa. Trykk pluss (+) for å opprette mål for alle elever i
-              gruppa.
-            </div>
-          {:else}
-            <div bind:this={goalsListElement} class="list-group">
-              {#each goals as goal, index (goal.id)}
-                <div
-                  class="list-group-item goal-item {expandedGoals[goal.id]
-                    ? 'shadow border-2 z-1'
-                    : ''}"
-                >
-                  <div class="goal-primary-row">
-                    <!-- Drag handle -->
-                    <span>
-                      <pkt-icon
-                        title="Endre rekkefølge"
-                        class="me-2 row-handle-draggable"
-                        name="drag"
-                        role="button"
-                        tabindex="0"
-                      ></pkt-icon>
-                    </span>
-                    <!-- Numbering -->
-                    <span>
-                      {goal.sortOrder || index + 1}
-                    </span>
-                    <!-- Goal type icon -->
-                    <span class="goal-type-icon"><GroupSVG /></span>
-                    <!-- Goal title -->
-                    <span>
-                      {isShowGoalTitleEnabled ? goal.title : '🙊'}
-                    </span>
-                    <!-- Expand goal info -->
-                    <ButtonMini
-                      options={{
-                        iconName: `chevron-thin-${expandedGoals[goal.id] ? 'up' : 'down'}`,
-                        classes: 'mini-button rounded justify-end',
-                        title: `${expandedGoals[goal.id] ? 'Skjul' : 'Vis'} observasjoner`,
-                        onClick: () => toggleGoalExpansion(goal.id),
-                      }}
-                    />
-                  </div>
-
-                  {#if expandedGoals[goal.id]}
-                    {#if !isGoalInUse[goal.id]}
-                      <div class="my-3">
-                        <p>
-                          Ingen observasjoner for dette målet. Trykk pluss (+) for å opprette en
-                          observasjon.
-                        </p>
-
-                        <ButtonMini
-                          options={{
-                            iconName: 'edit',
-                            classes: 'my-2 me-2',
-                            title: 'Rediger personlig mål',
-                            onClick: () => handleEditGoal(goal),
-                            variant: 'icon-left',
-                            skin: 'primary',
-                          }}
-                        >
-                          Rediger personlig mål
-                        </ButtonMini>
-
-                        <ButtonMini
-                          options={{
-                            iconName: 'trash-can',
-                            classes: 'my-2',
-                            title: 'Slett personlig mål',
-                            onClick: () => handleDeleteGoal(goal.id),
-                            variant: 'icon-left',
-                            skin: 'primary',
-                          }}
-                        >
-                          Slett mål
-                        </ButtonMini>
-                      </div>
-                    {/if}
-                    <div class="goal-secondary-row">
-                      {#each students as student (student.id)}
-                        {@const studentGoal = goalsWithCalculatedMasteryByStudentId[
-                          student.id
-                        ].find(g => g.id === goal.id)}
-                        <div class="student-observations-in-goal mb-2 align-items-center">
-                          <span>
-                            {student.name}
-                          </span>
-
-                          <!-- Stats widgets -->
-                          <span class="d-flex gap-2 align-items-center">
-                            {#if studentGoal?.masteryData}
-                              <MasteryLevelBadge masteryData={studentGoal.masteryData} />
-                              <SparklineChart
-                                data={studentGoal.observations?.map(
-                                  (o: ObservationType) => o.masteryValue
-                                )}
-                              />
-                            {:else}<MasteryLevelBadge isBadgeEmpty={true} />{/if}
-                          </span>
-                          <!-- New observation button -->
-                          <ButtonMini
-                            options={{
-                              iconName: 'plus-sign',
-                              classes: 'mini-button bordered',
-                              title: 'Ny observasjon',
-                              onClick: () => handleEditObservation(goal, null, student),
-                            }}
-                          />
-                        </div>
-                      {/each}
-                    </div>
-                  {/if}
-                </div>
-              {/each}
-            </div>
-          {/if}
-        </div>
-      </div>
-    {/if}
-
-    <!-- Students Section -->
-    {#if students}
-      <div class="mt-4">
-        <h2 class="mb-3">Elever</h2>
-        <div
-          bind:this={studentsGridElement}
-          class="students-grid"
-          aria-label="Elevliste"
-          style="--subject-count: {$dataStore.subjects.length}"
+  <!-- Group goals Section -->
+  {#if currentSchool?.isGroupGoalEnabled && group.subjectId}
+    <section>
+      <div class="d-flex align-items-center gap-2">
+        <h2>Mål</h2>
+        <ButtonMini
+          options={{
+            iconName: 'plus-sign',
+            classes: 'mini-button bordered',
+            title: `Legg til nytt gruppemål for ${group.displayName}`,
+            variant: 'icon-only',
+            skin: 'tertiary',
+            onClick: () => handleEditGoal(null),
+          }}
         >
-          <span class="item header header-row">Elev</span>
-          {#each $dataStore.subjects as subject, index (subject.id)}
-            <span class="item header header-row">
-              <span class="subject-label-header">
-                {subject.shortName}
-              </span>
+          Nytt gruppemål
+        </ButtonMini>
+      </div>
+
+      <div bind:this={goalsListElement} class="list-group mt-3">
+        {#each groupGoals as goal, index (goal.id)}
+          <div class="list-group-item goal-row">
+            <!-- Drag handle -->
+            <span>
+              <pkt-icon
+                title="Endre rekkefølge"
+                class="me-2 row-handle-draggable"
+                name="drag"
+                role="button"
+                tabindex="0"
+              ></pkt-icon>
+            </span>
+            <!-- Numbering -->
+            <span>
+              {goal.sortOrder || index + 1}
+            </span>
+            <!-- Goal type icon -->
+            <span class="goal-type-icon"><GroupSVG /></span>
+            <!-- Goal title -->
+            <span>
+              {isShowGoalTitleEnabled ? goal.title : '🙊'}
+            </span>
+            <!-- Actions -->
+            <span>
+              {#if isGoalInUse(goal.id)}
+                <pkt-icon
+                  name="lock-locked"
+                  size="small"
+                  title="Målet er i bruk av en eller flere elever"
+                ></pkt-icon>
+              {:else}
+                <ButtonMini
+                  options={{
+                    title: 'Rediger mål',
+                    iconName: 'edit',
+                    skin: 'secondary',
+                    variant: 'icon-only',
+                    size: 'tiny',
+                    classes: 'me-1',
+                    onClick: () => handleEditGoal(goal),
+                  }}
+                />
+                <ButtonMini
+                  options={{
+                    title: 'Slett mål',
+                    iconName: 'trash-can',
+                    skin: 'secondary',
+                    variant: 'icon-only',
+                    size: 'tiny',
+                    classes: 'me-0',
+                    onClick: () => handleDeleteGoal(goal.id),
+                  }}
+                />
+              {/if}
+            </span>
+          </div>
+        {/each}
+      </div>
+    </section>
+  {/if}
+
+  <!-- Students Section -->
+  <section>
+    <h2 class="mb-3">Elever</h2>
+    {#if group.type === GROUP_TYPE_BASIS}
+      <div
+        class="students-grid"
+        aria-label="Elevliste"
+        style="--columns-count: {$dataStore.subjects.length}"
+      >
+        <span class="item header header-row">Elev</span>
+        {#each $dataStore.subjects as subject, index (subject.id)}
+          <span class="item header header-row">
+            <span class="subject-label-header">
+              {subject.shortName}
+            </span>
+          </span>
+        {/each}
+        {#each students as student (student.id)}
+          <StudentRow {student} subjects={$dataStore.subjects} groups={allGroups} />
+        {/each}
+      </div>
+    {:else if group.type === GROUP_TYPE_TEACHING}
+      <div
+        class="students-grid my-3"
+        aria-label="Elevliste"
+        style="--columns-count: {groupGoals.length}"
+      >
+        <span class="item header header-row">Elev</span>
+        {#each groupGoals as goal (goal.id)}
+          <span class="item header header-row">
+            <span class="subject-label-header">
+              {goal.title || goal.sortOrder}
+            </span>
+          </span>
+        {/each}
+        {#each students as student (student.id)}
+          <span class="item">
+            {student.name}
+          </span>
+          {#each groupGoals as goal (goal.id)}
+            {@const decoGoal = getDecoratedGoalFor(student.id, goal.id)}
+            <span class="item">
+              {#if decoGoal?.masteryData}
+                <MasteryLevelBadge masteryData={decoGoal.masteryData} />
+                <SparklineChart
+                  data={decoGoal.observations?.map((o: ObservationType) => o.masteryValue)}
+                />
+              {:else}
+                <MasteryLevelBadge isBadgeEmpty={true} />
+              {/if}
             </span>
           {/each}
-          {#each students as student (student.id)}
-            <StudentRow {student} subjects={$dataStore.subjects} groups={allGroups} />
-          {/each}
-        </div>
+        {/each}
       </div>
+    {:else}
+      <h5 class="alert alert-warning">ukjent gruppetype</h5>
     {/if}
-  {:else}
-    <div class="alert alert-warning">
-      <h4>Fant ikke gruppen</h4>
-      <p>
-        Gruppe <span class="fw-bold">{groupId}</span>
-        eksisterer ikke, eller du mangler tilgang.
-      </p>
-    </div>
-  {/if}
-</section>
+  </section>
+{/if}
 
 <!-- Offcanvas for creating/editing goals -->
 <Offcanvas
@@ -489,46 +445,17 @@
 </Offcanvas>
 
 <style>
+  section {
+    margin-bottom: 2rem;
+  }
+
   .group-svg > :global(svg) {
     height: 7rem;
   }
 
-  .student-observations-in-goal {
-    border-bottom: 1px solid rgb(from var(--bs-secondary) r g b / 25%);
-    display: grid;
-    grid-template-columns: 8fr 3fr 1fr;
-    column-gap: 5px;
-  }
-
-  .goal-item {
-    background-color: var(--bs-light);
-    line-height: normal;
-  }
-
-  .goal-primary-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 15fr 1fr;
-    column-gap: 5px;
-  }
-
-  .goal-secondary-row {
-    margin: 10px 0 0 6px;
-    padding-left: 30px;
-    border-left: 3px solid rgb(from var(--bs-secondary) r g b / 25%);
-  }
-
-  .row-handle-draggable {
-    cursor: move;
-    vertical-align: -8%;
-  }
-
-  .goal-type-icon > :global(svg) {
-    height: 1.2em;
-  }
-
   .students-grid {
     display: grid;
-    grid-template-columns: 2fr repeat(var(--subject-count, 8), 1fr);
+    grid-template-columns: 3fr repeat(var(--columns-count, 8), 1fr);
     align-items: start;
     gap: 0;
   }
@@ -539,7 +466,7 @@
     min-height: 4rem;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .students-grid :global(.item.header-row) {
@@ -551,13 +478,24 @@
     border-bottom: 1px solid var(--bs-border-color);
   }
 
-  .students-grid :global(.item.header:first-child),
-  .students-grid :global(.item.student-name) {
-    justify-content: flex-start;
-  }
-
   .subject-label-header {
     transform: rotate(-60deg);
     font-size: 0.8rem;
+  }
+
+  .goal-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 6fr 1fr;
+    column-gap: 5px;
+    background-color: var(--bs-light);
+  }
+
+  .row-handle-draggable {
+    cursor: move;
+    vertical-align: -8%;
+  }
+
+  .goal-type-icon > :global(svg) {
+    height: 1.2em;
   }
 </style>

@@ -5,6 +5,8 @@ export const SUBJECTS_ALLOWED_ALL = 'all'
 export const SUBJECTS_ALLOWED_CUSTOM = 'only-custom'
 export const SUBJECTS_ALLOWED_GROUP = 'only-group'
 export const NONE_FIELD_VALUE = '__none__'
+export const GROUP_TYPE_BASIS = 'basis'
+export const GROUP_TYPE_TEACHING = 'teaching'
 
 // Mastery missing reasons
 export const MISSING_REASON_NO_OBSERVATIONS = 'no-observations'

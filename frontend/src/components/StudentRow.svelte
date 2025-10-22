@@ -55,8 +55,6 @@
       <MasteryLevelBadge isBadgeEmpty={true} />
     {:else if masteryBySubjectId[subject.id]?.missingReason === MISSING_REASON_NO_GOALS}
       <MasteryLevelBadge isBadgeVoid={true} />
-    {:else}
-      hmm
     {/if}
   </span>
 {/each}
