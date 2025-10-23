@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { GroupType } from '../generated/types.gen'
+  import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
 
   const { group, onclick, isTypeWarningEnabled } = $props<{
     group: GroupType | null
@@ -7,15 +8,15 @@
     onclick?: () => void
   }>()
 
-  const label = $derived(
-    group ? (group.type === 'basis' ? 'Basisgruppe' : 'Undervisningsgruppe') : ''
+  const label: string = $derived(
+    group.type === GROUP_TYPE_BASIS ? 'Basisgruppe' : 'Undervisningsgruppe'
   )
-
-  const skin = $derived(group ? (group.type === 'basis' ? 'blue' : 'green') : '')
+  const skin: string = $derived(group.type === GROUP_TYPE_BASIS ? 'blue' : 'green')
 
   const isGroupTypeChanged = $derived.by(() => {
-    // Inspect feideId to determine original type
-    const originalType = group.feideId.split(':')[3] === 'u' ? 'teaching' : 'basis'
+    // Inspect feideId to determine original group type
+    const originalType =
+      group.feideId.split(':')[3] === 'u' ? GROUP_TYPE_TEACHING : GROUP_TYPE_BASIS
     return originalType !== group.type
   })
 </script>

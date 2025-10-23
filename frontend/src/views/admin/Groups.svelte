@@ -262,7 +262,7 @@
           <span>Aktivert</span>
         </div>
         <!-- Data rows -->
-        {#each filteredGroups as group}
+        {#each filteredGroups as group (group.id)}
           <div class="group-grid-row">
             <a href="/groups/{group.id}">
               {group.displayName}
