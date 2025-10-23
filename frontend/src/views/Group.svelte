@@ -53,9 +53,13 @@
   let isObservationEditorOpen = $state<boolean>(false)
   let isGoalEditorOpen = $state<boolean>(false)
   let isShowGoalTitleEnabled = $state<boolean>(true)
-  let allSubjectIds = $state<string[]>([])
+  let allSubjectIds = $state<string[] | null>(null)
   let currentSchool = $derived($dataStore.currentSchool)
-  let subjects = $derived<SubjectType[]>($dataStore.subjects)
+  let subjects = $derived<SubjectType[]>(
+    allSubjectIds
+      ? $dataStore.subjects.filter(subj => allSubjectIds?.includes(subj.id))
+      : $dataStore.subjects
+  )
   let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
 
   const fetchGroupData = async () => {
@@ -363,14 +367,9 @@
   <section>
     <h2 class="mb-3">Elever</h2>
     {#if group.type === GROUP_TYPE_BASIS}
-      <div
-        class="students-grid"
-        aria-label="Elevliste"
-        style="--columns-count: {$dataStore.subjects.length}"
-      >
+      <div class="students-grid" aria-label="Elevliste" style="--columns-count: {subjects.length}">
         <span class="item header header-row">Elev</span>
-        {#each allSubjectIds as subjectId, index (subjectId)}
-          {@const aSubject = $dataStore.subjects.find(s => s.id === subjectId)}
+        {#each subjects as aSubject (aSubject.id)}
           {#if aSubject}
             <span class="item header header-row">
               <span class="subject-label-header">
@@ -380,7 +379,7 @@
           {/if}
         {/each}
         {#each students as student (student.id)}
-          <StudentRow {student} subjects={$dataStore.subjects} groups={allGroups} />
+          <StudentRow {student} {subjects} groups={allGroups} />
         {/each}
       </div>
     {:else if group.type === GROUP_TYPE_TEACHING}
