@@ -53,12 +53,13 @@
   let isObservationEditorOpen = $state<boolean>(false)
   let isGoalEditorOpen = $state<boolean>(false)
   let isShowGoalTitleEnabled = $state<boolean>(true)
-  let allSubjectIds = $state<string[] | null>(null)
+  let representedSubjectIds = $state<string[] | null>(null)
   let currentSchool = $derived($dataStore.currentSchool)
   let subjects = $derived<SubjectType[]>(
-    allSubjectIds
-      ? $dataStore.subjects.filter(subj => allSubjectIds?.includes(subj.id))
+    (representedSubjectIds
+      ? $dataStore.subjects.filter(subj => representedSubjectIds?.includes(subj.id))
       : $dataStore.subjects
+    ).sort((a, b) => a.displayName.localeCompare(b.displayName))
   )
   let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
 
@@ -105,7 +106,7 @@
           })
         })
       )
-      allSubjectIds = Array.from(subjectIdsSet)
+      representedSubjectIds = Array.from(subjectIdsSet)
     } catch (error) {
       console.error('Error fetching group:', error)
     } finally {

@@ -10,44 +10,30 @@
   import type { GroupType, GoalType, UserType, SubjectType } from '../generated/types.gen'
 
   const router = useTinyRouter()
-  let currentSchool = $derived($dataStore.currentSchool)
   let selectedGroupId = $state<string | undefined>(undefined)
-  let selectedGroup = $state<GroupType | undefined>(undefined)
   let allGroups = $state<GroupType[]>([])
   let students = $state<UserType[]>([])
+  let isLoadingGroups = $state<boolean>(false)
+  let isLoadingStudents = $state<boolean>(false)
   let nameFilter = $state<string>('')
+  let subjects = $state<SubjectType[]>([])
+
+  let currentSchool = $derived($dataStore.currentSchool)
   let filteredStudents = $derived(
     nameFilter
       ? students.filter(student => student.name.toLowerCase().includes(nameFilter.toLowerCase()))
       : students
   )
-  let subjects = $state<SubjectType[]>([])
+  let selectedGroup = $derived<GroupType | undefined>(
+    allGroups.find(group => group.id === selectedGroupId)
+  )
   let headerText = $derived.by(() => {
     let text = selectedGroup ? `Elever i gruppe: ${selectedGroup.displayName}` : 'Alle elever'
     text = nameFilter ? `${text} med navn som inneholder "${nameFilter}"` : text
     return text
   })
-  let isLoadingGroups = $state<boolean>(false)
-  let isLoadingStudents = $state<boolean>(false)
-  let studentsGridElement = $state<HTMLElement | null>(null)
 
-  const fetchAllStudentsInSchool = async () => {
-    if (!currentSchool) return
-    try {
-      isLoadingStudents = true
-      const studentsResult = await usersList({
-        query: { roles: 'student', school: currentSchool.id },
-      })
-      students = studentsResult.data || []
-    } catch (error) {
-      console.error('Error fetching all students:', error)
-      students = []
-    } finally {
-      isLoadingStudents = false
-    }
-  }
-
-  const fetchAllGroups = async () => {
+  const fetchGroups = async () => {
     if (!currentSchool) return
     try {
       isLoadingGroups = true
@@ -66,16 +52,24 @@
     }
   }
 
-  const fetchGroupMembers = async (groupId: string) => {
+  const fetchStudents = async () => {
     if (!currentSchool) return
     try {
       isLoadingStudents = true
+      const queryOptions = selectedGroupId
+        ? { groups: selectedGroupId, school: currentSchool.id, roles: STUDENT_ROLE }
+        : { school: currentSchool.id, roles: STUDENT_ROLE }
       const studentsResult = await usersList({
-        query: { groups: groupId, school: currentSchool.id, roles: STUDENT_ROLE },
+        query: queryOptions,
       })
       students = studentsResult.data || []
+      await fetchSubjectsForStudents(students, $dataStore.subjects, currentSchool.id).then(
+        fetchedSubjects => {
+          subjects = fetchedSubjects
+        }
+      )
     } catch (error) {
-      console.error(`Error fetching members for group ${groupId}:`, error)
+      console.error('Error fetching members', { selectedGroupId, error })
       students = []
     } finally {
       isLoadingStudents = false
@@ -91,53 +85,18 @@
   }
 
   $effect(() => {
-    if (students.length > 0) {
-      fetchSubjectsForStudents(students, $dataStore.subjects, currentSchool.id).then(
-        fetchedSubjects => {
-          subjects = fetchedSubjects
-        }
-      )
-    }
-  })
-
-  $effect(() => {
-    currentSchool = $dataStore.currentSchool
-  })
-
-  $effect(() => {
-    // Read selectedGroupId first to establish reactivity
-    selectedGroupId = router.getQueryParam('groupId')
     if (currentSchool && currentSchool.id) {
-      fetchAllGroups().then(() => {
-        selectedGroup = allGroups.find(group => group.id === selectedGroupId)
-        if (selectedGroup) {
-          fetchGroupMembers(selectedGroup.id)
-        } else {
-          // fetch all students if no group is selected
-          fetchAllStudentsInSchool()
-        }
+      fetchGroups().then(() => {
+        fetchStudents()
       })
     }
   })
 
-  // Effect to apply last-row class to the last row of grid items
   $effect(() => {
-    if (studentsGridElement && filteredStudents.length > 0 && subjects.length > 0) {
-      // Remove existing last-row classes
-      const allItems = studentsGridElement.querySelectorAll('.item')
-      allItems.forEach(item => item.classList.remove('last-row'))
-
-      // Calculate how many items are in the last row
-      const totalColumns = subjects.length + 1 // +1 for student name column
-      const totalItems = allItems.length
-      const itemsInLastRow = totalColumns
-
-      // Apply last-row class to the last row items
-      for (let i = totalItems - itemsInLastRow; i < totalItems; i++) {
-        if (allItems[i]) {
-          allItems[i].classList.add('last-row')
-        }
-      }
+    const newGroupId = router.getQueryParam('groupId')
+    if (newGroupId !== selectedGroupId) {
+      selectedGroupId = newGroupId
+      fetchStudents()
     }
   })
 </script>
@@ -178,12 +137,7 @@
     </div>
     <span>Henter data...</span>
   {:else if students.length > 0}
-    <div
-      bind:this={studentsGridElement}
-      class="students-grid"
-      aria-label="Elevliste"
-      style="--subject-count: {subjects.length}"
-    >
+    <div class="students-grid" aria-label="Elevliste" style="--subject-count: {subjects.length}">
       <span class="item header header-row">Elev</span>
       {#each subjects as subject (subject.id)}
         <span class="item header header-row">

@@ -90,7 +90,8 @@ export const fetchSubjectsForStudents = async (
 
   const subjects: SubjectType[] = Array.from(subjectIds)
     .map(subjectId => allSubjects.find(s => s.id === subjectId))
-    .filter((s): s is SubjectType => s !== undefined)
+    .filter((subject): subject is SubjectType => !!subject)
+    .sort((a, b) => a.displayName.localeCompare(b.displayName))
 
   return subjects
 }
@@ -134,24 +135,24 @@ export const subjectIdsViaGroupOrGoal = async (
   studentId: string,
   schoolId: string
 ): Promise<string[]> => {
-  const subjectIds: Set<string> = new Set()
+  const subjectsId: Set<string> = new Set()
   const groupsResult: any = await groupsList({
-    query: { user: studentId, school: schoolId, isEnabled: true },
+    query: { user: studentId, school: schoolId },
   })
   const userGroups = groupsResult.data || []
   userGroups.forEach((group: any) => {
     if (group.subjectId && group.type === 'teaching') {
-      subjectIds.add(group.subjectId)
+      subjectsId.add(group.subjectId)
     }
   })
   const goalsResult: any = await goalsList({ query: { student: studentId } })
   const userGoals = goalsResult.data || []
   userGoals.forEach((goal: GoalType) => {
     if (goal.subjectId) {
-      subjectIds.add(goal.subjectId)
+      subjectsId.add(goal.subjectId)
     }
   })
-  return Array.from(subjectIds)
+  return Array.from(subjectsId)
 }
 
 // For a single student, output goals grouped by subjectId, with mastery data calculated
