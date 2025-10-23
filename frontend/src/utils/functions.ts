@@ -134,24 +134,24 @@ export const subjectIdsViaGroupOrGoal = async (
   studentId: string,
   schoolId: string
 ): Promise<string[]> => {
-  const subjectsId: Set<string> = new Set()
+  const subjectIds: Set<string> = new Set()
   const groupsResult: any = await groupsList({
-    query: { user: studentId, school: schoolId },
+    query: { user: studentId, school: schoolId, isEnabled: true },
   })
   const userGroups = groupsResult.data || []
   userGroups.forEach((group: any) => {
     if (group.subjectId && group.type === 'teaching') {
-      subjectsId.add(group.subjectId)
+      subjectIds.add(group.subjectId)
     }
   })
   const goalsResult: any = await goalsList({ query: { student: studentId } })
   const userGoals = goalsResult.data || []
   userGoals.forEach((goal: GoalType) => {
     if (goal.subjectId) {
-      subjectsId.add(goal.subjectId)
+      subjectIds.add(goal.subjectId)
     }
   })
-  return Array.from(subjectsId)
+  return Array.from(subjectIds)
 }
 
 // For a single student, output goals grouped by subjectId, with mastery data calculated

@@ -32,10 +32,8 @@
   import GroupTypeTag from '../components/GroupTypeTag.svelte'
   import StudentRow from '../components/StudentRow.svelte'
   import { dataStore } from '../stores/data'
-
   import { getLocalStorageItem } from '../stores/localStorage'
-
-  import { goalsWithCalculatedMastery, fetchSubjectsForStudents } from '../utils/functions'
+  import { goalsWithCalculatedMastery, subjectIdsViaGroupOrGoal } from '../utils/functions'
 
   const { groupId } = $props<{ groupId: string }>()
 
@@ -55,7 +53,7 @@
   let isObservationEditorOpen = $state<boolean>(false)
   let isGoalEditorOpen = $state<boolean>(false)
   let isShowGoalTitleEnabled = $state<boolean>(true)
-  let expandedGoals = $state<Record<string, boolean>>({})
+  let allSubjectIds = $state<string[]>([])
   let currentSchool = $derived($dataStore.currentSchool)
   let subjects = $derived<SubjectType[]>($dataStore.subjects)
   let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
@@ -86,7 +84,7 @@
       students = studentsResult.data || []
       groupGoals = goalsResult.data || []
 
-      // for each student, fetch their goals with calculated mastery
+      // For each student, fetch their goals with calculated mastery
       await Promise.all(
         students.map(async student => {
           return goalsWithCalculatedMastery(student.id, groupGoals).then(calculatedGoals => {
@@ -94,6 +92,16 @@
           })
         })
       )
+      // For each student, fetch their subjectIds
+      const subjectIdsSet = new Set<string>()
+      await Promise.all(
+        students.map(async student => {
+          return subjectIdsViaGroupOrGoal(student.id, currentSchool.id).then(subjectIds => {
+            subjectIds.forEach(id => subjectIdsSet.add(id))
+          })
+        })
+      )
+      allSubjectIds = Array.from(subjectIdsSet)
     } catch (error) {
       console.error('Error fetching group:', error)
     } finally {
@@ -361,12 +369,15 @@
         style="--columns-count: {$dataStore.subjects.length}"
       >
         <span class="item header header-row">Elev</span>
-        {#each $dataStore.subjects as subject, index (subject.id)}
-          <span class="item header header-row">
-            <span class="subject-label-header">
-              {subject.shortName}
+        {#each allSubjectIds as subjectId, index (subjectId)}
+          {@const aSubject = $dataStore.subjects.find(s => s.id === subjectId)}
+          {#if aSubject}
+            <span class="item header header-row">
+              <span class="subject-label-header">
+                {aSubject.shortName}
+              </span>
             </span>
-          </span>
+          {/if}
         {/each}
         {#each students as student (student.id)}
           <StudentRow {student} subjects={$dataStore.subjects} groups={allGroups} />

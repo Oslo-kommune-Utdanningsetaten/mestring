@@ -95,8 +95,8 @@
   .void-badge {
     background: repeating-linear-gradient(
       -45deg,
-      color-mix(in srgb, var(--bs-danger) 30%, transparent),
-      color-mix(in srgb, var(--bs-danger) 30%, transparent) 1px,
+      color-mix(in srgb, var(--bs-gray) 50%, transparent),
+      color-mix(in srgb, var(--bs-gray) 50%, transparent) 1px,
       white 2px,
       white 4px
     );
