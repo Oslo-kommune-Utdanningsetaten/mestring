@@ -73,7 +73,7 @@
     fetchStudentData(student.id)
   }
 
-  // Add personal goals
+  // Add personal goal
   const handleEditGoal = (goal: GoalDecorated | null) => {
     goalWip = {
       ...goal,
