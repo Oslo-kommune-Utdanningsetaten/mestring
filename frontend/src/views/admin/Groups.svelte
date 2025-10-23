@@ -264,7 +264,9 @@
         <!-- Data rows -->
         {#each filteredGroups as group}
           <div class="group-grid-row">
-            <span>{group.displayName}</span>
+            <a href="/groups/{group.id}">
+              {group.displayName}
+            </a>
             <GroupTypeTag
               {group}
               onclick={() => handleGroupTypeToggle(group)}
