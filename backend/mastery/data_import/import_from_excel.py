@@ -17,28 +17,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
 django.setup()
 
 
-def ensure_test_school():
-    """
-    Ensure that a test school exists in the database.
-    If it does not exist, create it.
-    """
-    school_id = 'kakrafoonorg'
-    school = models.School.objects.filter(id=school_id).first()
-    if not school:
-        print("Creating test school:", school_id)
-        school = models.School.objects.create(
-            display_name='Kakrafoon barneskole',
-            short_name='kak',
-            id='kakrafoonorg',
-            maintained_at=timezone.now(),
-            feide_id='fc:org:feide.osloskolen.no:unit:NO987654321',
-            org_number='NO987654321',
-            is_service_enabled=True,
-        )
-        school.save()
-    return school
-
-
 def ensure_mastery_schema_exists():
     title = 'Mestringstrappa'
     mastery_schema = models.MasterySchema.objects.filter(title=title).first()
@@ -51,31 +29,31 @@ def ensure_mastery_schema_exists():
             config={
                 "levels": [
                     {
-                        "text": "Mestrer ikke",
+                        "title": "Mestrer ikke",
                         "color": "rgb(229, 50, 43)",
                         "maxValue": 20,
                         "minValue": 1
                     },
                     {
-                        "text": "Mestrer sjelden",
+                        "title": "Mestrer sjelden",
                         "color": "rgb(159, 113, 202)",
                         "maxValue": 40,
                         "minValue": 21
                     },
                     {
-                        "text": "Mestrer iblant",
+                        "title": "Mestrer iblant",
                         "color": "rgb(86, 174, 232)",
                         "maxValue": 60,
                         "minValue": 41
                     },
                     {
-                        "text": "Mestrer ofte",
+                        "title": "Mestrer ofte",
                         "color": "rgb(241, 249, 97)",
                         "maxValue": 80,
                         "minValue": 61
                     },
                     {
-                        "text": "Mestrer",
+                        "title": "Mestrer",
                         "color": "rgb(160, 207, 106)",
                         "maxValue": 100,
                         "minValue": 81
@@ -274,8 +252,3 @@ def run_import():
         print("Observations imported:", len(results))
 
     print("Excel import all done")
-
-
-if __name__ == '__main__':
-    ensure_test_school()
-    run_import()
