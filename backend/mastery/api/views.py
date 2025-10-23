@@ -30,15 +30,6 @@ def get_request_param(query_params, name: str):
 
 
 class FingerprintViewSetMixin:
-    """
-    Adds created_by/updated_by fingerprints.
-
-    Implementation notes:
-    - We call super().perform_create/update first to preserve behavior from
-      upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
-    - Then we patch the instance to set created_by/updated_by and save only
-      the changed fields.
-    """
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
@@ -49,7 +40,6 @@ class FingerprintViewSetMixin:
 
     def perform_update(self, serializer):
         super().perform_update(serializer)
-
         instance = getattr(serializer, "instance", None)
         instance.updated_by = self.request.user
         instance.save(update_fields=["updated_by"])
