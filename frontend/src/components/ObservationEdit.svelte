@@ -69,13 +69,13 @@
         <ValueInputVertical
           {masterySchema}
           bind:masteryValue={localObservation.masteryValue}
-          label="Hvor ofte mestrer {student?.name}: {goal?.title}"
+          label="Hvor ofte mestrer {student?.name} {goal?.title || 'dette målet'}?"
         />
       {:else}
         <ValueInputHorizontal
           {masterySchema}
           bind:masteryValue={localObservation.masteryValue}
-          label="Hvor ofte mestrer {student?.name}: {goal?.title}"
+          label="Hvor ofte mestrer {student?.name} {goal?.title || 'dette målet'}?"
         />
       {/if}
     </div>
