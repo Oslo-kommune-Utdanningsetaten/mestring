@@ -14,6 +14,7 @@
   import Link from './Link.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparklineChart from './SparklineChart.svelte'
+  import SparkbarChart from './SparkbarChart.svelte'
   import GoalEdit from './GoalEdit.svelte'
   import ObservationEdit from './ObservationEdit.svelte'
   import GroupSVG from '../assets/group.svg.svelte'
@@ -259,6 +260,10 @@
         {#if goal.masteryData}
           <MasteryLevelBadge masteryData={goal.masteryData} />
           <SparklineChart data={goal.observations?.map((o: ObservationType) => o.masteryValue)} />
+          <SparkbarChart
+            data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
+            masterySchema={$dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)}
+          />
         {:else}
           <MasteryLevelBadge isBadgeEmpty={true} />
         {/if}
