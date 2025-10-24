@@ -53,7 +53,6 @@
       }
       onDone()
     } catch (error) {
-      // TODO: Show an error message to the user
       console.error('Error saving Observation:', error)
     }
   }
