@@ -2,17 +2,11 @@
   import { type DataMaintenanceTaskType } from '../../generated/types.gen'
   import { dataMaintenanceTasksList } from '../../generated/sdk.gen'
   import { formatDate } from '../../utils/functions'
+  import { TASK_STATES } from '../../utils/constants'
 
   let tasks = $state<DataMaintenanceTaskType[]>([])
   let isLoading = $state<boolean>(false)
   let openRows = $state<Record<string, boolean>>({})
-
-  const statusVariant: Record<string, string> = {
-    pending: 'secondary',
-    running: 'primary',
-    finished: 'success',
-    failed: 'danger',
-  }
 
   const handleRowClick = (taskId: string) => {
     openRows[taskId] = !openRows[taskId]
@@ -80,7 +74,7 @@
             >
               <td>
                 <span
-                  class={`badge text-bg-${statusVariant[task.status || 'pending'] || 'secondary'}`}
+                  class={`badge text-bg-${TASK_STATES[task.status || 'pending'] || 'secondary'}`}
                 >
                   {task.status}
                 </span>

@@ -11,3 +11,11 @@ export const GROUP_TYPE_TEACHING = 'teaching'
 // Mastery missing reasons
 export const MISSING_REASON_NO_OBSERVATIONS = 'no-observations'
 export const MISSING_REASON_NO_GOALS = 'no-goals'
+
+// Maintenance task states
+export const TASK_STATES: Record<string, string> = {
+  pending: 'secondary',
+  running: 'primary',
+  finished: 'success',
+  failed: 'danger',
+}
