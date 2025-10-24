@@ -18,13 +18,6 @@
   let goalWip = $state<GoalDecorated | null>(null)
   let isGoalEditorOpen = $state<boolean>(false)
   let studentGoalsCount = $state<number>(0)
-  let preferredMasterySchema = $derived(
-    getLocalStorageItem('preferredMasterySchemaId')
-      ? $dataStore.masterySchemas.find(
-          ms => ms.id === getLocalStorageItem('preferredMasterySchemaId')
-        )
-      : $dataStore.masterySchemas[0]
-  )
 
   const fetchStudentData = async (userId: string) => {
     try {
@@ -66,7 +59,7 @@
           studentId: student?.id,
           subjectId: subject.id,
           sortOrder: i + 1,
-          masterySchemaId: preferredMasterySchema?.id,
+          masterySchemaId: $dataStore.defaultMasterySchema?.id,
         }
         await goalsCreate({
           body: goal,
@@ -84,8 +77,7 @@
       subjectId: null,
       studentId: student?.id,
       sortOrder: goal?.sortOrder || 1,
-      masterySchemaId:
-        goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
+      masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,
     }
     isGoalEditorOpen = true
   }
@@ -144,7 +136,7 @@
               skin: 'primary',
             }}
           >
-            Opprett alle mål ({preferredMasterySchema?.title})
+            Opprett alle mål ({$dataStore.defaultMasterySchema?.title})
           </ButtonMini>
         {/if}
       </div>

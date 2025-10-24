@@ -19,9 +19,7 @@ import {
 } from '../utils/constants'
 import type { AppData } from '../types/models'
 
-let masterySchemasCache = null as MasterySchemaType[] | null
-
-// When school changes, reload subjects, user status, and mastery schemas
+// When school changes, reset subjects, user status, and mastery schemas
 export const setCurrentSchool = (school: SchoolType) => {
   const currentData = get(dataStore) as AppData
   if (currentData.currentSchool?.id !== school?.id) {
@@ -32,15 +30,19 @@ export const setCurrentSchool = (school: SchoolType) => {
     if (school?.id) {
       registerSubjects(school)
       registerUserStatus(school)
-      registerMasterySchemas(true)
+      registerMasterySchemas(school)
     }
   }
 }
 
 const setMasterySchemas = (schemas: MasterySchemaType[]) => {
-  masterySchemasCache = schemas
+  // Default mastery schema is either system default, or user's preferred, or simply first in list
+  const defaultSchema =
+    schemas.find(schema => schema.isDefault) ||
+    schemas.find(schema => schema.id === getLocalStorageItem('preferredMasterySchemaId')) ||
+    (schemas.length > 0 ? schemas[0] : null)
   dataStore.update(data => {
-    return { ...data, masterySchemas: schemas }
+    return { ...data, masterySchemas: schemas, defaultMasterySchema: defaultSchema }
   })
 }
 
@@ -97,22 +99,15 @@ const loadSchool = async () => {
   removeLocalStorageItem('currentSchool')
 }
 
-const registerMasterySchemas = async (hardRefresh: boolean) => {
-  if (hardRefresh) {
-    masterySchemasCache = null
-  }
-  if (masterySchemasCache) {
-    return
-  }
+const registerMasterySchemas = async (school: SchoolType) => {
   try {
     const result = await masterySchemasList({
-      query: { school: get(dataStore).currentSchool?.id },
+      query: { school: school.id },
     })
     const schemas = result.data || []
     setMasterySchemas(schemas)
   } catch (error) {
     console.error('Error fetching mastery schemas:', error)
-    masterySchemasCache = null
     return null
   }
 }

@@ -134,8 +134,7 @@
       groupId: group?.id || null,
       isGoalPersonal: false,
       sortOrder: goal?.sortOrder || (groupGoals?.length ? groupGoals.length + 1 : 1),
-      masterySchemaId:
-        goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId') || '',
+      masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,
     }
     isGoalEditorOpen = true
   }

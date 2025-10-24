@@ -272,6 +272,7 @@ class MasterySchema(BaseModel):
     description = models.TextField(null=True)
     config = models.JSONField(null=True)
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=True, related_name='mastery_schemas')
+    is_default = models.BooleanField(default=False)  # is this the default schema for the school
 
 
 class Goal(BaseModel):

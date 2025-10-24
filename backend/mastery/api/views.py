@@ -507,7 +507,7 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
     access_policy = MasterySchemaAccessPolicy
 
     def get_queryset(self):
-        qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('-updated_at')
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('title')
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
             if school_param:

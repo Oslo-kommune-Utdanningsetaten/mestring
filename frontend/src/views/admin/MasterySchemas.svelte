@@ -1,6 +1,11 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
-  import { masterySchemasDestroy, masterySchemasList, schoolsList } from '../../generated/sdk.gen'
+  import {
+    masterySchemasDestroy,
+    masterySchemasList,
+    schoolsList,
+    masterySchemasPartialUpdate,
+  } from '../../generated/sdk.gen'
   import type { MasterySchemaType, SchoolType } from '../../generated/types.gen'
   import type { MasterySchemaWithConfig } from '../../types/models'
   import { useTinyRouter } from 'svelte-tiny-router'
@@ -8,16 +13,17 @@
   import ButtonMini from '../../components/ButtonMini.svelte'
   import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
+  import { dataStore } from '../../stores/data'
 
   const router = useTinyRouter()
-  let masterySchemas = $derived<MasterySchemaWithConfig[]>([])
   let masterySchemaWip: Partial<MasterySchemaWithConfig> | null =
     $state<Partial<MasterySchemaType> | null>(null)
   let isJsonVisible = $state<boolean>(false)
   let isEditorOpen = $state<boolean>(false)
   let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
-  let selectedSchool = $derived<SchoolType | null>(null)
+  let selectedSchool = $state<SchoolType | null>(null)
+  let masterySchemas = $derived<MasterySchemaWithConfig[]>([])
 
   const fetchSchools = async () => {
     try {
@@ -71,6 +77,35 @@
     }
   }
 
+  // Toggle whether group title is displayed in goal edit
+  const toggleIsDefault = async (masterySchema: MasterySchemaType) => {
+    try {
+      const current = masterySchema.isDefault ?? false
+      const result = await masterySchemasPartialUpdate({
+        path: { id: masterySchema.id },
+        body: { isDefault: !current },
+      })
+      const otherSchemasForSchool = masterySchemas.filter(
+        schema => schema.schoolId === selectedSchool?.id && schema.id !== masterySchema.id
+      )
+      // If setting this schema to default, unset others
+      if (result.data?.isDefault) {
+        for (const schema of otherSchemasForSchool) {
+          await masterySchemasPartialUpdate({
+            path: { id: schema.id },
+            body: { isDefault: false },
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error updating isGoalTitleEnabled:', error)
+    } finally {
+      // sleep a bit to allow backend to process changes
+      await new Promise(resolve => setTimeout(resolve, 0.6))
+      await fetchMasterySchemas()
+    }
+  }
+
   const getSchoolName = (schoolId: string | undefined) => {
     return schools.find(school => school.id === schoolId)?.displayName || '??'
   }
@@ -81,6 +116,17 @@
       selectedSchool = schools.find(school => school.id === schoolId) || null
       fetchMasterySchemas()
     })
+  })
+
+  $effect(() => {
+    if ($dataStore.currentSchool && !selectedSchool) {
+      router.navigate(
+        urlStringFrom(
+          { school: $dataStore.currentSchool.id },
+          { path: '/admin/mastery-schemas', mode: 'merge' }
+        )
+      )
+    }
   })
 </script>
 
@@ -154,6 +200,17 @@
               <p class="card-text">
                 {masterySchema.description || 'Ingen beskrivelse'}
               </p>
+
+              <div class="mb-4">
+                <pkt-checkbox
+                  label={masterySchema.isDefault ? 'Default schema for school' : 'Not default'}
+                  labelPosition="right"
+                  isSwitch="true"
+                  aria-checked={masterySchema.isDefault}
+                  checked={masterySchema.isDefault}
+                  onchange={() => toggleIsDefault(masterySchema)}
+                ></pkt-checkbox>
+              </div>
 
               <div class="mb-4">
                 {#each masterySchema?.config?.levels || [] as level}

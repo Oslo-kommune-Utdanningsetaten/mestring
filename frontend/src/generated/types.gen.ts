@@ -70,6 +70,7 @@ export type MasterySchemaType = {
     title?: string;
     description?: string | null;
     config?: unknown;
+    isDefault?: boolean;
     readonly createdById: string;
     readonly updatedById: string;
     schoolId?: string | null;
@@ -183,6 +184,7 @@ export type PatchedMasterySchemaType = {
     title?: string;
     description?: string | null;
     config?: unknown;
+    isDefault?: boolean;
     readonly createdById?: string;
     readonly updatedById?: string;
     schoolId?: string | null;
@@ -467,6 +469,7 @@ export type MasterySchemaCreateType = {
     title?: string;
     description?: string | null;
     config?: unknown;
+    isDefault?: boolean;
     schoolId?: string | null;
 };
 
@@ -533,6 +536,7 @@ export type PatchedMasterySchemaCreateType = {
     title?: string;
     description?: string | null;
     config?: unknown;
+    isDefault?: boolean;
     schoolId?: string | null;
 };
 

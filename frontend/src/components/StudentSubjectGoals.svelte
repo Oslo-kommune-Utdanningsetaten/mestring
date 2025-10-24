@@ -71,7 +71,7 @@
         subjectId: goal?.subjectId || getLocalStorageItem('preferredSubjectId'),
         studentId: student.id,
         sortOrder: goal?.sortOrder || (goalsForSubject?.length ? goalsForSubject.length + 1 : 1),
-        masterySchemaId: goal?.masterySchemaId || getLocalStorageItem('preferredMasterySchemaId'),
+        masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,
       }
     } else {
       const personalGoalsCount = goalsForSubject?.filter(g => g.isPersonal).length
@@ -80,8 +80,7 @@
         studentId: student.id,
         isPersonal: true,
         sortOrder: personalGoalsCount + 1,
-        masterySchemaId:
-          getLocalStorageItem('preferredMasterySchemaId') || $dataStore.masterySchemas[0]?.id,
+        masterySchemaId: $dataStore.defaultMasterySchema?.id,
       }
     }
     isGoalEditorOpen = true
