@@ -18,15 +18,6 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: Record<string, unknown>;
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const dataMaintenanceTasksList = <ThrowOnError extends boolean = false>(options?: Options<DataMaintenanceTasksListData, ThrowOnError>) => {
     return (options?.client ?? client).get<DataMaintenanceTasksListResponses, unknown, ThrowOnError>({
         url: '/api/data-maintenance-tasks/',
@@ -34,15 +25,6 @@ export const dataMaintenanceTasksList = <ThrowOnError extends boolean = false>(o
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const dataMaintenanceTasksCreate = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksCreateData, ThrowOnError>) => {
     return (options.client ?? client).post<DataMaintenanceTasksCreateResponses, unknown, ThrowOnError>({
         url: '/api/data-maintenance-tasks/',
@@ -54,15 +36,6 @@ export const dataMaintenanceTasksCreate = <ThrowOnError extends boolean = false>
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const dataMaintenanceTasksDestroy = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksDestroyData, ThrowOnError>) => {
     return (options.client ?? client).delete<DataMaintenanceTasksDestroyResponses, unknown, ThrowOnError>({
         url: '/api/data-maintenance-tasks/{id}/',
@@ -70,15 +43,6 @@ export const dataMaintenanceTasksDestroy = <ThrowOnError extends boolean = false
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const dataMaintenanceTasksRetrieve = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksRetrieveData, ThrowOnError>) => {
     return (options.client ?? client).get<DataMaintenanceTasksRetrieveResponses, unknown, ThrowOnError>({
         url: '/api/data-maintenance-tasks/{id}/',
@@ -86,15 +50,6 @@ export const dataMaintenanceTasksRetrieve = <ThrowOnError extends boolean = fals
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const dataMaintenanceTasksPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksPartialUpdateData, ThrowOnError>) => {
     return (options.client ?? client).patch<DataMaintenanceTasksPartialUpdateResponses, unknown, ThrowOnError>({
         url: '/api/data-maintenance-tasks/{id}/',
@@ -106,15 +61,6 @@ export const dataMaintenanceTasksPartialUpdate = <ThrowOnError extends boolean =
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const dataMaintenanceTasksUpdate = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksUpdateData, ThrowOnError>) => {
     return (options.client ?? client).put<DataMaintenanceTasksUpdateResponses, unknown, ThrowOnError>({
         url: '/api/data-maintenance-tasks/{id}/',
@@ -162,15 +108,6 @@ export const fetchSchoolImportStatus = <ThrowOnError extends boolean = false>(op
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const goalsList = <ThrowOnError extends boolean = false>(options?: Options<GoalsListData, ThrowOnError>) => {
     return (options?.client ?? client).get<GoalsListResponses, unknown, ThrowOnError>({
         url: '/api/goals/',
@@ -178,15 +115,6 @@ export const goalsList = <ThrowOnError extends boolean = false>(options?: Option
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const goalsCreate = <ThrowOnError extends boolean = false>(options?: Options<GoalsCreateData, ThrowOnError>) => {
     return (options?.client ?? client).post<GoalsCreateResponses, unknown, ThrowOnError>({
         url: '/api/goals/',
@@ -198,15 +126,6 @@ export const goalsCreate = <ThrowOnError extends boolean = false>(options?: Opti
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const goalsDestroy = <ThrowOnError extends boolean = false>(options: Options<GoalsDestroyData, ThrowOnError>) => {
     return (options.client ?? client).delete<GoalsDestroyResponses, unknown, ThrowOnError>({
         url: '/api/goals/{id}/',
@@ -214,15 +133,6 @@ export const goalsDestroy = <ThrowOnError extends boolean = false>(options: Opti
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const goalsRetrieve = <ThrowOnError extends boolean = false>(options: Options<GoalsRetrieveData, ThrowOnError>) => {
     return (options.client ?? client).get<GoalsRetrieveResponses, unknown, ThrowOnError>({
         url: '/api/goals/{id}/',
@@ -230,15 +140,6 @@ export const goalsRetrieve = <ThrowOnError extends boolean = false>(options: Opt
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const goalsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<GoalsPartialUpdateData, ThrowOnError>) => {
     return (options.client ?? client).patch<GoalsPartialUpdateResponses, unknown, ThrowOnError>({
         url: '/api/goals/{id}/',
@@ -250,15 +151,6 @@ export const goalsPartialUpdate = <ThrowOnError extends boolean = false>(options
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const goalsUpdate = <ThrowOnError extends boolean = false>(options: Options<GoalsUpdateData, ThrowOnError>) => {
     return (options.client ?? client).put<GoalsUpdateResponses, unknown, ThrowOnError>({
         url: '/api/goals/{id}/',
@@ -270,15 +162,6 @@ export const goalsUpdate = <ThrowOnError extends boolean = false>(options: Optio
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const groupsList = <ThrowOnError extends boolean = false>(options: Options<GroupsListData, ThrowOnError>) => {
     return (options.client ?? client).get<GroupsListResponses, unknown, ThrowOnError>({
         url: '/api/groups/',
@@ -286,15 +169,6 @@ export const groupsList = <ThrowOnError extends boolean = false>(options: Option
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const groupsCreate = <ThrowOnError extends boolean = false>(options: Options<GroupsCreateData, ThrowOnError>) => {
     return (options.client ?? client).post<GroupsCreateResponses, unknown, ThrowOnError>({
         url: '/api/groups/',
@@ -306,15 +180,6 @@ export const groupsCreate = <ThrowOnError extends boolean = false>(options: Opti
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const groupsDestroy = <ThrowOnError extends boolean = false>(options: Options<GroupsDestroyData, ThrowOnError>) => {
     return (options.client ?? client).delete<GroupsDestroyResponses, unknown, ThrowOnError>({
         url: '/api/groups/{id}/',
@@ -322,15 +187,6 @@ export const groupsDestroy = <ThrowOnError extends boolean = false>(options: Opt
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const groupsRetrieve = <ThrowOnError extends boolean = false>(options: Options<GroupsRetrieveData, ThrowOnError>) => {
     return (options.client ?? client).get<GroupsRetrieveResponses, unknown, ThrowOnError>({
         url: '/api/groups/{id}/',
@@ -338,15 +194,6 @@ export const groupsRetrieve = <ThrowOnError extends boolean = false>(options: Op
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const groupsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<GroupsPartialUpdateData, ThrowOnError>) => {
     return (options.client ?? client).patch<GroupsPartialUpdateResponses, unknown, ThrowOnError>({
         url: '/api/groups/{id}/',
@@ -358,15 +205,6 @@ export const groupsPartialUpdate = <ThrowOnError extends boolean = false>(option
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const groupsUpdate = <ThrowOnError extends boolean = false>(options: Options<GroupsUpdateData, ThrowOnError>) => {
     return (options.client ?? client).put<GroupsUpdateResponses, unknown, ThrowOnError>({
         url: '/api/groups/{id}/',
@@ -402,15 +240,6 @@ export const importGroupsAndUsers = <ThrowOnError extends boolean = false>(optio
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const masterySchemasList = <ThrowOnError extends boolean = false>(options?: Options<MasterySchemasListData, ThrowOnError>) => {
     return (options?.client ?? client).get<MasterySchemasListResponses, unknown, ThrowOnError>({
         url: '/api/mastery-schemas/',
@@ -418,15 +247,6 @@ export const masterySchemasList = <ThrowOnError extends boolean = false>(options
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const masterySchemasCreate = <ThrowOnError extends boolean = false>(options?: Options<MasterySchemasCreateData, ThrowOnError>) => {
     return (options?.client ?? client).post<MasterySchemasCreateResponses, unknown, ThrowOnError>({
         url: '/api/mastery-schemas/',
@@ -438,15 +258,6 @@ export const masterySchemasCreate = <ThrowOnError extends boolean = false>(optio
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const masterySchemasDestroy = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasDestroyData, ThrowOnError>) => {
     return (options.client ?? client).delete<MasterySchemasDestroyResponses, unknown, ThrowOnError>({
         url: '/api/mastery-schemas/{id}/',
@@ -454,15 +265,6 @@ export const masterySchemasDestroy = <ThrowOnError extends boolean = false>(opti
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const masterySchemasRetrieve = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasRetrieveData, ThrowOnError>) => {
     return (options.client ?? client).get<MasterySchemasRetrieveResponses, unknown, ThrowOnError>({
         url: '/api/mastery-schemas/{id}/',
@@ -470,15 +272,6 @@ export const masterySchemasRetrieve = <ThrowOnError extends boolean = false>(opt
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const masterySchemasPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasPartialUpdateData, ThrowOnError>) => {
     return (options.client ?? client).patch<MasterySchemasPartialUpdateResponses, unknown, ThrowOnError>({
         url: '/api/mastery-schemas/{id}/',
@@ -490,15 +283,6 @@ export const masterySchemasPartialUpdate = <ThrowOnError extends boolean = false
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const masterySchemasUpdate = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasUpdateData, ThrowOnError>) => {
     return (options.client ?? client).put<MasterySchemasUpdateResponses, unknown, ThrowOnError>({
         url: '/api/mastery-schemas/{id}/',
@@ -510,15 +294,6 @@ export const masterySchemasUpdate = <ThrowOnError extends boolean = false>(optio
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const observationsList = <ThrowOnError extends boolean = false>(options?: Options<ObservationsListData, ThrowOnError>) => {
     return (options?.client ?? client).get<ObservationsListResponses, unknown, ThrowOnError>({
         url: '/api/observations/',
@@ -526,15 +301,6 @@ export const observationsList = <ThrowOnError extends boolean = false>(options?:
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const observationsCreate = <ThrowOnError extends boolean = false>(options: Options<ObservationsCreateData, ThrowOnError>) => {
     return (options.client ?? client).post<ObservationsCreateResponses, unknown, ThrowOnError>({
         url: '/api/observations/',
@@ -546,15 +312,6 @@ export const observationsCreate = <ThrowOnError extends boolean = false>(options
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const observationsDestroy = <ThrowOnError extends boolean = false>(options: Options<ObservationsDestroyData, ThrowOnError>) => {
     return (options.client ?? client).delete<ObservationsDestroyResponses, unknown, ThrowOnError>({
         url: '/api/observations/{id}/',
@@ -562,15 +319,6 @@ export const observationsDestroy = <ThrowOnError extends boolean = false>(option
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const observationsRetrieve = <ThrowOnError extends boolean = false>(options: Options<ObservationsRetrieveData, ThrowOnError>) => {
     return (options.client ?? client).get<ObservationsRetrieveResponses, unknown, ThrowOnError>({
         url: '/api/observations/{id}/',
@@ -578,15 +326,6 @@ export const observationsRetrieve = <ThrowOnError extends boolean = false>(optio
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const observationsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ObservationsPartialUpdateData, ThrowOnError>) => {
     return (options.client ?? client).patch<ObservationsPartialUpdateResponses, unknown, ThrowOnError>({
         url: '/api/observations/{id}/',
@@ -598,15 +337,6 @@ export const observationsPartialUpdate = <ThrowOnError extends boolean = false>(
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const observationsUpdate = <ThrowOnError extends boolean = false>(options: Options<ObservationsUpdateData, ThrowOnError>) => {
     return (options.client ?? client).put<ObservationsUpdateResponses, unknown, ThrowOnError>({
         url: '/api/observations/{id}/',
@@ -625,15 +355,6 @@ export const pingRetrieve = <ThrowOnError extends boolean = false>(options?: Opt
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const rolesList = <ThrowOnError extends boolean = false>(options?: Options<RolesListData, ThrowOnError>) => {
     return (options?.client ?? client).get<RolesListResponses, unknown, ThrowOnError>({
         url: '/api/roles/',
@@ -641,15 +362,6 @@ export const rolesList = <ThrowOnError extends boolean = false>(options?: Option
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const rolesCreate = <ThrowOnError extends boolean = false>(options: Options<RolesCreateData, ThrowOnError>) => {
     return (options.client ?? client).post<RolesCreateResponses, unknown, ThrowOnError>({
         url: '/api/roles/',
@@ -661,15 +373,6 @@ export const rolesCreate = <ThrowOnError extends boolean = false>(options: Optio
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const rolesDestroy = <ThrowOnError extends boolean = false>(options: Options<RolesDestroyData, ThrowOnError>) => {
     return (options.client ?? client).delete<RolesDestroyResponses, unknown, ThrowOnError>({
         url: '/api/roles/{id}/',
@@ -677,15 +380,6 @@ export const rolesDestroy = <ThrowOnError extends boolean = false>(options: Opti
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const rolesRetrieve = <ThrowOnError extends boolean = false>(options: Options<RolesRetrieveData, ThrowOnError>) => {
     return (options.client ?? client).get<RolesRetrieveResponses, unknown, ThrowOnError>({
         url: '/api/roles/{id}/',
@@ -693,15 +387,6 @@ export const rolesRetrieve = <ThrowOnError extends boolean = false>(options: Opt
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const rolesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<RolesPartialUpdateData, ThrowOnError>) => {
     return (options.client ?? client).patch<RolesPartialUpdateResponses, unknown, ThrowOnError>({
         url: '/api/roles/{id}/',
@@ -713,15 +398,6 @@ export const rolesPartialUpdate = <ThrowOnError extends boolean = false>(options
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const rolesUpdate = <ThrowOnError extends boolean = false>(options: Options<RolesUpdateData, ThrowOnError>) => {
     return (options.client ?? client).put<RolesUpdateResponses, unknown, ThrowOnError>({
         url: '/api/roles/{id}/',
@@ -733,15 +409,6 @@ export const rolesUpdate = <ThrowOnError extends boolean = false>(options: Optio
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const schoolsList = <ThrowOnError extends boolean = false>(options?: Options<SchoolsListData, ThrowOnError>) => {
     return (options?.client ?? client).get<SchoolsListResponses, unknown, ThrowOnError>({
         url: '/api/schools/',
@@ -749,15 +416,6 @@ export const schoolsList = <ThrowOnError extends boolean = false>(options?: Opti
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const schoolsCreate = <ThrowOnError extends boolean = false>(options: Options<SchoolsCreateData, ThrowOnError>) => {
     return (options.client ?? client).post<SchoolsCreateResponses, unknown, ThrowOnError>({
         url: '/api/schools/',
@@ -769,15 +427,6 @@ export const schoolsCreate = <ThrowOnError extends boolean = false>(options: Opt
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const schoolsDestroy = <ThrowOnError extends boolean = false>(options: Options<SchoolsDestroyData, ThrowOnError>) => {
     return (options.client ?? client).delete<SchoolsDestroyResponses, unknown, ThrowOnError>({
         url: '/api/schools/{id}/',
@@ -785,15 +434,6 @@ export const schoolsDestroy = <ThrowOnError extends boolean = false>(options: Op
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const schoolsRetrieve = <ThrowOnError extends boolean = false>(options: Options<SchoolsRetrieveData, ThrowOnError>) => {
     return (options.client ?? client).get<SchoolsRetrieveResponses, unknown, ThrowOnError>({
         url: '/api/schools/{id}/',
@@ -801,15 +441,6 @@ export const schoolsRetrieve = <ThrowOnError extends boolean = false>(options: O
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const schoolsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<SchoolsPartialUpdateData, ThrowOnError>) => {
     return (options.client ?? client).patch<SchoolsPartialUpdateResponses, unknown, ThrowOnError>({
         url: '/api/schools/{id}/',
@@ -821,15 +452,6 @@ export const schoolsPartialUpdate = <ThrowOnError extends boolean = false>(optio
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const schoolsUpdate = <ThrowOnError extends boolean = false>(options: Options<SchoolsUpdateData, ThrowOnError>) => {
     return (options.client ?? client).put<SchoolsUpdateResponses, unknown, ThrowOnError>({
         url: '/api/schools/{id}/',
@@ -841,15 +463,6 @@ export const schoolsUpdate = <ThrowOnError extends boolean = false>(options: Opt
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const situationsList = <ThrowOnError extends boolean = false>(options?: Options<SituationsListData, ThrowOnError>) => {
     return (options?.client ?? client).get<SituationsListResponses, unknown, ThrowOnError>({
         url: '/api/situations/',
@@ -857,15 +470,6 @@ export const situationsList = <ThrowOnError extends boolean = false>(options?: O
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const situationsCreate = <ThrowOnError extends boolean = false>(options: Options<SituationsCreateData, ThrowOnError>) => {
     return (options.client ?? client).post<SituationsCreateResponses, unknown, ThrowOnError>({
         url: '/api/situations/',
@@ -877,15 +481,6 @@ export const situationsCreate = <ThrowOnError extends boolean = false>(options: 
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const situationsDestroy = <ThrowOnError extends boolean = false>(options: Options<SituationsDestroyData, ThrowOnError>) => {
     return (options.client ?? client).delete<SituationsDestroyResponses, unknown, ThrowOnError>({
         url: '/api/situations/{id}/',
@@ -893,15 +488,6 @@ export const situationsDestroy = <ThrowOnError extends boolean = false>(options:
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const situationsRetrieve = <ThrowOnError extends boolean = false>(options: Options<SituationsRetrieveData, ThrowOnError>) => {
     return (options.client ?? client).get<SituationsRetrieveResponses, unknown, ThrowOnError>({
         url: '/api/situations/{id}/',
@@ -909,15 +495,6 @@ export const situationsRetrieve = <ThrowOnError extends boolean = false>(options
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const situationsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<SituationsPartialUpdateData, ThrowOnError>) => {
     return (options.client ?? client).patch<SituationsPartialUpdateResponses, unknown, ThrowOnError>({
         url: '/api/situations/{id}/',
@@ -929,15 +506,6 @@ export const situationsPartialUpdate = <ThrowOnError extends boolean = false>(op
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const situationsUpdate = <ThrowOnError extends boolean = false>(options: Options<SituationsUpdateData, ThrowOnError>) => {
     return (options.client ?? client).put<SituationsUpdateResponses, unknown, ThrowOnError>({
         url: '/api/situations/{id}/',
@@ -949,15 +517,6 @@ export const situationsUpdate = <ThrowOnError extends boolean = false>(options: 
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const statusList = <ThrowOnError extends boolean = false>(options?: Options<StatusListData, ThrowOnError>) => {
     return (options?.client ?? client).get<StatusListResponses, unknown, ThrowOnError>({
         url: '/api/status/',
@@ -965,15 +524,6 @@ export const statusList = <ThrowOnError extends boolean = false>(options?: Optio
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const statusCreate = <ThrowOnError extends boolean = false>(options: Options<StatusCreateData, ThrowOnError>) => {
     return (options.client ?? client).post<StatusCreateResponses, unknown, ThrowOnError>({
         url: '/api/status/',
@@ -985,15 +535,6 @@ export const statusCreate = <ThrowOnError extends boolean = false>(options: Opti
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const statusDestroy = <ThrowOnError extends boolean = false>(options: Options<StatusDestroyData, ThrowOnError>) => {
     return (options.client ?? client).delete<StatusDestroyResponses, unknown, ThrowOnError>({
         url: '/api/status/{id}/',
@@ -1001,15 +542,6 @@ export const statusDestroy = <ThrowOnError extends boolean = false>(options: Opt
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const statusRetrieve = <ThrowOnError extends boolean = false>(options: Options<StatusRetrieveData, ThrowOnError>) => {
     return (options.client ?? client).get<StatusRetrieveResponses, unknown, ThrowOnError>({
         url: '/api/status/{id}/',
@@ -1017,15 +549,6 @@ export const statusRetrieve = <ThrowOnError extends boolean = false>(options: Op
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const statusPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<StatusPartialUpdateData, ThrowOnError>) => {
     return (options.client ?? client).patch<StatusPartialUpdateResponses, unknown, ThrowOnError>({
         url: '/api/status/{id}/',
@@ -1037,15 +560,6 @@ export const statusPartialUpdate = <ThrowOnError extends boolean = false>(option
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const statusUpdate = <ThrowOnError extends boolean = false>(options: Options<StatusUpdateData, ThrowOnError>) => {
     return (options.client ?? client).put<StatusUpdateResponses, unknown, ThrowOnError>({
         url: '/api/status/{id}/',
@@ -1057,15 +571,6 @@ export const statusUpdate = <ThrowOnError extends boolean = false>(options: Opti
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const subjectsList = <ThrowOnError extends boolean = false>(options?: Options<SubjectsListData, ThrowOnError>) => {
     return (options?.client ?? client).get<SubjectsListResponses, unknown, ThrowOnError>({
         url: '/api/subjects/',
@@ -1073,15 +578,6 @@ export const subjectsList = <ThrowOnError extends boolean = false>(options?: Opt
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const subjectsCreate = <ThrowOnError extends boolean = false>(options: Options<SubjectsCreateData, ThrowOnError>) => {
     return (options.client ?? client).post<SubjectsCreateResponses, unknown, ThrowOnError>({
         url: '/api/subjects/',
@@ -1093,15 +589,6 @@ export const subjectsCreate = <ThrowOnError extends boolean = false>(options: Op
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const subjectsDestroy = <ThrowOnError extends boolean = false>(options: Options<SubjectsDestroyData, ThrowOnError>) => {
     return (options.client ?? client).delete<SubjectsDestroyResponses, unknown, ThrowOnError>({
         url: '/api/subjects/{id}/',
@@ -1109,15 +596,6 @@ export const subjectsDestroy = <ThrowOnError extends boolean = false>(options: O
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const subjectsRetrieve = <ThrowOnError extends boolean = false>(options: Options<SubjectsRetrieveData, ThrowOnError>) => {
     return (options.client ?? client).get<SubjectsRetrieveResponses, unknown, ThrowOnError>({
         url: '/api/subjects/{id}/',
@@ -1125,15 +603,6 @@ export const subjectsRetrieve = <ThrowOnError extends boolean = false>(options: 
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const subjectsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<SubjectsPartialUpdateData, ThrowOnError>) => {
     return (options.client ?? client).patch<SubjectsPartialUpdateResponses, unknown, ThrowOnError>({
         url: '/api/subjects/{id}/',
@@ -1145,15 +614,6 @@ export const subjectsPartialUpdate = <ThrowOnError extends boolean = false>(opti
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const subjectsUpdate = <ThrowOnError extends boolean = false>(options: Options<SubjectsUpdateData, ThrowOnError>) => {
     return (options.client ?? client).put<SubjectsUpdateResponses, unknown, ThrowOnError>({
         url: '/api/subjects/{id}/',
@@ -1165,15 +625,6 @@ export const subjectsUpdate = <ThrowOnError extends boolean = false>(options: Op
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const userGroupsList = <ThrowOnError extends boolean = false>(options: Options<UserGroupsListData, ThrowOnError>) => {
     return (options.client ?? client).get<UserGroupsListResponses, unknown, ThrowOnError>({
         url: '/api/user-groups/',
@@ -1181,15 +632,6 @@ export const userGroupsList = <ThrowOnError extends boolean = false>(options: Op
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const userGroupsCreate = <ThrowOnError extends boolean = false>(options?: Options<UserGroupsCreateData, ThrowOnError>) => {
     return (options?.client ?? client).post<UserGroupsCreateResponses, unknown, ThrowOnError>({
         url: '/api/user-groups/',
@@ -1201,15 +643,6 @@ export const userGroupsCreate = <ThrowOnError extends boolean = false>(options?:
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const userGroupsDestroy = <ThrowOnError extends boolean = false>(options: Options<UserGroupsDestroyData, ThrowOnError>) => {
     return (options.client ?? client).delete<UserGroupsDestroyResponses, unknown, ThrowOnError>({
         url: '/api/user-groups/{id}/',
@@ -1217,15 +650,6 @@ export const userGroupsDestroy = <ThrowOnError extends boolean = false>(options:
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const userGroupsRetrieve = <ThrowOnError extends boolean = false>(options: Options<UserGroupsRetrieveData, ThrowOnError>) => {
     return (options.client ?? client).get<UserGroupsRetrieveResponses, unknown, ThrowOnError>({
         url: '/api/user-groups/{id}/',
@@ -1233,15 +657,6 @@ export const userGroupsRetrieve = <ThrowOnError extends boolean = false>(options
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const userGroupsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<UserGroupsPartialUpdateData, ThrowOnError>) => {
     return (options.client ?? client).patch<UserGroupsPartialUpdateResponses, unknown, ThrowOnError>({
         url: '/api/user-groups/{id}/',
@@ -1253,15 +668,6 @@ export const userGroupsPartialUpdate = <ThrowOnError extends boolean = false>(op
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const userGroupsUpdate = <ThrowOnError extends boolean = false>(options: Options<UserGroupsUpdateData, ThrowOnError>) => {
     return (options.client ?? client).put<UserGroupsUpdateResponses, unknown, ThrowOnError>({
         url: '/api/user-groups/{id}/',
@@ -1273,15 +679,6 @@ export const userGroupsUpdate = <ThrowOnError extends boolean = false>(options: 
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const userSchoolsList = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsListData, ThrowOnError>) => {
     return (options.client ?? client).get<UserSchoolsListResponses, unknown, ThrowOnError>({
         url: '/api/user-schools/',
@@ -1289,15 +686,6 @@ export const userSchoolsList = <ThrowOnError extends boolean = false>(options: O
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const userSchoolsCreate = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsCreateData, ThrowOnError>) => {
     return (options.client ?? client).post<UserSchoolsCreateResponses, unknown, ThrowOnError>({
         url: '/api/user-schools/',
@@ -1309,15 +697,6 @@ export const userSchoolsCreate = <ThrowOnError extends boolean = false>(options:
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const userSchoolsDestroy = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsDestroyData, ThrowOnError>) => {
     return (options.client ?? client).delete<UserSchoolsDestroyResponses, unknown, ThrowOnError>({
         url: '/api/user-schools/{id}/',
@@ -1325,15 +704,6 @@ export const userSchoolsDestroy = <ThrowOnError extends boolean = false>(options
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const userSchoolsRetrieve = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsRetrieveData, ThrowOnError>) => {
     return (options.client ?? client).get<UserSchoolsRetrieveResponses, unknown, ThrowOnError>({
         url: '/api/user-schools/{id}/',
@@ -1341,15 +711,6 @@ export const userSchoolsRetrieve = <ThrowOnError extends boolean = false>(option
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const userSchoolsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsPartialUpdateData, ThrowOnError>) => {
     return (options.client ?? client).patch<UserSchoolsPartialUpdateResponses, unknown, ThrowOnError>({
         url: '/api/user-schools/{id}/',
@@ -1361,15 +722,6 @@ export const userSchoolsPartialUpdate = <ThrowOnError extends boolean = false>(o
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const userSchoolsUpdate = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsUpdateData, ThrowOnError>) => {
     return (options.client ?? client).put<UserSchoolsUpdateResponses, unknown, ThrowOnError>({
         url: '/api/user-schools/{id}/',
@@ -1381,15 +733,6 @@ export const userSchoolsUpdate = <ThrowOnError extends boolean = false>(options:
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const usersList = <ThrowOnError extends boolean = false>(options: Options<UsersListData, ThrowOnError>) => {
     return (options.client ?? client).get<UsersListResponses, unknown, ThrowOnError>({
         url: '/api/users/',
@@ -1397,15 +740,6 @@ export const usersList = <ThrowOnError extends boolean = false>(options: Options
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const usersCreate = <ThrowOnError extends boolean = false>(options: Options<UsersCreateData, ThrowOnError>) => {
     return (options.client ?? client).post<UsersCreateResponses, unknown, ThrowOnError>({
         url: '/api/users/',
@@ -1417,15 +751,6 @@ export const usersCreate = <ThrowOnError extends boolean = false>(options: Optio
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const usersDestroy = <ThrowOnError extends boolean = false>(options: Options<UsersDestroyData, ThrowOnError>) => {
     return (options.client ?? client).delete<UsersDestroyResponses, unknown, ThrowOnError>({
         url: '/api/users/{id}/',
@@ -1433,15 +758,6 @@ export const usersDestroy = <ThrowOnError extends boolean = false>(options: Opti
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const usersRetrieve = <ThrowOnError extends boolean = false>(options: Options<UsersRetrieveData, ThrowOnError>) => {
     return (options.client ?? client).get<UsersRetrieveResponses, unknown, ThrowOnError>({
         url: '/api/users/{id}/',
@@ -1449,15 +765,6 @@ export const usersRetrieve = <ThrowOnError extends boolean = false>(options: Opt
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const usersPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<UsersPartialUpdateData, ThrowOnError>) => {
     return (options.client ?? client).patch<UsersPartialUpdateResponses, unknown, ThrowOnError>({
         url: '/api/users/{id}/',
@@ -1469,15 +776,6 @@ export const usersPartialUpdate = <ThrowOnError extends boolean = false>(options
     });
 };
 
-/**
- * Adds created_by/updated_by fingerprints.
- *
- * Implementation notes:
- * - We call super().perform_create/update first to preserve behavior from
- * upstream mixins (e.g., AccessViewSetMixin) and DRF internals.
- * - Then we patch the instance to set created_by/updated_by and save only
- * the changed fields.
- */
 export const usersUpdate = <ThrowOnError extends boolean = false>(options: Options<UsersUpdateData, ThrowOnError>) => {
     return (options.client ?? client).put<UsersUpdateResponses, unknown, ThrowOnError>({
         url: '/api/users/{id}/',

@@ -163,16 +163,18 @@
     />
   </div>
 
-  <div class="form-group mb-3">
-    <label for="goalTitle" class="form-label">Tittel</label>
-    <input
-      id="goalTitle"
-      type="text"
-      class="form-control rounded-0 border-2 border-primary input-field"
-      bind:value={localGoal.title}
-      placeholder="Tittel på målet"
-    />
-  </div>
+  {#if $dataStore.currentSchool.isGoalTitleEnabled}
+    <div class="form-group mb-3">
+      <label for="goalTitle" class="form-label">Tittel</label>
+      <input
+        id="goalTitle"
+        type="text"
+        class="form-control rounded-0 border-2 border-primary input-field"
+        bind:value={localGoal.title}
+        placeholder="Tittel på målet"
+      />
+    </div>
+  {/if}
 
   <div class="d-flex gap-2 justify-content-start mt-4">
     <ButtonMini

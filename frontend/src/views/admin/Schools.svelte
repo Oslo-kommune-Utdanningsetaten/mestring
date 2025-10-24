@@ -114,6 +114,23 @@
     }
   }
 
+  // Toggle whether group title is displayed in goal edit
+  const toggleGoalTitleEnabled = async (school: SchoolType) => {
+    try {
+      const current = (school as any).isGoalTitleEnabled ?? false
+      const result = await schoolsPartialUpdate({
+        path: { id: school.id },
+        body: { isGoalTitleEnabled: !current },
+      })
+      const index = schools.findIndex(s => s.id === school.id)
+      if (index >= 0 && result.data) {
+        schools[index] = result.data
+      }
+    } catch (error) {
+      console.error('Error updating isGoalTitleEnabled:', error)
+    }
+  }
+
   // Toggle whether teachers can see the students list menu item
   const toggleStudentListEnabled = async (school: SchoolType) => {
     try {
@@ -352,6 +369,20 @@
             aria-checked={(school as any).isGroupGoalEnabled}
             checked={(school as any).isGroupGoalEnabled}
             onchange={() => toggleGroupGoalEnabled(school)}
+          ></pkt-checkbox>
+        </div>
+        <div>
+          <pkt-checkbox
+            id={'goal-title' + school.id}
+            class="mb-0 ms-3"
+            label={(school as any).isGoalTitleEnabled
+              ? 'Måltittel tilgjengelig'
+              : 'Måltittel ikke tilgjgengelig'}
+            labelPosition="right"
+            isSwitch="true"
+            aria-checked={(school as any).isGoalTitleEnabled}
+            checked={(school as any).isGoalTitleEnabled}
+            onchange={() => toggleGoalTitleEnabled(school)}
           ></pkt-checkbox>
         </div>
         <div>
