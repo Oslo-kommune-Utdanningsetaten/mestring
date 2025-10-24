@@ -140,64 +140,68 @@
   </div>
 
   <div class="mt-4">
-    {#if masterySchemas.length > 0}
-      {#each masterySchemas as masterySchema}
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h3 class="card-title">
-              {masterySchema.title}
-            </h3>
-            <h5 class="card-title">
-              {getSchoolName(masterySchema.schoolId)}
-            </h5>
-            <p class="card-text">
-              {masterySchema.description || 'Ingen beskrivelse'}
-            </p>
+    {#if selectedSchool}
+      {#if masterySchemas.length > 0}
+        {#each masterySchemas as masterySchema}
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h3 class="card-title">
+                {masterySchema.title}
+              </h3>
+              <h5 class="card-title">
+                {getSchoolName(masterySchema.schoolId)}
+              </h5>
+              <p class="card-text">
+                {masterySchema.description || 'Ingen beskrivelse'}
+              </p>
 
-            <div class="mb-4">
-              {#each masterySchema?.config?.levels || [] as level}
-                <span class="p-2" style="background-color: {level.color || 'white'};">
-                  {level.title}
-                </span>
-              {/each}
-            </div>
-
-            {#if isJsonVisible}
-              <div class="json-viewer">
-                <pre>{JSON.stringify(masterySchema, null, 2)}</pre>
+              <div class="mb-4">
+                {#each masterySchema?.config?.levels || [] as level}
+                  <span class="p-2" style="background-color: {level.color || 'white'};">
+                    {level.title}
+                  </span>
+                {/each}
               </div>
-            {/if}
 
-            <ButtonMini
-              options={{
-                title: 'Rediger',
-                iconName: 'edit',
-                skin: 'secondary',
-                variant: 'icon-left',
-                classes: 'my-2 me-2',
-                onClick: () => handleEditMasterySchema(masterySchema),
-              }}
-            >
-              Rediger
-            </ButtonMini>
+              {#if isJsonVisible}
+                <div class="json-viewer">
+                  <pre>{JSON.stringify(masterySchema, null, 2)}</pre>
+                </div>
+              {/if}
 
-            <ButtonMini
-              options={{
-                title: 'Slett',
-                iconName: 'trash-can',
-                skin: 'secondary',
-                variant: 'icon-left',
-                classes: 'my-2',
-                onClick: () => handleDeleteMasterySchema(masterySchema.id),
-              }}
-            >
-              Slett
-            </ButtonMini>
+              <ButtonMini
+                options={{
+                  title: 'Rediger',
+                  iconName: 'edit',
+                  skin: 'secondary',
+                  variant: 'icon-left',
+                  classes: 'my-2 me-2',
+                  onClick: () => handleEditMasterySchema(masterySchema),
+                }}
+              >
+                Rediger
+              </ButtonMini>
+
+              <ButtonMini
+                options={{
+                  title: 'Slett',
+                  iconName: 'trash-can',
+                  skin: 'secondary',
+                  variant: 'icon-left',
+                  classes: 'my-2',
+                  onClick: () => handleDeleteMasterySchema(masterySchema.id),
+                }}
+              >
+                Slett
+              </ButtonMini>
+            </div>
           </div>
-        </div>
-      {/each}
+        {/each}
+      {:else}
+        <div class="alert alert-info">Ingen mestringsskjemaer for denne skolen</div>
+      {/if}
     {:else}
-      <div class="alert alert-info">No mastery schemas available for the selected school.</div>
+      <div class="alert alert-info">Velg en skole</div>
     {/if}
   </div>
 </section>
