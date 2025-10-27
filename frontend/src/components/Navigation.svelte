@@ -1,5 +1,6 @@
 <script lang="ts">
   import Link from './Link.svelte'
+  import GoalIconCelebration from './GoalIconCelebration.svelte'
   import oslologoUrl from '@oslokommune/punkt-assets/dist/logos/oslologo.svg?url'
 
   import { currentPath } from '../stores/navigation'
@@ -38,6 +39,12 @@
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   <div class="container-md">
     <a class="navbar-brand fw-bold" href="/">
+      <span class="me-1 goal-icon-wrapper">
+        <pkt-icon name="goal"></pkt-icon>
+        <span class="celebration-overlay">
+          <GoalIconCelebration />
+        </span>
+      </span>
       {currentSchool?.displayName || 'INGEN SKOLE VALGT'}
     </a>
 
@@ -152,9 +159,27 @@
     padding-left: 30px;
   }
 
-  .selected-school {
-    background-color: #f8f9fa;
-    color: #000;
-    font-weight: bold;
+  .goal-icon-wrapper {
+    position: relative;
+    display: inline-flex;
+    width: 28px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .goal-icon-wrapper :global(pkt-icon) {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .goal-icon-wrapper .celebration-overlay {
+    position: absolute;
+    inset: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 </style>

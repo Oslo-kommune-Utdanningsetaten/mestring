@@ -37,7 +37,7 @@
   <Navigation />
 </header>
 
-<main class="container-md py-4">
+<main class="container-md py-3">
   {#if $isLoggingInUser}
     <div class="d-flex align-items-center gap-2 text-secondary small py-2">
       <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
