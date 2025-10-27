@@ -98,6 +98,7 @@
         <pkt-select
           label="Fag"
           name="goalSubject"
+          fullwidth={true}
           value={localGoal.subjectId || NONE_FIELD_VALUE}
           hasError={!localGoal.subjectId || localGoal.subjectId === NONE_FIELD_VALUE}
           requiredText="Velg et fag"
@@ -133,6 +134,7 @@
       <pkt-select
         label="Mestringsskjema"
         name="goalMasterySchema"
+        fullwidth={true}
         value={localGoal.masterySchemaId || NONE_FIELD_VALUE}
         hasError={!localGoal.masterySchemaId || localGoal.masterySchemaId === NONE_FIELD_VALUE}
         requiredText="Velg et mestringsskjema"
