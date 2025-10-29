@@ -136,7 +136,7 @@ def test_teacher_group_access(
 
     # Teacher cannot retrieve other group
     resp = client.get(f'/api/groups/{other_teaching_group_with_members.id}/')
-    assert resp.status_code == 403
+    assert resp.status_code == 404
 
 
 @pytest.mark.django_db
@@ -187,4 +187,4 @@ def test_student_group_access(
 
     # Student cannot retrieve other group
     resp = client.get(f'/api/groups/{other_teaching_group_with_members.id}/')
-    assert resp.status_code == 403
+    assert resp.status_code == 404

@@ -13,25 +13,18 @@ class GroupAccessPolicy(BaseAccessPolicy):
             "principal": ["role:superadmin"],
             "effect": "allow",
         },
-        # School admins have full access to groups belonging to their school
+        # School admins can update groups belonging to their school
         {
-            "action": ["*"],
+            "action": ["update", "partial_update"],
             "principal": ["role:admin"],
             "effect": "allow",
             "condition": "is_admin_at_school",
         },
         # Authenticated user can list according to scope_queryset
         {
-            "action": ["list"],
+            "action": ["list", "retrieve"],
             "principal": ["authenticated"],
             "effect": "allow",
-        },
-        # Teachers and students can retrieve groups they are member of
-        {
-            "action": ["retrieve"],
-            "principal": ["role:student", "role:teacher"],
-            "effect": "allow",
-            "condition": "is_member_of_enabled_group",
         },
     ]
 
@@ -57,15 +50,12 @@ class GroupAccessPolicy(BaseAccessPolicy):
 
     # True if requester is admin at the group's school
     def is_admin_at_school(self, request, view, action):
-        group_id = self.get_target_id(view)
-        if not group_id:
+        group = view.get_object()
+        if not group:
             return False
-        # Get the school id cheaply (None if group absent)
-        school_id = (
-            Group.objects.filter(id=group_id)
-            .values_list('school_id', flat=True)
-            .first()
-        )
+        school_id = self.scope_queryset(
+            request, Group.objects.filter(id=group.id)).values_list(
+            "school_id", flat=True).first()
         if not school_id:
             return False
         return UserSchool.objects.filter(
@@ -73,8 +63,3 @@ class GroupAccessPolicy(BaseAccessPolicy):
             school_id=school_id,
             role__name="admin"
         ).exists()
-
-    # True if requester is member of enabled group
-    def is_member_of_enabled_group(self, request, view, action):
-        group_id = self.get_target_id(view)
-        return bool(group_id) and request.user.groups.filter(id=group_id, is_enabled=True).exists()

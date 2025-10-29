@@ -40,11 +40,11 @@ class UserSchoolAccessPolicy(BaseAccessPolicy):
 
     def is_user_owner(self, request, view, action):
         try:
-            user_school_id = self.get_target_id(view)
-            if not user_school_id:
+            user_school = view.get_object()
+            if not user_school:
                 return False
             qs = self.scope_queryset(request, UserSchool.objects)
-            return qs.filter(id=user_school_id).exists()
+            return qs.filter(id=user_school.id).exists()
         except Exception:
             logger.exception("UserSchoolAccessPolicy.is_user_target")
             return False

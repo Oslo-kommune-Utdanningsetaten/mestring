@@ -24,23 +24,3 @@ class BaseAccessPolicy(AccessPolicy):
         except Exception:
             pass
         return values
-
-    # --- Helper utilities -------------------------------------------------
-    def get_target_id(self, view):
-        """Return ID of the target objevt (from the URL kwargs) only if the object is visible to the user.
-        """
-        lookup_url_kwarg = getattr(view, 'lookup_url_kwarg', None)
-        lookup_field = getattr(view, 'lookup_field', 'pk')
-        key = lookup_url_kwarg or lookup_field
-        target_id = view.kwargs.get(key)
-        if not target_id:
-            return None
-        # Try to verify visibility
-        try:
-            qs = view.get_queryset()
-            if not qs.filter(**{lookup_field: target_id}).exists():
-                return None
-        except Exception:
-            # Not a considered crash, object is not visible to the user
-            pass
-        return target_id
