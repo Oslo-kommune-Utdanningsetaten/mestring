@@ -120,8 +120,8 @@ class GoalAccessPolicy(BaseAccessPolicy):
         """Students can only create personal goals for themselves."""
         try:
             requester = request.user
-            student_id = request.data.get('student_id') or request.data.get('student')
-            group_id = request.data.get('group_id') or request.data.get('group')
+            student_id = request.data.get('student_id')
+            group_id = request.data.get('group_id')
 
             # Must be creating a personal goal
             if group_id is not None:
@@ -141,8 +141,8 @@ class GoalAccessPolicy(BaseAccessPolicy):
         """
         try:
             requester = request.user
-            student_id = request.data.get('student_id') or request.data.get('student')
-            group_id = request.data.get('group_id') or request.data.get('group')
+            student_id = request.data.get('student_id')
+            group_id = request.data.get('group_id')
 
             # Group goal: Must teach that group
             if group_id is not None:

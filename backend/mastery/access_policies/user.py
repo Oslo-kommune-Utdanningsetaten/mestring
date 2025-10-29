@@ -30,12 +30,12 @@ class UserAccessPolicy(BaseAccessPolicy):
             groups_where_current_user_is_teacher = user.teacher_groups
             groups_where_current_user_is_student = user.student_groups
 
-            # Get schools where user is an admin
+            # All schools where user is admin
             school_admin_ids = UserSchool.objects.filter(
                 user_id=user.id, role__name="admin"
             ).values_list("school_id", flat=True).distinct()
 
-            # Collect all teacher user IDs from schools the user is affiliated with
+            # All teacher user IDs from schools the user is affiliated with
             teacher_ids = User.objects.filter(
                 user_groups__group__school__in=user.get_schools(),
                 user_groups__role__name='teacher'

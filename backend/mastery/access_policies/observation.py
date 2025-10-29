@@ -120,7 +120,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         - Personal goal observations: Must be basis group teacher OR teach that subject to that student
         """
         try:
-            goal_id = request.data.get("goal") or request.data.get("goal_id")
+            goal_id = request.data.get("goal_id")
             requester = request.user
 
             if not goal_id:
@@ -155,7 +155,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
     def can_student_create_observation(self, request, view, action):
         """Students can only create observations about themselves."""
         try:
-            student_id = request.data.get("student") or request.data.get("student_id")
+            student_id = request.data.get("student_id")
             requester = request.user
 
             # Force it so that students cannot create invisible observations
