@@ -251,7 +251,7 @@ def subject_without_group(db, school):
 
 
 @pytest.fixture
-def subject_without_group_at_other_school(db, other_school):
+def subject_owned_by_other_school(db, other_school):
     return Subject.objects.create(
         display_name="Sosiale ferdigheter",
         short_name="Sosialt",
@@ -378,12 +378,14 @@ def observation_on_personal_goal_other_student(db, other_student, goal_personal_
         is_visible_to_student=True
     )
 
+
 @pytest.fixture
 def other_school_group_goal(db, other_school_teaching_group_with_members):
     return Goal.objects.create(
         title="Lese 2 bøker",
         group=other_school_teaching_group_with_members,
     )
+
 
 @pytest.fixture
 def other_school_personal_goal(db, other_school_student):
