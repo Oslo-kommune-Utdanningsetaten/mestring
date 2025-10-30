@@ -1,9 +1,7 @@
 import logging
-
 from django.db.models import Q, Exists, OuterRef
-
 from .base import BaseAccessPolicy
-from mastery.models import Goal, UserGroup, UserSchool
+from mastery.models import Goal, UserGroup, UserSchool, Observation
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +48,13 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             "effect": "allow",
             "condition": "can_teacher_modify_observation"
         },
+        # School admins can CRUD observations for students at their school
+        {
+            "action": ["create", "update", "partial_update", "destroy"],
+            "principal": ["role:admin"],
+            "effect": "allow",
+            "condition": "is_admin_at_school"
+        },
         # Everyone else: implicitly denied
     ]
 
@@ -57,7 +62,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         """
         Filter observations based on who can see them:
         - Everyone: Observations they created or observed (if visible)
-        - School inspectors: All observations for students at their school
+        - School inspectors and admins: All observations with goals which are in groups at their schools, or which are for subjects owned by the school
         - Teaching group teachers:
           - Observations on group goals in groups they teach
           - Observations on personal goals for students they teach in that subject
@@ -85,8 +90,8 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             if school_affiliated_ids:
                 # Observations on goals in groups at their schools
                 filters |= Q(goal__group__school_id__in=school_affiliated_ids)
-                # Observations on personal goals for students at their schools
-                filters |= Q(student__groups__school_id__in=school_affiliated_ids)
+                # Observations on goals attached to subjects owned by their schools
+                filters |= Q(goal__subject__owned_by_school_id__in=school_affiliated_ids)
 
             # Teaching group teachers: Observations on group goals + personal goals for students they teach
             if teacher_group_ids:
@@ -211,4 +216,33 @@ class ObservationAccessPolicy(BaseAccessPolicy):
 
         except Exception:
             logger.exception("ObservationAccessPolicy.can_teacher_modify_observation error")
+            return False
+
+    # True if requester is admin at the school which owns the observation
+    def is_admin_at_school(self, request, view, action):
+        try:
+            if action == 'create':
+                goal_id = request.data.get("goal_id")
+                goal = Goal.objects.get(id=goal_id)
+            elif action in ['update', 'partial_update', 'destroy']:
+                observation = view.get_object()
+                if not observation:
+                    return False
+                goal = observation.goal
+            if not goal:
+                return False
+            if goal.group_id:
+                school_id = goal.group.school_id
+            else:
+                school_id = goal.subject.owned_by_school_id
+            if not school_id:
+                return False
+
+            school_admin_ids = UserSchool.objects.filter(
+                user_id=request.user.id, role__name="admin").values_list("school_id", flat=True).distinct()
+
+            return school_id in school_admin_ids
+
+        except Exception:
+            logger.exception("SubjectAccessPolicy.belongs_to_group error")
             return False

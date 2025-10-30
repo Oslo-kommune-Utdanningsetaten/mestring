@@ -145,6 +145,14 @@ class User(BaseModel):
         school_schools = School.objects.filter(user_schools__user=self)
         return (group_schools | school_schools).distinct()
 
+    def has_role_at_school(self, role_name, school):
+        """Check if user has a specific role at a given school"""
+        return UserSchool.objects.filter(
+            user=self,
+            school=school,
+            role__name=role_name
+        ).exists()
+
     @property
     def student_groups(self):
         """Get all groups where user is a student"""

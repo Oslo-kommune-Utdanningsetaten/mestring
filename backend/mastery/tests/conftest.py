@@ -268,7 +268,7 @@ def subject_with_group(db, teaching_group_with_members):
 
 
 @pytest.fixture
-def subject_without_group(db, school):
+def subject_owned_by_school(db, school):
     # Owned by school is set to simulate subject managed by school
     return Subject.objects.create(
         display_name="Sosiale ferdigheter",
@@ -295,19 +295,20 @@ def goal_with_group(db, teaching_group_with_members):
 
 
 @pytest.fixture
-def goal_personal(db, student):
+def goal_personal(db, student, subject_owned_by_school):
     return Goal.objects.create(
         title="Lese 2 bøker",
         student=student,
+        subject=subject_owned_by_school,
     )
 
 
 @pytest.fixture
-def goal_personal_other_student(db, subject_without_group, other_student):
+def goal_personal_other_student(db, subject_owned_by_school, other_student):
     return Goal.objects.create(
         title="Lese 2 bøker",
         student=other_student,
-        subject=subject_without_group,
+        subject=subject_owned_by_school,
     )
 
 

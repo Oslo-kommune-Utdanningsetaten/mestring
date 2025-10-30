@@ -4,7 +4,7 @@ from mastery.models import User, Group, Subject, Goal
 
 
 @pytest.mark.django_db
-def test_non_user_subject_access(school, subject_with_group, subject_without_group):
+def test_non_user_subject_access(school, subject_with_group, subject_owned_by_school):
     client = APIClient()
     # Non-authenticated user cannot access subjects
     resp = client.get(f'/api/subjects/')
@@ -15,13 +15,13 @@ def test_non_user_subject_access(school, subject_with_group, subject_without_gro
     assert resp.status_code == 403
     resp = client.get(f'/api/subjects/{subject_with_group.id}/')
     assert resp.status_code == 403
-    resp = client.get(f'/api/subjects/{subject_without_group.id}/')
+    resp = client.get(f'/api/subjects/{subject_owned_by_school.id}/')
     assert resp.status_code == 403
 
 
 @pytest.mark.django_db
 def test_superadmin_subject_access(
-        school, other_school, superadmin, subject_with_group, subject_without_group,
+        school, other_school, superadmin, subject_with_group, subject_owned_by_school,
         subject_owned_by_other_school):
     client = APIClient()
     client.force_authenticate(user=superadmin)
@@ -34,14 +34,14 @@ def test_superadmin_subject_access(
     resp = client.get('/api/subjects/', {'school': school.id})
     assert resp.status_code == 200
     received_ids = {s['id'] for s in resp.json()}
-    expected_ids = {subject_with_group.id, subject_without_group.id}
+    expected_ids = {subject_with_group.id, subject_owned_by_school.id}
     assert received_ids == expected_ids
 
     # Superadmin can list subjects specifically owned by school
     resp = client.get(f'/api/subjects/', {'school': school.id, 'is_owned_by_school': True})
     assert resp.status_code == 200
     received_ids = {s['id'] for s in resp.json()}
-    expected_ids = {subject_without_group.id}
+    expected_ids = {subject_owned_by_school.id}
     assert received_ids == expected_ids
 
     # Superadmin can list subjects not specifically owned by school
@@ -54,7 +54,7 @@ def test_superadmin_subject_access(
     # Superadmin can retrieve both kinds of subjects
     resp = client.get(f'/api/subjects/{subject_with_group.id}/')
     assert resp.status_code == 200
-    resp = client.get(f'/api/subjects/{subject_without_group.id}/')
+    resp = client.get(f'/api/subjects/{subject_owned_by_school.id}/')
     assert resp.status_code == 200
 
     # Can create a subject owned by another school
@@ -78,7 +78,7 @@ def test_superadmin_subject_access(
 
 @pytest.mark.django_db
 def test_authenticated_subject_access(
-        school, other_school, school_inspector, teacher, student, subject_with_group, subject_without_group,
+        school, other_school, school_inspector, teacher, student, subject_with_group, subject_owned_by_school,
         subject_owned_by_other_school):
     client = APIClient()
 
@@ -91,7 +91,7 @@ def test_authenticated_subject_access(
         # Can list all subjects in school
         resp = client.get(f'/api/subjects/', {'school': school.id})
         assert resp.status_code == 200
-        expected_ids = {subject_with_group.id, subject_without_group.id}
+        expected_ids = {subject_with_group.id, subject_owned_by_school.id}
         received_ids = {subject['id'] for subject in resp.json()}
         assert received_ids == expected_ids
 
@@ -105,7 +105,7 @@ def test_authenticated_subject_access(
         # Can list subjects owned by school
         resp = client.get(f'/api/subjects/', {'school': school.id, 'is_owned_by_school': True})
         assert resp.status_code == 200
-        expected_ids = {subject_without_group.id}
+        expected_ids = {subject_owned_by_school.id}
         received_ids = {subject['id'] for subject in resp.json()}
         assert received_ids == expected_ids
 

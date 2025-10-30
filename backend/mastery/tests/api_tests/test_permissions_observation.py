@@ -65,9 +65,9 @@ def test_superadmin_observation_access(
 
 @pytest.mark.django_db
 def test_school_inspector_observation_access(
-        school_inspector, student, other_school_student,
-        observation_on_group_goal, observation_on_personal_goal, goal_personal,
-        other_school_group_goal, other_school_personal_goal, subject_without_group):
+        school, school_inspector, student, other_school_student, observation_on_group_goal,
+        observation_on_personal_goal, goal_personal, other_school_group_goal, other_school_personal_goal,
+        subject_owned_by_school):
     """
     Test access for school inspector.
     School inspector have read only access to all observations for students at their school.
@@ -91,23 +91,6 @@ def test_school_inspector_observation_access(
         is_visible_to_student=True
     )
 
-    # Unaffiliated student without school relationship
-    unaffiliated_student = User.objects.create(
-        name="Unaffiliated Student",
-        feide_id="unaffiliated-student@example.com",
-        email="unaffiliated-student@example.com",
-    )
-    personal_goal_unaffiliated = Goal.objects.create(
-        title="Personal goal for unaffiliated student",
-        student=unaffiliated_student,
-        subject=subject_without_group,
-    )
-    observation_unaffiliated = Observation.objects.create(
-        student=unaffiliated_student,
-        goal=personal_goal_unaffiliated,
-        is_visible_to_student=True
-    )
-
     # Endpoint is unusable without required params
     resp = client.get("/api/observations/")
     assert resp.status_code == 400
@@ -118,18 +101,11 @@ def test_school_inspector_observation_access(
     resp = client.get("/api/observations/", {"student": student.id})
     assert resp.status_code == 200
     received_ids = {obs["id"] for obs in resp.json()}
-    assert observation_on_group_goal.id in received_ids  # Group goal observation at inspector's school
-    assert observation_on_personal_goal.id in received_ids  # Personal goal observation at inspector's school
-    assert observation_personal_other_school.id not in received_ids
-    assert observation_unaffiliated.id not in received_ids
+    expected_ids = {observation_on_group_goal.id, observation_on_personal_goal.id}
+    assert received_ids == expected_ids
 
     # School inspector cannot list observations for students at other schools
     resp = client.get("/api/observations/", {"student": other_school_student.id})
-    assert resp.status_code == 200
-    assert resp.json() == []
-
-    # School inspector cannot list observations for unaffiliated students
-    resp = client.get("/api/observations/", {"student": unaffiliated_student.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
@@ -171,10 +147,6 @@ def test_school_inspector_observation_access(
 
     # School inspector cannot retrieve personal goal observations at other schools
     resp = client.get(f"/api/observations/{observation_personal_other_school.id}/")
-    assert resp.status_code == 404
-
-    # School inspector cannot retrieve observations for unaffiliated students
-    resp = client.get(f"/api/observations/{observation_unaffiliated.id}/")
     assert resp.status_code == 404
 
     ################### Create ###################
@@ -254,7 +226,7 @@ def test_user_observation_access(
 @pytest.mark.django_db
 def test_teaching_group_teacher_observation_access(
         teacher, student, student_role, observation_on_group_goal,
-        other_teaching_group_with_members, subject_with_group, subject_without_group):
+        other_teaching_group_with_members, subject_with_group, subject_owned_by_school):
     client = APIClient()
     client.force_authenticate(user=teacher)
 
@@ -274,7 +246,7 @@ def test_teaching_group_teacher_observation_access(
     personal_goal_untaught_subject = Goal.objects.create(
         title="Personal goal in social subject",
         student=student,
-        subject=subject_without_group,
+        subject=subject_owned_by_school,
     )
     observation_untaught_subject = Observation.objects.create(
         student=student,
@@ -601,3 +573,107 @@ def test_student_observation_access(
     # Cannot DELETE observation they didn't create
     resp = client.delete(f"/api/observations/{observation_on_group_goal.id}/")
     assert resp.status_code == 403
+
+
+@pytest.mark.django_db
+def test_school_admin_observation_access(
+    school_admin, student, other_school_student,
+        observation_on_group_goal, observation_on_personal_goal, observation_on_personal_goal_other_student,
+        other_school_group_goal, other_school_personal_goal):
+    """
+    School admin should have full read/write access to observations that are
+    attached to goals which either belong to a group at the admin's school or
+    are attached to a subject owned by the admin's school. 
+    They should not have access to observations for other schools.
+    """
+    client = APIClient()
+    client.force_authenticate(user=school_admin)
+
+    observation_personal_other_school = Observation.objects.create(
+        student=other_school_student,
+        goal=other_school_personal_goal,
+        is_visible_to_student=True
+    )
+    observation_group_other_school = Observation.objects.create(
+        student=other_school_student,
+        goal=other_school_group_goal,
+        is_visible_to_student=True
+    )
+
+    # Endpoint unusable without params
+    resp = client.get("/api/observations/")
+    assert resp.status_code == 400
+
+    # List observations for a student at the admin's school
+    resp = client.get("/api/observations/", {"student": student.id})
+    assert resp.status_code == 200
+    received_ids = {obs["id"] for obs in resp.json()}
+    excepted_ids = {observation_on_group_goal.id, observation_on_personal_goal.id}
+    assert received_ids == excepted_ids
+
+    # Can retrieve observations at their school
+    resp = client.get(f"/api/observations/{observation_on_group_goal.id}/")
+    assert resp.status_code == 200
+
+    # Can retrieve personal observations attached to subjects owned by the school
+    resp = client.get(f"/api/observations/{observation_on_personal_goal_other_student.id}/")
+    assert resp.status_code == 200
+
+    # Cannot retrieve observations belonging to other schools
+    resp = client.get(f"/api/observations/{observation_group_other_school.id}/")
+    assert resp.status_code == 404
+    resp = client.get(f"/api/observations/{observation_personal_other_school.id}/")
+    assert resp.status_code == 404
+
+    ################### Create ###################
+
+    # Can create observation on a group goal at their school
+    resp = client.post("/api/observations/", {
+        "student_id": student.id,
+        "goal_id": observation_on_group_goal.goal.id,
+        "is_visible_to_student": True,
+        "created_by_id": school_admin.id,
+        "mastery_value": 50,
+    }, format='json')
+    assert resp.status_code == 201
+    created_group_obs_id = resp.json()["id"]
+
+    # Can update the created observation
+    resp = client.put(f"/api/observations/{created_group_obs_id}/", {
+        "student_id": student.id,
+        "goal_id": observation_on_group_goal.goal.id,
+        "is_visible_to_student": True,
+        "created_by_id": school_admin.id,
+        "mastery_value": 60,
+    }, format='json')
+    assert resp.status_code == 200
+    assert resp.json()['masteryValue'] == 60
+
+    # Can delete the created observation
+    resp = client.delete(f"/api/observations/{created_group_obs_id}/")
+    assert resp.status_code == 204
+
+    # Can create observation on a personal goal attached to a school-owned subject
+    resp = client.post("/api/observations/", {
+        "student_id": observation_on_personal_goal_other_student.student.id,
+        "goal_id": observation_on_personal_goal_other_student.goal.id,
+        "is_visible_to_student": True,
+        "created_by_id": school_admin.id,
+        "mastery_value": 50,
+    }, format='json')
+    assert resp.status_code == 201
+    created_personal_obs_id = resp.json()["id"]
+
+    # Can update and delete it
+    resp = client.put(f"/api/observations/{created_personal_obs_id}/", {
+        "student_id": observation_on_personal_goal_other_student.student.id,
+        "goal_id": observation_on_personal_goal_other_student.goal.id,
+        "is_visible_to_student": True,
+        "created_by_id": school_admin.id,
+        "mastery_value": 60,
+    }, format='json')
+    assert resp.status_code == 200
+    assert resp.json()['masteryValue'] == 60
+
+    resp = client.delete(f"/api/observations/{created_personal_obs_id}/")
+    assert resp.status_code == 204

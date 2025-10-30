@@ -61,7 +61,7 @@ def test_superadmin_goal_access(superadmin, goal_with_group, goal_personal_other
 def test_school_inspector_goal_access(
         school_inspector, school, goal_with_group, goal_personal, goal_personal_other_student, student,
         teaching_group_with_members, other_teaching_group_with_members, other_school_teaching_group,
-        other_school_student, other_school_group_goal, other_school_personal_goal, subject_without_group,
+        other_school_student, other_school_group_goal, other_school_personal_goal, subject_owned_by_school,
         student_role):
     """
     Test access for school inspectors.
@@ -70,20 +70,6 @@ def test_school_inspector_goal_access(
     """
     client = APIClient()
     client.force_authenticate(user=school_inspector)
-
-    ################### Setup ###################
-
-    # Unaffiliated student not in any group
-    unaffiliated_student = User.objects.create(
-        name="Unaffiliated Student",
-        feide_id="unaffiliated-student@example.com",
-        email="unaffiliated-student@example.com",
-    )
-    personal_goal_unaffiliated = Goal.objects.create(
-        title="Personal goal for unaffiliated student",
-        student=unaffiliated_student,
-        subject=subject_without_group,
-    )
 
     # Endpoint is unusable without required params
     resp = client.get('/api/goals/')
@@ -95,8 +81,8 @@ def test_school_inspector_goal_access(
     resp = client.get('/api/goals/', {'group': goal_with_group.group.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
-    assert goal_with_group.id in received_ids
-    assert other_school_group_goal.id not in received_ids
+    excepted_ids = {goal_with_group.id}
+    assert received_ids == excepted_ids
 
     # School inspector cannot list goals in groups at other schools
     resp = client.get('/api/goals/', {'group': other_school_teaching_group.id})
@@ -107,29 +93,20 @@ def test_school_inspector_goal_access(
     resp = client.get('/api/goals/', {'student': student.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
-    assert goal_personal.id in received_ids  # Personal goal at inspector's school
-    assert goal_with_group.id in received_ids  # Group goal at inspector's school
-    assert other_school_personal_goal.id not in received_ids
-    assert personal_goal_unaffiliated.id not in received_ids
+    excepted_ids = {goal_personal.id, goal_with_group.id}
+    assert received_ids == excepted_ids
 
     # School inspector cannot list goals for students at other schools
     resp = client.get('/api/goals/', {'student': other_school_student.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
-    # School inspector cannot list goals for unaffiliated students
-    resp = client.get('/api/goals/', {'student': unaffiliated_student.id})
-    assert resp.status_code == 200
-    assert resp.json() == []
-
     # School inspector can list goals by subject at their school
-    resp = client.get('/api/goals/', {'subject': subject_without_group.id})
+    resp = client.get('/api/goals/', {'subject': subject_owned_by_school.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
-    assert goal_personal.id not in received_ids  # Fails because it don´t have subject
-    assert goal_personal_other_student.id in received_ids
-    assert other_school_personal_goal.id not in received_ids
-    assert personal_goal_unaffiliated.id not in received_ids
+    excepted_ids = {goal_personal.id, goal_personal_other_student.id}
+    assert received_ids == excepted_ids
 
     ################### Retrieve ###################
 
@@ -147,9 +124,6 @@ def test_school_inspector_goal_access(
     resp = client.get(f'/api/goals/{other_school_personal_goal.id}/')
     assert resp.status_code == 404
 
-    resp = client.get(f'/api/goals/{personal_goal_unaffiliated.id}/')
-    assert resp.status_code == 404
-
     ################### Create ###################
 
     # School inspector has READ-ONLY access cannot create goals
@@ -162,7 +136,7 @@ def test_school_inspector_goal_access(
     resp = client.post('/api/goals/', {
         'student_id': student.id,
         'title': 'New personal goal by school inspector',
-        'subject_id': subject_without_group.id
+        'subject_id': subject_owned_by_school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -178,7 +152,7 @@ def test_school_inspector_goal_access(
     resp = client.put(f'/api/goals/{goal_personal.id}/', {
         'student_id': student.id,
         'title': 'Updated personal goal',
-        'subject_id': subject_without_group.id
+        'subject_id': subject_owned_by_school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -196,7 +170,7 @@ def test_school_inspector_goal_access(
 def test_student_goal_access(
     other_teaching_group_with_members,
     goal_with_group,
-    subject_without_group,
+    subject_owned_by_school,
     student,
     other_student,
     teacher,
@@ -208,14 +182,14 @@ def test_student_goal_access(
     personal_goal_self = Goal.objects.create(
         title="My personal goal",
         student=student,
-        subject=subject_without_group,
+        subject=subject_owned_by_school,
     )
 
     # Personal goal owned by another student
     personal_goal_other = Goal.objects.create(
         title="Other student personal goal",
         student=other_student,
-        subject=subject_without_group,
+        subject=subject_owned_by_school,
     )
 
     # Group goal in another group the student is NOT a member of
@@ -253,7 +227,7 @@ def test_student_goal_access(
     assert resp.json() == []
 
     # Student can list personal goal by subject
-    resp = client.get('/api/goals/', {'subject': subject_without_group.id})
+    resp = client.get('/api/goals/', {'subject': subject_owned_by_school.id})
     assert resp.status_code == 200
     received_ids = {group['id'] for group in resp.json()}
     assert personal_goal_self.id in received_ids
@@ -281,7 +255,7 @@ def test_student_goal_access(
     resp = client.post('/api/goals/', {
         'student_id': student.id,
         'title': 'My new personal goal',
-        'subject_id': subject_without_group.id,
+        'subject_id': subject_owned_by_school.id,
         'created_by_id': student.id
     }, format='json')
     assert resp.status_code == 201
@@ -291,7 +265,7 @@ def test_student_goal_access(
     resp = client.post('/api/goals/', {
         'student_id': other_student.id,
         'title': 'Goal for other student',
-        'subject_id': subject_without_group.id,
+        'subject_id': subject_owned_by_school.id,
         'created_by_id': student.id
     }, format='json')
     assert resp.status_code == 403
@@ -308,7 +282,7 @@ def test_student_goal_access(
     resp = client.put(f'/api/goals/{created_goal_id}/', {
         'student_id': student.id,
         'title': 'Updated personal goal',
-        'subject_id': subject_without_group.id
+        'subject_id': subject_owned_by_school.id
     }, format='json')
     assert resp.status_code == 200
 
@@ -316,13 +290,13 @@ def test_student_goal_access(
     teacher_created_goal = Goal.objects.create(
         title="Teacher set goal for student",
         student=student,
-        subject=subject_without_group,
+        subject=subject_owned_by_school,
         created_by=teacher,
     )
     resp = client.put(f'/api/goals/{teacher_created_goal.id}/', {
         'student_id': student.id,
         'title': 'Try to update teacher goal',
-        'subject_id': subject_without_group.id
+        'subject_id': subject_owned_by_school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -330,7 +304,7 @@ def test_student_goal_access(
     resp = client.put(f'/api/goals/{personal_goal_other.id}/', {
         'student_id': other_student.id,
         'title': "Can't update this",
-        'subject_id': subject_without_group.id
+        'subject_id': subject_owned_by_school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -366,7 +340,7 @@ def test_student_goal_access(
     personal_goal_no_groups = Goal.objects.create(
         title="Personal goal for student without groups",
         student=student_without_groups,
-        subject=subject_without_group,
+        subject=subject_owned_by_school,
     )
 
     client.force_authenticate(user=student_without_groups)
@@ -381,7 +355,7 @@ def test_teaching_group_teacher_goal_access(
     teaching_group_with_members,
     other_teaching_group_with_members,
     goal_with_group,
-    subject_without_group,
+    subject_owned_by_school,
     subject_with_group,
     teacher,
     student,
@@ -410,14 +384,14 @@ def test_teaching_group_teacher_goal_access(
     personal_goal_untaught_subject = Goal.objects.create(
         title="Student's goal in subject teacher doesn't teach",
         student=student,
-        subject=subject_without_group,
+        subject=subject_owned_by_school,
     )
 
     # Personal goal for a student NOT in any group taught by teacher
     personal_goal_other = Goal.objects.create(
         title="Other student personal goal",
         student=other_student,
-        subject=subject_without_group,
+        subject=subject_owned_by_school,
     )
 
     # Group goal in a group teacher does NOT teach
@@ -435,7 +409,7 @@ def test_teaching_group_teacher_goal_access(
     created_personal_goal = Goal.objects.create(
         title="Teacher created external goal",
         student=unrelated_student,
-        subject=subject_without_group,
+        subject=subject_owned_by_school,
         created_by=teacher,
     )
 
@@ -445,7 +419,7 @@ def test_teaching_group_teacher_goal_access(
 
     # Endpoint is unusable with both group and subject params
     resp = client.get(
-        '/api/goals/', {'group': teaching_group_with_members.id, 'subject': subject_without_group.id})
+        '/api/goals/', {'group': teaching_group_with_members.id, 'subject': subject_owned_by_school.id})
     assert resp.status_code == 400
 
     # Can list goals in groups they teach
@@ -484,7 +458,7 @@ def test_teaching_group_teacher_goal_access(
     assert personal_goal_in_taught_subject.id in received_ids
 
     # Teacher can list goals they created (even in subjects they don't teach)
-    resp = client.get('/api/goals/', {'subject': subject_without_group.id})
+    resp = client.get('/api/goals/', {'subject': subject_owned_by_school.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
     assert created_personal_goal.id in received_ids
@@ -538,7 +512,7 @@ def test_teaching_group_teacher_goal_access(
     resp = client.post('/api/goals/', {
         'student_id': student.id,
         'title': 'Social goal attempt',
-        'subject_id': subject_without_group.id
+        'subject_id': subject_owned_by_school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -571,7 +545,7 @@ def test_teaching_group_teacher_goal_access(
     resp = client.put(f'/api/goals/{personal_goal_untaught_subject.id}/', {
         'student_id': student.id,
         'title': 'Try to update social goal',
-        'subject_id': subject_without_group.id
+        'subject_id': subject_owned_by_school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -606,7 +580,7 @@ def test_basis_group_teacher_goal_access(
     teaching_group_with_members,
     other_teaching_group_with_members,
     basis_group,
-    subject_without_group,
+    subject_owned_by_school,
     teacher,
     student,
     other_student,
@@ -634,14 +608,14 @@ def test_basis_group_teacher_goal_access(
     personal_goal = Goal.objects.create(
         title="Student's personal goal",
         student=student,
-        subject=subject_without_group,
+        subject=subject_owned_by_school,
     )
 
     # Personal goal for student not in teacher's basis group
     personal_goal_other = Goal.objects.create(
         title="Other student personal goal",
         student=other_student,
-        subject=subject_without_group,
+        subject=subject_owned_by_school,
     )
 
     # Group goal in teaching group teacher teaches
@@ -671,7 +645,7 @@ def test_basis_group_teacher_goal_access(
     assert personal_goal_other.id not in received_ids
 
     # Basis teacher can list personal goals by subject for their students
-    resp = client.get('/api/goals/', {'subject': subject_without_group.id})
+    resp = client.get('/api/goals/', {'subject': subject_owned_by_school.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
     assert personal_goal.id in received_ids
@@ -693,7 +667,7 @@ def test_basis_group_teacher_goal_access(
     resp = client.post('/api/goals/', {
         'student_id': student.id,
         'title': 'Personal goal by basis teacher',
-        'subject_id': subject_without_group.id,
+        'subject_id': subject_owned_by_school.id,
         'created_by_id': teacher.id
     }, format='json')
     assert resp.status_code == 201
@@ -703,7 +677,7 @@ def test_basis_group_teacher_goal_access(
     resp = client.post('/api/goals/', {
         'student_id': other_student.id,
         'title': 'Personal goal for other student',
-        'subject_id': subject_without_group.id
+        'subject_id': subject_owned_by_school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -711,7 +685,7 @@ def test_basis_group_teacher_goal_access(
     resp = client.put(f'/api/goals/{created_personal_goal_id}/', {
         'student_id': student.id,
         'title': 'Updated personal goal',
-        'subject_id': subject_without_group.id
+        'subject_id': subject_owned_by_school.id
     }, format='json')
     assert resp.status_code == 200
     assert resp.json()['title'] == 'Updated personal goal'
@@ -720,14 +694,14 @@ def test_basis_group_teacher_goal_access(
     student_created_goal = Goal.objects.create(
         title="Student created their own goal",
         student=student,
-        subject=subject_without_group,
+        subject=subject_owned_by_school,
         created_by=student,
     )
 
     resp = client.put(f'/api/goals/{student_created_goal.id}/', {
         'student_id': student.id,
         'title': 'Teacher trying to update student goal',
-        'subject_id': subject_without_group.id
+        'subject_id': subject_owned_by_school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -745,7 +719,7 @@ def test_basis_group_teacher_goal_access(
     resp = client.put(f'/api/goals/{personal_goal_other.id}/', {
         'student_id': other_student.id,
         'title': 'Updated personal goal attempt',
-        'subject_id': subject_without_group.id
+        'subject_id': subject_owned_by_school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -764,7 +738,7 @@ def test_basis_group_teacher_goal_access(
     personal_goal_other_teahcer = Goal.objects.create(
         title="Other student personal goal",
         student=student,
-        subject=subject_without_group,
+        subject=subject_owned_by_school,
         created_by=other_teacher,
     )
 
@@ -772,7 +746,7 @@ def test_basis_group_teacher_goal_access(
     resp = client.put(f'/api/goals/{personal_goal_other_teahcer.id}/', {
         'student_id': student.id,
         'title': 'Cannot update this',
-        'subject_id': subject_without_group.id
+        'subject_id': subject_owned_by_school.id
     }, format='json')
     assert resp.status_code == 403
 
