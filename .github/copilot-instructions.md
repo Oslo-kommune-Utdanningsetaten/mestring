@@ -108,6 +108,7 @@ State what you're missing, then propose targeted files to open. Do not guess sil
 
 ## Do Not
 
+- Important: Do not change or improve code which is unrelated to the request!
 - Invent endpoints or model fields not present in code.
 - Introduce business logic directly into frontend view components if it belongs server-side.
 - Add dependencies without checking existing tooling.
