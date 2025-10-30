@@ -179,7 +179,7 @@ class User(BaseModel):
 
 class Role(BaseModel):
     """
-    A Role represents a role a User can have in a Group. So far we only have 'student', 'teacher', 'staff', 'admin'.
+    A Role represents a role a User can have in a Group. So far we only have 'student', 'teacher', 'staff', 'admin', 'inspector'.
     """
     name = models.CharField(max_length=200)
 
@@ -313,7 +313,7 @@ class Situation(BaseModel):
 
 class Observation(BaseModel):
     """
-    An Observation represents an observation of a student, performed by a teacher or student. Only teachers and admins can access an observation if is_visible_to_student is False.
+    An Observation represents an observation of a student, performed by a teacher or student. Only teachers, inspectors and admins can access an observation if is_visible_to_student is False.
     """
     goal = models.ForeignKey(Goal, on_delete=models.RESTRICT, null=False, related_name='observations')
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False,

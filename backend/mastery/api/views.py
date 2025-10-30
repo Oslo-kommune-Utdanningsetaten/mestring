@@ -150,7 +150,7 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
             ),
             OpenApiParameter(
                 name='role',
-                description='Role name (e.g., student, teacher, staff, admin)',
+                description='Role name (e.g., student, teacher, staff, admin, inspector)',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
@@ -216,7 +216,7 @@ class UserSchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mo
             ),
             OpenApiParameter(
                 name='role',
-                description='Role name (e.g., student, teacher, staff, admin)',
+                description='Role name (e.g., student, teacher, staff, admin, inspector)',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY

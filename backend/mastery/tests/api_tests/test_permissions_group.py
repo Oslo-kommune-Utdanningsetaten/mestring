@@ -79,19 +79,19 @@ def test_superadmin_group_access(
 
 
 @pytest.mark.django_db
-def test_school_admin_group_access(
-        school, other_school, school_admin, teaching_group, other_school_teaching_group):
+def test_school_inspector_group_access(
+        school, other_school, school_inspector, teaching_group, other_school_teaching_group):
     client = APIClient()
-    client.force_authenticate(user=school_admin)
+    client.force_authenticate(user=school_inspector)
 
     # Can list groups in affiliated school
     resp = client.get('/api/groups/', {'school': school.id})
     assert resp.status_code == 200
-    data = resp.json()
     expected_ids = {teaching_group.id}
-    received_ids = {group['id'] for group in data}
-    assert len(received_ids) == len(expected_ids)
-    assert expected_ids.issubset(received_ids)
+    received_ids = {group['id'] for group in resp.json()}
+    print("🦊groups", resp.json())
+    assert expected_ids == received_ids
+
     # Will not include groups from other school
     assert other_school_teaching_group.id not in received_ids
 

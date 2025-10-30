@@ -118,6 +118,7 @@ def ensure_roles_exist():
     student_role = models.Role.objects.filter(name="student").first()
     admin_role = models.Role.objects.filter(name="admin").first()
     staff_role = models.Role.objects.filter(name="staff").first()
+    inspector_role = models.Role.objects.filter(name="inspector").first()
 
     if not teacher_role:
         teacher_role = models.Role.objects.create(
@@ -135,8 +136,11 @@ def ensure_roles_exist():
         staff_role = models.Role.objects.create(
             name="staff", maintained_at=timezone.now()
         )
-
-    return teacher_role, student_role, admin_role, staff_role
+    if not inspector_role:
+        inspector_role = models.Role.objects.create(
+            name="inspector", maintained_at=timezone.now()
+        )
+    return teacher_role, student_role, admin_role, staff_role, inspector_role
 
 
 def ensure_user_exists(user_data):

@@ -30,9 +30,9 @@ class UserAccessPolicy(BaseAccessPolicy):
             groups_where_current_user_is_teacher = user.teacher_groups
             groups_where_current_user_is_student = user.student_groups
 
-            # All schools where user is admin
-            school_admin_ids = UserSchool.objects.filter(
-                user_id=user.id, role__name="admin"
+            # All schools where user is admin or inspector
+            school_affiliated_ids = UserSchool.objects.filter(
+                user_id=user.id, role__name__in=["admin", "inspector"]
             ).values_list("school_id", flat=True).distinct()
 
             # All teacher user IDs from schools the user is affiliated with
@@ -46,12 +46,12 @@ class UserAccessPolicy(BaseAccessPolicy):
             filters |= Q(user_groups__group__in=groups_where_current_user_is_student)
             filters |= Q(id__in=teacher_ids)
 
-            # School admins: All users (students and teachers) at their schools
-            if school_admin_ids:
+            # School inspectors and admin: All users (students and teachers) at their schools
+            if school_affiliated_ids:
                 # Users in groups at their schools
-                filters |= Q(user_groups__group__school_id__in=school_admin_ids)
+                filters |= Q(user_groups__group__school_id__in=school_affiliated_ids)
                 # Users directly affiliated with their schools
-                filters |= Q(user_schools__school_id__in=school_admin_ids)
+                filters |= Q(user_schools__school_id__in=school_affiliated_ids)
 
             return qs.filter(filters).distinct()
         except Exception:

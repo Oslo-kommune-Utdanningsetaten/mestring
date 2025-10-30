@@ -50,6 +50,11 @@ def admin_role(db):
 
 
 @pytest.fixture
+def inspector_role(db):
+    return Role.objects.create(name="inspector")
+
+
+@pytest.fixture
 def superadmin(db) -> User:
     return User.objects.create(
         name="Superadmin",
@@ -71,6 +76,17 @@ def school_admin(db, school, admin_role) -> User:
 
 
 @pytest.fixture
+def school_inspector(db, school, inspector_role) -> User:
+    user = User.objects.create(
+        name="School inspector",
+        feide_id="schoolinspector001@kakrafoon.kommune.no",
+        email="schoolinspector001@kakrafoon.kommune.no",
+    )
+    school.set_affiliated_user(user, inspector_role)
+    return user
+
+
+@pytest.fixture
 def other_school_admin(db, other_school, admin_role) -> User:
     user = User.objects.create(
         name="Other School admin",
@@ -78,6 +94,17 @@ def other_school_admin(db, other_school, admin_role) -> User:
         email="otherschooladmin001@kakrafoon.kommune.no",
     )
     other_school.set_affiliated_user(user, admin_role)
+    return user
+
+
+@pytest.fixture
+def other_school_inspector(db, other_school, inspector_role) -> User:
+    user = User.objects.create(
+        name="Other School inspector",
+        feide_id="otherschoolinspector001@kakrafoon.kommune.no",
+        email="otherschoolinspector001@kakrafoon.kommune.no",
+    )
+    other_school.set_affiliated_user(user, inspector_role)
     return user
 
 

@@ -1877,7 +1877,7 @@ export type UserGroupsListData = {
          */
         group?: string;
         /**
-         * Role name (e.g., student, teacher, staff, admin)
+         * Role name (e.g., student, teacher, staff, admin, inspector)
          */
         role?: string;
         /**
@@ -1991,7 +1991,7 @@ export type UserSchoolsListData = {
     path?: never;
     query: {
         /**
-         * Role name (e.g., student, teacher, staff, admin)
+         * Role name (e.g., student, teacher, staff, admin, inspector)
          */
         role?: string;
         /**

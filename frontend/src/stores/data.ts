@@ -16,6 +16,7 @@ import {
   SUBJECTS_ALLOWED_ALL,
   SUBJECTS_ALLOWED_CUSTOM,
   SCHOOL_ADMIN_ROLE,
+  SCHOOL_INSPECTOR_ROLE,
 } from '../utils/constants'
 import type { AppData } from '../types/models'
 
@@ -65,8 +66,16 @@ export const registerUserStatus = async (school: SchoolType) => {
     query: { user: user.id, school: school.id },
   })
   const userSchools = userSchoolsResult.data || []
-  let isSchooladmin = !!userSchools.some(userSchool => userSchool.role.name === SCHOOL_ADMIN_ROLE)
-  dataStore.update(data => ({ ...data, isSchooladmin, isSuperadmin: user.isSuperadmin }))
+  const isSchoolAdmin = !!userSchools.some(userSchool => userSchool.role.name === SCHOOL_ADMIN_ROLE)
+  const isSchoolInspector = !!userSchools.some(
+    userSchool => userSchool.role.name === SCHOOL_INSPECTOR_ROLE
+  )
+  dataStore.update(data => ({
+    ...data,
+    isSchoolAdmin,
+    isSchoolInspector,
+    isSuperadmin: user.isSuperadmin,
+  }))
 }
 
 const loadSchool = async () => {

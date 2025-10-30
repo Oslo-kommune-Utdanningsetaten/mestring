@@ -13,7 +13,8 @@ export type AppData = {
   masterySchemas: MasterySchemaType[]
   defaultMasterySchema?: MasterySchemaType | null
   roles?: RoleType[]
-  isSchooladmin?: boolean
+  isSchoolAdmin?: boolean
+  isSchoolInspector?: boolean
   isSuperadmin?: boolean
 }
 

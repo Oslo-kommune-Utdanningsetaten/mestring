@@ -63,32 +63,32 @@ def test_superadmin_user_access(superadmin, school, teaching_group_with_members,
 
 
 @pytest.mark.django_db
-def test_school_admin_user_access(
-        school_admin, school, other_school, teaching_group_with_members,
+def test_school_inspector_user_access(
+        school_inspector, school, other_school, teaching_group_with_members,
         other_teaching_group_with_members, other_school_teaching_group_with_members,
-        student_role, admin_role):
+        student_role, inspector_role):
     """
-    Test access for school admins.
-    School admins can see ALL users (students and teachers) at their school,
+    Test access for school inspectors.
+    School inspectors can see ALL users (students and teachers) at their school,
     including users in groups they don't personally teach.
     They cannot see users from other schools.
     """
     client = APIClient()
-    client.force_authenticate(user=school_admin)
+    client.force_authenticate(user=school_inspector)
 
-    # Get users from admin's school
+    # Users from inspector's school
     teacher = teaching_group_with_members.get_teachers().first()
     student = teaching_group_with_members.get_students().first()
     other_teacher = other_teaching_group_with_members.get_teachers().first()
     other_student = other_teaching_group_with_members.get_students().first()
 
-    # Get users from other school
+    # Users from other school
     other_school_teacher = other_school_teaching_group_with_members.get_teachers().first()
     other_school_student = other_school_teaching_group_with_members.get_students().first()
 
     ################### List ###################
 
-    # School admin can list ALL users at their school
+    # School inspector can list ALL users at their school
     resp = client.get('/api/users/', {'school': school.id})
     assert resp.status_code == 200
     data = resp.json()
@@ -103,7 +103,7 @@ def test_school_admin_user_access(
     assert len(received_ids) == len(expected_ids)
     assert expected_ids.issubset(received_ids)
 
-    # School admin can list all teachers at their school
+    # School inspector can list all teachers at their school
     resp = client.get('/api/users/', {'school': school.id, 'roles': 'teacher'})
     assert resp.status_code == 200
     data = resp.json()
@@ -112,7 +112,7 @@ def test_school_admin_user_access(
     assert len(received_ids) == len(expected_ids)
     assert expected_ids.issubset(received_ids)
 
-    # School admin can list all students at their school
+    # School inspector can list all students at their school
     resp = client.get('/api/users/', {'school': school.id, 'roles': 'student'})
     assert resp.status_code == 200
     data = resp.json()
@@ -121,7 +121,7 @@ def test_school_admin_user_access(
     assert len(received_ids) == len(expected_ids)
     assert expected_ids.issubset(received_ids)
 
-    # School admin can list users in specific groups at their school
+    # School inspector can list users in specific groups at their school
     resp = client.get('/api/users/', {'school': school.id, 'groups': teaching_group_with_members.id})
     assert resp.status_code == 200
     data = resp.json()
@@ -130,7 +130,7 @@ def test_school_admin_user_access(
     assert len(received_ids) == len(expected_ids)
     assert expected_ids.issubset(received_ids)
 
-    # School admin cannot list users from other schools
+    # School inspector cannot list users from other schools
     resp = client.get('/api/users/', {'school': other_school.id})
     assert resp.status_code == 200
     data = resp.json()
@@ -140,25 +140,25 @@ def test_school_admin_user_access(
 
     ################### Retrieve ###################
 
-    # School admin can retrieve students at their school
+    # School inspector can retrieve students at their school
     resp = client.get(f'/api/users/{student.id}/')
     assert resp.status_code == 200
 
     resp = client.get(f'/api/users/{other_student.id}/')
     assert resp.status_code == 200
 
-    # School admin can retrieve teachers at their school
+    # School inspector can retrieve teachers at their school
     resp = client.get(f'/api/users/{teacher.id}/')
     assert resp.status_code == 200
 
     resp = client.get(f'/api/users/{other_teacher.id}/')
     assert resp.status_code == 200
 
-    # School admin can retrieve themselves
-    resp = client.get(f'/api/users/{school_admin.id}/')
+    # School inspector can retrieve themselves
+    resp = client.get(f'/api/users/{school_inspector.id}/')
     assert resp.status_code == 200
 
-    # School admin cannot retrieve users from other schools
+    # School inspector cannot retrieve users from other schools
     resp = client.get(f'/api/users/{other_school_teacher.id}/')
     assert resp.status_code == 404
 
@@ -167,13 +167,13 @@ def test_school_admin_user_access(
 
     ################### UserSchool affiliated student ###################
 
-    # Teacher becomes school admin
-    teacher_becomes_school_admin = UserSchool.objects.create(
-        user=teacher, school=school, role=admin_role
+    # Teacher becomes school inspector
+    teacher_becomes_school_inspector = UserSchool.objects.create(
+        user=teacher, school=school, role=inspector_role
     )
 
     client.force_authenticate(user=teacher)
-    # Now teacher (as school admin) can see all users at the school
+    # Now teacher (as school inspector) can see all users at the school
     resp = client.get('/api/users/', {'school': school.id})
     assert resp.status_code == 200
     data = resp.json()

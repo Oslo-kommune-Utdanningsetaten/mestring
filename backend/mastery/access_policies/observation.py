@@ -57,7 +57,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         """
         Filter observations based on who can see them:
         - Everyone: Observations they created or observed (if visible)
-        - School admins: All observations for students at their school
+        - School inspectors: All observations for students at their school
         - Teaching group teachers:
           - Observations on group goals in groups they teach
           - Observations on personal goals for students they teach in that subject
@@ -73,19 +73,20 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             teacher_group_ids = list(requester.teacher_groups.values_list('id', flat=True))
             teacher_basis_group_ids = list(requester.teacher_groups.filter(
                 type='basis').values_list('id', flat=True))
-            school_admin_ids = UserSchool.objects.filter(
-                user_id=requester.id, role__name="admin").values_list("school_id", flat=True).distinct()
+            school_affiliated_ids = UserSchool.objects.filter(
+                user_id=requester.id, role__name__in=["admin", "inspector"]).values_list(
+                "school_id", flat=True).distinct()
 
             # Everyone can see observations they created or observed
             filters = Q(created_by=requester)
             filters |= Q(observer=requester, is_visible_to_student=True)
 
-            # School admins: All observations for students at their schools
-            if school_admin_ids:
+            # School inspectors and admins: All observations for students at their schools
+            if school_affiliated_ids:
                 # Observations on goals in groups at their schools
-                filters |= Q(goal__group__school_id__in=school_admin_ids)
+                filters |= Q(goal__group__school_id__in=school_affiliated_ids)
                 # Observations on personal goals for students at their schools
-                filters |= Q(student__groups__school_id__in=school_admin_ids)
+                filters |= Q(student__groups__school_id__in=school_affiliated_ids)
 
             # Teaching group teachers: Observations on group goals + personal goals for students they teach
             if teacher_group_ids:

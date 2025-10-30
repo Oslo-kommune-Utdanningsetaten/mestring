@@ -58,18 +58,18 @@ def test_superadmin_goal_access(superadmin, goal_with_group, goal_personal_other
 
 
 @pytest.mark.django_db
-def test_school_admin_goal_access(
-        school_admin, school, goal_with_group, goal_personal, goal_personal_other_student, student,
+def test_school_inspector_goal_access(
+        school_inspector, school, goal_with_group, goal_personal, goal_personal_other_student, student,
         teaching_group_with_members, other_teaching_group_with_members, other_school_teaching_group,
         other_school_student, other_school_group_goal, other_school_personal_goal, subject_without_group,
         student_role):
     """
-    Test access for school admins.
-    School admins have read only access to all goals group and personal for students at their school
+    Test access for school inspectors.
+    School inspectors have read only access to all goals group and personal for students at their school
     They cannot create, update, or delete any goals
     """
     client = APIClient()
-    client.force_authenticate(user=school_admin)
+    client.force_authenticate(user=school_inspector)
 
     ################### Setup ###################
 
@@ -91,38 +91,38 @@ def test_school_admin_goal_access(
 
     ################### List ###################
 
-    # School admin can list goals in groups at their school
+    # School inspector can list goals in groups at their school
     resp = client.get('/api/goals/', {'group': goal_with_group.group.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
     assert goal_with_group.id in received_ids
     assert other_school_group_goal.id not in received_ids
 
-    # School admin cannot list goals in groups at other schools
+    # School inspector cannot list goals in groups at other schools
     resp = client.get('/api/goals/', {'group': other_school_teaching_group.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
-    # School admin can list goals for students at their school
+    # School inspector can list goals for students at their school
     resp = client.get('/api/goals/', {'student': student.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
-    assert goal_personal.id in received_ids  # Personal goal at admin's school
-    assert goal_with_group.id in received_ids  # Group goal at admin's school
+    assert goal_personal.id in received_ids  # Personal goal at inspector's school
+    assert goal_with_group.id in received_ids  # Group goal at inspector's school
     assert other_school_personal_goal.id not in received_ids
     assert personal_goal_unaffiliated.id not in received_ids
 
-    # School admin cannot list goals for students at other schools
+    # School inspector cannot list goals for students at other schools
     resp = client.get('/api/goals/', {'student': other_school_student.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
-    # School admin cannot list goals for unaffiliated students
+    # School inspector cannot list goals for unaffiliated students
     resp = client.get('/api/goals/', {'student': unaffiliated_student.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
-    # School admin can list goals by subject at their school
+    # School inspector can list goals by subject at their school
     resp = client.get('/api/goals/', {'subject': subject_without_group.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
@@ -133,14 +133,14 @@ def test_school_admin_goal_access(
 
     ################### Retrieve ###################
 
-    # School admin can retrieve goals at their school
+    # School inspector can retrieve goals at their school
     resp = client.get(f'/api/goals/{goal_with_group.id}/')
     assert resp.status_code == 200
 
     resp = client.get(f'/api/goals/{goal_personal.id}/')
     assert resp.status_code == 200
 
-    # School admin cannot retrieve goals at other schools
+    # School inspector cannot retrieve goals at other schools
     resp = client.get(f'/api/goals/{other_school_group_goal.id}/')
     assert resp.status_code == 404
 
@@ -152,23 +152,23 @@ def test_school_admin_goal_access(
 
     ################### Create ###################
 
-    # School admin has READ-ONLY access cannot create goals
+    # School inspector has READ-ONLY access cannot create goals
     resp = client.post('/api/goals/', {
         'group_id': teaching_group_with_members.id,
-        'title': 'New group goal by school admin'
+        'title': 'New group goal by school inspector'
     }, format='json')
     assert resp.status_code == 403
 
     resp = client.post('/api/goals/', {
         'student_id': student.id,
-        'title': 'New personal goal by school admin',
+        'title': 'New personal goal by school inspector',
         'subject_id': subject_without_group.id
     }, format='json')
     assert resp.status_code == 403
 
     ################### Update ###################
 
-    # School admin cannot update goals
+    # School inspector cannot update goals
     resp = client.put(f'/api/goals/{goal_with_group.id}/', {
         'group_id': goal_with_group.group.id,
         'title': 'Updated goal title'
@@ -184,7 +184,7 @@ def test_school_admin_goal_access(
 
     ################### Delete ###################
 
-    # School admin cannot delete goals
+    # School inspector cannot delete goals
     resp = client.delete(f'/api/goals/{goal_with_group.id}/')
     assert resp.status_code == 403
 

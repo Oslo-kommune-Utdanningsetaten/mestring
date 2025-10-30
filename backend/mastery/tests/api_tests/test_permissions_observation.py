@@ -64,17 +64,17 @@ def test_superadmin_observation_access(
 
 
 @pytest.mark.django_db
-def test_school_admin_observation_access(
-        school_admin, student, other_school_student,
+def test_school_inspector_observation_access(
+        school_inspector, student, other_school_student,
         observation_on_group_goal, observation_on_personal_goal, goal_personal,
         other_school_group_goal, other_school_personal_goal, subject_without_group):
     """
-    Test access for school admins.
-    School admins have read only access to all observations for students at their school.
+    Test access for school inspector.
+    School inspector have read only access to all observations for students at their school.
     They cannot create, update, or delete any observations.
     """
     client = APIClient()
-    client.force_authenticate(user=school_admin)
+    client.force_authenticate(user=school_inspector)
 
     #### Setup additional data ####
 
@@ -114,26 +114,26 @@ def test_school_admin_observation_access(
 
     ################### List ###################
 
-    # School admin can list observations for students at their school
+    # School inspector can list observations for students at their school
     resp = client.get("/api/observations/", {"student": student.id})
     assert resp.status_code == 200
     received_ids = {obs["id"] for obs in resp.json()}
-    assert observation_on_group_goal.id in received_ids  # Group goal observation at admin's school
-    assert observation_on_personal_goal.id in received_ids  # Personal goal observation at admin's school
+    assert observation_on_group_goal.id in received_ids  # Group goal observation at inspector's school
+    assert observation_on_personal_goal.id in received_ids  # Personal goal observation at inspector's school
     assert observation_personal_other_school.id not in received_ids
     assert observation_unaffiliated.id not in received_ids
 
-    # School admin cannot list observations for students at other schools
+    # School inspector cannot list observations for students at other schools
     resp = client.get("/api/observations/", {"student": other_school_student.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
-    # School admin cannot list observations for unaffiliated students
+    # School inspector cannot list observations for unaffiliated students
     resp = client.get("/api/observations/", {"student": unaffiliated_student.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
-    # School admin can list observations by goal at their school
+    # School inspector can list observations by goal at their school
     resp = client.get("/api/observations/", {"goal": observation_on_group_goal.goal.id})
     assert resp.status_code == 200
     received_ids = {obs["id"] for obs in resp.json()}
@@ -144,42 +144,42 @@ def test_school_admin_observation_access(
     received_ids = {obs["id"] for obs in resp.json()}
     assert observation_on_personal_goal.id in received_ids
 
-    # School admin cannot list observations by goal at other schools
+    # School inspector cannot list observations by goal at other schools
     resp = client.get("/api/observations/", {"goal": other_school_group_goal.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
     ################### Retrieve ###################
 
-    # School admin can retrieve group goal observations at their school
+    # School inspector can retrieve group goal observations at their school
     resp = client.get(f"/api/observations/{observation_on_group_goal.id}/")
     assert resp.status_code == 200
 
-    # School admin can retrieve personal goal observations at their school
+    # School inspector can retrieve personal goal observations at their school
     resp = client.get(f"/api/observations/{observation_on_personal_goal.id}/")
     assert resp.status_code == 200
 
-    # School admin can see observations even if not visible to student
+    # School inspector can see observations even if not visible to student
     observation_on_personal_goal.is_visible_to_student = False
     observation_on_personal_goal.save()
     resp = client.get(f"/api/observations/{observation_on_personal_goal.id}/")
     assert resp.status_code == 200
 
-    # School admin cannot retrieve group goal observations at other schools
+    # School inspector cannot retrieve group goal observations at other schools
     resp = client.get(f"/api/observations/{observation_group_other_school.id}/")
     assert resp.status_code == 404
 
-    # School admin cannot retrieve personal goal observations at other schools
+    # School inspector cannot retrieve personal goal observations at other schools
     resp = client.get(f"/api/observations/{observation_personal_other_school.id}/")
     assert resp.status_code == 404
 
-    # School admin cannot retrieve observations for unaffiliated students
+    # School inspector cannot retrieve observations for unaffiliated students
     resp = client.get(f"/api/observations/{observation_unaffiliated.id}/")
     assert resp.status_code == 404
 
     ################### Create ###################
 
-    # School admin cannot create observations on group goals
+    # School inspector cannot create observations on group goals
     resp = client.post("/api/observations/", {
         "student_id": student.id,
         "goal_id": observation_on_group_goal.goal.id,
@@ -187,7 +187,7 @@ def test_school_admin_observation_access(
     }, format='json')
     assert resp.status_code == 403
 
-    # School admin cannot create observations on personal goals
+    # School inspector cannot create observations on personal goals
     resp = client.post("/api/observations/", {
         "student_id": student.id,
         "goal_id": goal_personal.id,
@@ -197,7 +197,7 @@ def test_school_admin_observation_access(
 
     ################### Update ###################
 
-    # School admin cannot update observations on group goals
+    # School inspector cannot update observations on group goals
     resp = client.put(f"/api/observations/{observation_on_group_goal.id}/", {
         "student_id": student.id,
         "goal_id": observation_on_group_goal.goal.id,
@@ -206,7 +206,7 @@ def test_school_admin_observation_access(
     }, format='json')
     assert resp.status_code == 403
 
-    # School admin cannot update observations on personal goals
+    # School inspector cannot update observations on personal goals
     resp = client.put(f"/api/observations/{observation_on_personal_goal.id}/", {
         "student_id": student.id,
         "goal_id": goal_personal.id,
@@ -217,11 +217,11 @@ def test_school_admin_observation_access(
 
     ################### Delete ###################
 
-    # School admin cannot delete observations on group goals
+    # School inspector cannot delete observations on group goals
     resp = client.delete(f"/api/observations/{observation_on_group_goal.id}/")
     assert resp.status_code == 403
 
-    # School admin cannot delete observations on personal goals
+    # School inspector cannot delete observations on personal goals
     resp = client.delete(f"/api/observations/{observation_on_personal_goal.id}/")
     assert resp.status_code == 403
 

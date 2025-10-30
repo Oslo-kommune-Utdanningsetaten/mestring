@@ -35,6 +35,7 @@ def test_superadmin_access(superadmin, school, school_admin):
     assert resp.status_code == 200
 
 
+# TODO: Rewrite to use student and other student fixtures, because inspectors and admins have more access than we're testing here
 @pytest.mark.django_db
 def test_user_self_access(school, other_school, school_admin, other_school_admin):
     client = APIClient()

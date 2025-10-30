@@ -36,7 +36,8 @@ class GroupAccessPolicy(BaseAccessPolicy):
             return qs
         try:
             school_admin_ids = UserSchool.objects.filter(
-                user_id=user.id, role__name="admin").values_list("school_id", flat=True).distinct()
+                user_id=user.id, role__name__in=["admin", "inspector"]
+            ).values_list("school_id", flat=True).distinct()
             teacher_groups = user.teacher_groups
             student_groups = user.student_groups
             return qs.filter(

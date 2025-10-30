@@ -78,12 +78,11 @@ def test_superadmin_subject_access(
 
 @pytest.mark.django_db
 def test_authenticated_subject_access(
-        school, other_school, school_admin, teacher, student, subject_with_group, subject_without_group,
+        school, other_school, school_inspector, teacher, student, subject_with_group, subject_without_group,
         subject_owned_by_other_school):
     client = APIClient()
-    client.force_authenticate(user=school_admin)
 
-    for index, user in enumerate([school_admin, teacher, student]):
+    for index, user in enumerate([school_inspector, teacher, student]):
         client.force_authenticate(user=user)
         # School param is required
         resp = client.get(f'/api/subjects/')
