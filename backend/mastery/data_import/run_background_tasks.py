@@ -3,7 +3,9 @@ import names
 import time
 import logging
 import threading
+import traceback
 from datetime import timedelta
+import json
 from django.db import transaction
 from django.utils import timezone
 from mastery.models import DataMaintenanceTask, generate_nanoid
@@ -43,7 +45,40 @@ def claim_next_task():
 
 # For each chunk of work done, update the progress
 def update_progress(task, result):
-    DataMaintenanceTask.objects.filter(id=task.id).update(result=result, last_heartbeat_at=timezone.now())
+    # Merge incoming result into the persisted task.result without overwriting existing errors.
+    # Use select_for_update to avoid race conditions when multiple workers/processes update the same task.
+    with transaction.atomic():
+        persisted = DataMaintenanceTask.objects.select_for_update().only("id", "result").get(id=task.id)
+        persisted_result = persisted.result or {}
+
+        # Merge top-level keys from incoming result into persisted_result (shallow merge).
+        # Preserve existing errors array and append new errors if present.
+        incoming = result or {}
+        merged = dict(persisted_result)
+
+        # Merge/append errors
+        persisted_errors = merged.get("errors", []) or []
+        incoming_errors = incoming.get("errors", []) or []
+        # Avoid duplicating identical error entries by deterministic JSON serialization
+        # Keep errors as JSON objects in the stored list; only use serialized form for dedupe keys.
+        try:
+            seen = {json.dumps(e, sort_keys=True) for e in persisted_errors}
+        except Exception:
+            seen = set()
+        for e in incoming_errors:
+            try:
+                s = json.dumps(e, sort_keys=True)
+            except Exception:
+                # Fallback to str() if object not JSON-serializable
+                s = str(e)
+            if s not in seen:
+                persisted_errors.append(e)
+                seen.add(s)
+
+        merged.update(incoming)
+        merged["errors"] = persisted_errors
+
+        DataMaintenanceTask.objects.filter(id=task.id).update(result=merged, last_heartbeat_at=timezone.now())
 
 
 def next_execution_time(task):
@@ -51,10 +86,10 @@ def next_execution_time(task):
     return timezone.now() + timedelta(seconds=delay)
 
 
-def append_error_to_result(task, error):
+def append_error_to_result(task, error_as_string):
     result = task.result or {}
     errors = result.get("errors", [])
-    errors.append({"error": "unexpected-error", "message": str(error)[:1000]})
+    errors.append({"error": "unexpected-error", "message": error_as_string})
     result["errors"] = errors
     return result
 
@@ -106,14 +141,16 @@ def run():
             task.finished_at = timezone.now()
             task.save(update_fields=["status", "finished_at", "updated_at"])
         except Exception as error:
-            logger.error(f"Task {task.job_name} (id: {task.id}) failed: {error}")
+            logger.error(f"Task {task.job_name} (id: {task.id}) failed: {error}", exc_info=True)
+            tb = traceback.format_exc()
+            error_as_string = str(error) + f". {tb}"
             with transaction.atomic():
                 # refresh task to avoid stale data
                 task = (DataMaintenanceTask.objects.select_for_update().only(
                     "id", "result", "attempts", "status", "handler_name", "earliest_run_at", "updated_at",
                     "failed_at").get(id=task.id))
                 # append error to result
-                task.result = append_error_to_result(task, error)
+                task.result = append_error_to_result(task, error_as_string)
 
                 if task.attempts <= len(RETRY_BACKOFF):
                     # failed, but schedule retry

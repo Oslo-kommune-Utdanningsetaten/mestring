@@ -25,7 +25,7 @@ def import_memberships_from_file(org_number):
     with open(memberships_file, "r", encoding="utf-8") as file:
         memberships_data = json.load(file)
 
-    teacher_role, student_role, _, _ = ensure_roles_exist()
+    teacher_role, student_role, _, _, _ = ensure_roles_exist()
 
     # Progress reporting variables
     processed_count = 0
