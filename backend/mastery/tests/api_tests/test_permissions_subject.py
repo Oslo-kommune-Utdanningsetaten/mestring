@@ -142,7 +142,7 @@ def test_authenticated_subject_access(
 
 
 @pytest.mark.django_db
-def test_school_admin_subject_access(school_admin, school, other_school, client):
+def test_school_admin_subject_access(school_admin, school, other_school, client, subject_with_group):
     client = APIClient()
     client.force_authenticate(user=school_admin)
 
@@ -180,6 +180,11 @@ def test_school_admin_subject_access(school_admin, school, other_school, client)
     # Can delete the created subject
     resp = client.delete(f'/api/subjects/{created_id}/')
     assert resp.status_code == 204
+
+    # Cannot edit a subject attached to a group at the school
+    resp = client.patch(f'/api/subjects/{subject_with_group.id}/',
+                        {'display_name': 'Patched!'}, format='json')
+    assert resp.status_code == 403
 
     # Cannot create a subject owned by other school
     payload = {
