@@ -128,7 +128,7 @@
         <div class="user-grid-row header fw-bold">
           <span>Bruker</span>
           <span>Tilknytninger</span>
-          <span></span>
+          <span>Rolle</span>
         </div>
         <!-- Data rows -->
         {#each filteredUsers as user}

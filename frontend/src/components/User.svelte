@@ -14,7 +14,7 @@
     userSchoolsDestroy,
     userSchoolsCreate,
   } from '../generated/sdk.gen'
-  import { SCHOOL_ADMIN_ROLE } from '../utils/constants'
+  import { SCHOOL_ADMIN_ROLE, SCHOOL_INSPECTOR_ROLE, NONE_FIELD_VALUE } from '../utils/constants'
   import { dataStore } from '../stores/data'
   import ButtonMini from './ButtonMini.svelte'
 
@@ -22,11 +22,19 @@
   const adminRole = $derived<RoleType>(
     $dataStore.roles?.find(role => role.name === SCHOOL_ADMIN_ROLE)
   )
+  const inspectorRole = $derived<RoleType>(
+    $dataStore.roles?.find(role => role.name === SCHOOL_INSPECTOR_ROLE)
+  )
   let userGroups = $state<NestedUserGroupType[]>([])
   let userSchools = $state<NestedUserSchoolType[]>([])
   let isLoadingData = $state<boolean>(false)
   let hasLoadedData = $state<boolean>(false)
+  let isSchoolInspector = $derived(!!userSchools.find(us => us.role.id === inspectorRole?.id))
   let isSchoolAdmin = $derived(!!userSchools.find(us => us.role.id === adminRole?.id))
+  const relevantSchoolRoles = [SCHOOL_INSPECTOR_ROLE, SCHOOL_ADMIN_ROLE]
+  let selectedSchoolRole = $derived(
+    isSchoolAdmin ? SCHOOL_ADMIN_ROLE : isSchoolInspector ? SCHOOL_INSPECTOR_ROLE : NONE_FIELD_VALUE
+  )
 
   const fetchUserAffiliations = async () => {
     try {
@@ -45,30 +53,40 @@
     }
   }
 
-  const handleToggleSchoolAdminStatus = async () => {
-    if (!user.id || !school.id || !adminRole.id) {
-      console.error('Missing user, school, or admin role information', user, school, adminRole)
+  const handleRoleChange = async (roleName: string) => {
+    if (!user.id || !school.id || !roleName) {
+      console.error('Missing information', user, school, roleName)
       return
     }
+
+    const confirmed = confirm(
+      `Er du sikker på at du vil endre ${user.name} sin rolle til ${roleName}?`
+    )
+
+    if (!confirmed) return
+
     try {
-      if (isSchoolAdmin) {
-        // Remove admin role
-        const userGroupAdmin = userSchools.find(us => us.role.name === SCHOOL_ADMIN_ROLE)
-        if (userGroupAdmin) {
-          await userSchoolsDestroy({
-            path: {
-              id: userGroupAdmin.id,
-            },
+      // Remove all existing roles
+      await Promise.all(
+        userSchools
+          .filter(us => relevantSchoolRoles.includes(us.role.name))
+          .map(async userSchool => {
+            return await userSchoolsDestroy({
+              path: {
+                id: userSchool.id,
+              },
+            })
           })
-        }
-      } else {
-        // Add admin role
+      )
+      // Add new role
+      const roleToAssign = $dataStore.roles?.find(role => role.name === roleName)
+      if (roleToAssign) {
         await userSchoolsCreate({
-          body: { userId: user.id, schoolId: school.id, roleId: adminRole.id },
+          body: { userId: user.id, schoolId: school.id, roleId: roleToAssign.id },
         })
       }
     } catch (error) {
-      console.error('Error toggling school admin status:', error)
+      console.error('Error changing role:', error)
     } finally {
       fetchUserAffiliations()
     }
@@ -96,14 +114,25 @@
   </div>
   <div>
     {#if userSchools.length > 0 || userGroups.length > 0}
-      <pkt-checkbox
-        label="Admin"
-        labelPosition="left"
-        isSwitch="true"
-        aria-checked={isSchoolAdmin}
-        checked={isSchoolAdmin}
-        onchange={() => handleToggleSchoolAdminStatus()}
-      ></pkt-checkbox>
+      <div class="pkt-inputwrapper">
+        <pkt-select
+          label=""
+          name="userSchoolRole"
+          value={selectedSchoolRole}
+          onchange={(e: Event) => {
+            const target = e.target as HTMLSelectElement | null
+            const roleName = target?.value || NONE_FIELD_VALUE
+            handleRoleChange(roleName)
+          }}
+        >
+          <option value={NONE_FIELD_VALUE}>Ingen</option>
+          {#each relevantSchoolRoles as option}
+            <option value={option}>
+              {option}
+            </option>
+          {/each}
+        </pkt-select>
+      </div>
     {:else}
       <div class="pkt-input-check">
         <ButtonMini
