@@ -752,3 +752,120 @@ def test_basis_group_teacher_goal_access(
 
     resp = client.delete(f'/api/goals/{personal_goal_other_teahcer.id}/')
     assert resp.status_code == 403
+
+
+@pytest.mark.django_db
+def test_school_admin_goal_access(
+    school_admin,
+    school,
+    teaching_group_with_members,
+    other_school_teaching_group,
+    goal_with_group,
+    goal_personal,
+    goal_personal_other_student,
+    other_school_group_goal,
+    other_school_personal_goal,
+    subject_owned_by_school,
+    student,
+):
+    """
+    School admins have read and write access to goals attached to groups at their school
+    and to (personal) goals attached to subjects owned by their school. They do not have
+    access to goals from other schools.
+    """
+    client = APIClient()
+    client.force_authenticate(user=school_admin)
+
+    # Endpoint requires at least one param
+    resp = client.get('/api/goals/')
+    assert resp.status_code == 400
+
+    # Can list group goals for groups at their school
+    resp = client.get('/api/goals/', {'group': teaching_group_with_members.id})
+    assert resp.status_code == 200
+    received_ids = {goal['id'] for goal in resp.json()}
+    expected_ids = {goal_with_group.id}
+    assert received_ids == expected_ids
+
+    # Cannot list group goals from other schools
+    resp = client.get('/api/goals/', {'group': other_school_teaching_group.id})
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+    # Can list personal goals by subject owned by their school
+    resp = client.get('/api/goals/', {'subject': subject_owned_by_school.id})
+    assert resp.status_code == 200
+    received_ids = {goal['id'] for goal in resp.json()}
+    expected_ids = {goal_personal.id, goal_personal_other_student.id}
+    assert received_ids == expected_ids
+
+    # Can retrieve specific group and personal goals at their school
+    resp = client.get(f'/api/goals/{goal_with_group.id}/')
+    assert resp.status_code == 200
+    resp = client.get(f'/api/goals/{goal_personal.id}/')
+    assert resp.status_code == 200
+
+    # Cannot retrieve goals from other schools
+    resp = client.get(f'/api/goals/{other_school_group_goal.id}/')
+    assert resp.status_code == 404
+    resp = client.get(f'/api/goals/{other_school_personal_goal.id}/')
+    assert resp.status_code == 404
+
+    # Can create a group goal in their school
+    resp = client.post('/api/goals/', {
+        'group_id': teaching_group_with_members.id,
+        'title': 'New group goal by school admin',
+        'created_by_id': school_admin.id
+    }, format='json')
+    assert resp.status_code == 201
+    created_group_goal_id = resp.json()['id']
+
+    # Can create a personal goal for a student in a subject owned by the school
+    resp = client.post('/api/goals/', {
+        'student_id': student.id,
+        'title': 'New personal goal by school admin',
+        'subject_id': subject_owned_by_school.id,
+        'created_by_id': school_admin.id
+    }, format='json')
+    assert resp.status_code == 201
+    created_personal_goal_id = resp.json()['id']
+
+    # Can update goals at their school
+    resp = client.put(f'/api/goals/{created_group_goal_id}/', {
+        'group_id': teaching_group_with_members.id,
+        'title': 'Updated by admin'
+    }, format='json')
+    assert resp.status_code == 200
+
+    resp = client.put(f'/api/goals/{created_personal_goal_id}/', {
+        'student_id': student.id,
+        'title': 'Updated personal by admin',
+        'subject_id': subject_owned_by_school.id
+    }, format='json')
+    assert resp.status_code == 200
+
+    # Can delete goals at their school
+    resp = client.delete(f'/api/goals/{created_group_goal_id}/')
+    assert resp.status_code == 204
+    resp = client.delete(f'/api/goals/{created_personal_goal_id}/')
+    assert resp.status_code == 204
+
+    # Cannot list goals from other schools
+    resp = client.get('/api/goals/', {'group': other_school_teaching_group.id})
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+    # Cannot create goals for other schools' groups
+    resp = client.post('/api/goals/', {
+        'group_id': other_school_teaching_group.id,
+        'title': 'Invalid group goal',
+        'created_by_id': school_admin.id
+    }, format='json')
+    assert resp.status_code == 403
+
+    # Cannot update goals from other schools (403 or 404 depending on implementation)
+    resp = client.put(f'/api/goals/{other_school_group_goal.id}/', {
+        'group_id': other_school_teaching_group.id,
+        'title': 'Try update other school'
+    }, format='json')
+    assert resp.status_code in (403, 404)

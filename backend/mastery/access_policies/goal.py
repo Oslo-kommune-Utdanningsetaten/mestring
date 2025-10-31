@@ -1,5 +1,5 @@
 from .base import BaseAccessPolicy
-from mastery.models import User, UserGroup, UserSchool
+from mastery.models import Subject, UserGroup, UserSchool, Group
 from django.db.models import Q, Exists, OuterRef
 import logging
 
@@ -47,7 +47,14 @@ class GoalAccessPolicy(BaseAccessPolicy):
             "principal": ["role:teacher"],
             "effect": "allow",
             "condition": "can_teacher_modify_goal"
-        }
+        },
+        # School admins have write access to goals belonging to their school
+        {
+            "action": ["create", "update", "partial_update", "destroy"],
+            "principal": ["role:admin"],
+            "effect": "allow",
+            "condition": "is_admin_at_school"
+        },
     ]
 
     def scope_queryset(self, request, qs):
@@ -215,4 +222,47 @@ class GoalAccessPolicy(BaseAccessPolicy):
             return is_basis_teacher or teaches_subject
         except Exception:
             logger.exception("GoalAccessPolicy.can_teacher_modify_goal error")
+            return False
+
+    # True if requester is admin at the school which owns the goal
+    def is_admin_at_school(self, request, view, action):
+        try:
+            if action == 'create':
+                group_id = request.data.get("group_id")
+                subject_id = request.data.get("subject_id")
+                if group_id:
+                    # Get school from group
+                    group = Group.objects.get(id=group_id)
+                    school_id = group.school_id
+                elif subject_id:
+                    # Get school from subject
+                    subject = Subject.objects.get(id=subject_id)
+                    school_id = subject.owned_by_school_id
+                else:
+                    return False
+
+            elif action in ['update', 'partial_update', 'destroy']:
+                goal = view.get_object()
+                if not goal:
+                    return False
+                if goal.group_id:
+                    # Get school from group
+                    school_id = goal.group.school_id
+                else:
+                    # Get school from subject
+                    school_id = goal.subject.owned_by_school_id
+            else:
+                return False
+
+            # No school associated, deny access
+            if not school_id:
+                return False
+
+            school_admin_ids = UserSchool.objects.filter(
+                user_id=request.user.id, role__name="admin").values_list("school_id", flat=True).distinct()
+
+            return school_id in school_admin_ids
+
+        except Exception:
+            logger.exception("SubjectAccessPolicy.belongs_to_group error")
             return False
