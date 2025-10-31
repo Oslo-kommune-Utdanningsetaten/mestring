@@ -51,7 +51,7 @@ class SubjectAccessPolicy(BaseAccessPolicy):
                 Q(owned_by_school_id__in=school_ids)
             ).distinct()
         except Exception:
-            logger.exception("SubjectAccessPolicy.scope_queryset error")
+            logger.exception("SubjectAccessPolicy.scope_queryset")
             return qs.none()
 
     # True if requester is admin at the school which owns the subject
@@ -75,5 +75,5 @@ class SubjectAccessPolicy(BaseAccessPolicy):
             return school_id in school_admin_ids
 
         except Exception:
-            logger.exception("SubjectAccessPolicy.belongs_to_group error")
+            logger.exception("SubjectAccessPolicy.belongs_to_group")
             return False

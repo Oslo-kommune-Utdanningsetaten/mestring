@@ -121,7 +121,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
 
             return qs.filter(filters).distinct()
         except Exception:
-            logger.exception("GoalAccessPolicy.scope_queryset error")
+            logger.exception("GoalAccessPolicy.scope_queryset")
             return qs.none()
 
     def can_student_create_goal(self, request, view, action):
@@ -138,7 +138,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
             # Must be creating for themselves
             return str(student_id) == str(requester.id)
         except Exception:
-            logger.exception("GoalAccessPolicy.can_student_create_goal error")
+            logger.exception("GoalAccessPolicy.can_student_create_goal")
             return False
 
     def can_teacher_create_goal(self, request, view, action):
@@ -176,7 +176,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
 
             return False
         except Exception:
-            logger.exception("GoalAccessPolicy.can_teacher_create_goal error")
+            logger.exception("GoalAccessPolicy.can_teacher_create_goal")
             return False
 
     def can_student_modify_goal(self, request, view, action):
@@ -188,7 +188,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
                     target_goal.group_id is None and
                     target_goal.created_by_id == requester.id)
         except Exception as error:
-            logger.exception("GoalAccessPolicy.can_student_modify_goal error")
+            logger.exception("GoalAccessPolicy.can_student_modify_goal")
             return False
 
     def can_teacher_modify_goal(self, request, view, action):
@@ -221,7 +221,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
 
             return is_basis_teacher or teaches_subject
         except Exception:
-            logger.exception("GoalAccessPolicy.can_teacher_modify_goal error")
+            logger.exception("GoalAccessPolicy.can_teacher_modify_goal")
             return False
 
     # True if requester is admin at the school which owns the goal
@@ -264,5 +264,5 @@ class GoalAccessPolicy(BaseAccessPolicy):
             return school_id in school_admin_ids
 
         except Exception:
-            logger.exception("SubjectAccessPolicy.belongs_to_group error")
+            logger.exception("SubjectAccessPolicy.belongs_to_group")
             return False

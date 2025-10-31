@@ -116,7 +116,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
 
             return qs.filter(filters).distinct()
         except Exception:
-            logger.exception("ObservationAccessPolicy.scope_queryset error")
+            logger.exception("ObservationAccessPolicy.scope_queryset")
             return qs.none()
 
     def can_teacher_create_observation(self, request, view, action):
@@ -155,7 +155,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             return False
 
         except Exception:
-            logger.exception("ObservationAccessPolicy.can_teacher_create_observation error:")
+            logger.exception("ObservationAccessPolicy.can_teacher_create_observation")
             return False
 
     def can_student_create_observation(self, request, view, action):
@@ -169,7 +169,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
 
             return str(student_id) == str(requester.id)
         except Exception:
-            logger.exception("ObservationAccessPolicy.can_student_create_observation error")
+            logger.exception("ObservationAccessPolicy.can_student_create_observation")
             return False
 
     def can_student_modify_observation(self, request, view, action):
@@ -181,7 +181,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             return (target_observation.created_by_id == requester.id and
                     target_observation.student_id == requester.id)
         except Exception:
-            logger.exception("ObservationAccessPolicy.can_student_modify_observation error")
+            logger.exception("ObservationAccessPolicy.can_student_modify_observation")
             return False
 
     def can_teacher_modify_observation(self, request, view, action):
@@ -215,7 +215,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             return is_basis_teacher or teaches_subject
 
         except Exception:
-            logger.exception("ObservationAccessPolicy.can_teacher_modify_observation error")
+            logger.exception("ObservationAccessPolicy.can_teacher_modify_observation")
             return False
 
     # True if requester is admin at the school which owns the observation
@@ -244,5 +244,5 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             return school_id in school_admin_ids
 
         except Exception:
-            logger.exception("SubjectAccessPolicy.belongs_to_group error")
+            logger.exception("SubjectAccessPolicy.belongs_to_group")
             return False

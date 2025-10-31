@@ -30,5 +30,5 @@ class SchoolAccessPolicy(BaseAccessPolicy):
             user_schools = user.get_schools()
             return qs.filter(id__in=user_schools.values("id"))
         except Exception:
-            logger.exception("SchoolAccessPolicy.scope_queryset error")
+            logger.exception("SchoolAccessPolicy.scope_queryset")
             return qs.none()
