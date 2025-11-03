@@ -43,7 +43,7 @@ export type MasterySchemaConfig = {
   renderDirection?: 'horizontal' | 'vertical'
   isColorGradientEnabled?: boolean
   isIncrementIndicatorEnabled?: boolean
-  isTitleInputEnabled?: boolean
+  isValueIndicatorEnabled?: boolean
   isMasteryValueInputEnabled?: boolean
   isMasteryDescriptionInputEnabled?: boolean
   isFeedforwardInputEnabled?: boolean

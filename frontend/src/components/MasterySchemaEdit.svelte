@@ -99,7 +99,7 @@
 
   <JSONEditor content={{ json: localJson }} onChange={handleJsonChange} />
 
-  <div class="d-flex gap-2 justify-content-start mt-4">
+  <div class="d-flex gap-2 justify-content-start">
     <ButtonMini
       options={{
         title: 'Lagre',

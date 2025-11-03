@@ -7,11 +7,14 @@
     label = 'Mastery Value',
   }: {
     masterySchema: MasterySchemaWithConfig | null
-    masteryValue?: number | null
+    masteryValue: number
     label?: string
   } = $props()
 
   const calculations = $derived(useMasteryCalculations(masterySchema))
+  let thumbYPosition = $state(0)
+  let yOffset = $state(0)
+
   const sortedMasteryLevels = $derived(
     [...calculations.masteryLevels].sort((a, b) => b.minValue - a.minValue)
   )
@@ -25,6 +28,14 @@
     if ((masteryValue === null || masteryValue === undefined) && calculations.hasLevels) {
       masteryValue = calculations.defaultValue
     }
+  })
+
+  $effect(() => {
+    const min = Number(calculations.minValue ?? 0)
+    const max = Number(calculations.maxValue ?? 100)
+    const increment = calculations.sliderValueIncrement
+    thumbYPosition = Math.round(((masteryValue - min) / (max - min)) * 100)
+    yOffset = -Math.round((thumbYPosition / 100) * 5)
   })
 </script>
 
@@ -43,20 +54,22 @@
       class="slider"
       bind:value={masteryValue}
     />
-    <div id="valueIndicatorContainer">
-      <div
-        id="valueIndicator"
-        style="top: clamp(0px, calc(100% - {safeMasteryValue}% - 0.75em), calc(100% - 1.3em));"
-      >
-        {safeMasteryValue}
+    {#if masterySchema?.config?.isValueIndicatorEnabled}
+      <div id="valueIndicatorContainer">
+        <div
+          id="valueIndicator"
+          style="bottom: clamp(0%, calc({thumbYPosition + yOffset}% - 0.75em), calc(100% - 1.5em));"
+        >
+          {safeMasteryValue}
+        </div>
       </div>
-    </div>
+    {/if}
 
     <div class="stairs-container">
       {#if masterySchema?.config?.isIncrementIndicatorEnabled}
         <div
           id="incrementIndicator"
-          style="top: clamp(0px, calc(100% - {safeMasteryValue}%), calc(100% - 5px));"
+          style="bottom: clamp(0%, {thumbYPosition + yOffset}%, calc(100% - 10px));"
         ></div>
       {/if}
       {#each sortedMasteryLevels as masteryLevel, index}
@@ -74,10 +87,10 @@
 <style>
   #incrementIndicator {
     position: absolute;
-    top: 0;
+    bottom: 0%;
     left: 0%;
     width: 100%;
-    height: 5px;
+    height: 10px;
     background-color: rgba(0, 0, 0, 0.25);
     z-index: 1;
   }
@@ -89,7 +102,7 @@
 
   #valueIndicator {
     position: absolute;
-    top: 0;
+    bottom: 0;
     left: 50px;
     width: 3em;
     height: 1.5em;
@@ -130,7 +143,7 @@
   .slider::-webkit-slider-thumb,
   .slider::-moz-range-thumb {
     width: 50px;
-    height: 10px;
+    height: 15px;
     border-radius: 3px;
     cursor: pointer;
   }
