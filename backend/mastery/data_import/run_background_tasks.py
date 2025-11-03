@@ -45,14 +45,11 @@ def claim_next_task():
 
 # For each chunk of work done, update the progress
 def update_progress(task, result):
-    # Merge incoming result into the persisted task.result without overwriting existing errors.
-    # Use select_for_update to avoid race conditions when multiple workers/processes update the same task.
+    # Merge incoming result without overwriting existing errors.
     with transaction.atomic():
+        # Use select_for_update to avoid race conditions (not currently necessary, but future-proof)
         persisted = DataMaintenanceTask.objects.select_for_update().only("id", "result").get(id=task.id)
         persisted_result = persisted.result or {}
-
-        # Merge top-level keys from incoming result into persisted_result (shallow merge).
-        # Preserve existing errors array and append new errors if present.
         incoming = result or {}
         merged = dict(persisted_result)
 
@@ -60,24 +57,23 @@ def update_progress(task, result):
         persisted_errors = merged.get("errors", []) or []
         incoming_errors = incoming.get("errors", []) or []
         # Avoid duplicating identical error entries by deterministic JSON serialization
-        # Keep errors as JSON objects in the stored list; only use serialized form for dedupe keys.
         try:
             seen = {json.dumps(e, sort_keys=True) for e in persisted_errors}
         except Exception:
             seen = set()
-        for e in incoming_errors:
+        for error in incoming_errors:
             try:
-                s = json.dumps(e, sort_keys=True)
+                s = json.dumps(error, sort_keys=True)
             except Exception:
-                # Fallback to str() if object not JSON-serializable
-                s = str(e)
+                # Fallback, just in case
+                s = str(error)
             if s not in seen:
-                persisted_errors.append(e)
+                persisted_errors.append(error)
                 seen.add(s)
 
         merged.update(incoming)
         merged["errors"] = persisted_errors
-
+        # Update the task result and last_heartbeat_at
         DataMaintenanceTask.objects.filter(id=task.id).update(result=merged, last_heartbeat_at=timezone.now())
 
 
