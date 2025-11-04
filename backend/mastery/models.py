@@ -82,12 +82,12 @@ class School(BaseModel):
         user_school = UserSchool.objects.filter(
             user=user,
             school=self,
-            defaults={'role': role}
+            role=role
         ).first()
         return user_school or UserSchool.objects.create(
             user=user,
             school=self,
-            defaults={'role': role}
+            role=role
         )
 
     def get_affiliated_user(self, role_name):
