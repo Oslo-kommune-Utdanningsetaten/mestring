@@ -33,7 +33,6 @@
   $effect(() => {
     const min = Number(calculations.minValue ?? 0)
     const max = Number(calculations.maxValue ?? 100)
-    const increment = calculations.sliderValueIncrement
     thumbYPosition = Math.round(((masteryValue - min) / (max - min)) * 100)
     yOffset = -Math.round((thumbYPosition / 100) * 5)
   })

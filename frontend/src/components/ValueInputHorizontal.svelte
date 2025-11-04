@@ -6,16 +6,28 @@
     masteryValue = $bindable(),
     label = 'Mastery Value',
   }: {
-    masterySchema: MasterySchemaWithConfig | null
-    masteryValue?: number | null
+    masterySchema: MasterySchemaWithConfig
+    masteryValue: number
     label?: string
   } = $props()
 
   const calculations = $derived(useMasteryCalculations(masterySchema))
+  let thumbXPosition = $derived(
+    Math.round(
+      ((masteryValue - calculations.minValue) / (calculations.maxValue - calculations.minValue)) *
+        100
+    )
+  )
+  let xOffset = $derived(thumbXPosition > 40 ? -((thumbXPosition - 40) / 40) * 1.1 : 0)
+
   const rungWidth = $derived(
     calculations.masteryLevels.length ? 100 / calculations.masteryLevels.length : 100
   )
   const safeMasteryValue = $derived(calculations.calculateSafeMasteryValue(masteryValue))
+
+  const calculateRungHeight = (index: number) => {
+    return (index + 1) * (100 / calculations.masteryLevels.length)
+  }
 
   // Set default value when masteryValue is null/undefined and schema is available
   $effect(() => {
@@ -23,10 +35,6 @@
       masteryValue = calculations.defaultValue
     }
   })
-
-  const calculateRungHeight = (index: number) => {
-    return (index + 1) * (100 / calculations.masteryLevels.length)
-  }
 </script>
 
 <div class="mb-4">
@@ -50,7 +58,7 @@
     {#if masterySchema?.config?.isIncrementIndicatorEnabled}
       <div
         id="incrementIndicator"
-        style="left: calc(max(0px, {safeMasteryValue}% - {safeMasteryValue / 20}px));"
+        style="left: clamp(0%, {thumbXPosition + xOffset}%, calc(100% - 10px));"
       ></div>
     {/if}
   </div>
@@ -68,7 +76,7 @@
     {#if masterySchema?.config?.isIncrementIndicatorEnabled}
       <div
         id="valueIndicator"
-        style="left: calc(max(0px, {safeMasteryValue}% - {safeMasteryValue / 10 + 5}px));"
+        style="left: clamp(0%, calc({thumbXPosition + xOffset}% - 0.5rem), calc(100%));"
       >
         {safeMasteryValue}
       </div>
@@ -92,7 +100,7 @@
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 5px;
+    width: 10px;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.25);
   }
@@ -102,6 +110,7 @@
     bottom: 1.2em;
     left: 0;
     text-align: center;
+    width: auto;
   }
 
   .rung {

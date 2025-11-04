@@ -13,7 +13,7 @@ export function useMasteryCalculations(masterySchema: MasterySchemaWithConfig | 
   const minValue = hasLevels ? Math.min(...masteryLevels.map(lev => lev.minValue)) : 0
   const maxValue = hasLevels ? Math.max(...masteryLevels.map(lev => lev.maxValue)) : 100
   const sliderValueIncrement = masterySchema?.config?.inputIncrement || 1
-  const defaultValue = (minValue + maxValue) / 2
+  const defaultValue = Math.floor((minValue + maxValue) / 2)
 
   const calculateSafeMasteryValue = (value: number | null | undefined): number => {
     let result: number = defaultValue
