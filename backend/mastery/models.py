@@ -79,7 +79,12 @@ class School(BaseModel):
         if isinstance(role, str):
             role, _ = Role.objects.get_or_create(name=role)
 
-        return UserSchool.objects.get_or_create(
+        user_school = UserSchool.objects.filter(
+            user=user,
+            school=self,
+            defaults={'role': role}
+        ).first()
+        return user_school or UserSchool.objects.create(
             user=user,
             school=self,
             defaults={'role': role}
