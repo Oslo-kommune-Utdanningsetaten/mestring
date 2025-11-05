@@ -64,6 +64,10 @@
     }
   }
 
+  const getMasterySchmemaForGoal = (goal: GoalType) => {
+    return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
+  }
+
   // Remember, we're only editing personal goals here
   const handleEditGoal = (goal: GoalDecorated | null) => {
     if (goal.id) {
@@ -258,11 +262,17 @@
       <!-- Stats widgets -->
       <span class="item d-flex align-items-center gap-3 align-items-center">
         {#if goal.masteryData}
-          <MasteryLevelBadge masteryData={goal.masteryData} />
-          <SparklineChart data={goal.observations?.map((o: ObservationType) => o.masteryValue)} />
+          <MasteryLevelBadge
+            masteryData={goal.masteryData}
+            masterySchema={getMasterySchmemaForGoal(goal)}
+          />
+          <SparklineChart
+            data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
+            masterySchema={getMasterySchmemaForGoal(goal)}
+          />
           <SparkbarChart
             data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
-            masterySchema={$dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)}
+            masterySchema={getMasterySchmemaForGoal(goal)}
           />
         {:else}
           <MasteryLevelBadge isBadgeEmpty={true} />

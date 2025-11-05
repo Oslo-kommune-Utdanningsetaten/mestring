@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { MasteryConfigLevel, MasterySchemaWithConfig } from '../types/models'
-  import { getMasteryColorByValue } from '../utils/functions'
+  import { useMasteryCalculations, getMasteryColorByValue } from '../utils/masteryHelpers'
   /* SVG SparkbarChart Component */
 
   type BarRect = {
@@ -28,8 +28,6 @@
     data,
     width = 26,
     height = 26,
-    min = 0,
-    max = 100,
     lineColor = 'rgb(100, 100, 100)',
     title: providedTitle,
   }: Props = $props()
@@ -38,8 +36,7 @@
   const hasSufficientData = $derived(
     Array.isArray(data) && data.length > 0 && data.every(n => Number.isFinite(n))
   )
-  const effectiveMin = $derived(min ?? (hasSufficientData ? Math.min(...data) : 0))
-  const effectiveMax = $derived(max ?? (hasSufficientData ? Math.max(...data) : 1))
+  const calculations = $derived(useMasteryCalculations(masterySchema))
   const title = $derived(providedTitle ?? (hasSufficientData ? data.join(', ') : 'Mangler data'))
 
   const bars = $derived<BarRect[]>(
@@ -47,15 +44,15 @@
       if (!hasSufficientData) return []
 
       const count = data.length || 1
-      const span = effectiveMax - effectiveMin || 1
       const baseWidth = width / count
       const gap = count > 1 ? baseWidth * 0.2 : 0
       const barWidth = Math.max(baseWidth - gap, 0)
 
+      const yChunkCount = calculations.maxValue / calculations.sliderValueIncrement
+      const yChunkHeight = height / yChunkCount
+
       return data.map((value, index) => {
-        const normalized = (value - effectiveMin) / span
-        const clamped = Math.max(0, Math.min(1, normalized))
-        const barHeight = clamped * height
+        const barHeight = yChunkHeight * value
         const x = index * baseWidth + gap / 2
         const y = height - barHeight
         const color =

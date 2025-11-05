@@ -1,12 +1,12 @@
 <script lang="ts">
-  /* SVG Sparkline Component */
+  import type { MasterySchemaWithConfig } from '../types/models'
+  import { useMasteryCalculations } from '../utils/masteryHelpers'
 
   interface Props {
     data: number[]
     width?: number
     height?: number
-    min?: number | null
-    max?: number | null
+    masterySchema: MasterySchemaWithConfig | null
     lineColor?: string
     strokeWidth?: number
     title?: string
@@ -17,8 +17,7 @@
     data,
     width = 26,
     height = 26,
-    min = 0,
-    max = 100,
+    masterySchema,
     lineColor = 'rgb(100, 100, 100)',
     strokeWidth = 1.6,
   }: Props = $props()
@@ -26,23 +25,20 @@
   const hasSufficientData = $derived(
     Array.isArray(data) && data.length > 1 && data.every(n => Number.isFinite(n))
   )
-  const effectiveMin = $derived(min ?? (hasSufficientData ? Math.min(...data) : 0))
-  const effectiveMax = $derived(max ?? (hasSufficientData ? Math.max(...data) : 1))
   const title = $derived(hasSufficientData ? data.join(', ') : 'Mangler data')
+  const calculations = $derived(useMasteryCalculations(masterySchema))
 
   const calculatePoints = () => {
     if (!hasSufficientData) return ''
 
-    const low = effectiveMin
-    const high = effectiveMax
-    const span = high - low || 1
     const stepX = width / (data.length - 1)
+    const yChunkCount = calculations.maxValue / calculations.sliderValueIncrement
+    const yChunkHeight = height / yChunkCount
 
     return data
       .map((value, index) => {
-        const normalized = (value - low) / span
         const x = index * stepX
-        const y = (1 - normalized) * height
+        const y = height - yChunkHeight * value //(1 - normalized) * height
         return `${x.toFixed(2)},${y.toFixed(2)}`
       })
       .join(' ')

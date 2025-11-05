@@ -34,6 +34,7 @@
   import { dataStore } from '../stores/data'
   import { getLocalStorageItem } from '../stores/localStorage'
   import { goalsWithCalculatedMastery, subjectIdsViaGroupOrGoal } from '../utils/functions'
+  import SparkbarChart from '../components/SparkbarChart.svelte'
 
   const { groupId } = $props<{ groupId: string }>()
 
@@ -112,6 +113,10 @@
     } finally {
       isLoading = false
     }
+  }
+
+  const getMasterySchmemaForGoal = (goal: GoalType) => {
+    return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
   }
 
   // Get the calculated mastery for a specific student's goal
@@ -407,13 +412,21 @@
             <span class="item">
               <button
                 title="Legg til observasjon"
-                class="new-observation-button"
+                class="new-observation-button gap-2 d-flex align-items-center"
                 onclick={() => handleEditObservation(goal, null, student)}
               >
                 {#if decoGoal?.masteryData}
-                  <MasteryLevelBadge masteryData={decoGoal.masteryData} />
+                  <MasteryLevelBadge
+                    masteryData={decoGoal.masteryData}
+                    masterySchema={getMasterySchmemaForGoal(goal)}
+                  />
                   <SparklineChart
                     data={decoGoal.observations?.map((o: ObservationType) => o.masteryValue)}
+                    masterySchema={getMasterySchmemaForGoal(goal)}
+                  />
+                  <SparkbarChart
+                    data={decoGoal.observations?.map((o: ObservationType) => o.masteryValue)}
+                    masterySchema={getMasterySchmemaForGoal(goal)}
                   />
                 {:else}
                   <MasteryLevelBadge isBadgeEmpty={true} />

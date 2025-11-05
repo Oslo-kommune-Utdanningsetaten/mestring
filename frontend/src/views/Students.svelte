@@ -6,8 +6,8 @@
   import { urlStringFrom, fetchSubjectsForStudents } from '../utils/functions'
   import StudentRow from '../components/StudentRow.svelte'
   import { STUDENT_ROLE } from '../utils/constants'
-  import { groupsList, usersList, goalsList } from '../generated/sdk.gen'
-  import type { GroupType, GoalType, UserType, SubjectType } from '../generated/types.gen'
+  import { groupsList, usersList } from '../generated/sdk.gen'
+  import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
 
   const router = useTinyRouter()
   let selectedGroupId = $state<string | undefined>(undefined)
@@ -21,7 +21,11 @@
   let currentSchool = $derived($dataStore.currentSchool)
   let filteredStudents = $derived(
     nameFilter
-      ? students.filter(student => student.name.toLowerCase().includes(nameFilter.toLowerCase()))
+      ? students.filter(
+          student =>
+            student.id === nameFilter ||
+            student.name.toLowerCase().includes(nameFilter.toLowerCase())
+        )
       : students
   )
   let selectedGroup = $derived<GroupType | undefined>(

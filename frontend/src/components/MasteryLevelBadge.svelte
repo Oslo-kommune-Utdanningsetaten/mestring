@@ -1,12 +1,15 @@
 <script lang="ts">
-  import type { Mastery } from '../types/models'
+  import type { Mastery, MasterySchemaWithConfig } from '../types/models'
+  import { useMasteryCalculations } from '../utils/masteryHelpers'
 
   const {
     masteryData,
+    masterySchema,
     isBadgeEmpty = false,
     isBadgeVoid = false,
   } = $props<{
     masteryData?: Mastery
+    masterySchema?: MasterySchemaWithConfig | null
     isBadgeEmpty?: boolean
     isBadgeVoid?: boolean
   }>()
@@ -14,9 +17,10 @@
   const mastery = $derived(masteryData?.mastery ?? 0)
   const trend = $derived(masteryData?.trend ?? 0)
   const title = $derived(masteryData?.title ?? '')
+  const calculations = $derived(useMasteryCalculations(masterySchema))
 
   // Trend
-  const similarityRange = 6 // +/- 5 similarity threshold
+  const similarityRange = 6
   const isFlat = $derived(Math.abs(trend) < similarityRange)
   const isDecreasing = $derived(trend < 0 && !isFlat)
   // Colors
@@ -32,9 +36,9 @@
   // Calculate mastery indicator position based on available space
   const indicatorPosition = (masteryValue: number) => {
     const maxY = trendBoxSize - masteryIndicatorHeight
-    if (masteryValue < 0) return 0
-    if (masteryValue > 100) return maxY
-    return Math.round((masteryValue / 100) * maxY)
+    if (masteryValue < calculations.minValue) return 0
+    if (masteryValue > calculations.maxValue) return maxY
+    return Math.round((masteryValue / calculations.maxValue) * maxY)
   }
 </script>
 
