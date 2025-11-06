@@ -128,7 +128,6 @@
       {/if}
     </div>
   </div>
-
   <div class="form-group mb-3">
     <div class="pkt-inputwrapper">
       <pkt-select
@@ -146,7 +145,7 @@
       >
         <option disabled value={NONE_FIELD_VALUE}>Velg mestringsskjema</option>
         {#each masterySchemas as masterySchema}
-          <option value={masterySchema.id}>
+          <option disabled={!masterySchema.isDefault} value={masterySchema.id}>
             {masterySchema.title}
           </option>
         {/each}
