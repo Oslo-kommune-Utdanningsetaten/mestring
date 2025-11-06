@@ -39,7 +39,7 @@
 
   const getTitle = () => {
     const action = localGoal.id ? 'Redigerer' : 'Nytt'
-    const goalType = isGoalPersonal ? 'personlig ' : 'gruppe'
+    const goalType = isGoalPersonal ? 'individuelt ' : 'gruppe'
     const target = isGoalPersonal ? student?.name : group?.displayName
     return `${action} ${goalType}mål for ${target}`
   }

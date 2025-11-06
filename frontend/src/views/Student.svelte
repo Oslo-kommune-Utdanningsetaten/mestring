@@ -117,26 +117,18 @@
     <div class="card shadow-sm">
       <div class="d-flex align-items-center gap-2 mb-3 card-header">
         <h2>Mål</h2>
-        <ButtonMini
-          options={{
-            iconName: 'plus-sign',
-            classes: 'mini-button bordered',
-            title: 'Legg til nytt personlig mål',
-            onClick: () => handleEditGoal(null),
-          }}
-        />
         {#if studentGoalsCount === 0}
           <ButtonMini
             options={{
               iconName: 'plus-sign',
               classes: 'm-2',
-              title: 'Opprett alle mål!',
+              title: 'Opprett alle mål',
               onClick: () => handleCreateAllPersonalGoals(),
               variant: 'icon-left',
               skin: 'primary',
             }}
           >
-            Opprett alle mål ({$dataStore.defaultMasterySchema?.title})
+            Opprett alle mål!
           </ButtonMini>
         {/if}
       </div>

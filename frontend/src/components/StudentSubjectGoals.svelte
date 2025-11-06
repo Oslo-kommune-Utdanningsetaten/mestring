@@ -9,6 +9,7 @@
     goalsUpdate,
     goalsList,
     groupsList,
+    goalsCreate,
   } from '../generated/sdk.gen'
   import { goalsWithCalculatedMasteryBySubjectId } from '../utils/functions'
   import Link from './Link.svelte'
@@ -69,7 +70,7 @@
   }
 
   // Remember, we're only editing personal goals here
-  const handleEditGoal = (goal: GoalDecorated | null) => {
+  const handleEditGoal = async (goal: GoalDecorated | null) => {
     if (goal.id) {
       goalWip = {
         ...goal,
@@ -80,12 +81,28 @@
       }
     } else {
       const personalGoalsCount = goalsForSubject?.filter(g => g.isPersonal).length
-      goalWip = {
+      const newGoal = {
         subjectId: subjectId,
         studentId: student.id,
         isPersonal: true,
         sortOrder: personalGoalsCount + 1,
         masterySchemaId: $dataStore.defaultMasterySchema?.id,
+      }
+
+      // If all stars are aligned, just create the goal instantly instead of exposing the user to the create goal form
+      const createInstantly =
+        !$dataStore.currentSchool.isGoalTitleEnabled &&
+        !!$dataStore.defaultMasterySchema?.id &&
+        !!subjectId
+
+      if (createInstantly) {
+        await goalsCreate({
+          body: newGoal,
+        })
+        return onRefreshRequired()
+      } else {
+        // open the goal editor with prefilled values
+        goalWip = newGoal
       }
     }
     isGoalEditorOpen = true
@@ -208,7 +225,7 @@
     options={{
       iconName: 'plus-sign',
       classes: 'mini-button bordered',
-      title: 'Legg til nytt personlig mål',
+      title: 'Legg til nytt individuelt mål',
       onClick: () => handleEditGoal({}),
     }}
   />
@@ -238,7 +255,7 @@
 
       <!-- Goal type icon -->
       {#if goal.isPersonal}
-        <span class="goal-type-icon item" title="Personlig mål">
+        <span class="goal-type-icon item" title="Individuelt mål">
           <PersonSVG />
         </span>
       {:else}
@@ -300,7 +317,7 @@
         <div class="my-3">
           {#if !goal.isPersonal}
             <p>
-              Dette målet er ikke personlig, men gitt for <Link to={`/groups/${goal.groupId}/`}>
+              Dette målet er ikke individuelt, men gitt for <Link to={`/groups/${goal.groupId}/`}>
                 hele gruppa
               </Link>.
             </p>
@@ -313,20 +330,20 @@
               options={{
                 iconName: 'edit',
                 classes: 'my-2 me-2',
-                title: 'Rediger personlig mål',
+                title: 'Rediger individuelt mål',
                 onClick: () => handleEditGoal(goal),
                 variant: 'icon-left',
                 skin: 'primary',
               }}
             >
-              Rediger personlig mål
+              Rediger individuelt mål
             </ButtonMini>
 
             <ButtonMini
               options={{
                 iconName: 'trash-can',
                 classes: 'my-2',
-                title: 'Slett personlig mål',
+                title: 'Slett individuelt mål',
                 onClick: () => handleDeleteGoal(goal.id),
                 variant: 'icon-left',
                 skin: 'primary',
