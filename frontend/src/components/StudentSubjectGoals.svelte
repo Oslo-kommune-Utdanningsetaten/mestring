@@ -230,10 +230,12 @@
           />
         {/if}
       </span>
+
       <!-- Goal order -->
       <span class="item">
         {goal.sortOrder || index + 1}
       </span>
+
       <!-- Goal type icon -->
       {#if goal.isPersonal}
         <span class="goal-type-icon item" title="Personlig mål">
@@ -244,10 +246,12 @@
           <GroupSVG />
         </span>
       {/if}
+
       <!-- Goal title -->
       <span class="item">
         {isShowGoalTitleEnabled ? goal.title : '🙊'}
       </span>
+
       <!-- New observation button -->
       <span class="item">
         <ButtonMini
@@ -259,8 +263,9 @@
           }}
         />
       </span>
+
       <!-- Stats widgets -->
-      <span class="item d-flex align-items-center gap-3 align-items-center">
+      <span class="item d-flex gap-2">
         {#if goal.masteryData}
           <MasteryLevelBadge
             masteryData={goal.masteryData}
@@ -278,7 +283,8 @@
           <MasteryLevelBadge isBadgeEmpty={true} />
         {/if}
       </span>
-      <!-- Expand goal info -->
+
+      <!-- Toggle goal info -->
       <ButtonMini
         options={{
           iconName: `chevron-thin-${expandedGoals[goal.id] ? 'up' : 'down'}`,
@@ -437,12 +443,13 @@
 
   .goal-primary-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 10fr 1fr 2fr 1fr;
-    column-gap: 5px;
+    grid-template-columns: 1fr 1fr 1fr 10fr 40px 100px 1fr;
+    column-gap: 2px;
+    align-items: center;
   }
 
   .goal-primary-row > .item {
-    align-self: center;
+    justify-self: start;
   }
 
   .goal-secondary-row {
