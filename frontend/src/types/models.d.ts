@@ -41,6 +41,7 @@ export type MasterySchemaConfig = {
   levels: MasteryConfigLevel[]
   inputIncrement: number
   renderDirection?: 'horizontal' | 'vertical'
+  flatTrendThreshold: number
   isColorGradientEnabled?: boolean
   isIncrementIndicatorEnabled?: boolean
   isValueIndicatorEnabled?: boolean
