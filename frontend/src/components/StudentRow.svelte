@@ -2,6 +2,7 @@
   import type { Mastery, GoalDecorated } from '../types/models'
   import type { UserType, SubjectType, GroupType } from '../generated/types.gen'
   import { goalsList } from '../generated/sdk.gen'
+  import { dataStore } from '../stores/data'
   import { goalsWithCalculatedMasteryBySubjectId, aggregateMasterys } from '../utils/functions'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import { MISSING_REASON_NO_OBSERVATIONS, MISSING_REASON_NO_GOALS } from '../utils/constants'
@@ -50,7 +51,10 @@
 {#each subjects as subject}
   <span class="item">
     {#if masteryBySubjectId[subject.id]?.mastery}
-      <MasteryLevelBadge masteryData={masteryBySubjectId[subject.id].mastery!} />
+      <MasteryLevelBadge
+        masteryData={masteryBySubjectId[subject.id].mastery!}
+        masterySchema={$dataStore.defaultMasterySchema}
+      />
     {:else if masteryBySubjectId[subject.id]?.missingReason === MISSING_REASON_NO_OBSERVATIONS}
       <MasteryLevelBadge isBadgeEmpty={true} />
     {:else if masteryBySubjectId[subject.id]?.missingReason === MISSING_REASON_NO_GOALS}
