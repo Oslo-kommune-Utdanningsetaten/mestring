@@ -272,8 +272,6 @@
         </h1>
         {#if subject}
           <h5 class="text-secondary" title={subject.grepCode}>{subject.displayName}</h5>
-        {:else}
-          <h5 class="text-secondary">Ikke tilknyttet et fag</h5>
         {/if}
       </div>
     </div>
