@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { GoalCreateType, UserType, SubjectType } from '../generated/types.gen'
-  import { usersRetrieve, goalsCreate, goalsList } from '../generated/sdk.gen'
+  import type { GoalCreateType, UserType, SubjectType, GroupType } from '../generated/types.gen'
+  import { usersRetrieve, goalsCreate, goalsList, groupsList } from '../generated/sdk.gen'
   import { subjectIdsViaGroupOrGoal } from '../utils/functions'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
   import GoalEdit from '../components/GoalEdit.svelte'
@@ -9,11 +9,11 @@
   import StudentSVG from '../assets/education.svg.svelte'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
-  import { getLocalStorageItem } from '../stores/localStorage'
 
   const { studentId } = $props<{ studentId: string }>()
   let student = $state<UserType | null>(null)
   let subjects = $state<SubjectType[]>([])
+  let groups = $state<GroupType[]>([])
   let currentSchool = $derived($dataStore.currentSchool)
   let goalWip = $state<GoalDecorated | null>(null)
   let isGoalEditorOpen = $state<boolean>(false)
@@ -21,10 +21,12 @@
 
   const fetchStudentData = async (userId: string) => {
     try {
-      const result = await usersRetrieve({ path: { id: userId } })
-      student = result.data!
+      const userResult = await usersRetrieve({ path: { id: userId } })
+      student = userResult.data!
+
       if (!student) return
       await fetchSubjects(student.id)
+      await fetchGroups(student.id)
       await countStudentGoals()
     } catch (error) {
       console.error(`Could not load data for student ${userId}`, error)
@@ -42,6 +44,18 @@
     } catch (error) {
       console.error(`Could not load subjects for ${studentId}`, error)
       subjects = []
+    }
+  }
+
+  const fetchGroups = async (studentId: string) => {
+    try {
+      const groupsResult = await groupsList({
+        query: { user: studentId, school: currentSchool.id, isEnabled: true },
+      })
+      groups = groupsResult.data || []
+    } catch (error) {
+      console.error(`Could not load groups for ${studentId}`, error)
+      groups = []
     }
   }
 
@@ -68,18 +82,6 @@
     })
 
     fetchStudentData(student.id)
-  }
-
-  // Add personal goal
-  const handleEditGoal = (goal: GoalDecorated | null) => {
-    goalWip = {
-      ...goal,
-      subjectId: null,
-      studentId: student?.id,
-      sortOrder: goal?.sortOrder || 1,
-      masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,
-    }
-    isGoalEditorOpen = true
   }
 
   const handleCloseEditGoal = () => {
@@ -113,6 +115,8 @@
         </h5>
       </div>
     </div>
+    <div class="my-4">Medlem av: {groups.map(g => g.displayName).join(', ')}</div>
+
     <!-- Goals and mastery -->
     <div class="card shadow-sm">
       <div class="d-flex align-items-center gap-2 mb-3 card-header">
