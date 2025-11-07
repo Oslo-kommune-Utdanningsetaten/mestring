@@ -21,7 +21,7 @@
   const calculations = $derived(useMasteryCalculations(masterySchema))
 
   // Trend
-  const isFlat = $derived(Math.abs(trend) <= calculations.flatTrendThreshold)
+  const isFlat = $derived(Math.abs(trend) < calculations.flatTrendThreshold)
   const isDecreasing = $derived(trend < 0 && !isFlat)
   // Colors
   const increasingColor = 'var(--bs-success)'
