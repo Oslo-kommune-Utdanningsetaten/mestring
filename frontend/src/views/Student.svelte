@@ -128,7 +128,7 @@
               skin: 'primary',
             }}
           >
-            Opprett alle mål!
+            Opprett alle mål
           </ButtonMini>
         {/if}
       </div>
