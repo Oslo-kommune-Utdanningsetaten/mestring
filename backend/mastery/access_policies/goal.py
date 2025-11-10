@@ -201,10 +201,6 @@ class GoalAccessPolicy(BaseAccessPolicy):
             target_goal = view.get_object()
             requester = request.user
 
-            if target_goal.created_by_id != requester.id:
-                # Teachers can only modify goals they created
-                return False
-
             # Group goal: Must teach that group
             if target_goal.group_id:
                 return requester.teacher_groups.filter(id=target_goal.group_id).exists()
@@ -214,12 +210,12 @@ class GoalAccessPolicy(BaseAccessPolicy):
             is_basis_teacher = target_goal.student.groups.filter(id__in=basis_group_ids).exists()
 
             # Check if teaches this subject to this student
-            teaches_subject = requester.teacher_groups.filter(
+            is_teacher_of_subject = requester.teacher_groups.filter(
                 subject=target_goal.subject,
                 members__id=target_goal.student_id
             ).exists()
 
-            return is_basis_teacher or teaches_subject
+            return is_basis_teacher or is_teacher_of_subject
         except Exception:
             logger.exception("GoalAccessPolicy.can_teacher_modify_goal")
             return False
