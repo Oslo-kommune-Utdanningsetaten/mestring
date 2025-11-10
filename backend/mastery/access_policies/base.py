@@ -17,9 +17,9 @@ class BaseAccessPolicy(AccessPolicy):
         if user.is_superadmin:
             values.append("superadmin")
         try:
-            # Collect user <--> group affiliations passing through the user_group table (e.g. teacher, student)
+            # Collect user <--> group members passing through the user_group table (e.g. teacher, student)
             values.extend({ug.role.name for ug in user.user_groups.all()})
-            # Collect user <--> school affiliations passing through the user_school table (e.g. school admin)
+            # Collect user <--> school employees passing through the user_school table (e.g. school admin)
             values.extend({us.role.name for us in user.user_schools.all()})
         except Exception:
             pass

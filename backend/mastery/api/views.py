@@ -111,7 +111,7 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 raise ValidationError(
                     {'error': 'missing-parameter', 'message': 'The "school" query parameter is required.'})
 
-            # Filter by school: include users in groups OR users directly affiliated via UserSchool
+            # Filter by school: include users in groups (via UserGroup) OR users empolyed (via UserSchool)
             qs = qs.filter(
                 Q(user_groups__group__school_id=school_param) |
                 Q(user_schools__school_id=school_param)

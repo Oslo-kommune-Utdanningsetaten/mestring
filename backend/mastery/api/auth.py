@@ -121,7 +121,7 @@ def feidecallback(request):
         # But ensure user gets staff role at all schools they are affiliated with
         if staff_schools:
             for school in staff_schools:
-                school.set_affiliated_user(user, 'staff')
+                school.set_employed_user(user, 'staff')
 
         request.session["feide_tokens"] = tokens
         request.session["feide_user_id"] = feide_user_id

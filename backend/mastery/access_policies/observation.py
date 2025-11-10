@@ -78,7 +78,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             teacher_group_ids = list(requester.teacher_groups.values_list('id', flat=True))
             teacher_basis_group_ids = list(requester.teacher_groups.filter(
                 type='basis').values_list('id', flat=True))
-            school_affiliated_ids = UserSchool.objects.filter(
+            school_employee_ids = UserSchool.objects.filter(
                 user_id=requester.id, role__name__in=["admin", "inspector"]).values_list(
                 "school_id", flat=True).distinct()
 
@@ -87,11 +87,11 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             filters |= Q(observer=requester, is_visible_to_student=True)
 
             # School inspectors and admins: All observations for students at their schools
-            if school_affiliated_ids:
+            if school_employee_ids:
                 # Observations on goals in groups at their schools
-                filters |= Q(goal__group__school_id__in=school_affiliated_ids)
+                filters |= Q(goal__group__school_id__in=school_employee_ids)
                 # Observations on goals attached to subjects owned by their schools
-                filters |= Q(goal__subject__owned_by_school_id__in=school_affiliated_ids)
+                filters |= Q(goal__subject__owned_by_school_id__in=school_employee_ids)
 
             # Teaching group teachers: Observations on group goals + personal goals for students they teach
             if teacher_group_ids:
