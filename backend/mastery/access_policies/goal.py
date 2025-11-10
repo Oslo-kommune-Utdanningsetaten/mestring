@@ -80,7 +80,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
                 requester.teacher_groups.filter(type='basis').values_list('id', flat=True))
             student_group_ids = list(
                 requester.student_groups.values_list('id', flat=True))
-            school_affiliated_ids = UserSchool.objects.filter(
+            school_employee_ids = UserSchool.objects.filter(
                 user_id=requester.id, role__name__in=["admin", "inspector"]).values_list(
                 "school_id", flat=True).distinct()
 
@@ -88,11 +88,11 @@ class GoalAccessPolicy(BaseAccessPolicy):
             filters = Q(created_by=requester)
 
             # School inspectors and admins: All goals for students at their schools
-            if school_affiliated_ids:
+            if school_employee_ids:
                 # Goals for groups at their schools
-                filters |= Q(group__school_id__in=school_affiliated_ids)
+                filters |= Q(group__school_id__in=school_employee_ids)
                 # Goals for subjects owned by their schools
-                filters |= Q(subject__owned_by_school_id__in=school_affiliated_ids)
+                filters |= Q(subject__owned_by_school_id__in=school_employee_ids)
 
             # Teaching group teachers: Group goals + personal goals for students they teach
             if teacher_group_ids:

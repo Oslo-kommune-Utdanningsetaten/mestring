@@ -93,11 +93,11 @@ def test_school_inspector_user_access(
     assert resp.status_code == 200
     data = resp.json()
 
-    # Expected users: all users in groups at the school + users directly affiliated via UserSchool
+    # Expected users: all users in groups at the school + users employed at school (via UserSchool)
     expected_ids = (
         {user.id for user in teaching_group_with_members.get_members()} |
         {user.id for user in other_teaching_group_with_members.get_members()} |
-        {user.id for user in school.get_affiliated_user(None)}
+        {user.id for user in school.get_employed_user(None)}
     )
     received_ids = {user['id'] for user in data}
     assert len(received_ids) == len(expected_ids)
@@ -180,7 +180,7 @@ def test_school_inspector_user_access(
     expected_ids = (
         {user.id for user in teaching_group_with_members.get_members()} |
         {user.id for user in other_teaching_group_with_members.get_members()} |
-        {user.id for user in school.get_affiliated_user(None)}
+        {user.id for user in school.get_employed_user(None)}
     )
     received_ids = {user['id'] for user in data}
     assert len(received_ids) == len(expected_ids)

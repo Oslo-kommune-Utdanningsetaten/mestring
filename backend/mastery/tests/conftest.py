@@ -71,7 +71,7 @@ def school_admin(db, school, admin_role) -> User:
         feide_id="schooladmin001@kakrafoon.kommune.no",
         email="schooladmin001@kakrafoon.kommune.no",
     )
-    school.set_affiliated_user(user, admin_role)
+    school.set_employed_user(user, admin_role)
     return user
 
 
@@ -82,7 +82,7 @@ def school_inspector(db, school, inspector_role) -> User:
         feide_id="schoolinspector001@kakrafoon.kommune.no",
         email="schoolinspector001@kakrafoon.kommune.no",
     )
-    school.set_affiliated_user(user, inspector_role)
+    school.set_employed_user(user, inspector_role)
     return user
 
 
@@ -93,7 +93,7 @@ def other_school_admin(db, other_school, admin_role) -> User:
         feide_id="otherschooladmin001@kakrafoon.kommune.no",
         email="otherschooladmin001@kakrafoon.kommune.no",
     )
-    other_school.set_affiliated_user(user, admin_role)
+    other_school.set_employed_user(user, admin_role)
     return user
 
 
@@ -104,7 +104,7 @@ def other_school_inspector(db, other_school, inspector_role) -> User:
         feide_id="otherschoolinspector001@kakrafoon.kommune.no",
         email="otherschoolinspector001@kakrafoon.kommune.no",
     )
-    other_school.set_affiliated_user(user, inspector_role)
+    other_school.set_employed_user(user, inspector_role)
     return user
 
 

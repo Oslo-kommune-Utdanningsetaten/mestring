@@ -74,7 +74,7 @@ class School(BaseModel):
             user_groups__role__name='teacher'
         ).distinct()
 
-    def set_affiliated_user(self, user, role):
+    def set_employed_user(self, user, role):
         """Add a user to this school with the specified role"""
         if isinstance(role, str):
             role, _ = Role.objects.get_or_create(name=role)
@@ -90,8 +90,8 @@ class School(BaseModel):
             role=role
         )
 
-    def get_affiliated_user(self, role_name):
-        """Get all affiliated users by optional role_name"""
+    def get_employed_user(self, role_name):
+        """Get all employed users, by optional role_name"""
         if role_name:
             return User.objects.filter(
                 user_schools__school=self,
@@ -133,7 +133,7 @@ class User(BaseModel):
         related_name='members')
     schools = models.ManyToManyField(
         'School', through='UserSchool', through_fields=('user', 'school'),
-        related_name='staff')
+        related_name='employees')
     is_superadmin = models.BooleanField(default=False)  # caution, site-wide admin
 
     def _get_groups_with_role(self, role_name):
