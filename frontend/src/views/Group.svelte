@@ -32,8 +32,11 @@
   import GroupTypeTag from '../components/GroupTypeTag.svelte'
   import StudentRow from '../components/StudentRow.svelte'
   import { dataStore } from '../stores/data'
-  import { getLocalStorageItem } from '../stores/localStorage'
-  import { goalsWithCalculatedMastery, subjectIdsViaGroupOrGoal } from '../utils/functions'
+  import {
+    goalsWithCalculatedMastery,
+    subjectIdsViaGroupOrGoal,
+    abbreviateName,
+  } from '../utils/functions'
   import SparkbarChart from '../components/SparkbarChart.svelte'
 
   const { groupId } = $props<{ groupId: string }>()
@@ -279,7 +282,7 @@
       <GroupTypeTag {group} />
       {#each teachers as teacher}
         <pkt-tag iconName="lecture" skin="yellow">
-          <span>{teacher.name}</span>
+          <span>{abbreviateName(teacher.name)}</span>
         </pkt-tag>
       {/each}
     </div>

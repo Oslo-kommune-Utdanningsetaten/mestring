@@ -1,6 +1,6 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
-  import { urlStringFrom } from '../utils/functions'
+  import { urlStringFrom, abbreviateName } from '../utils/functions'
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   import { groupsList, usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType } from '../generated/types.gen'
@@ -76,7 +76,7 @@
           {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
             {#each groupMembers[group.id].teachers as teacher}
               <pkt-tag iconName="lecture" skin="yellow">
-                <span title={teacher.feideId}>{teacher.name}</span>
+                <span title={teacher.feideId}>{abbreviateName(teacher.name)}</span>
               </pkt-tag>
             {/each}
           {/if}

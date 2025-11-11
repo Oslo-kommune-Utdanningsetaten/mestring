@@ -231,6 +231,13 @@ export const findAverage = (numbers: number[]): number => {
   return numbers.reduce((sum, currentValue) => sum + currentValue, 0) / numbers.length
 }
 
+export const abbreviateName = (fullName: string): string => {
+  const names = fullName.split(' ')
+  const first = names[0]
+  const rest = names.slice(1)
+  return `${first} ${rest.map(n => n.charAt(0).toUpperCase() + '.').join(' ')}`
+}
+
 export const isNumber = (value: any) => {
   return typeof value === 'number'
 }
