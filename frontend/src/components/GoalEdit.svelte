@@ -102,6 +102,7 @@
           value={localGoal.subjectId || NONE_FIELD_VALUE}
           hasError={!localGoal.subjectId || localGoal.subjectId === NONE_FIELD_VALUE}
           requiredText="Velg et fag"
+          disabled={!localGoal.isRelevant}
           onchange={(e: Event) => {
             const target = e.target as HTMLSelectElement | null
             const subjectId = target?.value || NONE_FIELD_VALUE
@@ -116,13 +117,9 @@
           {/each}
         </pkt-select>
       {:else}
-        <div
-          class="border border-2 rounded-0 border-primary fs-5 p-2 {!subjectViaGroup
-            ? 'alert alert-warning'
-            : ''}"
-        >
+        <div class="fs-5 mb-1 {!subjectViaGroup ? 'alert alert-warning' : ''}">
           {subjectViaGroup
-            ? subjectViaGroup.displayName
+            ? 'Fag: ' + subjectViaGroup.displayName
             : 'Denne gruppen er ikke tilknyttet et fag'}
         </div>
       {/if}
@@ -137,6 +134,7 @@
         value={localGoal.masterySchemaId || NONE_FIELD_VALUE}
         hasError={!localGoal.masterySchemaId || localGoal.masterySchemaId === NONE_FIELD_VALUE}
         requiredText="Velg et mestringsskjema"
+        disabled={!localGoal.isRelevant}
         onchange={(e: Event) => {
           const target = e.target as HTMLSelectElement | null
           const msid = target?.value || NONE_FIELD_VALUE
@@ -160,6 +158,7 @@
       type="integer"
       class="form-control rounded-0 border-2 border-primary input-field"
       bind:value={localGoal.sortOrder}
+      disabled={!localGoal.isRelevant}
       placeholder="Rekkefølge (tall)"
     />
   </div>
@@ -172,19 +171,31 @@
         type="text"
         class="form-control rounded-0 border-2 border-primary input-field"
         bind:value={localGoal.title}
+        disabled={!localGoal.isRelevant}
         placeholder="Tittel på målet"
       />
     </div>
   {/if}
 
-  <div class="d-flex gap-2 justify-content-start mt-4">
+  <div>
+    <pkt-checkbox
+      class="mb-1"
+      label={localGoal.isRelevant ? 'Målet er i bruk' : 'Målet er ikke lenger relevant'}
+      labelPosition="right"
+      isSwitch="true"
+      aria-checked={localGoal.isRelevant ? 'true' : 'false'}
+      checked={localGoal.isRelevant}
+      onchange={() => (localGoal = { ...localGoal, isRelevant: !localGoal.isRelevant })}
+    ></pkt-checkbox>
+  </div>
+
+  <div class="d-flex gap-3 justify-content-start mt-5">
     <ButtonMini
       options={{
         title: 'Lagre',
         iconName: 'check',
         skin: 'primary',
         variant: 'label-only',
-        classes: 'm-2',
         disabled: !isFormValid,
         onClick: () => handleSave(),
       }}
@@ -198,7 +209,6 @@
         iconName: 'close',
         skin: 'secondary',
         variant: 'label-only',
-        classes: 'm-2',
         onClick: () => onDone(),
       }}
     >

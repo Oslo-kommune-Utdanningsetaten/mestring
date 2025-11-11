@@ -232,7 +232,12 @@
 </div>
 
 {#snippet goalInList(goal: GoalDecorated, index: number)}
-  <div class="list-group-item goal-item {expandedGoals[goal.id] ? 'shadow border-2 z-1' : ''}">
+  <div
+    class="list-group-item goal-item {expandedGoals[goal.id]
+      ? 'shadow border-2 z-1'
+      : ''}  {goal.isRelevant ? '' : 'hatched-background'}"
+    title={goal.isRelevant ? '' : 'Målet er ikke lenger relevant for eleven'}
+  >
     <div class="goal-primary-row">
       <!-- Drag handle -->
       <span class="item mt-1">
@@ -276,6 +281,7 @@
             iconName: 'plus-sign',
             classes: 'mini-button bordered',
             title: 'Ny observasjon',
+            disabled: !goal.isRelevant,
             onClick: () => handleEditObservation(goal, null),
           }}
         />
@@ -313,48 +319,8 @@
     </div>
 
     {#if expandedGoals[goal.id]}
-      {#if goal?.observations.length === 0}
-        <div class="my-3">
-          {#if !goal.isPersonal}
-            <p>
-              Dette målet er ikke individuelt, men gitt for <Link to={`/groups/${goal.groupId}/`}>
-                hele gruppa
-              </Link>.
-            </p>
-          {:else}
-            <p>
-              Ingen observasjoner for dette målet. Trykk pluss (+) for å opprette en observasjon.
-            </p>
-
-            <ButtonMini
-              options={{
-                iconName: 'edit',
-                classes: 'my-2 me-2',
-                title: 'Rediger individuelt mål',
-                onClick: () => handleEditGoal(goal),
-                variant: 'icon-left',
-                skin: 'primary',
-              }}
-            >
-              Rediger individuelt mål
-            </ButtonMini>
-
-            <ButtonMini
-              options={{
-                iconName: 'trash-can',
-                classes: 'my-2',
-                title: 'Slett individuelt mål',
-                onClick: () => handleDeleteGoal(goal.id),
-                variant: 'icon-left',
-                skin: 'primary',
-              }}
-            >
-              Slett mål
-            </ButtonMini>
-          {/if}
-        </div>
-      {:else}
-        <div class="goal-secondary-row">
+      <div class="goal-secondary-row">
+        {#if goal.observations?.length}
           <div class="student-observations-row mb-2">
             <span>Når</span>
             <span>Verdi</span>
@@ -392,8 +358,46 @@
               </span>
             </div>
           {/each}
-        </div>
-      {/if}
+        {:else}
+          <p>Ingen observasjoner for dette målet.</p>
+        {/if}
+      </div>
+      <div class="my-3">
+        {#if goal.isPersonal}
+          <ButtonMini
+            options={{
+              iconName: 'edit',
+              classes: 'my-2 me-2',
+              title: 'Rediger individuelt mål',
+              onClick: () => handleEditGoal(goal),
+              variant: 'icon-left',
+              skin: 'secondary',
+            }}
+          >
+            Rediger individuelt mål
+          </ButtonMini>
+
+          <ButtonMini
+            options={{
+              iconName: 'trash-can',
+              classes: 'my-2',
+              title: 'Slett individuelt mål',
+              onClick: () => handleDeleteGoal(goal.id),
+              disabled: goal.observations?.length > 0,
+              variant: 'icon-left',
+              skin: 'secondary',
+            }}
+          >
+            Slett mål
+          </ButtonMini>
+        {:else}
+          <p>
+            Dette målet er ikke individuelt, men gitt for <Link to={`/groups/${goal.groupId}/`}>
+              hele gruppa
+            </Link>.
+          </p>
+        {/if}
+      </div>
     {/if}
   </div>
 {/snippet}

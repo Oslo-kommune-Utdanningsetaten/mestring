@@ -35,6 +35,7 @@ export type GoalType = {
     title?: string | null;
     description?: string | null;
     sortOrder?: number | null;
+    isRelevant?: boolean;
     readonly createdById: string;
     readonly updatedById: string;
     groupId?: string | null;
@@ -149,6 +150,7 @@ export type PatchedGoalType = {
     title?: string | null;
     description?: string | null;
     sortOrder?: number | null;
+    isRelevant?: boolean;
     readonly createdById?: string;
     readonly updatedById?: string;
     groupId?: string | null;
@@ -447,6 +449,7 @@ export type GoalCreateType = {
     title?: string | null;
     description?: string | null;
     sortOrder?: number | null;
+    isRelevant?: boolean;
     groupId?: string | null;
     studentId?: string | null;
     subjectId?: string | null;
@@ -514,6 +517,7 @@ export type PatchedGoalCreateType = {
     title?: string | null;
     description?: string | null;
     sortOrder?: number | null;
+    isRelevant?: boolean;
     groupId?: string | null;
     studentId?: string | null;
     subjectId?: string | null;

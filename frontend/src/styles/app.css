@@ -222,6 +222,20 @@ a:hover {
   }
 }
 
+.hatched-background {
+  background-image: linear-gradient(
+    135deg,
+    #ededed 25%,
+    #fff 25%,
+    #fff 50%,
+    #ededed 50%,
+    #ededed 75%,
+    #fff 75%,
+    #fff 100%
+  );
+  background-size: 14.14px 14.14px;
+}
+
 mark {
   margin: 0 -0.4em;
   padding: 0.1em 0.4em;

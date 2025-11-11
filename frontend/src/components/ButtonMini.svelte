@@ -8,6 +8,7 @@
       title?: string
       variant?: string
       skin?: string
+      color?: string
       disabled?: boolean
       onClick?: () => void
       size?: 'tiny' | 'small' | 'medium' | 'large'
@@ -23,6 +24,7 @@
   const title = options.title || 'TITTEL MANGLER'
   const variant = options.variant || 'icon-only'
   const skin = options.skin || 'tertiary'
+  const color = options.color || null // allowed colors defined here https://punkt.oslo.kommune.no/latest/komponenter-og-maler/komponenter/button/#props
   const disabled = $derived<boolean>(options.disabled || false)
   const onClick =
     options.onClick ||
@@ -58,6 +60,7 @@
     class={classes}
     {iconName}
     {title}
+    {color}
     onclick={() => onClick()}
     {disabled}
     onkeydown={(e: any) => {

@@ -303,6 +303,7 @@ class Goal(BaseModel):
     mastery_schema = models.ForeignKey(
         MasterySchema, on_delete=models.RESTRICT, null=True, related_name='goals')
     sort_order = models.IntegerField(null=True)
+    is_relevant = models.BooleanField(default=True)  # keep old goals for history
 
     class Meta:
         constraints = [

@@ -306,7 +306,7 @@
 
       <div bind:this={goalsListElement} class="list-group mt-3">
         {#each groupGoals as goal, index (goal.id)}
-          <div class="list-group-item goal-row">
+          <div class="list-group-item goal-row {goal.isRelevant ? '' : 'hatched-background'}">
             <!-- Drag handle -->
             <span>
               <pkt-icon
@@ -355,6 +355,7 @@
                     variant: 'icon-only',
                     size: 'tiny',
                     classes: 'me-0',
+                    disabled: !goal.isRelevant || isGoalInUse(goal.id),
                     onClick: () => handleDeleteGoal(goal.id),
                   }}
                 />
@@ -375,7 +376,7 @@
         {#each subjects as aSubject (aSubject.id)}
           {#if aSubject}
             <span class="item header header-row">
-              <span class="subject-label-header">
+              <span class="column-header">
                 {aSubject.shortName}
               </span>
             </span>
@@ -394,7 +395,7 @@
         <span class="item header header-row">Elev</span>
         {#each groupGoals as goal (goal.id)}
           <span class="item header header-row">
-            <span class="subject-label-header">
+            <span class="column-header {goal.isRelevant ? '' : 'hatched-background text-muted'}">
               {goal.title || goal.sortOrder}
             </span>
           </span>
@@ -411,6 +412,7 @@
               <button
                 title="Legg til observasjon"
                 class="new-observation-button gap-2 d-flex align-items-center"
+                disabled={!goal.isRelevant}
                 onclick={() => handleEditObservation(goal, null, student)}
               >
                 {#if decoGoal?.masteryData}
@@ -507,7 +509,7 @@
     border-bottom: 1px solid var(--bs-border-color);
   }
 
-  .subject-label-header {
+  .column-header {
     transform: rotate(-60deg);
     font-size: 0.8rem;
   }
