@@ -240,7 +240,7 @@
   >
     <div class="goal-primary-row">
       <!-- Drag handle -->
-      <span class="item mt-1">
+      <span class="item">
         {#if goal.isPersonal}
           <ButtonMini
             options={{
@@ -501,7 +501,6 @@
 
   :global(.row-handle-draggable) {
     cursor: move;
-    vertical-align: -8%;
   }
 
   .goal-type-icon > :global(svg) {
