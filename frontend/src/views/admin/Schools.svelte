@@ -321,31 +321,29 @@
   {/if}
 
   {#each schools as school}
-    <div class="border border-1 mb-4" class:opacity-25={!school.isServiceEnabled}>
+    <div class="border border-3 mb-4" class:opacity-25={!school.isServiceEnabled}>
       <div class="p-4">
-        <div class="row align-items-start mb-4">
-          <div class="d-flex align-items-center">
-            <h5>{school.displayName}</h5>
-            <pkt-checkbox
-              id={'service-' + school.id}
-              class="ms-auto"
-              label={school.isServiceEnabled ? 'Aktivert' : 'Deaktivert'}
-              labelPosition="right"
-              isSwitch="true"
-              aria-checked={school.isServiceEnabled}
-              checked={school.isServiceEnabled}
-              onchange={() => toggleServiceEnabled(school)}
-            ></pkt-checkbox>
-          </div>
-
-          <div class="text-muted small">
-            {school.orgNumber}, Oppdatert {formatDate(school.updatedAt)}
-          </div>
+        <div class="d-flex align-items-center">
+          <h3>{school.displayName}</h3>
+          <pkt-checkbox
+            id={'service-' + school.id}
+            class="ms-auto"
+            label={school.isServiceEnabled ? 'Aktivert' : 'Deaktivert'}
+            labelPosition="right"
+            isSwitch="true"
+            aria-checked={school.isServiceEnabled}
+            checked={school.isServiceEnabled}
+            onchange={() => toggleServiceEnabled(school)}
+          ></pkt-checkbox>
         </div>
 
-        <div class="mb-2">Hvilke fag er tilgjengelige på skolen</div>
+        <div class="text-muted small">
+          {school.orgNumber}, Oppdatert {formatDate(school.updatedAt)}
+        </div>
 
-        <!-- Radio buttons for filtering groups -->
+        <!-- Subjects -->
+        <h4 class="my-4">Fag</h4>
+        <p class="mb-3">Hvilke fag er tilgjengelige på skolen?</p>
         <fieldset class="d-flex flex-wrap gap-4">
           {#each subjectOptions as option}
             <pkt-radiobutton
@@ -357,182 +355,184 @@
             ></pkt-radiobutton>
           {/each}
         </fieldset>
-        <div>
-          <pkt-checkbox
-            id={'group-goal-' + school.id}
-            class="mb-0 ms-3"
-            label={(school as any).isGroupGoalEnabled
-              ? 'Gruppemål tilgjengelig'
-              : 'Gruppemål ikke tilgjgengelig'}
-            labelPosition="right"
-            isSwitch="true"
-            aria-checked={(school as any).isGroupGoalEnabled}
-            checked={(school as any).isGroupGoalEnabled}
-            onchange={() => toggleGroupGoalEnabled(school)}
-          ></pkt-checkbox>
-        </div>
-        <div>
-          <pkt-checkbox
-            id={'goal-title' + school.id}
-            class="mb-0 ms-3"
-            label={(school as any).isGoalTitleEnabled
-              ? 'Måltittel tilgjengelig'
-              : 'Måltittel ikke tilgjgengelig'}
-            labelPosition="right"
-            isSwitch="true"
-            aria-checked={(school as any).isGoalTitleEnabled}
-            checked={(school as any).isGoalTitleEnabled}
-            onchange={() => toggleGoalTitleEnabled(school)}
-          ></pkt-checkbox>
-        </div>
-        <div>
-          <pkt-checkbox
-            id={'student-list-' + school.id}
-            class="mb-0 ms-3"
-            label={(school as any).isStudentListEnabled
-              ? 'Elevliste synlig'
-              : 'Elevliste ikke synlig'}
-            labelPosition="right"
-            isSwitch="true"
-            aria-checked={(school as any).isStudentListEnabled}
-            checked={(school as any).isStudentListEnabled}
-            onchange={() => toggleStudentListEnabled(school)}
-          ></pkt-checkbox>
-        </div>
+        <hr />
 
+        <!-- Groups -->
+        <h4 class="my-4">Grupper</h4>
+        <pkt-checkbox
+          id={'group-goal-' + school.id}
+          label={(school as any).isGroupGoalEnabled
+            ? 'Gruppemål tilgjengelig'
+            : 'Gruppemål ikke tilgjgengelig'}
+          labelPosition="right"
+          isSwitch="true"
+          aria-checked={(school as any).isGroupGoalEnabled}
+          checked={(school as any).isGroupGoalEnabled}
+          onchange={() => toggleGroupGoalEnabled(school)}
+        ></pkt-checkbox>
+
+        <pkt-checkbox
+          id={'goal-title' + school.id}
+          class="ms-1"
+          label={(school as any).isGoalTitleEnabled
+            ? 'Fritekst-tittel på mål tilgjengelig'
+            : 'Fritekst-tittel på mål IKKE tilgjgengelig'}
+          labelPosition="right"
+          isSwitch="true"
+          aria-checked={(school as any).isGoalTitleEnabled}
+          checked={(school as any).isGoalTitleEnabled}
+          onchange={() => toggleGoalTitleEnabled(school)}
+        ></pkt-checkbox>
+        <hr />
+
+        <!-- Groups -->
+        <h4 class="my-4">Navigasjon for lærere</h4>
+        <pkt-checkbox
+          id={'student-list-' + school.id}
+          label={(school as any).isStudentListEnabled
+            ? 'Elevliste synlig'
+            : 'Elevliste ikke synlig'}
+          labelPosition="right"
+          isSwitch="true"
+          aria-checked={(school as any).isStudentListEnabled}
+          checked={(school as any).isStudentListEnabled}
+          onchange={() => toggleStudentListEnabled(school)}
+        ></pkt-checkbox>
+        <hr />
+
+        <!-- Import status -->
+        <h4 class="mt-4 mb-3">Importstatus</h4>
         {#if importStatus[school.orgNumber]}
-          <div class="my-4">
-            <div class="table-responsive">
-              <table class="table table-sm align-middle mb-0">
-                <thead>
-                  <tr class="border-bottom">
-                    <th class="border-0 fw-semibold text-dark small pb-2">Type</th>
-                    <th class="border-0 fw-semibold text-dark small text-center pb-2">Hentet</th>
-                    <th class="border-0 fw-semibold text-dark small text-center pb-2">Database</th>
-                    <th class="border-0 fw-semibold text-dark small text-center pb-2">Forskjell</th>
-                    <th class="border-0 fw-semibold text-dark small text-center pb-2">
-                      Sist hentet
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="border-0">
-                    <td class="border-0 py-2">
-                      <div class="d-flex align-items-center">
-                        <pkt-icon name="folder" size="16" class="me-2 text-muted"></pkt-icon>
-                        <span class="small">Grupper</span>
-                      </div>
-                    </td>
-                    <td class="border-0 text-center py-2 small">
-                      {importStatus[school.orgNumber].groups.fetchedCount ?? '—'}
-                    </td>
-                    <td class="border-0 text-center py-2 small">
-                      {importStatus[school.orgNumber].groups.dbCount ?? '—'}
-                    </td>
-                    <td class="border-0 text-center py-2 small">
-                      {importStatus[school.orgNumber].groups.diff ?? '—'}
-                    </td>
-                    <td class="border-0 text-center py-2 small text-muted">
-                      {formatDate(importStatus[school.orgNumber].groups.fetchedAt)}
-                    </td>
-                  </tr>
-                  <tr class="border-0">
-                    <td class="border-0 py-2">
-                      <div class="d-flex align-items-center">
-                        <pkt-icon
-                          name="two-people-dancing"
-                          size="16"
-                          class="me-2 text-muted"
-                        ></pkt-icon>
-                        <span class="small">Brukere</span>
-                      </div>
-                    </td>
-                    <td class="border-0 text-center py-2 small">
-                      {importStatus[school.orgNumber].users.fetchedCount ?? '—'}
-                    </td>
-                    <td class="border-0 text-center py-2 small">
-                      {importStatus[school.orgNumber].users.dbCount ?? '—'}
-                    </td>
-                    <td class="border-0 text-center py-2 small">
-                      {importStatus[school.orgNumber].users.diff ?? '—'}
-                    </td>
-                    <td class="border-0 text-center py-2 small text-muted">
-                      {formatDate(importStatus[school.orgNumber].users.fetchedAt)}
-                    </td>
-                  </tr>
-                  <tr class="border-0">
-                    <td class="border-0 py-2">
-                      <div class="d-flex align-items-center">
-                        <pkt-icon name="link" size="16" class="me-2 text-muted"></pkt-icon>
-                        <span class="small">Medlemskap</span>
-                      </div>
-                    </td>
-                    <td class="border-0 text-center py-2 small">
-                      {importStatus[school.orgNumber].memberships.fetchedCount ?? '—'}
-                    </td>
-                    <td class="border-0 text-center py-2 small">
-                      {importStatus[school.orgNumber].memberships.dbCount ?? '—'}
-                    </td>
-                    <td class="border-0 text-center py-2 small">
-                      {importStatus[school.orgNumber].memberships.diff ?? '—'}
-                    </td>
-                    <td class="border-0 text-center py-2 small text-muted">
-                      {formatDate(importStatus[school.orgNumber].memberships.fetchedAt)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead>
+                <tr class="border-bottom">
+                  <th class="border-0 fw-semibold text-dark small pb-2">Type</th>
+                  <th class="border-0 fw-semibold text-dark small text-center pb-2">Hentet</th>
+                  <th class="border-0 fw-semibold text-dark small text-center pb-2">Database</th>
+                  <th class="border-0 fw-semibold text-dark small text-center pb-2">Forskjell</th>
+                  <th class="border-0 fw-semibold text-dark small text-center pb-2">Sist hentet</th>
+                </tr>
+              </thead>
 
-            {#if importStatus[school.orgNumber].lastImportAt}
-              <div class="d-flex align-items-center mt-3 pt-3 border-top">
-                <pkt-icon name="clock" size="16" class="me-2 text-muted"></pkt-icon>
-                <span class="text-muted small">
-                  Sist import: {formatDate(importStatus[school.orgNumber].lastImportAt)}
-                </span>
-              </div>
-            {/if}
+              <tbody>
+                <!-- Users -->
+                <tr class="border-0">
+                  <td class="border-0 py-2">
+                    <div class="d-flex align-items-center">
+                      <pkt-icon name="person" size="16" class="me-2 text-muted"></pkt-icon>
+                      <span class="small">Brukere</span>
+                    </div>
+                  </td>
+                  <td class="border-0 text-center py-2 small">
+                    {importStatus[school.orgNumber].users.fetchedCount ?? '—'}
+                  </td>
+                  <td class="border-0 text-center py-2 small">
+                    {importStatus[school.orgNumber].users.dbCount ?? '—'}
+                  </td>
+                  <td class="border-0 text-center py-2 small">
+                    {importStatus[school.orgNumber].users.diff ?? '—'}
+                  </td>
+                  <td class="border-0 text-center py-2 small text-muted">
+                    {formatDate(importStatus[school.orgNumber].users.fetchedAt)}
+                  </td>
+                </tr>
+
+                <!-- Groups -->
+                <tr class="border-0">
+                  <td class="border-0 py-2">
+                    <div class="d-flex align-items-center">
+                      <pkt-icon name="group" size="16" class="me-2 text-muted"></pkt-icon>
+                      <span class="small">Grupper</span>
+                    </div>
+                  </td>
+                  <td class="border-0 text-center py-2 small">
+                    {importStatus[school.orgNumber].groups.fetchedCount ?? '—'}
+                  </td>
+                  <td class="border-0 text-center py-2 small">
+                    {importStatus[school.orgNumber].groups.dbCount ?? '—'}
+                  </td>
+                  <td class="border-0 text-center py-2 small">
+                    {importStatus[school.orgNumber].groups.diff ?? '—'}
+                  </td>
+                  <td class="border-0 text-center py-2 small text-muted">
+                    {formatDate(importStatus[school.orgNumber].groups.fetchedAt)}
+                  </td>
+                </tr>
+
+                <!-- Memberships -->
+                <tr class="border-0">
+                  <td class="border-0 py-2">
+                    <div class="d-flex align-items-center">
+                      <pkt-icon name="holding-hands" size="16" class="me-2 text-muted"></pkt-icon>
+                      <span class="small">Medlemskap</span>
+                    </div>
+                  </td>
+                  <td class="border-0 text-center py-2 small">
+                    {importStatus[school.orgNumber].memberships.fetchedCount ?? '—'}
+                  </td>
+                  <td class="border-0 text-center py-2 small">
+                    {importStatus[school.orgNumber].memberships.dbCount ?? '—'}
+                  </td>
+                  <td class="border-0 text-center py-2 small">
+                    {importStatus[school.orgNumber].memberships.diff ?? '—'}
+                  </td>
+                  <td class="border-0 text-center py-2 small text-muted">
+                    {formatDate(importStatus[school.orgNumber].memberships.fetchedAt)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+
+          {#if importStatus[school.orgNumber].lastImportAt}
+            <div class="d-flex align-items-center mt-3 pt-3 border-top">
+              <pkt-icon name="clock" size="16" class="me-2 text-muted"></pkt-icon>
+              <span class="text-muted small">
+                Sist import: {formatDate(importStatus[school.orgNumber].lastImportAt)}
+              </span>
+            </div>
+          {/if}
         {/if}
 
         <div>
           <!-- Hent grupper -->
           <ButtonMini
             options={{
-              title: 'Hent grupper',
-              iconName: 'folder',
+              title: 'Hent grupper fra Feide',
+              iconName: 'group',
               skin: 'secondary',
               variant: 'icon-left',
               onClick: () => handleFetchGroupsForSchool(school.orgNumber),
             }}
           >
-            Hent grupper
+            Hent grupper fra Feide
           </ButtonMini>
 
           <!-- Hent brukere -->
           <ButtonMini
             options={{
-              title: 'Hent brukere',
-              iconName: 'two-people-dancing',
+              title: 'Hent brukere fra Feide',
+              iconName: 'person',
               skin: 'secondary',
               variant: 'icon-left',
               onClick: () => handleFetchMembershipsForSchool(school.orgNumber),
             }}
           >
-            Hent brukere
+            Hent brukere fra Feide
           </ButtonMini>
 
           <!-- Importer -->
           <ButtonMini
             options={{
-              title: 'Importer',
+              title: 'Importér',
               iconName: 'download',
               skin: 'secondary',
               variant: 'icon-left',
               onClick: () => handleImportGroupsAndUsers(school.orgNumber),
             }}
           >
-            Importer
+            Importér
           </ButtonMini>
         </div>
       </div>
