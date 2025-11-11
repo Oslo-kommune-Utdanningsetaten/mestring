@@ -6,6 +6,7 @@
   import GoalEdit from '../components/GoalEdit.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
+  import Link from '../components/Link.svelte'
   import StudentSVG from '../assets/education.svg.svelte'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
@@ -115,7 +116,16 @@
         </h5>
       </div>
     </div>
-    <div class="my-4">Medlem av: {groups.map(g => g.displayName).join(', ')}</div>
+    <div class="my-4">
+      Medlem av:
+      {#each groups as group, index (group.id)}
+        <span>
+          <Link to={`/groups/${group.id}/`}>
+            {group.displayName}
+          </Link>{index < groups.length - 1 ? ', ' : ''}
+        </span>
+      {/each}
+    </div>
 
     <!-- Goals and mastery -->
     <div class="card shadow-sm">
