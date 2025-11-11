@@ -274,8 +274,22 @@
         {isShowGoalTitleEnabled ? goal.title : '🙊'}
       </span>
 
+      <!-- Stats widgets -->
+      <span class="item item--stats d-flex gap-2">
+        {#if goal.masteryData}
+          <MasteryLevelBadge
+            masteryData={goal.masteryData}
+            masterySchema={getMasterySchmemaForGoal(goal)}
+          />
+          <SparkbarChart
+            data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
+            masterySchema={getMasterySchmemaForGoal(goal)}
+          />
+        {/if}
+      </span>
+
       <!-- New observation button -->
-      <span class="item">
+      <span class="item item--right">
         <ButtonMini
           options={{
             iconName: 'plus-sign',
@@ -287,35 +301,17 @@
         />
       </span>
 
-      <!-- Stats widgets -->
-      <span class="item d-flex gap-2">
-        {#if goal.masteryData}
-          <MasteryLevelBadge
-            masteryData={goal.masteryData}
-            masterySchema={getMasterySchmemaForGoal(goal)}
-          />
-          <SparklineChart
-            data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
-            masterySchema={getMasterySchmemaForGoal(goal)}
-          />
-          <SparkbarChart
-            data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
-            masterySchema={getMasterySchmemaForGoal(goal)}
-          />
-        {:else}
-          <MasteryLevelBadge isBadgeEmpty={true} />
-        {/if}
-      </span>
-
       <!-- Toggle goal info -->
-      <ButtonMini
-        options={{
-          iconName: `chevron-thin-${expandedGoals[goal.id] ? 'up' : 'down'}`,
-          classes: 'mini-button rounded justify-end',
-          title: `${expandedGoals[goal.id] ? 'Skjul' : 'Vis'} observasjoner`,
-          onClick: () => toggleGoalExpansion(goal.id),
-        }}
-      />
+      <span class="item item--right">
+        <ButtonMini
+          options={{
+            iconName: `chevron-thin-${expandedGoals[goal.id] ? 'up' : 'down'}`,
+            classes: 'mini-button rounded',
+            title: `${expandedGoals[goal.id] ? 'Skjul' : 'Vis'} observasjoner`,
+            onClick: () => toggleGoalExpansion(goal.id),
+          }}
+        />
+      </span>
     </div>
 
     {#if expandedGoals[goal.id]}
@@ -464,13 +460,29 @@
 
   .goal-primary-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 10fr 40px 100px 1fr;
-    column-gap: 2px;
+    grid-template-columns: auto auto auto minmax(0, 1fr) auto auto auto;
+    column-gap: 0.5rem;
     align-items: center;
   }
 
   .goal-primary-row > .item {
-    justify-self: start;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.25rem;
+  }
+
+  .goal-primary-row > .item.item--right {
+    justify-content: flex-end;
+  }
+
+  .goal-primary-row > .item.item--stats {
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+
+  .goal-primary-row .item.mt-1 {
+    margin-top: 0;
   }
 
   .goal-secondary-row {

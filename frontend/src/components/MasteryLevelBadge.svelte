@@ -29,7 +29,7 @@
   const decreasingColor = 'var(--bs-danger)'
   const trendColor = $derived(isDecreasing ? decreasingColor : isFlat ? flatColor : increasingColor)
   // Dimensions
-  const trendBoxSize = 22
+  const trendBoxSize = 24
   const masteryIndicatorHeight = 4
   const masteryIndicatorOutcrop = 2
   const masteryIndicatorWidth = trendBoxSize + masteryIndicatorOutcrop * 2

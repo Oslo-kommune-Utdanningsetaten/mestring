@@ -16,8 +16,6 @@
     data: number[]
     width?: number
     height?: number
-    min?: number | null
-    max?: number | null
     lineColor?: string
     title?: string
   }
@@ -26,8 +24,8 @@
   const {
     masterySchema,
     data,
-    width = 26,
-    height = 26,
+    width = 24,
+    height = 24,
     lineColor = 'rgb(100, 100, 100)',
     title: providedTitle,
   }: Props = $props()

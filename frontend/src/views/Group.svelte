@@ -409,29 +409,28 @@
           {#each groupGoals as goal (goal.id)}
             {@const decoGoal = getDecoratedGoalFor(student.id, goal.id)}
             <span class="item">
+              {#if decoGoal?.masteryData}
+                <MasteryLevelBadge
+                  masteryData={decoGoal.masteryData}
+                  masterySchema={getMasterySchmemaForGoal(goal)}
+                />
+                <SparklineChart
+                  data={decoGoal.observations?.map((o: ObservationType) => o.masteryValue)}
+                  masterySchema={getMasterySchmemaForGoal(goal)}
+                />
+                <SparkbarChart
+                  data={decoGoal.observations?.map((o: ObservationType) => o.masteryValue)}
+                  masterySchema={getMasterySchmemaForGoal(goal)}
+                />
+              {:else}
+                <MasteryLevelBadge isBadgeEmpty={true} />
+              {/if}
               <button
                 title="Legg til observasjon"
                 class="new-observation-button gap-2 d-flex align-items-center"
                 disabled={!goal.isRelevant}
                 onclick={() => handleEditObservation(goal, null, student)}
-              >
-                {#if decoGoal?.masteryData}
-                  <MasteryLevelBadge
-                    masteryData={decoGoal.masteryData}
-                    masterySchema={getMasterySchmemaForGoal(goal)}
-                  />
-                  <SparklineChart
-                    data={decoGoal.observations?.map((o: ObservationType) => o.masteryValue)}
-                    masterySchema={getMasterySchmemaForGoal(goal)}
-                  />
-                  <SparkbarChart
-                    data={decoGoal.observations?.map((o: ObservationType) => o.masteryValue)}
-                    masterySchema={getMasterySchmemaForGoal(goal)}
-                  />
-                {:else}
-                  <MasteryLevelBadge isBadgeEmpty={true} />
-                {/if}
-              </button>
+              ></button>
             </span>
           {/each}
         {/each}

@@ -15,8 +15,8 @@
   // Props with sane defaults
   const {
     data,
-    width = 26,
-    height = 26,
+    width = 24,
+    height = 24,
     masterySchema,
     lineColor = 'rgb(100, 100, 100)',
     strokeWidth = 1.6,
