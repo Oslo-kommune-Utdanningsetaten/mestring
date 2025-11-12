@@ -76,6 +76,7 @@ TEMPLATES = [
 ]
 WSGI_APPLICATION = 'wsgi.application'
 
+# Various security
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'mestring.osloskolen.no',
                  'mestring-dev.osloskolen.no', 'iz-mest-ap01t.oslo.int']
 
@@ -84,7 +85,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://mestring-dev.osloskolen.no',
     'https://mestring.osloskolen.no',
     'http://localhost:5173',
-    'http://iz-mest-ap01t.oslo.int'
+    'http://iz-mest-ap01t.oslo.int',
+    'http://iz-mest-ap01p.oslo.int'
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -92,8 +94,24 @@ CORS_ALLOWED_ORIGINS = [
     'https://mestring-dev.osloskolen.no',
     'http://127.0.0.1:5173',
     'http://localhost:5173',
-    'http://iz-mest-ap01t.oslo.int'
+    'http://iz-mest-ap01t.oslo.int',
+    'http://iz-mest-ap01p.oslo.int'
+
 ]
+
+CSRF_COOKIE_HTTPONLY = False  # Requires different handling of the token to work with HttpOnly cookies
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'Strict'
+
+SESSION_COOKIE_AGE = 28800  # 8 hours, matching Feide expires_in
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# cdn.jsdelivr.net is needed for swagger-ui
+CSP_DEFAULT_SRC = ("'self'", "'unsafe-inline'", "cdn.jsdelivr.net")
+CSP_IMG_SRC = ("'self'", "data:", "cdn.jsdelivr.net")
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
