@@ -12,6 +12,13 @@
   let isHomeActive = $derived($currentPath === '/')
   let isAboutActive = $derived($currentPath === '/about')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
+  let environmentWarning = $derived(
+    window.location.hostname.includes('mestring-dev')
+      ? 'development'
+      : window.location.hostname.includes('localhost')
+        ? 'localhost'
+        : undefined
+  )
   const API_CHECK_INTERVAL = 60 * 1000 // every 60 secondss
 
   $effect(() => {
@@ -37,6 +44,11 @@
 {/if}
 
 <nav class="navbar navbar-expand-md navbar-light bg-light">
+  {#if environmentWarning}
+    <div class="environment-warning-banner">
+      {environmentWarning}
+    </div>
+  {/if}
   <div class="container-md">
     <a class="navbar-brand fw-bold" href="/">
       <span class="me-1 goal-icon-wrapper">
@@ -181,5 +193,30 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+  }
+
+  nav.navbar {
+    position: relative;
+  }
+
+  .environment-warning-banner {
+    position: absolute;
+    top: 26px;
+    left: -40px;
+    z-index: 5;
+    display: inline-block;
+    width: 170px;
+    padding: 5px 0;
+    background: #d63384;
+    color: #fff;
+    font-family: 'courier new', courier, monospace;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-align: center;
+    text-transform: uppercase;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.18);
+    transform: rotate(-45deg);
+    pointer-events: none;
   }
 </style>
