@@ -23,6 +23,7 @@
   import MasterySchemas from './views/admin/MasterySchemas.svelte'
   import DataMaintenanceTask from './views/admin/DataMaintenanceTask.svelte'
   import Schools from './views/admin/Schools.svelte'
+  import AlertBar from './components/AlertBar.svelte'
 
   // Defer side-effect network calls until after component mount
   onMount(async () => {
@@ -35,6 +36,7 @@
 
 <header class="m-0 p-0 vw-100">
   <Navigation />
+  <AlertBar />
 </header>
 
 <main class="container-md py-3">

@@ -242,12 +242,12 @@ export const isNumber = (value: any) => {
   return typeof value === 'number'
 }
 
-export const formatDate = (isoDate?: string | null) => {
+export const formatDate = (isoDate?: string | number | undefined) => {
   if (!isoDate) return null
   return format(new Date(isoDate), 'yyyy-MM-dd HH:mm')
 }
 
-export const formatDateDistance = (isoDate?: string | null) => {
+export const formatDateDistance = (isoDate?: string | number | undefined) => {
   if (!isoDate) return null
   return formatDistanceToNow(new Date(isoDate), { addSuffix: true, locale: noLocale })
 }
