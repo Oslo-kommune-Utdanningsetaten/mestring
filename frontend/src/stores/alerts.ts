@@ -9,7 +9,6 @@ type AlertType = {
 }
 
 const alertTTL = 5 * 1000 // time to live for non-persistent alerts in milliseconds
-const cleanupInterval = 60 * 60 * 1000 // interval to check and remove old alerts in milliseconds
 
 let nextAlertId = 0
 
@@ -31,8 +30,6 @@ export const removeAlert = (id?: number) => {
 setInterval(() => {
   const now = Date.now()
   alerts.update(currentAlerts =>
-    currentAlerts.filter(
-      alert => alert.isPersistent || (alert.timestamp && now - alert.timestamp < cleanupInterval)
-    )
+    currentAlerts.filter(alert => alert.isPersistent || now - alert.timestamp < alertTTL)
   )
 }, alertTTL)

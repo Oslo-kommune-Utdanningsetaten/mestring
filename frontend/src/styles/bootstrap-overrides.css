@@ -78,6 +78,18 @@ a:hover,
   font-weight: bold;
 }
 
+.bg-success {
+  background-color: var(--pkt-color-brand-green-400) !important;
+}
+
 .bg-info {
-  background-color: var(--bs-info) !important;
+  background-color: var(--pkt-color-brand-blue-500) !important;
+}
+
+.bg-warning {
+  background-color: var(--pkt-color-brand-yellow-500) !important;
+}
+
+.bg-danger {
+  background-color: var(--pkt-color-brand-red-600) !important;
 }
