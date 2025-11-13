@@ -6,8 +6,9 @@ import urllib.parse
 from datetime import datetime
 from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from oauthlib.oauth2 import WebApplicationClient
 from mastery.models import User, School
 
@@ -77,6 +78,7 @@ def check_affiliations(feide_user_id, affiliations):
 
 
 @require_GET
+@permission_classes([AllowAny])
 def feidelogin(request):
     provider_config = get_provider_config()
     authorization_endpoint = provider_config["authorization_endpoint"]
@@ -90,6 +92,7 @@ def feidelogin(request):
 
 
 @require_GET
+@permission_classes([AllowAny])
 def feidecallback(request):
     code = request.GET.get("code", None)
     if not code:
@@ -141,6 +144,7 @@ def feidecallback(request):
 
 
 @require_GET
+@permission_classes([IsAuthenticated])
 def feidelogout(request):
     tokens = request.session.get("feide_tokens")
     request.session.flush()
@@ -158,6 +162,7 @@ def feidelogout(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def auth_status(request):
     user_id = request.session.get("user_id", None)
     if not user_id:
