@@ -15,11 +15,11 @@
   import { formatDate } from '../../utils/functions'
 
   import ButtonMini from '../../components/ButtonMini.svelte'
+  import { addAlert } from '../../stores/alerts'
+  import { add } from 'date-fns'
 
   const router = useTinyRouter()
   let schools = $state<SchoolType[]>([])
-  let alertMessage = $state<string>('')
-  let alertType = $state<'success' | 'error' | ''>('')
   let feideOrgInput: HTMLInputElement
 
   // Radio options for subject config
@@ -65,7 +65,10 @@
         }
       }
     } catch (error) {
-      console.error('Error fetching import status:', orgNumber, error)
+      addAlert({
+        type: 'danger',
+        message: `Feil ved henting av importstatus for skole ${orgNumber}`,
+      })
     }
   }
 
@@ -77,7 +80,10 @@
         .sort((a, b) => Number(!a.isServiceEnabled) - Number(!b.isServiceEnabled))
       await Promise.all(schools.map(school => loadImportStatusForSchool(school.orgNumber)))
     } catch (error) {
-      console.error('Error fetching schools:', error)
+      addAlert({
+        type: 'danger',
+        message: 'Feil ved henting av skoler',
+      })
       schools = []
     }
   }
@@ -93,7 +99,10 @@
         schools[index] = result.data
       }
     } catch (error) {
-      console.error('Error updating school:', error)
+      addAlert({
+        type: 'danger',
+        message: `Feil ved oppdatering av status for skole ${school.displayName}`,
+      })
     }
   }
 
@@ -166,102 +175,122 @@
     }
   }
 
-  const dismissAlert = () => {
-    alertMessage = ''
-    alertType = ''
-  }
-
   const handleFetchGroupsForSchool = async (orgNumber: string) => {
-    dismissAlert()
     try {
       const result = await fetchGroupsForSchool({
         path: { org_number: orgNumber },
       } as any)
 
       if (result.response.status === 201) {
-        // @ts-expect-error result.data typed as unknown by generator
-        alertMessage = `Bakgrunnsjobb opprettet for henting av grupper for ${orgNumber} (Task ID: ${result.data.taskId})`
-        alertType = 'success'
+        addAlert({
+          type: 'success',
+          message: `Bakgrunnsjobb opprettet for henting av grupper for ${orgNumber}`,
+        })
+        router.navigate('/admin/data-maintenance-tasks')
       } else if (result.response.status === 409) {
-        alertMessage = `Kan ikke opprette ny bakgrunnsjobb for ${orgNumber} fordi det allerede finnes en pågående jobb.`
-        alertType = 'error'
+        addAlert({
+          type: 'warning',
+          message: `Kan ikke opprette ny bakgrunnsjobb for ${orgNumber} fordi det allerede finnes en pågående jobb.`,
+        })
       } else {
-        alertMessage = `Feil ved oppretting av bakgrunnsjobb for ${orgNumber}`
-        alertType = 'error'
+        addAlert({
+          type: 'danger',
+          message: `Feil ved oppretting av bakgrunnsjobb for ${orgNumber}`,
+        })
       }
     } catch (error: any) {
-      alertMessage = `Nettverksfeil: ${error?.message || error}`
-      alertType = 'error'
+      addAlert({
+        type: 'danger',
+        message: `Nettverksfeil: ${error?.message || error}`,
+      })
     }
   }
 
   const handleFetchMembershipsForSchool = async (orgNumber: string) => {
-    dismissAlert()
     try {
       const result = await fetchMembershipsForSchool({
         path: { org_number: orgNumber },
       } as any)
 
       if (result.response.status === 201) {
-        // @ts-expect-error result.data typed as unknown by generator
-        alertMessage = `Bakgrunnsjobb opprettet for henting av medlemskap for ${orgNumber} (Task ID: ${result.data.taskId})`
-        alertType = 'success'
+        addAlert({
+          type: 'success',
+          message: `Bakgrunnsjobb opprettet for henting av medlemskap for ${orgNumber}`,
+        })
+        router.navigate('/admin/data-maintenance-tasks')
       } else if (result.response.status === 409) {
-        alertMessage = `Kan ikke opprette ny bakgrunnsjobb for ${orgNumber} fordi det allerede finnes en pågående jobb.`
-        alertType = 'error'
+        addAlert({
+          type: 'warning',
+          message: `Kan ikke opprette ny bakgrunnsjobb for ${orgNumber} fordi det allerede finnes en pågående jobb.`,
+        })
       } else {
-        alertMessage = `Feil ved oppretting av bakgrunnsjobb for ${orgNumber}`
-        alertType = 'error'
+        addAlert({
+          type: 'danger',
+          message: `Feil ved oppretting av bakgrunnsjobb for ${orgNumber}`,
+        })
       }
     } catch (error: any) {
-      alertMessage = `Nettverksfeil: ${error?.message || error}`
-      alertType = 'error'
+      addAlert({
+        type: 'danger',
+        message: `Nettverksfeil: ${error?.message || error}`,
+      })
     }
   }
 
   const handleImportSchool = async (orgNumber: string) => {
-    dismissAlert()
     try {
       const result = await feideImportSchool({
         path: { org_number: orgNumber },
       } as any)
       if (result.response.status === 201) {
-        alertMessage = `Skole med org nr ${orgNumber} importert fra Feide`
-        alertType = 'success'
+        addAlert({
+          type: 'success',
+          message: `Skole med org nr ${orgNumber} importert fra Feide`,
+        })
         await fetchSchools()
         feideOrgInput.value = ''
       } else {
-        alertMessage = `Feil ved import av skole ${orgNumber}`
-        alertType = 'error'
+        addAlert({
+          type: 'danger',
+          message: `Feil ved import av skole ${orgNumber}`,
+        })
       }
     } catch (error: any) {
-      alertMessage = `Nettverksfeil: ${error?.message || error}`
-      alertType = 'error'
+      addAlert({
+        type: 'danger',
+        message: `Nettverksfeil: ${error?.message || error}`,
+      })
     }
   }
 
   const handleImportGroupsAndUsers = async (orgNumber: string) => {
-    dismissAlert()
     try {
       const result = await importGroupsAndUsers({
         path: { org_number: orgNumber },
       } as any)
 
       if (result.response.status === 201) {
-        // @ts-expect-error result.data typed as unknown by generator
-        alertMessage = `Bakgrunnsjobb opprettet for import av grupper og brukere for ${orgNumber} (Task ID: ${result.data.taskId})`
-        alertType = 'success'
+        addAlert({
+          type: 'success',
+          message: `Bakgrunnsjobb opprettet for import av grupper og brukere for ${orgNumber}`,
+        })
         router.navigate('/admin/data-maintenance-tasks')
       } else if (result.response.status === 409) {
-        alertMessage = `Kan ikke opprette ny bakgrunnsjobb for ${orgNumber} fordi det allerede finnes en pågående jobb.`
-        alertType = 'error'
+        addAlert({
+          type: 'warning',
+          message: `Kan ikke opprette ny bakgrunnsjobb for ${orgNumber} fordi det allerede finnes en pågående jobb.`,
+        })
       } else {
-        alertMessage = `Feil ved oppretting av importbakgrunnsjobb for ${orgNumber}`
-        alertType = 'error'
+        addAlert({
+          type: 'danger',
+          message: `Feil ved oppretting av importbakgrunnsjobb for ${orgNumber}`,
+        })
       }
     } catch (error: any) {
-      alertMessage = `Nettverksfeil: ${error?.message || error}`
-      alertType = 'error'
+      addAlert({
+        type: 'danger',
+        message: `Nettverksfeil: ${error?.message || error}`,
+      })
     }
   }
 
@@ -294,31 +323,6 @@
       Legg til ny skole
     </ButtonMini>
   </div>
-
-  <!-- Alert -->
-  {#if alertMessage}
-    <div
-      class="alert alert-{alertType === 'success' ? 'success' : 'danger'} border-0 mb-0 mt-3"
-      role="alert"
-    >
-      <div class="d-flex align-items-start">
-        <pkt-icon
-          name={alertType === 'success' ? 'check-circle' : 'alert-circle'}
-          size="20"
-          class="me-2 mt-0 flex-shrink-0"
-        ></pkt-icon>
-        <div class="flex-grow-1">
-          <div class="small fw-medium">{alertMessage}</div>
-        </div>
-        <button
-          type="button"
-          class="btn-close btn-close-sm"
-          onclick={dismissAlert}
-          aria-label="Lukk"
-        ></button>
-      </div>
-    </div>
-  {/if}
 
   {#each schools as school}
     <div class="border border-3 mb-4" class:opacity-25={!school.isServiceEnabled}>

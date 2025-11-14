@@ -1,22 +1,26 @@
 import { writable, get } from 'svelte/store'
 
+type alertTypeType = 'success' | 'info' | 'warning' | 'danger' // not 100% happy with alertTypeTypeType, but hey :/
+
 type AlertType = {
   id: number
   timestamp: number
-  type: string
+  type: alertTypeType
   message: string
   isPersistent: boolean
 }
 
-const alertTTL = 5 * 1000 // time to live for non-persistent alerts in milliseconds
-const alertFlushInterval = 3 * 1000 // interval to flush old alerts
+const alertTTL = 10 * 1000 // Keep non-persistent alerts visible for 10 seconds
+const alertFlushInterval = 5 * 1000 // Check if old alerts should be removed every 5 seconds
 
 let nextAlertId = 0
 
-// Create a store to track alerts
+// Store to track alerts
 export const alerts = writable<AlertType[]>([])
 
 export const addAlert = (newAlert: Partial<AlertType>) => {
+  // Don't add alert to store if we already have one with same message
+  if (get(alerts).some(alert => alert.message === newAlert.message)) return
   newAlert.id = ++nextAlertId
   newAlert.timestamp = Date.now()
   newAlert.isPersistent = newAlert.isPersistent || false

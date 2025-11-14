@@ -1,8 +1,11 @@
 <script lang="ts">
   import { Router, Route } from 'svelte-tiny-router'
+  import { onMount } from 'svelte'
   import { checkAuth, isLoggingInUser } from './stores/auth'
   import { loadData, currentUser } from './stores/data'
-  import { onMount } from 'svelte'
+  import { apiHealth } from './stores/apiHealth'
+  import { addAlert } from './stores/alerts'
+
   import 'bootstrap/dist/css/bootstrap.min.css'
   import './styles/bootstrap-overrides.css'
   import 'bootstrap/dist/js/bootstrap.min.js'
@@ -24,6 +27,29 @@
   import DataMaintenanceTask from './views/admin/DataMaintenanceTask.svelte'
   import Schools from './views/admin/Schools.svelte'
   import AlertBar from './components/AlertBar.svelte'
+
+  const API_CHECK_INTERVAL = 60 * 1000 // every 60 seconds
+
+  $effect(() => {
+    // Check API health on component load
+    apiHealth.checkHealth()
+
+    // Interval to check API health periodically
+    const interval = setInterval(() => {
+      apiHealth.checkHealth()
+      if (!$apiHealth.isOk) {
+        addAlert({
+          type: 'danger',
+          message: `Connection issues. API: ${$apiHealth.api} | DB: ${$apiHealth.db} 😬`,
+          isPersistent: true,
+        })
+      }
+    }, API_CHECK_INTERVAL)
+
+    return () => {
+      clearInterval(interval)
+    }
+  })
 
   // Defer side-effect network calls until after component mount
   onMount(async () => {

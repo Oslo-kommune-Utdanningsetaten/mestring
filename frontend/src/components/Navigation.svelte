@@ -1,12 +1,11 @@
 <script lang="ts">
+  import { dataStore, currentUser } from '../stores/data'
+  import { login, logout } from '../stores/auth'
+  import { currentPath } from '../stores/navigation'
+
   import Link from './Link.svelte'
   import GoalIconCelebration from './GoalIconCelebration.svelte'
   import oslologoUrl from '@oslokommune/punkt-assets/dist/logos/oslologo.svg?url'
-
-  import { currentPath } from '../stores/navigation'
-  import { dataStore, currentUser } from '../stores/data'
-  import { apiHealth } from '../stores/apiHealth'
-  import { login, logout } from '../stores/auth'
 
   let currentSchool = $derived($dataStore.currentSchool)
   let isHomeActive = $derived($currentPath === '/')
@@ -19,29 +18,7 @@
         ? 'localhost'
         : undefined
   )
-  const API_CHECK_INTERVAL = 60 * 1000 // every 60 secondss
-
-  $effect(() => {
-    // Check API health on component load
-    apiHealth.checkHealth()
-
-    // Interval to check API health periodically
-    const interval = setInterval(() => {
-      apiHealth.checkHealth()
-    }, API_CHECK_INTERVAL)
-
-    return () => {
-      clearInterval(interval)
-    }
-  })
 </script>
-
-{#if !$apiHealth.isOk}
-  <div class="alert alert-danger">
-    <strong>Connection issues 😬</strong>
-    API: {$apiHealth.api} | DB: {$apiHealth.db}
-  </div>
-{/if}
 
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   {#if environmentWarning}
