@@ -1,9 +1,10 @@
-from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.db import connection
 from django.db.models import Q
+from django.utils import timezone
+from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from mastery.data_import.import_school import import_school_from_feide
 from mastery.data_import.helpers import get_school_fetched_stats
@@ -14,6 +15,7 @@ from mastery import models
 # Used by frontend to check status of API and DB
 @api_view(["GET"])
 @permission_classes([AllowAny])
+@ensure_csrf_cookie  # Hand out CSRF cookie to the client
 def ping(request):
     db_status = "unknown"
     http_status = 200

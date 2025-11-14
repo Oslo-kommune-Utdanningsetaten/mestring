@@ -98,8 +98,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://iz-mest-ap01p.oslo.int'
 ]
 
-CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_SAMESITE = 'Strict'
 
 SESSION_COOKIE_AGE = 28800  # 8 hours, matching Feide expires_in

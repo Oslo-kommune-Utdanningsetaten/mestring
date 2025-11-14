@@ -1,10 +1,10 @@
 from typing import Optional, Tuple
-from rest_framework.authentication import BaseAuthentication
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from mastery.models import User
 
 
-class SessionUserIdAuthentication(BaseAuthentication):
+class SessionUserIdAuthentication(SessionAuthentication):
     """
     Authenticates using a 'user_id' stored in the session (set by Feide callback).
     Returns mastery.models.User as request.user.
@@ -19,5 +19,6 @@ class SessionUserIdAuthentication(BaseAuthentication):
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             raise AuthenticationFailed("Invalid session user")
-
+        # Enforce CSRF validation for session-based authentication
+        self.enforce_csrf(request)
         return user, None
