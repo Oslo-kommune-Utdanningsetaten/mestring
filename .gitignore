@@ -22,6 +22,7 @@ backend/.venv
 # non-code files in notes
 notes/*.docx
 notes/*.pdf
+notes/security_scan.md
 
 # macos
 .DS_Store
