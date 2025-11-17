@@ -162,7 +162,7 @@ def feidelogout(request):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def auth_status(request):
     user_id = request.session.get("user_id", None)
     if not user_id:
