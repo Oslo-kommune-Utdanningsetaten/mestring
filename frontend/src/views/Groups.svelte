@@ -60,7 +60,7 @@
 
   {#if groups.length === 0}
     <div class="mt-3">
-      🫤 Du har visst ikke tilgang til noen grupper på {currentSchool.displayName}.
+      🫤 Du har visst ikke tilgang til noen grupper på {currentSchool?.displayName}.
     </div>
   {:else}
     {#each groups as group}
