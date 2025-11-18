@@ -136,11 +136,13 @@
 
 <section class="py-3">
   {#if isLoadingStudents || isLoadingGroups}
-    <div class="spinner-border text-primary" role="status">
+    <div class="mt-3 spinner-border text-primary" role="status">
       <span class="visually-hidden">Henter data...</span>
     </div>
     <span>Henter data...</span>
-  {:else if students.length > 0}
+  {:else if students.length === 0}
+    <div class="mt-3">Her var det tomt, gitt.</div>
+  {:else}
     <div class="students-grid" aria-label="Elevliste" style="--subject-count: {subjects.length}">
       <span class="item header header-row">Elev</span>
       {#each subjects as subject (subject.id)}
@@ -154,8 +156,6 @@
         <StudentRow {student} {subjects} groups={allGroups} />
       {/each}
     </div>
-  {:else if !isLoadingStudents && !isLoadingGroups}
-    <div class="alert alert-info">Ingen elever</div>
   {/if}
 </section>
 
