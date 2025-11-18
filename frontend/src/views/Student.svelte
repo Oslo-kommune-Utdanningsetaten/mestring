@@ -12,6 +12,7 @@
   import { dataStore } from '../stores/data'
 
   const { studentId } = $props<{ studentId: string }>()
+  const individualGoalcount = 3
   let student = $state<UserType | null>(null)
   let subjects = $state<SubjectType[]>([])
   let groups = $state<GroupType[]>([])
@@ -69,7 +70,7 @@
     if (!student) return
     const schoolSubjects = $dataStore.subjects
     schoolSubjects.forEach(async (subject, index) => {
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < individualGoalcount; i++) {
         const goal: GoalCreateType = {
           studentId: student?.id,
           subjectId: subject.id,
@@ -136,13 +137,13 @@
             options={{
               iconName: 'plus-sign',
               classes: 'm-2',
-              title: 'Opprett alle mål',
+              title: `Opprett ${individualGoalcount} individuelle mål for hvert fag`,
               onClick: () => handleCreateAllPersonalGoals(),
               variant: 'icon-left',
               skin: 'primary',
             }}
           >
-            Opprett alle mål
+            Opprett {individualGoalcount} individuelle mål for hvert fag
           </ButtonMini>
         {/if}
       </div>

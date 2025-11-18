@@ -16,7 +16,7 @@ export const MISSING_REASON_NO_GOALS = 'no-goals'
 // Maintenance task states
 export const TASK_STATES: Record<string, string> = {
   pending: 'secondary',
-  running: 'primary',
+  running: 'secondary',
   finished: 'success',
   failed: 'danger',
 }
