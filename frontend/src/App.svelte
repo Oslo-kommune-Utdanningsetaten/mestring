@@ -30,11 +30,14 @@
 
   const API_CHECK_INTERVAL = 60 * 1000 // every 60 seconds
 
-  $effect(() => {
-    // Check API health on component load
-    apiHealth.checkHealth()
+  onMount(() => {
+    checkAuth().then(() => {
+      if ($currentUser) {
+        loadData()
+      }
+    })
 
-    // Interval to check API health periodically
+    // Periodically check API health
     const interval = setInterval(() => {
       apiHealth.checkHealth()
       if (!$apiHealth.isOk) {
@@ -50,14 +53,6 @@
       clearInterval(interval)
     }
   })
-
-  // Defer side-effect network calls until after component mount
-  onMount(async () => {
-    await checkAuth()
-    if ($currentUser) {
-      loadData()
-    }
-  })
 </script>
 
 <header class="m-0 p-0 vw-100">
@@ -69,7 +64,7 @@
   {#if $isLoggingInUser}
     <div class="d-flex align-items-center gap-2 text-secondary small py-2">
       <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-      <span>Logger inn…</span>
+      <span>Logger inn...</span>
     </div>
   {/if}
   <Router>

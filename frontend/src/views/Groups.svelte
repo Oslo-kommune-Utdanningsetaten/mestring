@@ -59,7 +59,9 @@
   <h2>Mine grupper</h2>
 
   {#if groups.length === 0}
-    <div class="alert alert-info">Du har visst ikke tilgang til noen grupper</div>
+    <div class="mt-3">
+      🫤 Du har visst ikke tilgang til noen grupper på {currentSchool.displayName}.
+    </div>
   {:else}
     {#each groups as group}
       <div class="card shadow-sm p-3">
