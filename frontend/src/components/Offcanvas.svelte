@@ -88,7 +88,6 @@
     box-shadow: -10px 0px 20px 5px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
-    width: 50vw;
     transform: translateX(var(--initial-shift));
     transition: transform 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
   }
