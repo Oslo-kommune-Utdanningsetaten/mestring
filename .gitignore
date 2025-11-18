@@ -11,7 +11,11 @@ __pycache__/
 # data we don't want in git
 backend/mastery/data_import/data/*
 backend/mastery/logs/*
-backend/mastery/management/nuclei/*
+
+# ignore temp data files in nuclei folder
+backend/mastery/management/nuclei/*.json
+backend/mastery/management/nuclei/*.html
+backend/mastery/management/nuclei/*.yaml
 
 # python virtual environment
 backend/.venv
