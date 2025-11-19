@@ -99,48 +99,44 @@ def ensure_default_mastery_schema_exists(school):
 
     return models.MasterySchema.objects.create(
         title='Mestringstrappa',
-        description='Mestring angitt med fem nivåer, fra "aldri" til "mestrer".',
+        description='Mestring angitt med fire nivåer, 1-100',
         school=school,
         maintained_at=timezone.now(),
+        is_default=True,
         config={
             "levels": [
                 {
-                    "text": "Mestrer ikke",
-                    "color": "rgb(229, 50, 43)",
-                    "maxValue": 20,
+                    "color": "rgb(255, 40, 40)",
+                    "title": "Mestrer ikke",
+                    "maxValue": 15,
                     "minValue": 1
                 },
                 {
-                    "text": "Mestrer sjelden",
-                    "color": "rgb(159, 113, 202)",
-                    "maxValue": 40,
-                    "minValue": 21
+                    "color": "rgb(255, 165, 0)",
+                    "title": "Mestrer iblant",
+                    "maxValue": 55,
+                    "minValue": 16
                 },
                 {
-                    "text": "Mestrer iblant",
+                    "color": "rgb(82, 205, 82)",
+                    "title": "Mestrer ofte",
+                    "maxValue": 85,
+                    "minValue": 56
+                },
+                {
                     "color": "rgb(86, 174, 232)",
-                    "maxValue": 60,
-                    "minValue": 41
-                },
-                {
-                    "text": "Mestrer ofte",
-                    "color": "rgb(241, 249, 97)",
-                    "maxValue": 80,
-                    "minValue": 61
-                },
-                {
-                    "text": "Mestrer",
-                    "color": "rgb(160, 207, 106)",
+                    "title": "Mestrer",
                     "maxValue": 100,
-                    "minValue": 81
+                    "minValue": 86
                 }
             ],
             "inputIncrement": 1,
             "renderDirection": "vertical",
             "isColorGradientEnabled": False,
-            "isFeedforwardInputEnabled": True,
-            "isMasteryValueInputEnabled": True,
+            "isValueIndicatorEnabled": True,
+            "isFeedforwardInputEnabled": False,
             "isIncrementIndicatorEnabled": True,
-            "isMasteryDescriptionInputEnabled": True
+            "isMasteryValueInputEnabled": True,
+            "isMasteryDescriptionInputEnabled": False
         }
     )
