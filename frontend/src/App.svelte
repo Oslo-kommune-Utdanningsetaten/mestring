@@ -31,12 +31,13 @@
   const API_CHECK_INTERVAL = 60 * 1000 // every 60 seconds
 
   onMount(() => {
+    apiHealth.checkHealth()
+
     checkAuth().then(() => {
       if ($currentUser) {
         loadData()
       }
     })
-
     // Periodically check API health
     const interval = setInterval(() => {
       apiHealth.checkHealth()

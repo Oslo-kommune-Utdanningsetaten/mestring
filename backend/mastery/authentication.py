@@ -20,5 +20,5 @@ class SessionUserIdAuthentication(SessionAuthentication):
         except User.DoesNotExist:
             raise AuthenticationFailed("Invalid session user")
         # Enforce CSRF validation for session-based authentication
-        # FIXME: self.enforce_csrf(request)
+        self.enforce_csrf(request)
         return user, None
