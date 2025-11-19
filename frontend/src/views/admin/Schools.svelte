@@ -365,9 +365,7 @@
         <h4 class="my-4">Grupper</h4>
         <pkt-checkbox
           id={'group-goal-' + school.id}
-          label={(school as any).isGroupGoalEnabled
-            ? 'Gruppemål tilgjengelig'
-            : 'Gruppemål ikke tilgjgengelig'}
+          label={`Gruppemål ${(school as any).isGroupGoalEnabled ? '' : 'IKKE'} tilgjengelig`}
           labelPosition="right"
           isSwitch="true"
           aria-checked={(school as any).isGroupGoalEnabled}
@@ -378,9 +376,7 @@
         <pkt-checkbox
           id={'goal-title' + school.id}
           class="ms-1"
-          label={(school as any).isGoalTitleEnabled
-            ? 'Fritekst-tittel på mål tilgjengelig'
-            : 'Fritekst-tittel på mål IKKE tilgjgengelig'}
+          label={`Fritekst-tittel på mål ${(school as any).isGoalTitleEnabled ? '' : 'IKKE'} tilgjengelig`}
           labelPosition="right"
           isSwitch="true"
           aria-checked={(school as any).isGoalTitleEnabled}
@@ -393,9 +389,7 @@
         <h4 class="my-4">Navigasjon for lærere</h4>
         <pkt-checkbox
           id={'student-list-' + school.id}
-          label={(school as any).isStudentListEnabled
-            ? 'Elevliste synlig'
-            : 'Elevliste ikke synlig'}
+          label={`Elevliste ${(school as any).isStudentListEnabled ? '' : 'IKKE'} synlig`}
           labelPosition="right"
           isSwitch="true"
           aria-checked={(school as any).isStudentListEnabled}
