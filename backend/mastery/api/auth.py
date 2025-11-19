@@ -55,26 +55,42 @@ def request_tokens_from_feide(code):
     return client.parse_request_body_response(json.dumps(token_response.json()))
 
 
-def check_affiliations(feide_user_id, affiliations):
+def check_affiliations(feide_user_id, feide_affiliations):
     """
-    Check if user has affiliation with an existing school.
-    Returns a tuple (student_schools, teacher_schools, staff_schools)
+    Check if user has affiliation with an existing school which has been enabled.
+    Returns a dict with affiliated schools and messages
     """
-    if not feide_user_id or not affiliations:
-        return [], [], []
+    result = {
+        "student_schools": [],
+        "teacher_schools": [],
+        "staff_schools": [],
+        "messages": []
+    }
+    if not feide_user_id or not feide_affiliations:
+        return result
 
-    student_schools = []
-    teacher_schools = []
-    staff_schools = []
     for school in School.objects.all():
         org_number = school.org_number
-        if f"student@{org_number}.feide.osloskolen.no" in affiliations:
-            student_schools.append(school)
-        if f"faculty@{org_number}.feide.osloskolen.no" in affiliations:
-            teacher_schools.append(school)
-        if f"staff@{org_number}.feide.osloskolen.no" in affiliations:
-            staff_schools.append(school)
-    return student_schools, teacher_schools, staff_schools
+        if f"student@{org_number}.feide.osloskolen.no" in feide_affiliations:
+            if school.is_service_enabled:
+                result["student_schools"].append(school)
+            else:
+                result["messages"].append(
+                    f"Du er elev ved {school.display_name}, men skolen har ikke aktivert tjenesten.")
+        if f"faculty@{org_number}.feide.osloskolen.no" in feide_affiliations:
+            if school.is_service_enabled:
+                result["teacher_schools"].append(school)
+            else:
+                result["messages"].append(
+                    f"Du er lærer ved {school.display_name}, men skolen har ikke aktivert tjenesten.")
+        if f"staff@{org_number}.feide.osloskolen.no" in feide_affiliations:
+            if school.is_service_enabled:
+                result["staff_schools"].append(school)
+            else:
+                result["messages"].append(
+                    f"Du er ansatt ved {school.display_name}, men skolen har ikke aktivert tjenesten.")
+
+    return result
 
 
 @require_GET
@@ -100,15 +116,20 @@ def feidecallback(request):
     tokens = request_tokens_from_feide(code)
     user_info = get_user_info()
     feide_user_id = user_info.get("eduPersonPrincipalName", "").strip().lower()
-    affiliations = user_info.get("eduPersonScopedAffiliation", [])
+    feide_affiliations = user_info.get("eduPersonScopedAffiliation", [])
 
-    # check if user has affiliation with an existing school
-    student_schools, teacher_schools, staff_schools = check_affiliations(feide_user_id, affiliations)
+    # check if user has affiliation with an enabled school in the system
+    system_affiliations = check_affiliations(feide_user_id, feide_affiliations)
+    student_schools = system_affiliations["student_schools"]
+    teacher_schools = system_affiliations["teacher_schools"]
+    staff_schools = system_affiliations["staff_schools"]
+    messages = system_affiliations["messages"]
 
     logger.debug(f"💁‍♀️ User {feide_user_id}")
     logger.debug(f"💁‍♀️ Student affiliations: {student_schools}")
     logger.debug(f"💁‍♀️ Teacher affiliations: {teacher_schools}")
     logger.debug(f"💁‍♀️ Staff affiliations: {staff_schools}")
+    logger.debug(f"💁‍♀️ Messages: {messages}")
 
     if student_schools or teacher_schools or staff_schools:
         # Student, teacher or staff at a known school --> allow login
@@ -121,7 +142,7 @@ def feidecallback(request):
             }
         )
         # Student and teacher roles are granted via imported groups
-        # But ensure user gets staff role at all schools they are affiliated with
+        # But ensure user gets staff role at schools they are affiliated with
         if staff_schools:
             for school in staff_schools:
                 school.set_employed_user(user, 'staff')
@@ -139,8 +160,10 @@ def feidecallback(request):
             request.session["user_id"] = superadmin_user.id
             return redirect(FRONTEND)
         else:
+            # No affiliated schools found --> deny login
             request.session.clear()
-            return redirect(f'{FRONTEND}?error=login_failed')
+            error_message = ' '.join(messages) or "login_failed"
+            return redirect(f'{FRONTEND}?error={error_message}')
 
 
 @require_GET
