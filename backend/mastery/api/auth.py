@@ -72,7 +72,7 @@ def check_affiliations(feide_user_id, feide_affiliations):
     for school in School.objects.all():
         org_number = school.org_number
         if f"student@{org_number}.feide.osloskolen.no" in feide_affiliations:
-            if school.is_service_enabled:
+            if school.is_service_enabled and school.is_service_enabled_for_students:
                 result["student_schools"].append(school)
             else:
                 result["messages"].append(
