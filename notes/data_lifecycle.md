@@ -7,11 +7,10 @@ All models have, via `Basemodel`, have these fields:
 - `maintained_at` - Timestamp is updated each time the Feide import job creates or updates something, e.g. `Group`, `UserGroup`, `User`.
 - `marked_for_deletion_at` - A "soft delete" flag. When this is set, the row is invisible to users unless a specific parameter is sent with the request. When this timestamp is 90 (or some other number) days old, the system will remove this row from the database ("hard delete"), see deletion below.
 
-Additionally, groups have these fields which originate from the feide_id:
-E.g.: `fc:org:kakrafoon.kommune.no:b:NO987654321:3a:2025-08-01:2026-06-30`
+Additionally, groups from Feide have `notBefore` and `notAfter` fields which are persisted in the `Group` table as:
 
-- `valid_from` - Originates from the first date stamp (in this case 2025-08-01). If current date is less than this value, the `Group` (and thereby user_groups/memberships) is invisible to users unless a specific param is sent with the request.
-- `valid_to` - Originates from the last date stamp (in this case 2026-06-30). If current date is greater than this value, the `Group` (and thereby user_groups/memberships) is invisible to users unless a specific param is sent with the request.
+- `valid_from` - If current date is less than this value, the `Group` (and thereby user_groups/memberships) is invisible to users unless a specific param is sent with the request.
+- `valid_to` - If current date is greater than this value, the `Group` (and thereby user_groups/memberships) is invisible to users unless a specific param is sent with the request.
 
 **Note**: `UserGroup` rows (memberships) should not be visible if the associated `Group` is outside the `valid_from` <--> `valid_to` scope.
 
