@@ -5,13 +5,13 @@ This issue sketches up a plan for the lifecycle of our various pieces of data.
 All models have, via `Basemodel`, these fields:
 
 - `maintained_at` - Timestamp is updated each time the Feide import job creates or updates something, e.g. `Group`, `UserGroup`, `User`.
-- `marked_for_deletion_at` - A "soft delete" flag. When this is set, the row is invisible to users unless a specific flag is sent with the request. When this timestamp is 90 (or some other number) days old, the system will remove this row from the database ("hard delete").
+- `marked_for_deletion_at` - A "soft delete" flag. When this is set, the row is invisible to users unless a specific parameter is sent with the request. When this timestamp is 90 (or some other number) days old, the system will remove this row from the database ("hard delete"), see deletion below.
 
-In addition, groups have these fields which originates from the feide_id:
+Additionally, groups have these fields which originate from the feide_id:
 E.g.: `fc:org:kakrafoon.kommune.no:b:NO987654321:3a:2025-08-01:2026-06-30`
 
-- `valid_from` - Originates comes from the first date stamp (in this case 2025-08-01). If current date is less than this value, the `Group` (and thereby user_groups/memberships) is invisible to users unless a specific flag is sent with the request.
-- `valid_to` - Originates comes from the last date stamp (in this case 2026-06-30). If current date is greater than this value, the `Group` (and thereby user_groups/memberships) is invisible to users unless a specific flag is sent with the request.
+- `valid_from` - Originates from the first date stamp (in this case 2025-08-01). If current date is less than this value, the `Group` (and thereby user_groups/memberships) is invisible to users unless a specific param is sent with the request.
+- `valid_to` - Originates from the last date stamp (in this case 2026-06-30). If current date is greater than this value, the `Group` (and thereby user_groups/memberships) is invisible to users unless a specific param is sent with the request.
 
 **Note**: `UserGroup` rows (memberships) should not be visible if the associated `Group` is outside the `valid_from` <--> `valid_to` scope.
 
@@ -23,13 +23,13 @@ _Easy come, not so easy go._
 
 ## Create and update
 
-The daily (?) Feide import job operates on school level. It happens in five stages, each of these stages are orchestrated by a row in the `DataMaintenanceTask` table:
+The daily Feide import job operates on school level. It happens in five stages, each of these stages are orchestrated by a row in the `DataMaintenanceTask` table:
 
-1. **Fetch groups**: Get all school groups from Feide and store these in a sanitized `groups.json` file, ordered by group type (teaching, basis etc).
+1. **Fetch groups**: Get all school groups from Feide and store them in a sanitized `groups.json` file, ordered by group type (teaching, basis etc).
 2. **Fetch members**: Based on the content of `groups.json`, fetch members for each group. Store these in a sanitized `memberships.json` file, ordered by group -> role -> user.
 3. **Import groups**: Based on the content of `groups.json`. Create, or update existing, rows in the `group` table. The `maintained_at` timestamp is set in both cases, and the `marked_for_deletion_at` field is unset.
-4. **Import memberships**: Based on the content of `memberships.json`. Create, or update existing, rows in the `user` table. Then create, or update existing, rows in the `user_group` table, representing user memberships in groups. The `maintained_at` timestamp is always set, and the `marked_for_deletion_at` field is unset.
-5. **Schedule cleanup**: When fetch and import is done, it's time to look at what was not touched during the import. The running Feide import job has a `started_at` timestamp. All `User` and `UserGroup` rows with `maintained_at` < `started_at` are implicitly unkown to Feide. If the `Group` is inside the `valid_from` <--> `valid_to` scope, the `marked_for_deletion_at` timestamp is set to now. If the `Group` is outside this scope, leave it alone (it's considered historic data).
+4. **Import memberships**: Based on the content of `memberships.json`. Create, or update existing, rows in the `user` table. Then create, or update existing, rows in the `user_group` table, representing user memberships in groups. The `maintained_at` timestamp is set, and the `marked_for_deletion_at` field is unset.
+5. **Schedule cleanup**: When fetch and import is done, it's time to look at what was _not_ touched during the import. The running Feide import job has a `started_at` timestamp. All `User` and `UserGroup` rows with `maintained_at` < `started_at` are implicitly unkown to Feide. If the `Group` is inside the `valid_from` <--> `valid_to` scope, the `marked_for_deletion_at` timestamp is set to now. If the `Group` is outside this scope, leave it alone (it's considered historic data).
 
 ## Automatic data removal
 
@@ -42,6 +42,6 @@ There are four cases where data "disappears" automatically:
 
 ## Additional maintenance
 
-- School admins and inspectors are promoted manually (via a `UserSchool` row). We should probably delete these at every new school year, and manually set new ones.
-- We'll need a UI where superadmin can examine and maybe update rows with `marked_for_deletion_at`.
+- School admins and inspectors are promoted manually (using `UserSchool`). We should probably delete these at every new school year, and manually set new ones.
+- We'll need a UI where superadmin can inspect and maybe update rows with `marked_for_deletion_at`.
 - Anything else❓
