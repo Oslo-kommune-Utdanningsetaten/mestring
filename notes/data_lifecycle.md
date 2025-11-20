@@ -21,9 +21,6 @@ E.g.: `fc:org:kakrafoon.kommune.no:b:NO987654321:3a:2025-08-01:2026-06-30`
 
 _Easy come, not so easy go._
 
-<img width="720" height="404" alt="image" src="https://github.com/user-attachments/assets/b8df10ee-eb46-4028-8eb5-d07b3081b8de" />
-
-
 ## Create and update
 
 The daily Feide import job operates on school level. It happens in five stages, each of these stages are orchestrated by a row in the `DataMaintenanceTask` table:
