@@ -15,7 +15,7 @@ E.g.: `fc:org:kakrafoon.kommune.no:b:NO987654321:3a:2025-08-01:2026-06-30`
 
 **Note**: `UserGroup` rows (memberships) should not be visible if the associated `Group` is outside the `valid_from` <--> `valid_to` scope.
 
-**Note**: `Goal` rows (memberships) should not be visible if the associated `Group` is outside the `valid_from` <--> `valid_to` scope. This only removes group goals from visibility. Personal goals will still be visible. Is this correct behavior❓
+**Note**: `Goal` rows should not be visible if the associated `Group` is outside the `valid_from` <--> `valid_to` scope. This only removes group goals from visibility. Personal goals will still be visible. Is this correct behavior❓
 
 # Herding data through their respective lifecycles
 
