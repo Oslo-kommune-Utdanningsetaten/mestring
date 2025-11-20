@@ -9,6 +9,7 @@ export type DataMaintenanceTaskType = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
+    markedForDeletionAt?: string | null;
     status?: StatusEnumType;
     jobName: string;
     jobParams?: unknown;
@@ -32,6 +33,7 @@ export type GoalType = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
+    markedForDeletionAt?: string | null;
     title?: string | null;
     description?: string | null;
     sortOrder?: number | null;
@@ -51,6 +53,7 @@ export type GroupType = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
+    markedForDeletionAt?: string | null;
     feideId: string;
     displayName: string;
     type: string;
@@ -68,6 +71,7 @@ export type MasterySchemaType = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
+    markedForDeletionAt?: string | null;
     title?: string;
     description?: string | null;
     config?: unknown;
@@ -85,6 +89,7 @@ export type NestedUserGroupType = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
+    markedForDeletionAt?: string | null;
     readonly createdById: string;
     readonly updatedById: string;
 };
@@ -97,6 +102,7 @@ export type NestedUserSchoolType = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
+    markedForDeletionAt?: string | null;
     readonly createdById: string;
     readonly updatedById: string;
 };
@@ -106,6 +112,7 @@ export type ObservationType = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
+    markedForDeletionAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
@@ -124,6 +131,7 @@ export type PatchedDataMaintenanceTaskType = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
+    markedForDeletionAt?: string | null;
     status?: StatusEnumType;
     jobName?: string;
     jobParams?: unknown;
@@ -147,6 +155,7 @@ export type PatchedGoalType = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
+    markedForDeletionAt?: string | null;
     title?: string | null;
     description?: string | null;
     sortOrder?: number | null;
@@ -166,6 +175,7 @@ export type PatchedGroupType = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
+    markedForDeletionAt?: string | null;
     feideId?: string;
     displayName?: string;
     type?: string;
@@ -183,6 +193,7 @@ export type PatchedMasterySchemaType = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
+    markedForDeletionAt?: string | null;
     title?: string;
     description?: string | null;
     config?: unknown;
@@ -200,6 +211,7 @@ export type PatchedNestedUserGroupType = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
+    markedForDeletionAt?: string | null;
     readonly createdById?: string;
     readonly updatedById?: string;
 };
@@ -209,6 +221,7 @@ export type PatchedObservationType = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
+    markedForDeletionAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
@@ -227,6 +240,7 @@ export type PatchedRoleType = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
+    markedForDeletionAt?: string | null;
     name?: string;
     readonly createdById?: string;
     readonly updatedById?: string;
@@ -237,12 +251,14 @@ export type PatchedSchoolType = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
+    markedForDeletionAt?: string | null;
     feideId?: string;
     displayName?: string;
     shortName?: string | null;
     orgNumber?: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
+    isServiceEnabledForStudents?: boolean;
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
@@ -256,6 +272,7 @@ export type PatchedSituationType = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
+    markedForDeletionAt?: string | null;
     title?: string;
     description?: string | null;
     happensAt?: string | null;
@@ -268,6 +285,7 @@ export type PatchedStatusType = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
+    markedForDeletionAt?: string | null;
     estimatedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
@@ -283,6 +301,7 @@ export type PatchedSubjectType = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
+    markedForDeletionAt?: string | null;
     displayName?: string;
     shortName?: string;
     grepCode?: string | null;
@@ -297,6 +316,7 @@ export type PatchedUserType = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
+    markedForDeletionAt?: string | null;
     name?: string;
     feideId?: string;
     email?: string;
@@ -314,6 +334,7 @@ export type PatchedUserSchoolType = {
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
+    markedForDeletionAt?: string | null;
     readonly createdById?: string;
     readonly updatedById?: string;
     userId?: string;
@@ -326,6 +347,7 @@ export type RoleType = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
+    markedForDeletionAt?: string | null;
     name: string;
     readonly createdById: string;
     readonly updatedById: string;
@@ -336,12 +358,14 @@ export type SchoolType = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
+    markedForDeletionAt?: string | null;
     feideId: string;
     displayName: string;
     shortName?: string | null;
     orgNumber: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
+    isServiceEnabledForStudents?: boolean;
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
@@ -355,6 +379,7 @@ export type SituationType = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
+    markedForDeletionAt?: string | null;
     title: string;
     description?: string | null;
     happensAt?: string | null;
@@ -367,6 +392,7 @@ export type StatusType = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
+    markedForDeletionAt?: string | null;
     estimatedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
@@ -390,6 +416,7 @@ export type SubjectType = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
+    markedForDeletionAt?: string | null;
     displayName: string;
     shortName: string;
     grepCode?: string | null;
@@ -404,6 +431,7 @@ export type UserType = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
+    markedForDeletionAt?: string | null;
     name: string;
     feideId: string;
     email: string;
@@ -421,6 +449,7 @@ export type UserSchoolType = {
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
+    markedForDeletionAt?: string | null;
     readonly createdById: string;
     readonly updatedById: string;
     userId: string;
@@ -429,6 +458,7 @@ export type UserSchoolType = {
 };
 
 export type DataMaintenanceTaskCreateType = {
+    markedForDeletionAt?: string | null;
     status?: StatusEnumType;
     jobName: string;
     jobParams?: unknown;
@@ -446,6 +476,7 @@ export type DataMaintenanceTaskCreateType = {
 };
 
 export type GoalCreateType = {
+    markedForDeletionAt?: string | null;
     title?: string | null;
     description?: string | null;
     sortOrder?: number | null;
@@ -458,6 +489,7 @@ export type GoalCreateType = {
 };
 
 export type GroupCreateType = {
+    markedForDeletionAt?: string | null;
     feideId: string;
     displayName: string;
     type: string;
@@ -469,6 +501,7 @@ export type GroupCreateType = {
 };
 
 export type MasterySchemaCreateType = {
+    markedForDeletionAt?: string | null;
     title?: string;
     description?: string | null;
     config?: unknown;
@@ -477,14 +510,15 @@ export type MasterySchemaCreateType = {
 };
 
 export type NestedUserGroupCreateType = {
-    [key: string]: unknown;
+    markedForDeletionAt?: string | null;
 };
 
 export type NestedUserSchoolCreateType = {
-    [key: string]: unknown;
+    markedForDeletionAt?: string | null;
 };
 
 export type ObservationCreateType = {
+    markedForDeletionAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
@@ -497,6 +531,7 @@ export type ObservationCreateType = {
 };
 
 export type PatchedDataMaintenanceTaskCreateType = {
+    markedForDeletionAt?: string | null;
     status?: StatusEnumType;
     jobName?: string;
     jobParams?: unknown;
@@ -514,6 +549,7 @@ export type PatchedDataMaintenanceTaskCreateType = {
 };
 
 export type PatchedGoalCreateType = {
+    markedForDeletionAt?: string | null;
     title?: string | null;
     description?: string | null;
     sortOrder?: number | null;
@@ -526,6 +562,7 @@ export type PatchedGoalCreateType = {
 };
 
 export type PatchedGroupCreateType = {
+    markedForDeletionAt?: string | null;
     feideId?: string;
     displayName?: string;
     type?: string;
@@ -537,6 +574,7 @@ export type PatchedGroupCreateType = {
 };
 
 export type PatchedMasterySchemaCreateType = {
+    markedForDeletionAt?: string | null;
     title?: string;
     description?: string | null;
     config?: unknown;
@@ -545,10 +583,11 @@ export type PatchedMasterySchemaCreateType = {
 };
 
 export type PatchedNestedUserGroupCreateType = {
-    [key: string]: unknown;
+    markedForDeletionAt?: string | null;
 };
 
 export type PatchedObservationCreateType = {
+    markedForDeletionAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
@@ -561,16 +600,19 @@ export type PatchedObservationCreateType = {
 };
 
 export type PatchedRoleCreateType = {
+    markedForDeletionAt?: string | null;
     name?: string;
 };
 
 export type PatchedSchoolCreateType = {
+    markedForDeletionAt?: string | null;
     feideId?: string;
     displayName?: string;
     shortName?: string | null;
     orgNumber?: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
+    isServiceEnabledForStudents?: boolean;
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
@@ -578,12 +620,14 @@ export type PatchedSchoolCreateType = {
 };
 
 export type PatchedSituationCreateType = {
+    markedForDeletionAt?: string | null;
     title?: string;
     description?: string | null;
     happensAt?: string | null;
 };
 
 export type PatchedStatusCreateType = {
+    markedForDeletionAt?: string | null;
     estimatedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
@@ -593,6 +637,7 @@ export type PatchedStatusCreateType = {
 };
 
 export type PatchedSubjectCreateType = {
+    markedForDeletionAt?: string | null;
     displayName?: string;
     shortName?: string;
     grepCode?: string | null;
@@ -601,6 +646,7 @@ export type PatchedSubjectCreateType = {
 };
 
 export type PatchedUserCreateType = {
+    markedForDeletionAt?: string | null;
     name?: string;
     feideId?: string;
     email?: string;
@@ -610,22 +656,26 @@ export type PatchedUserCreateType = {
 };
 
 export type PatchedUserSchoolCreateType = {
+    markedForDeletionAt?: string | null;
     userId?: string;
     schoolId?: string;
     roleId?: string;
 };
 
 export type RoleCreateType = {
+    markedForDeletionAt?: string | null;
     name: string;
 };
 
 export type SchoolCreateType = {
+    markedForDeletionAt?: string | null;
     feideId: string;
     displayName: string;
     shortName?: string | null;
     orgNumber: string;
     owner?: string | null;
     isServiceEnabled?: boolean;
+    isServiceEnabledForStudents?: boolean;
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
@@ -633,12 +683,14 @@ export type SchoolCreateType = {
 };
 
 export type SituationCreateType = {
+    markedForDeletionAt?: string | null;
     title: string;
     description?: string | null;
     happensAt?: string | null;
 };
 
 export type StatusCreateType = {
+    markedForDeletionAt?: string | null;
     estimatedAt?: string | null;
     masteryValue?: number | null;
     masteryDescription?: string | null;
@@ -648,6 +700,7 @@ export type StatusCreateType = {
 };
 
 export type SubjectCreateType = {
+    markedForDeletionAt?: string | null;
     displayName: string;
     shortName: string;
     grepCode?: string | null;
@@ -656,6 +709,7 @@ export type SubjectCreateType = {
 };
 
 export type UserCreateType = {
+    markedForDeletionAt?: string | null;
     name: string;
     feideId: string;
     email: string;
@@ -665,6 +719,7 @@ export type UserCreateType = {
 };
 
 export type UserSchoolCreateType = {
+    markedForDeletionAt?: string | null;
     userId: string;
     schoolId: string;
     roleId: string;

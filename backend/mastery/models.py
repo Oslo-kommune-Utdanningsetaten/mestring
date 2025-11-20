@@ -18,6 +18,7 @@ class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     maintained_at = models.DateTimeField(null=True)
+    marked_for_deletion_at = models.DateTimeField(null=True)  # soft delete
     created_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True,
                                    related_name='created_%(class)s_set')
     updated_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True,
@@ -38,6 +39,7 @@ class School(BaseModel):
     org_number = models.CharField(max_length=50)
     owner = models.CharField(max_length=200, null=True)
     is_service_enabled = models.BooleanField(default=False)
+    is_service_enabled_for_students = models.BooleanField(default=False)  # can students use the service
     is_group_goal_enabled = models.BooleanField(default=True)  # can group goals can be created
     is_student_list_enabled = models.BooleanField(default=False)  # can teachers see the /students menu item
     is_goal_title_enabled = models.BooleanField(default=True)  # are goals displayed with titles
@@ -209,6 +211,15 @@ class Group(BaseModel):
     valid_from = models.DateTimeField(null=True)
     valid_to = models.DateTimeField(null=True)
     is_enabled = models.BooleanField(default=False)  # whether the group is active in the system
+
+    def is_currently_valid(self):
+        """Return True if in valid_from <--> valid_to range, or if no range is set"""
+        now = timezone.now()
+        if self.valid_from and now < self.valid_from:
+            return False
+        if self.valid_to and now > self.valid_to:
+            return False
+        return True
 
     def get_members(self, role=None):
         """
