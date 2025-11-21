@@ -2,6 +2,8 @@ This issue sketches up a plan for the lifecycle of our various pieces of data.
 
 # Model infrastructure
 
+![Mestring data model](./data_model.jpeg)
+
 All models have, via `Basemodel`, have these fields:
 
 - `maintained_at` - Timestamp is updated each time the Feide import job creates or updates something, e.g. `Group`, `UserGroup`, `User`.
