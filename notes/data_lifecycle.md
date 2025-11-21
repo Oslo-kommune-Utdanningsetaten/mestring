@@ -39,10 +39,11 @@ There are four cases where data "disappears" automatically:
 1. **Group memberships change**. E.g. school cancels a teaching group, a teacher is reassigned to a group, a student moves to another group etc. This should "just work", given the above logic. Users are given new memberships, and old memberships become invisible (due to `marked_for_deletion_at`). Likewise, memberships where the group is is either invalid (date wise) or marked for deletion, should not be visible.
 2. **Student or teacher quits the school**. This should also "just work", given the above logic. Users loose memberships, due to `marked_for_deletion_at` on `UserGroup` rows. **Note**: The creator of an observation or goal (observation.created_by or goal.created_by) or the target of an observation (observation.student) will keep access to that thing - is this correct❓There might not be a UI where these things can be viewed...
 3. **End of school year**: Due to the `valid_from` <--> `valid_to` scope, groups and memberships should automatically become invisible, and new groups + memberships automatically created on import.
-4. **Deletion**: When the `marked_for_deletion_at` timestamp is more than 90 days (or some other pre-configured number) older than the current time, a delete task irrevocably removes the row from the database ("hard delete"). Before deletion, we could do an extra request to Feide, to confirm that the item is no longer in use❓
+4. **Deletion**: When the `marked_for_deletion_at` timestamp is more than 90 days (or some other pre-configured number) older than the current time, a delete task irrevocably removes the row from the database ("hard delete").
 
 ## Additional maintenance
 
 - School admins and inspectors are promoted manually (in the `UserSchool` table). For security purposes, we should probably delete admins and inspectors come every new school year, and manually set new ones.
 - We'll need a UI where superadmin can inspect and maybe update rows with `marked_for_deletion_at`.
+- The Role-API (https://api.osloskolen.no/) might help us automate the promotion/demotion of users to school- admins and inspectors.
 - Anything else❓
