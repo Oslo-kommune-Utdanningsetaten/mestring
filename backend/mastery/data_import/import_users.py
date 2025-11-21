@@ -154,6 +154,7 @@ def ensure_user_exists(user_data):
         user.name = user_data.get("name", user.name)
         user.email = user_data.get("email", user.email)
         user.maintained_at = timezone.now()
+        user.marked_for_deletion_at = None  # Unset, in case it was set
         user.save()
         logger.debug("User maintained: %s", user.email)
         return user, False
@@ -181,7 +182,8 @@ def ensure_membership_exists(user, group, role):
 
     if existing_membership:
         existing_membership.maintained_at = timezone.now()
-        existing_membership.save(update_fields=['maintained_at'])
+        existing_membership.marked_for_deletion_at = None  # Unset, in case it was set
+        existing_membership.save(update_fields=['maintained_at', 'marked_for_deletion_at'])
         logger.debug("Membership maintained: %s in %s as %s", user.email, group.display_name, role.name)
         return existing_membership, False
 

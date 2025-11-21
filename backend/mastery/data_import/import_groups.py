@@ -163,11 +163,13 @@ def ensure_group_exists(group_data, group_type, subject=None):
     if existing_group:
         # Do not touch the is_enabled field on existing groups
         # Do not touch the type field on existing groups
+        # Unset marked_for_deletion_at (in case it was set)
         existing_group.display_name = group_data["displayName"]
         existing_group.subject = subject
         existing_group.valid_from = group_data.get("notBefore")
         existing_group.valid_to = group_data.get("notAfter")
         existing_group.maintained_at = timezone.now()
+        existing_group.marked_for_deletion_at = None
         existing_group.save()
         logger.debug("Maintained existing group: %s", feide_id)
         return existing_group, False
