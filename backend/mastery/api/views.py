@@ -29,6 +29,18 @@ def get_request_param(query_params, name: str):
     return value, is_key_present
 
 
+def apply_deleted_filter(query_params, qs):
+    is_deleted_param, is_deleted_set = get_request_param(query_params, 'is_deleted')
+
+    if is_deleted_set:
+        # Request has specified whether to include deleted or non-deleted items
+        qs = qs.filter(marked_for_deletion_at__isnull=not is_deleted_param)
+    else:
+        # By default, exclude deleted items
+        qs = qs.filter(marked_for_deletion_at__isnull=True)
+    return qs
+
+
 class FingerprintViewSetMixin:
 
     def perform_create(self, serializer):
@@ -92,6 +104,13 @@ class SchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
+            OpenApiParameter(
+                name='is_deleted',
+                description='Filter users by whether they are soft-deleted',
+                required=False,
+                type={'type': 'boolean'},
+                location=OpenApiParameter.QUERY
+            ),
         ]
     )
 )
@@ -102,6 +121,9 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
 
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('name')
+
+        qs = apply_deleted_filter(self.request.query_params, qs)
+
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
             roles_param, _ = get_request_param(self.request.query_params, 'roles')
@@ -155,6 +177,13 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
+            OpenApiParameter(
+                name='is_deleted',
+                description='Filter user_schools by whether they are soft-deleted',
+                required=False,
+                type={'type': 'boolean'},
+                location=OpenApiParameter.QUERY
+            ),
         ]
     )
 )
@@ -170,6 +199,7 @@ class UserSchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mo
 
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = apply_deleted_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
@@ -221,6 +251,13 @@ class UserSchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mo
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
+            OpenApiParameter(
+                name='is_deleted',
+                description='Filter user_groups by whether they are soft-deleted',
+                required=False,
+                type={'type': 'boolean'},
+                location=OpenApiParameter.QUERY
+            ),
         ]
     )
 )
@@ -231,6 +268,7 @@ class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
 
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = apply_deleted_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
@@ -300,6 +338,13 @@ class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
+                name='is_deleted',
+                description='Filter groups by whether they are soft-deleted',
+                required=False,
+                type={'type': 'boolean'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='subject',
                 description='Filter groups by the subject their subject',
                 required=False,
@@ -316,6 +361,8 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
 
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('display_name')
+        qs = apply_deleted_filter(self.request.query_params, qs)
+
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
             type_param, _ = get_request_param(self.request.query_params, 'type')
@@ -350,6 +397,7 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
                     qs = qs.filter(id__in=ids)
             if is_enabled_set:
                 qs = qs.filter(is_enabled=is_enabled_param)
+
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs.distinct()
 
@@ -370,7 +418,14 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
                 required=False,
                 type={'type': 'boolean'},
                 location=OpenApiParameter.QUERY
-            )
+            ),
+            OpenApiParameter(
+                name='is_deleted',
+                description='Filter subjects by whether they are soft-deleted',
+                required=False,
+                type={'type': 'boolean'},
+                location=OpenApiParameter.QUERY
+            ),
         ]
     )
 )
@@ -381,6 +436,7 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
 
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('display_name')
+        qs = apply_deleted_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
@@ -431,6 +487,13 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
+            OpenApiParameter(
+                name='is_deleted',
+                description='Filter goals by whether they are soft-deleted',
+                required=False,
+                type={'type': 'boolean'},
+                location=OpenApiParameter.QUERY
+            ),
         ]
     )
 )
@@ -444,6 +507,7 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
 
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('sort_order')
+        qs = apply_deleted_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             group_param, _ = get_request_param(self.request.query_params, 'group')
@@ -479,13 +543,28 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
         return qs
 
 
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='is_deleted',
+                description='Filter goals by whether they are soft-deleted',
+                required=False,
+                type={'type': 'boolean'},
+                location=OpenApiParameter.QUERY
+            ),
+        ]
+    )
+)
 class RoleViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Role.objects.all()
     serializer_class = serializers.RoleSerializer
     access_policy = RoleAccessPolicy
 
     def get_queryset(self):
-        return self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('name')
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('name')
+        qs = apply_deleted_filter(self.request.query_params, qs)
+        return qs
 
 
 @extend_schema_view(
@@ -539,6 +618,13 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
+            OpenApiParameter(
+                name='is_deleted',
+                description='Filter observations by whether they are soft-deleted',
+                required=False,
+                type={'type': 'boolean'},
+                location=OpenApiParameter.QUERY
+            ),
         ]
     )
 )
@@ -549,6 +635,7 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
 
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('observed_at')
+        qs = apply_deleted_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             student_param, _ = get_request_param(self.request.query_params, 'student')

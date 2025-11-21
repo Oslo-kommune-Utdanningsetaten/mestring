@@ -1015,6 +1015,10 @@ export type GroupsListData = {
          */
         ids?: string;
         /**
+         * Filter groups by whether they are soft-deleted
+         */
+        isDeleted?: boolean;
+        /**
          * Filter groups by whether they are enabled
          */
         isEnabled?: boolean;

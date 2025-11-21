@@ -89,7 +89,6 @@ def test_school_inspector_group_access(
     assert resp.status_code == 200
     expected_ids = {teaching_group.id}
     received_ids = {group['id'] for group in resp.json()}
-    print("🦊groups", resp.json())
     assert expected_ids == received_ids
 
     # Will not include groups from other school
