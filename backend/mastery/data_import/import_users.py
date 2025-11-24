@@ -113,34 +113,18 @@ def import_memberships_from_file(org_number):
 
 
 def ensure_roles_exist():
-    """Ensure that neccessary roles exist"""
-    teacher_role = models.Role.objects.filter(name="teacher").first()
-    student_role = models.Role.objects.filter(name="student").first()
-    admin_role = models.Role.objects.filter(name="admin").first()
-    staff_role = models.Role.objects.filter(name="staff").first()
-    inspector_role = models.Role.objects.filter(name="inspector").first()
+    """Ensure necessary roles exist"""
+    role_names = ["teacher", "student", "admin", "staff", "inspector"]
+    roles = []
 
-    if not teacher_role:
-        teacher_role = models.Role.objects.create(
-            name="teacher", maintained_at=timezone.now()
+    for role_name in role_names:
+        role, _ = models.Role.objects.get_or_create(
+            name=role_name,
+            defaults={"maintained_at": timezone.now()}
         )
-    if not student_role:
-        student_role = models.Role.objects.create(
-            name="student", maintained_at=timezone.now()
-        )
-    if not admin_role:
-        admin_role = models.Role.objects.create(
-            name="admin", maintained_at=timezone.now()
-        )
-    if not staff_role:
-        staff_role = models.Role.objects.create(
-            name="staff", maintained_at=timezone.now()
-        )
-    if not inspector_role:
-        inspector_role = models.Role.objects.create(
-            name="inspector", maintained_at=timezone.now()
-        )
-    return teacher_role, student_role, admin_role, staff_role, inspector_role
+        roles.append(role)
+
+    return tuple(roles)
 
 
 def ensure_user_exists(user_data):
@@ -154,18 +138,20 @@ def ensure_user_exists(user_data):
         user.name = user_data.get("name", user.name)
         user.email = user_data.get("email", user.email)
         user.maintained_at = now
-        user.marked_for_deletion_at = None  # Unset, in case it was set
-        user.save()
-        # Cascade un-delete related objects
-        models.Observation.objects.filter(student=user).update(marked_for_deletion_at=None, maintained_at=now)
-        models.Goal.objects.filter(student=user).update(marked_for_deletion_at=None, maintained_at=now)
+        if user.marked_for_deletion_at:
+            user.marked_for_deletion_at = None
+            # Cascade un-delete related objects
+            models.Observation.objects.filter(student=user).update(
+                marked_for_deletion_at=None, maintained_at=now)
+            models.Goal.objects.filter(student=user).update(marked_for_deletion_at=None, maintained_at=now)
         logger.debug("User maintained: %s", user.email)
+        user.save()
         return user, False
 
     user = models.User.objects.create(
         feide_id=user_data["feide_id"],
-        name=user_data.get("name", ""),
-        email=user_data.get("email", ""),
+        name=user_data.get("name", None),
+        email=user_data.get("email", None),
         maintained_at=now,
     )
     logger.debug("User created: %s", user.email)

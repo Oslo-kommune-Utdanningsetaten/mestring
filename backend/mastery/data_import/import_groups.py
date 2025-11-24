@@ -157,7 +157,7 @@ def ensure_group_exists(group_data, group_type, subject=None):
     Returns (group, created_bool)
     """
     feide_id = group_data["id"]
-
+    now = timezone.now()
     # Check if group already exists
     existing_group = models.Group.objects.filter(feide_id__exact=feide_id).first()
     if existing_group:
@@ -168,9 +168,14 @@ def ensure_group_exists(group_data, group_type, subject=None):
         existing_group.subject = subject
         existing_group.valid_from = group_data.get("notBefore")
         existing_group.valid_to = group_data.get("notAfter")
-        existing_group.maintained_at = timezone.now()
-        existing_group.marked_for_deletion_at = None
+        existing_group.maintained_at = now
         existing_group.save()
+        if existing_group.marked_for_deletion_at:
+            existing_group.marked_for_deletion_at = None
+            # Cascade unset any soft-delete timestamp on related goals
+            models.Goal.objects.filter(
+                group=existing_group).update(
+                maintained_at=now, marked_for_deletion_at=None)
         logger.debug("Maintained existing group: %s", feide_id)
         return existing_group, False
 
@@ -185,7 +190,7 @@ def ensure_group_exists(group_data, group_type, subject=None):
         feide_id=feide_id,
         valid_from=group_data.get("notBefore"),
         valid_to=group_data.get("notAfter"),
-        maintained_at=timezone.now(),
+        maintained_at=now,
     )
     logger.debug("Created new group: %s", feide_id)
     return new_group, True

@@ -69,35 +69,18 @@ def ensure_mastery_schema_exists():
 
 
 def ensure_roles_exist():
-    """Ensure that neccessary roles exist"""
-    teacher_role = models.Role.objects.filter(name="teacher").first()
-    student_role = models.Role.objects.filter(name="student").first()
-    admin_role = models.Role.objects.filter(name="admin").first()
-    staff_role = models.Role.objects.filter(name="staff").first()
-    inspector_role = models.Role.objects.filter(name="inspector").first()
+    """Ensure necessary roles exist"""
+    role_names = ["teacher", "student", "admin", "staff", "inspector"]
+    roles = []
 
-    if not teacher_role:
-        teacher_role = models.Role.objects.create(
-            name="teacher", maintained_at=timezone.now()
+    for role_name in role_names:
+        role, _ = models.Role.objects.get_or_create(
+            name=role_name,
+            defaults={"maintained_at": timezone.now()}
         )
-    if not student_role:
-        student_role = models.Role.objects.create(
-            name="student", maintained_at=timezone.now()
-        )
-    if not admin_role:
-        admin_role = models.Role.objects.create(
-            name="admin", maintained_at=timezone.now()
-        )
-    if not staff_role:
-        staff_role = models.Role.objects.create(
-            name="staff", maintained_at=timezone.now()
-        )
-    if not inspector_role:
-        inspector_role = models.Role.objects.create(
-            name="inspector", maintained_at=timezone.now()
-        )
+        roles.append(role)
 
-    return teacher_role, student_role, admin_role, staff_role, inspector_role
+    return tuple(roles)
 
 
 def objects_from_sheet(sheet, field_names):
