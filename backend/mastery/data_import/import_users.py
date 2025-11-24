@@ -149,13 +149,16 @@ def ensure_user_exists(user_data):
     Returns (user, created_bool)
     """
     user = models.User.objects.filter(feide_id__exact=user_data["feide_id"]).first()
-
+    now = timezone.now()
     if user:
         user.name = user_data.get("name", user.name)
         user.email = user_data.get("email", user.email)
-        user.maintained_at = timezone.now()
+        user.maintained_at = now
         user.marked_for_deletion_at = None  # Unset, in case it was set
         user.save()
+        # Cascade un-delete related objects
+        models.Observation.objects.filter(student=user).update(marked_for_deletion_at=None, maintained_at=now)
+        models.Goal.objects.filter(student=user).update(marked_for_deletion_at=None, maintained_at=now)
         logger.debug("User maintained: %s", user.email)
         return user, False
 
@@ -163,7 +166,7 @@ def ensure_user_exists(user_data):
         feide_id=user_data["feide_id"],
         name=user_data.get("name", ""),
         email=user_data.get("email", ""),
-        maintained_at=timezone.now(),
+        maintained_at=now,
     )
     logger.debug("User created: %s", user.email)
     return user, True
