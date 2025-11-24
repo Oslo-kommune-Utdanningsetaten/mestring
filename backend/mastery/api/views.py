@@ -1,5 +1,6 @@
 from .. import models, serializers
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.filters import OrderingFilter
@@ -38,6 +39,20 @@ def apply_deleted_filter(query_params, qs):
     else:
         # By default, exclude deleted items
         qs = qs.filter(marked_for_deletion_at__isnull=True)
+    return qs
+
+
+def apply_valid_group_filter(query_params, qs):
+    is_valid_param, is_valid_set = get_request_param(query_params, 'is_valid')
+    now = timezone.now()
+
+    if is_valid_set and not is_valid_param:
+        # Only invalid groups
+        qs = qs.filter(Q(valid_from__gt=now) | Q(valid_to__lt=now))
+    else:
+        # By default, include only valid groups
+        qs = qs.filter(Q(valid_from__isnull=True) | Q(valid_from__lte=now))
+        qs = qs.filter(Q(valid_to__isnull=True) | Q(valid_to__gte=now))
     return qs
 
 
@@ -331,8 +346,15 @@ class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
+                name='subject',
+                description='Filter groups by the subject their subject',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='is_enabled',
-                description='Filter groups by whether they are enabled',
+                description='Filter groups by whether they are enabled for use',
                 required=False,
                 type={'type': 'boolean'},
                 location=OpenApiParameter.QUERY
@@ -345,12 +367,12 @@ class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='subject',
-                description='Filter groups by the subject their subject',
+                name='is_valid',
+                description='Filter groups by whether they are valid by date',
                 required=False,
-                type={'type': 'string'},
+                type={'type': 'boolean'},
                 location=OpenApiParameter.QUERY
-            )
+            ),
         ]
     )
 )
@@ -362,6 +384,7 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('display_name')
         qs = apply_deleted_filter(self.request.query_params, qs)
+        qs = apply_valid_group_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')

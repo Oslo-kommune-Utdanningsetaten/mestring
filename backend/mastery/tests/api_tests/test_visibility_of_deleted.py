@@ -3,6 +3,9 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 from mastery.models import Group
 
+# These tests verify visibility of soft-deleted groups and users, via the API
+# Even though all relevant viewssets obey the is_deleted filter, only user and group tests have been implemented
+
 
 @pytest.fixture
 def set_up_database(db):
