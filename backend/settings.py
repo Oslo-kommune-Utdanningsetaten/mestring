@@ -247,12 +247,12 @@ LOGGING = {
         },
         'mastery.data_import': {
             'handlers': ['console', 'data_import_file'],
-            'level': 'DEBUG',  # TODO: discuss if need to changed to INFO when in production
+            'level': 'DEBUG',
             'propagate': False,
         },
         'mastery.access_policies': {
             'handlers': ['console', 'access_policies_file'],
-            'level': 'DEBUG',  # TODO: discuss if need to changed to INFO when in production
+            'level': 'DEBUG',
             'propagate': True,
         },
     },
