@@ -348,6 +348,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='goal',
-            constraint=models.CheckConstraint(check=models.Q(('group__isnull', False), ('student__isnull', False), _connector='OR'), name='goal_group_or_student'),
+            constraint=models.CheckConstraint(condition=models.Q(('group__isnull', False), ('student__isnull', False), _connector='OR'), name='goal_group_or_student'),
         ),
     ]
