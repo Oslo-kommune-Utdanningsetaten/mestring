@@ -87,6 +87,7 @@
         isPersonal: true,
         sortOrder: personalGoalsCount + 1,
         masterySchemaId: $dataStore.defaultMasterySchema?.id,
+        isRelevant: true,
       }
 
       // If all stars are aligned, just create the goal instantly instead of exposing the user to the create goal form

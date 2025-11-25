@@ -17,8 +17,6 @@
   let subjects = $state<SubjectType[]>([])
   let groups = $state<GroupType[]>([])
   let currentSchool = $derived($dataStore.currentSchool)
-  let goalWip = $state<GoalDecorated | null>(null)
-  let isGoalEditorOpen = $state<boolean>(false)
   let studentGoalsCount = $state<number>(0)
 
   const fetchStudentData = async (userId: string) => {
@@ -84,15 +82,6 @@
     })
 
     fetchStudentData(student.id)
-  }
-
-  const handleCloseEditGoal = () => {
-    isGoalEditorOpen = false
-    fetchStudentData(studentId)
-  }
-
-  const handleGoalDone = async () => {
-    handleCloseEditGoal()
   }
 
   $effect(() => {
@@ -167,26 +156,6 @@
     <div class="m-2">Fant ikke eleven</div>
   {/if}
 </section>
-
-<!-- offcanvas for creating/editing goals -->
-<Offcanvas
-  bind:isOpen={isGoalEditorOpen}
-  ariaLabel="Rediger mål"
-  onClosed={() => {
-    goalWip = null
-    fetchStudentData(studentId)
-  }}
->
-  {#if goalWip}
-    <GoalEdit
-      goal={goalWip}
-      {student}
-      subject={null}
-      isGoalPersonal={true}
-      onDone={handleGoalDone}
-    />
-  {/if}
-</Offcanvas>
 
 <style>
   .student-svg > :global(svg) {

@@ -143,6 +143,7 @@
       isGoalPersonal: false,
       sortOrder: goal?.sortOrder || (groupGoals?.length ? groupGoals.length + 1 : 1),
       masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,
+      isRelevant: goal?.id ? goal?.isRelevant : true,
     }
     isGoalEditorOpen = true
   }

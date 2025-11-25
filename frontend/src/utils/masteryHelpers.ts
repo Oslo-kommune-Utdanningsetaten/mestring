@@ -20,7 +20,7 @@ export function useMasteryCalculations(masterySchema: MasterySchemaWithConfig | 
   const sliderValueIncrement = masterySchema?.config?.inputIncrement || 1
   const defaultValue = Math.floor((minValue + maxValue) / 2)
   const deltaValue = maxValue - minValue
-  const flatTrendThreshold = masterySchema?.config?.flatTrendThreshold || 5
+  const flatTrendThreshold = masterySchema?.config?.flatTrendThreshold || 1
 
   const calculateSafeMasteryValue = (value: number | null | undefined): number => {
     let result: number = defaultValue
