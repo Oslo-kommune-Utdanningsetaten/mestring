@@ -131,7 +131,8 @@ def ensure_default_mastery_schema_exists(school):
                 }
             ],
             "inputIncrement": 1,
-            "renderDirection": "vertical",
+            "renderDirection": "horizontal",
+            "flatTrendThreshold": 5,
             "isColorGradientEnabled": False,
             "isValueIndicatorEnabled": True,
             "isFeedforwardInputEnabled": False,
