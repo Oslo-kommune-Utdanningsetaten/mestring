@@ -16,7 +16,6 @@
 
   import ButtonMini from '../../components/ButtonMini.svelte'
   import { addAlert } from '../../stores/alerts'
-  import { add } from 'date-fns'
 
   const router = useTinyRouter()
   let schools = $state<SchoolType[]>([])
