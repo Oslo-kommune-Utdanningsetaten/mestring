@@ -46,15 +46,15 @@ There are four cases where data "disappears" automatically:
 - School admins and inspectors are promoted manually (in the `UserSchool` table). For security purposes, we should probably delete admins and inspectors come every new school year, and manually set new ones.
 - We'll need a UI where superadmin can inspect and maybe update rows with `marked_for_deletion_at`.
 - The Role-API (https://api.osloskolen.no/) might help us automate the promotion/demotion of users to school- admins and inspectors.
-- Anything else
+- Anything else❓
 
 ## Lifecycle stage responsibility
 
-|             | Create              | Maintain | Soft delete / invisible                                                                                         | Un-delete                   | Hard delete                                  |
-| ----------- | ------------------- | -------- | --------------------------------------------------------------------------------------------------------------- | --------------------------- | -------------------------------------------- |
-| Group       | Importer            | Importer | **Cleaner**, if not maintained: marked-for-deletion-at **Automatic**, if outside valid-to <--> valid-from range | Importer, ensure_group      | Cleaner, if marked-for-deletion-at > 90 days |
-| User        | Importer            | Importer | **Cleaner**, if no UserGroups or UserSchools: marked-for-deletion-at                                            | Importer, ensure_user       | Cleaner, if marked-for-deletion-at > 90 days |
-| UserGroup   | Importer            | Importer | **Cleaner**, only consider UserGroup if group is still valid. If not maintained: marked-for-deletion-at         | Importer, ensure_membership | Cleaner, if marked-for-deletion-at > 1 hour  |
-| Observation | Manual, by User     |          | **Cleaner**, if user not maintained: marked-for-deletion-at                                                     | Importer, ensure_user       | Cleaner, if marked-for-deletion-at > 90 days |
-| Goal        | Manual, by User     |          | **Cleaner**, if user not maintained: marked-for-deletion-at                                                     | Importer, ensure_user       | Cleaner, if marked-for-deletion-at > 90 days |
-| UserSchool  | Automatic, on login |          |                                                                                                                 |                             | Manual                                       |
+|             | Create              | Maintain | Soft delete / invisible                                                                                            | Un-delete                   | Hard delete                                  |
+| ----------- | ------------------- | -------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------- | -------------------------------------------- |
+| Group       | Importer            | Importer | **Cleaner**, if not maintained: marked-for-deletion-at<br>**Automatic**, if outside valid-to <--> valid-from range | Importer, ensure_group      | Cleaner, if marked-for-deletion-at > 90 days |
+| User        | Importer            | Importer | **Cleaner**, if no UserGroups or UserSchools: marked-for-deletion-at                                               | Importer, ensure_user       | Cleaner, if marked-for-deletion-at > 90 days |
+| UserGroup   | Importer            | Importer | **Cleaner**, only consider UserGroup if group is still valid. If not maintained: marked-for-deletion-at            | Importer, ensure_membership | Cleaner, if marked-for-deletion-at > 1 hour  |
+| Observation | Manual, by User     |          | **Cleaner**, if user not maintained: marked-for-deletion-at                                                        | Importer, ensure_user       | Cleaner, if marked-for-deletion-at > 90 days |
+| Goal        | Manual, by User     |          | **Cleaner**, if user not maintained: marked-for-deletion-at                                                        | Importer, ensure_user       | Cleaner, if marked-for-deletion-at > 90 days |
+| UserSchool  | Automatic, on login |          |                                                                                                                    |                             | Manual                                       |
