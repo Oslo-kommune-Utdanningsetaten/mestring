@@ -39,6 +39,9 @@
       displayName = subject.displayName ?? null
       shortName = subject.shortName ?? null
     }
+    // focus first input field
+    const inputField = document.getElementById('subjectName') as HTMLInputElement
+    inputField?.focus()
   })
 </script>
 
