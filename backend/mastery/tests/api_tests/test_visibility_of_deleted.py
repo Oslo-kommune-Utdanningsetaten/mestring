@@ -75,14 +75,14 @@ def test_deleted_group_access(
         assert resp.status_code == 404
 
         # Can list the group when including deleted param
-        resp = client.get('/api/groups/', {'school': school.id, 'isDeleted': True})
+        resp = client.get('/api/groups/', {'school': school.id, 'deleted': 'include'})
         assert resp.status_code == 200
         expected_ids = {group.id}
         received_ids = {group['id'] for group in resp.json()}
         assert expected_ids == received_ids
 
         # Can retrieve the specific group when including deleted param
-        resp = client.get(f'/api/groups/{group.id}/', {'isDeleted': True})
+        resp = client.get(f'/api/groups/{group.id}/', {'deleted': 'include'})
         assert resp.status_code == 200
         assert resp.json()['id'] == group.id
 
@@ -129,12 +129,12 @@ def test_deleted_user_access(school, student, superadmin, teaching_group, studen
     assert resp.status_code == 404
 
     # Can list the user with deleted param
-    resp = client.get('/api/users/', {'school': school.id, 'isDeleted': True})
+    resp = client.get('/api/users/', {'school': school.id, 'deleted': 'include'})
     assert resp.status_code == 200
     expected_ids = {student.id}
     received_ids = {student['id'] for student in resp.json()}
     assert expected_ids == received_ids
 
     # Can retrieve the user with deleted param
-    resp = client.get(f'/api/users/{student.id}/', {'isDeleted': True})
+    resp = client.get(f'/api/users/{student.id}/', {'deleted': 'include'})
     assert resp.status_code == 200
