@@ -22,7 +22,7 @@ def test_non_deleted_group_access(
         type="basis",
         school=school,
         is_enabled=True,
-        marked_for_deletion_at=None
+        deleted_at=None
     )
 
     group.add_member(teacher, teacher_role)
@@ -54,7 +54,7 @@ def test_deleted_group_access(
         type="basis",
         school=school,
         is_enabled=True,
-        marked_for_deletion_at=timezone.now()
+        deleted_at=timezone.now()
     )
 
     group.add_member(teacher, teacher_role)
@@ -91,7 +91,7 @@ def test_deleted_group_access(
 def test_non_deleted_user_access(school, student, superadmin, teaching_group, student_role):
 
     teaching_group.add_member(student, student_role)
-    student.marked_for_deletion_at = None
+    student.deleted_at = None
     student.save()
 
     client = APIClient()
@@ -113,7 +113,7 @@ def test_non_deleted_user_access(school, student, superadmin, teaching_group, st
 def test_deleted_user_access(school, student, superadmin, teaching_group, student_role):
 
     teaching_group.add_member(student, student_role)
-    student.marked_for_deletion_at = timezone.now()
+    student.deleted_at = timezone.now()
     student.save()
 
     client = APIClient()

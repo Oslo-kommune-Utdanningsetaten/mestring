@@ -138,12 +138,12 @@ def ensure_user_exists(user_data):
         user.name = user_data.get("name", user.name)
         user.email = user_data.get("email", user.email)
         user.maintained_at = now
-        if user.marked_for_deletion_at:
-            user.marked_for_deletion_at = None
+        if user.deleted_at:
+            user.deleted_at = None
             # Cascade un-delete related objects
             models.Observation.objects.filter(student=user).update(
-                marked_for_deletion_at=None, maintained_at=now)
-            models.Goal.objects.filter(student=user).update(marked_for_deletion_at=None, maintained_at=now)
+                deleted_at=None, maintained_at=now)
+            models.Goal.objects.filter(student=user).update(deleted_at=None, maintained_at=now)
         logger.debug("User maintained: %s", user.email)
         user.save()
         return user, False
@@ -171,8 +171,8 @@ def ensure_membership_exists(user, group, role):
 
     if existing_membership:
         existing_membership.maintained_at = timezone.now()
-        existing_membership.marked_for_deletion_at = None  # Unset, in case it was set
-        existing_membership.save(update_fields=['maintained_at', 'marked_for_deletion_at'])
+        existing_membership.deleted_at = None  # Unset, in case it was set
+        existing_membership.save(update_fields=['maintained_at', 'deleted_at'])
         logger.debug("Membership maintained: %s in %s as %s", user.email, group.display_name, role.name)
         return existing_membership, False
 

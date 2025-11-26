@@ -18,7 +18,7 @@ class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     maintained_at = models.DateTimeField(null=True)
-    marked_for_deletion_at = models.DateTimeField(null=True)  # soft delete
+    deleted_at = models.DateTimeField(null=True)  # soft delete
     created_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True,
                                    related_name='created_%(class)s_set')
     updated_by = models.ForeignKey('User', on_delete=models.SET_NULL, null=True,

@@ -35,10 +35,10 @@ def apply_deleted_filter(query_params, qs):
 
     if is_deleted_set:
         # Request has specified whether to include deleted or non-deleted items
-        qs = qs.filter(marked_for_deletion_at__isnull=not is_deleted_param)
+        qs = qs.filter(deleted_at__isnull=not is_deleted_param)
     else:
         # By default, exclude deleted items
-        qs = qs.filter(marked_for_deletion_at__isnull=True)
+        qs = qs.filter(deleted_at__isnull=True)
     return qs
 
 

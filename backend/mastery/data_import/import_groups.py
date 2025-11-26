@@ -163,19 +163,19 @@ def ensure_group_exists(group_data, group_type, subject=None):
     if existing_group:
         # Do not touch the is_enabled field on existing groups
         # Do not touch the type field on existing groups
-        # Unset marked_for_deletion_at (in case it was set)
+        # Unset deleted_at (in case it was set)
         existing_group.display_name = group_data["displayName"]
         existing_group.subject = subject
         existing_group.valid_from = group_data.get("notBefore")
         existing_group.valid_to = group_data.get("notAfter")
         existing_group.maintained_at = now
         existing_group.save()
-        if existing_group.marked_for_deletion_at:
-            existing_group.marked_for_deletion_at = None
+        if existing_group.deleted_at:
+            existing_group.deleted_at = None
             # Cascade unset any soft-delete timestamp on related goals
             models.Goal.objects.filter(
                 group=existing_group).update(
-                maintained_at=now, marked_for_deletion_at=None)
+                maintained_at=now, deleted_at=None)
         logger.debug("Maintained existing group: %s", feide_id)
         return existing_group, False
 

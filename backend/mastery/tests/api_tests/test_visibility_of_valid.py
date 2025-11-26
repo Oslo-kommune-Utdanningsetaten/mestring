@@ -21,7 +21,7 @@ def test_valid_group_access(
         type="basis",
         school=school,
         is_enabled=True,
-        marked_for_deletion_at=None,
+        deleted_at=None,
         valid_from=now - timezone.timedelta(days=3),
         valid_to=now + timezone.timedelta(days=3)
     )
@@ -31,7 +31,7 @@ def test_valid_group_access(
         type="basis",
         school=school,
         is_enabled=True,
-        marked_for_deletion_at=None,
+        deleted_at=None,
         valid_to=now + timezone.timedelta(days=3)
     )
     valid_group_no_to = Group.objects.create(
@@ -40,7 +40,7 @@ def test_valid_group_access(
         type="basis",
         school=school,
         is_enabled=True,
-        marked_for_deletion_at=None,
+        deleted_at=None,
         valid_from=now - timezone.timedelta(days=3)
     )
 
@@ -74,7 +74,7 @@ def test_invalid_group_access(
         type="basis",
         school=school,
         is_enabled=True,
-        marked_for_deletion_at=None,
+        deleted_at=None,
         valid_from=now - timezone.timedelta(days=3),
         valid_to=now - timezone.timedelta(days=1)  # expired
     )
@@ -84,7 +84,7 @@ def test_invalid_group_access(
         type="basis",
         school=school,
         is_enabled=True,
-        marked_for_deletion_at=None,
+        deleted_at=None,
         valid_to=now - timezone.timedelta(days=3)
     )
     invalid_group_no_to = Group.objects.create(
@@ -93,7 +93,7 @@ def test_invalid_group_access(
         type="basis",
         school=school,
         is_enabled=True,
-        marked_for_deletion_at=None,
+        deleted_at=None,
         valid_from=now + timezone.timedelta(days=1)  # valid from tomorrow
     )
 
