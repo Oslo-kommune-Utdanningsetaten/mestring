@@ -50,11 +50,11 @@ There are four cases where data "disappears" automatically:
 
 ## Lifecycle stage responsibility
 
-|             | Create              | Maintain | Soft delete / invisible                                                                                            | Un-delete                   | Hard delete                                  |
-| ----------- | ------------------- | -------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------- | -------------------------------------------- |
-| Group       | Importer            | Importer | **Cleaner**, if not maintained: marked-for-deletion-at<br>**Automatic**, if outside valid-to <--> valid-from range | Importer, ensure_group      | Cleaner, if marked-for-deletion-at > 90 days |
-| User        | Importer            | Importer | **Cleaner**, if no UserGroups or UserSchools: marked-for-deletion-at                                               | Importer, ensure_user       | Cleaner, if marked-for-deletion-at > 90 days |
-| Observation | Manual, by User     |          | **Cleaner**, if User not maintained: marked-for-deletion-at                                                        | Importer, ensure_user       | Cleaner, if marked-for-deletion-at > 90 days |
-| Goal        | Manual, by User     |          | **Cleaner**, if User not maintained: marked-for-deletion-at                                                        | Importer, ensure_user       | Cleaner, if marked-for-deletion-at > 90 days |
-| UserGroup   | Importer            | Importer | **Cleaner**, only consider UserGroup with valid Group -> If UserGroup not maintained: marked-for-deletion-at       | Importer, ensure_membership | Cleaner, if marked-for-deletion-at > 1 hour  |
-| UserSchool  | Automatic, on login |          |                                                                                                                    |                             | Manual                                       |
+|             | Create              | Maintain | Soft delete / invisible                                                                                | Un-delete                   | Hard delete                        |
+| ----------- | ------------------- | -------- | ------------------------------------------------------------------------------------------------------ | --------------------------- | ---------------------------------- |
+| Group       | Importer            | Importer | **Cleaner**, if not maintained: `deleted_at`<br>**Automatic**, if outside `valid_to` <--> `valid_from` | Importer, ensure_group      | Cleaner, if `deleted_at` > 90 days |
+| User        | Importer            | Importer | **Cleaner**, if no UserGroups or UserSchools: `deleted_at`                                             | Importer, ensure_user       | Cleaner, if `deleted_at` > 90 days |
+| Observation | Manual, by User     |          | **Cleaner**, if User not maintained: `deleted_at`                                                      | Importer, ensure_user       | Cleaner, if `deleted_at` > 90 days |
+| Goal        | Manual, by User     |          | **Cleaner**, if User not maintained: `deleted_at`                                                      | Importer, ensure_user       | Cleaner, if `deleted_at` > 90 days |
+| UserGroup   | Importer            | Importer | **Cleaner**, only consider UserGroup with valid Group -> If UserGroup not maintained: `deleted_at`     | Importer, ensure_membership | Cleaner, if `deleted_at` > 1 hour  |
+| UserSchool  | Automatic, on login |          |                                                                                                        |                             | Manual                             |
