@@ -24,7 +24,11 @@ def import_memberships_from_file(org_number):
     memberships_file = os.path.join(data_dir, org_number, "memberships.json")
     with open(memberships_file, "r", encoding="utf-8") as file:
         memberships_data = json.load(file)
+    yield from import_memberships(memberships_data)
 
+
+def import_memberships(memberships_data):
+    """Import memberships from provided data structure"""
     teacher_role, student_role, _, _, _ = ensure_roles_exist()
 
     # Progress reporting variables

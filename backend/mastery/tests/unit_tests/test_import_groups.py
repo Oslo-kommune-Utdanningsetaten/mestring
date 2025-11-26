@@ -4,39 +4,6 @@ from mastery import models
 from django.utils import timezone
 
 
-@pytest.fixture
-def groups_data(db, school):
-    school_feide_id = school.feide_id
-    teaching = school_feide_id.replace(":unit:", ":u:")
-    basis = school_feide_id.replace(":unit:", ":b:")
-    return {
-        "teaching": [{
-            "id": f"{teaching}:udg-fg-kropps%C3%B8ving%202e:2025-06-05:2026-06-04",
-            "type": "fc:gogroup",
-            "displayName": "Kroppsøving 2E",
-            "notBefore": "2025-06-04T22:00:00Z",
-            "notAfter": "2026-06-04T22:00:00Z",
-            "go_type": "u",
-            "parent": school_feide_id,
-            "go_type_displayName": "undervisningsgruppe",
-            "grep": {
-                "displayName": "Kroppsøving 2. årstrinn",
-                "code": "KRO0012"
-            }
-        }],
-        "basis": [{
-            "id": f"{basis}:udg-kl-4b:2025-06-05:2026-06-04",
-            "type": "fc:gogroup",
-            "displayName": "4B",
-            "notBefore": "2025-06-04T22:00:00Z",
-            "notAfter": "2026-06-04T22:00:00Z",
-            "go_type": "b",
-            "parent": school_feide_id,
-            "go_type_displayName": "basisgruppe"
-        }]
-    }
-
-
 @pytest.mark.django_db
 def test_import_groups_create(groups_data, school):
     """Test group creation on import"""

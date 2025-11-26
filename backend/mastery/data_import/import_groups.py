@@ -34,7 +34,7 @@ def import_groups_from_file(org_number):
     with open(groups_file, "r", encoding="utf-8") as file:
         groups_data = json.load(file)
 
-    return import_groups(groups_data)
+    yield from import_groups(groups_data)
 
 
 def import_groups(groups_data):
