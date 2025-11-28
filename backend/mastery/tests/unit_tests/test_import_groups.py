@@ -30,9 +30,9 @@ def test_import_groups_create(groups_data, school):
 @pytest.mark.django_db
 def test_import_groups_maintain(groups_data, school):
     """Test group maintenance on import"""
-    # Import creates basis and teaching groups, and required subject
+    # Initial import creates basis and teaching groups, and required subject
     result = list(import_groups(groups_data))
-    # Importing with same data maintains existing data
+    # Re-importing with same data maintains existing data
     result = list(import_groups(groups_data))
     final_chunk = result[-1]
     assert final_chunk["is_done"] is True
@@ -56,7 +56,7 @@ def test_import_groups_maintain(groups_data, school):
 @pytest.mark.django_db
 def test_import_groups_undelete(groups_data, school):
     """Test undelete on import"""
-    # Import creates basis and teaching groups, and required subject
+    # Initial import creates basis and teaching groups, and required subject
     list(import_groups(groups_data))
     teaching_group = models.Group.objects.get(feide_id=groups_data["teaching"][0]["id"])
     deleted_ts = timezone.now() - timezone.timedelta(days=1)
@@ -64,7 +64,7 @@ def test_import_groups_undelete(groups_data, school):
     goal = models.Goal.objects.create(title="Lese bøk. Les bøk!", group=teaching_group, deleted_at=deleted_ts)
     teaching_group.deleted_at = deleted_ts
     teaching_group.save()
-    # Importing with same data will undelete soft-deleted groups and their goals
+    # Re-importing with same data will undelete soft-deleted groups and their goals
     list(import_groups(groups_data))
     teaching_group.refresh_from_db()
     goal.refresh_from_db()

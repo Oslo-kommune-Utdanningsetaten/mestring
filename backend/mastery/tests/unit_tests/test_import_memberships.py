@@ -86,8 +86,6 @@ def a_basis_group(db, school, groups_data):
 @pytest.mark.django_db
 def test_import_users_create(memberships_data, school, a_teaching_group, a_basis_group):
     """Test user creation on import"""
-
-    # Import creates users and memberships
     result = list(import_memberships(memberships_data))
     final_chunk = result[-1]
     assert final_chunk["is_done"] is True
@@ -96,3 +94,27 @@ def test_import_users_create(memberships_data, school, a_teaching_group, a_basis
     assert changes["user"]["maintained"] == 0
     assert changes["membership"]["created"] == 6
     assert changes["membership"]["maintained"] == 0
+    assert models.User.objects.all().count() == 5
+    teacher_feide_id = memberships_data[f"{a_teaching_group.feide_id}"]["teachers"][0]["feide_id"]
+    assert models.User.objects.filter(feide_id=teacher_feide_id).exists()
+
+
+@pytest.mark.django_db
+def test_import_users_maintain(memberships_data, school, a_teaching_group, a_basis_group):
+    """Test user maintenance on import"""
+    # Initial import creates users
+    result = list(import_memberships(memberships_data))
+    # Re-mporting with same data maintains existing data
+    result = list(import_memberships(memberships_data))
+    final_chunk = result[-1]
+    changes = final_chunk["result"]["changes"]
+    assert final_chunk["is_done"] is True
+    assert changes["user"]["created"] == 0
+    assert changes["user"]["maintained"] == 5
+    assert changes["membership"]["created"] == 0
+    assert changes["membership"]["maintained"] == 6
+    assert models.User.objects.all().count() == 5
+    # get fresh rows from db
+    teacher_feide_id = memberships_data[f"{a_teaching_group.feide_id}"]["teachers"][0]["feide_id"]
+    teacher = models.User.objects.filter(feide_id=teacher_feide_id).first()
+    assert teacher.created_at < teacher.maintained_at
