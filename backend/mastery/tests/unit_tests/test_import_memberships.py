@@ -118,3 +118,37 @@ def test_import_users_maintain(memberships_data, school, a_teaching_group, a_bas
     teacher_feide_id = memberships_data[f"{a_teaching_group.feide_id}"]["teachers"][0]["feide_id"]
     teacher = models.User.objects.filter(feide_id=teacher_feide_id).first()
     assert teacher.created_at < teacher.maintained_at
+
+
+@pytest.mark.django_db
+def test_import_users_undelete(memberships_data, school, a_teaching_group, a_basis_group):
+    """Test undelete on import"""
+    # Initial import creates users
+    list(import_memberships(memberships_data))
+    # Soft-delete a user and a membership
+    user_feide_id = memberships_data[f"{a_teaching_group.feide_id}"]["students"][0]["feide_id"]
+    user = models.User.objects.filter(feide_id=user_feide_id).first()
+    user.deleted_at = timezone.now()
+    user.save()
+    # Re-importing with same data should undelete the user and membership
+    list(import_memberships(memberships_data))
+    user.refresh_from_db()
+    assert user.deleted_at is None
+
+
+@pytest.mark.django_db
+def test_import_memberships_undelete(memberships_data, school, a_teaching_group, a_basis_group):
+    """Test undelete of memberships on import"""
+    # Initial import creates users and memberships
+    list(import_memberships(memberships_data))
+    teacher_feide_id = memberships_data[f"{a_teaching_group.feide_id}"]["teachers"][0]["feide_id"]
+    teacher = models.User.objects.filter(feide_id=teacher_feide_id).first()
+    user_group = models.UserGroup.objects.filter(user=teacher, group=a_teaching_group).first()
+    assert user_group is not None
+    user_group.deleted_at = timezone.now()
+    user_group.save()
+    # Re-importing with same data should undelete the membership
+    list(import_memberships(memberships_data))
+    user_group.refresh_from_db()
+    assert user_group.created_at < user_group.maintained_at
+    assert user_group.deleted_at is None
