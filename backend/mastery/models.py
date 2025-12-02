@@ -202,7 +202,7 @@ class Role(BaseModel):
 
 class Group(BaseModel):
     """
-    A Group represents a collection of Users in the system. Basis and teaching groups will be the most common, but School will also be modeled as a Group
+    A Group represents a collection of Users in the system. Basis and teaching groups are the only types so far.
     """
     objects = GroupQuerySet.as_manager()  # Enable custom querysets
 

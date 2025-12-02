@@ -20,14 +20,20 @@ def update_data_integrity(org_number, maintenance_threshold):
     print("Everything maintained earlier than", maintenance_threshold, "will be soft-deleted")
 
     # Soft delete
-    # Groups: if not maintained since maintenance_threshold AND group is valid, mark as deleted (DO NOT mess with invalid groups)
-    changes["groups"] = {}
+    # Groups: if not maintained since maintenance_threshold AND not deleted AND group is valid -> mark as deleted (DO NOT mess with invalid groups)
     groups = models.Group.objects.filter(
         school=school, deleted_at__isnull=True, maintained_at__lt=maintenance_threshold).within_validity_period()
-    print("🦊Soft-deleting", groups.count(), "groups")
-    changes["groups"]["soft-deleted"] = groups.count()
     groups.update(deleted_at=now)
-    # User: if not superadmin, or no non-deleted UserGroup memberships, mark as deleted
+    changes["groups"] = {}
+    changes["groups"]["soft-deleted"] = groups.count()
+
+    # User: if not maintained since maintenance_threshold AND if not superadmin AND no non-deleted UserGroups -> mark as deleted
+    users = models.User.objects.filter(
+        is_superadmin=False, maintained_at__lt=maintenance_threshold).exclude(
+        user_groups__deleted_at__isnull=True)
+    users.update(deleted_at=now)
+    changes["users"] = {}
+    changes["users"]["soft-deleted"] = users.count()
     # Observation: if student not maintained since maintenance_threshold, mark as deleted
     # Goal: if student and student not maintained since maintenance_threshold, mark as deleted
     # Goal: if Group and Group not maintained since maintenance_threshold, mark as deleted
