@@ -1,14 +1,12 @@
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from mastery.api import auth, custom
+import os
+
+SERVER_DEPLOYMENT = os.environ.get("SERVER_DEPLOYMENT")
 
 urlpatterns = [
     path('api/', include('mastery.urls')),
-    path('api/schema/', SpectacularAPIView.as_view(),
-         name='schema'),
-    path(
-        'api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'),
-        name='swagger-ui'),
     path('api/ping/', custom.ping, name='ping'),
     path('auth/feidelogin/', auth.feidelogin, name='feide_login'),
     path('auth/feidecallback', auth.feidecallback, name='feide_callback'),
@@ -40,3 +38,12 @@ urlpatterns = [
         name='fetch_school_import_status'
     )
 ]
+
+if SERVER_DEPLOYMENT != 'production':
+    urlpatterns += [
+        path('api/schema/', SpectacularAPIView.as_view(),
+             name='schema'),
+        path(
+            'api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'),
+            name='swagger-ui')
+    ]
