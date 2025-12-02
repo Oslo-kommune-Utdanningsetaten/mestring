@@ -2,6 +2,7 @@ from django.utils import timezone
 from django.db import models
 from django.db.models import Q
 from nanoid import generate
+from .querysets import GroupQuerySet
 
 ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
@@ -203,6 +204,8 @@ class Group(BaseModel):
     """
     A Group represents a collection of Users in the system. Basis and teaching groups will be the most common, but School will also be modeled as a Group
     """
+    objects = GroupQuerySet.as_manager()  # Enable custom querysets
+
     feide_id = models.CharField(max_length=200, unique=True)
     display_name = models.CharField(max_length=200)
     type = models.CharField(max_length=200)  # either 'basis' or 'teaching' for now
@@ -214,12 +217,7 @@ class Group(BaseModel):
 
     def is_currently_valid(self):
         """Return True if in valid_from <--> valid_to range, or if no range is set"""
-        now = timezone.now()
-        if self.valid_from and now < self.valid_from:
-            return False
-        if self.valid_to and now > self.valid_to:
-            return False
-        return True
+        return Group.objects.filter(id=self.id).within_validity_period().exists()
 
     def get_members(self, role=None):
         """

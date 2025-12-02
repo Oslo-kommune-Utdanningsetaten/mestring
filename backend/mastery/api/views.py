@@ -44,16 +44,13 @@ def apply_deleted_filter(query_params, qs):
 
 def apply_valid_group_filter(query_params, qs):
     is_valid_param, is_valid_set = get_request_param(query_params, 'is_valid')
-    now = timezone.now()
 
     if is_valid_set and not is_valid_param:
         # Only invalid groups
-        qs = qs.filter(Q(valid_from__gt=now) | Q(valid_to__lt=now))
+        return qs.outside_validity_period()
     else:
         # By default, include only valid groups
-        qs = qs.filter(Q(valid_from__isnull=True) | Q(valid_from__lte=now))
-        qs = qs.filter(Q(valid_to__isnull=True) | Q(valid_to__gte=now))
-    return qs
+        return qs.within_validity_period()
 
 
 class FingerprintViewSetMixin:

@@ -53,10 +53,8 @@ def import_memberships(memberships_data):
         for role_key, role_obj in [("teachers", teacher_role), ("students", student_role)]:
             # Ensure user and membership for each member in this role
             for member_data in feide_group_memberships.get(role_key, []):
-
                 user, user_was_created = ensure_user_exists(member_data)
-
-                # Only count user creation/maintain once per unique user
+                # Users can have multiple memberships, but only count user creation/maintain once per unique user
                 user_id = user.feide_id
                 if user_id not in processed_users:
                     processed_users.add(user_id)
@@ -65,7 +63,7 @@ def import_memberships(memberships_data):
                     else:
                         users_maintained += 1
 
-                # If we're here, user exists, now ensure membership
+                # User exists, now ensure membership
                 _, membership_created = ensure_membership_exists(user, group, role_obj)
 
                 if membership_created:
