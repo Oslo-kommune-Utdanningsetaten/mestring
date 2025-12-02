@@ -39,7 +39,7 @@ urlpatterns = [
     )
 ]
 
-if SERVER_DEPLOYMENT != 'production':
+if SERVER_DEPLOYMENT in ['localhost', 'development']:
     urlpatterns += [
         path('api/schema/', SpectacularAPIView.as_view(),
              name='schema'),
