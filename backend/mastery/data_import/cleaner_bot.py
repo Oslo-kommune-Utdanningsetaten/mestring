@@ -18,9 +18,13 @@ def update_data_integrity(maintenance_threshold):
 
     changes["user"] = {}
     changes["user"]["soft-deleted"] = soft_delete_users(now, maintenance_threshold)
-    # Observation: if student not maintained since maintenance_threshold, mark as deleted
-    # Goal: if student and student not maintained since maintenance_threshold, mark as deleted
-    # Goal: if Group and Group not maintained since maintenance_threshold, mark as deleted
+
+    changes["observation"] = {}
+    changes["observation"]["soft-deleted"] = soft_delete_observations(now, maintenance_threshold)
+
+    changes["goal"] = {}
+    changes["goal"]["soft-deleted"] = soft_delete_goals(now, maintenance_threshold)
+
     # UserGroup: if UserGroup not maintained since maintenance_threshold AND Group is valid, mark as deleted (DO NOT mess with memberships to invalid groups)
     #
     # Hard delete
@@ -51,24 +55,54 @@ def update_data_integrity(maintenance_threshold):
 
 
 def soft_delete_groups(now, maintenance_threshold):
-    # if not maintained since maintenance_threshold AND not deleted AND group is valid -> mark as deleted (DO NOT mess with invalid groups)
+    # If not maintained since maintenance_threshold AND not deleted AND group is valid -> mark as deleted
+    # DO NOT mess with invalid groups
     groups = models.Group.objects.filter(
-        deleted_at__isnull=True, maintained_at__lt=maintenance_threshold).within_validity_period()
+        deleted_at__isnull=True,
+        maintained_at__lt=maintenance_threshold
+    ).within_validity_period()
     count = groups.count()
     groups.update(deleted_at=now)
     return count
 
 
 def soft_delete_users(now, maintenance_threshold):
-    # if not superadmin AND not maintained since maintenance_threshold AND no non-deleted UserGroups -> mark as deleted
+    # If not superadmin AND not maintained since maintenance_threshold AND no non-deleted UserGroups -> mark as deleted
     users = models.User.objects.annotate(
-        active_user_groups_count=Count(
-            'user_groups', filter=Q(user_groups__deleted_at__isnull=True))
+        active_user_groups_count=Count('user_groups',
+                                       filter=Q(user_groups__deleted_at__isnull=True))
     ).filter(
+        deleted_at__isnull=True,
         is_superadmin=False,
         maintained_at__lt=maintenance_threshold,
         active_user_groups_count=0
     )
     count = users.count()
     users.update(deleted_at=now)
+    return count
+
+
+def soft_delete_observations(now, maintenance_threshold):
+    # If student is soft-deleted -> mark as deleted
+    observations = models.Observation.objects.filter(
+        deleted_at__isnull=True,
+        student__deleted_at__isnull=False
+    )
+    count = observations.count()
+    observations.update(deleted_at=now)
+    return count
+
+
+def soft_delete_goals(now, maintenance_threshold):
+    # If student (i.e. this is a personal goal) AND student is soft-deleted -> mark as deleted
+    # OR
+    # If group (i.e. this is a group goal) AND group is soft-deleted -> mark as deleted
+    goals = models.Goal.objects.filter(
+        deleted_at__isnull=True
+    ).filter(
+        Q(student_id__isnull=False, student__deleted_at__isnull=False) |
+        Q(group_id__isnull=False, group__deleted_at__isnull=False)
+    )
+    count = goals.count()
+    goals.update(deleted_at=now)
     return count

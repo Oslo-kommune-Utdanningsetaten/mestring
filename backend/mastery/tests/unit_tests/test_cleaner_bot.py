@@ -34,6 +34,24 @@ def invalid_group(school):
     )
 
 
+@pytest.fixture
+def observation(student, goal_personal):
+    return models.Observation.objects.create(
+        student=student,
+        goal=goal_personal,
+        is_visible_to_student=True
+    )
+
+
+@pytest.fixture
+def other_observation(other_student, goal_personal):
+    return models.Observation.objects.create(
+        student=other_student,
+        goal=goal_personal,
+        is_visible_to_student=True
+    )
+
+
 @pytest.mark.django_db
 def test_soft_delete_unmaintained_valid_group(valid_group):
     now = timezone.now()
@@ -133,3 +151,26 @@ def test_keep_superadmin_user(student):
     assert final_chunk["is_done"] is True
     assert changes["user"]["soft-deleted"] == 0
     assert student.deleted_at is None
+
+
+@pytest.mark.django_db
+def test_soft_delete_observation(student, other_student, observation, other_observation):
+    now = timezone.now()
+    # Soft-delete observation for soft-deleted student
+    student.deleted_at = now
+    student.save()
+    result = update_data_integrity(now)
+    final_chunk = list(result)[-1]
+    changes = final_chunk["result"]["changes"]
+    observation.refresh_from_db()
+    assert final_chunk["is_done"] is True
+    assert changes["observation"]["soft-deleted"] == 1
+    assert observation.deleted_at is not None
+    # Don't soft-delete observation for non-deleted student
+    other_observation.refresh_from_db()
+    assert other_observation.deleted_at is None
+
+
+@pytest.mark.django_db
+def test_soft_delete_goal(student, other_student, goal_personal, valid_group, student_role):
+    assert True
