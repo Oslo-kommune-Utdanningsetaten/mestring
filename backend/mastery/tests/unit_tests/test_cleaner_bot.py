@@ -52,6 +52,31 @@ def other_observation(other_student, goal_personal):
     )
 
 
+@pytest.fixture
+def personal_goal(db, student):
+    return models.Goal.objects.create(
+        title="Lese 2 bøker",
+        student=student,
+    )
+
+
+@pytest.fixture
+def group_goal(db, valid_group, student, student_role):
+    valid_group.add_member(student, student_role)
+    return models.Goal.objects.create(
+        title="Lese 2 bøker",
+        group=valid_group,
+    )
+
+
+@pytest.fixture
+def other_student_personal_goal(db, other_student):
+    return models.Goal.objects.create(
+        title="Lese 2 bøker",
+        student=other_student,
+    )
+
+
 @pytest.mark.django_db
 def test_soft_delete_unmaintained_valid_group(valid_group):
     now = timezone.now()
@@ -154,7 +179,7 @@ def test_keep_superadmin_user(student):
 
 
 @pytest.mark.django_db
-def test_soft_delete_observation(student, other_student, observation, other_observation):
+def test_soft_delete_observation(student, observation, other_observation):
     now = timezone.now()
     # Soft-delete observation for soft-deleted student
     student.deleted_at = now
@@ -172,5 +197,66 @@ def test_soft_delete_observation(student, other_student, observation, other_obse
 
 
 @pytest.mark.django_db
-def test_soft_delete_goal(student, other_student, goal_personal, valid_group, student_role):
-    assert True
+def test_soft_delete_personal_goal(
+        student, personal_goal, group_goal, other_student_personal_goal):
+    now = timezone.now()
+    # Initial cleanup -> no deletes
+    result = update_data_integrity(now)
+    final_chunk = list(result)[-1]
+    changes = final_chunk["result"]["changes"]
+    personal_goal.refresh_from_db()
+    group_goal.refresh_from_db()
+    other_student_personal_goal.refresh_from_db()
+    assert final_chunk["is_done"] is True
+    assert changes["group"]["soft-deleted"] == 0
+    assert personal_goal.deleted_at is None
+    assert group_goal.deleted_at is None
+    assert other_student_personal_goal.deleted_at is None
+
+    # Soft-delete personal goal for soft-deleted student
+    student.deleted_at = now
+    student.save()
+    result = update_data_integrity(now)
+    final_chunk = list(result)[-1]
+    changes = final_chunk["result"]["changes"]
+    personal_goal.refresh_from_db()
+    group_goal.refresh_from_db()
+    other_student_personal_goal.refresh_from_db()
+    assert final_chunk["is_done"] is True
+    assert changes["goal"]["soft-deleted"] == 1
+    assert personal_goal.deleted_at is not None
+    assert group_goal.deleted_at is None
+    assert other_student_personal_goal.deleted_at is None
+
+
+@pytest.mark.django_db
+def test_soft_delete_group_goal(
+        personal_goal, group_goal, other_student_personal_goal, valid_group):
+    now = timezone.now()
+    # Initial cleanup -> no deletes
+    result = update_data_integrity(now)
+    final_chunk = list(result)[-1]
+    changes = final_chunk["result"]["changes"]
+    personal_goal.refresh_from_db()
+    group_goal.refresh_from_db()
+    other_student_personal_goal.refresh_from_db()
+    assert final_chunk["is_done"] is True
+    assert changes["group"]["soft-deleted"] == 0
+    assert personal_goal.deleted_at is None
+    assert group_goal.deleted_at is None
+    assert other_student_personal_goal.deleted_at is None
+
+    # Soft-delete group goal for soft-deleted group
+    valid_group.deleted_at = now
+    valid_group.save()
+    result = update_data_integrity(now)
+    final_chunk = list(result)[-1]
+    changes = final_chunk["result"]["changes"]
+    personal_goal.refresh_from_db()
+    group_goal.refresh_from_db()
+    other_student_personal_goal.refresh_from_db()
+    assert final_chunk["is_done"] is True
+    assert changes["goal"]["soft-deleted"] == 1
+    assert group_goal.deleted_at is not None
+    assert personal_goal.deleted_at is None
+    assert other_student_personal_goal.deleted_at is None
