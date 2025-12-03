@@ -1,39 +1,23 @@
 from django.utils import timezone
 from mastery import models
+from django.db.models import Q, Count
 import logging
 logger = logging.getLogger(__name__)
 
 
-def update_data_integrity(org_number, maintenance_threshold):
-    logger.debug("Update data for", org_number)
-    school = models.School.objects.filter(org_number=org_number).first()
-    if not school:
-        message = "School with org number {org_number} not found"
-        logger.error(message)
-        raise Exception(message)
+def update_data_integrity(maintenance_threshold):
 
     changes = {}
     errors = []
     now = timezone.now()
-
-    logger.debug("Everything maintained earlier than", maintenance_threshold, "will be soft-deleted")
-    print("Everything maintained earlier than", maintenance_threshold, "will be soft-deleted")
+    logger.debug(f"Everything maintained earlier than %s will be soft-deleted", maintenance_threshold)
 
     # Soft delete
-    # Groups: if not maintained since maintenance_threshold AND not deleted AND group is valid -> mark as deleted (DO NOT mess with invalid groups)
-    groups = models.Group.objects.filter(
-        school=school, deleted_at__isnull=True, maintained_at__lt=maintenance_threshold).within_validity_period()
-    groups.update(deleted_at=now)
-    changes["groups"] = {}
-    changes["groups"]["soft-deleted"] = groups.count()
+    changes["group"] = {}
+    changes["group"]["soft-deleted"] = soft_delete_groups(now, maintenance_threshold)
 
-    # User: if not maintained since maintenance_threshold AND if not superadmin AND no non-deleted UserGroups -> mark as deleted
-    users = models.User.objects.filter(
-        is_superadmin=False, maintained_at__lt=maintenance_threshold).exclude(
-        user_groups__deleted_at__isnull=True)
-    users.update(deleted_at=now)
-    changes["users"] = {}
-    changes["users"]["soft-deleted"] = users.count()
+    changes["user"] = {}
+    changes["user"]["soft-deleted"] = soft_delete_users(now, maintenance_threshold)
     # Observation: if student not maintained since maintenance_threshold, mark as deleted
     # Goal: if student and student not maintained since maintenance_threshold, mark as deleted
     # Goal: if Group and Group not maintained since maintenance_threshold, mark as deleted
@@ -48,7 +32,7 @@ def update_data_integrity(org_number, maintenance_threshold):
     #
     # Output progress chunks as:
     # "changes": {
-    #     "groups": {
+    #     "group": {
     #         "soft-deleted": 0,
     #         "hard-deleted": 0,
     #     },
@@ -64,3 +48,27 @@ def update_data_integrity(org_number, maintenance_threshold):
         },
         "is_done": True,
     }
+
+
+def soft_delete_groups(now, maintenance_threshold):
+    # if not maintained since maintenance_threshold AND not deleted AND group is valid -> mark as deleted (DO NOT mess with invalid groups)
+    groups = models.Group.objects.filter(
+        deleted_at__isnull=True, maintained_at__lt=maintenance_threshold).within_validity_period()
+    count = groups.count()
+    groups.update(deleted_at=now)
+    return count
+
+
+def soft_delete_users(now, maintenance_threshold):
+    # if not superadmin AND not maintained since maintenance_threshold AND no non-deleted UserGroups -> mark as deleted
+    users = models.User.objects.annotate(
+        active_user_groups_count=Count(
+            'user_groups', filter=Q(user_groups__deleted_at__isnull=True))
+    ).filter(
+        is_superadmin=False,
+        maintained_at__lt=maintenance_threshold,
+        active_user_groups_count=0
+    )
+    count = users.count()
+    users.update(deleted_at=now)
+    return count
