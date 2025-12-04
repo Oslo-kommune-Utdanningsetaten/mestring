@@ -1,6 +1,13 @@
 from django.utils import timezone
 from mastery import models
 from django.db.models import Q, Count
+from mastery.constants import (
+    DAYS_BEFORE_HARD_DELETE_OF_GROUP,
+    DAYS_BEFORE_HARD_DELETE_OF_OBSERVATION,
+    DAYS_BEFORE_HARD_DELETE_OF_GOAL,
+    DAYS_BEFORE_HARD_DELETE_OF_USER,
+    HOURS_BEFORE_HARD_DELETE_OF_USER_GROUP,
+)
 import logging
 logger = logging.getLogger(__name__)
 
@@ -15,31 +22,24 @@ def update_data_integrity(maintenance_threshold):
     }
     errors = []
     now = timezone.now()
-    logger.debug(f"Everything maintained earlier than %s will be soft-deleted", maintenance_threshold)
 
     # Soft delete
+    logger.debug(f"Begin soft-delete of anything maintained earlier than %s", maintenance_threshold)
     changes["group"]["soft-deleted"] = soft_delete_groups(now, maintenance_threshold)
     changes["user"]["soft-deleted"] = soft_delete_users(now, maintenance_threshold)
     changes["observation"]["soft-deleted"] = soft_delete_observations(now, maintenance_threshold)
     changes["goal"]["soft-deleted"] = soft_delete_goals(now, maintenance_threshold)
     changes["user_group"]["soft-deleted"] = soft_delete_user_groups(now, maintenance_threshold)
+    logger.debug(f"End soft-delete")
 
     # Hard delete
-    # Groups: if deleted_at older than 90 days, hard delete
-    # changes["group"]["hard-deleted"] = hard_delete_groups(now)
-    # User: if deleted_at older than 90 days, hard delete
-    # Observation: if deleted_at older than 90 days, hard delete
-    # Goal: if deleted_at older than 90 days, hard delete
-    # UserGroup: if deleted_at older than 1 hour, hard delete
-    #
-    # Output progress chunks as:
-    # "changes": {
-    #     "group": {
-    #         "soft-deleted": 0,
-    #         "hard-deleted": 0,
-    #     },
-    #     "...": {}
-    # },
+    logger.debug(f"Begin hard-delete of anything soft-deleted a sufficiently long time ago")
+    changes["group"]["hard-deleted"] = hard_delete_groups(now)
+    changes["user"]["hard-deleted"] = hard_delete_users(now)
+    changes["observation"]["hard-deleted"] = hard_delete_observations(now)
+    changes["goal"]["hard-deleted"] = hard_delete_goals(now)
+    changes["user_group"]["hard-deleted"] = hard_delete_user_groups(now)
+    logger.debug(f"End hard-delete")
 
     yield {
         "result": {
@@ -124,4 +124,50 @@ def soft_delete_user_groups(now, maintenance_threshold):
 
 
 def hard_delete_groups(now):
-    return 0
+    # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_GROUP days, hard delete
+    groups = models.Group.objects.filter(
+        deleted_at__lt=now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_GROUP)
+    )
+    count = groups.count()
+    groups.delete()
+    return count
+
+
+def hard_delete_users(now):
+    # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_USER days, hard delete
+    users = models.User.objects.filter(
+        deleted_at__lt=now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_USER)
+    )
+    count = users.count()
+    users.delete()
+    return count
+
+
+def hard_delete_observations(now):
+    # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_OBSERVATION days, hard delete
+    observations = models.Observation.objects.filter(
+        deleted_at__lt=now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_OBSERVATION)
+    )
+    count = observations.count()
+    observations.delete()
+    return count
+
+
+def hard_delete_goals(now):
+    # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_GOAL days, hard delete
+    goals = models.Goal.objects.filter(
+        deleted_at__lt=now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_GOAL)
+    )
+    count = goals.count()
+    goals.delete()
+    return count
+
+
+def hard_delete_user_groups(now):
+    # If deleted_at older than HOURS_BEFORE_HARD_DELETE_OF_USER_GROUP hours, hard delete
+    user_groups = models.UserGroup.objects.filter(
+        deleted_at__lt=now - timezone.timedelta(hours=HOURS_BEFORE_HARD_DELETE_OF_USER_GROUP)
+    )
+    count = user_groups.count()
+    user_groups.delete()
+    return count
