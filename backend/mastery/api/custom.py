@@ -225,14 +225,28 @@ def import_groups_and_users(request, org_number):
     operation_id="update_data_integrity",
     summary="Ensure data integrity is as expected",
     description="Soft-delete data which has not been maintained during imports, and hard-delete data which has been soft-deleted for a sufficient time.",
-    parameters=[]
+    parameters=[
+        OpenApiParameter(
+            name='org_number',
+            description='Organization number of the school',
+            required=True,
+            type={'type': 'string'},
+            location=OpenApiParameter.PATH
+        )
+    ]
 )
 @api_view(["POST"])
 @permission_classes([ImportAccessPolicy])
-def update_data_integrity(request):
+def update_data_integrity(request, org_number):
     """
     Activate the cleaner bot.
     """
+    school = models.School.objects.filter(org_number=org_number).first()
+    if not school:
+        return Response(
+            {"message": f"School not found for org {org_number}"},
+            status=404,
+        )
     # Check if there's already a pending or running similar task
     existing_task = models.DataMaintenanceTask.objects.filter(
         Q(status="pending") | Q(status="running"),

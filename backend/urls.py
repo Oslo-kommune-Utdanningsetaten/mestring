@@ -33,6 +33,11 @@ urlpatterns = [
         name='import_groups_and_users'
     ),
     path(
+        'api/import/update_data_integrity/<str:org_number>/',
+        custom.update_data_integrity,
+        name='update_data_integrity'
+    ),
+    path(
         'api/fetch/school_import_status/<str:org_number>/',
         custom.fetch_school_import_status,
         name='fetch_school_import_status'

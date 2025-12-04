@@ -1186,6 +1186,25 @@ export type ImportGroupsAndUsersResponses = {
     200: unknown;
 };
 
+export type UpdateDataIntegrityData = {
+    body?: never;
+    path: {
+        /**
+         * Organization number of the school
+         */
+        orgNumber: string;
+    };
+    query?: never;
+    url: '/api/import/update_data_integrity/{org_number}/';
+};
+
+export type UpdateDataIntegrityResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
 export type MasterySchemasListData = {
     body?: never;
     path?: never;
