@@ -305,12 +305,12 @@ class Goal(BaseModel):
     """
     title = models.CharField(max_length=200, null=True)
     description = models.TextField(null=True)
-    group = models.ForeignKey(Group, on_delete=models.RESTRICT, null=True, related_name='goals')
-    student = models.ForeignKey(User, on_delete=models.RESTRICT, null=True, related_name='goals')
-    subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True, related_name='goals')
-    previous_goal = models.ForeignKey('Goal', on_delete=models.RESTRICT, null=True)
+    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, related_name='goals')
+    student = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='goals')
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name='goals')
+    previous_goal = models.ForeignKey('Goal', on_delete=models.SET_NULL, null=True)
     mastery_schema = models.ForeignKey(
-        MasterySchema, on_delete=models.RESTRICT, null=True, related_name='goals')
+        MasterySchema, on_delete=models.SET_NULL, null=True, related_name='goals')
     sort_order = models.IntegerField(null=True)
     is_relevant = models.BooleanField(default=True)  # keep old goals for history
 
