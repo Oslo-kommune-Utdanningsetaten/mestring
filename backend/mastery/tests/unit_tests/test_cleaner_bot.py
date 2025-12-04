@@ -260,3 +260,52 @@ def test_soft_delete_group_goal(
     assert group_goal.deleted_at is not None
     assert personal_goal.deleted_at is None
     assert other_student_personal_goal.deleted_at is None
+
+
+@pytest.mark.django_db
+def test_do_not_soft_delete_user_group(student, student_role, valid_group):
+    now = timezone.now()
+    valid_group.add_member(student, student_role)
+    user_group = models.UserGroup.objects.filter(user=student, role=student_role, group=valid_group).first()
+    # Initial cleanup -> no deletes
+    result = update_data_integrity(now)
+    final_chunk = list(result)[-1]
+    changes = final_chunk["result"]["changes"]
+    user_group.refresh_from_db()
+    assert final_chunk["is_done"] is True
+    assert changes["user_group"]["soft-deleted"] == 0
+    assert user_group.deleted_at is None
+
+
+@pytest.mark.django_db
+def test_soft_delete_unmaintained_user_group(student, student_role, valid_group):
+    now = timezone.now()
+    valid_group.add_member(student, student_role)
+    user_group = models.UserGroup.objects.filter(user=student, role=student_role, group=valid_group).first()
+    # Soft-delete user_group if unmaintained and group is valid
+    user_group.maintained_at = now - timezone.timedelta(days=10)
+    user_group.save()
+    result = update_data_integrity(now)
+    final_chunk = list(result)[-1]
+    changes = final_chunk["result"]["changes"]
+    user_group.refresh_from_db()
+    assert final_chunk["is_done"] is True
+    assert changes["user_group"]["soft-deleted"] == 1
+    assert user_group.deleted_at is not None
+
+
+@pytest.mark.django_db
+def test_soft_delete_user_group_for_deleted_group(student, student_role, valid_group):
+    now = timezone.now()
+    valid_group.add_member(student, student_role)
+    user_group = models.UserGroup.objects.filter(user=student, role=student_role, group=valid_group).first()
+    # Soft-delete user_group if group is soft-deleted
+    valid_group.deleted_at = now
+    valid_group.save()
+    result = update_data_integrity(now)
+    final_chunk = list(result)[-1]
+    changes = final_chunk["result"]["changes"]
+    user_group.refresh_from_db()
+    assert final_chunk["is_done"] is True
+    assert changes["user_group"]["soft-deleted"] == 1
+    assert user_group.deleted_at is not None

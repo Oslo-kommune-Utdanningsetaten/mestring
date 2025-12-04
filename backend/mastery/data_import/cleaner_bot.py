@@ -6,29 +6,27 @@ logger = logging.getLogger(__name__)
 
 
 def update_data_integrity(maintenance_threshold):
-
-    changes = {}
+    changes = {
+        "group": {},
+        "user": {},
+        "observation": {},
+        "goal": {},
+        "user_group": {},
+    }
     errors = []
     now = timezone.now()
     logger.debug(f"Everything maintained earlier than %s will be soft-deleted", maintenance_threshold)
 
     # Soft delete
-    changes["group"] = {}
     changes["group"]["soft-deleted"] = soft_delete_groups(now, maintenance_threshold)
-
-    changes["user"] = {}
     changes["user"]["soft-deleted"] = soft_delete_users(now, maintenance_threshold)
-
-    changes["observation"] = {}
     changes["observation"]["soft-deleted"] = soft_delete_observations(now, maintenance_threshold)
-
-    changes["goal"] = {}
     changes["goal"]["soft-deleted"] = soft_delete_goals(now, maintenance_threshold)
+    changes["user_group"]["soft-deleted"] = soft_delete_user_groups(now, maintenance_threshold)
 
-    # UserGroup: if UserGroup not maintained since maintenance_threshold AND Group is valid, mark as deleted (DO NOT mess with memberships to invalid groups)
-    #
     # Hard delete
     # Groups: if deleted_at older than 90 days, hard delete
+    # changes["group"]["hard-deleted"] = hard_delete_groups(now)
     # User: if deleted_at older than 90 days, hard delete
     # Observation: if deleted_at older than 90 days, hard delete
     # Goal: if deleted_at older than 90 days, hard delete
@@ -56,7 +54,7 @@ def update_data_integrity(maintenance_threshold):
 
 def soft_delete_groups(now, maintenance_threshold):
     # If not maintained since maintenance_threshold AND not deleted AND group is valid -> mark as deleted
-    # DO NOT mess with invalid groups
+    # Note: DO NOT mess with invalid groups
     groups = models.Group.objects.filter(
         deleted_at__isnull=True,
         maintained_at__lt=maintenance_threshold
@@ -106,3 +104,24 @@ def soft_delete_goals(now, maintenance_threshold):
     count = goals.count()
     goals.update(deleted_at=now)
     return count
+
+
+def soft_delete_user_groups(now, maintenance_threshold):
+    # If UserGroup not maintained since maintenance_threshold AND Group is valid -> mark as deleted
+    # Note: This let's us keep memberships in out-dated (invalid) groups for historical purposes
+    # OR
+    # IF Group is soft-deleted -> mark as deleted
+    user_groups = models.UserGroup.objects.filter(
+        deleted_at__isnull=True
+    ).filter(
+        Q(group__in=models.Group.objects.within_validity_period(),
+          maintained_at__lt=maintenance_threshold) |
+        Q(group__deleted_at__isnull=False)
+    )
+    count = user_groups.count()
+    user_groups.update(deleted_at=now)
+    return count
+
+
+def hard_delete_groups(now):
+    return 0
