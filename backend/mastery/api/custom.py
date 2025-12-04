@@ -258,13 +258,25 @@ def update_data_integrity(request, org_number):
              "message": "Another cleaner bot is already pending or running."},
             status=409)
 
-    task = models.DataMaintenanceTask.objects.create(
-        status="pending",
-        job_name="update_data_integrity",
-        job_params={"maintained_earlier_than": timezone.now()},
-        display_name=f"Activate cleaner bot",
-        earliest_run_at=timezone.now()
+    previous_import_task = (
+        models.DataMaintenanceTask.objects
+        .filter(job_name="import_groups_and_users", status="finished")
+        .filter(job_params__org_number=org_number)
+        .order_by("-finished_at")
+        .first()
     )
+
+    if not previous_import_task:
+        return Response(
+            {"status": "error",
+             "message": "Run import before cleaning up data."},
+            status=409)
+
+    task = models.DataMaintenanceTask.objects.create(
+        status="pending", job_name="update_data_integrity",
+        job_params={"maintained_earlier_than": previous_import_task.started_at.isoformat()
+                    if previous_import_task else None, },
+        display_name=f"Activate cleaner bot", earliest_run_at=timezone.now())
     return Response(status=201, data={"status": "tasks_created", "task_ids": [task.id]})
 
 

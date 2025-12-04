@@ -10,6 +10,7 @@
     feideImportSchool,
     schoolsList,
     schoolsPartialUpdate,
+    updateDataIntegrity,
   } from '../../generated/sdk.gen'
   import type { SchoolImportStatus } from '../../types/models'
   import { formatDate } from '../../utils/functions'
@@ -171,6 +172,37 @@
       }
     } catch (error) {
       console.error('Error updating subjectsAllowed:', error)
+    }
+  }
+
+  const handleActivateCleanerBotForSchool = async (orgNumber: string) => {
+    try {
+      const result = await updateDataIntegrity({
+        path: { org_number: orgNumber },
+      } as any)
+
+      if (result.response.status === 201) {
+        addAlert({
+          type: 'success',
+          message: `Bakgrunnsjobb opprettet for sletting av snargh for ${orgNumber}`,
+        })
+        router.navigate('/admin/data-maintenance-tasks')
+      } else if (result.response.status === 409) {
+        addAlert({
+          type: 'warning',
+          message: `Kan ikke opprette ny bakgrunnsjobb for ${orgNumber} fordi det allerede finnes en pågående jobb.`,
+        })
+      } else {
+        addAlert({
+          type: 'danger',
+          message: `Feil ved oppretting av bakgrunnsjobb for ${orgNumber}`,
+        })
+      }
+    } catch (error: any) {
+      addAlert({
+        type: 'danger',
+        message: `Nettverksfeil: ${error?.message || error}`,
+      })
     }
   }
 
@@ -530,6 +562,19 @@
             }}
           >
             Importér
+          </ButtonMini>
+
+          <!-- Cleanerbot -->
+          <ButtonMini
+            options={{
+              title: 'Aktivér cleanerbot',
+              iconName: 'obstacle',
+              skin: 'secondary',
+              variant: 'icon-left',
+              onClick: () => handleActivateCleanerBotForSchool(school.orgNumber),
+            }}
+          >
+            Aktivér cleanerbot
           </ButtonMini>
         </div>
       </div>
