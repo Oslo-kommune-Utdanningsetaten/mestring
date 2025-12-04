@@ -12,6 +12,7 @@ from mastery.models import DataMaintenanceTask, generate_nanoid
 from .import_school import school_update
 from .import_groups import import_groups_from_file
 from .import_users import import_memberships_from_file
+from .cleaner_bot import update_data_integrity
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +120,8 @@ def do_work(task):
         yield from import_groups_from_file(org_number)
     elif task.job_name == "import_memberships":
         yield from import_memberships_from_file(org_number)
+    elif task.job_name == "update_data_integrity":
+        yield from update_data_integrity(task.job_params.get("maintained_earlier_than"))
     else:
         raise ValueError(f"Unknown job_name '{task.job_name}'")
 
