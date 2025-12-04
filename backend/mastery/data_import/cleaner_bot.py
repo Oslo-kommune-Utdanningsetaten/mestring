@@ -12,6 +12,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# This method is typically run immediately after a data import from Feide has completed
+# Should be set to run with maintenance_threshold equal to the time the import started
+# Data which should be invisible, due to not being maintained during feide import, is soft-deleted
+# Data which has been soft-deleted for some time is hard-deleted
 def update_data_integrity(maintenance_threshold):
     changes = {
         "group": {},
@@ -128,6 +132,7 @@ def hard_delete_groups(now):
     groups = models.Group.objects.filter(
         deleted_at__lt=now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_GROUP)
     )
+    # Note: This will cascade delete UserGroups
     count = groups.count()
     groups.delete()
     return count
@@ -135,6 +140,7 @@ def hard_delete_groups(now):
 
 def hard_delete_users(now):
     # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_USER days, hard delete
+    # Note: This will cascade delete UserGroups, Personal Goals and Observations
     users = models.User.objects.filter(
         deleted_at__lt=now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_USER)
     )
@@ -155,6 +161,7 @@ def hard_delete_observations(now):
 
 def hard_delete_goals(now):
     # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_GOAL days, hard delete
+    # Note: This will fail if there are Observations linked to the Goal
     goals = models.Goal.objects.filter(
         deleted_at__lt=now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_GOAL)
     )
@@ -165,6 +172,7 @@ def hard_delete_goals(now):
 
 def hard_delete_user_groups(now):
     # If deleted_at older than HOURS_BEFORE_HARD_DELETE_OF_USER_GROUP hours, hard delete
+    # Note: The short delay is to quickly update group memberships
     user_groups = models.UserGroup.objects.filter(
         deleted_at__lt=now - timezone.timedelta(hours=HOURS_BEFORE_HARD_DELETE_OF_USER_GROUP)
     )
