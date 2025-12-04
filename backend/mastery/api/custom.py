@@ -222,6 +222,39 @@ def import_groups_and_users(request, org_number):
 
 
 @extend_schema(
+    operation_id="update_data_integrity",
+    summary="Ensure data integrity is as expected",
+    description="Soft-delete data which has not been maintained during imports, and hard-delete data which has been soft-deleted for a sufficient time.",
+    parameters=[]
+)
+@api_view(["POST"])
+@permission_classes([ImportAccessPolicy])
+def update_data_integrity(request):
+    """
+    Activate the cleaner bot.
+    """
+    # Check if there's already a pending or running similar task
+    existing_task = models.DataMaintenanceTask.objects.filter(
+        Q(status="pending") | Q(status="running"),
+        job_name="update_data_integrity",
+    ).first()
+    if existing_task:
+        return Response(
+            {"status": "error",
+             "message": "Another cleaner bot is already pending or running."},
+            status=409)
+
+    task = models.DataMaintenanceTask.objects.create(
+        status="pending",
+        job_name="update_data_integrity",
+        job_params={"maintained_earlier_than": timezone.now()},
+        display_name=f"Activate cleaner bot",
+        earliest_run_at=timezone.now()
+    )
+    return Response(status=201, data={"status": "tasks_created", "task_ids": [task.id]})
+
+
+@extend_schema(
     operation_id="fetch_school_import_status",
     summary="Get school import status",
     description="Return status for one school: Groups, Users, Memberships (last fetch count + time, DB count, diff) and last import timestamp.",

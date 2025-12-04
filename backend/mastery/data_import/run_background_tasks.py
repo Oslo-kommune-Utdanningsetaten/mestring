@@ -121,6 +121,7 @@ def do_work(task):
     elif task.job_name == "import_memberships":
         yield from import_memberships_from_file(org_number)
     elif task.job_name == "update_data_integrity":
+        print("Running update_data_integrity", task.id, task.job_params.get("maintained_earlier_than"))
         yield from update_data_integrity(task.job_params.get("maintained_earlier_than"))
     else:
         raise ValueError(f"Unknown job_name '{task.job_name}'")

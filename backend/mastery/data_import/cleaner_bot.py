@@ -47,7 +47,7 @@ def update_data_integrity(maintained_earlier_than):
 
     yield {
         "result": {
-            "entity": "school",
+            "entity": "all",
             "action": "update_data_integrity",
             "errors": errors,
             "changes": changes,
