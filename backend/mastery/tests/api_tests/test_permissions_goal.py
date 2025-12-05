@@ -480,11 +480,12 @@ def test_teaching_group_teacher_goal_access(
     resp = client.get(f'/api/goals/{personal_goal_other.id}/')
     assert resp.status_code == 404
 
-    # Teacher can create goals in groups they teach
+    # Teacher can create group goals in groups they teach
     resp = client.post('/api/goals/', {
         'group_id': teaching_group_with_members.id,
         'title': 'New group goal by teaching teacher',
-        "created_by_id": teacher.id
+        'created_by_id': teacher.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 201
     created_group_goal_id = resp.json()['id']
@@ -494,7 +495,8 @@ def test_teaching_group_teacher_goal_access(
         'student_id': student.id,
         'title': 'Personal goal in taught subject',
         'subject_id': teaching_group_with_members.subject.id,
-        "created_by_id": teacher.id
+        "created_by_id": teacher.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 201
     created_personal_goal_id = resp.json()['id']
@@ -518,7 +520,8 @@ def test_teaching_group_teacher_goal_access(
     # Teacher can update group goals they teach
     resp = client.put(f'/api/goals/{created_group_goal_id}/', {
         'group_id': teaching_group_with_members.id,
-        'title': 'Updated group goal'
+        'title': 'Updated group goal',
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 200
     assert resp.json()['title'] == 'Updated group goal'
@@ -527,7 +530,8 @@ def test_teaching_group_teacher_goal_access(
     resp = client.put(f'/api/goals/{created_personal_goal_id}/', {
         'student_id': student.id,
         'title': 'Updated personal goal',
-        'subject_id': teaching_group_with_members.subject.id
+        'subject_id': teaching_group_with_members.subject.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 200
     assert resp.json()['title'] == 'Updated personal goal'
@@ -544,7 +548,8 @@ def test_teaching_group_teacher_goal_access(
     goal_with_group.save()
     resp = client.put(f'/api/goals/{goal_with_group.id}/', {
         'group_id': teaching_group_with_members.id,
-        'title': 'Try to update goal created by another teacher'
+        'title': 'Try to update goal created by another teacher',
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 200
 
@@ -669,7 +674,8 @@ def test_basis_group_teacher_goal_access(
         'student_id': student.id,
         'title': 'Personal goal by basis teacher',
         'subject_id': subject_owned_by_school.id,
-        'created_by_id': teacher.id
+        'created_by_id': teacher.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 201
     created_personal_goal_id = resp.json()['id']
@@ -678,8 +684,8 @@ def test_basis_group_teacher_goal_access(
     resp = client.post('/api/goals/', {
         'student_id': other_student.id,
         'title': 'Personal goal for other student',
-        'subject_id': subject_owned_by_school.id
-        'school_id': school.id,
+        'subject_id': subject_owned_by_school.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -687,7 +693,8 @@ def test_basis_group_teacher_goal_access(
     resp = client.put(f'/api/goals/{created_personal_goal_id}/', {
         'student_id': student.id,
         'title': 'Updated personal goal',
-        'subject_id': subject_owned_by_school.id
+        'subject_id': subject_owned_by_school.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 200
     assert resp.json()['title'] == 'Updated personal goal'
@@ -704,7 +711,8 @@ def test_basis_group_teacher_goal_access(
     resp = client.put(f'/api/goals/{student_created_goal.id}/', {
         'student_id': student.id,
         'title': 'Teacher trying to update student goal',
-        'subject_id': subject_owned_by_school.id
+        'subject_id': subject_owned_by_school.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 200
 
@@ -713,7 +721,8 @@ def test_basis_group_teacher_goal_access(
 
     # Basis teacher cannot update group goals in groups they don't teach
     resp = client.put(f'/api/goals/{group_goal_other.id}/', {
-        'title': "Can't update this"
+        'title': "Can't update this",
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -725,7 +734,8 @@ def test_basis_group_teacher_goal_access(
     resp = client.put(f'/api/goals/{personal_goal_other.id}/', {
         'student_id': other_student.id,
         'title': 'Updated personal goal attempt',
-        'subject_id': subject_owned_by_school.id
+        'subject_id': subject_owned_by_school.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -751,7 +761,8 @@ def test_basis_group_teacher_goal_access(
     resp = client.put(f'/api/goals/{goal_created_by_other_teacher.id}/', {
         'student_id': student.id,
         'title': 'Can update this',
-        'subject_id': subject_owned_by_school.id
+        'subject_id': subject_owned_by_school.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 200
 
@@ -764,6 +775,7 @@ def test_basis_group_teacher_goal_access(
 def test_school_admin_goal_access(
     school_admin,
     school,
+    other_school,
     teaching_group_with_members,
     other_school_teaching_group,
     goal_with_group,
@@ -821,7 +833,8 @@ def test_school_admin_goal_access(
     resp = client.post('/api/goals/', {
         'group_id': teaching_group_with_members.id,
         'title': 'New group goal by school admin',
-        'created_by_id': school_admin.id
+        'created_by_id': school_admin.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 201
     created_group_goal_id = resp.json()['id']
@@ -831,22 +844,26 @@ def test_school_admin_goal_access(
         'student_id': student.id,
         'title': 'New personal goal by school admin',
         'subject_id': subject_owned_by_school.id,
-        'created_by_id': school_admin.id
+        'created_by_id': school_admin.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 201
     created_personal_goal_id = resp.json()['id']
 
-    # Can update goals at their school
+    # Can update group goals at their school
     resp = client.put(f'/api/goals/{created_group_goal_id}/', {
         'group_id': teaching_group_with_members.id,
-        'title': 'Updated by admin'
+        'title': 'Updated by admin',
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 200
 
+    # Can update personal goals at their school
     resp = client.put(f'/api/goals/{created_personal_goal_id}/', {
         'student_id': student.id,
         'title': 'Updated personal by admin',
-        'subject_id': subject_owned_by_school.id
+        'subject_id': subject_owned_by_school.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 200
 
@@ -865,7 +882,8 @@ def test_school_admin_goal_access(
     resp = client.post('/api/goals/', {
         'group_id': other_school_teaching_group.id,
         'title': 'Invalid group goal',
-        'created_by_id': school_admin.id
+        'created_by_id': school_admin.id,
+        'school_id': other_school.id
     }, format='json')
     assert resp.status_code == 403
 
