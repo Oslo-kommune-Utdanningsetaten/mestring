@@ -3,12 +3,9 @@
   import { usersRetrieve, goalsCreate, goalsList, groupsList } from '../generated/sdk.gen'
   import { subjectIdsViaGroupOrGoal } from '../utils/functions'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
-  import GoalEdit from '../components/GoalEdit.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
-  import Offcanvas from '../components/Offcanvas.svelte'
   import Link from '../components/Link.svelte'
   import StudentSVG from '../assets/education.svg.svelte'
-  import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
 
   const { studentId } = $props<{ studentId: string }>()
@@ -74,6 +71,8 @@
           subjectId: subject.id,
           sortOrder: i + 1,
           masterySchemaId: $dataStore.defaultMasterySchema?.id,
+          schoolId: $dataStore.currentSchool.id,
+          isRelevant: true,
         }
         await goalsCreate({
           body: goal,

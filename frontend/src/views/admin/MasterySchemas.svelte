@@ -60,7 +60,7 @@
     if (masterySchema) {
       masterySchemaWip = { ...masterySchema }
     } else {
-      masterySchemaWip = selectedSchool ? { schoolId: selectedSchool.id } : {}
+      masterySchemaWip = { schoolId: selectedSchool?.id }
     }
     isEditorOpen = true
   }
@@ -159,34 +159,34 @@
 </section>
 
 <section class="py-4">
-  <ButtonMini
-    options={{
-      title: 'Nytt mestringsskjema',
-      iconName: 'plus-sign',
-      skin: 'primary',
-      variant: 'label-only',
-      classes: '',
-      onClick: () => handleEditMasterySchema(null),
-    }}
-  >
-    Nytt mestringsskjema
-  </ButtonMini>
+  {#if selectedSchool}
+    <ButtonMini
+      options={{
+        title: 'Nytt mestringsskjema',
+        iconName: 'plus-sign',
+        skin: 'primary',
+        variant: 'label-only',
+        classes: '',
+        onClick: () => handleEditMasterySchema(null),
+      }}
+    >
+      Nytt mestringsskjema
+    </ButtonMini>
 
-  <div class="pkt-input-check mt-3">
-    <div class="pkt-input-check__input">
-      <input
-        class="pkt-input-check__input-checkbox"
-        type="checkbox"
-        role="switch"
-        id="groupTypeSwitch"
-        bind:checked={isJsonVisible}
-      />
-      <label class="pkt-input-check__input-label" for="groupTypeSwitch">Vis JSON config</label>
+    <div class="pkt-input-check mt-3">
+      <div class="pkt-input-check__input">
+        <input
+          class="pkt-input-check__input-checkbox"
+          type="checkbox"
+          role="switch"
+          id="groupTypeSwitch"
+          bind:checked={isJsonVisible}
+        />
+        <label class="pkt-input-check__input-label" for="groupTypeSwitch">Vis JSON config</label>
+      </div>
     </div>
-  </div>
 
-  <div class="mt-4">
-    {#if selectedSchool}
+    <div class="mt-4">
       {#if masterySchemas.length > 0}
         {#each masterySchemas as masterySchema}
           <div class="card shadow-sm">
@@ -257,10 +257,10 @@
       {:else}
         <div class="alert alert-info">Ingen mestringsskjemaer for denne skolen</div>
       {/if}
-    {:else}
-      <div class="alert alert-info">Velg en skole</div>
-    {/if}
-  </div>
+    </div>
+  {:else}
+    <div class="alert alert-info">Velg en skole</div>
+  {/if}
 </section>
 
 <!-- Offcanvas for creating/editing mastery schemas -->

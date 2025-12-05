@@ -287,28 +287,31 @@ def subject_owned_by_other_school(db, other_school):
 
 
 @pytest.fixture
-def goal_with_group(db, teaching_group_with_members):
+def goal_with_group(db, school, teaching_group_with_members):
     return Goal.objects.create(
         title="Lese 2 bøker",
         group=teaching_group_with_members,
+        school=school,
     )
 
 
 @pytest.fixture
-def goal_personal(db, student, subject_owned_by_school):
+def goal_personal(db, school, student, subject_owned_by_school):
     return Goal.objects.create(
         title="Lese 2 bøker",
         student=student,
         subject=subject_owned_by_school,
+        school=school,
     )
 
 
 @pytest.fixture
-def goal_personal_other_student(db, subject_owned_by_school, other_student):
+def goal_personal_other_student(db, school, subject_owned_by_school, other_student):
     return Goal.objects.create(
         title="Lese 2 bøker",
         student=other_student,
         subject=subject_owned_by_school,
+        school=school
     )
 
 
@@ -408,18 +411,20 @@ def observation_on_personal_goal_other_student(db, other_student, goal_personal_
 
 
 @pytest.fixture
-def other_school_group_goal(db, other_school_teaching_group_with_members):
+def other_school_group_goal(db, other_school, other_school_teaching_group_with_members):
     return Goal.objects.create(
         title="Lese 2 bøker",
         group=other_school_teaching_group_with_members,
+        school=other_school,
     )
 
 
 @pytest.fixture
-def other_school_personal_goal(db, other_school_student):
+def other_school_personal_goal(db, other_school, other_school_student):
     return Goal.objects.create(
         title="Lese 2 bøker",
         student=other_school_student,
+        school=other_school,
     )
 
 

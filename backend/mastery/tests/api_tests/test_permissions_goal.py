@@ -174,6 +174,7 @@ def test_student_goal_access(
     student,
     other_student,
     teacher,
+    school,
 ):
     client = APIClient()
     client.force_authenticate(user=student)
@@ -183,6 +184,7 @@ def test_student_goal_access(
         title="My personal goal",
         student=student,
         subject=subject_owned_by_school,
+        school=school,
     )
 
     # Personal goal owned by another student
@@ -190,12 +192,14 @@ def test_student_goal_access(
         title="Other student personal goal",
         student=other_student,
         subject=subject_owned_by_school,
+        school=school,
     )
 
     # Group goal in another group the student is NOT a member of
     group_goal_other = Goal.objects.create(
         title="Foreign group goal",
         group=other_teaching_group_with_members,
+        school=school,
     )
 
     # Student can't list goals without required params
@@ -256,7 +260,8 @@ def test_student_goal_access(
         'student_id': student.id,
         'title': 'My new personal goal',
         'subject_id': subject_owned_by_school.id,
-        'created_by_id': student.id
+        'created_by_id': student.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 201
     created_goal_id = resp.json()['id']
@@ -266,7 +271,8 @@ def test_student_goal_access(
         'student_id': other_student.id,
         'title': 'Goal for other student',
         'subject_id': subject_owned_by_school.id,
-        'created_by_id': student.id
+        'created_by_id': student.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -274,7 +280,8 @@ def test_student_goal_access(
     resp = client.post('/api/goals/', {
         'group_id': goal_with_group.group.id,
         'title': 'Group goal attempt',
-        'created_by_id': student.id
+        'created_by_id': student.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -282,7 +289,8 @@ def test_student_goal_access(
     resp = client.put(f'/api/goals/{created_goal_id}/', {
         'student_id': student.id,
         'title': 'Updated personal goal',
-        'subject_id': subject_owned_by_school.id
+        'subject_id': subject_owned_by_school.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 200
 
@@ -292,11 +300,13 @@ def test_student_goal_access(
         student=student,
         subject=subject_owned_by_school,
         created_by=teacher,
+        school=school
     )
     resp = client.put(f'/api/goals/{teacher_created_goal.id}/', {
         'student_id': student.id,
         'title': 'Try to update teacher goal',
-        'subject_id': subject_owned_by_school.id
+        'subject_id': subject_owned_by_school.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -304,7 +314,8 @@ def test_student_goal_access(
     resp = client.put(f'/api/goals/{personal_goal_other.id}/', {
         'student_id': other_student.id,
         'title': "Can't update this",
-        'subject_id': subject_owned_by_school.id
+        'subject_id': subject_owned_by_school.id,
+        'school_id': school.id
     }, format='json')
     assert resp.status_code == 403
 
@@ -341,6 +352,7 @@ def test_student_goal_access(
         title="Personal goal for student without groups",
         student=student_without_groups,
         subject=subject_owned_by_school,
+        school=school
     )
 
     client.force_authenticate(user=student_without_groups)
@@ -361,6 +373,7 @@ def test_teaching_group_teacher_goal_access(
     goal_with_group,
     subject_owned_by_school,
     subject_with_group,
+    school
 ):
     """
     Test access for teachers who only teach a teaching group (NOT basis group teachers).
@@ -377,6 +390,7 @@ def test_teaching_group_teacher_goal_access(
         title="Student's personal goal in taught subject",
         student=student,
         subject=subject_with_group,
+        school=school,
     )
 
     # Personal goal for student in subject teacher does NOT teach (e.g. social subject)
@@ -384,6 +398,7 @@ def test_teaching_group_teacher_goal_access(
         title="Student's goal in subject teacher doesn't teach",
         student=student,
         subject=subject_owned_by_school,
+        school=school,
     )
 
     # Personal goal for a student NOT in any group taught by teacher
@@ -391,12 +406,14 @@ def test_teaching_group_teacher_goal_access(
         title="Other student personal goal",
         student=other_student,
         subject=subject_owned_by_school,
+        school=school,
     )
 
     # Group goal in a group teacher does NOT teach
     group_goal_other = Goal.objects.create(
         title="Foreign group goal",
         group=other_teaching_group_with_members,
+        school=school,
     )
 
     # Endpoint is unusable without required params
@@ -565,7 +582,8 @@ def test_basis_group_teacher_goal_access(
     other_student,
     student_role,
     teacher_role,
-    other_teacher
+    other_teacher,
+    school,
 ):
     """
     Test access for basis group teachers.
@@ -588,6 +606,7 @@ def test_basis_group_teacher_goal_access(
         title="Student's personal goal",
         student=student,
         subject=subject_owned_by_school,
+        school=school,
     )
 
     # Personal goal for student not in teacher's basis group
@@ -595,12 +614,14 @@ def test_basis_group_teacher_goal_access(
         title="Other student personal goal",
         student=other_student,
         subject=subject_owned_by_school,
+        school=school,
     )
 
     # Group goal in teaching group teacher teaches
     group_goal_own = Goal.objects.create(
         title="Group goal in own teaching group",
         group=teaching_group_with_members,
+        school=school,
     )
 
     # Student is also in another teaching group teacher doesn't teach
@@ -608,6 +629,7 @@ def test_basis_group_teacher_goal_access(
     group_goal_other = Goal.objects.create(
         title="Group goal in other teaching group",
         group=other_teaching_group_with_members,
+        school=school,
     )
 
     # Basis teacher needs at least one parameter to list goals
@@ -657,6 +679,7 @@ def test_basis_group_teacher_goal_access(
         'student_id': other_student.id,
         'title': 'Personal goal for other student',
         'subject_id': subject_owned_by_school.id
+        'school_id': school.id,
     }, format='json')
     assert resp.status_code == 403
 
@@ -675,6 +698,7 @@ def test_basis_group_teacher_goal_access(
         student=student,
         subject=subject_owned_by_school,
         created_by=student,
+        school=school,
     )
 
     resp = client.put(f'/api/goals/{student_created_goal.id}/', {
@@ -722,6 +746,7 @@ def test_basis_group_teacher_goal_access(
         student=student,
         subject=subject_owned_by_school,
         created_by=other_teacher_in_same_group,
+        school=school,
     )
     resp = client.put(f'/api/goals/{goal_created_by_other_teacher.id}/', {
         'student_id': student.id,

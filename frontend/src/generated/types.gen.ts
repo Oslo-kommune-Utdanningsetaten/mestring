@@ -43,6 +43,7 @@ export type GoalType = {
     groupId?: string | null;
     studentId?: string | null;
     subjectId?: string | null;
+    schoolId: string;
     previousGoalId?: string | null;
     masterySchemaId?: string | null;
     readonly isPersonal: boolean;
@@ -78,7 +79,7 @@ export type MasterySchemaType = {
     isDefault?: boolean;
     readonly createdById: string;
     readonly updatedById: string;
-    schoolId?: string | null;
+    schoolId: string;
 };
 
 export type NestedUserGroupType = {
@@ -165,6 +166,7 @@ export type PatchedGoalType = {
     groupId?: string | null;
     studentId?: string | null;
     subjectId?: string | null;
+    schoolId?: string;
     previousGoalId?: string | null;
     masterySchemaId?: string | null;
     readonly isPersonal?: boolean;
@@ -200,7 +202,7 @@ export type PatchedMasterySchemaType = {
     isDefault?: boolean;
     readonly createdById?: string;
     readonly updatedById?: string;
-    schoolId?: string | null;
+    schoolId?: string;
 };
 
 export type PatchedNestedUserGroupType = {
@@ -484,6 +486,7 @@ export type GoalCreateType = {
     groupId?: string | null;
     studentId?: string | null;
     subjectId?: string | null;
+    schoolId: string;
     previousGoalId?: string | null;
     masterySchemaId?: string | null;
 };
@@ -506,7 +509,7 @@ export type MasterySchemaCreateType = {
     description?: string | null;
     config?: unknown;
     isDefault?: boolean;
-    schoolId?: string | null;
+    schoolId: string;
 };
 
 export type NestedUserGroupCreateType = {
@@ -557,6 +560,7 @@ export type PatchedGoalCreateType = {
     groupId?: string | null;
     studentId?: string | null;
     subjectId?: string | null;
+    schoolId?: string;
     previousGoalId?: string | null;
     masterySchemaId?: string | null;
 };
@@ -579,7 +583,7 @@ export type PatchedMasterySchemaCreateType = {
     description?: string | null;
     config?: unknown;
     isDefault?: boolean;
-    schoolId?: string | null;
+    schoolId?: string;
 };
 
 export type PatchedNestedUserGroupCreateType = {
@@ -923,7 +927,7 @@ export type GoalsListResponses = {
 export type GoalsListResponse = GoalsListResponses[keyof GoalsListResponses];
 
 export type GoalsCreateData = {
-    body?: GoalCreateType;
+    body: GoalCreateType;
     path?: never;
     query?: never;
     url: '/api/goals/';
@@ -993,7 +997,7 @@ export type GoalsPartialUpdateResponses = {
 export type GoalsPartialUpdateResponse = GoalsPartialUpdateResponses[keyof GoalsPartialUpdateResponses];
 
 export type GoalsUpdateData = {
-    body?: GoalCreateType;
+    body: GoalCreateType;
     path: {
         /**
          * A unique value identifying this goal.
@@ -1224,7 +1228,7 @@ export type MasterySchemasListResponses = {
 export type MasterySchemasListResponse = MasterySchemasListResponses[keyof MasterySchemasListResponses];
 
 export type MasterySchemasCreateData = {
-    body?: MasterySchemaCreateType;
+    body: MasterySchemaCreateType;
     path?: never;
     query?: never;
     url: '/api/mastery-schemas/';
@@ -1294,7 +1298,7 @@ export type MasterySchemasPartialUpdateResponses = {
 export type MasterySchemasPartialUpdateResponse = MasterySchemasPartialUpdateResponses[keyof MasterySchemasPartialUpdateResponses];
 
 export type MasterySchemasUpdateData = {
-    body?: MasterySchemaCreateType;
+    body: MasterySchemaCreateType;
     path: {
         /**
          * A unique value identifying this mastery schema.

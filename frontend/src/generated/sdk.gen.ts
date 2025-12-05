@@ -115,13 +115,13 @@ export const goalsList = <ThrowOnError extends boolean = false>(options?: Option
     });
 };
 
-export const goalsCreate = <ThrowOnError extends boolean = false>(options?: Options<GoalsCreateData, ThrowOnError>) => {
-    return (options?.client ?? client).post<GoalsCreateResponses, unknown, ThrowOnError>({
+export const goalsCreate = <ThrowOnError extends boolean = false>(options: Options<GoalsCreateData, ThrowOnError>) => {
+    return (options.client ?? client).post<GoalsCreateResponses, unknown, ThrowOnError>({
         url: '/api/goals/',
         ...options,
         headers: {
             'Content-Type': 'application/json',
-            ...options?.headers
+            ...options.headers
         }
     });
 };
@@ -259,13 +259,13 @@ export const masterySchemasList = <ThrowOnError extends boolean = false>(options
     });
 };
 
-export const masterySchemasCreate = <ThrowOnError extends boolean = false>(options?: Options<MasterySchemasCreateData, ThrowOnError>) => {
-    return (options?.client ?? client).post<MasterySchemasCreateResponses, unknown, ThrowOnError>({
+export const masterySchemasCreate = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasCreateData, ThrowOnError>) => {
+    return (options.client ?? client).post<MasterySchemasCreateResponses, unknown, ThrowOnError>({
         url: '/api/mastery-schemas/',
         ...options,
         headers: {
             'Content-Type': 'application/json',
-            ...options?.headers
+            ...options.headers
         }
     });
 };

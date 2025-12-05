@@ -61,7 +61,8 @@ def test_import_groups_undelete(groups_data, school):
     teaching_group = models.Group.objects.get(feide_id=groups_data["teaching"][0]["id"])
     deleted_ts = timezone.now() - timezone.timedelta(days=1)
     # Soft-delete teaching group and a related goal
-    goal = models.Goal.objects.create(title="Lese bøk. Les bøk!", group=teaching_group, deleted_at=deleted_ts)
+    goal = models.Goal.objects.create(title="Lese bøk. Les bøk!",
+                                      group=teaching_group, deleted_at=deleted_ts, school=school)
     teaching_group.deleted_at = deleted_ts
     teaching_group.save()
     # Re-importing with same data will undelete soft-deleted groups and their goals

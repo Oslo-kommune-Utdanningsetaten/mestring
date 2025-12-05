@@ -226,7 +226,7 @@ def test_user_observation_access(
 @pytest.mark.django_db
 def test_teaching_group_teacher_observation_access(
         teacher, student, student_role, observation_on_group_goal,
-        other_teaching_group_with_members, subject_with_group, subject_owned_by_school):
+        other_teaching_group_with_members, subject_with_group, subject_owned_by_school, school):
     client = APIClient()
     client.force_authenticate(user=teacher)
 
@@ -235,6 +235,7 @@ def test_teaching_group_teacher_observation_access(
         title="Personal goal in taught subject",
         student=student,
         subject=subject_with_group,
+        school=school,
     )
     observation_taught_subject = Observation.objects.create(
         student=student,
@@ -247,6 +248,7 @@ def test_teaching_group_teacher_observation_access(
         title="Personal goal in social subject",
         student=student,
         subject=subject_owned_by_school,
+        school=school,
     )
     observation_untaught_subject = Observation.objects.create(
         student=student,
@@ -310,6 +312,7 @@ def test_teaching_group_teacher_observation_access(
     goal_other_group = Goal.objects.create(
         title="Group goal in other teaching group",
         group=other_teaching_group_with_members,
+        school=school,
     )
     observation_other_group = Observation.objects.create(
         student=student,
@@ -397,7 +400,7 @@ def test_teaching_group_teacher_observation_access(
 @pytest.mark.django_db
 def test_basis_group_teacher_observation_access(
         teacher, other_teacher, student, student_role, teacher_role, observation_on_personal_goal,
-        basis_group, other_teaching_group_with_members):
+        basis_group, other_teaching_group_with_members, school):
     """
     Test that basis group teachers have full access to observations for students in their basis group.
     """
@@ -408,7 +411,8 @@ def test_basis_group_teacher_observation_access(
     other_teaching_group_with_members.add_member(student, student_role)
     goal = Goal.objects.create(
         title="Lese 2 bøker",
-        group=other_teaching_group_with_members
+        group=other_teaching_group_with_members,
+        school=school
     )
     observation = Observation.objects.create(student=student, goal=goal, is_visible_to_student=True)
 

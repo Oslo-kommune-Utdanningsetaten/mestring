@@ -87,6 +87,7 @@
         isPersonal: true,
         sortOrder: personalGoalsCount + 1,
         masterySchemaId: $dataStore.defaultMasterySchema?.id,
+        schoolId: $dataStore.currentSchool.id,
         isRelevant: true,
       }
 

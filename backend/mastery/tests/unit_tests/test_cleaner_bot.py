@@ -60,28 +60,31 @@ def other_observation(other_student, goal_personal):
 
 
 @pytest.fixture
-def personal_goal(db, student, subject_owned_by_school):
+def personal_goal(db, school, student, subject_owned_by_school):
     return models.Goal.objects.create(
         title="Lese 2 bøker",
         student=student,
-        subject=subject_owned_by_school
+        subject=subject_owned_by_school,
+        school=school,
     )
 
 
 @pytest.fixture
-def group_goal(db, valid_group, student, student_role):
+def group_goal(db, school, valid_group, student, student_role):
     valid_group.add_member(student, student_role)
     return models.Goal.objects.create(
         title="Lese 2 bøker",
         group=valid_group,
+        school=school,
     )
 
 
 @pytest.fixture
-def other_student_personal_goal(db, other_student):
+def other_student_personal_goal(db, school, other_student):
     return models.Goal.objects.create(
         title="Lese 2 bøker",
         student=other_student,
+        school=school,
     )
 
 
