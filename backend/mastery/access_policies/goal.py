@@ -87,12 +87,9 @@ class GoalAccessPolicy(BaseAccessPolicy):
             # Everyone can see goals they created
             filters = Q(created_by=requester)
 
-            # School inspectors and admins: All goals for students at their schools
+            # School inspectors and admins: All goals at their schools
             if school_employee_ids:
-                # Goals for groups at their schools
-                filters |= Q(group__school_id__in=school_employee_ids)
-                # Goals for subjects owned by their schools
-                filters |= Q(subject__owned_by_school_id__in=school_employee_ids)
+                filters |= Q(school_id__in=school_employee_ids)
 
             # Teaching group teachers: Group goals + personal goals for students they teach
             if teacher_group_ids:
@@ -136,7 +133,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
                 return False
 
             # Must be creating for themselves
-            return str(student_id) == str(requester.id)
+            return student_id == requester.id
         except Exception:
             logger.exception("GoalAccessPolicy.can_student_create_goal")
             return False
@@ -224,29 +221,13 @@ class GoalAccessPolicy(BaseAccessPolicy):
     def is_admin_at_school(self, request, view, action):
         try:
             if action == 'create':
-                group_id = request.data.get("group_id")
-                subject_id = request.data.get("subject_id")
-                if group_id:
-                    # Get school from group
-                    group = Group.objects.get(id=group_id)
-                    school_id = group.school_id
-                elif subject_id:
-                    # Get school from subject
-                    subject = Subject.objects.get(id=subject_id)
-                    school_id = subject.owned_by_school_id
-                else:
-                    return False
+                school_id = request.data.get("school_id")
 
             elif action in ['update', 'partial_update', 'destroy']:
                 goal = view.get_object()
                 if not goal:
                     return False
-                if goal.group_id:
-                    # Get school from group
-                    school_id = goal.group.school_id
-                else:
-                    # Get school from subject
-                    school_id = goal.subject.owned_by_school_id
+                school_id = goal.school_id
             else:
                 return False
 
