@@ -110,7 +110,7 @@ class Subject(BaseModel):
     """
     display_name = models.CharField(max_length=200)
     short_name = models.CharField(max_length=200)
-    owned_by_school = models.ForeignKey(School, on_delete=models.RESTRICT,
+    owned_by_school = models.ForeignKey(School, on_delete=models.CASCADE,
                                         null=True, related_name='owned_subjects')
     grep_code = models.CharField(max_length=200, null=True)  # UDIR grep code
     grep_group_code = models.CharField(max_length=200, null=True)  # UDIR grep code opplæringsfag
@@ -209,8 +209,8 @@ class Group(BaseModel):
     feide_id = models.CharField(max_length=200, unique=True)
     display_name = models.CharField(max_length=200)
     type = models.CharField(max_length=200)  # either 'basis' or 'teaching' for now
-    subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True, related_name='groups')
-    school = models.ForeignKey(School, on_delete=models.RESTRICT, null=False, related_name='groups')
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name='groups')
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='groups')
     valid_from = models.DateTimeField(null=True)
     valid_to = models.DateTimeField(null=True)
     is_enabled = models.BooleanField(default=False)  # whether the group is active in the system
@@ -293,7 +293,7 @@ class MasterySchema(BaseModel):
     title = models.CharField(max_length=200, null=False, default="Navnløst mestringsskjema")
     description = models.TextField(null=True)
     config = models.JSONField(null=True)
-    school = models.ForeignKey(School, on_delete=models.CASCADE, null=True, related_name='mastery_schemas')
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='mastery_schemas')
     is_default = models.BooleanField(default=False)  # is this the default schema for the school
 
 
@@ -308,6 +308,8 @@ class Goal(BaseModel):
     group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, related_name='goals')
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='goals')
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name='goals')
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False,
+                               related_name='goals')  # for easier querying
     previous_goal = models.ForeignKey('Goal', on_delete=models.SET_NULL, null=True)
     mastery_schema = models.ForeignKey(
         MasterySchema, on_delete=models.SET_NULL, null=True, related_name='goals')
@@ -338,7 +340,7 @@ class Observation(BaseModel):
     """
     An Observation represents an observation of a student, performed by a teacher or student. Only teachers, inspectors and admins can access an observation if is_visible_to_student is False.
     """
-    goal = models.ForeignKey(Goal, on_delete=models.RESTRICT, null=False, related_name='observations')
+    goal = models.ForeignKey(Goal, on_delete=models.CASCADE, null=False, related_name='observations')
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False,
                                 related_name='observations_received')
     observer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
