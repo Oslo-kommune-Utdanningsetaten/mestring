@@ -586,9 +586,8 @@ def test_school_admin_observation_access(
         other_school_group_goal, other_school_personal_goal):
     """
     School admin should have full read/write access to observations that are
-    attached to goals which either belong to a group at the admin's school or
-    are attached to a subject owned by the admin's school. 
-    They should not have access to observations for other schools.
+    attached to goals the admin's school. 
+    They should not have access to observations for goals at other schools.
     """
     client = APIClient()
     client.force_authenticate(user=school_admin)

@@ -787,9 +787,8 @@ def test_school_admin_goal_access(
     student,
 ):
     """
-    School admins have read and write access to goals attached to groups at their school
-    and to (personal) goals attached to subjects owned by their school. They do not have
-    access to goals from other schools.
+    School admins have read and write access to goals at their school.
+    They do not have access to goals from other schools.
     """
     client = APIClient()
     client.force_authenticate(user=school_admin)
