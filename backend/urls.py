@@ -23,6 +23,11 @@ urlpatterns = [
         name='fetch_memberships_for_school'
     ),
     path(
+        'api/fetch/groups_and_users/feide/<str:org_number>/',
+        custom.fetch_groups_and_users,
+        name='fetch_groups_and_users'
+    ),
+    path(
         'api/import/school/feide/<str:org_number>/',
         custom.import_school,
         name='feide_import_school_api'

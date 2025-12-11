@@ -3,8 +3,7 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import { type SchoolType } from '../../generated/types.gen'
   import {
-    fetchGroupsForSchool,
-    fetchMembershipsForSchool,
+    fetchGroupsAndUsers,
     fetchSchoolImportStatus,
     importGroupsAndUsers,
     feideImportSchool,
@@ -199,6 +198,11 @@
           message: `Bakgrunnsjobb opprettet for sletting av snargh for ${orgNumber}`,
         })
         router.navigate('/admin/data-maintenance-tasks')
+      } else if (result.response.status === 400) {
+        addAlert({
+          type: 'warning',
+          message: `Kan ikke opprette ny bakgrunnsjobb for ${orgNumber} fordi det aldri har blitt kjørt en import.`,
+        })
       } else if (result.response.status === 409) {
         addAlert({
           type: 'warning',
@@ -218,16 +222,16 @@
     }
   }
 
-  const handleFetchGroupsForSchool = async (orgNumber: string) => {
+  const handleFetchUsersAndGroups = async (orgNumber: string) => {
     try {
-      const result = await fetchGroupsForSchool({
+      const result = await fetchGroupsAndUsers({
         path: { org_number: orgNumber },
       } as any)
 
       if (result.response.status === 201) {
         addAlert({
           type: 'success',
-          message: `Bakgrunnsjobb opprettet for henting av grupper for ${orgNumber}`,
+          message: `Opprettet bakgrunnsjobber for henting av grupper og brukere for ${orgNumber}`,
         })
         router.navigate('/admin/data-maintenance-tasks')
       } else if (result.response.status === 409) {
@@ -238,38 +242,7 @@
       } else {
         addAlert({
           type: 'danger',
-          message: `Feil ved oppretting av bakgrunnsjobb for ${orgNumber}`,
-        })
-      }
-    } catch (error: any) {
-      addAlert({
-        type: 'danger',
-        message: `Nettverksfeil: ${error?.message || error}`,
-      })
-    }
-  }
-
-  const handleFetchMembershipsForSchool = async (orgNumber: string) => {
-    try {
-      const result = await fetchMembershipsForSchool({
-        path: { org_number: orgNumber },
-      } as any)
-
-      if (result.response.status === 201) {
-        addAlert({
-          type: 'success',
-          message: `Bakgrunnsjobb opprettet for henting av medlemskap for ${orgNumber}`,
-        })
-        router.navigate('/admin/data-maintenance-tasks')
-      } else if (result.response.status === 409) {
-        addAlert({
-          type: 'warning',
-          message: `Kan ikke opprette ny bakgrunnsjobb for ${orgNumber} fordi det allerede finnes en pågående jobb.`,
-        })
-      } else {
-        addAlert({
-          type: 'danger',
-          message: `Feil ved oppretting av bakgrunnsjobb for ${orgNumber}`,
+          message: `Feil ved oppretting av bakgrunnsjobber for ${orgNumber}`,
         })
       }
     } catch (error: any) {
@@ -537,43 +510,30 @@
         {/if}
 
         <div>
-          <!-- Hent grupper -->
+          <!-- Request fetch job, feide to file -->
           <ButtonMini
             options={{
-              title: 'Hent grupper fra Feide',
+              title: 'Hent grupper og brukere fra Feide',
               iconName: 'group',
               skin: 'secondary',
               variant: 'icon-left',
-              onClick: () => handleFetchGroupsForSchool(school.orgNumber),
+              onClick: () => handleFetchUsersAndGroups(school.orgNumber),
             }}
           >
             Hent grupper fra Feide
           </ButtonMini>
 
-          <!-- Hent brukere -->
+          <!-- Request import job, file to database -->
           <ButtonMini
             options={{
-              title: 'Hent brukere fra Feide',
-              iconName: 'person',
-              skin: 'secondary',
-              variant: 'icon-left',
-              onClick: () => handleFetchMembershipsForSchool(school.orgNumber),
-            }}
-          >
-            Hent brukere fra Feide
-          </ButtonMini>
-
-          <!-- Importer -->
-          <ButtonMini
-            options={{
-              title: 'Importér',
+              title: 'Importér grupper og brukere til databasen',
               iconName: 'download',
               skin: 'secondary',
               variant: 'icon-left',
               onClick: () => handleImportGroupsAndUsers(school.orgNumber),
             }}
           >
-            Importér
+            Importér til database
           </ButtonMini>
 
           <!-- Cleanerbot -->

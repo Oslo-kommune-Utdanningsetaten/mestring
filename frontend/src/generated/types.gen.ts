@@ -854,6 +854,25 @@ export type FetchGroupsForSchoolResponses = {
     200: unknown;
 };
 
+export type FetchGroupsAndUsersData = {
+    body?: never;
+    path: {
+        /**
+         * Organization number of the school
+         */
+        orgNumber: string;
+    };
+    query?: never;
+    url: '/api/fetch/groups_and_users/feide/{org_number}/';
+};
+
+export type FetchGroupsAndUsersResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
 export type FetchMembershipsForSchoolData = {
     body?: never;
     path: {

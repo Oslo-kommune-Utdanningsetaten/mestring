@@ -166,6 +166,60 @@ def fetch_memberships_for_school(request, org_number):
 
 
 @extend_schema(
+    operation_id="fetch_groups_and_users",
+    summary="Fetch group and user data for a school",
+    description="Fetch group memberships for a single school (by org number) and store at data_import/data/schools/<org>/users.json. Also fetch groups into data_import/data/schools/<org>/memberships.json.",
+    parameters=[
+        OpenApiParameter(
+            name='org_number',
+            description='Organization number of the school',
+            required=True,
+            type={'type': 'string'},
+            location=OpenApiParameter.PATH
+        )
+    ]
+)
+@api_view(["POST"])
+@permission_classes([ImportAccessPolicy])
+def fetch_groups_and_users(request, org_number):
+    print('fetch_groups_and_users called')
+    school = models.School.objects.filter(org_number=org_number).first()
+    if not school:
+        return Response(
+            {"error": "unknown-school", "message": f"School not found for org {org_number}"},
+            status=404,
+        )
+
+    # Check if there's already a (pending or running) task for this org_number
+    existing_task = models.DataMaintenanceTask.objects.filter(
+        Q(status="pending") | Q(status="running"),
+        job_name__in=["fetch_groups_from_feide", "fetch_memberships_from_feide"],
+        job_params__org_number=org_number
+    ).first()
+    if existing_task:
+        return Response(
+            {"status": "error",
+             "message": "A fetch of groups or memberships task is already pending or running for this school."},
+            status=409)
+
+    task = models.DataMaintenanceTask.objects.create(
+        status="pending",
+        job_name="fetch_groups_from_feide",
+        job_params={"org_number": org_number},
+        display_name=f"Fetch groups for {school.display_name}",
+        earliest_run_at=timezone.now()
+    )
+    task2 = models.DataMaintenanceTask.objects.create(
+        status="pending",
+        job_name="fetch_memberships_from_feide",
+        job_params={"org_number": org_number},
+        display_name=f"Fetch memberships for {school.display_name}",
+        earliest_run_at=timezone.now()
+    )
+    return Response(status=201, data={"status": "tasks_created", "task_ids": [task.id, task2.id]})
+
+
+@extend_schema(
     operation_id="import_groups_and_users",
     summary="Import groups and users",
     description="Import groups and users for a specific school from previously fetched files.",
@@ -251,6 +305,7 @@ def update_data_integrity(request, org_number):
     existing_task = models.DataMaintenanceTask.objects.filter(
         Q(status="pending") | Q(status="running"),
         job_name="update_data_integrity",
+        job_params={"org_number": org_number},
     ).first()
     if existing_task:
         return Response(
@@ -260,8 +315,11 @@ def update_data_integrity(request, org_number):
 
     previous_import_task = (
         models.DataMaintenanceTask.objects
-        .filter(job_name="import_groups_and_users", status="finished")
-        .filter(job_params__org_number=org_number)
+        .filter(
+            job_name="import_memberships",
+            job_params={"org_number": org_number},
+            status="finished"
+        )
         .order_by("-finished_at")
         .first()
     )
@@ -270,13 +328,18 @@ def update_data_integrity(request, org_number):
         return Response(
             {"status": "error",
              "message": "Run import before cleaning up data."},
-            status=409)
+            status=400)
 
     task = models.DataMaintenanceTask.objects.create(
-        status="pending", job_name="update_data_integrity",
-        job_params={"maintained_earlier_than": previous_import_task.started_at.isoformat()
-                    if previous_import_task else None, },
-        display_name=f"Activate cleaner bot", earliest_run_at=timezone.now())
+        status="pending",
+        job_name="update_data_integrity",
+        job_params={
+            "org_number": org_number,
+            "maintained_earlier_than": previous_import_task.started_at.isoformat()
+        },
+        display_name=f"Activate cleaner bot for {school.display_name}",
+        earliest_run_at=timezone.now())
+
     return Response(status=201, data={"status": "tasks_created", "task_ids": [task.id]})
 
 
@@ -331,7 +394,7 @@ def fetch_school_import_status(request, org_number):
     )
     last_import_task = (
         models.DataMaintenanceTask.objects
-        .filter(job_name="import_groups_and_users", status="finished")
+        .filter(job_name="import_memberships", status="finished")
         .filter(job_params__org_number=org_number)
         .order_by("-finished_at")
         .first()
