@@ -17,6 +17,7 @@
 
   import ButtonMini from '../../components/ButtonMini.svelte'
   import { addAlert } from '../../stores/alerts'
+  import { dataStore } from '../../stores/data'
 
   const router = useTinyRouter()
   let schools = $state<SchoolType[]>([])
@@ -75,9 +76,20 @@
   const fetchSchools = async () => {
     try {
       const result = await schoolsList()
-      schools = (result.data || [])
+      const currentSchoolId = $dataStore.currentSchool?.id
+
+      let fetchedSchools = (result.data || [])
         .sort((a, b) => a.displayName.localeCompare(b.displayName, 'nb', { sensitivity: 'base' }))
         .sort((a, b) => Number(!a.isServiceEnabled) - Number(!b.isServiceEnabled))
+
+      if (currentSchoolId) {
+        const currentSchoolIndex = fetchedSchools.findIndex(s => s.id === currentSchoolId)
+        if (currentSchoolIndex > -1) {
+          const [currentSchool] = fetchedSchools.splice(currentSchoolIndex, 1)
+          fetchedSchools.unshift(currentSchool)
+        }
+      }
+      schools = fetchedSchools
       await Promise.all(schools.map(school => loadImportStatusForSchool(school.orgNumber)))
     } catch (error) {
       addAlert({
