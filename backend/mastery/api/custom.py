@@ -351,7 +351,7 @@ def update_data_integrity(request, org_number):
         job_params={
             "org_number": org_number,
             "groups_earlier_than": groups_earlier_than,
-            "members.hips_earlier_than": memberships_earlier_than,
+            "memberships_earlier_than": memberships_earlier_than,
         },
         display_name=f"Activate cleaner bot for {school.display_name}",
         earliest_run_at=timezone.now()
