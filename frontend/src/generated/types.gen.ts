@@ -1042,13 +1042,13 @@ export type GroupsListData = {
          */
         deleted?: 'exclude' | 'include' | 'only';
         /**
+         * Filter groups by whether they are enabled for use: "only" (default, only enabled), "include" (both enabled and disabled), or "exclude" (only disabled)
+         */
+        enabled?: 'exclude' | 'include' | 'only';
+        /**
          * Filter by ids (comma-separated list of group ids, e.g., xyx,123)
          */
         ids?: string;
-        /**
-         * Filter groups by whether they are enabled for use
-         */
-        isEnabled?: boolean;
         /**
          * Filter groups by whether they are valid by date
          */

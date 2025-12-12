@@ -8,6 +8,9 @@ from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_access_policy import AccessViewSetMixin
 from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy, SituationAccessPolicy, StatusAccessPolicy
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_request_param(query_params, name: str):
@@ -350,10 +353,10 @@ class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='is_enabled',
-                description='Filter groups by whether they are enabled for use',
+                name='enabled',
+                description='Filter groups by whether they are enabled for use: "only" (default, only enabled), "include" (both enabled and disabled), or "exclude" (only disabled)',
                 required=False,
-                type={'type': 'boolean'},
+                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
@@ -390,7 +393,7 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
             subject_param, _ = get_request_param(self.request.query_params, 'subject')
             roles_param, _ = get_request_param(self.request.query_params, 'roles')
             ids_param, _ = get_request_param(self.request.query_params, 'ids')
-            is_enabled_param, is_enabled_set = get_request_param(self.request.query_params, 'is_enabled')
+            enabled_param, _ = get_request_param(self.request.query_params, 'enabled')
 
             if not school_param:
                 raise ValidationError(
@@ -415,8 +418,20 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
                 ids = [id.strip() for id in ids_param.split(',') if id]
                 if ids:
                     qs = qs.filter(id__in=ids)
-            if is_enabled_set:
-                qs = qs.filter(is_enabled=is_enabled_param)
+
+            # enabled filter
+            if enabled_param:
+                if enabled_param == 'exclude':
+                    qs = qs.filter(is_enabled=False)  # Only disabled groups
+                elif enabled_param == 'only':
+                    qs = qs.filter(is_enabled=True)  # Only enabled groups
+                elif enabled_param == 'include':
+                    qs = qs  # All groups, deleted and non-deleted
+                else:
+                    logger.warning("Unknown value for 'enabled' parameter: %s", enabled_param)
+            else:
+                qs = qs.filter(is_enabled=True)  # default
+            return qs
 
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs.distinct()

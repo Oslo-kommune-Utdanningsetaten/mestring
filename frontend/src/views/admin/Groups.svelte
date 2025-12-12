@@ -7,6 +7,7 @@
   import { urlStringFrom } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
   import GroupTypeTag from '../../components/GroupTypeTag.svelte'
+  import ButtonMini from '../../components/ButtonMini.svelte'
   import { NONE_FIELD_VALUE } from '../../utils/constants'
 
   const router = useTinyRouter()
@@ -14,15 +15,24 @@
   let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingGroups = $state<boolean>(false)
-  let groupFetchSelection = $state<string>('all') // all, only-enabled, only-disabled
+  let enabledSelection = $state<'include' | 'only' | 'exclude'>('only')
+  let deletedSelection = $state<'include' | 'only' | 'exclude'>('include')
   let selectedSchool = $state<SchoolType | null>(null)
   let nameFilter = $state<string>('')
+  let openRows = $state<Record<string, boolean>>({})
 
-  // Radio options for group filtering
-  const groupFetchOptions = [
-    { value: 'all', label: 'Alle grupper' },
-    { value: 'only-enabled', label: 'Aktiverte grupper' },
-    { value: 'only-disabled', label: 'Deaktiverte grupper' },
+  // Options for filtering by enabled
+  const enabledOptions = [
+    { value: 'include', label: 'All' },
+    { value: 'only', label: 'Enabled groups' },
+    { value: 'exclude', label: 'Disabled groups' },
+  ] as const
+
+  // Options for filtering by deleted
+  const deletedOptions = [
+    { value: 'include', label: 'All' },
+    { value: 'only', label: 'Deleted' },
+    { value: 'exclude', label: 'Non-deleted' },
   ] as const
 
   let filteredGroups = $derived(
@@ -31,13 +41,10 @@
       : groups
   )
 
-  let groupFetchOption = $derived(
-    groupFetchSelection === 'all'
-      ? {}
-      : groupFetchSelection === 'only-enabled'
-        ? { isEnabled: true }
-        : { isEnabled: false }
-  )
+  let groupFetchOptions = $derived({
+    enabled: enabledSelection,
+    deleted: deletedSelection,
+  })
 
   const subjectsById: Record<string, SubjectType> = $derived(
     $dataStore.subjects.reduce(
@@ -89,7 +96,7 @@
     if (!selectedSchool) return
     try {
       isLoadingGroups = true
-      const queryOption = { ...groupFetchOption, school: selectedSchool.id }
+      const queryOption = { ...groupFetchOptions, school: selectedSchool.id }
       const result = await groupsList({ query: queryOption })
       groups = (result.data || []).sort((a, b) =>
         a.displayName.localeCompare(b.displayName, 'no', { sensitivity: 'base' })
@@ -166,6 +173,11 @@
     }
   }
 
+  const handleInfoToggle = (groupId: string) => {
+    openRows[groupId] = !openRows[groupId]
+    openRows = { ...openRows }
+  }
+
   $effect(() => {
     fetchSchools()
   })
@@ -226,21 +238,39 @@
       />
     {/if}
   </div>
-  <!-- Radio buttons for filtering groups -->
-  <fieldset>
-    <legend class="visually-hidden">Filtrer grupper</legend>
-    {#each groupFetchOptions as option}
-      <label class="my-2 ms-1 d-block">
-        <input
-          type="radio"
-          name="groupFetchInclusion"
-          value={option.value}
-          bind:group={groupFetchSelection}
-        />
-        <span class="ms-2">{option.label}</span>
-      </label>
-    {/each}
-  </fieldset>
+  <!-- Radio buttons for enabled status -->
+  <div class="d-flex flex-wrap gap-3 mt-3">
+    <fieldset class="border p-3 rounded">
+      <legend class="w-auto fs-6">Enabled?</legend>
+      {#each enabledOptions as option}
+        <label class="my-2 ms-1 d-block">
+          <input
+            type="radio"
+            name="enabledOptions"
+            value={option.value}
+            bind:group={enabledSelection}
+          />
+          <span class="ms-2">{option.label}</span>
+        </label>
+      {/each}
+    </fieldset>
+
+    <!-- Radio buttons for deleted status -->
+    <fieldset class="border p-3 rounded">
+      <legend class="w-auto fs-6">Deleted?</legend>
+      {#each deletedOptions as option}
+        <label class="my-2 ms-1 d-block">
+          <input
+            type="radio"
+            name="deletedOptions"
+            value={option.value}
+            bind:group={deletedSelection}
+          />
+          <span class="ms-2">{option.label}</span>
+        </label>
+      {/each}
+    </fieldset>
+  </div>
 </section>
 
 <section class="py-3">
@@ -260,6 +290,7 @@
           <span>Type</span>
           <span>Fag</span>
           <span>Aktivert</span>
+          <span>Info</span>
         </div>
         <!-- Data rows -->
         {#each filteredGroups as group (group.id)}
@@ -304,7 +335,21 @@
               checked={group.isEnabled}
               onchange={() => handleToggleGroupEnabledStatus(group)}
             ></pkt-checkbox>
+            <ButtonMini
+              options={{
+                title: 'Zaa',
+                iconName: 'alert-information',
+                size: 'tiny',
+                skin: 'primary',
+                variant: 'icon-left',
+                classes: '',
+                onClick: () => handleInfoToggle(group.id),
+              }}
+            />
           </div>
+          {#if openRows[group.id]}
+            <pre class="bg-info">{JSON.stringify(group, null, 2)}</pre>
+          {/if}
         {/each}
       {/if}
     </div>
@@ -325,7 +370,7 @@
 
   .group-grid-row {
     display: grid;
-    grid-template-columns: 2fr 2fr 1fr 0.5fr;
+    grid-template-columns: 2fr 2fr 1fr 0.5fr 0.3fr;
     column-gap: 1rem;
     padding: 0.5rem 0.5rem;
     align-items: center;
