@@ -8,6 +8,7 @@ import json
 from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from datetime import datetime
 from mastery.models import DataMaintenanceTask, generate_nanoid
 from .import_school import school_update
 from .import_groups import import_groups_from_file
@@ -121,13 +122,15 @@ def do_work(task):
     elif task.job_name == "import_memberships":
         yield from import_memberships_from_file(org_number)
     elif task.job_name == "update_data_integrity":
-        timestamp_str = job_params.get("maintained_earlier_than")
-        maintained_earlier_than = parse_datetime(timestamp_str)
-        if not maintained_earlier_than:
-            raise ValueError(
-                f"Invalid or missing maintained_earlier_than timestamp for job_name '{task.job_name}'")
-        print("Running update_data_integrity", task.id, maintained_earlier_than)
-        yield from update_data_integrity(org_number, maintained_earlier_than)
+        groups_earlier_than = parse_datetime(job_params.get("groups_earlier_than"))
+        memberships_earlier_than = parse_datetime(job_params.get("memberships_earlier_than"))
+        if not groups_earlier_than or not memberships_earlier_than:
+            raise ValueError(f"Invalid maintained timestamps for task '{task.id}'")
+        options = {
+            "groups_earlier_than": groups_earlier_than,
+            "memberships_earlier_than": memberships_earlier_than,
+        }
+        yield from update_data_integrity(org_number, options)
     else:
         raise ValueError(f"Unknown job_name '{task.job_name}'")
 

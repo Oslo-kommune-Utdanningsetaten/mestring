@@ -313,7 +313,18 @@ def update_data_integrity(request, org_number):
              "message": "Another cleaner bot is already pending or running."},
             status=409)
 
-    previous_import_task = (
+    previous_import_groups_task = (
+        models.DataMaintenanceTask.objects
+        .filter(
+            job_name="import_groups",
+            job_params={"org_number": org_number},
+            status="finished"
+        )
+        .order_by("-finished_at")
+        .first()
+    )
+
+    previous_import_memberships_task = (
         models.DataMaintenanceTask.objects
         .filter(
             job_name="import_memberships",
@@ -324,21 +335,27 @@ def update_data_integrity(request, org_number):
         .first()
     )
 
-    if not previous_import_task:
+    if not previous_import_groups_task or not previous_import_memberships_task:
         return Response(
             {"status": "error",
              "message": "Run import before cleaning up data."},
             status=400)
 
+    groups_earlier_than = previous_import_groups_task.started_at.strftime(
+        '%Y-%m-%dT%H:%M:%S.%fZ')
+    memberships_earlier_than = previous_import_memberships_task.started_at.strftime(
+        '%Y-%m-%dT%H:%M:%S.%fZ')
     task = models.DataMaintenanceTask.objects.create(
         status="pending",
         job_name="update_data_integrity",
         job_params={
             "org_number": org_number,
-            "maintained_earlier_than": previous_import_task.started_at.isoformat()
+            "groups_earlier_than": groups_earlier_than,
+            "members.hips_earlier_than": memberships_earlier_than,
         },
         display_name=f"Activate cleaner bot for {school.display_name}",
-        earliest_run_at=timezone.now())
+        earliest_run_at=timezone.now()
+    )
 
     return Response(status=201, data={"status": "tasks_created", "task_ids": [task.id]})
 

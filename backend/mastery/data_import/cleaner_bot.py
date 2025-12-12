@@ -16,13 +16,19 @@ logger = logging.getLogger(__name__)
 # Should be set to run with maintained_earlier_than equal to the time the import started
 # Data which should be invisible, due to not being maintained during feide import, is soft-deleted
 # Data which has been soft-deleted for some time is hard-deleted
-def update_data_integrity(org_number, maintained_earlier_than):
+def update_data_integrity(org_number, options):
 
     logger.debug("Activating cleaner bot for organization: %s", org_number)
 
     school = models.School.objects.filter(org_number=org_number).first()
     if not school:
         raise Exception(f"School with org number {org_number} not found in database.")
+
+    groups_earlier_than = options.get("groups_earlier_than")
+    memberships_earlier_than = options.get("memberships_earlier_than")
+    if not groups_earlier_than or not memberships_earlier_than:
+        raise ValueError(
+            "Both 'groups_earlier_than' and 'memberships_earlier_than' must be provided in options.")
 
     changes = {
         "group": {},
@@ -35,12 +41,12 @@ def update_data_integrity(org_number, maintained_earlier_than):
     now = timezone.now()
 
     # Soft delete
-    logger.debug(f"Begin soft-delete of anything maintained earlier than %s", maintained_earlier_than)
-    changes["group"]["soft-deleted"] = soft_delete_groups(school, now, maintained_earlier_than)
-    changes["user"]["soft-deleted"] = soft_delete_users(school, now, maintained_earlier_than)
-    changes["observation"]["soft-deleted"] = soft_delete_observations(school, now, maintained_earlier_than)
-    changes["goal"]["soft-deleted"] = soft_delete_goals(school, now, maintained_earlier_than)
-    changes["user_group"]["soft-deleted"] = soft_delete_user_groups(school, now, maintained_earlier_than)
+    logger.debug("Begin soft-delete: %s", options)
+    changes["group"]["soft-deleted"] = soft_delete_groups(school, now, groups_earlier_than)
+    changes["user"]["soft-deleted"] = soft_delete_users(school, now, memberships_earlier_than)
+    changes["observation"]["soft-deleted"] = soft_delete_observations(school, now)
+    changes["goal"]["soft-deleted"] = soft_delete_goals(school, now)
+    changes["user_group"]["soft-deleted"] = soft_delete_user_groups(school, now, memberships_earlier_than)
     logger.debug(f"End soft-delete")
 
     # Hard delete
@@ -94,7 +100,7 @@ def soft_delete_users(school, now, maintained_earlier_than):
     return count
 
 
-def soft_delete_observations(school, now, maintained_earlier_than):
+def soft_delete_observations(school, now):
     # If student is soft-deleted -> mark as deleted
     on_personal_goals_on_school = Q(
         goal__student__isnull=False,
@@ -110,7 +116,7 @@ def soft_delete_observations(school, now, maintained_earlier_than):
     return count
 
 
-def soft_delete_goals(school, now, maintained_earlier_than):
+def soft_delete_goals(school, now):
     # If student (i.e. this is a personal goal) AND student is soft-deleted -> mark as deleted
     # OR
     # If group (i.e. this is a group goal) AND group is soft-deleted -> mark as deleted
