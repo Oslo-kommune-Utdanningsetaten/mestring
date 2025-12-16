@@ -1,8 +1,8 @@
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import SimpleRouter
 from mastery.api import views
 
-router = DefaultRouter()
+router = SimpleRouter()
 router.register(r'schools', views.SchoolViewSet, basename="school")
 router.register(r'subjects', views.SubjectViewSet, basename="subject")
 router.register(r'users', views.UserViewSet, basename="user")
