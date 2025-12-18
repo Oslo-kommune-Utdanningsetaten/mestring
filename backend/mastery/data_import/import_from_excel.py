@@ -31,37 +31,36 @@ def ensure_mastery_schema_exists():
                     {
                         "title": "Mestrer ikke",
                         "color": "rgb(229, 50, 43)",
-                        "maxValue": 20,
-                        "minValue": 1
+                        "max_value": 20,
+                        "min_value": 1
                     },
                     {
                         "title": "Mestrer sjelden",
                         "color": "rgb(159, 113, 202)",
-                        "maxValue": 40,
-                        "minValue": 21
+                        "max_value": 40,
+                        "min_value": 21
                     },
                     {
                         "title": "Mestrer iblant",
                         "color": "rgb(86, 174, 232)",
-                        "maxValue": 60,
-                        "minValue": 41
+                        "max_value": 60,
+                        "min_value": 41
                     },
                     {
                         "title": "Mestrer ofte",
                         "color": "rgb(241, 249, 97)",
-                        "maxValue": 80,
-                        "minValue": 61
+                        "max_value": 80,
+                        "min_value": 61
                     },
                     {
                         "title": "Mestrer",
                         "color": "rgb(160, 207, 106)",
-                        "maxValue": 100,
-                        "minValue": 81
+                        "max_value": 100,
+                        "min_value": 81
                     }
                 ],
-                "inputIncrement": 1,
-                "renderDirection": "vertical",
-                "isColorGradientEnabled": False
+                "input_increment": 1,
+                "render_direction": "horizontal",
             }
         )
         mastery_schema.save()

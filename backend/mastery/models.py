@@ -296,6 +296,26 @@ class MasterySchema(BaseModel):
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='mastery_schemas')
     is_default = models.BooleanField(default=False)  # is this the default schema for the school
 
+    def get_value_range(self):
+        """
+        Returns (min_value, max_value) tuple from the schema's config levels.
+        Returns (None, None) if config or levels are not defined.
+        """
+        if not self.config:
+            return None, None
+
+        levels = self.config.get('levels', [])
+        if not levels:
+            return None, None
+
+        all_min_values = [level.get('min_value') for level in levels if level.get('min_value') is not None]
+        all_max_values = [level.get('max_value') for level in levels if level.get('max_value') is not None]
+
+        if not all_min_values or not all_max_values:
+            return None, None
+
+        return min(all_min_values), max(all_max_values)
+
 
 class Goal(BaseModel):
     """

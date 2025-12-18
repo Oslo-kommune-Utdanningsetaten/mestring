@@ -2,6 +2,7 @@
   import type { ObservationType, GoalType, UserType } from '../generated/types.gen'
   import { observationsCreate, observationsUpdate } from '../generated/sdk.gen'
   import type { GoalDecorated, MasterySchemaWithConfig } from '../types/models'
+  import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore, currentUser } from '../stores/data'
   import ButtonMini from './ButtonMini.svelte'
   import ValueInputVertical from './ValueInputVertical.svelte'
@@ -17,9 +18,10 @@
   const masterySchema: MasterySchemaWithConfig = $derived(
     $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
   )
+  const calculations = $derived(useMasteryCalculations(masterySchema))
 
-  let localObservation = $state<Partial<ObservationType>>({
-    masteryValue: null,
+  let localObservation = $state<Partial<ObservationType> & { masteryValue: number }>({
+    masteryValue: calculations.defaultValue,
   })
 
   // Update localObservation when observation prop changes
@@ -29,10 +31,8 @@
     }
   })
 
-  const renderDirection = (goal: GoalDecorated): 'horizontal' | 'vertical' => {
-    if (!goal || !$dataStore.masterySchemas) return 'vertical'
-    const masterySchema = $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
-    return masterySchema.config?.renderDirection === 'horizontal' ? 'horizontal' : 'vertical'
+  const renderDirection = (): 'horizontal' | 'vertical' | 'unknown' => {
+    return masterySchema?.config?.renderDirection || 'unknown'
   }
 
   const handleSave = async () => {
@@ -59,81 +59,85 @@
 </script>
 
 <div class="observation-edit p-4">
-  <h3 class="pb-2">
-    {localObservation.id ? 'Redigerer' : 'Ny'} observasjon
-  </h3>
+  {#if localObservation}
+    <h3 class="pb-2">
+      {localObservation.id ? 'Redigerer' : 'Ny'} observasjon
+    </h3>
 
-  {#if masterySchema?.config?.isMasteryValueInputEnabled}
-    <div class="mb-4">
-      {#if renderDirection(goal) === 'vertical'}
-        <ValueInputVertical
-          {masterySchema}
-          bind:masteryValue={localObservation.masteryValue}
-          label="Hvor ofte mestrer {student?.name} {goal?.title || 'dette målet'}?"
-        />
-      {:else}
-        <ValueInputHorizontal
-          {masterySchema}
-          bind:masteryValue={localObservation.masteryValue}
-          label="Hvor ofte mestrer {student?.name} {goal?.title || 'dette målet'}?"
-        />
-      {/if}
+    {#if masterySchema?.config?.isMasteryValueInputEnabled}
+      <div class="mb-4">
+        {#if renderDirection() === 'vertical'}
+          <ValueInputVertical
+            {masterySchema}
+            bind:masteryValue={localObservation.masteryValue}
+            label="Hvor ofte mestrer {student?.name} {goal?.title || 'dette målet'}?"
+          />
+        {:else}
+          <ValueInputHorizontal
+            {masterySchema}
+            bind:masteryValue={localObservation.masteryValue}
+            label="Hvor ofte mestrer {student?.name} {goal?.title || 'dette målet'}?"
+          />
+        {/if}
+      </div>
+    {/if}
+
+    {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
+      <div class="form-group my-4">
+        <label for="description" class="form-label">Beskrivelse/tilbakemelding</label>
+        <textarea
+          id="description"
+          class="form-control rounded-0 border-2 border-primary"
+          bind:value={localObservation.masteryDescription}
+          placeholder="Kort beskrivelse av elevens mestringsnivå"
+          rows="4"
+        ></textarea>
+      </div>
+    {/if}
+
+    {#if masterySchema?.config?.isFeedforwardInputEnabled}
+      <div class="form-group mb-3">
+        <label for="feedforward" class="form-label">Fremovermelding</label>
+        <textarea
+          id="feedforward"
+          class="form-control rounded-0 border-2 border-primary"
+          bind:value={localObservation.feedforward}
+          placeholder="Konkret, hva kan eleven gjøre for å forbedre seg?"
+          rows="4"
+        ></textarea>
+      </div>
+    {/if}
+
+    <div class="d-flex gap-2 justify-content-start mt-4">
+      <ButtonMini
+        options={{
+          title: 'Lagre',
+          iconName: 'check',
+          skin: 'primary',
+          variant: 'label-only',
+          classes: 'm-2',
+          onClick: () => handleSave(),
+        }}
+      >
+        Lagre
+      </ButtonMini>
+
+      <ButtonMini
+        options={{
+          title: 'Avbryt',
+          iconName: 'close',
+          skin: 'secondary',
+          variant: 'label-only',
+          classes: 'm-2',
+          onClick: () => onDone(),
+        }}
+      >
+        Avbryt
+      </ButtonMini>
     </div>
+  {:else}
+    No observation...
   {/if}
-
-  {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
-    <div class="form-group my-4">
-      <label for="description" class="form-label">Beskrivelse/tilbakemelding</label>
-      <textarea
-        id="description"
-        class="form-control rounded-0 border-2 border-primary"
-        bind:value={localObservation.masteryDescription}
-        placeholder="Kort beskrivelse av elevens mestringsnivå"
-        rows="4"
-      ></textarea>
-    </div>
-  {/if}
-
-  {#if masterySchema?.config?.isFeedforwardInputEnabled}
-    <div class="form-group mb-3">
-      <label for="feedforward" class="form-label">Fremovermelding</label>
-      <textarea
-        id="feedforward"
-        class="form-control rounded-0 border-2 border-primary"
-        bind:value={localObservation.feedforward}
-        placeholder="Konkret, hva kan eleven gjøre for å forbedre seg?"
-        rows="4"
-      ></textarea>
-    </div>
-  {/if}
-
-  <div class="d-flex gap-2 justify-content-start mt-4">
-    <ButtonMini
-      options={{
-        title: 'Lagre',
-        iconName: 'check',
-        skin: 'primary',
-        variant: 'label-only',
-        classes: 'm-2',
-        onClick: () => handleSave(),
-      }}
-    >
-      Lagre
-    </ButtonMini>
-
-    <ButtonMini
-      options={{
-        title: 'Avbryt',
-        iconName: 'close',
-        skin: 'secondary',
-        variant: 'label-only',
-        classes: 'm-2',
-        onClick: () => onDone(),
-      }}
-    >
-      Avbryt
-    </ButtonMini>
-  </div>
 </div>
 
 <style>

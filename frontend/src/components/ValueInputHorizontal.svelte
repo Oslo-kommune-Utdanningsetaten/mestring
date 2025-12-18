@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { useMasteryCalculations, type MasterySchemaWithConfig } from '../utils/masteryHelpers'
+  import { useMasteryCalculations } from '../utils/masteryHelpers'
+  import type { MasterySchemaWithConfig } from '../types/models'
 
   let {
     masterySchema,
@@ -126,7 +127,7 @@
 
   .slider::-webkit-slider-thumb,
   .slider::-moz-range-thumb {
-    width: 5px;
+    width: 25px;
     height: 30px;
     border-radius: 3px;
     cursor: pointer;

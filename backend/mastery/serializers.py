@@ -127,6 +127,28 @@ class ObservationSerializer(BaseModelSerializer):
         model = models.Observation
         fields = '__all__'
 
+    def validate(self, attrs):
+        goal = attrs.get('goal')  # in case of create
+        if goal is None and self.instance:
+            goal = self.instance.goal  # in case of partial update
+
+        mastery_value = attrs.get('mastery_value')
+
+        if goal and mastery_value is not None:
+            if not goal.mastery_schema:
+                return attrs
+
+            schema_min, schema_max = goal.mastery_schema.get_value_range()
+            if schema_min is None or schema_max is None:
+                return attrs
+
+            if mastery_value < schema_min or mastery_value > schema_max:
+                raise serializers.ValidationError(
+                    {'mastery_value': f'Must be between {schema_min} and {schema_max}'}
+                )
+
+        return attrs
+
 
 class StatusSerializer(BaseModelSerializer):
     class Meta:

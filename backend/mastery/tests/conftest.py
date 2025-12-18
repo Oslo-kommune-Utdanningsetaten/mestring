@@ -326,25 +326,24 @@ def mastery_schema(db, school):
                 {
                     "text": "Gjengi",
                     "color": "rgb(229, 50, 43)",
-                    "maxValue": 33,
-                    "minValue": 1
+                    "max_value": 33,
+                    "min_value": 1
                 },
                 {
                     "text": "Forklare",
                     "color": "rgb(255, 204, 0)",
-                    "maxValue": 66,
-                    "minValue": 34
+                    "max_value": 66,
+                    "min_value": 34
                 },
                 {
                     "text": "Se sammenhenger",
                     "color": "rgb(23, 231, 21)",
-                    "maxValue": 100,
-                    "minValue": 67
+                    "max_value": 100,
+                    "min_value": 67
                 },
             ],
-            "inputIncrement": 1,
-            "renderDirection": "horizontal",
-            "isColorGradientEnabled": False
+            "input_increment": 1,
+            "render_direction": "horizontal",
         },
     )
 

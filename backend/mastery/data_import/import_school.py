@@ -108,36 +108,35 @@ def ensure_default_mastery_schema_exists(school):
                 {
                     "color": "rgb(255, 40, 40)",
                     "title": "Mestrer ikke",
-                    "maxValue": 15,
-                    "minValue": 1
+                    "max_value": 15,
+                    "min_value": 1
                 },
                 {
                     "color": "rgb(255, 165, 0)",
                     "title": "Mestrer iblant",
-                    "maxValue": 55,
-                    "minValue": 16
+                    "max_value": 55,
+                    "min_value": 16
                 },
                 {
                     "color": "rgb(82, 205, 82)",
                     "title": "Mestrer ofte",
-                    "maxValue": 85,
-                    "minValue": 56
+                    "max_value": 85,
+                    "min_value": 56
                 },
                 {
                     "color": "rgb(86, 174, 232)",
                     "title": "Mestrer",
-                    "maxValue": 100,
-                    "minValue": 86
+                    "max_value": 100,
+                    "min_value": 86
                 }
             ],
-            "inputIncrement": 1,
-            "renderDirection": "horizontal",
-            "flatTrendThreshold": 5,
-            "isColorGradientEnabled": False,
-            "isValueIndicatorEnabled": True,
-            "isFeedforwardInputEnabled": False,
-            "isIncrementIndicatorEnabled": True,
-            "isMasteryValueInputEnabled": True,
-            "isMasteryDescriptionInputEnabled": False
+            "input_increment": 1,
+            "render_direction": "horizontal",
+            "flat_trend_threshold": 5,
+            "is_value_indicator_enabled": True,
+            "is_mastery_value_input_enabled": True,
+            "is_mastery_description_input_enabled": False,
+            "is_feedforward_input_nabled": False,
+            "is_increment_indicator_enabled": True
         }
     )
