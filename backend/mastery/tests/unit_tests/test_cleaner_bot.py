@@ -91,11 +91,15 @@ def other_student_personal_goal(db, school, other_student):
 @pytest.mark.django_db
 def test_soft_delete_unmaintained_valid_group(school, valid_group):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
 
     # unmaintained valid group should be soft-deleted
     valid_group.maintained_at = now - timezone.timedelta(days=10)
     valid_group.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     valid_group.refresh_from_db()
@@ -105,7 +109,7 @@ def test_soft_delete_unmaintained_valid_group(school, valid_group):
 
     # unmaintained, deleted group should not be handled
     previous_deleted_at = valid_group.deleted_at
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     valid_group.refresh_from_db()
@@ -117,9 +121,13 @@ def test_soft_delete_unmaintained_valid_group(school, valid_group):
 @pytest.mark.django_db
 def test_soft_delete_unmaintained_invalid_group(school, invalid_group):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     invalid_group.maintained_at = now - timezone.timedelta(days=10)
     invalid_group.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     invalid_group.refresh_from_db()
@@ -132,10 +140,14 @@ def test_soft_delete_unmaintained_invalid_group(school, invalid_group):
 @pytest.mark.django_db
 def test_keep_maintained_user(school, student):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     # Don't soft-delete maintained user
     student.maintained_at = now
     student.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     student.refresh_from_db()
@@ -147,9 +159,13 @@ def test_keep_maintained_user(school, student):
 @pytest.mark.django_db
 def test_keep_user_with_membership(school, student, student_role, valid_group):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     # Don't soft-delete user with active memberships
     valid_group.add_member(student, student_role)
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     student.refresh_from_db()
@@ -161,6 +177,10 @@ def test_keep_user_with_membership(school, student, student_role, valid_group):
 @pytest.mark.django_db
 def test_soft_delete_unmaintained_user(school, student, student_role, valid_group):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     # Soft-delete unmaintained user
     valid_group.add_member(student, student_role)
     user_group = models.UserGroup.objects.filter(user=student, role=student_role, group=valid_group).first()
@@ -168,7 +188,7 @@ def test_soft_delete_unmaintained_user(school, student, student_role, valid_grou
     user_group.save()
     student.maintained_at = now - timezone.timedelta(days=10)
     student.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     student.refresh_from_db()
@@ -180,10 +200,14 @@ def test_soft_delete_unmaintained_user(school, student, student_role, valid_grou
 @pytest.mark.django_db
 def test_keep_superadmin_user(school, student):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     # Don't soft-delete superadmin
     student.is_superadmin = True  # unlikely for a student, but hey
     student.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     student.refresh_from_db()
@@ -195,10 +219,14 @@ def test_keep_superadmin_user(school, student):
 @pytest.mark.django_db
 def test_soft_delete_observation(school, student, observation, other_observation):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     # Soft-delete observation for soft-deleted student
     student.deleted_at = now
     student.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     observation.refresh_from_db()
@@ -214,8 +242,12 @@ def test_soft_delete_observation(school, student, observation, other_observation
 def test_soft_delete_personal_goal(
         school, student, personal_goal, group_goal, other_student_personal_goal):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     # Initial cleanup -> no deletes
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     personal_goal.refresh_from_db()
@@ -230,7 +262,7 @@ def test_soft_delete_personal_goal(
     # Soft-delete personal goal for soft-deleted student
     student.deleted_at = now
     student.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     personal_goal.refresh_from_db()
@@ -247,8 +279,12 @@ def test_soft_delete_personal_goal(
 def test_soft_delete_group_goal(
         school, personal_goal, group_goal, other_student_personal_goal, valid_group):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     # Initial cleanup -> no deletes
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     personal_goal.refresh_from_db()
@@ -263,7 +299,7 @@ def test_soft_delete_group_goal(
     # Soft-delete group goal for soft-deleted group
     valid_group.deleted_at = now
     valid_group.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     personal_goal.refresh_from_db()
@@ -279,10 +315,14 @@ def test_soft_delete_group_goal(
 @pytest.mark.django_db
 def test_do_not_soft_delete_user_group(school, student, student_role, valid_group):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     valid_group.add_member(student, student_role)
     user_group = models.UserGroup.objects.filter(user=student, role=student_role, group=valid_group).first()
     # Initial cleanup -> no deletes
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     user_group.refresh_from_db()
@@ -294,12 +334,16 @@ def test_do_not_soft_delete_user_group(school, student, student_role, valid_grou
 @pytest.mark.django_db
 def test_soft_delete_unmaintained_user_group(school, student, student_role, valid_group):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     valid_group.add_member(student, student_role)
     user_group = models.UserGroup.objects.filter(user=student, role=student_role, group=valid_group).first()
     # Soft-delete user_group if unmaintained and group is valid
     user_group.maintained_at = now - timezone.timedelta(days=10)
     user_group.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     user_group.refresh_from_db()
@@ -311,12 +355,16 @@ def test_soft_delete_unmaintained_user_group(school, student, student_role, vali
 @pytest.mark.django_db
 def test_soft_delete_user_group_for_deleted_group(school, student, student_role, valid_group):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     valid_group.add_member(student, student_role)
     user_group = models.UserGroup.objects.filter(user=student, role=student_role, group=valid_group).first()
     # Soft-delete user_group if group is soft-deleted
     valid_group.deleted_at = now
     valid_group.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     user_group.refresh_from_db()
@@ -328,9 +376,13 @@ def test_soft_delete_user_group_for_deleted_group(school, student, student_role,
 @pytest.mark.django_db
 def test_hard_delete_group(school, valid_group):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     group_id = valid_group.id
     # Initial cleanup -> no deletes
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
@@ -340,7 +392,7 @@ def test_hard_delete_group(school, valid_group):
     # Almost, but not quite ready for delete
     valid_group.deleted_at = now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_GROUP-1)
     valid_group.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
@@ -350,7 +402,7 @@ def test_hard_delete_group(school, valid_group):
     # Hard-delete group which is has been soft-deleted a sufficient time
     valid_group.deleted_at = now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_GROUP)
     valid_group.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
@@ -361,9 +413,13 @@ def test_hard_delete_group(school, valid_group):
 @pytest.mark.django_db
 def test_hard_delete_user(school, student):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     user_id = student.id
     # Initial cleanup -> no deletes
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
@@ -373,7 +429,7 @@ def test_hard_delete_user(school, student):
     # Almost, but not quite ready for delete
     student.deleted_at = now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_USER-1)
     student.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
@@ -383,7 +439,7 @@ def test_hard_delete_user(school, student):
     # Hard-delete user which is has been soft-deleted a sufficient time
     student.deleted_at = now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_USER)
     student.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
@@ -394,9 +450,13 @@ def test_hard_delete_user(school, student):
 @pytest.mark.django_db
 def test_hard_delete_user(school, observation):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     observation_id = observation.id
     # Initial cleanup -> no deletes
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
@@ -406,7 +466,7 @@ def test_hard_delete_user(school, observation):
     # Almost, but not quite ready for delete
     observation.deleted_at = now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_OBSERVATION-1)
     observation.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
@@ -416,7 +476,7 @@ def test_hard_delete_user(school, observation):
     # Hard-delete user which is has been soft-deleted a sufficient time
     observation.deleted_at = now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_OBSERVATION)
     observation.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
@@ -427,9 +487,13 @@ def test_hard_delete_user(school, observation):
 @pytest.mark.django_db
 def test_hard_delete_goal(school, personal_goal):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     goal_id = personal_goal.id
     # Initial cleanup -> no deletes
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
@@ -439,7 +503,7 @@ def test_hard_delete_goal(school, personal_goal):
     # Almost, but not quite ready for delete
     personal_goal.deleted_at = now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_GOAL-1)
     personal_goal.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
@@ -449,7 +513,7 @@ def test_hard_delete_goal(school, personal_goal):
     # Hard-delete goal which is has been soft-deleted a sufficient time
     personal_goal.deleted_at = now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_GOAL)
     personal_goal.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
@@ -460,11 +524,15 @@ def test_hard_delete_goal(school, personal_goal):
 @pytest.mark.django_db
 def test_hard_delete_user_group(school, student, student_role, valid_group):
     now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
     valid_group.add_member(student, student_role)
     user_group = models.UserGroup.objects.filter(user=student, role=student_role, group=valid_group).first()
     user_group_id = user_group.id
     # Initial cleanup -> no deletes
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
@@ -474,7 +542,7 @@ def test_hard_delete_user_group(school, student, student_role, valid_group):
     # Almost, but not quite ready for delete
     user_group.deleted_at = now - timezone.timedelta(hours=HOURS_BEFORE_HARD_DELETE_OF_USER_GROUP-1)
     user_group.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
@@ -484,7 +552,7 @@ def test_hard_delete_user_group(school, student, student_role, valid_group):
     # Hard-delete user_group which is has been soft-deleted a sufficient time
     user_group.deleted_at = now - timezone.timedelta(hours=HOURS_BEFORE_HARD_DELETE_OF_USER_GROUP)
     user_group.save()
-    result = update_data_integrity(school.org_number, now)
+    result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
     assert final_chunk["is_done"] is True
