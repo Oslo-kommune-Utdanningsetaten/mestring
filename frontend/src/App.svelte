@@ -2,7 +2,7 @@
   import { Router, Route } from 'svelte-tiny-router'
   import { onMount } from 'svelte'
   import { checkAuth, isLoggingInUser } from './stores/auth'
-  import { loadData, currentUser } from './stores/data'
+  import { loadData, currentUser, dataStore } from './stores/data'
   import { apiHealth } from './stores/apiHealth'
   import { addAlert } from './stores/alerts'
 
@@ -29,6 +29,23 @@
   import AlertBar from './components/AlertBar.svelte'
 
   const API_CHECK_INTERVAL = 60 * 1000 // every 60 seconds
+
+  // All routes in the app
+  const routes = [
+    { path: '/', component: Home },
+    { path: '/about', component: About },
+    { path: '/groups', component: Groups },
+    { path: '/groups/:groupId', component: Group },
+    { path: '/profile', component: Profile },
+    { path: '/students', component: Students },
+    { path: '/students/:studentId', component: Student },
+    { path: '/admin/users', component: Users },
+    { path: '/admin/groups', component: AdminGroups },
+    { path: '/admin/subjects', component: Subjects },
+    { path: '/admin/mastery-schemas', component: MasterySchemas },
+    { path: '/admin/data-maintenance-tasks', component: DataMaintenanceTask },
+    { path: '/admin/schools', component: Schools },
+  ]
 
   onMount(() => {
     apiHealth.checkHealth()
@@ -67,33 +84,22 @@
       <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
       <span>Logger inn...</span>
     </div>
+  {:else}
+    <Router>
+      {#each routes as route}
+        {#if $dataStore.hasUserAccessToPath(route.path)}
+          <Route path={route.path} component={route.component} />
+        {/if}
+      {/each}
+      <!-- Fallback route: no "path" prop means it always matches -->
+      <Route>
+        <div>
+          <h4>Unrecognized path :/</h4>
+          <p>The page you're looking for doesn't exist.</p>
+        </div>
+      </Route>
+    </Router>
   {/if}
-  <Router>
-    <Route path="/" component={Home} />
-    <Route path="/about" component={About} />
-
-    {#if $currentUser}
-      <Route path="/groups" component={Groups} />
-      <Route path="/groups/:groupId" component={Group} />
-      <Route path="/students" component={Students} />
-      <Route path="/students/:studentId" component={Student} />
-      <Route path="/admin/subjects" component={Subjects} />
-      <Route path="/admin/users" component={Users} />
-      <Route path="/admin/groups" component={AdminGroups} />
-      <Route path="/admin/mastery-schemas" component={MasterySchemas} />
-      <Route path="/admin/data-maintenance-tasks" component={DataMaintenanceTask} />
-      <Route path="/admin/schools" component={Schools} />
-      <Route path="/profile" component={Profile} />
-    {/if}
-
-    <!-- Fallback route: no "path" prop means it always matches -->
-    <Route>
-      <div>
-        <h4>Unrecognized path :/</h4>
-        <p>The page you're looking for doesn't exist.</p>
-      </div>
-    </Route>
-  </Router>
 </main>
 
 <style>

@@ -73,7 +73,7 @@
           </Link>
         </li>
 
-        {#if $currentUser?.isSuperadmin}
+        {#if $dataStore.hasUserAccessToPath('/admin')}
           <li class="nav-item dropdown">
             <a
               class={`nav-link dropdown-toggle ${isAdminActive ? 'active' : ''}`}
@@ -108,7 +108,7 @@
           </li>
         {/if}
 
-        {#if $currentUser}
+        {#if $dataStore.hasUserAccessToPath('/profile')}
           <li class="nav-item dropdown" title="Logget på som {$currentUser.name}">
             <a
               class={`nav-link dropdown-toggle ${isProfileActive ? 'active' : ''}`}

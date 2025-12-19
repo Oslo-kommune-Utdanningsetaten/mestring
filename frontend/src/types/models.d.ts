@@ -11,8 +11,9 @@ export type AppData = {
   currentSchool: SchoolType | null
   currentUser: BasicUserType | null
   masterySchemas: MasterySchemaType[]
+  hasUserAccessToPath: (path: string) => boolean
+  roles: RoleType[]
   defaultMasterySchema?: MasterySchemaType | null
-  roles?: RoleType[]
   isSchoolAdmin?: boolean
   isSchoolInspector?: boolean
   isSuperadmin?: boolean

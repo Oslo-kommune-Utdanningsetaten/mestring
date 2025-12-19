@@ -254,7 +254,7 @@
       <span class="item header header-row">Eies av</span>
       <span class="item header header-row">Elever</span>
       <span class="item header header-row">Grupper</span>
-      <span class="item header header-row">Fagkoder</span>
+      <span class="item header header-row">Fagkode</span>
       <span class="item header header-row">Handlinger</span>
       {#each filteredSubjects as subject (subject.id)}
         <!-- Fag navn -->

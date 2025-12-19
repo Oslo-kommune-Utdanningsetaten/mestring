@@ -13,7 +13,7 @@
   const fetchGroups = async () => {
     try {
       const result = await groupsList({
-        query: { school: currentSchool?.id, isEnabled: true },
+        query: { school: currentSchool?.id, enabled: 'only' },
       })
       groups = result.data || []
     } catch (error) {
