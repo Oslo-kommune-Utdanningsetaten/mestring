@@ -9,8 +9,10 @@
 
   let currentSchool = $derived($dataStore.currentSchool)
   let isHomeActive = $derived($currentPath === '/')
-  let isAboutActive = $derived($currentPath === '/about')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
+  let isAboutActive = $derived($currentPath === '/about')
+  let isAdminActive = $derived($currentPath.startsWith('/admin'))
+  let isProfileActive = $derived($currentPath.startsWith('/profile'))
   let environmentWarning = $derived(
     window.location.hostname.includes('mestring-dev')
       ? 'development'
@@ -74,7 +76,7 @@
         {#if $currentUser?.isSuperadmin}
           <li class="nav-item dropdown">
             <a
-              class="nav-link dropdown-toggle"
+              class={`nav-link dropdown-toggle ${isAdminActive ? 'active' : ''}`}
               id="navbarDropdown"
               role="button"
               data-bs-toggle="dropdown"
@@ -109,7 +111,7 @@
         {#if $currentUser}
           <li class="nav-item dropdown" title="Logget på som {$currentUser.name}">
             <a
-              class="nav-link dropdown-toggle"
+              class={`nav-link dropdown-toggle ${isProfileActive ? 'active' : ''}`}
               id="navbarDropdown"
               role="button"
               data-bs-toggle="dropdown"
@@ -117,7 +119,7 @@
               Profil
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item" href="/user-info">Min side</a></li>
+              <li><Link to="/profile" className="dropdown-item">Min side</Link></li>
               <li>
                 <a class="dropdown-item" href="#" onclick={logout}>Logg ut</a>
               </li>

@@ -18,7 +18,7 @@
   import Groups from './views/Groups.svelte'
   import Students from './views/Students.svelte'
   import Navigation from './components/Navigation.svelte'
-  import UserInfo from './views/UserInfo.svelte'
+  import Profile from './views/Profile.svelte'
   // Admin views
   import Users from './views/admin/Users.svelte'
   import AdminGroups from './views/admin/Groups.svelte'
@@ -73,17 +73,17 @@
     <Route path="/about" component={About} />
 
     {#if $currentUser}
-      <Route path="/students/:studentId" component={Student} />
+      <Route path="/groups" component={Groups} />
       <Route path="/groups/:groupId" component={Group} />
       <Route path="/students" component={Students} />
-      <Route path="/groups" component={Groups} />
-      <Route path="/user-info" component={UserInfo} />
+      <Route path="/students/:studentId" component={Student} />
       <Route path="/admin/subjects" component={Subjects} />
       <Route path="/admin/users" component={Users} />
       <Route path="/admin/groups" component={AdminGroups} />
       <Route path="/admin/mastery-schemas" component={MasterySchemas} />
       <Route path="/admin/data-maintenance-tasks" component={DataMaintenanceTask} />
       <Route path="/admin/schools" component={Schools} />
+      <Route path="/profile" component={Profile} />
     {/if}
 
     <!-- Fallback route: no "path" prop means it always matches -->
