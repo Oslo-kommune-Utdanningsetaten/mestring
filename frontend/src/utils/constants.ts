@@ -20,3 +20,8 @@ export const TASK_STATES: Record<string, string> = {
   finished: 'success',
   failed: 'danger',
 }
+
+export const PUBLIC_PATHS = ['', 'about']
+export const STUDENT_PATHS = ['', 'about', 'groups', 'profile']
+export const TEACHER_PATHS = ['', 'about', 'groups', 'profile', 'students']
+export const RESTRICTED_PATHS = ['', 'about', 'groups', 'profile', 'students', 'users']

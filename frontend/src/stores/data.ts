@@ -20,13 +20,12 @@ import {
   SCHOOL_INSPECTOR_ROLE,
   TEACHER_ROLE,
   STUDENT_ROLE,
+  PUBLIC_PATHS,
+  STUDENT_PATHS,
+  TEACHER_PATHS,
+  RESTRICTED_PATHS,
 } from '../utils/constants'
 import type { AppData } from '../types/models'
-
-const publicPaths = ['', 'about']
-const studentPaths = publicPaths.concat('groups', 'profile')
-const teacherPaths = studentPaths.concat('students')
-const restrictedPaths = teacherPaths.concat('users')
 
 const setMasterySchemas = (schemas: MasterySchemaType[]) => {
   // Default mastery schema is either system default, or user's preferred, or simply first in list
@@ -44,14 +43,14 @@ const hasUserAccessToPath = (path: string): boolean => {
   const trimmedPath = path.split('/')[1]
   // Not logged in can only access public paths
   if (!currentUser) {
-    return publicPaths.includes(trimmedPath)
+    return PUBLIC_PATHS.includes(trimmedPath)
   }
   // Logged in students
-  if (studentPaths.includes(trimmedPath)) return true
+  if (STUDENT_PATHS.includes(trimmedPath)) return true
   // Logged in teachers
-  if (teacherPaths.includes(trimmedPath)) return true
+  if (TEACHER_PATHS.includes(trimmedPath)) return true
   // Inspector or admin can access restricted paths
-  if ((isSchoolAdmin || isSchoolInspector) && restrictedPaths.includes(trimmedPath)) {
+  if ((isSchoolAdmin || isSchoolInspector) && RESTRICTED_PATHS.includes(trimmedPath)) {
     return true
   }
   // Superadmin can access everything
