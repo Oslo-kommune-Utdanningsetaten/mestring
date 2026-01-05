@@ -121,8 +121,6 @@ export const registerUserStatus = async (school: SchoolType) => {
   const userSchools = userSchoolsResult.data || []
   const schools = schoolsResult.data || []
 
-  // TODO: Decorate currentUser with studentGroups, teacherGroups and allGroups
-  // update all components where we need this info to use dataStore.currentUser
   const isSchoolAdmin = !!userSchools.some(
     userSchool => userSchool.role.name === SCHOOL_ADMIN_ROLE && userSchool.school.id === school.id
   )
