@@ -1,8 +1,6 @@
 <script lang="ts">
   import { dataStore, setCurrentSchool, currentUser } from '../stores/data'
-  import { schoolsList, groupsList } from '../generated/sdk.gen'
   import { urlStringFrom } from '../utils/functions'
-  import { STUDENT_ROLE } from '../utils/constants'
   import type { GroupType, SchoolType } from '../generated/types.gen'
 
   let schools = $derived<SchoolType[]>($dataStore.currentUser.schools || [])
