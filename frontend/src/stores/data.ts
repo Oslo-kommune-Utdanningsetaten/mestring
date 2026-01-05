@@ -25,7 +25,7 @@ import {
   TEACHER_PATHS,
   RESTRICTED_PATHS,
 } from '../utils/constants'
-import type { AppData } from '../types/models'
+import type { AppData, UserDecorated } from '../types/models'
 
 const setMasterySchemas = (schemas: MasterySchemaType[]) => {
   // Default mastery schema is either system default, or user's preferred, or simply first in list
@@ -39,7 +39,9 @@ const setMasterySchemas = (schemas: MasterySchemaType[]) => {
 }
 
 const hasUserAccessToPath = (path: string): boolean => {
-  const { currentUser, isSchoolAdmin, isSchoolInspector } = get(dataStore)
+  const currentData = get(dataStore) as AppData
+  const currentUser = currentData.currentUser
+  const { isSchoolAdmin, isSchoolInspector, isSuperadmin } = currentUser
   const trimmedPath = path.split('/')[1]
   // Not logged in can only access public paths
   if (!currentUser) {
@@ -54,7 +56,7 @@ const hasUserAccessToPath = (path: string): boolean => {
     return true
   }
   // Superadmin can access everything
-  return currentUser.isSuperadmin
+  return isSuperadmin
 }
 
 // When school changes, reset subjects, user status, and mastery schemas
@@ -82,9 +84,9 @@ export const dataStore = writable<AppData>({
   hasUserAccessToPath,
 })
 
-export const currentUser = derived(dataStore, d => d.currentUser)
+export const currentUser: UserDecorated = derived(dataStore, d => d.currentUser)
 
-export const setCurrentUser = (user: UserType | null) => {
+export const setCurrentUser = (user: UserDecorated | null) => {
   dataStore.update(data => ({ ...data, currentUser: user }))
 }
 
@@ -99,7 +101,13 @@ export const registerUserStatus = async (school: SchoolType) => {
   const studentGroupsResult = await groupsList({
     query: { user: user.id, school: school.id, roles: STUDENT_ROLE },
   })
-  // TODO: Decorate currentUser with studentGroups and teacherGroups
+  const allGroupsResult = await groupsList({
+    query: { school: school.id },
+  })
+  const teacherGroups = teacherGroupsResult.data || []
+  const studentGroups = studentGroupsResult.data || []
+  const allGroups = allGroupsResult.data || []
+  // TODO: Decorate currentUser with studentGroups, teacherGroups and allGroups
   // update all components where we need this info to use dataStore.currentUser
   const userSchools = userSchoolsResult.data || []
   const isSchoolAdmin = !!userSchools.some(
@@ -109,12 +117,16 @@ export const registerUserStatus = async (school: SchoolType) => {
     userSchool =>
       userSchool.role.name === SCHOOL_INSPECTOR_ROLE && userSchool.school.id === school.id
   )
-  dataStore.update(data => ({
-    ...data,
+  const userDecorated: UserDecorated = {
+    ...user,
+    schools: userSchools.map(us => us.school),
+    allGroups,
+    teacherGroups,
+    studentGroups,
     isSchoolAdmin,
     isSchoolInspector,
-    isSuperadmin: user.isSuperadmin,
-  }))
+  }
+  setCurrentUser(userDecorated)
 }
 
 const loadSchools = async () => {

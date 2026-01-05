@@ -59,72 +59,73 @@
           <li class="nav-item">
             <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
           </li>
-          {#if currentSchool.isStudentListEnabled || $dataStore.hasUserAccessToPath('/students')}
+          {#if currentSchool?.isStudentListEnabled || $dataStore.hasUserAccessToPath('/students')}
             <li class="nav-item">
               <Link to="/students" className={`nav-link ${isStudentsActive ? 'active' : ''}`}>
                 Elever
               </Link>
             </li>
           {/if}
-        {/if}
-        <li class="nav-item">
-          <Link to="/about" className={`nav-link ${isAboutActive ? 'active' : ''}`}>
-            Om&nbsp;tjenesten
-          </Link>
-        </li>
 
-        {#if $dataStore.hasUserAccessToPath('/admin')}
-          <li class="nav-item dropdown">
-            <a
-              class={`nav-link dropdown-toggle ${isAdminActive ? 'active' : ''}`}
-              id="navbarDropdown"
-              role="button"
-              data-bs-toggle="dropdown"
-            >
-              Admin
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-              <li>
-                <Link to="/admin/schools" className="dropdown-item">Skoler</Link>
-              </li>
-              <li>
-                <Link to="/admin/users" className="dropdown-item">Brukere</Link>
-              </li>
-              <li>
-                <Link to="/admin/subjects" className="dropdown-item">Fag</Link>
-              </li>
-              <li>
-                <Link to="/admin/groups" className="dropdown-item">Grupper</Link>
-              </li>
-              <li>
-                <Link to="/admin/data-maintenance-tasks" className="dropdown-item">
-                  Bakgrunnsjobber
-                </Link>
-              </li>
-              <li>
-                <Link to="/admin/mastery-schemas" className="dropdown-item">Mastery Schemas</Link>
-              </li>
-            </ul>
+          <li class="nav-item">
+            <Link to="/about" className={`nav-link ${isAboutActive ? 'active' : ''}`}>
+              Om&nbsp;tjenesten
+            </Link>
           </li>
-        {/if}
 
-        {#if $dataStore.hasUserAccessToPath('/profile')}
-          <li class="nav-item dropdown" title="Logget på som {$currentUser.name}">
-            <a
-              class={`nav-link dropdown-toggle ${isProfileActive ? 'active' : ''}`}
-              id="navbarDropdown"
-              role="button"
-              data-bs-toggle="dropdown"
-            >
-              Profil
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-              <li><Link to="/profile" className="dropdown-item">Min side</Link></li>
-              <li>
-                <a class="dropdown-item" href="#" onclick={logout}>Logg ut</a>
-              </li>
-            </ul>
-          </li>
+          {#if $dataStore.hasUserAccessToPath('/admin')}
+            <li class="nav-item dropdown">
+              <a
+                class={`nav-link dropdown-toggle ${isAdminActive ? 'active' : ''}`}
+                id="navbarDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+              >
+                Admin
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <li>
+                  <Link to="/admin/schools" className="dropdown-item">Skoler</Link>
+                </li>
+                <li>
+                  <Link to="/admin/users" className="dropdown-item">Brukere</Link>
+                </li>
+                <li>
+                  <Link to="/admin/subjects" className="dropdown-item">Fag</Link>
+                </li>
+                <li>
+                  <Link to="/admin/groups" className="dropdown-item">Grupper</Link>
+                </li>
+                <li>
+                  <Link to="/admin/data-maintenance-tasks" className="dropdown-item">
+                    Bakgrunnsjobber
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/admin/mastery-schemas" className="dropdown-item">Mastery Schemas</Link>
+                </li>
+              </ul>
+            </li>
+          {/if}
+
+          {#if $dataStore.hasUserAccessToPath('/profile')}
+            <li class="nav-item dropdown" title="Logget på som {$currentUser.name}">
+              <a
+                class={`nav-link dropdown-toggle ${isProfileActive ? 'active' : ''}`}
+                id="navbarDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+              >
+                Profil
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <li><Link to="/profile" className="dropdown-item">Min side</Link></li>
+                <li>
+                  <a class="dropdown-item" href="#" onclick={logout}>Logg ut</a>
+                </li>
+              </ul>
+            </li>
+          {/if}
         {/if}
 
         {#if !$currentUser}
