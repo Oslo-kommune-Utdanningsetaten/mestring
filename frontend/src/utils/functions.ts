@@ -83,9 +83,8 @@ export const fetchSubjectsForStudents = async (
     })
   })
 
-  const subjects: SubjectType[] = Array.from(subjectIds)
-    .map(subjectId => allSubjects.find(s => s.id === subjectId))
-    .filter((subject): subject is SubjectType => !!subject)
+  const subjects = allSubjects
+    .filter(subject => subjectIds.has(subject.id))
     .sort((a, b) => a.displayName.localeCompare(b.displayName))
 
   return subjects
