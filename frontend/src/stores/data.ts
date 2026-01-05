@@ -92,24 +92,37 @@ export const setCurrentUser = (user: UserDecorated | null) => {
 
 export const registerUserStatus = async (school: SchoolType) => {
   const user = get(dataStore).currentUser
-  const userSchoolsResult = await userSchoolsList({
-    query: { user: user.id, school: school.id },
-  })
-  const teacherGroupsResult = await groupsList({
-    query: { user: user.id, school: school.id, roles: TEACHER_ROLE },
-  })
-  const studentGroupsResult = await groupsList({
-    query: { user: user.id, school: school.id, roles: STUDENT_ROLE },
-  })
-  const allGroupsResult = await groupsList({
-    query: { school: school.id },
-  })
+  const [
+    schoolsResult,
+    userSchoolsResult,
+    teacherGroupsResult,
+    studentGroupsResult,
+    allGroupsResult,
+  ] = await Promise.all([
+    schoolsList({
+      query: { isServiceEnabled: true },
+    }),
+    userSchoolsList({
+      query: { user: user.id, school: school.id },
+    }),
+    groupsList({
+      query: { user: user.id, school: school.id, roles: TEACHER_ROLE },
+    }),
+    groupsList({
+      query: { user: user.id, school: school.id, roles: STUDENT_ROLE },
+    }),
+    groupsList({
+      query: { school: school.id },
+    }),
+  ])
   const teacherGroups = teacherGroupsResult.data || []
   const studentGroups = studentGroupsResult.data || []
   const allGroups = allGroupsResult.data || []
+  const userSchools = userSchoolsResult.data || []
+  const schools = schoolsResult.data || []
+
   // TODO: Decorate currentUser with studentGroups, teacherGroups and allGroups
   // update all components where we need this info to use dataStore.currentUser
-  const userSchools = userSchoolsResult.data || []
   const isSchoolAdmin = !!userSchools.some(
     userSchool => userSchool.role.name === SCHOOL_ADMIN_ROLE && userSchool.school.id === school.id
   )
@@ -119,7 +132,7 @@ export const registerUserStatus = async (school: SchoolType) => {
   )
   const userDecorated: UserDecorated = {
     ...user,
-    schools: userSchools.map(us => us.school),
+    schools,
     allGroups,
     teacherGroups,
     studentGroups,
