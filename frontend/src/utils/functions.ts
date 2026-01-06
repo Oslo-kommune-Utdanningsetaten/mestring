@@ -51,46 +51,6 @@ export const urlStringFrom = (
   )
 }
 
-// Fetch subjects for the given students to build the grid headers
-// based on subjects linked to their goals and groups
-// TODO: update views.py to provide an endpoint subjectsList for user (or maybe even users)
-export const fetchSubjectsForStudents = async (
-  students: UserType[],
-  allSubjects: SubjectType[],
-  schoolId: string
-): Promise<SubjectType[]> => {
-  const subjectIds = new Set<string>()
-
-  const data = await Promise.all(
-    students.map(async student => {
-      const goalsResult = await goalsList({
-        query: { student: student.id },
-      })
-      const goals: GoalType[] = goalsResult.data || []
-      const groupsResult: any = await groupsList({
-        query: { user: student.id, school: schoolId },
-      })
-      const groups: GroupType[] = groupsResult.data || []
-      return { goals, groups }
-    })
-  )
-
-  data.forEach(({ goals, groups }) => {
-    goals.forEach(goal => {
-      if (goal.subjectId) subjectIds.add(goal.subjectId)
-    })
-    groups.forEach(group => {
-      if (group.subjectId) subjectIds.add(group.subjectId)
-    })
-  })
-
-  const subjects = allSubjects
-    .filter(subject => subjectIds.has(subject.id))
-    .sort((a, b) => a.displayName.localeCompare(b.displayName))
-
-  return subjects
-}
-
 export const subjectNamesFromStudentGoals = (
   goals: GoalType[],
   allSubjects: SubjectType[]

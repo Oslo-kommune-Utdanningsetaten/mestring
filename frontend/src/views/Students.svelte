@@ -3,10 +3,10 @@
   import '@oslokommune/punkt-elements/dist/pkt-textinput.js'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { dataStore } from '../stores/data'
-  import { urlStringFrom, fetchSubjectsForStudents } from '../utils/functions'
+  import { urlStringFrom } from '../utils/functions'
   import StudentRow from '../components/StudentRow.svelte'
   import { STUDENT_ROLE } from '../utils/constants'
-  import { usersList } from '../generated/sdk.gen'
+  import { subjectsList, usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
 
   const router = useTinyRouter()
@@ -47,10 +47,11 @@
         query: queryOptions,
       })
       students = studentsResult.data || []
-      await fetchSubjectsForStudents(students, $dataStore.subjects, currentSchool.id).then(
-        fetchedSubjects => {
-          subjects = fetchedSubjects
-        }
+      const subjectsResult = await subjectsList({
+        query: { school: currentSchool.id, students: students.map(s => s.id).join(',') },
+      })
+      subjects = (subjectsResult.data || []).sort((a, b) =>
+        a.displayName.localeCompare(b.displayName)
       )
     } catch (error) {
       console.error('Error fetching members', { selectedGroupId, error })
