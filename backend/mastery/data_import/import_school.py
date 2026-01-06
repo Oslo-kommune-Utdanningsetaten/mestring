@@ -136,7 +136,7 @@ def ensure_default_mastery_schema_exists(school):
             "is_value_indicator_enabled": True,
             "is_mastery_value_input_enabled": True,
             "is_mastery_description_input_enabled": False,
-            "is_feedforward_input_nabled": False,
+            "is_feedforward_input_enabled": False,
             "is_increment_indicator_enabled": True
         }
     )
