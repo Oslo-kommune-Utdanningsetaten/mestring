@@ -1896,6 +1896,10 @@ export type SubjectsListData = {
          * All subjects belonging to school, either directly via owned_by_school or via groups belonging to school
          */
         school?: string;
+        /**
+         * Filter subjects by student participation. Comma-separated list of user IDs
+         */
+        students?: string;
     };
     url: '/api/subjects/';
 };

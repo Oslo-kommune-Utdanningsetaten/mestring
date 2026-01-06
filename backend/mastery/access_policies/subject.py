@@ -48,7 +48,9 @@ class SubjectAccessPolicy(BaseAccessPolicy):
                 # Subjects attached to groups which belong to a school where the user belongs
                 Q(groups__school_id__in=school_ids) |
                 # Subjects owned by schools where the user belongs
-                Q(owned_by_school_id__in=school_ids)
+                Q(owned_by_school_id__in=school_ids) |
+                # Subjects that have goals at schools where the user belongs
+                Q(goals__school_id__in=school_ids)
             ).distinct()
         except Exception:
             logger.exception("SubjectAccessPolicy.scope_queryset")

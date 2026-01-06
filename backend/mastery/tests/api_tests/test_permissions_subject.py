@@ -196,3 +196,92 @@ def test_school_admin_subject_access(school_admin, school, other_school, client,
     }
     resp = client.post('/api/subjects/', payload, format='json')
     assert resp.status_code == 403
+
+
+@pytest.mark.django_db
+def test_subject_filter_by_users(school, student, other_student, teacher, student_role, teacher_role):
+    """
+    Test that the 'users' query parameter correctly filters subjects by:
+    1. Users who are members of groups connected to the subject
+    2. Users who have personal goals connected to the subject
+    """
+    # Create subjects
+    subject_with_group = Subject.objects.create(
+        display_name="Math",
+        short_name="Math",
+        grep_code="math1",
+        grep_group_code="mathg1",
+    )
+
+    subject_with_personal_goal = Subject.objects.create(
+        display_name="Norwegian",
+        short_name="Norsk",
+        grep_code="nor1",
+        grep_group_code="norg1",
+    )
+
+    subject_unrelated = Subject.objects.create(
+        display_name="English",
+        short_name="Eng",
+        grep_code="eng1",
+        grep_group_code="engg1",
+    )
+
+    # Create a group with student as member, connected to subject_with_group
+    teaching_group = Group.objects.create(
+        feide_id="fc:group:teaching-math",
+        display_name="Math Group",
+        type="teaching",
+        school=school,
+        subject=subject_with_group,
+        is_enabled=True
+    )
+    teaching_group.add_member(student, student_role)
+    teaching_group.add_member(teacher, teacher_role)
+
+    # Create a personal goal for student connected to subject_with_personal_goal
+    Goal.objects.create(
+        title="Personal Norwegian Goal",
+        description="Improve Norwegian skills",
+        student=student,
+        subject=subject_with_personal_goal,
+        school=school,
+    )
+
+    client = APIClient()
+    client.force_authenticate(user=teacher)
+
+    # Test filtering by single user, returns both subjects: one via group membership, one via personal goal
+    resp = client.get('/api/subjects/', {'school': school.id, 'students': student.id})
+    assert resp.status_code == 200
+    received_ids = {s['id'] for s in resp.json()}
+    expected_ids = {subject_with_group.id, subject_with_personal_goal.id}
+    assert received_ids == expected_ids
+
+    # Test filtering by unrelated user, returns no subjects
+    resp = client.get('/api/subjects/', {'school': school.id, 'students': other_student.id})
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+    # Create a personal goal for other_student
+    Goal.objects.create(
+        title="Other Student English Goal",
+        description="Improve English skills",
+        student=other_student,
+        subject=subject_unrelated,
+        school=school,
+    )
+
+    # Test filtering by multiple users, returns subjects connected to either user
+    resp = client.get('/api/subjects/', {'school': school.id, 'students': f'{student.id},{other_student.id}'})
+    assert resp.status_code == 200
+    received_ids = {s['id'] for s in resp.json()}
+    expected_ids = {subject_with_group.id, subject_with_personal_goal.id, subject_unrelated.id}
+    assert received_ids == expected_ids
+
+    # Test that teacher can see subjects they're connected to via group
+    resp = client.get('/api/subjects/', {'school': school.id, 'students': teacher.id})
+    assert resp.status_code == 200
+    received_ids = {s['id'] for s in resp.json()}
+    expected_ids = {subject_with_group.id}
+    assert received_ids == expected_ids

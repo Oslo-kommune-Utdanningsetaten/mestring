@@ -448,6 +448,13 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
+                name='students',
+                description='Filter subjects by student participation. Comma-separated list of user IDs',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='is_owned_by_school',
                 description='Filter subjects on whether they are owned by the given school',
                 required=False,
@@ -475,6 +482,8 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
+            student_ids_param, _ = get_request_param(self.request.query_params, 'students')
+
             is_owned_by_school_param, is_owned_set = get_request_param(
                 self.request.query_params, 'is_owned_by_school')
 
@@ -485,8 +494,19 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
 
             qs = qs.filter(
                 Q(groups__school_id=school_param) |
-                Q(owned_by_school_id=school_param)
+                Q(owned_by_school_id=school_param) |
+                Q(goals__school_id=school_param)
             )
+
+            if student_ids_param:
+                student_ids = [student_id.strip()
+                               for student_id in student_ids_param.split(',') if student_id]
+                if student_ids:
+                    qs = qs.filter(
+                        # when querying by student_ids, include only subjects where the groups are enabled
+                        Q(groups__user_groups__user_id__in=student_ids, groups__is_enabled=True) |
+                        Q(goals__student_id__in=student_ids)
+                    )
 
             if is_owned_set:
                 if is_owned_by_school_param:

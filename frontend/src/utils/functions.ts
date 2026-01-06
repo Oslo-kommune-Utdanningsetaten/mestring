@@ -53,6 +53,7 @@ export const urlStringFrom = (
 
 // Fetch subjects for the given students to build the grid headers
 // based on subjects linked to their goals and groups
+// TODO: update views.py to provide an endpoint subjectsList for user (or maybe even users)
 export const fetchSubjectsForStudents = async (
   students: UserType[],
   allSubjects: SubjectType[],
@@ -123,30 +124,6 @@ export const goalsWithCalculatedMastery = async (
     result.push(decoratedGoal)
   })
   return result
-}
-
-export const subjectIdsViaGroupOrGoal = async (
-  studentId: string,
-  schoolId: string
-): Promise<string[]> => {
-  const subjectsId: Set<string> = new Set()
-  const groupsResult: any = await groupsList({
-    query: { user: studentId, school: schoolId },
-  })
-  const userGroups = groupsResult.data || []
-  userGroups.forEach((group: any) => {
-    if (group.subjectId && group.type === 'teaching') {
-      subjectsId.add(group.subjectId)
-    }
-  })
-  const goalsResult: any = await goalsList({ query: { student: studentId } })
-  const userGoals = goalsResult.data || []
-  userGoals.forEach((goal: GoalType) => {
-    if (goal.subjectId) {
-      subjectsId.add(goal.subjectId)
-    }
-  })
-  return Array.from(subjectsId)
 }
 
 // For a single student, output goals grouped by subjectId, with mastery data calculated
