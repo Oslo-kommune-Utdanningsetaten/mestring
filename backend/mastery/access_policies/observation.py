@@ -228,7 +228,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
                     return False
                 goal = observation.goal
 
-            if not goal and goal.school_id:
+            if not goal or not goal.school_id:
                 return False
 
             school_admin_ids = UserSchool.objects.filter(
