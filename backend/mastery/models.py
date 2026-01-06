@@ -378,7 +378,7 @@ class Observation(BaseModel):
 
 class Status(BaseModel):
     """
-    A status represents a snapshot of a students mastery at a point in time, typically in a subject, e.g. how is Lois doing in math (all math Goals are then considered)
+    A status represents an overall assessment of a students mastery in a subject, over a period of time. E.g. how has Lois been doing in math since October, considering all math Goals (individual and group).
     """
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, related_name='statuses')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=False, related_name='statuses')
