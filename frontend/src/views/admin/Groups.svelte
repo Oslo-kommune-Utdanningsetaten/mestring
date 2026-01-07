@@ -288,8 +288,8 @@
         <div class="group-grid-row header">
           <span>Gruppe</span>
           <span>Type</span>
-          <span>Fag</span>
-          <span>Aktivert</span>
+          <span>Subject</span>
+          <span>Enabled</span>
           <span>Info</span>
         </div>
         <!-- Data rows -->

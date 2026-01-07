@@ -187,6 +187,10 @@
   }
 
   const handleActivateCleanerBotForSchool = async (orgNumber: string) => {
+    const confirmed = confirm(`Er du helt sikker på at du vil kjøre ryddejobb for ${orgNumber}?`)
+
+    if (!confirmed) return
+
     try {
       const result = await updateDataIntegrity({
         path: { org_number: orgNumber },
