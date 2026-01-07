@@ -448,7 +448,7 @@ def test_hard_delete_user(school, student):
 
 
 @pytest.mark.django_db
-def test_hard_delete_user(school, observation):
+def test_hard_delete_observation(school, observation):
     now = timezone.now()
     options = {
         "groups_earlier_than": now,

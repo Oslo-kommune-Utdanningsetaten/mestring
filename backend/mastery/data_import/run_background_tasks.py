@@ -8,7 +8,6 @@ import json
 from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
-from datetime import datetime
 from mastery.models import DataMaintenanceTask, generate_nanoid
 from .import_school import school_update
 from .import_groups import import_groups_from_file

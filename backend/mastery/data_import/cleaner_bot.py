@@ -42,20 +42,30 @@ def update_data_integrity(org_number, options):
 
     # Soft delete
     logger.debug("Begin soft-delete: %s", options)
-    changes["group"]["soft-deleted"] = soft_delete_groups(school, now, groups_earlier_than)
-    changes["user"]["soft-deleted"] = soft_delete_users(school, now, memberships_earlier_than)
-    changes["observation"]["soft-deleted"] = soft_delete_observations(school, now)
-    changes["goal"]["soft-deleted"] = soft_delete_goals(school, now)
-    changes["user_group"]["soft-deleted"] = soft_delete_user_groups(school, now, memberships_earlier_than)
+    try:
+        changes["group"]["soft-deleted"] = soft_delete_groups(school, now, groups_earlier_than)
+        changes["user"]["soft-deleted"] = soft_delete_users(school, now, memberships_earlier_than)
+        changes["observation"]["soft-deleted"] = soft_delete_observations(school, now)
+        changes["goal"]["soft-deleted"] = soft_delete_goals(school, now)
+        changes["user_group"]["soft-deleted"] = soft_delete_user_groups(school, now, memberships_earlier_than)
+    except Exception as e:
+        logger.error(f"Soft deletion failed for school {school.org_number}: {e}")
+        errors.append({"error": "soft-delete-failed",
+                      "message": f"Soft deletion for school {school.org_number} failed"})
     logger.debug(f"End soft-delete")
 
     # Hard delete
     logger.debug(f"Begin hard-delete of anything soft-deleted a sufficiently long time ago")
-    changes["group"]["hard-deleted"] = hard_delete_groups(school, now)
-    changes["user"]["hard-deleted"] = hard_delete_users(school, now)
-    changes["observation"]["hard-deleted"] = hard_delete_observations(school, now)
-    changes["goal"]["hard-deleted"] = hard_delete_goals(school, now)
-    changes["user_group"]["hard-deleted"] = hard_delete_user_groups(school, now)
+    try:
+        changes["group"]["hard-deleted"] = hard_delete_groups(school, now)
+        changes["user"]["hard-deleted"] = hard_delete_users(now)
+        changes["observation"]["hard-deleted"] = hard_delete_observations(school, now)
+        changes["goal"]["hard-deleted"] = hard_delete_goals(school, now)
+        changes["user_group"]["hard-deleted"] = hard_delete_user_groups(school, now)
+    except Exception as e:
+        logger.error(f"Hard deletion failed for school {school.org_number}: {e}")
+        errors.append({"error": "hard-delete-failed",
+                      "message": f"Hard deletion for school {school.org_number} failed"})
     logger.debug(f"End hard-delete")
 
     yield {
@@ -163,9 +173,10 @@ def hard_delete_groups(school, now):
     return count
 
 
-def hard_delete_users(school, now):
+def hard_delete_users(now):
     # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_USER days, hard delete
     # Note: This will cascade delete UserGroups, Personal Goals and Observations
+    # Note: Users exist across schools, so no school filtering here
     users = models.User.objects.filter(
         deleted_at__lt=now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_USER)
     )

@@ -182,7 +182,6 @@ def fetch_memberships_for_school(request, org_number):
 @api_view(["POST"])
 @permission_classes([ImportAccessPolicy])
 def fetch_groups_and_users(request, org_number):
-    print('fetch_groups_and_users called')
     school = models.School.objects.filter(org_number=org_number).first()
     if not school:
         return Response(
