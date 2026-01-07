@@ -1,7 +1,7 @@
 import logging
 from django.db.models import Q, Exists, OuterRef
 from .base import BaseAccessPolicy
-from mastery.models import Goal, UserGroup, UserSchool, Observation
+from mastery.models import Goal, UserGroup, UserSchool
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +75,8 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         if requester.is_superadmin:
             return qs
         try:
-            teacher_group_ids = list(requester.teacher_groups.values_list('id', flat=True))
+            teacher_group_ids = list(requester.teacher_groups.filter(
+                type='teaching').values_list('id', flat=True))
             teacher_basis_group_ids = list(requester.teacher_groups.filter(
                 type='basis').values_list('id', flat=True))
             school_employee_ids = UserSchool.objects.filter(
@@ -97,12 +98,13 @@ class ObservationAccessPolicy(BaseAccessPolicy):
                 filters |= Q(goal__group_id__in=teacher_group_ids)
 
                 # Observations on personal goals where teacher teaches that subject to that student
-                student_in_teacher_subject = UserGroup.objects.filter(
+                memberships_in_teacher_group_on_subject = UserGroup.objects.filter(
                     user_id=OuterRef('goal__student_id'),
                     group_id__in=teacher_group_ids,
                     group__subject_id=OuterRef('goal__subject_id'),
                 )
-                qs = qs.annotate(teacher_teaches_student_subject=Exists(student_in_teacher_subject))
+                qs = qs.annotate(teacher_teaches_student_subject=Exists(
+                    memberships_in_teacher_group_on_subject))
                 filters |= Q(goal__student__isnull=False, teacher_teaches_student_subject=True)
 
             # Basis teachers: All observations for students in their basis group
@@ -237,5 +239,5 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             return goal.school_id in school_admin_ids
 
         except Exception:
-            logger.exception("SubjectAccessPolicy.belongs_to_group")
+            logger.exception("SubjectAccessPolicy.belongs_to_school")
             return False
