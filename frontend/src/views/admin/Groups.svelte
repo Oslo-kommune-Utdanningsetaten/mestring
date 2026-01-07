@@ -286,11 +286,11 @@
       {:else}
         <!-- Header row -->
         <div class="group-grid-row header">
-          <span>Gruppe</span>
+          <span>Display Name</span>
           <span>Type</span>
           <span>Subject</span>
           <span>Enabled</span>
-          <span>Info</span>
+          <span>JSON</span>
         </div>
         <!-- Data rows -->
         {#each filteredGroups as group (group.id)}
