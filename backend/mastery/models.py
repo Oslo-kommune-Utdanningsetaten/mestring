@@ -382,7 +382,10 @@ class Status(BaseModel):
     """
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, related_name='statuses')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=False, related_name='statuses')
-    estimated_at = models.DateTimeField(null=True)
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False,
+                               related_name='statuses')  # for easier querying
+    begin_at = models.DateTimeField(null=False)  # begin and end define the period this status covers
+    end_at = models.DateTimeField(null=False)
     mastery_value = models.IntegerField(null=True)
     mastery_description = models.TextField(null=True)
     feedforward = models.TextField(null=True)
