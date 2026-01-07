@@ -5,6 +5,7 @@ import {
   masterySchemasList,
   rolesList,
   userSchoolsList,
+  groupsList,
 } from '../generated/sdk.gen'
 import type { SchoolType, MasterySchemaType, UserType } from '../generated/types.gen'
 import {
@@ -17,8 +18,46 @@ import {
   SUBJECTS_ALLOWED_CUSTOM,
   SCHOOL_ADMIN_ROLE,
   SCHOOL_INSPECTOR_ROLE,
+  TEACHER_ROLE,
+  STUDENT_ROLE,
+  PUBLIC_PATHS,
+  STUDENT_PATHS,
+  TEACHER_PATHS,
+  RESTRICTED_PATHS,
 } from '../utils/constants'
-import type { AppData } from '../types/models'
+import type { AppData, UserDecorated } from '../types/models'
+
+const setMasterySchemas = (schemas: MasterySchemaType[]) => {
+  // Default mastery schema is either system default, or user's preferred, or simply first in list
+  const defaultSchema =
+    schemas.find(schema => schema.isDefault) ||
+    schemas.find(schema => schema.id === getLocalStorageItem('preferredMasterySchemaId')) ||
+    (schemas.length > 0 ? schemas[0] : null)
+  dataStore.update(data => {
+    return { ...data, masterySchemas: schemas, defaultMasterySchema: defaultSchema }
+  })
+}
+
+const hasUserAccessToPath = (path: string): boolean => {
+  const currentData = get(dataStore) as AppData
+  const currentUser = currentData.currentUser
+  const { isSchoolAdmin, isSchoolInspector, isSuperadmin } = currentUser
+  const trimmedPath = path.split('/')[1]
+  // Not logged in can only access public paths
+  if (!currentUser) {
+    return PUBLIC_PATHS.includes(trimmedPath)
+  }
+  // Logged in students
+  if (STUDENT_PATHS.includes(trimmedPath)) return true
+  // Logged in teachers
+  if (TEACHER_PATHS.includes(trimmedPath)) return true
+  // Inspector or admin can access restricted paths
+  if ((isSchoolAdmin || isSchoolInspector) && RESTRICTED_PATHS.includes(trimmedPath)) {
+    return true
+  }
+  // Superadmin can access everything
+  return isSuperadmin
+}
 
 // When school changes, reset subjects, user status, and mastery schemas
 export const setCurrentSchool = (school: SchoolType) => {
@@ -36,49 +75,72 @@ export const setCurrentSchool = (school: SchoolType) => {
   }
 }
 
-const setMasterySchemas = (schemas: MasterySchemaType[]) => {
-  // Default mastery schema is either system default, or user's preferred, or simply first in list
-  const defaultSchema =
-    schemas.find(schema => schema.isDefault) ||
-    schemas.find(schema => schema.id === getLocalStorageItem('preferredMasterySchemaId')) ||
-    (schemas.length > 0 ? schemas[0] : null)
-  dataStore.update(data => {
-    return { ...data, masterySchemas: schemas, defaultMasterySchema: defaultSchema }
-  })
-}
-
 export const dataStore = writable<AppData>({
   subjects: [],
   currentSchool: null,
   currentUser: null,
   masterySchemas: [],
+  roles: [],
+  hasUserAccessToPath,
 })
 
-export const currentUser = derived(dataStore, d => d.currentUser)
+export const currentUser: UserDecorated = derived(dataStore, d => d.currentUser)
 
-export const setCurrentUser = (user: UserType | null) => {
+export const setCurrentUser = (user: UserDecorated | null) => {
   dataStore.update(data => ({ ...data, currentUser: user }))
 }
 
 export const registerUserStatus = async (school: SchoolType) => {
   const user = get(dataStore).currentUser
-  const userSchoolsResult = await userSchoolsList({
-    query: { user: user.id, school: school.id },
-  })
+  const [
+    schoolsResult,
+    userSchoolsResult,
+    teacherGroupsResult,
+    studentGroupsResult,
+    allGroupsResult,
+  ] = await Promise.all([
+    schoolsList({
+      query: { isServiceEnabled: true },
+    }),
+    userSchoolsList({
+      query: { user: user.id, school: school.id },
+    }),
+    groupsList({
+      query: { user: user.id, school: school.id, roles: TEACHER_ROLE },
+    }),
+    groupsList({
+      query: { user: user.id, school: school.id, roles: STUDENT_ROLE },
+    }),
+    groupsList({
+      query: { school: school.id },
+    }),
+  ])
+  const teacherGroups = teacherGroupsResult.data || []
+  const studentGroups = studentGroupsResult.data || []
+  const allGroups = allGroupsResult.data || []
   const userSchools = userSchoolsResult.data || []
-  const isSchoolAdmin = !!userSchools.some(userSchool => userSchool.role.name === SCHOOL_ADMIN_ROLE)
-  const isSchoolInspector = !!userSchools.some(
-    userSchool => userSchool.role.name === SCHOOL_INSPECTOR_ROLE
+  const schools = schoolsResult.data || []
+
+  const isSchoolAdmin = !!userSchools.some(
+    userSchool => userSchool.role.name === SCHOOL_ADMIN_ROLE && userSchool.school.id === school.id
   )
-  dataStore.update(data => ({
-    ...data,
+  const isSchoolInspector = !!userSchools.some(
+    userSchool =>
+      userSchool.role.name === SCHOOL_INSPECTOR_ROLE && userSchool.school.id === school.id
+  )
+  const userDecorated: UserDecorated = {
+    ...user,
+    schools,
+    allGroups,
+    teacherGroups,
+    studentGroups,
     isSchoolAdmin,
     isSchoolInspector,
-    isSuperadmin: user.isSuperadmin,
-  }))
+  }
+  setCurrentUser(userDecorated)
 }
 
-const loadSchool = async () => {
+const loadSchools = async () => {
   let schools: SchoolType[] = []
   try {
     const result = await schoolsList()
@@ -166,15 +228,11 @@ const registerRoles = async (): Promise<void> => {
 export const loadData = async () => {
   try {
     const existingUser = get(dataStore).currentUser
-    dataStore.set({
-      currentSchool: null,
-      currentUser: existingUser,
-      subjects: [],
-      masterySchemas: [],
-      roles: [],
+    dataStore.update(data => {
+      return { ...data, currentUser: existingUser }
     })
     await registerRoles()
-    await loadSchool()
+    await loadSchools()
   } catch (error) {
     console.error('Failed to load data:', error)
   }

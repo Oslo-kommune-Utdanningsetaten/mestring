@@ -3,17 +3,16 @@
   import '@oslokommune/punkt-elements/dist/pkt-textinput.js'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { dataStore } from '../stores/data'
-  import { urlStringFrom, fetchSubjectsForStudents } from '../utils/functions'
+  import { urlStringFrom } from '../utils/functions'
   import StudentRow from '../components/StudentRow.svelte'
   import { STUDENT_ROLE } from '../utils/constants'
-  import { groupsList, usersList } from '../generated/sdk.gen'
+  import { subjectsList, usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
 
   const router = useTinyRouter()
   let selectedGroupId = $state<string | undefined>(undefined)
-  let allGroups = $state<GroupType[]>([])
+  let allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
   let students = $state<UserType[]>([])
-  let isLoadingGroups = $state<boolean>(false)
   let isLoadingStudents = $state<boolean>(false)
   let nameFilter = $state<string>('')
   let subjects = $state<SubjectType[]>([])
@@ -37,25 +36,6 @@
     return text
   })
 
-  const fetchGroups = async () => {
-    if (!currentSchool) return
-    try {
-      isLoadingGroups = true
-      const result = await groupsList({
-        query: {
-          school: currentSchool?.id,
-          isEnabled: true,
-        },
-      })
-      allGroups = result.data || []
-    } catch (error) {
-      console.error('Error fetching groups:', error)
-      allGroups = []
-    } finally {
-      isLoadingGroups = false
-    }
-  }
-
   const fetchStudents = async () => {
     if (!currentSchool) return
     try {
@@ -67,10 +47,11 @@
         query: queryOptions,
       })
       students = studentsResult.data || []
-      await fetchSubjectsForStudents(students, $dataStore.subjects, currentSchool.id).then(
-        fetchedSubjects => {
-          subjects = fetchedSubjects
-        }
+      const subjectsResult = await subjectsList({
+        query: { school: currentSchool.id, students: students.map(s => s.id).join(',') },
+      })
+      subjects = (subjectsResult.data || []).sort((a, b) =>
+        a.displayName.localeCompare(b.displayName)
       )
     } catch (error) {
       console.error('Error fetching members', { selectedGroupId, error })
@@ -90,9 +71,7 @@
 
   $effect(() => {
     if (currentSchool && currentSchool.id) {
-      fetchGroups().then(() => {
-        fetchStudents()
-      })
+      fetchStudents()
     }
   })
 
@@ -109,33 +88,26 @@
   <h2 class="py-3">{headerText}</h2>
   <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">
-    {#if isLoadingGroups}
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Henter data...</span>
-      </div>
-      <span>Henter grupper...</span>
-    {:else}
-      <div class="pkt-inputwrapper">
-        <select
-          class="pkt-input"
-          id="groupSelect"
-          onchange={(e: Event) => handleGroupSelect((e.target as HTMLSelectElement).value)}
-        >
-          <option value="0" selected={!selectedGroupId}>Velg gruppe</option>
-          {#each allGroups as group}
-            <option value={group.id} selected={group.id === selectedGroupId}>
-              {group.displayName}
-            </option>
-          {/each}
-        </select>
-      </div>
-      <input type="text" class="filterStudentsByName" placeholder="Navn" bind:value={nameFilter} />
-    {/if}
+    <div class="pkt-inputwrapper">
+      <select
+        class="pkt-input"
+        id="groupSelect"
+        onchange={(e: Event) => handleGroupSelect((e.target as HTMLSelectElement).value)}
+      >
+        <option value="0" selected={!selectedGroupId}>Velg gruppe</option>
+        {#each allGroups as group}
+          <option value={group.id} selected={group.id === selectedGroupId}>
+            {group.displayName}
+          </option>
+        {/each}
+      </select>
+    </div>
+    <input type="text" class="filterStudentsByName" placeholder="Navn" bind:value={nameFilter} />
   </div>
 </section>
 
 <section class="py-3">
-  {#if isLoadingStudents || isLoadingGroups}
+  {#if isLoadingStudents}
     <div class="mt-3 spinner-border text-primary" role="status">
       <span class="visually-hidden">Henter data...</span>
     </div>

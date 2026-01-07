@@ -1,7 +1,7 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { useTinyRouter } from 'svelte-tiny-router'
-  import { subjectsDestroy, subjectsList, schoolsList, groupsList } from '../../generated/sdk.gen'
+  import { subjectsDestroy, subjectsList, schoolsList } from '../../generated/sdk.gen'
   import type { SubjectType, SchoolType, GroupType } from '../../generated/types.gen'
   import { urlStringFrom } from '../../utils/functions'
   import ButtonMini from '../../components/ButtonMini.svelte'
@@ -66,14 +66,12 @@
   const fetchGroups = async (subjectId: string) => {
     if (!selectedSchool) return
     if (Object.hasOwn(groupsBySubjectId, subjectId)) return
-
     groupsBySubjectId[subjectId] = []
     try {
-      const groupResult = await groupsList({
-        query: { subject: subjectId, school: selectedSchool.id },
-      })
-      const groups = groupResult.data || []
-      groups.forEach(group => groupsBySubjectId[subjectId].push(group))
+      const groups = $dataStore.currentUser.allGroups.filter(
+        (group: GroupType) => group.subjectId === subjectId
+      )
+      groups.forEach((group: GroupType) => groupsBySubjectId[subjectId].push(group))
       groupsBySubjectId = { ...groupsBySubjectId }
     } catch (error) {
       console.error('Error fetching group:', error)
@@ -254,7 +252,7 @@
       <span class="item header header-row">Eies av</span>
       <span class="item header header-row">Elever</span>
       <span class="item header header-row">Grupper</span>
-      <span class="item header header-row">Fagkoder</span>
+      <span class="item header header-row">Fagkode</span>
       <span class="item header header-row">Handlinger</span>
       {#each filteredSubjects as subject (subject.id)}
         <!-- Fag navn -->

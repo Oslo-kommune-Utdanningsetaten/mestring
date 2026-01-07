@@ -51,46 +51,6 @@ export const urlStringFrom = (
   )
 }
 
-// Fetch subjects for the given students to build the grid headers
-// based on subjects linked to their goals and groups
-export const fetchSubjectsForStudents = async (
-  students: UserType[],
-  allSubjects: SubjectType[],
-  schoolId: string
-): Promise<SubjectType[]> => {
-  const subjectIds = new Set<string>()
-
-  const data = await Promise.all(
-    students.map(async student => {
-      const goalsResult = await goalsList({
-        query: { student: student.id },
-      })
-      const goals: GoalType[] = goalsResult.data || []
-      const groupsResult: any = await groupsList({
-        query: { user: student.id, school: schoolId },
-      })
-      const groups: GroupType[] = groupsResult.data || []
-      return { goals, groups }
-    })
-  )
-
-  data.forEach(({ goals, groups }) => {
-    goals.forEach(goal => {
-      if (goal.subjectId) subjectIds.add(goal.subjectId)
-    })
-    groups.forEach(group => {
-      if (group.subjectId) subjectIds.add(group.subjectId)
-    })
-  })
-
-  const subjects: SubjectType[] = Array.from(subjectIds)
-    .map(subjectId => allSubjects.find(s => s.id === subjectId))
-    .filter((subject): subject is SubjectType => !!subject)
-    .sort((a, b) => a.displayName.localeCompare(b.displayName))
-
-  return subjects
-}
-
 export const subjectNamesFromStudentGoals = (
   goals: GoalType[],
   allSubjects: SubjectType[]
@@ -124,30 +84,6 @@ export const goalsWithCalculatedMastery = async (
     result.push(decoratedGoal)
   })
   return result
-}
-
-export const subjectIdsViaGroupOrGoal = async (
-  studentId: string,
-  schoolId: string
-): Promise<string[]> => {
-  const subjectsId: Set<string> = new Set()
-  const groupsResult: any = await groupsList({
-    query: { user: studentId, school: schoolId },
-  })
-  const userGroups = groupsResult.data || []
-  userGroups.forEach((group: any) => {
-    if (group.subjectId && group.type === 'teaching') {
-      subjectsId.add(group.subjectId)
-    }
-  })
-  const goalsResult: any = await goalsList({ query: { student: studentId } })
-  const userGoals = goalsResult.data || []
-  userGoals.forEach((goal: GoalType) => {
-    if (goal.subjectId) {
-      subjectsId.add(goal.subjectId)
-    }
-  })
-  return Array.from(subjectsId)
 }
 
 // For a single student, output goals grouped by subjectId, with mastery data calculated

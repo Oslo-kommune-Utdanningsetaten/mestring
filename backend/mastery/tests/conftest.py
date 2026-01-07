@@ -287,28 +287,31 @@ def subject_owned_by_other_school(db, other_school):
 
 
 @pytest.fixture
-def goal_with_group(db, teaching_group_with_members):
+def goal_with_group(db, school, teaching_group_with_members):
     return Goal.objects.create(
         title="Lese 2 bøker",
         group=teaching_group_with_members,
+        school=school,
     )
 
 
 @pytest.fixture
-def goal_personal(db, student, subject_owned_by_school):
+def goal_personal(db, school, student, subject_owned_by_school):
     return Goal.objects.create(
         title="Lese 2 bøker",
         student=student,
         subject=subject_owned_by_school,
+        school=school,
     )
 
 
 @pytest.fixture
-def goal_personal_other_student(db, subject_owned_by_school, other_student):
+def goal_personal_other_student(db, school, subject_owned_by_school, other_student):
     return Goal.objects.create(
         title="Lese 2 bøker",
         student=other_student,
         subject=subject_owned_by_school,
+        school=school
     )
 
 
@@ -323,25 +326,24 @@ def mastery_schema(db, school):
                 {
                     "text": "Gjengi",
                     "color": "rgb(229, 50, 43)",
-                    "maxValue": 33,
-                    "minValue": 1
+                    "max_value": 33,
+                    "min_value": 1
                 },
                 {
                     "text": "Forklare",
                     "color": "rgb(255, 204, 0)",
-                    "maxValue": 66,
-                    "minValue": 34
+                    "max_value": 66,
+                    "min_value": 34
                 },
                 {
                     "text": "Se sammenhenger",
                     "color": "rgb(23, 231, 21)",
-                    "maxValue": 100,
-                    "minValue": 67
+                    "max_value": 100,
+                    "min_value": 67
                 },
             ],
-            "inputIncrement": 1,
-            "renderDirection": "horizontal",
-            "isColorGradientEnabled": False
+            "input_increment": 1,
+            "render_direction": "horizontal",
         },
     )
 
@@ -408,16 +410,51 @@ def observation_on_personal_goal_other_student(db, other_student, goal_personal_
 
 
 @pytest.fixture
-def other_school_group_goal(db, other_school_teaching_group_with_members):
+def other_school_group_goal(db, other_school, other_school_teaching_group_with_members):
     return Goal.objects.create(
         title="Lese 2 bøker",
         group=other_school_teaching_group_with_members,
+        school=other_school,
     )
 
 
 @pytest.fixture
-def other_school_personal_goal(db, other_school_student):
+def other_school_personal_goal(db, other_school, other_school_student):
     return Goal.objects.create(
         title="Lese 2 bøker",
         student=other_school_student,
+        school=other_school,
     )
+
+
+@pytest.fixture
+def groups_data(db, school):
+    school_feide_id = school.feide_id
+    teaching = school_feide_id.replace(":unit:", ":u:")
+    basis = school_feide_id.replace(":unit:", ":b:")
+    return {
+        "teaching": [{
+            "id": f"{teaching}:udg-fg-kropps%C3%B8ving%202e:2025-06-05:2026-06-04",
+            "type": "fc:gogroup",
+            "displayName": "Kroppsøving 2E",
+            "notBefore": "2025-06-04T22:00:00Z",
+            "notAfter": "2026-06-04T22:00:00Z",
+            "go_type": "u",
+            "parent": school_feide_id,
+            "go_type_displayName": "undervisningsgruppe",
+            "grep": {
+                "displayName": "Kroppsøving 2. årstrinn",
+                "code": "KRO0012"
+            }
+        }],
+        "basis": [{
+            "id": f"{basis}:udg-kl-4b:2025-06-05:2026-06-04",
+            "type": "fc:gogroup",
+            "displayName": "4B",
+            "notBefore": "2025-06-04T22:00:00Z",
+            "notAfter": "2026-06-04T22:00:00Z",
+            "go_type": "b",
+            "parent": school_feide_id,
+            "go_type_displayName": "basisgruppe"
+        }]
+    }

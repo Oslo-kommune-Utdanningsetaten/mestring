@@ -24,7 +24,7 @@ def _fetch_groups(url, token):
     if groups_response.status_code != 200:
         logger.error("Failed to fetch groups: %d %s", groups_response.status_code, groups_response.text)
         raise Exception(f"Failed to fetch groups: {groups_response.status_code}: {groups_response.text}")
-    
+
     groups = groups_response.json()
 
     result = {
@@ -199,9 +199,11 @@ def fetch_memberships_from_feide(org_number: str):
         members_response = requests.get(group_members_url, headers={"Authorization": "Bearer " + token})
 
         if members_response.status_code != 200:
-            logger.error("Failed to fetch members for group %s: HTTP %d", group_id, members_response.status_code)
+            logger.error("Failed to fetch members for group %s: HTTP %d",
+                         group_id, members_response.status_code)
             errors.append({"error": "fetch-error", "message": f"Failed to fetch members for group {group_id}"})
-            raise Exception(f"Failed to fetch members for group {group_id}: HTTP {members_response.status_code}")
+            raise Exception(
+                f"Failed to fetch members for group {group_id}: HTTP {members_response.status_code}")
 
         memberships[group_id] = {"teachers": [], "students": [], "other": []}
         feide_group_members = members_response.json() or []
@@ -213,11 +215,11 @@ def fetch_memberships_from_feide(org_number: str):
             feide_id = user_item.get('feide_id')
             unique_users.add(feide_id)
 
-            affiliation = (user_item.get('affiliation') or '').lower()
-            if affiliation == 'student':
+            affiliations = user_item.get('affiliations', [])
+            if 'student' in affiliations:
                 memberships[group_id]['students'].append(user_item)
                 total_student_memberships += 1
-            elif affiliation == 'faculty':
+            elif 'faculty' in affiliations:
                 memberships[group_id]['teachers'].append(user_item)
                 total_teacher_memberships += 1
             else:

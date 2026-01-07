@@ -1,6 +1,12 @@
 <script lang="ts">
   import { goalsCreate, goalsUpdate } from '../generated/sdk.gen'
-  import type { GoalType, GroupType, UserType, SubjectType } from '../generated/types.gen'
+  import type {
+    GoalType,
+    GroupType,
+    UserType,
+    SubjectType,
+    GoalCreateType,
+  } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
   import { setLocalStorageItem } from '../stores/localStorage'
   import ButtonMini from './ButtonMini.svelte'
@@ -66,11 +72,11 @@
       if (localGoal.id) {
         await goalsUpdate({
           path: { id: localGoal.id },
-          body: localGoal,
+          body: localGoal as GoalType,
         })
       } else {
         await goalsCreate({
-          body: localGoal,
+          body: localGoal as GoalCreateType,
         })
       }
       if (onDone) {

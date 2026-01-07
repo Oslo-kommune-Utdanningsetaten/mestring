@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AuthStatusRetrieveData, AuthStatusRetrieveResponses, DataMaintenanceTasksCreateData, DataMaintenanceTasksCreateResponses, DataMaintenanceTasksDestroyData, DataMaintenanceTasksDestroyResponses, DataMaintenanceTasksListData, DataMaintenanceTasksListResponses, DataMaintenanceTasksPartialUpdateData, DataMaintenanceTasksPartialUpdateResponses, DataMaintenanceTasksRetrieveData, DataMaintenanceTasksRetrieveResponses, DataMaintenanceTasksUpdateData, DataMaintenanceTasksUpdateResponses, FeideImportSchoolData, FeideImportSchoolResponses, FetchGroupsForSchoolData, FetchGroupsForSchoolResponses, FetchMembershipsForSchoolData, FetchMembershipsForSchoolResponses, FetchSchoolImportStatusData, FetchSchoolImportStatusResponses, GoalsCreateData, GoalsCreateResponses, GoalsDestroyData, GoalsDestroyResponses, GoalsListData, GoalsListResponses, GoalsPartialUpdateData, GoalsPartialUpdateResponses, GoalsRetrieveData, GoalsRetrieveResponses, GoalsUpdateData, GoalsUpdateResponses, GroupsCreateData, GroupsCreateResponses, GroupsDestroyData, GroupsDestroyResponses, GroupsListData, GroupsListResponses, GroupsPartialUpdateData, GroupsPartialUpdateResponses, GroupsRetrieveData, GroupsRetrieveResponses, GroupsUpdateData, GroupsUpdateResponses, ImportGroupsAndUsersData, ImportGroupsAndUsersResponses, MasterySchemasCreateData, MasterySchemasCreateResponses, MasterySchemasDestroyData, MasterySchemasDestroyResponses, MasterySchemasListData, MasterySchemasListResponses, MasterySchemasPartialUpdateData, MasterySchemasPartialUpdateResponses, MasterySchemasRetrieveData, MasterySchemasRetrieveResponses, MasterySchemasUpdateData, MasterySchemasUpdateResponses, ObservationsCreateData, ObservationsCreateResponses, ObservationsDestroyData, ObservationsDestroyResponses, ObservationsListData, ObservationsListResponses, ObservationsPartialUpdateData, ObservationsPartialUpdateResponses, ObservationsRetrieveData, ObservationsRetrieveResponses, ObservationsUpdateData, ObservationsUpdateResponses, PingRetrieveData, PingRetrieveResponses, RolesCreateData, RolesCreateResponses, RolesDestroyData, RolesDestroyResponses, RolesListData, RolesListResponses, RolesPartialUpdateData, RolesPartialUpdateResponses, RolesRetrieveData, RolesRetrieveResponses, RolesUpdateData, RolesUpdateResponses, SchoolsCreateData, SchoolsCreateResponses, SchoolsDestroyData, SchoolsDestroyResponses, SchoolsListData, SchoolsListResponses, SchoolsPartialUpdateData, SchoolsPartialUpdateResponses, SchoolsRetrieveData, SchoolsRetrieveResponses, SchoolsUpdateData, SchoolsUpdateResponses, SituationsCreateData, SituationsCreateResponses, SituationsDestroyData, SituationsDestroyResponses, SituationsListData, SituationsListResponses, SituationsPartialUpdateData, SituationsPartialUpdateResponses, SituationsRetrieveData, SituationsRetrieveResponses, SituationsUpdateData, SituationsUpdateResponses, StatusCreateData, StatusCreateResponses, StatusDestroyData, StatusDestroyResponses, StatusListData, StatusListResponses, StatusPartialUpdateData, StatusPartialUpdateResponses, StatusRetrieveData, StatusRetrieveResponses, StatusUpdateData, StatusUpdateResponses, SubjectsCreateData, SubjectsCreateResponses, SubjectsDestroyData, SubjectsDestroyResponses, SubjectsListData, SubjectsListResponses, SubjectsPartialUpdateData, SubjectsPartialUpdateResponses, SubjectsRetrieveData, SubjectsRetrieveResponses, SubjectsUpdateData, SubjectsUpdateResponses, UserGroupsCreateData, UserGroupsCreateResponses, UserGroupsDestroyData, UserGroupsDestroyResponses, UserGroupsListData, UserGroupsListResponses, UserGroupsPartialUpdateData, UserGroupsPartialUpdateResponses, UserGroupsRetrieveData, UserGroupsRetrieveResponses, UserGroupsUpdateData, UserGroupsUpdateResponses, UserSchoolsCreateData, UserSchoolsCreateResponses, UserSchoolsDestroyData, UserSchoolsDestroyResponses, UserSchoolsListData, UserSchoolsListResponses, UserSchoolsPartialUpdateData, UserSchoolsPartialUpdateResponses, UserSchoolsRetrieveData, UserSchoolsRetrieveResponses, UserSchoolsUpdateData, UserSchoolsUpdateResponses, UsersCreateData, UsersCreateResponses, UsersDestroyData, UsersDestroyResponses, UsersListData, UsersListResponses, UsersPartialUpdateData, UsersPartialUpdateResponses, UsersRetrieveData, UsersRetrieveResponses, UsersUpdateData, UsersUpdateResponses } from './types.gen';
+import type { AuthStatusRetrieveData, AuthStatusRetrieveResponses, DataMaintenanceTasksCreateData, DataMaintenanceTasksCreateResponses, DataMaintenanceTasksDestroyData, DataMaintenanceTasksDestroyResponses, DataMaintenanceTasksListData, DataMaintenanceTasksListResponses, DataMaintenanceTasksPartialUpdateData, DataMaintenanceTasksPartialUpdateResponses, DataMaintenanceTasksRetrieveData, DataMaintenanceTasksRetrieveResponses, DataMaintenanceTasksUpdateData, DataMaintenanceTasksUpdateResponses, FeideImportSchoolData, FeideImportSchoolResponses, FetchGroupsAndUsersData, FetchGroupsAndUsersResponses, FetchGroupsForSchoolData, FetchGroupsForSchoolResponses, FetchMembershipsForSchoolData, FetchMembershipsForSchoolResponses, FetchSchoolImportStatusData, FetchSchoolImportStatusResponses, GoalsCreateData, GoalsCreateResponses, GoalsDestroyData, GoalsDestroyResponses, GoalsListData, GoalsListResponses, GoalsPartialUpdateData, GoalsPartialUpdateResponses, GoalsRetrieveData, GoalsRetrieveResponses, GoalsUpdateData, GoalsUpdateResponses, GroupsCreateData, GroupsCreateResponses, GroupsDestroyData, GroupsDestroyResponses, GroupsListData, GroupsListResponses, GroupsPartialUpdateData, GroupsPartialUpdateResponses, GroupsRetrieveData, GroupsRetrieveResponses, GroupsUpdateData, GroupsUpdateResponses, ImportGroupsAndUsersData, ImportGroupsAndUsersResponses, MasterySchemasCreateData, MasterySchemasCreateResponses, MasterySchemasDestroyData, MasterySchemasDestroyResponses, MasterySchemasListData, MasterySchemasListResponses, MasterySchemasPartialUpdateData, MasterySchemasPartialUpdateResponses, MasterySchemasRetrieveData, MasterySchemasRetrieveResponses, MasterySchemasUpdateData, MasterySchemasUpdateResponses, ObservationsCreateData, ObservationsCreateResponses, ObservationsDestroyData, ObservationsDestroyResponses, ObservationsListData, ObservationsListResponses, ObservationsPartialUpdateData, ObservationsPartialUpdateResponses, ObservationsRetrieveData, ObservationsRetrieveResponses, ObservationsUpdateData, ObservationsUpdateResponses, PingRetrieveData, PingRetrieveResponses, RolesCreateData, RolesCreateResponses, RolesDestroyData, RolesDestroyResponses, RolesListData, RolesListResponses, RolesPartialUpdateData, RolesPartialUpdateResponses, RolesRetrieveData, RolesRetrieveResponses, RolesUpdateData, RolesUpdateResponses, SchoolsCreateData, SchoolsCreateResponses, SchoolsDestroyData, SchoolsDestroyResponses, SchoolsListData, SchoolsListResponses, SchoolsPartialUpdateData, SchoolsPartialUpdateResponses, SchoolsRetrieveData, SchoolsRetrieveResponses, SchoolsUpdateData, SchoolsUpdateResponses, SituationsCreateData, SituationsCreateResponses, SituationsDestroyData, SituationsDestroyResponses, SituationsListData, SituationsListResponses, SituationsPartialUpdateData, SituationsPartialUpdateResponses, SituationsRetrieveData, SituationsRetrieveResponses, SituationsUpdateData, SituationsUpdateResponses, StatusCreateData, StatusCreateResponses, StatusDestroyData, StatusDestroyResponses, StatusListData, StatusListResponses, StatusPartialUpdateData, StatusPartialUpdateResponses, StatusRetrieveData, StatusRetrieveResponses, StatusUpdateData, StatusUpdateResponses, SubjectsCreateData, SubjectsCreateResponses, SubjectsDestroyData, SubjectsDestroyResponses, SubjectsListData, SubjectsListResponses, SubjectsPartialUpdateData, SubjectsPartialUpdateResponses, SubjectsRetrieveData, SubjectsRetrieveResponses, SubjectsUpdateData, SubjectsUpdateResponses, UpdateDataIntegrityData, UpdateDataIntegrityResponses, UserGroupsCreateData, UserGroupsCreateResponses, UserGroupsDestroyData, UserGroupsDestroyResponses, UserGroupsListData, UserGroupsListResponses, UserGroupsPartialUpdateData, UserGroupsPartialUpdateResponses, UserGroupsRetrieveData, UserGroupsRetrieveResponses, UserGroupsUpdateData, UserGroupsUpdateResponses, UserSchoolsCreateData, UserSchoolsCreateResponses, UserSchoolsDestroyData, UserSchoolsDestroyResponses, UserSchoolsListData, UserSchoolsListResponses, UserSchoolsPartialUpdateData, UserSchoolsPartialUpdateResponses, UserSchoolsRetrieveData, UserSchoolsRetrieveResponses, UserSchoolsUpdateData, UserSchoolsUpdateResponses, UsersCreateData, UsersCreateResponses, UsersDestroyData, UsersDestroyResponses, UsersListData, UsersListResponses, UsersPartialUpdateData, UsersPartialUpdateResponses, UsersRetrieveData, UsersRetrieveResponses, UsersUpdateData, UsersUpdateResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -85,6 +85,18 @@ export const fetchGroupsForSchool = <ThrowOnError extends boolean = false>(optio
 };
 
 /**
+ * Fetch group and user data for a school
+ *
+ * Fetch group memberships for a single school (by org number) and store at data_import/data/schools/<org>/users.json. Also fetch groups into data_import/data/schools/<org>/memberships.json.
+ */
+export const fetchGroupsAndUsers = <ThrowOnError extends boolean = false>(options: Options<FetchGroupsAndUsersData, ThrowOnError>) => {
+    return (options.client ?? client).post<FetchGroupsAndUsersResponses, unknown, ThrowOnError>({
+        url: '/api/fetch/groups_and_users/feide/{org_number}/',
+        ...options
+    });
+};
+
+/**
  * Fetch group memberships for school
  *
  * Fetch group memberships for a single school (by org number) and store at data_import/data/schools/<org>/users.json
@@ -115,13 +127,13 @@ export const goalsList = <ThrowOnError extends boolean = false>(options?: Option
     });
 };
 
-export const goalsCreate = <ThrowOnError extends boolean = false>(options?: Options<GoalsCreateData, ThrowOnError>) => {
-    return (options?.client ?? client).post<GoalsCreateResponses, unknown, ThrowOnError>({
+export const goalsCreate = <ThrowOnError extends boolean = false>(options: Options<GoalsCreateData, ThrowOnError>) => {
+    return (options.client ?? client).post<GoalsCreateResponses, unknown, ThrowOnError>({
         url: '/api/goals/',
         ...options,
         headers: {
             'Content-Type': 'application/json',
-            ...options?.headers
+            ...options.headers
         }
     });
 };
@@ -240,6 +252,18 @@ export const importGroupsAndUsers = <ThrowOnError extends boolean = false>(optio
     });
 };
 
+/**
+ * Ensure data integrity is as expected
+ *
+ * Soft-delete data which has not been maintained during imports, and hard-delete data which has been soft-deleted for a sufficient time.
+ */
+export const updateDataIntegrity = <ThrowOnError extends boolean = false>(options: Options<UpdateDataIntegrityData, ThrowOnError>) => {
+    return (options.client ?? client).post<UpdateDataIntegrityResponses, unknown, ThrowOnError>({
+        url: '/api/import/update_data_integrity/{org_number}/',
+        ...options
+    });
+};
+
 export const masterySchemasList = <ThrowOnError extends boolean = false>(options?: Options<MasterySchemasListData, ThrowOnError>) => {
     return (options?.client ?? client).get<MasterySchemasListResponses, unknown, ThrowOnError>({
         url: '/api/mastery-schemas/',
@@ -247,13 +271,13 @@ export const masterySchemasList = <ThrowOnError extends boolean = false>(options
     });
 };
 
-export const masterySchemasCreate = <ThrowOnError extends boolean = false>(options?: Options<MasterySchemasCreateData, ThrowOnError>) => {
-    return (options?.client ?? client).post<MasterySchemasCreateResponses, unknown, ThrowOnError>({
+export const masterySchemasCreate = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasCreateData, ThrowOnError>) => {
+    return (options.client ?? client).post<MasterySchemasCreateResponses, unknown, ThrowOnError>({
         url: '/api/mastery-schemas/',
         ...options,
         headers: {
             'Content-Type': 'application/json',
-            ...options?.headers
+            ...options.headers
         }
     });
 };

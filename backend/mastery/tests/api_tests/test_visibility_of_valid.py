@@ -3,7 +3,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 from mastery.models import Group
 
-# These tests verify visibility of soft-deleted groups and users, via the API
+# Verify visibility of soft-deleted groups and users, via the API
 
 
 @pytest.fixture

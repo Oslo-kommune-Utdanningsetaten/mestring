@@ -2,6 +2,7 @@ from django.utils import timezone
 from django.db import models
 from django.db.models import Q
 from nanoid import generate
+from .querysets import GroupQuerySet
 
 ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
@@ -109,7 +110,7 @@ class Subject(BaseModel):
     """
     display_name = models.CharField(max_length=200)
     short_name = models.CharField(max_length=200)
-    owned_by_school = models.ForeignKey(School, on_delete=models.RESTRICT,
+    owned_by_school = models.ForeignKey(School, on_delete=models.CASCADE,
                                         null=True, related_name='owned_subjects')
     grep_code = models.CharField(max_length=200, null=True)  # UDIR grep code
     grep_group_code = models.CharField(max_length=200, null=True)  # UDIR grep code opplæringsfag
@@ -201,25 +202,22 @@ class Role(BaseModel):
 
 class Group(BaseModel):
     """
-    A Group represents a collection of Users in the system. Basis and teaching groups will be the most common, but School will also be modeled as a Group
+    A Group represents a collection of Users in the system. Basis and teaching groups are the only types so far.
     """
+    objects = GroupQuerySet.as_manager()  # Enable custom querysets
+
     feide_id = models.CharField(max_length=200, unique=True)
     display_name = models.CharField(max_length=200)
     type = models.CharField(max_length=200)  # either 'basis' or 'teaching' for now
-    subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True, related_name='groups')
-    school = models.ForeignKey(School, on_delete=models.RESTRICT, null=False, related_name='groups')
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name='groups')
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='groups')
     valid_from = models.DateTimeField(null=True)
     valid_to = models.DateTimeField(null=True)
     is_enabled = models.BooleanField(default=False)  # whether the group is active in the system
 
     def is_currently_valid(self):
         """Return True if in valid_from <--> valid_to range, or if no range is set"""
-        now = timezone.now()
-        if self.valid_from and now < self.valid_from:
-            return False
-        if self.valid_to and now > self.valid_to:
-            return False
-        return True
+        return Group.objects.filter(id=self.id).within_validity_period().exists()
 
     def get_members(self, role=None):
         """
@@ -295,8 +293,28 @@ class MasterySchema(BaseModel):
     title = models.CharField(max_length=200, null=False, default="Navnløst mestringsskjema")
     description = models.TextField(null=True)
     config = models.JSONField(null=True)
-    school = models.ForeignKey(School, on_delete=models.CASCADE, null=True, related_name='mastery_schemas')
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='mastery_schemas')
     is_default = models.BooleanField(default=False)  # is this the default schema for the school
+
+    def get_value_range(self):
+        """
+        Returns (min_value, max_value) tuple from the schema's config levels.
+        Returns (None, None) if config or levels are not defined.
+        """
+        if not self.config:
+            return None, None
+
+        levels = self.config.get('levels', [])
+        if not levels:
+            return None, None
+
+        all_min_values = [level.get('min_value') for level in levels if level.get('min_value') is not None]
+        all_max_values = [level.get('max_value') for level in levels if level.get('max_value') is not None]
+
+        if not all_min_values or not all_max_values:
+            return None, None
+
+        return min(all_min_values), max(all_max_values)
 
 
 class Goal(BaseModel):
@@ -307,12 +325,14 @@ class Goal(BaseModel):
     """
     title = models.CharField(max_length=200, null=True)
     description = models.TextField(null=True)
-    group = models.ForeignKey(Group, on_delete=models.RESTRICT, null=True, related_name='goals')
-    student = models.ForeignKey(User, on_delete=models.RESTRICT, null=True, related_name='goals')
-    subject = models.ForeignKey(Subject, on_delete=models.RESTRICT, null=True, related_name='goals')
-    previous_goal = models.ForeignKey('Goal', on_delete=models.RESTRICT, null=True)
+    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, related_name='goals')
+    student = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='goals')
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name='goals')
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False,
+                               related_name='goals')  # for easier querying
+    previous_goal = models.ForeignKey('Goal', on_delete=models.SET_NULL, null=True)
     mastery_schema = models.ForeignKey(
-        MasterySchema, on_delete=models.RESTRICT, null=True, related_name='goals')
+        MasterySchema, on_delete=models.SET_NULL, null=True, related_name='goals')
     sort_order = models.IntegerField(null=True)
     is_relevant = models.BooleanField(default=True)  # keep old goals for history
 
@@ -340,7 +360,7 @@ class Observation(BaseModel):
     """
     An Observation represents an observation of a student, performed by a teacher or student. Only teachers, inspectors and admins can access an observation if is_visible_to_student is False.
     """
-    goal = models.ForeignKey(Goal, on_delete=models.RESTRICT, null=False, related_name='observations')
+    goal = models.ForeignKey(Goal, on_delete=models.CASCADE, null=False, related_name='observations')
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False,
                                 related_name='observations_received')
     observer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
@@ -358,7 +378,7 @@ class Observation(BaseModel):
 
 class Status(BaseModel):
     """
-    A status represents a snapshot of a students mastery at a point in time, typically in a subject, e.g. how is Lois doing in math (all math Goals are then considered)
+    A status represents an overall assessment of a students mastery in a subject, over a period of time. E.g. how has Lois been doing in math since October, considering all math Goals (individual and group).
     """
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, related_name='statuses')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=False, related_name='statuses')

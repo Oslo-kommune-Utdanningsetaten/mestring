@@ -1,14 +1,13 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { dataStore } from '../stores/data'
-  import type { UserType, ObservationType, GoalType } from '../generated/types.gen'
+  import type { UserType, ObservationType, GoalType, GroupType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import {
     observationsDestroy,
     goalsDestroy,
     goalsUpdate,
     goalsList,
-    groupsList,
     goalsCreate,
   } from '../generated/sdk.gen'
   import { goalsWithCalculatedMasteryBySubjectId } from '../utils/functions'
@@ -49,10 +48,10 @@
       const goalsResult = await goalsList({ query: { student: student.id, subject: subjectId } })
       const goals = goalsResult.data || []
       const groupIds = goals.map(goal => goal.groupId).filter(Boolean) as string[]
-      const groupsResult = await groupsList({
-        query: { ids: groupIds.join(','), school: $dataStore.currentSchool.id },
-      })
-      const groups = groupsResult.data || []
+      const groups = $dataStore.currentUser.allGroups.filter((group: GroupType) =>
+        groupIds.includes(group.id)
+      )
+
       const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(
         student.id,
         goals,
@@ -87,6 +86,7 @@
         isPersonal: true,
         sortOrder: personalGoalsCount + 1,
         masterySchemaId: $dataStore.defaultMasterySchema?.id,
+        schoolId: $dataStore.currentSchool.id,
         isRelevant: true,
       }
 

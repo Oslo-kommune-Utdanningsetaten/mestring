@@ -37,7 +37,7 @@ def test_superadmin_group_access(
     client.force_authenticate(user=superadmin)
 
     # Can list all groups, including disabled ones
-    resp = client.get('/api/groups/', {'school': school.id})
+    resp = client.get('/api/groups/', {'school': school.id, 'enabled': 'include'})
     assert resp.status_code == 200
     data = resp.json()
     expected_ids = {teaching_group_with_members.id,
@@ -47,7 +47,7 @@ def test_superadmin_group_access(
     assert expected_ids.issubset(received_ids)
 
     # Can list only disabled groups
-    resp = client.get('/api/groups/', {'school': school.id, 'isEnabled': False})
+    resp = client.get('/api/groups/', {'school': school.id, 'enabled': 'exclude'})
     assert resp.status_code == 200
     data = resp.json()
     expected_ids = {disabled_group.id}
@@ -64,7 +64,7 @@ def test_superadmin_group_access(
         is_enabled=True
     )
     # Group listing should include new group
-    resp = client.get('/api/groups/', {'school': school.id})
+    resp = client.get('/api/groups/', {'school': school.id, 'enabled': 'include'})
     assert resp.status_code == 200
     data = resp.json()
     expected_ids = {teaching_group_with_members.id,

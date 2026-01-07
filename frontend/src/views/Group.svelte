@@ -6,6 +6,7 @@
     goalsList,
     goalsDestroy,
     goalsUpdate,
+    subjectsList,
   } from '../generated/sdk.gen'
   import type {
     GoalType,
@@ -32,11 +33,7 @@
   import GroupTypeTag from '../components/GroupTypeTag.svelte'
   import StudentRow from '../components/StudentRow.svelte'
   import { dataStore } from '../stores/data'
-  import {
-    goalsWithCalculatedMastery,
-    subjectIdsViaGroupOrGoal,
-    abbreviateName,
-  } from '../utils/functions'
+  import { goalsWithCalculatedMastery, abbreviateName } from '../utils/functions'
   import SparkbarChart from '../components/SparkbarChart.svelte'
 
   const { groupId } = $props<{ groupId: string }>()
@@ -57,14 +54,8 @@
   let isObservationEditorOpen = $state<boolean>(false)
   let isGoalEditorOpen = $state<boolean>(false)
   let isShowGoalTitleEnabled = $state<boolean>(true)
-  let representedSubjectIds = $state<string[] | null>(null)
   let currentSchool = $derived($dataStore.currentSchool)
-  let subjects = $derived<SubjectType[]>(
-    (representedSubjectIds
-      ? $dataStore.subjects.filter(subj => representedSubjectIds?.includes(subj.id))
-      : $dataStore.subjects
-    ).sort((a, b) => a.displayName.localeCompare(b.displayName))
-  )
+  let subjects = $state<SubjectType[]>([])
   let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
 
   const fetchGroupData = async () => {
@@ -101,16 +92,11 @@
           })
         })
       )
-      // For each student, fetch their subjectIds
-      const subjectIdsSet = new Set<string>()
-      await Promise.all(
-        students.map(async student => {
-          return subjectIdsViaGroupOrGoal(student.id, currentSchool.id).then(subjectIds => {
-            subjectIds.forEach(id => subjectIdsSet.add(id))
-          })
-        })
-      )
-      representedSubjectIds = Array.from(subjectIdsSet)
+      // Fetch subjects for students
+      const subjectsResult = await subjectsList({
+        query: { school: currentSchool.id, students: students.map(s => s.id).join(',') },
+      })
+      subjects = subjectsResult.data || []
     } catch (error) {
       console.error('Error fetching group:', error)
     } finally {

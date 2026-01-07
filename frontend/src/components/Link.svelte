@@ -11,7 +11,12 @@
     }
 
     event.preventDefault()
-    navigate(to)
+
+    // Allow Bootstrap dropdowns to close by letting the event bubble
+    // Bootstrap listens for clicks on .dropdown-item elements
+    requestAnimationFrame(() => {
+      navigate(to)
+    })
   }
 </script>
 

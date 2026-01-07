@@ -62,7 +62,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         """
         Filter observations based on who can see them:
         - Everyone: Observations they created or observed (if visible)
-        - School inspectors and admins: All observations with goals which are in groups at their schools, or which are for subjects owned by the school
+        - School inspectors and admins: All observations with goals at their schools
         - Teaching group teachers:
           - Observations on group goals in groups they teach
           - Observations on personal goals for students they teach in that subject
@@ -86,12 +86,10 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             filters = Q(created_by=requester)
             filters |= Q(observer=requester, is_visible_to_student=True)
 
-            # School inspectors and admins: All observations for students at their schools
+            # School inspectors and admins: All observations for goals at their schools
             if school_employee_ids:
-                # Observations on goals in groups at their schools
-                filters |= Q(goal__group__school_id__in=school_employee_ids)
-                # Observations on goals attached to subjects owned by their schools
-                filters |= Q(goal__subject__owned_by_school_id__in=school_employee_ids)
+                # Observations on goals at their schools
+                filters |= Q(goal__school_id__in=school_employee_ids)
 
             # Teaching group teachers: Observations on group goals + personal goals for students they teach
             if teacher_group_ids:
@@ -229,19 +227,14 @@ class ObservationAccessPolicy(BaseAccessPolicy):
                 if not observation:
                     return False
                 goal = observation.goal
-            if not goal:
-                return False
-            if goal.group_id:
-                school_id = goal.group.school_id
-            else:
-                school_id = goal.subject.owned_by_school_id
-            if not school_id:
+
+            if not goal or not goal.school_id:
                 return False
 
             school_admin_ids = UserSchool.objects.filter(
                 user_id=request.user.id, role__name="admin").values_list("school_id", flat=True).distinct()
 
-            return school_id in school_admin_ids
+            return goal.school_id in school_admin_ids
 
         except Exception:
             logger.exception("SubjectAccessPolicy.belongs_to_group")

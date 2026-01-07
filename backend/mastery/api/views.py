@@ -8,6 +8,9 @@ from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_access_policy import AccessViewSetMixin
 from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy, SituationAccessPolicy, StatusAccessPolicy
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_request_param(query_params, name: str):
@@ -31,29 +34,26 @@ def get_request_param(query_params, name: str):
 
 
 def apply_deleted_filter(query_params, qs):
-    is_deleted_param, is_deleted_set = get_request_param(query_params, 'is_deleted')
-
-    if is_deleted_set:
-        # Request has specified whether to include deleted or non-deleted items
-        qs = qs.filter(deleted_at__isnull=not is_deleted_param)
-    else:
-        # By default, exclude deleted items
-        qs = qs.filter(deleted_at__isnull=True)
-    return qs
+    deleted_param, _ = get_request_param(query_params, 'deleted')
+    if deleted_param == 'only':
+        # Only deleted items
+        return qs.filter(deleted_at__isnull=False)
+    elif deleted_param == 'include':
+        # All items, deleted and non-deleted
+        return qs
+    # Default: non-deleted
+    return qs.filter(deleted_at__isnull=True)
 
 
 def apply_valid_group_filter(query_params, qs):
     is_valid_param, is_valid_set = get_request_param(query_params, 'is_valid')
-    now = timezone.now()
 
     if is_valid_set and not is_valid_param:
         # Only invalid groups
-        qs = qs.filter(Q(valid_from__gt=now) | Q(valid_to__lt=now))
+        return qs.outside_validity_period()
     else:
         # By default, include only valid groups
-        qs = qs.filter(Q(valid_from__isnull=True) | Q(valid_from__lte=now))
-        qs = qs.filter(Q(valid_to__isnull=True) | Q(valid_to__gte=now))
-    return qs
+        return qs.within_validity_period()
 
 
 class FingerprintViewSetMixin:
@@ -120,10 +120,10 @@ class SchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='is_deleted',
-                description='Filter users by whether they are soft-deleted',
+                name='deleted',
+                description='Filter users by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
                 required=False,
-                type={'type': 'boolean'},
+                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
         ]
@@ -193,10 +193,10 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='is_deleted',
-                description='Filter user_schools by whether they are soft-deleted',
+                name='deleted',
+                description='Filter user_schools by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
                 required=False,
-                type={'type': 'boolean'},
+                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
         ]
@@ -267,10 +267,10 @@ class UserSchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mo
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='is_deleted',
-                description='Filter user_groups by whether they are soft-deleted',
+                name='deleted',
+                description='Filter user_goups by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
                 required=False,
-                type={'type': 'boolean'},
+                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
         ]
@@ -353,17 +353,17 @@ class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='is_enabled',
-                description='Filter groups by whether they are enabled for use',
+                name='enabled',
+                description='Filter groups by whether they are enabled for use: "only" (default, only enabled), "include" (both enabled and disabled), or "exclude" (only disabled)',
                 required=False,
-                type={'type': 'boolean'},
+                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='is_deleted',
-                description='Filter groups by whether they are soft-deleted',
+                name='deleted',
+                description='Filter groups by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
                 required=False,
-                type={'type': 'boolean'},
+                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
@@ -393,7 +393,7 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
             subject_param, _ = get_request_param(self.request.query_params, 'subject')
             roles_param, _ = get_request_param(self.request.query_params, 'roles')
             ids_param, _ = get_request_param(self.request.query_params, 'ids')
-            is_enabled_param, is_enabled_set = get_request_param(self.request.query_params, 'is_enabled')
+            enabled_param, _ = get_request_param(self.request.query_params, 'enabled')
 
             if not school_param:
                 raise ValidationError(
@@ -418,8 +418,20 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
                 ids = [id.strip() for id in ids_param.split(',') if id]
                 if ids:
                     qs = qs.filter(id__in=ids)
-            if is_enabled_set:
-                qs = qs.filter(is_enabled=is_enabled_param)
+
+            # enabled filter
+            if enabled_param:
+                if enabled_param == 'exclude':
+                    qs = qs.filter(is_enabled=False)  # Only disabled groups
+                elif enabled_param == 'only':
+                    qs = qs.filter(is_enabled=True)  # Only enabled groups
+                elif enabled_param == 'include':
+                    qs = qs  # All groups, deleted and non-deleted
+                else:
+                    logger.warning("Unknown value for 'enabled' parameter: %s", enabled_param)
+            else:
+                qs = qs.filter(is_enabled=True)  # default
+            return qs
 
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs.distinct()
@@ -436,6 +448,13 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
+                name='students',
+                description='Filter subjects by student participation. Comma-separated list of user IDs',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='is_owned_by_school',
                 description='Filter subjects on whether they are owned by the given school',
                 required=False,
@@ -443,10 +462,10 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='is_deleted',
-                description='Filter subjects by whether they are soft-deleted',
+                name='deleted',
+                description='Filter subjects by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
                 required=False,
-                type={'type': 'boolean'},
+                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
         ]
@@ -463,6 +482,8 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
+            student_ids_param, _ = get_request_param(self.request.query_params, 'students')
+
             is_owned_by_school_param, is_owned_set = get_request_param(
                 self.request.query_params, 'is_owned_by_school')
 
@@ -473,8 +494,19 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
 
             qs = qs.filter(
                 Q(groups__school_id=school_param) |
-                Q(owned_by_school_id=school_param)
+                Q(owned_by_school_id=school_param) |
+                Q(goals__school_id=school_param)
             )
+
+            if student_ids_param:
+                student_ids = [student_id.strip()
+                               for student_id in student_ids_param.split(',') if student_id]
+                if student_ids:
+                    qs = qs.filter(
+                        # when querying by student_ids, include only subjects where the groups are enabled
+                        Q(groups__user_groups__user_id__in=student_ids, groups__is_enabled=True) |
+                        Q(goals__student_id__in=student_ids)
+                    )
 
             if is_owned_set:
                 if is_owned_by_school_param:
@@ -511,10 +543,10 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='is_deleted',
-                description='Filter goals by whether they are soft-deleted',
+                name='deleted',
+                description='Filter goals by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
                 required=False,
-                type={'type': 'boolean'},
+                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
         ]
@@ -570,10 +602,10 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
     list=extend_schema(
         parameters=[
             OpenApiParameter(
-                name='is_deleted',
-                description='Filter goals by whether they are soft-deleted',
+                name='deleted',
+                description='Filter roles by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
                 required=False,
-                type={'type': 'boolean'},
+                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
         ]
@@ -642,10 +674,10 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='is_deleted',
-                description='Filter observations by whether they are soft-deleted',
+                name='deleted',
+                description='Filter observations by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
                 required=False,
-                type={'type': 'boolean'},
+                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
         ]

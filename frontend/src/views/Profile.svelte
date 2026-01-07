@@ -1,67 +1,21 @@
 <script lang="ts">
   import { dataStore, setCurrentSchool, currentUser } from '../stores/data'
-  import { schoolsList, groupsList } from '../generated/sdk.gen'
   import { urlStringFrom } from '../utils/functions'
   import type { GroupType, SchoolType } from '../generated/types.gen'
 
-  let schools = $state<SchoolType[]>([])
-  let groups = $state<GroupType[]>([])
-  let isLoadingSchools = $state(false)
-  let isLoadingGroups = $state(false)
+  let schools = $derived<SchoolType[]>($dataStore.currentUser.schools || [])
+  let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
   let currentSchool = $derived($dataStore.currentSchool)
-
-  const fetchSchools = async () => {
-    isLoadingSchools = true
-    try {
-      const result = await schoolsList()
-      schools = (result.data ?? []).filter(x => x.isServiceEnabled)
-    } catch (err) {
-      console.error('Error fetching schools:', err)
-      schools = []
-    } finally {
-      isLoadingSchools = false
-    }
-  }
-
-  const fetchUserGroups = async () => {
-    if (!$currentUser) return
-    isLoadingGroups = true
-    try {
-      const userGroups: any = await groupsList({
-        query: { user: $currentUser.id, roles: 'student', school: $dataStore.currentSchool?.id },
-      })
-      groups = userGroups.data || []
-    } catch (err) {
-      console.error('Error fetching user groups:', err)
-      groups = []
-    } finally {
-      isLoadingGroups = false
-    }
-  }
 
   const selectSchool = (school: SchoolType) => {
     setCurrentSchool(school)
   }
-
-  $effect(() => {
-    if (currentSchool && currentSchool.id) {
-      fetchSchools().then(() => {
-        if (currentSchool) {
-          fetchUserGroups()
-        }
-      })
-    }
-  })
 </script>
 
 <section class="container my-4">
   <h2 class="mb-4">Min side</h2>
 
-  {#if isLoadingGroups || isLoadingSchools}
-    <div class="text-center my-5">
-      <div class="spinner-border" role="status"></div>
-    </div>
-  {:else if !$currentUser}
+  {#if !$currentUser}
     <div class="alert alert-info">Du må logge inn for å se denne siden.</div>
   {:else}
     <!-- User Information -->

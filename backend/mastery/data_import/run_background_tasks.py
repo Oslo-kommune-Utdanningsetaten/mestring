@@ -1,6 +1,5 @@
 from mastery.data_import.feide_api import fetch_groups_from_feide, fetch_memberships_from_feide
 import names
-import time
 import logging
 import threading
 import traceback
@@ -8,10 +7,12 @@ from datetime import timedelta
 import json
 from django.db import transaction
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from mastery.models import DataMaintenanceTask, generate_nanoid
 from .import_school import school_update
 from .import_groups import import_groups_from_file
 from .import_users import import_memberships_from_file
+from .cleaner_bot import update_data_integrity
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +120,16 @@ def do_work(task):
         yield from import_groups_from_file(org_number)
     elif task.job_name == "import_memberships":
         yield from import_memberships_from_file(org_number)
+    elif task.job_name == "update_data_integrity":
+        groups_earlier_than = parse_datetime(job_params.get("groups_earlier_than"))
+        memberships_earlier_than = parse_datetime(job_params.get("memberships_earlier_than"))
+        if not groups_earlier_than or not memberships_earlier_than:
+            raise ValueError(f"Invalid maintained timestamps for task '{task.id}'")
+        options = {
+            "groups_earlier_than": groups_earlier_than,
+            "memberships_earlier_than": memberships_earlier_than,
+        }
+        yield from update_data_integrity(org_number, options)
     else:
         raise ValueError(f"Unknown job_name '{task.job_name}'")
 

@@ -3,19 +3,20 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import { type SchoolType } from '../../generated/types.gen'
   import {
-    fetchGroupsForSchool,
-    fetchMembershipsForSchool,
+    fetchGroupsAndUsers,
     fetchSchoolImportStatus,
     importGroupsAndUsers,
     feideImportSchool,
     schoolsList,
     schoolsPartialUpdate,
+    updateDataIntegrity,
   } from '../../generated/sdk.gen'
   import type { SchoolImportStatus } from '../../types/models'
   import { formatDate } from '../../utils/functions'
 
   import ButtonMini from '../../components/ButtonMini.svelte'
   import { addAlert } from '../../stores/alerts'
+  import { dataStore } from '../../stores/data'
 
   const router = useTinyRouter()
   let schools = $state<SchoolType[]>([])
@@ -74,9 +75,20 @@
   const fetchSchools = async () => {
     try {
       const result = await schoolsList()
-      schools = (result.data || [])
+      const currentSchoolId = $dataStore.currentSchool?.id
+
+      let fetchedSchools = (result.data || [])
         .sort((a, b) => a.displayName.localeCompare(b.displayName, 'nb', { sensitivity: 'base' }))
         .sort((a, b) => Number(!a.isServiceEnabled) - Number(!b.isServiceEnabled))
+
+      if (currentSchoolId) {
+        const currentSchoolIndex = fetchedSchools.findIndex(s => s.id === currentSchoolId)
+        if (currentSchoolIndex > -1) {
+          const [currentSchool] = fetchedSchools.splice(currentSchoolIndex, 1)
+          fetchedSchools.unshift(currentSchool)
+        }
+      }
+      schools = fetchedSchools
       await Promise.all(schools.map(school => loadImportStatusForSchool(school.orgNumber)))
     } catch (error) {
       addAlert({
@@ -174,18 +186,23 @@
     }
   }
 
-  const handleFetchGroupsForSchool = async (orgNumber: string) => {
+  const handleActivateCleanerBotForSchool = async (orgNumber: string) => {
     try {
-      const result = await fetchGroupsForSchool({
+      const result = await updateDataIntegrity({
         path: { org_number: orgNumber },
       } as any)
 
       if (result.response.status === 201) {
         addAlert({
           type: 'success',
-          message: `Bakgrunnsjobb opprettet for henting av grupper for ${orgNumber}`,
+          message: `Bakgrunnsjobb opprettet for sletting av snargh for ${orgNumber}`,
         })
         router.navigate('/admin/data-maintenance-tasks')
+      } else if (result.response.status === 400) {
+        addAlert({
+          type: 'warning',
+          message: `Kan ikke opprette ny bakgrunnsjobb for ${orgNumber} fordi det aldri har blitt kjørt en import.`,
+        })
       } else if (result.response.status === 409) {
         addAlert({
           type: 'warning',
@@ -205,16 +222,16 @@
     }
   }
 
-  const handleFetchMembershipsForSchool = async (orgNumber: string) => {
+  const handleFetchUsersAndGroups = async (orgNumber: string) => {
     try {
-      const result = await fetchMembershipsForSchool({
+      const result = await fetchGroupsAndUsers({
         path: { org_number: orgNumber },
       } as any)
 
       if (result.response.status === 201) {
         addAlert({
           type: 'success',
-          message: `Bakgrunnsjobb opprettet for henting av medlemskap for ${orgNumber}`,
+          message: `Opprettet bakgrunnsjobber for henting av grupper og brukere for ${orgNumber}`,
         })
         router.navigate('/admin/data-maintenance-tasks')
       } else if (result.response.status === 409) {
@@ -225,7 +242,7 @@
       } else {
         addAlert({
           type: 'danger',
-          message: `Feil ved oppretting av bakgrunnsjobb for ${orgNumber}`,
+          message: `Feil ved oppretting av bakgrunnsjobber for ${orgNumber}`,
         })
       }
     } catch (error: any) {
@@ -493,43 +510,43 @@
         {/if}
 
         <div>
-          <!-- Hent grupper -->
+          <!-- Request fetch job, feide to file -->
           <ButtonMini
             options={{
-              title: 'Hent grupper fra Feide',
+              title: 'Hent grupper og brukere fra Feide',
               iconName: 'group',
               skin: 'secondary',
               variant: 'icon-left',
-              onClick: () => handleFetchGroupsForSchool(school.orgNumber),
+              onClick: () => handleFetchUsersAndGroups(school.orgNumber),
             }}
           >
             Hent grupper fra Feide
           </ButtonMini>
 
-          <!-- Hent brukere -->
+          <!-- Request import job, file to database -->
           <ButtonMini
             options={{
-              title: 'Hent brukere fra Feide',
-              iconName: 'person',
-              skin: 'secondary',
-              variant: 'icon-left',
-              onClick: () => handleFetchMembershipsForSchool(school.orgNumber),
-            }}
-          >
-            Hent brukere fra Feide
-          </ButtonMini>
-
-          <!-- Importer -->
-          <ButtonMini
-            options={{
-              title: 'Importér',
+              title: 'Importér grupper og brukere til databasen',
               iconName: 'download',
               skin: 'secondary',
               variant: 'icon-left',
               onClick: () => handleImportGroupsAndUsers(school.orgNumber),
             }}
           >
-            Importér
+            Importér til database
+          </ButtonMini>
+
+          <!-- Cleanerbot -->
+          <ButtonMini
+            options={{
+              title: 'Aktivér cleanerbot',
+              iconName: 'obstacle',
+              skin: 'secondary',
+              variant: 'icon-left',
+              onClick: () => handleActivateCleanerBotForSchool(school.orgNumber),
+            }}
+          >
+            Aktivér cleanerbot
           </ButtonMini>
         </div>
       </div>

@@ -23,6 +23,11 @@ urlpatterns = [
         name='fetch_memberships_for_school'
     ),
     path(
+        'api/fetch/groups_and_users/feide/<str:org_number>/',
+        custom.fetch_groups_and_users,
+        name='fetch_groups_and_users'
+    ),
+    path(
         'api/import/school/feide/<str:org_number>/',
         custom.import_school,
         name='feide_import_school_api'
@@ -31,6 +36,11 @@ urlpatterns = [
         'api/import/school_groups_and_users/<str:org_number>/',
         custom.import_groups_and_users,
         name='import_groups_and_users'
+    ),
+    path(
+        'api/import/update_data_integrity/<str:org_number>/',
+        custom.update_data_integrity,
+        name='update_data_integrity'
     ),
     path(
         'api/fetch/school_import_status/<str:org_number>/',

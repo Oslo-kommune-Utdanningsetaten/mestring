@@ -1,14 +1,16 @@
 <script lang="ts">
   import type { GoalCreateType, UserType, SubjectType, GroupType } from '../generated/types.gen'
-  import { usersRetrieve, goalsCreate, goalsList, groupsList } from '../generated/sdk.gen'
-  import { subjectIdsViaGroupOrGoal } from '../utils/functions'
+  import {
+    usersRetrieve,
+    goalsCreate,
+    goalsList,
+    groupsList,
+    subjectsList,
+  } from '../generated/sdk.gen'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
-  import GoalEdit from '../components/GoalEdit.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
-  import Offcanvas from '../components/Offcanvas.svelte'
   import Link from '../components/Link.svelte'
   import StudentSVG from '../assets/education.svg.svelte'
-  import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
 
   const { studentId } = $props<{ studentId: string }>()
@@ -35,12 +37,10 @@
 
   const fetchSubjects = async (studentId: string) => {
     try {
-      const subjectIds = await subjectIdsViaGroupOrGoal(studentId, currentSchool.id)
-      if (subjectIds.length > 0) {
-        subjects = $dataStore.subjects.filter((subject: SubjectType) =>
-          subjectIds.includes(subject.id)
-        )
-      }
+      const subjectsResult = await subjectsList({
+        query: { school: currentSchool.id, students: studentId },
+      })
+      subjects = subjectsResult.data || []
     } catch (error) {
       console.error(`Could not load subjects for ${studentId}`, error)
       subjects = []
@@ -50,7 +50,7 @@
   const fetchGroups = async (studentId: string) => {
     try {
       const groupsResult = await groupsList({
-        query: { user: studentId, school: currentSchool.id, isEnabled: true },
+        query: { user: studentId, school: currentSchool.id },
       })
       groups = groupsResult.data || []
     } catch (error) {
@@ -74,6 +74,8 @@
           subjectId: subject.id,
           sortOrder: i + 1,
           masterySchemaId: $dataStore.defaultMasterySchema?.id,
+          schoolId: $dataStore.currentSchool.id,
+          isRelevant: true,
         }
         await goalsCreate({
           body: goal,

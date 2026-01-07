@@ -11,16 +11,24 @@ export type AppData = {
   currentSchool: SchoolType | null
   currentUser: BasicUserType | null
   masterySchemas: MasterySchemaType[]
+  hasUserAccessToPath: (path: string) => boolean
+  roles: RoleType[]
   defaultMasterySchema?: MasterySchemaType | null
-  roles?: RoleType[]
-  isSchoolAdmin?: boolean
-  isSchoolInspector?: boolean
-  isSuperadmin?: boolean
 }
 
 export type GoalDecorated = GoalType & {
   masteryData?: Mastery | null
   observations?: ObservationType[]
+}
+
+export type UserDecorated = UserType & {
+  allGroups?: GroupType[]
+  teacherGroups?: GroupType[]
+  studentGroups?: GroupType[]
+  schools?: SchoolType[]
+  isSchoolAdmin?: boolean
+  isSchoolInspector?: boolean
+  isSuperadmin?: boolean
 }
 
 export type MasteryLevel = {
