@@ -288,7 +288,8 @@ export type PatchedStatusType = {
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
     deletedAt?: string | null;
-    estimatedAt?: string | null;
+    beginAt?: string;
+    endAt?: string;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
@@ -296,6 +297,7 @@ export type PatchedStatusType = {
     readonly updatedById?: string;
     studentId?: string;
     subjectId?: string;
+    schoolId?: string;
 };
 
 export type PatchedSubjectType = {
@@ -395,7 +397,8 @@ export type StatusType = {
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
     deletedAt?: string | null;
-    estimatedAt?: string | null;
+    beginAt: string;
+    endAt: string;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
@@ -403,6 +406,7 @@ export type StatusType = {
     readonly updatedById: string;
     studentId: string;
     subjectId: string;
+    schoolId: string;
 };
 
 /**
@@ -632,12 +636,14 @@ export type PatchedSituationCreateType = {
 
 export type PatchedStatusCreateType = {
     deletedAt?: string | null;
-    estimatedAt?: string | null;
+    beginAt?: string;
+    endAt?: string;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
     studentId?: string;
     subjectId?: string;
+    schoolId?: string;
 };
 
 export type PatchedSubjectCreateType = {
@@ -695,12 +701,14 @@ export type SituationCreateType = {
 
 export type StatusCreateType = {
     deletedAt?: string | null;
-    estimatedAt?: string | null;
+    beginAt: string;
+    endAt: string;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
     studentId: string;
     subjectId: string;
+    schoolId: string;
 };
 
 export type SubjectCreateType = {
