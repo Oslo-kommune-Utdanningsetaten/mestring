@@ -384,6 +384,8 @@ class Status(BaseModel):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=False, related_name='statuses')
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False,
                                related_name='statuses')  # for easier querying
+    mastery_schema = models.ForeignKey(
+        MasterySchema, on_delete=models.SET_NULL, null=True, related_name='statuses')
     begin_at = models.DateTimeField(null=False)  # begin and end define the period this status covers
     end_at = models.DateTimeField(null=False)
     mastery_value = models.IntegerField(null=True)
