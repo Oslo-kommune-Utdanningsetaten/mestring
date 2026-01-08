@@ -298,6 +298,7 @@ export type PatchedStatusType = {
     studentId?: string;
     subjectId?: string;
     schoolId?: string;
+    masterySchemaId?: string | null;
 };
 
 export type PatchedSubjectType = {
@@ -407,6 +408,7 @@ export type StatusType = {
     studentId: string;
     subjectId: string;
     schoolId: string;
+    masterySchemaId?: string | null;
 };
 
 /**
@@ -644,6 +646,7 @@ export type PatchedStatusCreateType = {
     studentId?: string;
     subjectId?: string;
     schoolId?: string;
+    masterySchemaId?: string | null;
 };
 
 export type PatchedSubjectCreateType = {
@@ -709,6 +712,7 @@ export type StatusCreateType = {
     studentId: string;
     subjectId: string;
     schoolId: string;
+    masterySchemaId?: string | null;
 };
 
 export type SubjectCreateType = {
