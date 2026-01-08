@@ -230,8 +230,7 @@ def test_school_admin_status_access(
 
 @pytest.mark.django_db
 def test_teaching_group_teacher_status_access(
-        school, teacher, student, other_student, student_role, teacher_role,
-        teaching_group_with_members, other_teaching_group_with_members,
+        school, teacher, student, other_student,
         subject_with_group, subject_owned_by_school, status_at_school):
     """
     Teaching group teachers can create, read, update, and delete statuses
@@ -409,8 +408,7 @@ def test_basis_group_teacher_status_access(
 
 
 @pytest.mark.django_db
-def test_student_status_access(
-        school, student, other_student, subject_with_group, teaching_group_with_members):
+def test_student_status_access(school, student, other_student, subject_with_group):
     """
     Students can only see statuses about themselves after the end_at date (publish date).
     They cannot create, update, or delete statuses.
@@ -487,8 +485,6 @@ def test_student_status_access(
     }, format='json')
     assert resp.status_code == 403
 
-    ################### Delete ###################
-
     # Student cannot delete statuses
     resp = client.delete(f"/api/status/{status_visible.id}/")
     assert resp.status_code == 403
@@ -496,7 +492,7 @@ def test_student_status_access(
 
 @pytest.mark.django_db
 def test_user_can_see_own_created_statuses(
-        school, teacher, student, other_student, subject_owned_by_school):
+        school, teacher, other_student, subject_owned_by_school):
     """
     Users can see statuses they created, regardless of other access rules.
     """
