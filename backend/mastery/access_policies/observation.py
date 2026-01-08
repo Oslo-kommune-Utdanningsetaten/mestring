@@ -204,15 +204,18 @@ class ObservationAccessPolicy(BaseAccessPolicy):
                 return requester.teacher_groups.filter(id=target_observation.goal.group_id).exists()
 
             # Personal goal: Basis group teacher OR teaches that subject to that student
-            basis_group_ids = requester.teacher_groups.filter(type='basis').values_list('id', flat=True)
+            basis_group_ids = requester.teacher_groups.filter(
+                type='basis', school_id=target_observation.goal.school_id).values_list(
+                'id', flat=True)
             is_basis_teacher = target_observation.student.groups.filter(id__in=basis_group_ids).exists()
 
-            teaches_subject = requester.teacher_groups.filter(
+            teaches_subject_at_school = requester.teacher_groups.filter(
                 subject=target_observation.goal.subject,
-                members__id=target_observation.student_id
+                members__id=target_observation.student_id,
+                school_id=target_observation.goal.school_id
             ).exists()
 
-            return is_basis_teacher or teaches_subject
+            return is_basis_teacher or teaches_subject_at_school
 
         except Exception:
             logger.exception("ObservationAccessPolicy.can_teacher_modify_observation")

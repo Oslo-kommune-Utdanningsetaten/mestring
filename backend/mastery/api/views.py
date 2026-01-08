@@ -755,10 +755,86 @@ class SituationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
         return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
 
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='students',
+                description='Filter statuses by students.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='subject',
+                description='Filter statuses by subject.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='school',
+                description='Filter statuses by school.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='group',
+                description='Filter statuses by group.',
+                required=False,
+                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='editor',
+                description='Filter statuses by users who have created or updated it.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+        ]
+    )
+)
 class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Status.objects.all()
     serializer_class = serializers.StatusSerializer
     access_policy = StatusAccessPolicy
 
     def get_queryset(self):
-        return self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = apply_deleted_filter(self.request.query_params, qs)
+
+        if self.action == 'list':
+            students_param, _ = get_request_param(self.request.query_params, 'students')
+            school_param, _ = get_request_param(self.request.query_params, 'school')
+            subject_param, _ = get_request_param(self.request.query_params, 'subject')
+            group_param, _ = get_request_param(self.request.query_params, 'group')
+            editor_param, _ = get_request_param(self.request.query_params, 'editor')
+
+            if not school_param:
+                raise ValidationError({'error': 'missing-parameter',
+                                      'message': 'The "school" parameter is required.'})
+
+            qs = qs.filter(school_id=school_param)
+
+            if students_param:
+                student_ids = [student_id.strip() for student_id in students_param.split(',') if student_id]
+                if student_ids:
+                    qs = qs.filter(student_id__in=student_ids)
+
+            if group_param:
+                student_ids = UserGroup.objects.filter(
+                    group_id=group_param, role__name='student', deleted_at__isnull=True).values_list(
+                    'user_id', flat=True)
+                if student_ids:
+                    qs = qs.filter(student_id__in=student_ids)
+
+            if subject_param:
+                qs = qs.filter(subject_id=subject_param)
+
+            if editor_param:
+                qs = qs.filter(Q(created_by_id=editor_param) | Q(updated_by_id=editor_param))
+
+        # non-list actions (retrieve, create, update, destroy) do not require parameters
+        return qs

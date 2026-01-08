@@ -1,5 +1,6 @@
 import logging
 from django.db.models import Q, Exists, OuterRef
+from django.utils import timezone
 from .base import BaseAccessPolicy
 from mastery.models import Goal, UserGroup, UserSchool
 
@@ -94,7 +95,7 @@ class StatusAccessPolicy(BaseAccessPolicy):
                 filters |= Q(student__groups__id__in=teacher_basis_group_ids)
 
             # Students: Statuses about themselves, if current date is after end_at
-            filters |= Q(student=requester, end_at__lt=request.now())
+            filters |= Q(student=requester, end_at__lt=timezone.now())
 
             return qs.filter(filters).distinct()
         except Exception:
@@ -108,18 +109,20 @@ class StatusAccessPolicy(BaseAccessPolicy):
         try:
             student_id = request.data.get("student_id")
             subject_id = request.data.get("subject_id")
+            school_id = request.data.get("school_id")
             requester = request.user
 
             if not student_id or not subject_id:
                 return False
 
             # Teaches that subject to that student
-            teaches_subject = requester.teacher_groups.filter(
+            teaches_subject_at_school = requester.teacher_groups.filter(
                 subject_id=subject_id,
-                members__id=student_id
+                members__id=student_id,
+                school_id=school_id
             ).exists()
 
-            return teaches_subject
+            return teaches_subject_at_school
 
         except Exception:
             logger.exception("StatusAccessPolicy.can_teacher_create_status")
