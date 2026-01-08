@@ -1790,7 +1790,28 @@ export type SituationsUpdateResponse = SituationsUpdateResponses[keyof Situation
 export type StatusListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Filter statuses by users who have created or updated it.
+         */
+        editor?: string;
+        /**
+         * Filter statuses by group.
+         */
+        group?: 'exclude' | 'include' | 'only';
+        /**
+         * Filter statuses by school.
+         */
+        school?: string;
+        /**
+         * Filter statuses by students.
+         */
+        students?: string;
+        /**
+         * Filter statuses by subject.
+         */
+        subject?: string;
+    };
     url: '/api/status/';
 };
 
