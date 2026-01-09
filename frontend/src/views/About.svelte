@@ -91,7 +91,7 @@
 
     <div class="icon">
       <span class="svg-container" title="Status">
-        <pkt-icon name="graph"></pkt-icon>
+        <pkt-icon name="achievement"></pkt-icon>
       </span>
       <span class="icon-label">Status</span>
     </div>

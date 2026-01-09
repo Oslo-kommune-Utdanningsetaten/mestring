@@ -69,6 +69,10 @@
     return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
   }
 
+  const handleEditStatus = async () => {
+    console.log('Edit status clicked')
+  }
+
   // Remember, we're only editing personal goals here
   const handleEditGoal = async (goal: GoalDecorated | null) => {
     if (goal.id) {
@@ -232,6 +236,15 @@
       classes: 'bordered',
       title: 'Legg til nytt individuelt mål',
       onClick: () => handleEditGoal({}),
+    }}
+  />
+
+  <ButtonIcon
+    options={{
+      iconName: 'achievement',
+      classes: 'bordered',
+      title: 'Legg til ny status',
+      onClick: () => handleEditStatus(),
     }}
   />
 </div>
