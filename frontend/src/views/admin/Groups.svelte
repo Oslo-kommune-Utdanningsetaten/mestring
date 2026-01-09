@@ -7,7 +7,7 @@
   import { urlStringFrom } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
   import GroupTypeTag from '../../components/GroupTypeTag.svelte'
-  import ButtonMini from '../../components/ButtonMini.svelte'
+  import ButtonIcon from '../../components/ButtonIcon.svelte'
   import { NONE_FIELD_VALUE } from '../../utils/constants'
 
   const router = useTinyRouter()
@@ -335,14 +335,10 @@
               checked={group.isEnabled}
               onchange={() => handleToggleGroupEnabledStatus(group)}
             ></pkt-checkbox>
-            <ButtonMini
+            <ButtonIcon
               options={{
-                title: 'Zaa',
                 iconName: 'alert-information',
-                size: 'tiny',
-                skin: 'primary',
-                variant: 'icon-left',
-                classes: '',
+                title: 'Toggle JSON',
                 onClick: () => handleInfoToggle(group.id),
               }}
             />

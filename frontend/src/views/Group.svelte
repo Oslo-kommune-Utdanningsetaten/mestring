@@ -24,7 +24,7 @@
   } from '../utils/constants'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import GroupSVG from '../assets/group.svg.svelte'
-  import ButtonMini from '../components/ButtonMini.svelte'
+  import ButtonIcon from '../components/ButtonIcon.svelte'
   import ObservationEdit from '../components/ObservationEdit.svelte'
   import GoalEdit from '../components/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
@@ -280,18 +280,14 @@
     <section>
       <div class="d-flex align-items-center gap-2">
         <h2>Mål</h2>
-        <ButtonMini
+        <ButtonIcon
           options={{
-            iconName: 'plus-sign',
-            classes: 'mini-button bordered',
+            iconName: 'goal',
             title: `Legg til nytt gruppemål for ${group.displayName}`,
-            variant: 'icon-only',
-            skin: 'tertiary',
+            classes: 'bordered',
             onClick: () => handleEditGoal(null),
           }}
-        >
-          Nytt gruppemål
-        </ButtonMini>
+        />
       </div>
 
       <div bind:this={goalsListElement} class="list-group mt-3">
@@ -326,27 +322,21 @@
                   title="Målet er i bruk av en eller flere elever"
                 ></pkt-icon>
               {:else}
-                <ButtonMini
+                <ButtonIcon
                   options={{
-                    title: 'Rediger mål',
-                    iconName: 'edit',
-                    skin: 'secondary',
-                    variant: 'icon-only',
-                    size: 'tiny',
-                    classes: 'me-1',
-                    onClick: () => handleEditGoal(goal),
-                  }}
-                />
-                <ButtonMini
-                  options={{
-                    title: 'Slett mål',
                     iconName: 'trash-can',
-                    skin: 'secondary',
-                    variant: 'icon-only',
-                    size: 'tiny',
-                    classes: 'me-0',
+                    title: 'Slett mål',
+                    classes: 'bordered',
                     disabled: !goal.isRelevant || isGoalInUse(goal.id),
                     onClick: () => handleDeleteGoal(goal.id),
+                  }}
+                />
+                <ButtonIcon
+                  options={{
+                    iconName: 'edit',
+                    title: 'Rediger mål',
+                    classes: 'bordered',
+                    onClick: () => handleEditGoal(goal),
                   }}
                 />
               {/if}
@@ -505,7 +495,7 @@
 
   .goal-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 6fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 6fr 2fr;
     column-gap: 5px;
     background-color: var(--bs-light);
   }

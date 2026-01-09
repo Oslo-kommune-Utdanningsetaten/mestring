@@ -20,6 +20,7 @@
   import GroupSVG from '../assets/group.svg.svelte'
   import PersonSVG from '../assets/person.svg.svelte'
   import ButtonMini from './ButtonMini.svelte'
+  import ButtonIcon from './ButtonIcon.svelte'
   import Offcanvas from './Offcanvas.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { getLocalStorageItem } from '../stores/localStorage'
@@ -160,7 +161,10 @@
   }
 
   const toggleGoalExpansion = (goalId: string) => {
-    expandedGoals[goalId] = !expandedGoals[goalId]
+    expandedGoals = {
+      ...expandedGoals,
+      [goalId]: !expandedGoals[goalId],
+    }
   }
 
   const handleGoalOrderChange = async (event: SortableEvent) => {
@@ -222,10 +226,10 @@
   <h3>
     {subject ? subject.displayName : 'Ukjent'}
   </h3>
-  <ButtonMini
+  <ButtonIcon
     options={{
-      iconName: 'plus-sign',
-      classes: 'mini-button bordered',
+      iconName: 'goal',
+      classes: 'bordered',
       title: 'Legg til nytt individuelt mål',
       onClick: () => handleEditGoal({}),
     }}
@@ -233,10 +237,11 @@
 </div>
 
 {#snippet goalInList(goal: GoalDecorated, index: number)}
+  {@const isExpanded = expandedGoals[goal.id] || false}
   <div
-    class="list-group-item goal-item {expandedGoals[goal.id]
-      ? 'shadow border-2 z-1'
-      : ''}  {goal.isRelevant ? '' : 'hatched-background'}"
+    class="list-group-item goal-item {isExpanded ? 'shadow border-2 z-1' : ''}  {goal.isRelevant
+      ? ''
+      : 'hatched-background'}"
     title={goal.isRelevant ? '' : 'Målet er ikke lenger relevant for eleven'}
   >
     <div class="goal-primary-row">
@@ -261,12 +266,12 @@
 
       <!-- Goal type icon -->
       {#if goal.isPersonal}
-        <span class="goal-type-icon item" title="Individuelt mål">
-          <PersonSVG />
+        <span class="individual-goal-icon item" title="Individuelt mål">
+          <pkt-icon name="person"></pkt-icon>
         </span>
       {:else}
-        <span class="goal-type-icon item" title="Gruppemål">
-          <GroupSVG />
+        <span class="group-goal-icon item" title="Gruppemål">
+          <pkt-icon name="group"></pkt-icon>
         </span>
       {/if}
 
@@ -291,11 +296,11 @@
 
       <!-- New observation button -->
       <span class="item item--right">
-        <ButtonMini
+        <ButtonIcon
           options={{
-            iconName: 'plus-sign',
-            classes: 'mini-button bordered',
+            iconName: 'bullseye',
             title: 'Ny observasjon',
+            classes: 'bordered',
             disabled: !goal.isRelevant,
             onClick: () => handleEditObservation(goal, null),
           }}
@@ -304,18 +309,18 @@
 
       <!-- Toggle goal info -->
       <span class="item item--right">
-        <ButtonMini
+        <ButtonIcon
           options={{
-            iconName: `chevron-thin-${expandedGoals[goal.id] ? 'up' : 'down'}`,
-            classes: 'mini-button rounded',
-            title: `${expandedGoals[goal.id] ? 'Skjul' : 'Vis'} observasjoner`,
+            iconName: `chevron-thin-${isExpanded ? 'up' : 'down'}`,
+            disabled: !goal.isRelevant,
+            title: `${isExpanded ? 'Skjul' : 'Vis'} observasjoner`,
             onClick: () => toggleGoalExpansion(goal.id),
           }}
         />
       </span>
     </div>
 
-    {#if expandedGoals[goal.id]}
+    {#if isExpanded}
       <div class="goal-secondary-row">
         {#if goal.observations?.length}
           <div class="student-observations-row mb-2">
@@ -332,22 +337,20 @@
                 {observation.masteryValue}
               </span>
               <span>
-                <ButtonMini
+                <ButtonIcon
                   options={{
-                    size: 'tiny',
                     iconName: 'trash-can',
                     title: 'Slett observasjon',
-                    classes: 'hover-glow me-2',
+                    classes: 'bordered',
                     onClick: () => handleDeleteObservation(observation.id),
                   }}
                 />
                 {#if index === goal?.observations.length - 1}
-                  <ButtonMini
+                  <ButtonIcon
                     options={{
-                      size: 'tiny',
                       iconName: 'edit',
                       title: 'Rediger observasjon',
-                      classes: 'hover-glow me-2',
+                      classes: 'bordered',
                       onClick: () => handleEditObservation(goal, observation),
                     }}
                   />
@@ -401,12 +404,12 @@
 
 {#if goalsForSubject?.length}
   <div bind:this={goalsListElement} class="list-group mt-2">
-    {#each goalsForSubject.filter(goal => goal.isPersonal) as goal, index (goal.id)}
+    {#each goalsForSubject.filter(goal => goal.isPersonal) as goal, index (`${goal.id}-${expandedGoals[goal.id]}`)}
       {@render goalInList(goal, index)}
     {/each}
   </div>
   <div class="list-group mt-4">
-    {#each goalsForSubject.filter(goal => !goal.isPersonal) as goal, index (goal.id)}
+    {#each goalsForSubject.filter(goal => !goal.isPersonal) as goal, index (`${goal.id}-${expandedGoals[goal.id]}`)}
       {@render goalInList(goal, index)}
     {/each}
   </div>
@@ -504,7 +507,26 @@
     cursor: move;
   }
 
-  .goal-type-icon > :global(svg) {
-    height: 1.2em;
+  .individual-goal-icon :global(pkt-icon) {
+    height: 1rem;
+  }
+  .group-goal-icon :global(pkt-icon) {
+    height: 1.2rem;
+  }
+
+  /* Prevent icon shrinking on hover in ButtonMini */
+  :global(.mini-button pkt-button),
+  :global(.mini-button pkt-button:hover),
+  :global(.mini-button pkt-button:focus) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  :global(.mini-button pkt-button pkt-icon) {
+    flex-shrink: 0 !important;
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    font-size: 1.5rem !important;
   }
 </style>

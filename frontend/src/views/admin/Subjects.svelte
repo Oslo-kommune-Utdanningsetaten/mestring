@@ -5,6 +5,7 @@
   import type { SubjectType, SchoolType, GroupType } from '../../generated/types.gen'
   import { urlStringFrom } from '../../utils/functions'
   import ButtonMini from '../../components/ButtonMini.svelte'
+  import ButtonIcon from '../../components/ButtonIcon.svelte'
   import SubjectEdit from '../../components/SubjectEdit.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
   import { dataStore } from '../../stores/data'
@@ -288,26 +289,20 @@
         <!-- Actions -->
         <span class="item">
           {#if subject.ownedBySchoolId}
-            <ButtonMini
+            <ButtonIcon
               options={{
-                title: 'Rediger',
-                iconName: 'edit',
-                skin: 'secondary',
-                variant: 'icon-only',
-                size: 'tiny',
-                classes: 'me-1',
-                onClick: () => handleEditSubject(subject),
+                iconName: 'trash-can',
+                title: 'Slett',
+                classes: 'bordered',
+                onClick: () => handleDeleteSubject(subject.id),
               }}
             />
-            <ButtonMini
+            <ButtonIcon
               options={{
-                title: 'Slett',
-                iconName: 'trash-can',
-                skin: 'secondary',
-                variant: 'icon-only',
-                size: 'tiny',
-                classes: 'me-0',
-                onClick: () => handleDeleteSubject(subject.id),
+                iconName: 'edit',
+                title: 'Rediger',
+                classes: 'bordered',
+                onClick: () => handleEditSubject(subject),
               }}
             />
           {/if}
@@ -353,7 +348,7 @@
   .item {
     padding: 0.5rem;
     border-top: 1px solid var(--bs-border-color);
-    min-height: 2.8rem;
+    min-height: 3.2rem;
   }
 
   .item:nth-last-child(-n + 6) {

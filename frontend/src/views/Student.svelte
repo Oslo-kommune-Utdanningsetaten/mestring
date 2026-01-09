@@ -126,7 +126,7 @@
         {#if studentGoalsCount === 0}
           <ButtonMini
             options={{
-              iconName: 'plus-sign',
+              iconName: 'goal',
               classes: 'm-2',
               title: `Opprett ${individualGoalcount} individuelle mål for hvert fag`,
               onClick: () => handleCreateAllPersonalGoals(),
