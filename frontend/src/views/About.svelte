@@ -46,7 +46,7 @@
     <a href="https://punkt.oslo.kommune.no/latest/ikoner/" target="_blank">Punkt</a>
     og har følgende betydning:
   </p>
-  <div class="icon-grid">
+  <div class="icon-grid mt-4">
     <div class="icon">
       <span class="svg-container" title="Person">
         <pkt-icon name="person"></pkt-icon>
@@ -94,6 +94,20 @@
         <pkt-icon name="graph"></pkt-icon>
       </span>
       <span class="icon-label">Status</span>
+    </div>
+
+    <div class="icon">
+      <span class="svg-container" title="Status">
+        <pkt-icon name="trash-can"></pkt-icon>
+      </span>
+      <span class="icon-label">Slett</span>
+    </div>
+
+    <div class="icon">
+      <span class="svg-container" title="Status">
+        <pkt-icon name="edit"></pkt-icon>
+      </span>
+      <span class="icon-label">Rediger</span>
     </div>
   </div>
 </section>
