@@ -41,12 +41,12 @@ const setMasterySchemas = (schemas: MasterySchemaType[]) => {
 const hasUserAccessToPath = (path: string): boolean => {
   const currentData = get(dataStore) as AppData
   const currentUser = currentData.currentUser
-  const { isSchoolAdmin, isSchoolInspector, isSuperadmin } = currentUser
   const trimmedPath = path.split('/')[1]
   // Not logged in can only access public paths
   if (!currentUser) {
     return PUBLIC_PATHS.includes(trimmedPath)
   }
+  const { isSchoolAdmin, isSchoolInspector, isSuperadmin } = currentUser
   // Logged in students
   if (STUDENT_PATHS.includes(trimmedPath)) return true
   // Logged in teachers
