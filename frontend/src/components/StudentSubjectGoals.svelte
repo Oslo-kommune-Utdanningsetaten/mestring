@@ -308,7 +308,7 @@
       </span>
 
       <!-- New observation button -->
-      <span class="item item--right">
+      <span class="item">
         <ButtonIcon
           options={{
             iconName: 'bullseye',
@@ -321,7 +321,7 @@
       </span>
 
       <!-- Toggle goal info -->
-      <span class="item item--right">
+      <span class="item chevron">
         <ButtonIcon
           options={{
             iconName: `chevron-thin-${isExpanded ? 'up' : 'down'}`,
@@ -489,8 +489,10 @@
     gap: 0.25rem;
   }
 
-  .goal-primary-row > .item.item--right {
-    justify-content: flex-end;
+  .goal-primary-row > .item.chevron {
+    display: flex;
+    margin-left: auto;
+    justify-self: end;
   }
 
   .goal-primary-row > .item.item--stats {

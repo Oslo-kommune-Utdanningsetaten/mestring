@@ -24,8 +24,8 @@
   const {
     masterySchema,
     data,
-    width = 24,
-    height = 24,
+    width = 30,
+    height = 30,
     lineColor = 'rgb(100, 100, 100)',
     title: providedTitle,
   }: Props = $props()

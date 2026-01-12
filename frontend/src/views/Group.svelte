@@ -388,14 +388,10 @@
           </span>
           {#each groupGoals as goal (goal.id)}
             {@const decoGoal = getDecoratedGoalFor(student.id, goal.id)}
-            <span class="item">
+            <span class="item gap-1">
               {#if decoGoal?.masteryData}
                 <MasteryLevelBadge
                   masteryData={decoGoal.masteryData}
-                  masterySchema={getMasterySchmemaForGoal(goal)}
-                />
-                <SparklineChart
-                  data={decoGoal.observations?.map((o: ObservationType) => o.masteryValue)}
                   masterySchema={getMasterySchmemaForGoal(goal)}
                 />
                 <SparkbarChart
@@ -405,12 +401,17 @@
               {:else}
                 <MasteryLevelBadge isBadgeEmpty={true} />
               {/if}
-              <button
-                title="Legg til observasjon"
-                class="new-observation-button gap-2 d-flex align-items-center"
-                disabled={!goal.isRelevant}
-                onclick={() => handleEditObservation(goal, null, student)}
-              ></button>
+              <span class="add-observation-button">
+                <ButtonIcon
+                  options={{
+                    iconName: 'bullseye',
+                    title: 'Legg til observasjon',
+                    classes: 'bordered',
+                    disabled: !goal.isRelevant,
+                    onClick: () => handleEditObservation(goal, null, student),
+                  }}
+                />
+              </span>
             </span>
           {/each}
         {/each}
@@ -468,29 +469,35 @@
     grid-template-columns: 3fr repeat(var(--columns-count, 8), 1fr);
     align-items: start;
     gap: 0;
+    border: 1px solid var(--bs-border-color);
   }
 
-  .students-grid :global(.item) {
+  .students-grid .item {
     padding: 0.5rem;
-    border-top: 1px solid var(--bs-border-color);
     min-height: 4rem;
     display: flex;
     align-items: center;
     justify-content: flex-start;
+    border-right: 1px solid var(--bs-border-color);
+    border-bottom: 1px solid var(--bs-border-color);
   }
 
-  .students-grid :global(.item.header-row) {
+  .add-observation-button {
+    display: flex;
+    margin-left: auto;
+  }
+
+  .students-grid .item.header-row {
     background-color: var(--bs-light);
     font-weight: 800;
-  }
-
-  .students-grid :global(.item.last-row) {
-    border-bottom: 1px solid var(--bs-border-color);
   }
 
   .column-header {
     transform: rotate(-60deg);
     font-size: 0.8rem;
+    padding: 0.1rem 0.1rem 0.1rem 0.3rem;
+    max-width: 5rem;
+    background-color: var(--pkt-color-surface-strong-light-green);
   }
 
   .goal-row {
@@ -507,22 +514,5 @@
 
   .goal-type-icon > :global(svg) {
     height: 1.2em;
-  }
-
-  .new-observation-button {
-    cursor: pointer;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    border: none;
-    background: none;
-    padding: 4px;
-    margin: none;
-  }
-
-  .new-observation-button:hover {
-    border: 2px solid var(--bs-border-color);
-    margin-left: -2px;
   }
 </style>

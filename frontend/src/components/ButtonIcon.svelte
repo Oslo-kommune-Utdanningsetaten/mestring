@@ -46,7 +46,6 @@
   .button-icon :global(pkt-icon),
   .button-icon:hover :global(pkt-icon),
   .button-icon:hover :global(pkt-icon svg) {
-    border: none !important;
     width: 1.4em;
     height: 1.4em;
   }
