@@ -4,7 +4,7 @@
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   import { usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType } from '../generated/types.gen'
-  import GroupTypeTag from '../components/GroupTypeTag.svelte'
+  import GroupTag from '../components/GroupTag.svelte'
 
   let currentSchool = $derived($dataStore.currentSchool)
   let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
@@ -58,7 +58,7 @@
         </h3>
 
         <div class="d-flex align-items-center gap-2">
-          <GroupTypeTag {group} />
+          <GroupTag {group} isGroupTypeNameEnabled={true} />
 
           <!-- teachers -->
           {#if groupMembers && Object.hasOwn(groupMembers, group.id)}

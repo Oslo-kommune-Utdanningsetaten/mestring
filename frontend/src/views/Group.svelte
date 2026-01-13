@@ -30,7 +30,7 @@
   import Offcanvas from '../components/Offcanvas.svelte'
   import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
   import SparklineChart from '../components/SparklineChart.svelte'
-  import GroupTypeTag from '../components/GroupTypeTag.svelte'
+  import GroupTag from '../components/GroupTag.svelte'
   import StudentRow from '../components/StudentRow.svelte'
   import { dataStore } from '../stores/data'
   import { goalsWithCalculatedMastery, abbreviateName } from '../utils/functions'
@@ -266,7 +266,7 @@
       </div>
     </div>
     <div class="d-flex align-items-center gap-2 mt-1">
-      <GroupTypeTag {group} />
+      <GroupTag {group} isGroupTypeNameEnabled={true} />
       {#each teachers as teacher}
         <pkt-tag iconName="lecture" skin="yellow">
           <span>{abbreviateName(teacher.name)}</span>
@@ -469,7 +469,6 @@
     grid-template-columns: 3fr repeat(var(--columns-count, 8), 1fr);
     align-items: start;
     gap: 0;
-    border: 1px solid var(--bs-border-color);
   }
 
   .students-grid .item {

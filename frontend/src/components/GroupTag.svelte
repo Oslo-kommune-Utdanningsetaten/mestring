@@ -2,14 +2,35 @@
   import type { GroupType } from '../generated/types.gen'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
 
-  const { group, onclick, isTypeWarningEnabled } = $props<{
+  const {
+    group,
+    title,
+    isTypeWarningEnabled,
+    isGroupNameEnabled,
+    isGroupTypeNameEnabled,
+    onclick,
+    href,
+  } = $props<{
     group: GroupType | null
+    title?: string
     isTypeWarningEnabled?: boolean
+    isGroupNameEnabled?: boolean
+    isGroupTypeNameEnabled?: boolean
     onclick?: () => void
+    href?: string
   }>()
 
   const label: string = $derived(
-    group.type === GROUP_TYPE_BASIS ? 'Basisgruppe' : 'Undervisningsgruppe'
+    [
+      isGroupNameEnabled ? group.displayName : null,
+      isGroupTypeNameEnabled
+        ? group.type === GROUP_TYPE_BASIS
+          ? 'Basisgruppe'
+          : 'Undervisningsgruppe'
+        : null,
+    ]
+      .filter(Boolean)
+      .join(' - ')
   )
   const skin: string = $derived(group.type === GROUP_TYPE_BASIS ? 'blue' : 'green')
 
@@ -27,7 +48,7 @@
       <button
         type="button"
         class="p-0 m-0 border-0"
-        title="Endre gruppetype"
+        title={title || label}
         {onclick}
         aria-label={label}
       >
@@ -45,9 +66,13 @@
         </pkt-tag>
       </button>
     </span>
+  {:else if href}
+    <pkt-tag iconName="group" {skin}>
+      <a {href} title={title || label}>{label}</a>
+    </pkt-tag>
   {:else}
     <pkt-tag iconName="group" {skin}>
-      <span>{label}</span>
+      <span title={title || label}>{label}</span>
     </pkt-tag>
   {/if}
 {/if}

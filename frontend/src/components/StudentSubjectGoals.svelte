@@ -1,7 +1,13 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { dataStore } from '../stores/data'
-  import type { UserType, ObservationType, GoalType, GroupType } from '../generated/types.gen'
+  import type {
+    UserType,
+    ObservationType,
+    GoalType,
+    GroupType,
+    StatusType,
+  } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import {
     observationsDestroy,
@@ -13,12 +19,10 @@
   import { goalsWithCalculatedMasteryBySubjectId } from '../utils/functions'
   import Link from './Link.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
-  import SparklineChart from './SparklineChart.svelte'
   import SparkbarChart from './SparkbarChart.svelte'
   import GoalEdit from './GoalEdit.svelte'
   import ObservationEdit from './ObservationEdit.svelte'
-  import GroupSVG from '../assets/group.svg.svelte'
-  import PersonSVG from '../assets/person.svg.svelte'
+  import StatusEdit from './StatusEdit.svelte'
   import ButtonMini from './ButtonMini.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
   import Offcanvas from './Offcanvas.svelte'
@@ -36,6 +40,7 @@
   let sortableInstance: Sortable | null = null
   let isShowGoalTitleEnabled = $state<boolean>(true)
   let goalWip = $state<GoalDecorated | null>(null)
+  let statusWip = $state<Partial<StatusType> | null>(null)
   let goalForObservation = $state<GoalDecorated | null>(null)
   let observationWip = $state<ObservationType | {} | null>(null)
   let expandedGoals = $state<Record<string, boolean>>({})
@@ -43,6 +48,7 @@
   let subject = $derived($dataStore.subjects.find(s => s.id === subjectId) || null)
   let isGoalEditorOpen = $state<boolean>(false)
   let isObservationEditorOpen = $state<boolean>(false)
+  let isStatusEditorOpen = $state<boolean>(false)
 
   const fetchGoalsForSubject = async () => {
     try {
@@ -69,8 +75,20 @@
     return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
   }
 
-  const handleEditStatus = async () => {
+  const handleEditStatus = async (status: Partial<StatusType> | null) => {
     console.log('Edit status clicked')
+    if (status?.id) {
+      statusWip = {
+        ...status,
+      }
+    } else {
+      statusWip = {
+        subjectId: subjectId,
+        studentId: student.id,
+        schoolId: $dataStore.currentSchool.id,
+      }
+    }
+    isStatusEditorOpen = true
   }
 
   // Remember, we're only editing personal goals here
@@ -140,6 +158,15 @@
   const handleGoalDone = async () => {
     goalForObservation = null
     handleCloseEditGoal()
+  }
+
+  const handleCloseEditStatus = () => {
+    isStatusEditorOpen = false
+  }
+
+  const handleStatusDone = async () => {
+    goalForObservation = null
+    handleCloseEditStatus()
   }
 
   const handleObservationDone = async () => {
@@ -244,7 +271,7 @@
       iconName: 'achievement',
       classes: 'bordered',
       title: 'Legg til ny status',
-      onClick: () => handleEditStatus(),
+      onClick: () => handleEditStatus(null),
     }}
   />
 </div>
@@ -439,6 +466,20 @@
 >
   {#if goalWip}
     <GoalEdit goal={goalWip} {student} {subject} isGoalPersonal={true} onDone={handleGoalDone} />
+  {/if}
+</Offcanvas>
+
+<!-- offcanvas for creating/editing status -->
+<Offcanvas
+  bind:isOpen={isStatusEditorOpen}
+  width="60vw"
+  ariaLabel="Rediger status"
+  onClosed={() => {
+    console.log('Status editor closed')
+  }}
+>
+  {#if statusWip}
+    <StatusEdit status={statusWip} {student} {subject} onDone={handleStatusDone} />
   {/if}
 </Offcanvas>
 

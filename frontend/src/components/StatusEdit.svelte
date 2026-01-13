@@ -8,9 +8,9 @@
   import ValueInputVertical from './ValueInputVertical.svelte'
   import ValueInputHorizontal from './ValueInputHorizontal.svelte'
 
-  const { student, status, subject, onDone } = $props<{
-    student: UserType | null
+  const { status, student, subject, onDone } = $props<{
     status: StatusType | {} | null
+    student: UserType | null
     subject: SubjectType | null
     onDone: () => void
   }>()
@@ -57,9 +57,39 @@
 
 <div class="status-edit p-4">
   {#if localStatus}
-    <h3 class="pb-2">
-      {localStatus.id ? 'Redigerer' : 'Ny'} status
+    <h2 class="mb-4">
+      {localStatus.id ? 'Redigerer' : 'Ny'} status for
+    </h2>
+    <h3 class="mb-4">
+      <mark>{student?.name}</mark>
+      i faget
+      <mark>{subject.shortName || subject.displayName}</mark>
     </h3>
+
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="beginAt" class="form-label">F.o.m. dato</label>
+          <input
+            id="beginAt"
+            type="date"
+            class="form-control rounded-0 border-2 border-primary"
+            bind:value={localStatus.beginAt}
+          />
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="endAt" class="form-label">T.o.m. dato</label>
+          <input
+            id="endAt"
+            type="date"
+            class="form-control rounded-0 border-2 border-primary"
+            bind:value={localStatus.endAt}
+          />
+        </div>
+      </div>
+    </div>
 
     {#if masterySchema?.config?.isMasteryValueInputEnabled}
       <div class="mb-4">
@@ -112,7 +142,7 @@
           iconName: 'check',
           skin: 'primary',
           variant: 'label-only',
-          classes: 'm-2',
+          classes: 'me-2',
           onClick: () => handleSave(),
         }}
       >
@@ -125,7 +155,6 @@
           iconName: 'close',
           skin: 'secondary',
           variant: 'label-only',
-          classes: 'm-2',
           onClick: () => onDone(),
         }}
       >
@@ -141,5 +170,9 @@
   .status-edit {
     width: 100%;
     max-width: 100%;
+  }
+
+  .student-name {
+    color: var();
   }
 </style>

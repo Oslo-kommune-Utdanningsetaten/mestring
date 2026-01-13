@@ -6,7 +6,7 @@
   import { groupsList, schoolsList, groupsUpdate } from '../../generated/sdk.gen'
   import { urlStringFrom } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
-  import GroupTypeTag from '../../components/GroupTypeTag.svelte'
+  import GroupTag from '../../components/GroupTag.svelte'
   import ButtonIcon from '../../components/ButtonIcon.svelte'
   import { NONE_FIELD_VALUE } from '../../utils/constants'
 
@@ -298,10 +298,13 @@
             <a href="/groups/{group.id}">
               {group.displayName}
             </a>
-            <GroupTypeTag
+            <GroupTag
               {group}
+              title="Endre gruppetype"
               onclick={() => handleGroupTypeToggle(group)}
               isTypeWarningEnabled={true}
+              isGroupNameEnabled={false}
+              isGroupTypeNameEnabled={true}
             />
             <span>
               {#if group.type === 'basis'}
