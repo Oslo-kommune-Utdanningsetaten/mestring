@@ -49,6 +49,8 @@
   let isGoalEditorOpen = $state<boolean>(false)
   let isObservationEditorOpen = $state<boolean>(false)
   let isStatusEditorOpen = $state<boolean>(false)
+  const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
+  const today = new Date()
 
   const fetchGoalsForSubject = async () => {
     try {
@@ -86,6 +88,8 @@
         subjectId: subjectId,
         studentId: student.id,
         schoolId: $dataStore.currentSchool.id,
+        beginAt: sixtyDaysAgo.toISOString().split('T')[0],
+        endAt: today.toISOString().split('T')[0],
       }
     }
     isStatusEditorOpen = true
@@ -317,7 +321,7 @@
 
       <!-- Goal title -->
       <span class="item">
-        {isShowGoalTitleEnabled ? goal.title : '🙊'}
+        {$dataStore.currentSchool.isGoalTitleEnabled ? goal.title : ''}
       </span>
 
       <!-- Stats widgets -->
@@ -475,11 +479,17 @@
   width="60vw"
   ariaLabel="Rediger status"
   onClosed={() => {
-    console.log('Status editor closed')
+    statusWip = null
   }}
 >
   {#if statusWip}
-    <StatusEdit status={statusWip} {student} {subject} onDone={handleStatusDone} />
+    <StatusEdit
+      status={statusWip}
+      {student}
+      {subject}
+      goals={goalsForSubject}
+      onDone={handleStatusDone}
+    />
   {/if}
 </Offcanvas>
 
