@@ -290,7 +290,7 @@
     <div class="goal-primary-row">
       <!-- Drag handle -->
       <span class="item">
-        {#if goal.isPersonal}
+        {#if goal.isPersonal && goalsForSubject.filter(g => g.isPersonal).length > 1}
           <ButtonMini
             options={{
               size: 'tiny',
