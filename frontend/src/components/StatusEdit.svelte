@@ -11,6 +11,7 @@
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
   import ButtonMini from './ButtonMini.svelte'
+  import ButtonIcon from './ButtonIcon.svelte'
   import ValueInputVertical from './ValueInputVertical.svelte'
   import ValueInputHorizontal from './ValueInputHorizontal.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
@@ -25,6 +26,16 @@
     goals: GoalDecorated[]
     onDone: () => void
   }>()
+
+  let isGoalSectionExpanded = $state<boolean>(false)
+
+  const goalSectionToggleOptions = $derived.by(() => {
+    return {
+      iconName: `chevron-thin-${isGoalSectionExpanded ? 'up' : 'down'}`,
+      title: `${isGoalSectionExpanded ? 'Skjul' : 'Vis'} mål`,
+      onClick: () => toggleGoalsExpansion(),
+    }
+  })
 
   const masterySchema: MasterySchemaWithConfig = $derived($dataStore.defaultMasterySchema)
   const calculations = $derived(useMasteryCalculations(masterySchema))
@@ -41,6 +52,10 @@
 
   const renderDirection = (): 'horizontal' | 'vertical' | 'unknown' => {
     return masterySchema?.config?.renderDirection || 'unknown'
+  }
+
+  const toggleGoalsExpansion = () => {
+    isGoalSectionExpanded = !isGoalSectionExpanded
   }
 
   const handleSave = async () => {
@@ -94,16 +109,21 @@
 <div class="status-edit p-4">
   {#if localStatus}
     <!-- Name and subject -->
-    <h2 class="my-4">
+    <h2 class="mt-3 mb-5">
       <mark>{student?.name}</mark>
       i faget
       <mark>{subject.shortName || subject.displayName}</mark>
     </h2>
 
     <!-- Goals, compacted for reference -->
-    <div class="my-4">
-      <h4>Elevens mål i faget</h4>
-      {#if goals.length > 0}
+    <div class="my-5 goals-section">
+      <h4>
+        Elevens mål i faget <ButtonIcon options={goalSectionToggleOptions} />
+      </h4>
+      {#if !goals}
+        <p><em>Ingen mål for denne eleven i dette faget</em></p>
+      {/if}
+      {#if goals && isGoalSectionExpanded}
         <div class="goals-container mt-2">
           {#each goals as goal}
             <div class="goal-row">
@@ -142,8 +162,6 @@
             </div>
           {/each}
         </div>
-      {:else}
-        <p><em>Ingen mål for denne eleven i dette faget</em></p>
       {/if}
     </div>
 
@@ -152,8 +170,9 @@
     </h2>
 
     <!-- Begin and end dates -->
-    <div class="row my-4">
-      <div class="col-auto form-group">
+    <div class="row my-5">
+      <h3 class="col-2">Periode</h3>
+      <div class="col-auto">
         <label for="beginAt" class="form-label mb-0">Fra</label>
         <input
           id="beginAt"
@@ -167,7 +186,7 @@
           <div class="invalid-feedback d-block">{validationErrors.beginAt}</div>
         {/if}
       </div>
-      <div class="col-auto form-group">
+      <div class="col-auto">
         <label for="endAt" class="form-label mb-0">Til</label>
         <input
           id="endAt"
@@ -185,26 +204,29 @@
 
     <!-- Mastery value input -->
     {#if masterySchema?.config?.isMasteryValueInputEnabled}
-      <div class="my-4">
-        {#if renderDirection() === 'vertical'}
-          <ValueInputVertical
-            {masterySchema}
-            bind:masteryValue={localStatus.masteryValue}
-            label="Mestring i denne perioden"
-          />
-        {:else}
-          <ValueInputHorizontal
-            {masterySchema}
-            bind:masteryValue={localStatus.masteryValue}
-            label="Mestring i denne perioden"
-          />
-        {/if}
+      <div class="row my-5">
+        <h3 class="col-2">Mestring</h3>
+        <div class="col-10">
+          {#if renderDirection() === 'vertical'}
+            <ValueInputVertical
+              {masterySchema}
+              bind:masteryValue={localStatus.masteryValue}
+              label="Totalt sett, i denne perioden"
+            />
+          {:else}
+            <ValueInputHorizontal
+              {masterySchema}
+              bind:masteryValue={localStatus.masteryValue}
+              label="Totalt sett, i denne perioden"
+            />
+          {/if}
+        </div>
       </div>
     {/if}
 
     <!-- Mastery description input -->
     {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
-      <div class="form-group my-4">
+      <div class="my-4">
         <label for="description" class="form-label">Beskrivelse/tilbakemelding</label>
         <textarea
           id="description"
@@ -218,7 +240,7 @@
 
     <!-- Mastery feed forward input -->
     {#if masterySchema?.config?.isFeedforwardInputEnabled}
-      <div class="form-group my-4">
+      <div class="my-4">
         <label for="feedforward" class="form-label">Fremovermelding</label>
         <textarea
           id="feedforward"
@@ -230,11 +252,10 @@
       </div>
     {/if}
 
-    <div class="d-flex gap-2 justify-content-start mt-4">
+    <div class="d-flex gap-2 justify-content-start mt-2">
       <ButtonMini
         options={{
           title: 'Lagre',
-          iconName: 'check',
           skin: 'primary',
           variant: 'label-only',
           classes: 'me-2',
@@ -247,7 +268,6 @@
       <ButtonMini
         options={{
           title: 'Avbryt',
-          iconName: 'close',
           skin: 'secondary',
           variant: 'label-only',
           onClick: () => onDone(),
@@ -275,6 +295,16 @@
     max-width: 12rem;
   }
 
+  .goals-section {
+    background-color: var(--pkt-color-brand-neutrals-200);
+    padding: 0.5rem 1rem 1rem 1rem;
+
+    h4 {
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
+  }
+
   .goals-container {
     display: flex;
     flex-direction: column;
@@ -287,7 +317,7 @@
     gap: 1rem;
     align-items: stretch;
     padding: 0.5rem 1rem;
-    background-color: var(--pkt-color-brand-neutrals-200);
+    background-color: white;
     border-radius: 0px;
     min-height: 2rem;
   }

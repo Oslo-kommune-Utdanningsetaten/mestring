@@ -38,7 +38,6 @@
 
   let goalsForSubject = $state<GoalDecorated[]>([])
   let sortableInstance: Sortable | null = null
-  let isShowGoalTitleEnabled = $state<boolean>(true)
   let goalWip = $state<GoalDecorated | null>(null)
   let statusWip = $state<Partial<StatusType> | null>(null)
   let goalForObservation = $state<GoalDecorated | null>(null)
@@ -551,10 +550,6 @@
     flex-wrap: nowrap;
   }
 
-  .goal-primary-row .item.mt-1 {
-    margin-top: 0;
-  }
-
   .goal-secondary-row {
     margin-top: 10px;
     margin-left: 6px;
@@ -567,10 +562,6 @@
     grid-template-columns: 5fr 3fr 5fr;
     column-gap: 5px;
     align-items: center;
-  }
-
-  :global(.row-handle-draggable) {
-    cursor: move;
   }
 
   .individual-goal-icon :global(pkt-icon) {

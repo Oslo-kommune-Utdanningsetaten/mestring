@@ -13,15 +13,16 @@
   }
 
   const { options }: Props = $props()
-  const iconName = options.iconName || 'plus-sign'
-  const classes = options.classes || 'me-2'
-  const title = options.title || 'TITTEL MANGLER'
+  const iconName = $derived(options.iconName || 'plus-sign')
+  const classes = $derived(options.classes || 'me-2')
+  const title = $derived(options.title || 'TITTEL MANGLER')
   const disabled = $derived<boolean>(options.disabled || false)
-  const onClick =
+  const onClick = $derived(
     options.onClick ||
-    (() => {
-      console.warn('No onClick function provided')
-    })
+      (() => {
+        console.warn('No onClick function provided')
+      })
+  )
 </script>
 
 <button
