@@ -29,9 +29,9 @@
   import GoalEdit from '../components/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
   import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
-  import SparklineChart from '../components/SparklineChart.svelte'
   import GroupTag from '../components/GroupTag.svelte'
   import StudentRow from '../components/StudentRow.svelte'
+  import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import { dataStore } from '../stores/data'
   import { goalsWithCalculatedMastery, abbreviateName } from '../utils/functions'
   import SparkbarChart from '../components/SparkbarChart.svelte'
@@ -53,7 +53,6 @@
   let studentForObservation = $state<UserType | null>(null)
   let isObservationEditorOpen = $state<boolean>(false)
   let isGoalEditorOpen = $state<boolean>(false)
-  let isShowGoalTitleEnabled = $state<boolean>(true)
   let currentSchool = $derived($dataStore.currentSchool)
   let subjects = $state<SubjectType[]>([])
   let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
@@ -311,7 +310,7 @@
             <span class="goal-type-icon"><GroupSVG /></span>
             <!-- Goal title -->
             <span>
-              {isShowGoalTitleEnabled ? goal.title : '🙊'}
+              {$dataStore.currentSchool.isGoalTitleEnabled ? goal.title : ''}
             </span>
             <!-- Actions -->
             <span>
@@ -351,24 +350,10 @@
   <section>
     <h2 class="mb-3">Elever</h2>
     {#if group.type === GROUP_TYPE_BASIS}
-      <div class="students-grid" aria-label="Elevliste" style="--columns-count: {subjects.length}">
-        <span class="item header header-row">Elev</span>
-        {#each subjects as aSubject (aSubject.id)}
-          {#if aSubject}
-            <span class="item header header-row">
-              <span class="column-header">
-                {aSubject.shortName}
-              </span>
-            </span>
-          {/if}
-        {/each}
-        {#each students as student (student.id)}
-          <StudentRow {student} {subjects} groups={allGroups} />
-        {/each}
-      </div>
+      <StudentsWithSubjects {students} {subjects} groups={allGroups} />
     {:else if group.type === GROUP_TYPE_TEACHING}
       <div
-        class="students-grid my-3"
+        class="teaching-grid my-3"
         aria-label="Elevliste"
         style="--columns-count: {groupGoals.length}"
       >
@@ -464,14 +449,15 @@
     height: 7rem;
   }
 
-  .students-grid {
+  /* Teaching group grid - different from StudentsWithSubjects */
+  .teaching-grid {
     display: grid;
     grid-template-columns: 3fr repeat(var(--columns-count, 8), 1fr);
     align-items: start;
     gap: 0;
   }
 
-  .students-grid .item {
+  .teaching-grid .item {
     padding: 0.5rem;
     min-height: 4rem;
     display: flex;
@@ -486,7 +472,7 @@
     margin-left: auto;
   }
 
-  .students-grid .item.header-row {
+  .teaching-grid .item.header-row {
     background-color: var(--bs-light);
     font-weight: 800;
   }
@@ -497,6 +483,7 @@
     padding: 0.1rem 0.1rem 0.1rem 0.3rem;
     max-width: 5rem;
     background-color: var(--pkt-color-surface-strong-light-green);
+    border: 1px solid var(--pkt-color-grays-gray-100);
   }
 
   .goal-row {
@@ -504,6 +491,8 @@
     grid-template-columns: 1fr 1fr 1fr 6fr 2fr;
     column-gap: 5px;
     background-color: var(--bs-light);
+    min-height: 3rem;
+    align-items: center;
   }
 
   .row-handle-draggable {
