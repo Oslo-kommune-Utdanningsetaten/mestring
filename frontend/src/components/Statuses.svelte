@@ -2,7 +2,7 @@
   import type { StatusType, SubjectType, UserType } from '../generated/types.gen'
   import { statusList } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
-  import { formatDate } from '../utils/functions'
+  import Link from './Link.svelte'
 
   let { student, subject } = $props<{
     student: UserType
@@ -11,12 +11,6 @@
 
   let statuses = $state<StatusType[]>([])
   let isLoading = $state(true)
-
-  const generateTitle = (status: StatusType): string => {
-    const beginDate = formatDate(status.beginAt)
-    const endDate = formatDate(status.endAt)
-    return `${beginDate} - ${endDate}`
-  }
 
   const fetchStatuses = async () => {
     try {
@@ -49,15 +43,13 @@
   </div>
 {:else if statuses.length > 0}
   <div class="statuses-container">
+    <pkt-icon name="achievement" size="small"></pkt-icon>
     {#each statuses as status (status.id)}
       <div class="status-item" title={status.title}>
-        <pkt-icon name="achievement" size="small"></pkt-icon>
-        <span class="status-title">{status.title}</span>
+        <Link to={`/statuses/${status.id}/`}>{status.title}</Link>
       </div>
     {/each}
   </div>
-{:else}
-  <p class="text-muted fst-italic mb-0">Ingen statuser</p>
 {/if}
 
 <style>
@@ -65,15 +57,15 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    background-color: var(--pkt-color-surface-strong-light-green);
+    border-radius: 4px;
   }
 
   .status-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.25rem 0.5rem;
-    background-color: var(--pkt-color-surface-strong-light-green);
-    border-radius: 4px;
     font-size: 0.85rem;
   }
 

@@ -240,6 +240,7 @@ mark {
   --mark-color: var(--pkt-color-surface-default-yellow);
   --mark-skew: 0.15em;
   --mark-overlap: 0.2em;
+  --mark-height: 70%;
 
   margin-inline: calc(var(--mark-overlap) * -1);
   padding-inline: var(--mark-overlap);
@@ -250,9 +251,9 @@ mark {
     linear-gradient(var(--mark-color), var(--mark-color)),
     linear-gradient(to bottom right, var(--mark-color) 50%, transparent 50%);
   background-size:
-    var(--mark-skew) 100%,
-    calc(100% - var(--mark-skew) * 2) 100%,
-    var(--mark-skew) 100%;
+    var(--mark-skew) var(--mark-height),
+    calc(100% - var(--mark-skew) * 2) var(--mark-height),
+    var(--mark-skew) var(--mark-height);
   background-position:
     left center,
     center,

@@ -60,6 +60,7 @@
   let currentSchool = $derived($dataStore.currentSchool)
   let subjects = $state<SubjectType[]>([])
   let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
+  let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
   const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
   const today = new Date()
 
@@ -186,7 +187,6 @@
   }
 
   const handleEditStatus = async (status: Partial<StatusType> | null, student: UserType) => {
-    console.log('Edit status clicked')
     if (status?.id) {
       statusWip = {
         ...status,
@@ -206,6 +206,7 @@
   const handleStatusDone = async () => {
     goalForObservation = null
     isStatusEditorOpen = false
+    statusesKey++
   }
 
   const handleGoalOrderChange = async (event: SortableEvent) => {
@@ -399,7 +400,9 @@
             <a href={`/students/${student.id}`}>
               {student.name}
             </a>
-            <Statuses {student} {subject} />
+            {#key statusesKey}
+              <Statuses {student} {subject} />
+            {/key}
             <ButtonIcon
               options={{
                 iconName: 'achievement',

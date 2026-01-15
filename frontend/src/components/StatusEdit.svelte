@@ -100,7 +100,7 @@
       return
     }
 
-    localStatus.studentId = student?.id
+    localStatus.studentId = localStudent?.id
     localStatus.subjectId = subject?.id
     localStatus.schoolId = $dataStore.currentSchool?.id
     try {

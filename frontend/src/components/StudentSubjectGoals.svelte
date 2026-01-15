@@ -1,21 +1,9 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { dataStore } from '../stores/data'
-  import type {
-    UserType,
-    ObservationType,
-    GoalType,
-    GroupType,
-    StatusType,
-  } from '../generated/types.gen'
+  import type { UserType, ObservationType, GoalType, StatusType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
-  import {
-    observationsDestroy,
-    goalsDestroy,
-    goalsUpdate,
-    goalsList,
-    goalsCreate,
-  } from '../generated/sdk.gen'
+  import { observationsDestroy, goalsDestroy, goalsUpdate, goalsCreate } from '../generated/sdk.gen'
   import Link from './Link.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparkbarChart from './SparkbarChart.svelte'
