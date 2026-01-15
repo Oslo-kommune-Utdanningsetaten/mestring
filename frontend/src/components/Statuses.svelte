@@ -2,6 +2,7 @@
   import type { StatusType, SubjectType, UserType } from '../generated/types.gen'
   import { statusList } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
+  import { formatDate } from '../utils/functions'
 
   let { student, subject } = $props<{
     student: UserType
@@ -10,11 +11,6 @@
 
   let statuses = $state<StatusType[]>([])
   let isLoading = $state(true)
-
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('nb-NO', { day: '2-digit', month: '2-digit', year: 'numeric' })
-  }
 
   const generateTitle = (status: StatusType): string => {
     const beginDate = formatDate(status.beginAt)
@@ -54,9 +50,9 @@
 {:else if statuses.length > 0}
   <div class="statuses-container">
     {#each statuses as status (status.id)}
-      <div class="status-item" title={generateTitle(status)}>
+      <div class="status-item" title={status.title}>
         <pkt-icon name="achievement" size="small"></pkt-icon>
-        <span class="status-title">{generateTitle(status)}</span>
+        <span class="status-title">{status.title}</span>
       </div>
     {/each}
   </div>

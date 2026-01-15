@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
   import type {
     StatusType,
     SubjectType,
@@ -16,7 +17,7 @@
   import ValueInputHorizontal from './ValueInputHorizontal.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparkbarChart from './SparkbarChart.svelte'
-  import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
+  import { fetchGoalsForSubjectAndStudent, formatMonthName } from '../utils/functions'
   import type { GoalDecorated } from '../types/models'
 
   let { status, student, subject, goals, onDone } = $props<{
@@ -68,6 +69,13 @@
     )
   }
 
+  const handleGenerateTitle = () => {
+    localStatus = {
+      ...localStatus,
+      title: `${formatMonthName(localStatus.beginAt)} - ${formatMonthName(localStatus.endAt)}`,
+    }
+  }
+
   const toggleGoalsExpansion = () => {
     isGoalSectionExpanded = !isGoalSectionExpanded
   }
@@ -112,8 +120,7 @@
     }
   }
 
-  // Update localStatus when status prop changes
-  $effect(() => {
+  onMount(() => {
     localStatus = {
       ...status,
     }
@@ -224,6 +231,28 @@
       </div>
     </div>
 
+    <!-- Title -->
+    <div class="row my-5">
+      <h3 class="col-2">Tittel</h3>
+      <div class="col-10">
+        <div class="input-with-icon">
+          <input
+            type="text"
+            class="form-control rounded-0 border-2 border-primary p-2"
+            bind:value={localStatus.title}
+            placeholder="Angi en tittel"
+          />
+          <ButtonIcon
+            options={{
+              iconName: 'arrow-circle',
+              title: 'Foreslå tittel basert på datoer',
+              onClick: () => handleGenerateTitle(),
+            }}
+          />
+        </div>
+      </div>
+    </div>
+
     <!-- Mastery value input -->
     {#if masterySchema?.config?.isMasteryValueInputEnabled}
       <div class="row my-5">
@@ -315,6 +344,21 @@
     border-radius: 0px;
     padding-left: 8px;
     max-width: 12rem;
+  }
+
+  .input-with-icon {
+    position: relative;
+  }
+
+  .input-with-icon input {
+    padding-right: 2.5rem;
+  }
+
+  .input-with-icon :global(button) {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   .goals-section {

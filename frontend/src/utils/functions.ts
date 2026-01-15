@@ -1,12 +1,6 @@
 import type { Mastery, GoalDecorated } from '../types/models'
-import type {
-  GoalType,
-  SubjectType,
-  ObservationType,
-  GroupType,
-  UserType,
-} from '../generated/types.gen'
-import { goalsList, observationsList, groupsList } from '../generated/sdk.gen'
+import type { GoalType, SubjectType, ObservationType, GroupType } from '../generated/types.gen'
+import { goalsList, observationsList } from '../generated/sdk.gen'
 import { nb as noLocale } from 'date-fns/locale'
 import { format, formatDistanceToNow } from 'date-fns'
 
@@ -196,9 +190,19 @@ export const isNumber = (value: any) => {
   return typeof value === 'number'
 }
 
-export const formatDate = (isoDate?: string | number | undefined) => {
+export const formatDateTime = (isoDate?: string | number | undefined) => {
   if (!isoDate) return null
   return format(new Date(isoDate), 'yyyy-MM-dd HH:mm')
+}
+
+export const formatDate = (isoDate?: string | number | undefined) => {
+  if (!isoDate) return null
+  return format(new Date(isoDate), 'yyyy-MM-dd')
+}
+
+export const formatMonthName = (isoDate?: string | number | undefined) => {
+  if (!isoDate) return null
+  return format(new Date(isoDate), 'LLLL', { locale: noLocale })
 }
 
 export const formatDateDistance = (isoDate?: string | number | undefined) => {

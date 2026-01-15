@@ -12,7 +12,7 @@
     updateDataIntegrity,
   } from '../../generated/sdk.gen'
   import type { SchoolImportStatus } from '../../types/models'
-  import { formatDate } from '../../utils/functions'
+  import { formatDateTime } from '../../utils/functions'
 
   import ButtonMini from '../../components/ButtonMini.svelte'
   import { addAlert } from '../../stores/alerts'
@@ -362,7 +362,7 @@
         </div>
 
         <div class="text-muted small">
-          {school.orgNumber}, Oppdatert {formatDate(school.updatedAt)}
+          {school.orgNumber}, Oppdatert {formatDateTime(school.updatedAt)}
         </div>
 
         <!-- Subjects -->
@@ -452,7 +452,7 @@
                     {importStatus[school.orgNumber].users.diff ?? '—'}
                   </td>
                   <td class="border-0 text-center py-2 small text-muted">
-                    {formatDate(importStatus[school.orgNumber].users.fetchedAt)}
+                    {formatDateTime(importStatus[school.orgNumber].users.fetchedAt)}
                   </td>
                 </tr>
 
@@ -474,7 +474,7 @@
                     {importStatus[school.orgNumber].groups.diff ?? '—'}
                   </td>
                   <td class="border-0 text-center py-2 small text-muted">
-                    {formatDate(importStatus[school.orgNumber].groups.fetchedAt)}
+                    {formatDateTime(importStatus[school.orgNumber].groups.fetchedAt)}
                   </td>
                 </tr>
 
@@ -496,7 +496,7 @@
                     {importStatus[school.orgNumber].memberships.diff ?? '—'}
                   </td>
                   <td class="border-0 text-center py-2 small text-muted">
-                    {formatDate(importStatus[school.orgNumber].memberships.fetchedAt)}
+                    {formatDateTime(importStatus[school.orgNumber].memberships.fetchedAt)}
                   </td>
                 </tr>
               </tbody>
@@ -507,7 +507,7 @@
             <div class="d-flex align-items-center mt-3 pt-3 border-top">
               <pkt-icon name="clock" size="16" class="me-2 text-muted"></pkt-icon>
               <span class="text-muted small">
-                Sist import: {formatDate(importStatus[school.orgNumber].lastImportAt)}
+                Sist import: {formatDateTime(importStatus[school.orgNumber].lastImportAt)}
               </span>
             </div>
           {/if}
