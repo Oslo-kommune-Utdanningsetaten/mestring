@@ -548,27 +548,4 @@
     column-gap: 5px;
     align-items: center;
   }
-
-  .individual-goal-icon :global(pkt-icon) {
-    height: 1rem;
-  }
-  .group-goal-icon :global(pkt-icon) {
-    height: 1.2rem;
-  }
-
-  /* Prevent icon shrinking on hover in ButtonMini */
-  :global(.mini-button pkt-button),
-  :global(.mini-button pkt-button:hover),
-  :global(.mini-button pkt-button:focus) {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
-  :global(.mini-button pkt-button pkt-icon) {
-    flex-shrink: 0 !important;
-    width: 1.5rem !important;
-    height: 1.5rem !important;
-    font-size: 1.5rem !important;
-  }
 </style>
