@@ -177,6 +177,8 @@
                     data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
                     masterySchema={getMasterySchmemaForGoal(goal)}
                   />
+                {:else}
+                  Ingen observasjoner i dette målet
                 {/if}
               </span>
             </div>
