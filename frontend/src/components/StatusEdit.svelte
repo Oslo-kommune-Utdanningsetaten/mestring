@@ -6,7 +6,7 @@
     ObservationType,
     GoalType,
   } from '../generated/types.gen'
-  import { statusCreate, statusUpdate } from '../generated/sdk.gen'
+  import { statusCreate, statusUpdate, usersRetrieve } from '../generated/sdk.gen'
   import type { MasterySchemaWithConfig } from '../types/models'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
@@ -16,16 +16,19 @@
   import ValueInputHorizontal from './ValueInputHorizontal.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparkbarChart from './SparkbarChart.svelte'
-
+  import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
   import type { GoalDecorated } from '../types/models'
 
-  const { status, student, subject, goals, onDone } = $props<{
+  let { status, student, subject, goals, onDone } = $props<{
     status: StatusType | {} | null
-    student: UserType | null
     subject: SubjectType | null
-    goals: GoalDecorated[]
+    student?: UserType | null
+    goals?: GoalDecorated[]
     onDone: () => void
   }>()
+
+  let localStudent = $state<UserType | null>(student || null)
+  let localGoals = $state<GoalDecorated[] | null>(goals || null)
 
   let isGoalSectionExpanded = $state<boolean>(false)
 
@@ -52,6 +55,17 @@
 
   const renderDirection = (): 'horizontal' | 'vertical' | 'unknown' => {
     return masterySchema?.config?.renderDirection || 'unknown'
+  }
+
+  const fetchStudentData = async () => {
+    const userResult = await usersRetrieve({ path: { id: status.studentId } })
+    localStudent = userResult.data!
+    if (!localStudent) return
+    localGoals = await fetchGoalsForSubjectAndStudent(
+      subject.id,
+      localStudent.id,
+      $dataStore.currentUser.allGroups
+    )
   }
 
   const toggleGoalsExpansion = () => {
@@ -104,13 +118,19 @@
       ...status,
     }
   })
+
+  $effect(() => {
+    if (!student) {
+      fetchStudentData()
+    }
+  })
 </script>
 
 <div class="status-edit p-4">
-  {#if localStatus}
+  {#if localStatus && subject && localStudent}
     <!-- Name and subject -->
     <h2 class="mt-3 mb-5">
-      <mark>{student?.name}</mark>
+      <mark>{localStudent.name}</mark>
       i faget
       <mark>{subject.shortName || subject.displayName}</mark>
     </h2>
@@ -120,12 +140,12 @@
       <h4>
         Elevens mål i faget <ButtonIcon options={goalSectionToggleOptions} />
       </h4>
-      {#if !goals}
+      {#if !localGoals}
         <p><em>Ingen mål for denne eleven i dette faget</em></p>
       {/if}
-      {#if goals && isGoalSectionExpanded}
+      {#if localGoals && isGoalSectionExpanded}
         <div class="goals-container mt-2">
-          {#each goals as goal}
+          {#each localGoals as goal}
             <div class="goal-row">
               <span class="goal-sort-order">{goal.sortOrder}</span>
 
@@ -297,9 +317,12 @@
 
   .goals-section {
     background-color: var(--pkt-color-brand-neutrals-200);
-    padding: 0.5rem 1rem 1rem 1rem;
+    padding: 0.5rem;
 
     h4 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
       text-transform: uppercase;
       font-size: 0.8rem;
     }

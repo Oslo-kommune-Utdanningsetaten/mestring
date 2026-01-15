@@ -14,6 +14,7 @@
     UserType,
     ObservationType,
     SubjectType,
+    StatusType,
   } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import {
@@ -26,11 +27,11 @@
   import GroupSVG from '../assets/group.svg.svelte'
   import ButtonIcon from '../components/ButtonIcon.svelte'
   import ObservationEdit from '../components/ObservationEdit.svelte'
+  import StatusEdit from '../components/StatusEdit.svelte'
   import GoalEdit from '../components/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
   import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
   import GroupTag from '../components/GroupTag.svelte'
-  import StudentRow from '../components/StudentRow.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import { dataStore } from '../stores/data'
   import { goalsWithCalculatedMastery, abbreviateName } from '../utils/functions'
@@ -50,12 +51,16 @@
   let goalsWithCalculatedMasteryByStudentId = $state<Record<string, GoalDecorated[]>>({})
   let observationWip = $state<ObservationType | {} | null>(null)
   let goalForObservation = $state<GoalDecorated | null>(null)
+  let statusWip = $state<Partial<StatusType> | null>(null)
   let studentForObservation = $state<UserType | null>(null)
   let isObservationEditorOpen = $state<boolean>(false)
+  let isStatusEditorOpen = $state<boolean>(false)
   let isGoalEditorOpen = $state<boolean>(false)
   let currentSchool = $derived($dataStore.currentSchool)
   let subjects = $state<SubjectType[]>([])
   let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
+  const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
+  const today = new Date()
 
   const fetchGroupData = async () => {
     try {
@@ -177,6 +182,29 @@
       }
     }
     isObservationEditorOpen = true
+  }
+
+  const handleEditStatus = async (status: Partial<StatusType> | null, student: UserType) => {
+    console.log('Edit status clicked')
+    if (status?.id) {
+      statusWip = {
+        ...status,
+      }
+    } else {
+      statusWip = {
+        subjectId: subject?.id,
+        studentId: student.id,
+        schoolId: $dataStore.currentSchool.id,
+        beginAt: sixtyDaysAgo.toISOString().split('T')[0],
+        endAt: today.toISOString().split('T')[0],
+      }
+    }
+    isStatusEditorOpen = true
+  }
+
+  const handleStatusDone = async () => {
+    goalForObservation = null
+    isStatusEditorOpen = false
   }
 
   const handleGoalOrderChange = async (event: SortableEvent) => {
@@ -370,6 +398,14 @@
             <a href={`/students/${student.id}`}>
               {student.name}
             </a>
+            <ButtonIcon
+              options={{
+                iconName: 'achievement',
+                classes: 'bordered',
+                title: 'Legg til ny status',
+                onClick: () => handleEditStatus(null, student),
+              }}
+            />
           </span>
           {#each groupGoals as goal (goal.id)}
             {@const decoGoal = getDecoratedGoalFor(student.id, goal.id)}
@@ -437,6 +473,20 @@
       goal={goalForObservation}
       onDone={handleObservationDone}
     />
+  {/if}
+</Offcanvas>
+
+<!-- offcanvas for creating/editing status -->
+<Offcanvas
+  bind:isOpen={isStatusEditorOpen}
+  width="60vw"
+  ariaLabel="Rediger status"
+  onClosed={() => {
+    statusWip = null
+  }}
+>
+  {#if statusWip}
+    <StatusEdit status={statusWip} {subject} onDone={handleStatusDone} />
   {/if}
 </Offcanvas>
 

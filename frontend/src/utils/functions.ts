@@ -65,6 +65,24 @@ export const subjectNamesFromStudentGoals = (
   return Array.from(result)
 }
 
+export const fetchGoalsForSubjectAndStudent = async (
+  subjectId: string,
+  studentId: string,
+  studentGroups: GroupType[]
+): Promise<GoalDecorated[]> => {
+  try {
+    const goalsResult = await goalsList({ query: { student: studentId, subject: subjectId } })
+    const goals = goalsResult.data || []
+    const groupIds = goals.map(goal => goal.groupId).filter(Boolean) as string[]
+    const groups = studentGroups.filter((group: GroupType) => groupIds.includes(group.id))
+    const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(studentId, goals, groups)
+    return goalsBySubjectId[subjectId]
+  } catch (error) {
+    console.error('Error fetching goals:', error)
+    return []
+  }
+}
+
 export const goalsWithCalculatedMastery = async (
   studentId: string,
   studentGoals: GoalType[]

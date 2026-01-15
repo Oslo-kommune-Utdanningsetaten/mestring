@@ -16,7 +16,6 @@
     goalsList,
     goalsCreate,
   } from '../generated/sdk.gen'
-  import { goalsWithCalculatedMasteryBySubjectId } from '../utils/functions'
   import Link from './Link.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import SparkbarChart from './SparkbarChart.svelte'
@@ -28,7 +27,7 @@
   import Offcanvas from './Offcanvas.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { getLocalStorageItem } from '../stores/localStorage'
-  import { formatDateDistance } from '../utils/functions'
+  import { formatDateDistance, fetchGoalsForSubjectAndStudent } from '../utils/functions'
 
   const { subjectId, student, onRefreshRequired } = $props<{
     subjectId: string
@@ -51,33 +50,19 @@
   const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
   const today = new Date()
 
-  const fetchGoalsForSubject = async () => {
-    try {
-      const goalsResult = await goalsList({ query: { student: student.id, subject: subjectId } })
-      const goals = goalsResult.data || []
-      const groupIds = goals.map(goal => goal.groupId).filter(Boolean) as string[]
-      const groups = $dataStore.currentUser.allGroups.filter((group: GroupType) =>
-        groupIds.includes(group.id)
-      )
-
-      const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(
-        student.id,
-        goals,
-        groups
-      )
-      goalsForSubject = goalsBySubjectId[subjectId]
-    } catch (error) {
-      console.error('Error fetching goals:', error)
-      goalsForSubject = []
-    }
-  }
-
   const getMasterySchmemaForGoal = (goal: GoalType) => {
     return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
   }
 
+  const fetchGoals = async () => {
+    goalsForSubject = await fetchGoalsForSubjectAndStudent(
+      subjectId,
+      student.id,
+      $dataStore.currentUser.allGroups
+    )
+  }
+
   const handleEditStatus = async (status: Partial<StatusType> | null) => {
-    console.log('Edit status clicked')
     if (status?.id) {
       statusWip = {
         ...status,
@@ -179,7 +164,7 @@
   const handleDeleteObservation = async (observationId: string) => {
     try {
       await observationsDestroy({ path: { id: observationId } })
-      await fetchGoalsForSubject()
+      await fetchGoals()
     } catch (error) {
       console.error('Error deleting observation:', error)
     }
@@ -188,7 +173,7 @@
   const handleDeleteGoal = async (goalId: string) => {
     try {
       await goalsDestroy({ path: { id: goalId } })
-      await fetchGoalsForSubject()
+      await fetchGoals()
     } catch (error) {
       console.error('Error deleting goal:', error)
     }
@@ -228,13 +213,13 @@
     } catch (error) {
       console.error('Error updating goal order:', error)
     } finally {
-      await fetchGoalsForSubject()
+      await fetchGoals()
     }
   }
 
   $effect(() => {
     if (student && subjectId) {
-      fetchGoalsForSubject()
+      fetchGoals()
     }
   })
 
@@ -464,7 +449,7 @@
   ariaLabel="Rediger mål"
   onClosed={() => {
     goalWip = null
-    fetchGoalsForSubject()
+    fetchGoals()
   }}
 >
   {#if goalWip}
@@ -499,7 +484,7 @@
   ariaLabel="Rediger observasjon"
   onClosed={() => {
     observationWip = null
-    fetchGoalsForSubject()
+    fetchGoals()
   }}
 >
   {#if observationWip}
