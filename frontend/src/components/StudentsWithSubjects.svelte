@@ -59,8 +59,9 @@
     transform: rotate(-60deg);
     font-size: 0.8rem;
     padding: 0.1rem 0.1rem 0.1rem 0.3rem;
-    max-width: 5rem;
+    max-width: 6rem;
     background-color: var(--pkt-color-surface-strong-light-green);
     border: 1px solid var(--pkt-color-grays-gray-100);
+    overflow-wrap: break-word;
   }
 </style>
