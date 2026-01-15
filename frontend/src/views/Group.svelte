@@ -36,6 +36,7 @@
   import { dataStore } from '../stores/data'
   import { goalsWithCalculatedMastery, abbreviateName } from '../utils/functions'
   import SparkbarChart from '../components/SparkbarChart.svelte'
+  import Statuses from '../components/Statuses.svelte'
 
   const { groupId } = $props<{ groupId: string }>()
 
@@ -379,7 +380,7 @@
     <h2 class="mb-3">Elever</h2>
     {#if group.type === GROUP_TYPE_BASIS}
       <StudentsWithSubjects {students} {subjects} groups={allGroups} />
-    {:else if group.type === GROUP_TYPE_TEACHING}
+    {:else if group.type === GROUP_TYPE_TEACHING && subject}
       <div
         class="teaching-grid my-3"
         aria-label="Elevliste"
@@ -398,6 +399,7 @@
             <a href={`/students/${student.id}`}>
               {student.name}
             </a>
+            <Statuses {student} {subject} />
             <ButtonIcon
               options={{
                 iconName: 'achievement',
@@ -512,7 +514,7 @@
     min-height: 4rem;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     border-right: 1px solid var(--bs-border-color);
     border-bottom: 1px solid var(--bs-border-color);
   }
