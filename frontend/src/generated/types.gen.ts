@@ -288,6 +288,7 @@ export type PatchedStatusType = {
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
     deletedAt?: string | null;
+    title?: string | null;
     beginAt?: string;
     endAt?: string;
     masteryValue?: number | null;
@@ -398,6 +399,7 @@ export type StatusType = {
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
     deletedAt?: string | null;
+    title?: string | null;
     beginAt: string;
     endAt: string;
     masteryValue?: number | null;
@@ -638,6 +640,7 @@ export type PatchedSituationCreateType = {
 
 export type PatchedStatusCreateType = {
     deletedAt?: string | null;
+    title?: string | null;
     beginAt?: string;
     endAt?: string;
     masteryValue?: number | null;
@@ -704,6 +707,7 @@ export type SituationCreateType = {
 
 export type StatusCreateType = {
     deletedAt?: string | null;
+    title?: string | null;
     beginAt: string;
     endAt: string;
     masteryValue?: number | null;
