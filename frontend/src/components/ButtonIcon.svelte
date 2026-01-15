@@ -28,7 +28,7 @@
 <button
   {title}
   aria-label={title}
-  class={`button-icon ${classes}`}
+  class={`button-icon ${classes} ${disabled ? 'disabled' : ''}`}
   tabindex={disabled ? undefined : 0}
   onclick={() => !disabled && onClick()}
   onkeydown={(e: any) => {
@@ -40,28 +40,34 @@
   }}
   aria-disabled={disabled ? 'true' : 'false'}
 >
-  <pkt-icon name={iconName}></pkt-icon>
+  <pkt-icon name={iconName} variant="large"></pkt-icon>
 </button>
 
 <style>
-  .button-icon :global(pkt-icon),
-  .button-icon:hover :global(pkt-icon),
-  .button-icon:hover :global(pkt-icon svg) {
-    width: 1.4em;
-    height: 1.4em;
-  }
   .button-icon {
+    width: 32px;
+    height: 32px;
     display: inline-flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     border: none;
-    padding: 0.2rem;
     background-color: transparent;
   }
 
+  .button-icon pkt-icon {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+  }
+
+  .disabled {
+    cursor: not-allowed;
+    --fg-color: var(--pkt-color-grays-gray-500);
+    background-color: var(--pkt-color-grays-gray-100);
+  }
+
   .button-icon:hover {
-    transform: scale(1);
     background-color: var(--bs-gray);
   }
 
