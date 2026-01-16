@@ -264,6 +264,7 @@ export type PatchedSchoolType = {
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
+    isStatusEnabled?: boolean;
     subjectsAllowed?: string;
     readonly createdById?: string;
     readonly updatedById?: string;
@@ -375,6 +376,7 @@ export type SchoolType = {
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
+    isStatusEnabled?: boolean;
     subjectsAllowed?: string;
     readonly createdById: string;
     readonly updatedById: string;
@@ -628,6 +630,7 @@ export type PatchedSchoolCreateType = {
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
+    isStatusEnabled?: boolean;
     subjectsAllowed?: string;
 };
 
@@ -695,6 +698,7 @@ export type SchoolCreateType = {
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
+    isStatusEnabled?: boolean;
     subjectsAllowed?: string;
 };
 
