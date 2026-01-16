@@ -200,6 +200,11 @@ export const formatDate = (isoDate?: string | number | undefined) => {
   return format(new Date(isoDate), 'yyyy-MM-dd')
 }
 
+export const formatDateHumanly = (isoDate?: string | number | undefined) => {
+  if (!isoDate) return null
+  return format(new Date(isoDate), 'dd. LLLL yyyy', { locale: noLocale })
+}
+
 export const formatMonthName = (isoDate?: string | number | undefined) => {
   if (!isoDate) return null
   return format(new Date(isoDate), 'LLLL', { locale: noLocale })

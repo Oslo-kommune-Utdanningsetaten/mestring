@@ -13,6 +13,8 @@
   import ButtonMini from './ButtonMini.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
   import Offcanvas from './Offcanvas.svelte'
+  import Statuses from '../components/Statuses.svelte'
+
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { getLocalStorageItem } from '../stores/localStorage'
   import { formatDateDistance, fetchGoalsForSubjectAndStudent } from '../utils/functions'
@@ -35,6 +37,8 @@
   let isGoalEditorOpen = $state<boolean>(false)
   let isObservationEditorOpen = $state<boolean>(false)
   let isStatusEditorOpen = $state<boolean>(false)
+  let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
+
   const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
   const today = new Date()
 
@@ -136,13 +140,10 @@
     handleCloseEditGoal()
   }
 
-  const handleCloseEditStatus = () => {
-    isStatusEditorOpen = false
-  }
-
   const handleStatusDone = async () => {
     goalForObservation = null
-    handleCloseEditStatus()
+    isStatusEditorOpen = false
+    statusesKey++
   }
 
   const handleObservationDone = async () => {
@@ -250,6 +251,9 @@
       onClick: () => handleEditStatus(null),
     }}
   />
+  {#key statusesKey}
+    <Statuses {student} {subject} />
+  {/key}
 </div>
 
 {#snippet goalInList(goal: GoalDecorated, index: number)}

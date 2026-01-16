@@ -9,8 +9,7 @@
   import type { MasterySchemaWithConfig } from '../types/models'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
-  import { formatDate } from '../utils/functions'
-  import ButtonIcon from '../components/ButtonIcon.svelte'
+  import { formatDateHumanly } from '../utils/functions'
   import ButtonMini from '../components/ButtonMini.svelte'
   import StatusEdit from '../components/StatusEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
@@ -132,7 +131,7 @@
       <div>
         {#if updatedByUser}
           <p class="text-muted mb-0">
-            Sist endret av {updatedByUser.name}, {formatDate(status.updatedAt)}
+            Sist endret av {updatedByUser.name}, {formatDateHumanly(status.updatedAt)}
           </p>
         {/if}
       </div>
@@ -140,7 +139,7 @@
         <ButtonMini
           options={{
             title: 'Rediger status',
-            skin: 'primary',
+            skin: 'secondary',
             iconName: 'edit',
             variant: 'icon-left',
             classes: 'me-2',
@@ -152,7 +151,7 @@
         <ButtonMini
           options={{
             title: 'Slett status',
-            skin: 'primary',
+            skin: 'secondary',
             iconName: 'trash-can',
             variant: 'icon-left',
             classes: 'me-2',
@@ -171,7 +170,7 @@
       <h3 class="col-4">Periode</h3>
       <div class="col-8">
         <p class="mb-0">
-          {formatDate(status.beginAt)} – {formatDate(status.endAt)}
+          {formatDateHumanly(status.beginAt)} – {formatDateHumanly(status.endAt)}
         </p>
       </div>
     </div>
