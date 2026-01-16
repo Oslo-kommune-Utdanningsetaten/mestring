@@ -22,6 +22,15 @@ export const TASK_STATES: Record<string, string> = {
 }
 
 export const PUBLIC_PATHS = ['', 'about']
-export const STUDENT_PATHS = ['', 'about', 'groups', 'profile']
-export const TEACHER_PATHS = ['', 'about', 'groups', 'profile', 'students']
-export const RESTRICTED_PATHS = ['', 'about', 'groups', 'profile', 'students', 'users']
+export const STUDENT_PATHS = ['', 'about', 'groups', 'profile', 'statuses']
+export const TEACHER_PATHS = ['', 'about', 'groups', 'profile', 'statuses', 'students']
+export const RESTRICTED_PATHS = [
+  '',
+  'about',
+  'groups',
+  'profile',
+  ,
+  'statuses',
+  'students',
+  'users',
+]

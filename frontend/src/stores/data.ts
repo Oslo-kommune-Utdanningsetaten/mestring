@@ -7,7 +7,7 @@ import {
   userSchoolsList,
   groupsList,
 } from '../generated/sdk.gen'
-import type { SchoolType, MasterySchemaType, UserType } from '../generated/types.gen'
+import type { SchoolType, MasterySchemaType, GroupType } from '../generated/types.gen'
 import {
   getLocalStorageItem,
   setLocalStorageItem,
@@ -59,6 +59,26 @@ const hasUserAccessToPath = (path: string): boolean => {
   return isSuperadmin
 }
 
+const hasUserAccessToFeature = (feature: string, options: Record<string, string> = {}): boolean => {
+  const currentData = get(dataStore) as AppData
+  const currentUser = currentData.currentUser
+  console.log('Checking access to feature', feature, 'for user', currentUser)
+  if (!currentUser) {
+    return false
+  }
+  const { isSchoolAdmin, isSchoolInspector, isSuperadmin } = currentUser
+  if (feature === 'status-create') {
+    if (isSchoolAdmin || isSuperadmin) {
+      return true
+    }
+    const { studentId, subjectId } = options
+    // Return true if user is teacher of the student in the subject
+    // Return true if the user is a teacher of the basis group of the student
+  }
+
+  return true
+}
+
 // When school changes, reset subjects, user status, and mastery schemas
 export const setCurrentSchool = (school: SchoolType) => {
   const currentData = get(dataStore) as AppData
@@ -82,6 +102,7 @@ export const dataStore = writable<AppData>({
   masterySchemas: [],
   roles: [],
   hasUserAccessToPath,
+  hasUserAccessToFeature,
 })
 
 export const currentUser: UserDecorated = derived(dataStore, d => d.currentUser)

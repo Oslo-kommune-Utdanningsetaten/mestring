@@ -9,7 +9,6 @@
   } from '../generated/sdk.gen'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
-  import Link from '../components/Link.svelte'
   import StudentSVG from '../assets/education.svg.svelte'
   import GroupTag from '../components/GroupTag.svelte'
   import { dataStore } from '../stores/data'
