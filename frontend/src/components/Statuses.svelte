@@ -45,6 +45,7 @@
   </div>
 {:else if statuses.length > 0}
   <div class="statuses-container">
+    <pkt-icon class="watermark-icon pkt-icon--large" name="achievement"></pkt-icon>
     {#each statuses as status (status.id)}
       <span class="status-item" title={status.title}>
         <Link to={`/statuses/${status.id}/`}>{status.title}</Link>
@@ -58,6 +59,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     min-height: 32px;
     padding: 0.25rem 0.5rem;
     background-color: var(--pkt-color-surface-strong-light-green);
@@ -65,19 +67,12 @@
     gap: 0.125rem;
   }
 
-  /* Watermark using pseudo-element */
-  .statuses-container::before {
-    content: '';
+  .watermark-icon {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: -10% center;
-    background-size: 80px;
-    opacity: 0.1;
+    top: 50%;
+    left: -0.5rem;
+    transform: translateY(-50%);
+    opacity: 0.15;
     pointer-events: none;
     z-index: 0;
   }
