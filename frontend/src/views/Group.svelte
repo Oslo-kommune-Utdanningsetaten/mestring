@@ -400,19 +400,21 @@
             <a href={`/students/${student.id}`}>
               {student.name}
             </a>
-            <div class="d-flex align-items-center gap-2">
-              {#key statusesKey}
-                <Statuses {student} {subject} />
-              {/key}
-              <ButtonIcon
-                options={{
-                  iconName: 'achievement',
-                  classes: 'bordered',
-                  title: 'Legg til ny status',
-                  onClick: () => handleEditStatus(null, student),
-                }}
-              />
-            </div>
+            {#if $dataStore.currentSchool.isStatusEnabled}
+              <div class="d-flex align-items-center gap-2">
+                {#key statusesKey}
+                  <Statuses {student} {subject} />
+                {/key}
+                <ButtonIcon
+                  options={{
+                    iconName: 'achievement',
+                    classes: 'bordered',
+                    title: 'Legg til ny status',
+                    onClick: () => handleEditStatus(null, student),
+                  }}
+                />
+              </div>
+            {/if}
           </span>
           {#each groupGoals as goal (goal.id)}
             {@const decoGoal = getDecoratedGoalFor(student.id, goal.id)}

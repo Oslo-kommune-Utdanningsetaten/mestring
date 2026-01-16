@@ -242,18 +242,19 @@
       onClick: () => handleEditGoal({}),
     }}
   />
-
-  <ButtonIcon
-    options={{
-      iconName: 'achievement',
-      classes: 'bordered',
-      title: 'Legg til ny status',
-      onClick: () => handleEditStatus(null),
-    }}
-  />
-  {#key statusesKey}
-    <Statuses {student} {subject} />
-  {/key}
+  {#if $dataStore.currentSchool.isStatusEnabled}
+    <ButtonIcon
+      options={{
+        iconName: 'achievement',
+        classes: 'bordered',
+        title: 'Legg til ny status',
+        onClick: () => handleEditStatus(null),
+      }}
+    />
+    {#key statusesKey}
+      <Statuses {student} {subject} />
+    {/key}
+  {/if}
 </div>
 
 {#snippet goalInList(goal: GoalDecorated, index: number)}

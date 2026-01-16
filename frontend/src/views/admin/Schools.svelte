@@ -134,6 +134,23 @@
     }
   }
 
+  // Toggle whether statuses can be created at the school
+  const toggleStatusEnabled = async (school: SchoolType) => {
+    try {
+      const current = (school as any).isStatusEnabled ?? false
+      const result = await schoolsPartialUpdate({
+        path: { id: school.id },
+        body: { isStatusEnabled: !current },
+      })
+      const index = schools.findIndex(s => s.id === school.id)
+      if (index >= 0 && result.data) {
+        schools[index] = result.data
+      }
+    } catch (error) {
+      console.error('Error updating isStatusEnabled:', error)
+    }
+  }
+
   // Toggle whether group title is displayed in goal edit
   const toggleGoalTitleEnabled = async (school: SchoolType) => {
     try {
@@ -402,6 +419,19 @@
           aria-checked={(school as any).isGoalTitleEnabled}
           checked={(school as any).isGoalTitleEnabled}
           onchange={() => toggleGoalTitleEnabled(school)}
+        ></pkt-checkbox>
+        <hr />
+
+        <!-- Status -->
+        <h4 class="my-4">Status</h4>
+        <pkt-checkbox
+          id={'status-' + school.id}
+          label={`Status ${(school as any).isStatusEnabled ? '' : 'IKKE'} tilgjengelig`}
+          labelPosition="right"
+          isSwitch="true"
+          aria-checked={(school as any).isStatusEnabled}
+          checked={(school as any).isStatusEnabled}
+          onchange={() => toggleStatusEnabled(school)}
         ></pkt-checkbox>
         <hr />
 
