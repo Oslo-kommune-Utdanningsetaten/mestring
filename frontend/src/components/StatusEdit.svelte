@@ -123,6 +123,9 @@
   onMount(() => {
     localStatus = {
       ...status,
+      // Convert ISO timestamps to YYYY-MM-DD format for date inputs
+      beginAt: status.beginAt ? status.beginAt.split('T')[0] : undefined,
+      endAt: status.endAt ? status.endAt.split('T')[0] : undefined,
     }
   })
 
@@ -200,7 +203,7 @@
 
     <!-- Begin and end dates -->
     <div class="row my-5">
-      <h3 class="col-2">Periode</h3>
+      <h3 class="col-4">Periode</h3>
       <div class="col-auto">
         <label for="beginAt" class="form-label mb-0">Fra</label>
         <input
@@ -233,10 +236,12 @@
 
     <!-- Title -->
     <div class="row my-5">
-      <h3 class="col-2">Tittel</h3>
-      <div class="col-10">
+      <h3 class="col-4">Tittel</h3>
+      <div class="col-8">
+        <label for="title" class="visually-hidden">Tittel</label>
         <div class="input-with-icon">
           <input
+            id="title"
             type="text"
             class="form-control rounded-0 border-2 border-primary p-2"
             bind:value={localStatus.title}
@@ -256,8 +261,8 @@
     <!-- Mastery value input -->
     {#if masterySchema?.config?.isMasteryValueInputEnabled}
       <div class="row my-5">
-        <h3 class="col-2">Mestring</h3>
-        <div class="col-10">
+        <h3 class="col-4">Mestring</h3>
+        <div class="col-8">
           {#if renderDirection() === 'vertical'}
             <ValueInputVertical
               {masterySchema}
@@ -277,29 +282,37 @@
 
     <!-- Mastery description input -->
     {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
-      <div class="my-4">
-        <label for="description" class="form-label">Beskrivelse/tilbakemelding</label>
-        <textarea
-          id="description"
-          class="form-control rounded-0 border-2 border-primary"
-          bind:value={localStatus.masteryDescription}
-          placeholder="Kort beskrivelse av elevens mestringsnivå"
-          rows="4"
-        ></textarea>
+      <div class="row my-4">
+        <h3 class="col-4">Beskrivelse</h3>
+        <div class="col-8">
+          <label for="description" class="visually-hidden">
+            Beskrivelse av elevens mestringsnivå
+          </label>
+          <textarea
+            id="description"
+            class="form-control rounded-0 border-2 border-primary p-2"
+            bind:value={localStatus.masteryDescription}
+            placeholder="Kort beskrivelse av elevens mestringsnivå"
+            rows="4"
+          ></textarea>
+        </div>
       </div>
     {/if}
 
     <!-- Mastery feed forward input -->
     {#if masterySchema?.config?.isFeedforwardInputEnabled}
-      <div class="my-4">
-        <label for="feedforward" class="form-label">Fremovermelding</label>
-        <textarea
-          id="feedforward"
-          class="form-control rounded-0 border-2 border-primary"
-          bind:value={localStatus.feedforward}
-          placeholder="Konkret, hva kan eleven gjøre for å forbedre seg?"
-          rows="4"
-        ></textarea>
+      <div class="row my-4">
+        <h3 class="col-4">Fremovermelding</h3>
+        <div class="col-8">
+          <label for="feedforward" class="visually-hidden">Fremovermelding til eleven</label>
+          <textarea
+            id="feedforward"
+            class="form-control rounded-0 border-2 border-primary p-2"
+            bind:value={localStatus.feedforward}
+            placeholder="Konkret, hva kan eleven gjøre for å forbedre seg?"
+            rows="4"
+          ></textarea>
+        </div>
       </div>
     {/if}
 
