@@ -142,17 +142,17 @@
             {/each}
           </div>
           <p class="mt-2">
-            <strong>Verdi: {calculations.calculateSafeMasteryValue(status.masteryValue)}</strong>
+            {status.masteryValue}
           </p>
         </div>
       </div>
     {/if}
 
     <!-- Mastery description display -->
-    {#if masterySchema?.config?.isMasteryDescriptionInputEnabled && status.masteryDescription}
-      <div class="my-4">
-        <h3>Beskrivelse/tilbakemelding</h3>
-        <div>
+    {#if masterySchema?.config?.isFeedforwardInputEnabled && status.masteryDescription}
+      <div class="row my-4">
+        <h3 class="col-2">Beskrivelse</h3>
+        <div class="ps-2 col-10">
           {status.masteryDescription}
         </div>
       </div>
@@ -160,9 +160,9 @@
 
     <!-- Mastery feed forward display -->
     {#if masterySchema?.config?.isFeedforwardInputEnabled && status.feedforward}
-      <div class="my-4">
-        <h3>Fremovermelding</h3>
-        <div>
+      <div class="row my-4">
+        <h3 class="col-2">Fremovermelding</h3>
+        <div class="ps-2 col-10">
           {status.feedforward}
         </div>
       </div>
