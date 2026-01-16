@@ -400,17 +400,19 @@
             <a href={`/students/${student.id}`}>
               {student.name}
             </a>
-            {#key statusesKey}
-              <Statuses {student} {subject} />
-            {/key}
-            <ButtonIcon
-              options={{
-                iconName: 'achievement',
-                classes: 'bordered',
-                title: 'Legg til ny status',
-                onClick: () => handleEditStatus(null, student),
-              }}
-            />
+            <div class="d-flex align-items-center gap-2">
+              {#key statusesKey}
+                <Statuses {student} {subject} />
+              {/key}
+              <ButtonIcon
+                options={{
+                  iconName: 'achievement',
+                  classes: 'bordered',
+                  title: 'Legg til ny status',
+                  onClick: () => handleEditStatus(null, student),
+                }}
+              />
+            </div>
           </span>
           {#each groupGoals as goal (goal.id)}
             {@const decoGoal = getDecoratedGoalFor(student.id, goal.id)}
@@ -508,15 +510,17 @@
   .teaching-grid {
     display: grid;
     grid-template-columns: 3fr repeat(var(--columns-count, 8), 1fr);
-    align-items: start;
+    grid-auto-rows: minmax(5rem, 1fr);
+    align-items: stretch;
     gap: 0;
   }
 
   .teaching-grid .item {
     padding: 0.5rem;
-    min-height: 4rem;
+    min-height: 3rem;
     display: flex;
     align-items: center;
+    align-self: stretch;
     justify-content: space-between;
     border-right: 1px solid var(--bs-border-color);
     border-bottom: 1px solid var(--bs-border-color);

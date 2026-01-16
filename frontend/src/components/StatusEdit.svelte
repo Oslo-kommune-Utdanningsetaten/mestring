@@ -69,10 +69,16 @@
     )
   }
 
+  const generateTitle = (beginAt: string, endAt: string): string => {
+    const beginMonth = formatMonthName(beginAt)
+    const endMonth = formatMonthName(endAt)
+    return `${beginMonth} - ${endMonth}`
+  }
+
   const handleGenerateTitle = () => {
     localStatus = {
       ...localStatus,
-      title: `${formatMonthName(localStatus.beginAt)} - ${formatMonthName(localStatus.endAt)}`,
+      title: generateTitle(localStatus.beginAt!, localStatus.endAt!),
     }
   }
 
@@ -103,6 +109,8 @@
     localStatus.studentId = localStudent?.id
     localStatus.subjectId = subject?.id
     localStatus.schoolId = $dataStore.currentSchool?.id
+    localStatus.title =
+      localStatus.title?.trim() || generateTitle(localStatus.beginAt!, localStatus.endAt!)
     try {
       if (localStatus.id) {
         const result = await statusUpdate({
