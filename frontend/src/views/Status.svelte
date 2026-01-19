@@ -26,8 +26,6 @@
   let updatedByUser = $state<UserType | null>(null)
   let isLoading = $state<boolean>(true)
   let isStatusEditorOpen = $state<boolean>(false)
-  const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
-  const today = new Date()
 
   const masterySchema: MasterySchemaWithConfig = $derived(
     $dataStore.masterySchemas.find(ms => ms.id === status?.masterySchemaId) ||
@@ -192,6 +190,8 @@
                 class="mastery-level"
                 class:active={status.masteryValue >= level.minValue &&
                   status.masteryValue <= level.maxValue}
+                class:inactive={status.masteryValue < level.minValue ||
+                  status.masteryValue > level.maxValue}
                 style="--level-color: {level.color}; background-color: var(--level-color);"
               >
                 <strong>{level.title}</strong>
@@ -268,9 +268,14 @@
   }
 
   .mastery-level.active {
-    border-color: color-mix(in srgb, var(--level-color) 70%, black);
-    border-width: 10px;
+    border-color: color-mix(in srgb, var(--level-color) 70%, rgba(0, 0, 0, 0.7));
+    border-width: 5px;
     border-style: outset;
     font-weight: 600;
+  }
+
+  .mastery-level.inactive {
+    filter: grayscale(30%);
+    opacity: 0.4;
   }
 </style>
