@@ -242,7 +242,7 @@
       onClick: () => handleEditGoal({}),
     }}
   />
-  {#if $dataStore.currentSchool.isStatusEnabled && $dataStore.hasUserAccessToFeature( 'create-status', { subjectId: subjectId, studentId: student.id } )}
+  {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subjectId, studentId: student.id } )}
     <ButtonIcon
       options={{
         iconName: 'achievement',
@@ -252,9 +252,11 @@
       }}
     />
   {/if}
-  {#key statusesKey}
-    <Statuses {student} {subject} />
-  {/key}
+  {#if $dataStore.hasUserAccessToFeature( 'status', 'read', { subjectId: subjectId, studentId: student.id } )}
+    {#key statusesKey}
+      <Statuses {student} {subject} />
+    {/key}
+  {/if}
 </div>
 
 {#snippet goalInList(goal: GoalDecorated, index: number)}

@@ -12,7 +12,11 @@ export type AppData = {
   currentUser: BasicUserType | null
   masterySchemas: MasterySchemaType[]
   hasUserAccessToPath: (path: string) => boolean
-  hasUserAccessToFeature: (feature: string, options?: Record<string, string>) => boolean
+  hasUserAccessToFeature: (
+    resource: 'status',
+    action: 'create' | 'read' | 'delete',
+    options?: Record<string, string>
+  ) => boolean
   roles: RoleType[]
   defaultMasterySchema?: MasterySchemaType | null
 }

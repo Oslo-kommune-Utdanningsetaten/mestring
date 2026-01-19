@@ -59,24 +59,38 @@ const hasUserAccessToPath = (path: string): boolean => {
   return isSuperadmin
 }
 
-const hasUserAccessToFeature = (feature: string, options: Record<string, string> = {}): boolean => {
+const hasUserAccessToFeature = (
+  resource: string,
+  action: string,
+  options: Record<string, string> = {}
+): boolean => {
   const currentData = get(dataStore) as AppData
+  const currentSchool = currentData.currentSchool
+  if (!currentSchool || !currentSchool.isStatusEnabled) {
+    return false
+  }
   const currentUser = currentData.currentUser
-  console.log('Checking access to feature', feature, 'for user', currentUser)
   if (!currentUser) {
     return false
   }
   const { isSchoolAdmin, isSchoolInspector, isSuperadmin } = currentUser
-  if (feature === 'status-create') {
-    if (isSchoolAdmin || isSuperadmin) {
-      return true
+  if (resource === 'status') {
+    if (['create', 'update', 'delete'].includes(action)) {
+      if (isSchoolAdmin || isSuperadmin) {
+        return true
+      }
+      const { studentId, subjectId } = options
+      // FIXME: This is a simplified check; the following logic should be implemented
+      // Return true if user is teacher of the student in the subject
+      // Return true if the user is a teacher of the basis group of the student
+      return currentUser.teacherGroups.length > 0
+    } else if (action === 'read') {
+      return (
+        isSchoolAdmin || isSchoolInspector || isSuperadmin || currentUser.teacherGroups.length > 0
+      )
     }
-    const { studentId, subjectId } = options
-    // Return true if user is teacher of the student in the subject
-    // Return true if the user is a teacher of the basis group of the student
   }
-
-  return true
+  return false
 }
 
 // When school changes, reset subjects, user status, and mastery schemas
@@ -136,11 +150,11 @@ export const registerUserStatus = async (school: SchoolType) => {
       query: { school: school.id },
     }),
   ])
+  const schools = schoolsResult.data || []
+  const userSchools = userSchoolsResult.data || []
   const teacherGroups = teacherGroupsResult.data || []
   const studentGroups = studentGroupsResult.data || []
   const allGroups = allGroupsResult.data || []
-  const userSchools = userSchoolsResult.data || []
-  const schools = schoolsResult.data || []
 
   const isSchoolAdmin = !!userSchools.some(
     userSchool => userSchool.role.name === SCHOOL_ADMIN_ROLE && userSchool.school.id === school.id

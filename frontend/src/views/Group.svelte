@@ -402,17 +402,22 @@
             </a>
             {#if $dataStore.currentSchool.isStatusEnabled}
               <div class="d-flex align-items-center gap-2">
-                {#key statusesKey}
-                  <Statuses {student} {subject} />
-                {/key}
-                <ButtonIcon
-                  options={{
-                    iconName: 'achievement',
-                    classes: 'bordered',
-                    title: 'Legg til ny status',
-                    onClick: () => handleEditStatus(null, student),
-                  }}
-                />
+                {#if $dataStore.hasUserAccessToFeature( 'status', 'read', { subjectId: subject.id, studentId: student.id } )}
+                  {#key statusesKey}
+                    <Statuses {student} {subject} />
+                  {/key}
+                {/if}
+
+                {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentId: student.id } )}
+                  <ButtonIcon
+                    options={{
+                      iconName: 'achievement',
+                      classes: 'bordered',
+                      title: 'Legg til ny status',
+                      onClick: () => handleEditStatus(null, student),
+                    }}
+                  />
+                {/if}
               </div>
             {/if}
           </span>
