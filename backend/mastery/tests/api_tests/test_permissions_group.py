@@ -194,15 +194,6 @@ def test_group_filtering_by_user_and_role_bug(school, teacher_role, student_role
     """
     Test that filtering groups by both user and roles correctly filters
     on the SAME membership record, not separate records.
-
-    Bug scenario:
-    - A teacher is a member of a group (with teacher role)
-    - A student is also a member of the same group (with student role)
-    - When filtering for groups where the teacher has the student role,
-      the result should be EMPTY (giben that the teacher does not have the student role)
-    - BUG: Currently returns the group because:
-      1. Group has the teacher as a member (any role)
-      2. AND group has someone with the student role
     """
     from mastery.models import User, Group
 
