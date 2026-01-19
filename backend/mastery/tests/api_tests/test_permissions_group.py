@@ -187,3 +187,91 @@ def test_student_group_access(
     # Student cannot retrieve other group
     resp = client.get(f'/api/groups/{other_teaching_group_with_members.id}/')
     assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_group_filtering_by_user_and_role_bug(school, teacher_role, student_role):
+    """
+    Test that filtering groups by both user and roles correctly filters
+    on the SAME membership record, not separate records.
+
+    Bug scenario:
+    - A teacher is a member of a group (with teacher role)
+    - A student is also a member of the same group (with student role)
+    - When filtering for groups where the teacher has the student role,
+      the result should be EMPTY (giben that the teacher does not have the student role)
+    - BUG: Currently returns the group because:
+      1. Group has the teacher as a member (any role)
+      2. AND group has someone with the student role
+    """
+    from mastery.models import User, Group
+
+    client = APIClient()
+
+    # Create a teacher and student
+    teacher = User.objects.create(
+        name="Test Teacher",
+        feide_id="test-teacher@example.com",
+        email="test-teacher@example.com"
+    )
+    student = User.objects.create(
+        name="Test Student",
+        feide_id="test-student@example.com",
+        email="test-student@example.com"
+    )
+
+    # Create a group with both teacher and student
+    group = Group.objects.create(
+        feide_id="fc:group:test",
+        display_name="Test Group",
+        type="basis",
+        school=school,
+        is_enabled=True
+    )
+    group.add_member(teacher, teacher_role)
+    group.add_member(student, student_role)
+
+    # Authenticate as superadmin to have full access
+    superadmin = User.objects.create(
+        name="Superadmin",
+        feide_id="superadmin@example.com",
+        email="superadmin@example.com",
+        is_superadmin=True
+    )
+    client.force_authenticate(user=superadmin)
+
+    # Filter for groups where the teacher has the student role
+    # This SHOULD return 0 groups (teacher doesn't have student role)
+    resp = client.get('/api/groups/', {
+        'school': school.id,
+        'user': teacher.id,
+        'roles': 'student'
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+
+    # BUG: This currently fails because it returns the group
+    # even though the teacher doesn't have the student role in it
+    assert len(data) == 0
+
+    # Verify correct behavior: teacher should be found as teacher
+    resp = client.get('/api/groups/', {
+        'school': school.id,
+        'user': teacher.id,
+        'roles': 'teacher'
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]['id'] == group.id
+
+    # Verify correct behavior: student should be found as student
+    resp = client.get('/api/groups/', {
+        'school': school.id,
+        'user': student.id,
+        'roles': 'student'
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]['id'] == group.id

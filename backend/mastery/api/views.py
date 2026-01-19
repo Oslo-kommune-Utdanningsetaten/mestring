@@ -406,14 +406,22 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
             qs = qs.filter(school_id=school_param)
             if type_param:
                 qs = qs.filter(type=type_param.lower())
-            if user_param:
+
+            # When both user and roles are specified, they must be combined in a single filter
+            # to ensure we're filtering on the SAME UserGroup record
+            if user_param and roles_param:
+                role_names = [role.strip() for role in roles_param.split(',') if role]
+                if role_names:
+                    qs = qs.filter(user_groups__user_id=user_param, user_groups__role__name__in=role_names)
+            elif user_param:
                 qs = qs.filter(user_groups__user_id=user_param)
-            if subject_param:
-                qs = qs.filter(subject_id=subject_param)
-            if roles_param:
+            elif roles_param:
                 role_names = [role.strip() for role in roles_param.split(',') if role]
                 if role_names:
                     qs = qs.filter(user_groups__role__name__in=role_names)
+
+            if subject_param:
+                qs = qs.filter(subject_id=subject_param)
             if ids_param:
                 ids = [id.strip() for id in ids_param.split(',') if id]
                 if ids:
