@@ -148,23 +148,39 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 raise ValidationError(
                     {'error': 'missing-parameter', 'message': 'The "school" query parameter is required.'})
 
-            # Filter by school: include users in groups (via UserGroup) OR users empolyed (via UserSchool)
-            qs = qs.filter(
-                Q(user_groups__group__school_id=school_param) |
-                Q(user_schools__school_id=school_param)
-            )
-            if roles_param:
+            # When both groups and roles are specified, combine in a single filter
+            # to ensure users have the specified roles in the specified groups
+            if groups_param and roles_param:
+                group_ids = [group.strip() for group in groups_param.split(',') if group]
+                role_names = [role.strip() for role in roles_param.split(',') if role]
+                if group_ids and role_names:
+                    qs = qs.filter(
+                        user_groups__group_id__in=group_ids,
+                        user_groups__role__name__in=role_names,
+                        user_groups__group__school_id=school_param
+                    )
+            elif groups_param:
+                # Filter by groups only
+                group_ids = [group.strip() for group in groups_param.split(',') if group]
+                if group_ids:
+                    qs = qs.filter(
+                        user_groups__group_id__in=group_ids,
+                        user_groups__group__school_id=school_param
+                    )
+            elif roles_param:
+                # Filter by roles only (check both group memberships and school employment)
                 role_names = [role.strip() for role in roles_param.split(',') if role]
                 if role_names:
                     qs = qs.filter(
-                        Q(user_groups__role__name__in=role_names) |
-                        Q(user_schools__role__name__in=role_names)
+                        Q(user_groups__role__name__in=role_names, user_groups__group__school_id=school_param) |
+                        Q(user_schools__role__name__in=role_names, user_schools__school_id=school_param)
                     )
-            if groups_param:
-                group_ids = [group.strip() for group in groups_param.split(',') if group]
-                if group_ids:
-                    qs = qs.filter(user_groups__group_id__in=group_ids)
-        # non-list actions (retrieve, create, update, destroy) do not require parameters
+            else:
+                # Filter by school only: include users in groups (via UserGroup) OR users employed (via UserSchool)
+                qs = qs.filter(
+                    Q(user_groups__group__school_id=school_param) |
+                    Q(user_schools__school_id=school_param)
+                )
         return qs.distinct()
 
 

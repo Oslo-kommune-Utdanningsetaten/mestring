@@ -240,8 +240,6 @@ def test_group_filtering_by_user_and_role_bug(school, teacher_role, student_role
     )
     client.force_authenticate(user=superadmin)
 
-    # Filter for groups where the teacher has the student role
-    # This SHOULD return 0 groups (teacher doesn't have student role)
     resp = client.get('/api/groups/', {
         'school': school.id,
         'user': teacher.id,
@@ -250,8 +248,6 @@ def test_group_filtering_by_user_and_role_bug(school, teacher_role, student_role
     assert resp.status_code == 200
     data = resp.json()
 
-    # BUG: This currently fails because it returns the group
-    # even though the teacher doesn't have the student role in it
     assert len(data) == 0
 
     # Verify correct behavior: teacher should be found as teacher
