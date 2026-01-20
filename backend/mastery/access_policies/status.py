@@ -135,10 +135,12 @@ class StatusAccessPolicy(BaseAccessPolicy):
         try:
             target_status = view.get_object()
             requester = request.user
+            school_id = target_status.school_id
 
             teaches_subject = requester.teacher_groups.filter(
                 subject=target_status.subject,
-                members__id=target_status.student_id
+                members__id=target_status.student_id,
+                school_id=school_id
             ).exists()
 
             return teaches_subject

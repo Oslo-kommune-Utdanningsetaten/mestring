@@ -75,7 +75,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         if requester.is_superadmin:
             return qs
         try:
-            teacher_group_ids = list(requester.teacher_groups.filter(
+            teacher_teaching_group_ids = list(requester.teacher_groups.filter(
                 type='teaching').values_list('id', flat=True))
             teacher_basis_group_ids = list(requester.teacher_groups.filter(
                 type='basis').values_list('id', flat=True))
@@ -93,14 +93,14 @@ class ObservationAccessPolicy(BaseAccessPolicy):
                 filters |= Q(goal__school_id__in=school_employee_ids)
 
             # Teaching group teachers: Observations on group goals + personal goals for students they teach
-            if teacher_group_ids:
+            if teacher_teaching_group_ids:
                 # Observations on group goals in groups they teach
-                filters |= Q(goal__group_id__in=teacher_group_ids)
+                filters |= Q(goal__group_id__in=teacher_teaching_group_ids)
 
                 # Observations on personal goals where teacher teaches that subject to that student
                 memberships_in_teacher_group_on_subject = UserGroup.objects.filter(
                     user_id=OuterRef('goal__student_id'),
-                    group_id__in=teacher_group_ids,
+                    group_id__in=teacher_teaching_group_ids,
                     group__subject_id=OuterRef('goal__subject_id'),
                 )
                 qs = qs.annotate(teacher_teaches_student_subject=Exists(

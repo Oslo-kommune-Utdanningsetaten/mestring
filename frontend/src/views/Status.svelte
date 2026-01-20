@@ -206,7 +206,7 @@
     {/if}
 
     <!-- Mastery description display -->
-    {#if masterySchema?.config?.isFeedforwardInputEnabled}
+    {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
       <div class="row my-4">
         <h3 class="col-4">Beskrivelse</h3>
         <div class="col-8">
