@@ -6,8 +6,8 @@
   import { groupsList, schoolsList, groupsUpdate } from '../../generated/sdk.gen'
   import { urlStringFrom } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
-  import GroupTypeTag from '../../components/GroupTypeTag.svelte'
-  import ButtonMini from '../../components/ButtonMini.svelte'
+  import GroupTag from '../../components/GroupTag.svelte'
+  import ButtonIcon from '../../components/ButtonIcon.svelte'
   import { NONE_FIELD_VALUE } from '../../utils/constants'
 
   const router = useTinyRouter()
@@ -286,11 +286,11 @@
       {:else}
         <!-- Header row -->
         <div class="group-grid-row header">
-          <span>Gruppe</span>
+          <span>Display Name</span>
           <span>Type</span>
-          <span>Fag</span>
-          <span>Aktivert</span>
-          <span>Info</span>
+          <span>Subject</span>
+          <span>Enabled</span>
+          <span>JSON</span>
         </div>
         <!-- Data rows -->
         {#each filteredGroups as group (group.id)}
@@ -298,10 +298,13 @@
             <a href="/groups/{group.id}">
               {group.displayName}
             </a>
-            <GroupTypeTag
+            <GroupTag
               {group}
+              title="Endre gruppetype"
               onclick={() => handleGroupTypeToggle(group)}
               isTypeWarningEnabled={true}
+              isGroupNameEnabled={false}
+              isGroupTypeNameEnabled={true}
             />
             <span>
               {#if group.type === 'basis'}
@@ -335,14 +338,10 @@
               checked={group.isEnabled}
               onchange={() => handleToggleGroupEnabledStatus(group)}
             ></pkt-checkbox>
-            <ButtonMini
+            <ButtonIcon
               options={{
-                title: 'Zaa',
                 iconName: 'alert-information',
-                size: 'tiny',
-                skin: 'primary',
-                variant: 'icon-left',
-                classes: '',
+                title: 'Toggle JSON',
                 onClick: () => handleInfoToggle(group.id),
               }}
             />

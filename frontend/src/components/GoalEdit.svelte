@@ -91,6 +91,7 @@
   $effect(() => {
     localGoal = {
       ...goal,
+      schoolId: $dataStore.currentSchool?.id,
     }
   })
 </script>

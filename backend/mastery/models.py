@@ -44,6 +44,7 @@ class School(BaseModel):
     is_group_goal_enabled = models.BooleanField(default=True)  # can group goals can be created
     is_student_list_enabled = models.BooleanField(default=False)  # can teachers see the /students menu item
     is_goal_title_enabled = models.BooleanField(default=True)  # are goals displayed with titles
+    is_status_enabled = models.BooleanField(default=False)  # is status feature enabled
     # which subjects can be used: 'only-custom' (owned by school), 'only-group', 'all'
     subjects_allowed = models.CharField(max_length=50, null=False, default='all')
 
@@ -380,9 +381,15 @@ class Status(BaseModel):
     """
     A status represents an overall assessment of a students mastery in a subject, over a period of time. E.g. how has Lois been doing in math since October, considering all math Goals (individual and group).
     """
+    title = models.CharField(max_length=200, null=True)
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, related_name='statuses')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=False, related_name='statuses')
-    estimated_at = models.DateTimeField(null=True)
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False,
+                               related_name='statuses')  # for easier querying
+    mastery_schema = models.ForeignKey(
+        MasterySchema, on_delete=models.SET_NULL, null=True, related_name='statuses')
+    begin_at = models.DateTimeField(null=False)  # begin and end define the period this status covers
+    end_at = models.DateTimeField(null=False)
     mastery_value = models.IntegerField(null=True)
     mastery_description = models.TextField(null=True)
     feedforward = models.TextField(null=True)

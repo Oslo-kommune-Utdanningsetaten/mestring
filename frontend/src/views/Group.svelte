@@ -14,6 +14,7 @@
     UserType,
     ObservationType,
     SubjectType,
+    StatusType,
   } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import {
@@ -24,17 +25,18 @@
   } from '../utils/constants'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import GroupSVG from '../assets/group.svg.svelte'
-  import ButtonMini from '../components/ButtonMini.svelte'
+  import ButtonIcon from '../components/ButtonIcon.svelte'
   import ObservationEdit from '../components/ObservationEdit.svelte'
+  import StatusEdit from '../components/StatusEdit.svelte'
   import GoalEdit from '../components/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
   import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
-  import SparklineChart from '../components/SparklineChart.svelte'
-  import GroupTypeTag from '../components/GroupTypeTag.svelte'
-  import StudentRow from '../components/StudentRow.svelte'
+  import GroupTag from '../components/GroupTag.svelte'
+  import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import { dataStore } from '../stores/data'
   import { goalsWithCalculatedMastery, abbreviateName } from '../utils/functions'
   import SparkbarChart from '../components/SparkbarChart.svelte'
+  import Statuses from '../components/Statuses.svelte'
 
   const { groupId } = $props<{ groupId: string }>()
 
@@ -50,13 +52,17 @@
   let goalsWithCalculatedMasteryByStudentId = $state<Record<string, GoalDecorated[]>>({})
   let observationWip = $state<ObservationType | {} | null>(null)
   let goalForObservation = $state<GoalDecorated | null>(null)
+  let statusWip = $state<Partial<StatusType> | null>(null)
   let studentForObservation = $state<UserType | null>(null)
   let isObservationEditorOpen = $state<boolean>(false)
+  let isStatusEditorOpen = $state<boolean>(false)
   let isGoalEditorOpen = $state<boolean>(false)
-  let isShowGoalTitleEnabled = $state<boolean>(true)
   let currentSchool = $derived($dataStore.currentSchool)
   let subjects = $state<SubjectType[]>([])
   let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
+  let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
+  const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
+  const today = new Date()
 
   const fetchGroupData = async () => {
     try {
@@ -180,6 +186,29 @@
     isObservationEditorOpen = true
   }
 
+  const handleEditStatus = async (status: Partial<StatusType> | null, student: UserType) => {
+    if (status?.id) {
+      statusWip = {
+        ...status,
+      }
+    } else {
+      statusWip = {
+        subjectId: subject?.id,
+        studentId: student.id,
+        schoolId: $dataStore.currentSchool.id,
+        beginAt: sixtyDaysAgo.toISOString().split('T')[0],
+        endAt: today.toISOString().split('T')[0],
+      }
+    }
+    isStatusEditorOpen = true
+  }
+
+  const handleStatusDone = async () => {
+    goalForObservation = null
+    isStatusEditorOpen = false
+    statusesKey++
+  }
+
   const handleGoalOrderChange = async (event: SortableEvent) => {
     const { oldIndex, newIndex } = event
     if (oldIndex === undefined || newIndex === undefined) return
@@ -266,7 +295,7 @@
       </div>
     </div>
     <div class="d-flex align-items-center gap-2 mt-1">
-      <GroupTypeTag {group} />
+      <GroupTag {group} isGroupTypeNameEnabled={true} />
       {#each teachers as teacher}
         <pkt-tag iconName="lecture" skin="yellow">
           <span>{abbreviateName(teacher.name)}</span>
@@ -280,18 +309,14 @@
     <section>
       <div class="d-flex align-items-center gap-2">
         <h2>Mål</h2>
-        <ButtonMini
+        <ButtonIcon
           options={{
-            iconName: 'plus-sign',
-            classes: 'mini-button bordered',
+            iconName: 'goal',
             title: `Legg til nytt gruppemål for ${group.displayName}`,
-            variant: 'icon-only',
-            skin: 'tertiary',
+            classes: 'bordered',
             onClick: () => handleEditGoal(null),
           }}
-        >
-          Nytt gruppemål
-        </ButtonMini>
+        />
       </div>
 
       <div bind:this={goalsListElement} class="list-group mt-3">
@@ -315,7 +340,7 @@
             <span class="goal-type-icon"><GroupSVG /></span>
             <!-- Goal title -->
             <span>
-              {isShowGoalTitleEnabled ? goal.title : '🙊'}
+              {$dataStore.currentSchool.isGoalTitleEnabled ? goal.title : ''}
             </span>
             <!-- Actions -->
             <span>
@@ -326,27 +351,21 @@
                   title="Målet er i bruk av en eller flere elever"
                 ></pkt-icon>
               {:else}
-                <ButtonMini
+                <ButtonIcon
                   options={{
-                    title: 'Rediger mål',
-                    iconName: 'edit',
-                    skin: 'secondary',
-                    variant: 'icon-only',
-                    size: 'tiny',
-                    classes: 'me-1',
-                    onClick: () => handleEditGoal(goal),
-                  }}
-                />
-                <ButtonMini
-                  options={{
-                    title: 'Slett mål',
                     iconName: 'trash-can',
-                    skin: 'secondary',
-                    variant: 'icon-only',
-                    size: 'tiny',
-                    classes: 'me-0',
+                    title: 'Slett mål',
+                    classes: 'bordered',
                     disabled: !goal.isRelevant || isGoalInUse(goal.id),
                     onClick: () => handleDeleteGoal(goal.id),
+                  }}
+                />
+                <ButtonIcon
+                  options={{
+                    iconName: 'edit',
+                    title: 'Rediger mål',
+                    classes: 'bordered',
+                    onClick: () => handleEditGoal(goal),
                   }}
                 />
               {/if}
@@ -361,24 +380,10 @@
   <section>
     <h2 class="mb-3">Elever</h2>
     {#if group.type === GROUP_TYPE_BASIS}
-      <div class="students-grid" aria-label="Elevliste" style="--columns-count: {subjects.length}">
-        <span class="item header header-row">Elev</span>
-        {#each subjects as aSubject (aSubject.id)}
-          {#if aSubject}
-            <span class="item header header-row">
-              <span class="column-header">
-                {aSubject.shortName}
-              </span>
-            </span>
-          {/if}
-        {/each}
-        {#each students as student (student.id)}
-          <StudentRow {student} {subjects} groups={allGroups} />
-        {/each}
-      </div>
-    {:else if group.type === GROUP_TYPE_TEACHING}
+      <StudentsWithSubjects {students} {subjects} groups={allGroups} />
+    {:else if group.type === GROUP_TYPE_TEACHING && subject}
       <div
-        class="students-grid my-3"
+        class="teaching-grid my-3"
         aria-label="Elevliste"
         style="--columns-count: {groupGoals.length}"
       >
@@ -395,17 +400,33 @@
             <a href={`/students/${student.id}`}>
               {student.name}
             </a>
+            {#if $dataStore.currentSchool.isStatusEnabled}
+              <div class="d-flex align-items-center gap-2">
+                {#if $dataStore.hasUserAccessToFeature( 'status', 'read', { subjectId: subject.id, studentId: student.id } )}
+                  {#key statusesKey}
+                    <Statuses {student} {subject} />
+                  {/key}
+                {/if}
+
+                {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentId: student.id } )}
+                  <ButtonIcon
+                    options={{
+                      iconName: 'achievement',
+                      classes: 'bordered',
+                      title: 'Legg til ny status',
+                      onClick: () => handleEditStatus(null, student),
+                    }}
+                  />
+                {/if}
+              </div>
+            {/if}
           </span>
           {#each groupGoals as goal (goal.id)}
             {@const decoGoal = getDecoratedGoalFor(student.id, goal.id)}
-            <span class="item">
+            <span class="item gap-1">
               {#if decoGoal?.masteryData}
                 <MasteryLevelBadge
                   masteryData={decoGoal.masteryData}
-                  masterySchema={getMasterySchmemaForGoal(goal)}
-                />
-                <SparklineChart
-                  data={decoGoal.observations?.map((o: ObservationType) => o.masteryValue)}
                   masterySchema={getMasterySchmemaForGoal(goal)}
                 />
                 <SparkbarChart
@@ -415,12 +436,17 @@
               {:else}
                 <MasteryLevelBadge isBadgeEmpty={true} />
               {/if}
-              <button
-                title="Legg til observasjon"
-                class="new-observation-button gap-2 d-flex align-items-center"
-                disabled={!goal.isRelevant}
-                onclick={() => handleEditObservation(goal, null, student)}
-              ></button>
+              <span class="add-observation-button">
+                <ButtonIcon
+                  options={{
+                    iconName: 'bullseye',
+                    title: 'Legg til observasjon',
+                    classes: 'bordered',
+                    disabled: !goal.isRelevant,
+                    onClick: () => handleEditObservation(goal, null, student),
+                  }}
+                />
+              </span>
             </span>
           {/each}
         {/each}
@@ -464,6 +490,20 @@
   {/if}
 </Offcanvas>
 
+<!-- offcanvas for creating/editing status -->
+<Offcanvas
+  bind:isOpen={isStatusEditorOpen}
+  width="60vw"
+  ariaLabel="Rediger status"
+  onClosed={() => {
+    statusWip = null
+  }}
+>
+  {#if statusWip}
+    <StatusEdit status={statusWip} {subject} onDone={handleStatusDone} />
+  {/if}
+</Offcanvas>
+
 <style>
   section {
     margin-bottom: 2rem;
@@ -473,41 +513,52 @@
     height: 7rem;
   }
 
-  .students-grid {
+  /* Teaching group grid - different from StudentsWithSubjects */
+  .teaching-grid {
     display: grid;
     grid-template-columns: 3fr repeat(var(--columns-count, 8), 1fr);
-    align-items: start;
+    grid-auto-rows: minmax(5rem, 1fr);
+    align-items: stretch;
     gap: 0;
   }
 
-  .students-grid :global(.item) {
+  .teaching-grid .item {
     padding: 0.5rem;
-    border-top: 1px solid var(--bs-border-color);
-    min-height: 4rem;
+    min-height: 3rem;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    align-self: stretch;
+    justify-content: space-between;
+    border-right: 1px solid var(--bs-border-color);
+    border-bottom: 1px solid var(--bs-border-color);
   }
 
-  .students-grid :global(.item.header-row) {
+  .add-observation-button {
+    display: flex;
+    margin-left: auto;
+  }
+
+  .teaching-grid .item.header-row {
     background-color: var(--bs-light);
     font-weight: 800;
-  }
-
-  .students-grid :global(.item.last-row) {
-    border-bottom: 1px solid var(--bs-border-color);
   }
 
   .column-header {
     transform: rotate(-60deg);
     font-size: 0.8rem;
+    padding: 0.1rem 0.1rem 0.1rem 0.3rem;
+    max-width: 5rem;
+    background-color: var(--pkt-color-surface-strong-light-green);
+    border: 1px solid var(--pkt-color-grays-gray-100);
   }
 
   .goal-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 6fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 6fr 2fr;
     column-gap: 5px;
     background-color: var(--bs-light);
+    min-height: 3rem;
+    align-items: center;
   }
 
   .row-handle-draggable {
@@ -517,22 +568,5 @@
 
   .goal-type-icon > :global(svg) {
     height: 1.2em;
-  }
-
-  .new-observation-button {
-    cursor: pointer;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    border: none;
-    background: none;
-    padding: 4px;
-    margin: none;
-  }
-
-  .new-observation-button:hover {
-    border: 2px solid var(--bs-border-color);
-    margin-left: -2px;
   }
 </style>

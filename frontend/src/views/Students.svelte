@@ -4,7 +4,7 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
-  import StudentRow from '../components/StudentRow.svelte'
+  import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import { STUDENT_ROLE } from '../utils/constants'
   import { subjectsList, usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
@@ -115,19 +115,7 @@
   {:else if students.length === 0}
     <div class="mt-3">Her var det tomt, gitt.</div>
   {:else}
-    <div class="students-grid" aria-label="Elevliste" style="--subject-count: {subjects.length}">
-      <span class="item header header-row">Elev</span>
-      {#each subjects as subject (subject.id)}
-        <span class="item header header-row">
-          <span class="subject-label-header">
-            {subject.shortName}
-          </span>
-        </span>
-      {/each}
-      {#each filteredStudents as student (student.id)}
-        <StudentRow {student} {subjects} groups={allGroups} />
-      {/each}
-    </div>
+    <StudentsWithSubjects students={filteredStudents} {subjects} groups={allGroups} />
   {/if}
 </section>
 
@@ -139,40 +127,5 @@
     margin-top: 0px;
     padding-left: 15px;
     margin-left: 10px;
-  }
-
-  .students-grid {
-    display: grid;
-    grid-template-columns: 2fr repeat(var(--subject-count, 8), 1fr);
-    align-items: start;
-    gap: 0;
-  }
-
-  .students-grid :global(.item) {
-    padding: 0.5rem;
-    border-top: 1px solid var(--bs-border-color);
-    min-height: 4rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .students-grid :global(.item.header-row) {
-    background-color: var(--bs-light);
-    font-weight: 800;
-  }
-
-  .students-grid :global(.item.last-row) {
-    border-bottom: 1px solid var(--bs-border-color);
-  }
-
-  .students-grid :global(.item.header:first-child),
-  .students-grid :global(.item.student-name) {
-    justify-content: flex-start;
-  }
-
-  .subject-label-header {
-    transform: rotate(-60deg);
-    font-size: 0.8rem;
   }
 </style>

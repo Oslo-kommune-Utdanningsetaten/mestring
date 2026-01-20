@@ -237,16 +237,30 @@ a:hover {
 }
 
 mark {
-  margin: 0 -0.4em;
-  padding: 0.1em 0.4em;
-  border-radius: 0.8em 0.3em;
-  background: transparent;
-  background-image: linear-gradient(
-    to right,
-    rgba(199, 243, 95, 0.048),
-    rgba(29, 228, 95, 0.367) 4%,
-    rgba(174, 255, 0, 0.3)
-  );
+  --mark-color: var(--pkt-color-surface-default-yellow);
+  --mark-skew: 0.15em;
+  --mark-overlap: 0.2em;
+  --mark-height: 70%;
+
+  margin-inline: calc(var(--mark-overlap) * -1);
+  padding-inline: var(--mark-overlap);
+
+  background-color: transparent;
+  background-image:
+    linear-gradient(to bottom right, transparent 50%, var(--mark-color) 50%),
+    linear-gradient(var(--mark-color), var(--mark-color)),
+    linear-gradient(to bottom right, var(--mark-color) 50%, transparent 50%);
+  background-size:
+    var(--mark-skew) var(--mark-height),
+    calc(100% - var(--mark-skew) * 2) var(--mark-height),
+    var(--mark-skew) var(--mark-height);
+  background-position:
+    left center,
+    center,
+    right center;
+  background-repeat: no-repeat;
+  color: inherit;
+
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }

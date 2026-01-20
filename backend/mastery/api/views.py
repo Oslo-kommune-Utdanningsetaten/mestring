@@ -148,23 +148,39 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 raise ValidationError(
                     {'error': 'missing-parameter', 'message': 'The "school" query parameter is required.'})
 
-            # Filter by school: include users in groups (via UserGroup) OR users empolyed (via UserSchool)
-            qs = qs.filter(
-                Q(user_groups__group__school_id=school_param) |
-                Q(user_schools__school_id=school_param)
-            )
-            if roles_param:
+            # When both groups and roles are specified, combine in a single filter
+            # to ensure users have the specified roles in the specified groups
+            if groups_param and roles_param:
+                group_ids = [group.strip() for group in groups_param.split(',') if group]
+                role_names = [role.strip() for role in roles_param.split(',') if role]
+                if group_ids and role_names:
+                    qs = qs.filter(
+                        user_groups__group_id__in=group_ids,
+                        user_groups__role__name__in=role_names,
+                        user_groups__group__school_id=school_param
+                    )
+            elif groups_param:
+                # Filter by groups only
+                group_ids = [group.strip() for group in groups_param.split(',') if group]
+                if group_ids:
+                    qs = qs.filter(
+                        user_groups__group_id__in=group_ids,
+                        user_groups__group__school_id=school_param
+                    )
+            elif roles_param:
+                # Filter by roles only (check both group memberships and school employment)
                 role_names = [role.strip() for role in roles_param.split(',') if role]
                 if role_names:
                     qs = qs.filter(
-                        Q(user_groups__role__name__in=role_names) |
-                        Q(user_schools__role__name__in=role_names)
+                        Q(user_groups__role__name__in=role_names, user_groups__group__school_id=school_param) |
+                        Q(user_schools__role__name__in=role_names, user_schools__school_id=school_param)
                     )
-            if groups_param:
-                group_ids = [group.strip() for group in groups_param.split(',') if group]
-                if group_ids:
-                    qs = qs.filter(user_groups__group_id__in=group_ids)
-        # non-list actions (retrieve, create, update, destroy) do not require parameters
+            else:
+                # Filter by school only: include users in groups (via UserGroup) OR users employed (via UserSchool)
+                qs = qs.filter(
+                    Q(user_groups__group__school_id=school_param) |
+                    Q(user_schools__school_id=school_param)
+                )
         return qs.distinct()
 
 
@@ -406,14 +422,22 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
             qs = qs.filter(school_id=school_param)
             if type_param:
                 qs = qs.filter(type=type_param.lower())
-            if user_param:
+
+            # When both user and roles are specified, they must be combined in a single filter
+            # to ensure we're filtering on the SAME UserGroup record
+            if user_param and roles_param:
+                role_names = [role.strip() for role in roles_param.split(',') if role]
+                if role_names:
+                    qs = qs.filter(user_groups__user_id=user_param, user_groups__role__name__in=role_names)
+            elif user_param:
                 qs = qs.filter(user_groups__user_id=user_param)
-            if subject_param:
-                qs = qs.filter(subject_id=subject_param)
-            if roles_param:
+            elif roles_param:
                 role_names = [role.strip() for role in roles_param.split(',') if role]
                 if role_names:
                     qs = qs.filter(user_groups__role__name__in=role_names)
+
+            if subject_param:
+                qs = qs.filter(subject_id=subject_param)
             if ids_param:
                 ids = [id.strip() for id in ids_param.split(',') if id]
                 if ids:
@@ -755,10 +779,86 @@ class SituationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
         return self.access_policy().scope_queryset(self.request, super().get_queryset())
 
 
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='students',
+                description='Filter statuses by students.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='subject',
+                description='Filter statuses by subject.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='school',
+                description='Filter statuses by school.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='group',
+                description='Filter statuses by group.',
+                required=False,
+                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='editor',
+                description='Filter statuses by users who have created or updated it.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+        ]
+    )
+)
 class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
     queryset = models.Status.objects.all()
     serializer_class = serializers.StatusSerializer
     access_policy = StatusAccessPolicy
 
     def get_queryset(self):
-        return self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = apply_deleted_filter(self.request.query_params, qs)
+
+        if self.action == 'list':
+            students_param, _ = get_request_param(self.request.query_params, 'students')
+            school_param, _ = get_request_param(self.request.query_params, 'school')
+            subject_param, _ = get_request_param(self.request.query_params, 'subject')
+            group_param, _ = get_request_param(self.request.query_params, 'group')
+            editor_param, _ = get_request_param(self.request.query_params, 'editor')
+
+            if not school_param:
+                raise ValidationError({'error': 'missing-parameter',
+                                      'message': 'The "school" parameter is required.'})
+
+            qs = qs.filter(school_id=school_param)
+
+            if students_param:
+                student_ids = [student_id.strip() for student_id in students_param.split(',') if student_id]
+                if student_ids:
+                    qs = qs.filter(student_id__in=student_ids)
+
+            if group_param:
+                student_ids = UserGroup.objects.filter(
+                    group_id=group_param, role__name='student', deleted_at__isnull=True).values_list(
+                    'user_id', flat=True)
+                if student_ids:
+                    qs = qs.filter(student_id__in=student_ids)
+
+            if subject_param:
+                qs = qs.filter(subject_id=subject_param)
+
+            if editor_param:
+                qs = qs.filter(Q(created_by_id=editor_param) | Q(updated_by_id=editor_param))
+
+        # non-list actions (retrieve, create, update, destroy) do not require parameters
+        return qs

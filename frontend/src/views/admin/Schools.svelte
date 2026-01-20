@@ -12,7 +12,7 @@
     updateDataIntegrity,
   } from '../../generated/sdk.gen'
   import type { SchoolImportStatus } from '../../types/models'
-  import { formatDate } from '../../utils/functions'
+  import { formatDateTime } from '../../utils/functions'
 
   import ButtonMini from '../../components/ButtonMini.svelte'
   import { addAlert } from '../../stores/alerts'
@@ -134,6 +134,23 @@
     }
   }
 
+  // Toggle whether statuses can be created at the school
+  const toggleStatusEnabled = async (school: SchoolType) => {
+    try {
+      const current = (school as any).isStatusEnabled ?? false
+      const result = await schoolsPartialUpdate({
+        path: { id: school.id },
+        body: { isStatusEnabled: !current },
+      })
+      const index = schools.findIndex(s => s.id === school.id)
+      if (index >= 0 && result.data) {
+        schools[index] = result.data
+      }
+    } catch (error) {
+      console.error('Error updating isStatusEnabled:', error)
+    }
+  }
+
   // Toggle whether group title is displayed in goal edit
   const toggleGoalTitleEnabled = async (school: SchoolType) => {
     try {
@@ -187,6 +204,10 @@
   }
 
   const handleActivateCleanerBotForSchool = async (orgNumber: string) => {
+    const confirmed = confirm(`Er du helt sikker på at du vil kjøre ryddejobb for ${orgNumber}?`)
+
+    if (!confirmed) return
+
     try {
       const result = await updateDataIntegrity({
         path: { org_number: orgNumber },
@@ -358,7 +379,7 @@
         </div>
 
         <div class="text-muted small">
-          {school.orgNumber}, Oppdatert {formatDate(school.updatedAt)}
+          {school.orgNumber}, Oppdatert {formatDateTime(school.updatedAt)}
         </div>
 
         <!-- Subjects -->
@@ -398,6 +419,19 @@
           aria-checked={(school as any).isGoalTitleEnabled}
           checked={(school as any).isGoalTitleEnabled}
           onchange={() => toggleGoalTitleEnabled(school)}
+        ></pkt-checkbox>
+        <hr />
+
+        <!-- Status -->
+        <h4 class="my-4">Status</h4>
+        <pkt-checkbox
+          id={'status-' + school.id}
+          label={`Status ${(school as any).isStatusEnabled ? '' : 'IKKE'} tilgjengelig`}
+          labelPosition="right"
+          isSwitch="true"
+          aria-checked={(school as any).isStatusEnabled}
+          checked={(school as any).isStatusEnabled}
+          onchange={() => toggleStatusEnabled(school)}
         ></pkt-checkbox>
         <hr />
 
@@ -448,7 +482,7 @@
                     {importStatus[school.orgNumber].users.diff ?? '—'}
                   </td>
                   <td class="border-0 text-center py-2 small text-muted">
-                    {formatDate(importStatus[school.orgNumber].users.fetchedAt)}
+                    {formatDateTime(importStatus[school.orgNumber].users.fetchedAt)}
                   </td>
                 </tr>
 
@@ -470,7 +504,7 @@
                     {importStatus[school.orgNumber].groups.diff ?? '—'}
                   </td>
                   <td class="border-0 text-center py-2 small text-muted">
-                    {formatDate(importStatus[school.orgNumber].groups.fetchedAt)}
+                    {formatDateTime(importStatus[school.orgNumber].groups.fetchedAt)}
                   </td>
                 </tr>
 
@@ -492,7 +526,7 @@
                     {importStatus[school.orgNumber].memberships.diff ?? '—'}
                   </td>
                   <td class="border-0 text-center py-2 small text-muted">
-                    {formatDate(importStatus[school.orgNumber].memberships.fetchedAt)}
+                    {formatDateTime(importStatus[school.orgNumber].memberships.fetchedAt)}
                   </td>
                 </tr>
               </tbody>
@@ -503,7 +537,7 @@
             <div class="d-flex align-items-center mt-3 pt-3 border-top">
               <pkt-icon name="clock" size="16" class="me-2 text-muted"></pkt-icon>
               <span class="text-muted small">
-                Sist import: {formatDate(importStatus[school.orgNumber].lastImportAt)}
+                Sist import: {formatDateTime(importStatus[school.orgNumber].lastImportAt)}
               </span>
             </div>
           {/if}

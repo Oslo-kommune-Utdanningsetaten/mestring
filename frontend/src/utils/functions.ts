@@ -1,12 +1,6 @@
 import type { Mastery, GoalDecorated } from '../types/models'
-import type {
-  GoalType,
-  SubjectType,
-  ObservationType,
-  GroupType,
-  UserType,
-} from '../generated/types.gen'
-import { goalsList, observationsList, groupsList } from '../generated/sdk.gen'
+import type { GoalType, SubjectType, ObservationType, GroupType } from '../generated/types.gen'
+import { goalsList, observationsList } from '../generated/sdk.gen'
 import { nb as noLocale } from 'date-fns/locale'
 import { format, formatDistanceToNow } from 'date-fns'
 
@@ -63,6 +57,24 @@ export const subjectNamesFromStudentGoals = (
     }
   })
   return Array.from(result)
+}
+
+export const fetchGoalsForSubjectAndStudent = async (
+  subjectId: string,
+  studentId: string,
+  studentGroups: GroupType[]
+): Promise<GoalDecorated[]> => {
+  try {
+    const goalsResult = await goalsList({ query: { student: studentId, subject: subjectId } })
+    const goals = goalsResult.data || []
+    const groupIds = goals.map(goal => goal.groupId).filter(Boolean) as string[]
+    const groups = studentGroups.filter((group: GroupType) => groupIds.includes(group.id))
+    const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(studentId, goals, groups)
+    return goalsBySubjectId[subjectId]
+  } catch (error) {
+    console.error('Error fetching goals:', error)
+    return []
+  }
 }
 
 export const goalsWithCalculatedMastery = async (
@@ -178,9 +190,24 @@ export const isNumber = (value: any) => {
   return typeof value === 'number'
 }
 
-export const formatDate = (isoDate?: string | number | undefined) => {
+export const formatDateTime = (isoDate?: string | number | undefined) => {
   if (!isoDate) return null
   return format(new Date(isoDate), 'yyyy-MM-dd HH:mm')
+}
+
+export const formatDate = (isoDate?: string | number | undefined) => {
+  if (!isoDate) return null
+  return format(new Date(isoDate), 'yyyy-MM-dd')
+}
+
+export const formatDateHumanly = (isoDate?: string | number | undefined) => {
+  if (!isoDate) return null
+  return format(new Date(isoDate), 'dd. LLLL yyyy', { locale: noLocale })
+}
+
+export const formatMonthName = (isoDate?: string | number | undefined) => {
+  if (!isoDate) return null
+  return format(new Date(isoDate), 'LLLL', { locale: noLocale })
 }
 
 export const formatDateDistance = (isoDate?: string | number | undefined) => {

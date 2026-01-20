@@ -1,6 +1,8 @@
 import pytest
+from datetime import timedelta
 from django.test import Client
-from mastery.models import School, User, Group, Role, Subject, Goal, MasterySchema, Observation
+from django.utils import timezone
+from mastery.models import School, User, Group, Role, Subject, Goal, MasterySchema, Observation, Status
 
 
 @pytest.fixture
@@ -458,3 +460,33 @@ def groups_data(db, school):
             "go_type_displayName": "basisgruppe"
         }]
     }
+
+
+@pytest.fixture
+def status_at_school(db, school, student, subject_with_group):
+    """
+    Status for student at school in subject_with_group.
+    Covers a past period (60-2 days ago), already visible to student since end_at has passed.
+    """
+    return Status.objects.create(
+        student=student,
+        subject=subject_with_group,
+        school=school,
+        begin_at=timezone.now() - timedelta(days=60),
+        end_at=timezone.now() - timedelta(days=2),
+    )
+
+
+@pytest.fixture
+def status_at_other_school(db, other_school, other_school_student, subject_owned_by_other_school):
+    """
+    Status for other_school_student at other_school.
+    Covers a past period (60-2 days ago), already visible to student since end_at has passed.
+    """
+    return Status.objects.create(
+        student=other_school_student,
+        subject=subject_owned_by_other_school,
+        school=other_school,
+        begin_at=timezone.now() - timedelta(days=60),
+        end_at=timezone.now() - timedelta(days=2),
+    )

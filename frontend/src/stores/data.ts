@@ -7,7 +7,7 @@ import {
   userSchoolsList,
   groupsList,
 } from '../generated/sdk.gen'
-import type { SchoolType, MasterySchemaType, UserType } from '../generated/types.gen'
+import type { SchoolType, MasterySchemaType, GroupType } from '../generated/types.gen'
 import {
   getLocalStorageItem,
   setLocalStorageItem,
@@ -41,12 +41,12 @@ const setMasterySchemas = (schemas: MasterySchemaType[]) => {
 const hasUserAccessToPath = (path: string): boolean => {
   const currentData = get(dataStore) as AppData
   const currentUser = currentData.currentUser
-  const { isSchoolAdmin, isSchoolInspector, isSuperadmin } = currentUser
   const trimmedPath = path.split('/')[1]
   // Not logged in can only access public paths
   if (!currentUser) {
     return PUBLIC_PATHS.includes(trimmedPath)
   }
+  const { isSchoolAdmin, isSchoolInspector, isSuperadmin } = currentUser
   // Logged in students
   if (STUDENT_PATHS.includes(trimmedPath)) return true
   // Logged in teachers
@@ -57,6 +57,40 @@ const hasUserAccessToPath = (path: string): boolean => {
   }
   // Superadmin can access everything
   return isSuperadmin
+}
+
+const hasUserAccessToFeature = (
+  resource: string,
+  action: string,
+  options: Record<string, string> = {}
+): boolean => {
+  const currentData = get(dataStore) as AppData
+  const currentSchool = currentData.currentSchool
+  if (!currentSchool || !currentSchool.isStatusEnabled) {
+    return false
+  }
+  const currentUser = currentData.currentUser
+  if (!currentUser) {
+    return false
+  }
+  const { isSchoolAdmin, isSchoolInspector, isSuperadmin } = currentUser
+  if (resource === 'status') {
+    if (['create', 'update', 'delete'].includes(action)) {
+      if (isSchoolAdmin || isSuperadmin) {
+        return true
+      }
+      const { studentId, subjectId } = options
+      // FIXME: This is a simplified check; the following logic should be implemented
+      // Return true if user is teacher of the student in the subject
+      // Return true if the user is a teacher of the basis group of the student
+      return currentUser.teacherGroups.length > 0
+    } else if (action === 'read') {
+      return (
+        isSchoolAdmin || isSchoolInspector || isSuperadmin || currentUser.teacherGroups.length > 0
+      )
+    }
+  }
+  return false
 }
 
 // When school changes, reset subjects, user status, and mastery schemas
@@ -82,6 +116,7 @@ export const dataStore = writable<AppData>({
   masterySchemas: [],
   roles: [],
   hasUserAccessToPath,
+  hasUserAccessToFeature,
 })
 
 export const currentUser: UserDecorated = derived(dataStore, d => d.currentUser)
@@ -115,11 +150,11 @@ export const registerUserStatus = async (school: SchoolType) => {
       query: { school: school.id },
     }),
   ])
+  const schools = schoolsResult.data || []
+  const userSchools = userSchoolsResult.data || []
   const teacherGroups = teacherGroupsResult.data || []
   const studentGroups = studentGroupsResult.data || []
   const allGroups = allGroupsResult.data || []
-  const userSchools = userSchoolsResult.data || []
-  const schools = schoolsResult.data || []
 
   const isSchoolAdmin = !!userSchools.some(
     userSchool => userSchool.role.name === SCHOOL_ADMIN_ROLE && userSchool.school.id === school.id

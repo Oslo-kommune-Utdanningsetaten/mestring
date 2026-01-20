@@ -1,29 +1,23 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { dataStore } from '../stores/data'
-  import type { UserType, ObservationType, GoalType, GroupType } from '../generated/types.gen'
+  import type { UserType, ObservationType, GoalType, StatusType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
-  import {
-    observationsDestroy,
-    goalsDestroy,
-    goalsUpdate,
-    goalsList,
-    goalsCreate,
-  } from '../generated/sdk.gen'
-  import { goalsWithCalculatedMasteryBySubjectId } from '../utils/functions'
+  import { observationsDestroy, goalsDestroy, goalsUpdate, goalsCreate } from '../generated/sdk.gen'
   import Link from './Link.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
-  import SparklineChart from './SparklineChart.svelte'
   import SparkbarChart from './SparkbarChart.svelte'
   import GoalEdit from './GoalEdit.svelte'
   import ObservationEdit from './ObservationEdit.svelte'
-  import GroupSVG from '../assets/group.svg.svelte'
-  import PersonSVG from '../assets/person.svg.svelte'
+  import StatusEdit from './StatusEdit.svelte'
   import ButtonMini from './ButtonMini.svelte'
+  import ButtonIcon from './ButtonIcon.svelte'
   import Offcanvas from './Offcanvas.svelte'
+  import Statuses from '../components/Statuses.svelte'
+
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { getLocalStorageItem } from '../stores/localStorage'
-  import { formatDateDistance } from '../utils/functions'
+  import { formatDateDistance, fetchGoalsForSubjectAndStudent } from '../utils/functions'
 
   const { subjectId, student, onRefreshRequired } = $props<{
     subjectId: string
@@ -33,8 +27,8 @@
 
   let goalsForSubject = $state<GoalDecorated[]>([])
   let sortableInstance: Sortable | null = null
-  let isShowGoalTitleEnabled = $state<boolean>(true)
   let goalWip = $state<GoalDecorated | null>(null)
+  let statusWip = $state<Partial<StatusType> | null>(null)
   let goalForObservation = $state<GoalDecorated | null>(null)
   let observationWip = $state<ObservationType | {} | null>(null)
   let expandedGoals = $state<Record<string, boolean>>({})
@@ -42,30 +36,39 @@
   let subject = $derived($dataStore.subjects.find(s => s.id === subjectId) || null)
   let isGoalEditorOpen = $state<boolean>(false)
   let isObservationEditorOpen = $state<boolean>(false)
+  let isStatusEditorOpen = $state<boolean>(false)
+  let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
 
-  const fetchGoalsForSubject = async () => {
-    try {
-      const goalsResult = await goalsList({ query: { student: student.id, subject: subjectId } })
-      const goals = goalsResult.data || []
-      const groupIds = goals.map(goal => goal.groupId).filter(Boolean) as string[]
-      const groups = $dataStore.currentUser.allGroups.filter((group: GroupType) =>
-        groupIds.includes(group.id)
-      )
-
-      const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(
-        student.id,
-        goals,
-        groups
-      )
-      goalsForSubject = goalsBySubjectId[subjectId]
-    } catch (error) {
-      console.error('Error fetching goals:', error)
-      goalsForSubject = []
-    }
-  }
+  const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
+  const today = new Date()
 
   const getMasterySchmemaForGoal = (goal: GoalType) => {
     return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
+  }
+
+  const fetchGoals = async () => {
+    goalsForSubject = await fetchGoalsForSubjectAndStudent(
+      subjectId,
+      student.id,
+      $dataStore.currentUser.allGroups
+    )
+  }
+
+  const handleEditStatus = async (status: Partial<StatusType> | null) => {
+    if (status?.id) {
+      statusWip = {
+        ...status,
+      }
+    } else {
+      statusWip = {
+        subjectId: subjectId,
+        studentId: student.id,
+        schoolId: $dataStore.currentSchool.id,
+        beginAt: sixtyDaysAgo.toISOString().split('T')[0],
+        endAt: today.toISOString().split('T')[0],
+      }
+    }
+    isStatusEditorOpen = true
   }
 
   // Remember, we're only editing personal goals here
@@ -137,6 +140,12 @@
     handleCloseEditGoal()
   }
 
+  const handleStatusDone = async () => {
+    goalForObservation = null
+    isStatusEditorOpen = false
+    statusesKey++
+  }
+
   const handleObservationDone = async () => {
     handleCloseEditObservation()
   }
@@ -144,7 +153,7 @@
   const handleDeleteObservation = async (observationId: string) => {
     try {
       await observationsDestroy({ path: { id: observationId } })
-      await fetchGoalsForSubject()
+      await fetchGoals()
     } catch (error) {
       console.error('Error deleting observation:', error)
     }
@@ -153,14 +162,17 @@
   const handleDeleteGoal = async (goalId: string) => {
     try {
       await goalsDestroy({ path: { id: goalId } })
-      await fetchGoalsForSubject()
+      await fetchGoals()
     } catch (error) {
       console.error('Error deleting goal:', error)
     }
   }
 
   const toggleGoalExpansion = (goalId: string) => {
-    expandedGoals[goalId] = !expandedGoals[goalId]
+    expandedGoals = {
+      ...expandedGoals,
+      [goalId]: !expandedGoals[goalId],
+    }
   }
 
   const handleGoalOrderChange = async (event: SortableEvent) => {
@@ -190,13 +202,13 @@
     } catch (error) {
       console.error('Error updating goal order:', error)
     } finally {
-      await fetchGoalsForSubject()
+      await fetchGoals()
     }
   }
 
   $effect(() => {
     if (student && subjectId) {
-      fetchGoalsForSubject()
+      fetchGoals()
     }
   })
 
@@ -222,27 +234,43 @@
   <h3>
     {subject ? subject.displayName : 'Ukjent'}
   </h3>
-  <ButtonMini
+  <ButtonIcon
     options={{
-      iconName: 'plus-sign',
-      classes: 'mini-button bordered',
+      iconName: 'goal',
+      classes: 'bordered',
       title: 'Legg til nytt individuelt mål',
       onClick: () => handleEditGoal({}),
     }}
   />
+  {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subjectId, studentId: student.id } )}
+    <ButtonIcon
+      options={{
+        iconName: 'achievement',
+        classes: 'bordered',
+        title: 'Legg til ny status',
+        onClick: () => handleEditStatus(null),
+      }}
+    />
+  {/if}
+  {#if $dataStore.hasUserAccessToFeature( 'status', 'read', { subjectId: subjectId, studentId: student.id } )}
+    {#key statusesKey}
+      <Statuses {student} {subject} />
+    {/key}
+  {/if}
 </div>
 
 {#snippet goalInList(goal: GoalDecorated, index: number)}
+  {@const isExpanded = expandedGoals[goal.id] || false}
   <div
-    class="list-group-item goal-item {expandedGoals[goal.id]
-      ? 'shadow border-2 z-1'
-      : ''}  {goal.isRelevant ? '' : 'hatched-background'}"
+    class="list-group-item goal-item {isExpanded ? 'shadow border-2 z-1' : ''}  {goal.isRelevant
+      ? ''
+      : 'hatched-background'}"
     title={goal.isRelevant ? '' : 'Målet er ikke lenger relevant for eleven'}
   >
     <div class="goal-primary-row">
       <!-- Drag handle -->
       <span class="item">
-        {#if goal.isPersonal}
+        {#if goal.isPersonal && goalsForSubject.filter(g => g.isPersonal).length > 1}
           <ButtonMini
             options={{
               size: 'tiny',
@@ -261,18 +289,18 @@
 
       <!-- Goal type icon -->
       {#if goal.isPersonal}
-        <span class="goal-type-icon item" title="Individuelt mål">
-          <PersonSVG />
+        <span class="individual-goal-icon item" title="Individuelt mål">
+          <pkt-icon name="person"></pkt-icon>
         </span>
       {:else}
-        <span class="goal-type-icon item" title="Gruppemål">
-          <GroupSVG />
+        <span class="group-goal-icon item" title="Gruppemål">
+          <pkt-icon name="group"></pkt-icon>
         </span>
       {/if}
 
       <!-- Goal title -->
       <span class="item">
-        {isShowGoalTitleEnabled ? goal.title : '🙊'}
+        {$dataStore.currentSchool.isGoalTitleEnabled ? goal.title : ''}
       </span>
 
       <!-- Stats widgets -->
@@ -290,12 +318,12 @@
       </span>
 
       <!-- New observation button -->
-      <span class="item item--right">
-        <ButtonMini
+      <span class="item">
+        <ButtonIcon
           options={{
-            iconName: 'plus-sign',
-            classes: 'mini-button bordered',
+            iconName: 'bullseye',
             title: 'Ny observasjon',
+            classes: 'bordered',
             disabled: !goal.isRelevant,
             onClick: () => handleEditObservation(goal, null),
           }}
@@ -303,19 +331,19 @@
       </span>
 
       <!-- Toggle goal info -->
-      <span class="item item--right">
-        <ButtonMini
+      <span class="item chevron">
+        <ButtonIcon
           options={{
-            iconName: `chevron-thin-${expandedGoals[goal.id] ? 'up' : 'down'}`,
-            classes: 'mini-button rounded',
-            title: `${expandedGoals[goal.id] ? 'Skjul' : 'Vis'} observasjoner`,
+            iconName: `chevron-thin-${isExpanded ? 'up' : 'down'}`,
+            disabled: !goal.isRelevant,
+            title: `${isExpanded ? 'Skjul' : 'Vis'} observasjoner`,
             onClick: () => toggleGoalExpansion(goal.id),
           }}
         />
       </span>
     </div>
 
-    {#if expandedGoals[goal.id]}
+    {#if isExpanded}
       <div class="goal-secondary-row">
         {#if goal.observations?.length}
           <div class="student-observations-row mb-2">
@@ -332,22 +360,20 @@
                 {observation.masteryValue}
               </span>
               <span>
-                <ButtonMini
+                <ButtonIcon
                   options={{
-                    size: 'tiny',
                     iconName: 'trash-can',
                     title: 'Slett observasjon',
-                    classes: 'hover-glow me-2',
+                    classes: 'bordered',
                     onClick: () => handleDeleteObservation(observation.id),
                   }}
                 />
                 {#if index === goal?.observations.length - 1}
-                  <ButtonMini
+                  <ButtonIcon
                     options={{
-                      size: 'tiny',
                       iconName: 'edit',
                       title: 'Rediger observasjon',
-                      classes: 'hover-glow me-2',
+                      classes: 'bordered',
                       onClick: () => handleEditObservation(goal, observation),
                     }}
                   />
@@ -401,12 +427,12 @@
 
 {#if goalsForSubject?.length}
   <div bind:this={goalsListElement} class="list-group mt-2">
-    {#each goalsForSubject.filter(goal => goal.isPersonal) as goal, index (goal.id)}
+    {#each goalsForSubject.filter(goal => goal.isPersonal) as goal, index (`${goal.id}-${expandedGoals[goal.id]}`)}
       {@render goalInList(goal, index)}
     {/each}
   </div>
   <div class="list-group mt-4">
-    {#each goalsForSubject.filter(goal => !goal.isPersonal) as goal, index (goal.id)}
+    {#each goalsForSubject.filter(goal => !goal.isPersonal) as goal, index (`${goal.id}-${expandedGoals[goal.id]}`)}
       {@render goalInList(goal, index)}
     {/each}
   </div>
@@ -418,11 +444,31 @@
   ariaLabel="Rediger mål"
   onClosed={() => {
     goalWip = null
-    fetchGoalsForSubject()
+    fetchGoals()
   }}
 >
   {#if goalWip}
     <GoalEdit goal={goalWip} {student} {subject} isGoalPersonal={true} onDone={handleGoalDone} />
+  {/if}
+</Offcanvas>
+
+<!-- offcanvas for creating/editing status -->
+<Offcanvas
+  bind:isOpen={isStatusEditorOpen}
+  width="60vw"
+  ariaLabel="Rediger status"
+  onClosed={() => {
+    statusWip = null
+  }}
+>
+  {#if statusWip}
+    <StatusEdit
+      status={statusWip}
+      {student}
+      {subject}
+      goals={goalsForSubject}
+      onDone={handleStatusDone}
+    />
   {/if}
 </Offcanvas>
 
@@ -433,7 +479,7 @@
   ariaLabel="Rediger observasjon"
   onClosed={() => {
     observationWip = null
-    fetchGoalsForSubject()
+    fetchGoals()
   }}
 >
   {#if observationWip}
@@ -473,17 +519,15 @@
     gap: 0.25rem;
   }
 
-  .goal-primary-row > .item.item--right {
-    justify-content: flex-end;
+  .goal-primary-row > .item.chevron {
+    display: flex;
+    margin-left: auto;
+    justify-self: end;
   }
 
   .goal-primary-row > .item.item--stats {
     justify-content: flex-end;
     flex-wrap: nowrap;
-  }
-
-  .goal-primary-row .item.mt-1 {
-    margin-top: 0;
   }
 
   .goal-secondary-row {
@@ -498,13 +542,5 @@
     grid-template-columns: 5fr 3fr 5fr;
     column-gap: 5px;
     align-items: center;
-  }
-
-  :global(.row-handle-draggable) {
-    cursor: move;
-  }
-
-  .goal-type-icon > :global(svg) {
-    height: 1.2em;
   }
 </style>

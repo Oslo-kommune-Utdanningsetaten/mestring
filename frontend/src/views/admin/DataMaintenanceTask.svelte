@@ -1,7 +1,7 @@
 <script lang="ts">
   import { type DataMaintenanceTaskType } from '../../generated/types.gen'
   import { dataMaintenanceTasksList } from '../../generated/sdk.gen'
-  import { formatDate } from '../../utils/functions'
+  import { formatDateTime } from '../../utils/functions'
   import { TASK_STATES } from '../../utils/constants'
 
   let tasks = $state<DataMaintenanceTaskType[]>([])
@@ -81,7 +81,7 @@
               </td>
               <td>{task.id}</td>
               <td>{task.displayName || '-'}</td>
-              <td>{formatDate(task.createdAt)}</td>
+              <td>{formatDateTime(task.createdAt)}</td>
               <td>{task.attempts}</td>
             </tr>
             {#if openRows[task.id]}

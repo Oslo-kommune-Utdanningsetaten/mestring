@@ -9,8 +9,8 @@
   } from '../generated/sdk.gen'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
-  import Link from '../components/Link.svelte'
   import StudentSVG from '../assets/education.svg.svelte'
+  import GroupTag from '../components/GroupTag.svelte'
   import { dataStore } from '../stores/data'
 
   const { studentId } = $props<{ studentId: string }>()
@@ -109,12 +109,9 @@
       </div>
     </div>
     <div class="my-4">
-      Medlem av:
-      {#each groups as group, index (group.id)}
-        <span>
-          <Link to={`/groups/${group.id}/`}>
-            {group.displayName}
-          </Link>{index < groups.length - 1 ? ', ' : ''}
+      {#each groups as group}
+        <span class="me-2">
+          <GroupTag {group} isGroupNameEnabled={true} href={`/groups/${group.id}/`} />
         </span>
       {/each}
     </div>
@@ -126,7 +123,7 @@
         {#if studentGoalsCount === 0}
           <ButtonMini
             options={{
-              iconName: 'plus-sign',
+              iconName: 'goal',
               classes: 'm-2',
               title: `Opprett ${individualGoalcount} individuelle mål for hvert fag`,
               onClick: () => handleCreateAllPersonalGoals(),

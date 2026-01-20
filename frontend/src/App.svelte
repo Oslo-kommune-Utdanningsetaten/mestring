@@ -17,6 +17,7 @@
   import Group from './views/Group.svelte'
   import Groups from './views/Groups.svelte'
   import Students from './views/Students.svelte'
+  import Status from './views/Status.svelte'
   import Navigation from './components/Navigation.svelte'
   import Profile from './views/Profile.svelte'
   // Admin views
@@ -38,6 +39,7 @@
     { path: '/groups/:groupId', component: Group },
     { path: '/profile', component: Profile },
     { path: '/students', component: Students },
+    { path: '/statuses/:statusId', component: Status },
     { path: '/students/:studentId', component: Student },
     { path: '/admin/users', component: Users },
     { path: '/admin/groups', component: AdminGroups },

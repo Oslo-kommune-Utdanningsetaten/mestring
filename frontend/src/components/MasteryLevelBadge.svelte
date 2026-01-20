@@ -31,8 +31,8 @@
   const trendColor = $derived(isDecreasing ? decreasingColor : isFlat ? flatColor : increasingColor)
 
   // Dimensions
-  const trendBoxSizeX = 22
-  const trendBoxSizeY = 24
+  const trendBoxSizeX = 26
+  const trendBoxSizeY = 30
   const masteryIndicatorHeight = 4
   const masteryIndicatorOutcrop = 2
   const masteryIndicatorWidth = trendBoxSizeX + masteryIndicatorOutcrop * 2
@@ -62,13 +62,13 @@
   {:else if isBadgeEmpty}
     <span
       class="trend-box missing-mastery"
-      style="width: {trendBoxSizeX}px; height: {trendBoxSizeY}px;"
+      style="width: {trendBoxSizeX + masteryIndicatorOutcrop * 2}px; height: {trendBoxSizeY}px;"
       title="Observasjoner mangler"
     ></span>
   {:else if isBadgeVoid}
     <span
       class="trend-box missing-mastery void-badge"
-      style="width: {trendBoxSizeX}px; height: {trendBoxSizeY}px;"
+      style="width: {trendBoxSizeX + masteryIndicatorOutcrop * 2}px; height: {trendBoxSizeY}px;"
       title="Mål mangler"
     ></span>{/if}
 </span>

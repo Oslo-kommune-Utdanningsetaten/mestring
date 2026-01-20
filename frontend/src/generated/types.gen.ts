@@ -264,6 +264,7 @@ export type PatchedSchoolType = {
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
+    isStatusEnabled?: boolean;
     subjectsAllowed?: string;
     readonly createdById?: string;
     readonly updatedById?: string;
@@ -288,7 +289,9 @@ export type PatchedStatusType = {
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
     deletedAt?: string | null;
-    estimatedAt?: string | null;
+    title?: string | null;
+    beginAt?: string;
+    endAt?: string;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
@@ -296,6 +299,8 @@ export type PatchedStatusType = {
     readonly updatedById?: string;
     studentId?: string;
     subjectId?: string;
+    schoolId?: string;
+    masterySchemaId?: string | null;
 };
 
 export type PatchedSubjectType = {
@@ -371,6 +376,7 @@ export type SchoolType = {
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
+    isStatusEnabled?: boolean;
     subjectsAllowed?: string;
     readonly createdById: string;
     readonly updatedById: string;
@@ -395,7 +401,9 @@ export type StatusType = {
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
     deletedAt?: string | null;
-    estimatedAt?: string | null;
+    title?: string | null;
+    beginAt: string;
+    endAt: string;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
@@ -403,6 +411,8 @@ export type StatusType = {
     readonly updatedById: string;
     studentId: string;
     subjectId: string;
+    schoolId: string;
+    masterySchemaId?: string | null;
 };
 
 /**
@@ -620,6 +630,7 @@ export type PatchedSchoolCreateType = {
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
+    isStatusEnabled?: boolean;
     subjectsAllowed?: string;
 };
 
@@ -632,12 +643,16 @@ export type PatchedSituationCreateType = {
 
 export type PatchedStatusCreateType = {
     deletedAt?: string | null;
-    estimatedAt?: string | null;
+    title?: string | null;
+    beginAt?: string;
+    endAt?: string;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
     studentId?: string;
     subjectId?: string;
+    schoolId?: string;
+    masterySchemaId?: string | null;
 };
 
 export type PatchedSubjectCreateType = {
@@ -683,6 +698,7 @@ export type SchoolCreateType = {
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
+    isStatusEnabled?: boolean;
     subjectsAllowed?: string;
 };
 
@@ -695,12 +711,16 @@ export type SituationCreateType = {
 
 export type StatusCreateType = {
     deletedAt?: string | null;
-    estimatedAt?: string | null;
+    title?: string | null;
+    beginAt: string;
+    endAt: string;
     masteryValue?: number | null;
     masteryDescription?: string | null;
     feedforward?: string | null;
     studentId: string;
     subjectId: string;
+    schoolId: string;
+    masterySchemaId?: string | null;
 };
 
 export type SubjectCreateType = {
@@ -1782,7 +1802,28 @@ export type SituationsUpdateResponse = SituationsUpdateResponses[keyof Situation
 export type StatusListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Filter statuses by users who have created or updated it.
+         */
+        editor?: string;
+        /**
+         * Filter statuses by group.
+         */
+        group?: 'exclude' | 'include' | 'only';
+        /**
+         * Filter statuses by school.
+         */
+        school?: string;
+        /**
+         * Filter statuses by students.
+         */
+        students?: string;
+        /**
+         * Filter statuses by subject.
+         */
+        subject?: string;
+    };
     url: '/api/status/';
 };
 
