@@ -70,7 +70,7 @@
     if (!student || $dataStore.currentSchool.subjectsAllowed !== SUBJECTS_ALLOWED_CUSTOM) return
     const schoolSubjects = $dataStore.subjects
     // This works because schoolSubjects are only custom subjects (not the whole shebang)
-    schoolSubjects.forEach(async (subject, index) => {
+    for (const subject of schoolSubjects) {
       for (let i = 0; i < individualGoalcount; i++) {
         const goal: GoalCreateType = {
           studentId: student?.id,
@@ -84,7 +84,7 @@
           body: goal,
         })
       }
-    })
+    }
 
     fetchStudentData(student.id)
   }
