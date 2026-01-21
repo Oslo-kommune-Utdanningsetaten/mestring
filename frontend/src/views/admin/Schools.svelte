@@ -13,7 +13,11 @@
   } from '../../generated/sdk.gen'
   import type { SchoolImportStatus } from '../../types/models'
   import { formatDateTime } from '../../utils/functions'
-
+  import {
+    SUBJECTS_ALLOWED_ALL,
+    SUBJECTS_ALLOWED_CUSTOM,
+    SUBJECTS_ALLOWED_FEIDE,
+  } from '../../utils/constants'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import { addAlert } from '../../stores/alerts'
   import { dataStore } from '../../stores/data'
@@ -24,9 +28,9 @@
 
   // Radio options for subject config
   const subjectOptions = [
-    { value: 'all', label: 'Alle fag' },
-    { value: 'only-group', label: 'Kun fag via Feide-grupper' },
-    { value: 'only-custom', label: 'Kun egendefinerte fag' },
+    { value: SUBJECTS_ALLOWED_ALL, label: 'Alle fag' },
+    { value: SUBJECTS_ALLOWED_FEIDE, label: 'Kun fag via Feide-grupper' },
+    { value: SUBJECTS_ALLOWED_CUSTOM, label: 'Kun egendefinerte fag' },
   ] as const
 
   let importStatus = $state<Record<string, SchoolImportStatus>>({})

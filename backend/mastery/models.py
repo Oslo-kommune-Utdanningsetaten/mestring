@@ -45,7 +45,7 @@ class School(BaseModel):
     is_student_list_enabled = models.BooleanField(default=False)  # can teachers see the /students menu item
     is_goal_title_enabled = models.BooleanField(default=True)  # are goals displayed with titles
     is_status_enabled = models.BooleanField(default=False)  # is status feature enabled
-    # which subjects can be used: 'only-custom' (owned by school), 'only-group', 'all'
+    # which subjects can be used: 'only-custom' (owned by school), 'only-feide', 'all'
     subjects_allowed = models.CharField(max_length=50, null=False, default='all')
 
     def ensure_short_name(self, short_name):

@@ -1,7 +1,13 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { dataStore } from '../stores/data'
-  import type { UserType, ObservationType, GoalType, StatusType } from '../generated/types.gen'
+  import type {
+    UserType,
+    ObservationType,
+    GoalType,
+    StatusType,
+    SubjectType,
+  } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { observationsDestroy, goalsDestroy, goalsUpdate, goalsCreate } from '../generated/sdk.gen'
   import Link from './Link.svelte'
@@ -19,8 +25,8 @@
   import { getLocalStorageItem } from '../stores/localStorage'
   import { formatDateDistance, fetchGoalsForSubjectAndStudent } from '../utils/functions'
 
-  const { subjectId, student, onRefreshRequired } = $props<{
-    subjectId: string
+  const { subject, student, onRefreshRequired } = $props<{
+    subject: SubjectType
     student: UserType
     onRefreshRequired?: Function
   }>()
@@ -33,7 +39,6 @@
   let observationWip = $state<ObservationType | {} | null>(null)
   let expandedGoals = $state<Record<string, boolean>>({})
   let goalsListElement = $state<HTMLElement | null>(null)
-  let subject = $derived($dataStore.subjects.find(s => s.id === subjectId) || null)
   let isGoalEditorOpen = $state<boolean>(false)
   let isObservationEditorOpen = $state<boolean>(false)
   let isStatusEditorOpen = $state<boolean>(false)
@@ -48,7 +53,7 @@
 
   const fetchGoals = async () => {
     goalsForSubject = await fetchGoalsForSubjectAndStudent(
-      subjectId,
+      subject.id,
       student.id,
       $dataStore.currentUser.allGroups
     )
@@ -61,7 +66,7 @@
       }
     } else {
       statusWip = {
-        subjectId: subjectId,
+        subjectId: subject.id,
         studentId: student.id,
         schoolId: $dataStore.currentSchool.id,
         beginAt: sixtyDaysAgo.toISOString().split('T')[0],
@@ -84,7 +89,7 @@
     } else {
       const personalGoalsCount = goalsForSubject?.filter(g => g.isPersonal).length
       const newGoal = {
-        subjectId: subjectId,
+        subjectId: subject.id,
         studentId: student.id,
         isPersonal: true,
         sortOrder: personalGoalsCount + 1,
@@ -97,7 +102,7 @@
       const createInstantly =
         !$dataStore.currentSchool.isGoalTitleEnabled &&
         !!$dataStore.defaultMasterySchema?.id &&
-        !!subjectId
+        !!subject.id
 
       if (createInstantly) {
         await goalsCreate({
@@ -207,7 +212,7 @@
   }
 
   $effect(() => {
-    if (student && subjectId) {
+    if (student && subject) {
       fetchGoals()
     }
   })
@@ -242,7 +247,7 @@
       onClick: () => handleEditGoal({}),
     }}
   />
-  {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subjectId, studentId: student.id } )}
+  {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentId: student.id } )}
     <ButtonIcon
       options={{
         iconName: 'achievement',
@@ -252,7 +257,7 @@
       }}
     />
   {/if}
-  {#if $dataStore.hasUserAccessToFeature( 'status', 'read', { subjectId: subjectId, studentId: student.id } )}
+  {#if $dataStore.hasUserAccessToFeature( 'status', 'read', { subjectId: subject.id, studentId: student.id } )}
     {#key statusesKey}
       <Statuses {student} {subject} />
     {/key}

@@ -6,7 +6,9 @@
     goalsList,
     groupsList,
     subjectsList,
+    subjectsDestroy,
   } from '../generated/sdk.gen'
+  import { SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
   import StudentSVG from '../assets/education.svg.svelte'
@@ -65,8 +67,9 @@
   }
 
   const handleCreateAllPersonalGoals = async () => {
-    if (!student) return
+    if (!student || $dataStore.currentSchool.subjectsAllowed !== SUBJECTS_ALLOWED_CUSTOM) return
     const schoolSubjects = $dataStore.subjects
+    // This works because schoolSubjects are only custom subjects (not the whole shebang)
     schoolSubjects.forEach(async (subject, index) => {
       for (let i = 0; i < individualGoalcount; i++) {
         const goal: GoalCreateType = {
@@ -120,7 +123,7 @@
     <div class="card shadow-sm">
       <div class="d-flex align-items-center gap-2 mb-3 card-header">
         <h2>Mål</h2>
-        {#if studentGoalsCount === 0}
+        {#if studentGoalsCount === 0 && $dataStore.currentSchool.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM}
           <ButtonMini
             options={{
               iconName: 'goal',
@@ -140,7 +143,7 @@
           {#each subjects as subject (subject.id)}
             <li class="list-group-item py-3">
               <StudentSubjectGoals
-                subjectId={subject.id}
+                {subject}
                 {student}
                 onRefreshRequired={() => fetchStudentData(studentId)}
               />

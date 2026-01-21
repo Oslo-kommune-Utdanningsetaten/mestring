@@ -230,7 +230,7 @@ const registerSubjects = async (school: SchoolType): Promise<void> => {
       if (school.subjectsAllowed == SUBJECTS_ALLOWED_CUSTOM) {
         return !!subject.ownedBySchoolId
       } else {
-        // 'only-group'
+        // 'only-feide'
         return !subject.ownedBySchoolId
       }
     })
