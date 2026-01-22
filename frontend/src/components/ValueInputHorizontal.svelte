@@ -88,7 +88,7 @@
 <style>
   .stairs-container {
     position: relative;
-    height: 200px;
+    height: 250px;
     width: 100%;
   }
 
@@ -108,7 +108,7 @@
 
   #valueIndicator {
     position: absolute;
-    bottom: 1.2em;
+    bottom: 1.5em;
     left: 0;
     text-align: center;
     width: auto;
@@ -120,21 +120,29 @@
 
   .slider {
     width: 100%;
-    height: 5px;
+    height: 10px;
     padding-top: 0px;
     background-color: var(--bs-gray);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
   }
 
   .slider::-webkit-slider-thumb,
   .slider::-moz-range-thumb {
-    width: 25px;
-    height: 30px;
+    width: 50px;
+    height: 40px;
     border-radius: 3px;
+    border: 1px solid var(--pkt-color-grays-gray-500);
     cursor: pointer;
+    pointer-events: auto;
+    background-color: var(--pkt-color-grays-gray-100);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .slider::-webkit-slider-thumb {
+    /* Override default look */
     -webkit-appearance: none;
     appearance: none;
+    -webkit-tap-highlight-color: transparent;
   }
 </style>

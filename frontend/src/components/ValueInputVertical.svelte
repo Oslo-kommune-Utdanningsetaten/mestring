@@ -119,6 +119,7 @@
     justify-content: flex-start;
     align-items: flex-end;
     width: 100%;
+    height: 250px;
   }
 
   .rung {
@@ -134,22 +135,29 @@
     padding-top: 0px;
     padding-bottom: 0px;
     width: 10px;
+    z-index: 2;
     writing-mode: vertical-lr;
     direction: rtl;
     background-color: var(--bs-gray);
-    z-index: 2;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
   }
 
   .slider::-webkit-slider-thumb,
   .slider::-moz-range-thumb {
-    width: 50px;
-    height: 25px;
+    width: 40px;
+    height: 50px;
     border-radius: 3px;
+    border: 1px solid var(--pkt-color-grays-gray-500);
     cursor: pointer;
+    pointer-events: auto;
+    background-color: var(--pkt-color-grays-gray-100);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
+    -webkit-tap-highlight-color: transparent;
   }
 </style>
