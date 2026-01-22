@@ -24,6 +24,14 @@
   )
   const safeMasteryValue = $derived(calculations.calculateSafeMasteryValue(masteryValue))
 
+  const calculateRungHeight = (index: number) => {
+    const { minValue, maxValue, masteryLevels } = calculations
+    const currentLevel = masteryLevels[index]
+    const valuesCountTotal = maxValue - minValue + 1
+    const valuesCountCurrentLevel = currentLevel.maxValue - currentLevel.minValue + 1
+    return (valuesCountCurrentLevel / valuesCountTotal) * 100
+  }
+
   // Set default value when masteryValue is null/undefined and schema is available
   $effect(() => {
     if ((masteryValue === null || masteryValue === undefined) && calculations.hasLevels) {
@@ -75,7 +83,9 @@
       {#each sortedMasteryLevels as masteryLevel, index}
         <span
           class="rung px-2"
-          style="width: {(index + 1) * widthMultiplier}%; background-color: {masteryLevel.color};"
+          style="width: {(index + 1) * widthMultiplier}%; height: {calculateRungHeight(
+            index
+          )}%; background-color: {masteryLevel.color};"
         >
           {masteryLevel.title}
         </span>
@@ -123,7 +133,6 @@
   }
 
   .rung {
-    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;

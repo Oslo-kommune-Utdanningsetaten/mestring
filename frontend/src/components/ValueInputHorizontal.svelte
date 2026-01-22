@@ -21,10 +21,15 @@
   )
   let xOffset = $derived(thumbXPosition > 40 ? -((thumbXPosition - 40) / 40) * 1.1 : 0)
 
-  const rungWidth = $derived(
-    calculations.masteryLevels.length ? 100 / calculations.masteryLevels.length : 100
-  )
   const safeMasteryValue = $derived(calculations.calculateSafeMasteryValue(masteryValue))
+
+  const calculateRungWidth = (index: number) => {
+    const { minValue, maxValue, masteryLevels } = calculations
+    const currentLevel = masteryLevels[index]
+    const valuesCountTotal = maxValue - minValue + 1
+    const valuesCountCurrentLevel = currentLevel.maxValue - currentLevel.minValue + 1
+    return (valuesCountCurrentLevel / valuesCountTotal) * 100
+  }
 
   const calculateRungHeight = (index: number) => {
     return (index + 1) * (100 / calculations.masteryLevels.length)
@@ -47,7 +52,7 @@
     {#each calculations.masteryLevels as masteryLevel, index}
       <span
         class="rung flex-grow d-flex align-items-end justify-content-center text-center"
-        style="width: {rungWidth}%; height: {calculateRungHeight(
+        style="width: {calculateRungWidth(index)}%; height: {calculateRungHeight(
           index
         )}%; background-color: {masteryLevel.color};"
       >
