@@ -24,6 +24,7 @@
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { getLocalStorageItem } from '../stores/localStorage'
   import { formatDateDistance, fetchGoalsForSubjectAndStudent } from '../utils/functions'
+  import AuthorInfo from './AuthorInfo.svelte'
 
   const { subject, student, onRefreshRequired } = $props<{
     subject: SubjectType
@@ -358,10 +359,10 @@
           </div>
           {#each goal?.observations as observation, index}
             <div class="student-observations-row observation-item">
-              <span>
-                {formatDateDistance(observation.observedAt)}
+              <span class="bordered">
+                <AuthorInfo item={observation} />
               </span>
-              <span>
+              <span class="bordered">
                 {observation.masteryValue}
               </span>
               <span>

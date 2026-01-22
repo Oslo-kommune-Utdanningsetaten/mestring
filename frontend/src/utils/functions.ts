@@ -1,6 +1,12 @@
 import type { Mastery, GoalDecorated } from '../types/models'
-import type { GoalType, SubjectType, ObservationType, GroupType } from '../generated/types.gen'
-import { goalsList, observationsList } from '../generated/sdk.gen'
+import type {
+  GoalType,
+  SubjectType,
+  ObservationType,
+  GroupType,
+  StatusType,
+} from '../generated/types.gen'
+import { goalsList, observationsList, usersRetrieve } from '../generated/sdk.gen'
 import { nb as noLocale } from 'date-fns/locale'
 import { format, formatDistanceToNow } from 'date-fns'
 

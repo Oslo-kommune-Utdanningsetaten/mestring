@@ -13,6 +13,7 @@
   import ButtonMini from '../components/ButtonMini.svelte'
   import StatusEdit from '../components/StatusEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
+  import AuthorInfo from '../components/AuthorInfo.svelte'
   import { addAlert } from '../stores/alerts'
 
   let { statusId } = $props<{
@@ -23,7 +24,6 @@
   let statusWip = $state<Partial<StatusType> | null>(null)
   let student = $state<UserType | null>(null)
   let subject = $state<SubjectType | null>(null)
-  let updatedByUser = $state<UserType | null>(null)
   let isLoading = $state<boolean>(true)
   let isStatusEditorOpen = $state<boolean>(false)
 
@@ -49,16 +49,9 @@
       // Fetch student
       const studentResult = await usersRetrieve({ path: { id: status.studentId } })
       student = studentResult.data!
-
       // Fetch subject
       const subjectResult = await subjectsRetrieve({ path: { id: status.subjectId } })
       subject = subjectResult.data!
-
-      // Fetch updatedBy user
-      if (status.updatedById) {
-        const updatedByResult = await usersRetrieve({ path: { id: status.updatedById } })
-        updatedByUser = updatedByResult.data!
-      }
     } catch (error) {
       console.error('Error fetching status data:', error)
     } finally {
@@ -127,11 +120,9 @@
     <!-- Updated by info and action buttons -->
     <div class="d-flex justify-content-between align-items-center my-3">
       <div>
-        {#if updatedByUser}
-          <p class="text-muted mb-0">
-            Sist endret av {updatedByUser.name}, {formatDateHumanly(status.updatedAt)}
-          </p>
-        {/if}
+        <p class="text-muted mb-0">
+          <AuthorInfo item={status} />
+        </p>
       </div>
       <div class="d-flex gap-2">
         <ButtonMini
