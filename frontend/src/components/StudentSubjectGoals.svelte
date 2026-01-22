@@ -461,7 +461,6 @@
 <!-- offcanvas for creating/editing status -->
 <Offcanvas
   bind:isOpen={isStatusEditorOpen}
-  width="60vw"
   ariaLabel="Rediger status"
   onClosed={() => {
     statusWip = null
@@ -481,7 +480,6 @@
 <!-- offcanvas for creating/editing observations -->
 <Offcanvas
   bind:isOpen={isObservationEditorOpen}
-  width="60vw"
   ariaLabel="Rediger observasjon"
   onClosed={() => {
     observationWip = null

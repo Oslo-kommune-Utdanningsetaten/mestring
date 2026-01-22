@@ -266,7 +266,7 @@
 <!-- Offcanvas for creating/editing mastery schemas -->
 <Offcanvas
   bind:isOpen={isEditorOpen}
-  width="70vw"
+  width="80vw"
   ariaLabel="Rediger mestringsskjema"
   onClosed={() => {
     masterySchemaWip = null

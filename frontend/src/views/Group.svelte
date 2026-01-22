@@ -493,7 +493,6 @@
 <!-- offcanvas for creating/editing status -->
 <Offcanvas
   bind:isOpen={isStatusEditorOpen}
-  width="60vw"
   ariaLabel="Rediger status"
   onClosed={() => {
     statusWip = null
