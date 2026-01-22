@@ -123,26 +123,31 @@
     height: 10px;
     padding-top: 0px;
     background-color: var(--bs-gray);
-    -webkit-tap-highlight-color: transparent;
-    touch-action: none;
-  }
-
-  .slider::-webkit-slider-thumb,
-  .slider::-moz-range-thumb {
-    width: 50px;
-    height: 40px;
-    border-radius: 3px;
-    border: 1px solid var(--pkt-color-grays-gray-500);
-    cursor: pointer;
-    pointer-events: auto;
-    background-color: var(--pkt-color-grays-gray-100);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
   }
 
   .slider::-webkit-slider-thumb {
     /* Override default look */
     -webkit-appearance: none;
     appearance: none;
-    -webkit-tap-highlight-color: transparent;
+    width: 50px;
+    height: 40px;
+    border-radius: 3px;
+    border: 1px solid var(--pkt-color-grays-gray-500);
+    cursor: pointer;
+    background-color: var(--pkt-color-grays-gray-100);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .slider::-moz-range-thumb {
+    width: 50px;
+    height: 40px;
+    border-radius: 3px;
+    border: 1px solid var(--pkt-color-grays-gray-500);
+    cursor: pointer;
+    background-color: var(--pkt-color-grays-gray-100);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 </style>

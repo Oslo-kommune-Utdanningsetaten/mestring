@@ -139,25 +139,30 @@
     writing-mode: vertical-lr;
     direction: rtl;
     background-color: var(--bs-gray);
-    -webkit-tap-highlight-color: transparent;
-    touch-action: none;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
   }
 
-  .slider::-webkit-slider-thumb,
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 40px;
+    height: 50px;
+    border-radius: 3px;
+    border: 1px solid var(--pkt-color-grays-gray-500);
+    cursor: pointer;
+    background-color: var(--pkt-color-grays-gray-100);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
   .slider::-moz-range-thumb {
     width: 40px;
     height: 50px;
     border-radius: 3px;
     border: 1px solid var(--pkt-color-grays-gray-500);
     cursor: pointer;
-    pointer-events: auto;
     background-color: var(--pkt-color-grays-gray-100);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-
-  .slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    -webkit-tap-highlight-color: transparent;
   }
 </style>
