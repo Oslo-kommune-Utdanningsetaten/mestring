@@ -88,7 +88,7 @@
 <style>
   .stairs-container {
     position: relative;
-    height: 250px;
+    height: 200px;
     width: 100%;
   }
 
