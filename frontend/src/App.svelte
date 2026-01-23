@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Router, Route } from 'svelte-tiny-router'
   import { onMount } from 'svelte'
-  import { checkAuth, isLoggingInUser } from './stores/auth'
+  import { checkAuth, isLoggingInUser, login } from './stores/auth'
   import { loadData, currentUser, dataStore } from './stores/data'
   import { apiHealth } from './stores/apiHealth'
   import { addAlert } from './stores/alerts'
@@ -18,8 +18,8 @@
   import Groups from './views/Groups.svelte'
   import Students from './views/Students.svelte'
   import Status from './views/Status.svelte'
-  import Navigation from './components/Navigation.svelte'
   import Profile from './views/Profile.svelte'
+  import NotFound from './views/NotFound.svelte'
   // Admin views
   import Users from './views/admin/Users.svelte'
   import AdminGroups from './views/admin/Groups.svelte'
@@ -27,6 +27,9 @@
   import MasterySchemas from './views/admin/MasterySchemas.svelte'
   import DataMaintenanceTask from './views/admin/DataMaintenanceTask.svelte'
   import Schools from './views/admin/Schools.svelte'
+  // Conponents
+  import Navigation from './components/Navigation.svelte'
+  import ButtonMini from './components/ButtonMini.svelte'
   import AlertBar from './components/AlertBar.svelte'
 
   const API_CHECK_INTERVAL = 60 * 1000 // every 60 seconds
@@ -95,10 +98,7 @@
       {/each}
       <!-- Fallback route: no "path" prop means it always matches -->
       <Route>
-        <div>
-          <h4>Unrecognized path :/</h4>
-          <p>The page you're looking for doesn't exist.</p>
-        </div>
+        <NotFound />
       </Route>
     </Router>
   {/if}
