@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { UserType, SubjectType, GroupType } from '../generated/types.gen'
-  import type { GoalDecorated, Mastery } from '../types/models'
+  import type { Mastery } from '../types/models'
   import { goalsList } from '../generated/sdk.gen'
   import {
     goalsWithCalculatedMasteryBySubjectId,
