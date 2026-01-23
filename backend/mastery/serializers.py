@@ -150,6 +150,33 @@ class ObservationSerializer(BaseModelSerializer):
         return attrs
 
 
+class GoalWithObservationsSerializer(GoalSerializer):
+    observations = serializers.SerializerMethodField()
+
+    class Meta(GoalSerializer.Meta):
+        pass
+
+    def get_observations(self, goal):
+        request = self.context.get('request')
+        if not request:
+            raise ValueError("GoalWithObservationsSerializer requires request in context")
+
+        # Start with access-policy-filtered observations
+        policy = ObservationAccessPolicy()
+        observations_qs = policy.scope_queryset(request, models.Observation.objects.all())
+
+        # Filter to this goal's observations
+        observations_qs = observations_qs.filter(goal_id=goal.id)
+
+        # Filter by student if provided
+        student_id = request.query_params.get('student')
+        if student_id:
+            observations_qs = observations_qs.filter(student_id=student_id)
+
+        # Serialize the filtered observations
+        return ObservationSerializer(observations_qs, many=True, context=self.context).data
+
+
 class StatusSerializer(BaseModelSerializer):
     class Meta:
         model = models.Status

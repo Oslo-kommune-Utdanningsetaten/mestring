@@ -573,6 +573,13 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
                 type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
+            OpenApiParameter(
+                name='include_observations',
+                description='Include related observations in the response',
+                required=False,
+                type={'type': 'boolean'},
+                location=OpenApiParameter.QUERY
+            ),
         ]
     )
 )
@@ -592,6 +599,8 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
             group_param, _ = get_request_param(self.request.query_params, 'group')
             student_param, _ = get_request_param(self.request.query_params, 'student')
             subject_param, _ = get_request_param(self.request.query_params, 'subject')
+            include_observations_param, _ = get_request_param(
+                self.request.query_params, 'include_observations')
 
             if (not student_param) and (not subject_param) and (not group_param):
                 raise ValidationError(
@@ -618,6 +627,10 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                     Q(subject_id=subject_param) |
                     Q(group__subject_id=subject_param)
                 )
+            if include_observations_param and student_param:
+                # Include observations only when filtering by student
+                self.serializer_class = serializers.GoalWithObservationsSerializer
+                return qs
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs
 
