@@ -221,7 +221,6 @@
     // for each goal, update its sortOrder if it has changed
     const updatePromises: Promise<any>[] = localGoals.map(async (goal, index) => {
       const newSortOrder = index + 1 // for human readability, sortOrder starts at 1
-      console.log('goal', goal.title, '-->', newSortOrder)
       if (goal.sortOrder !== newSortOrder) {
         goal.sortOrder = newSortOrder
         return goalsUpdate({
