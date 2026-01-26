@@ -24,6 +24,7 @@ import {
   STUDENT_PATHS,
   TEACHER_PATHS,
   RESTRICTED_PATHS,
+  GROUP_TYPE_BASIS,
 } from '../utils/constants'
 import type { AppData, UserDecorated } from '../types/models'
 
@@ -62,7 +63,7 @@ const hasUserAccessToPath = (path: string): boolean => {
 const hasUserAccessToFeature = (
   resource: string,
   action: string,
-  options: Record<string, string> = {}
+  options: Record<string, any> = {}
 ): boolean => {
   const currentData = get(dataStore) as AppData
   const currentSchool = currentData.currentSchool
@@ -79,11 +80,28 @@ const hasUserAccessToFeature = (
       if (isSchoolAdmin || isSuperadmin) {
         return true
       }
-      const { studentId, subjectId } = options
+      const { subjectId, studentGroups } = options
       // FIXME: This is a simplified check; the following logic should be implemented
       // Return true if user is teacher of the student in the subject
       // Return true if the user is a teacher of the basis group of the student
-      return currentUser.teacherGroups.length > 0
+      const userTeacherGroups = currentUser.teacherGroups
+      // If no studentGroups provided, we can't verify access properly for teachers
+      if (!studentGroups || !Array.isArray(studentGroups)) {
+        return false
+      }
+
+      // Check access
+      return userTeacherGroups.some(teacherGroup => {
+        // Is teacher of the student via subject?
+        if (subjectId && teacherGroup.subjectId === subjectId && studentGroups.includes(teacherGroup.id)) {
+          return true
+        }
+        // Is teacher of the student via basis group?
+        if (teacherGroup.type === GROUP_TYPE_BASIS && studentGroups.includes(teacherGroup.id)) {
+          return true
+        }
+        return false
+      })
     } else if (action === 'read') {
       return (
         isSchoolAdmin || isSchoolInspector || isSuperadmin || currentUser.teacherGroups.length > 0

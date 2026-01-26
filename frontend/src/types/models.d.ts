@@ -15,7 +15,7 @@ export type AppData = {
   hasUserAccessToFeature: (
     resource: 'status',
     action: 'create' | 'read' | 'delete',
-    options?: Record<string, string>
+    options?: Record<string, any>
   ) => boolean
   roles: RoleType[]
   defaultMasterySchema?: MasterySchemaType | null
