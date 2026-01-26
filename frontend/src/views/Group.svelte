@@ -33,6 +33,7 @@
   import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
   import GroupTag from '../components/GroupTag.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
+  import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
   import { dataStore } from '../stores/data'
   import { goalsWithCalculatedMastery, abbreviateName } from '../utils/functions'
   import SparkbarChart from '../components/SparkbarChart.svelte'
@@ -221,7 +222,6 @@
     // for each goal, update its sortOrder if it has changed
     const updatePromises: Promise<any>[] = localGoals.map(async (goal, index) => {
       const newSortOrder = index + 1 // for human readability, sortOrder starts at 1
-      console.log('goal', goal.title, '-->', newSortOrder)
       if (goal.sortOrder !== newSortOrder) {
         goal.sortOrder = newSortOrder
         return goalsUpdate({
@@ -382,75 +382,15 @@
     {#if group.type === GROUP_TYPE_BASIS}
       <StudentsWithSubjects {students} {subjects} groups={allGroups} />
     {:else if group.type === GROUP_TYPE_TEACHING && subject}
-      <div
-        class="teaching-grid my-3"
-        aria-label="Elevliste"
-        style="--columns-count: {groupGoals.length}"
-      >
-        <span class="item header header-row">Elev</span>
-        {#each groupGoals as goal (goal.id)}
-          <span class="item header header-row">
-            <span class="column-header {goal.isRelevant ? '' : 'hatched-background text-muted'}">
-              {goal.title || goal.sortOrder}
-            </span>
-          </span>
-        {/each}
-        {#each students as student (student.id)}
-          <span class="item">
-            <a href={`/students/${student.id}`}>
-              {student.name}
-            </a>
-            {#if $dataStore.currentSchool.isStatusEnabled}
-              <div class="d-flex align-items-center gap-2">
-                {#if $dataStore.hasUserAccessToFeature( 'status', 'read', { subjectId: subject.id, studentId: student.id } )}
-                  {#key statusesKey}
-                    <Statuses {student} {subject} />
-                  {/key}
-                {/if}
-
-                {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentId: student.id } )}
-                  <ButtonIcon
-                    options={{
-                      iconName: 'achievement',
-                      classes: 'bordered',
-                      title: 'Legg til ny status',
-                      onClick: () => handleEditStatus(null, student),
-                    }}
-                  />
-                {/if}
-              </div>
-            {/if}
-          </span>
-          {#each groupGoals as goal (goal.id)}
-            {@const decoGoal = getDecoratedGoalFor(student.id, goal.id)}
-            <span class="item gap-1">
-              {#if decoGoal?.masteryData}
-                <MasteryLevelBadge
-                  masteryData={decoGoal.masteryData}
-                  masterySchema={getMasterySchmemaForGoal(goal)}
-                />
-                <SparkbarChart
-                  data={decoGoal.observations?.map((o: ObservationType) => o.masteryValue)}
-                  masterySchema={getMasterySchmemaForGoal(goal)}
-                />
-              {:else}
-                <MasteryLevelBadge isBadgeEmpty={true} />
-              {/if}
-              <span class="add-observation-button">
-                <ButtonIcon
-                  options={{
-                    iconName: 'bullseye',
-                    title: 'Legg til observasjon',
-                    classes: 'bordered',
-                    disabled: !goal.isRelevant,
-                    onClick: () => handleEditObservation(goal, null, student),
-                  }}
-                />
-              </span>
-            </span>
-          {/each}
-        {/each}
-      </div>
+      <StudentsWithGoals
+        {students}
+        goals={groupGoals}
+        goalsWithMasteryByStudentId={goalsWithCalculatedMasteryByStudentId}
+        {subject}
+        {statusesKey}
+        onEditObservation={handleEditObservation}
+        onEditStatus={handleEditStatus}
+      />
     {:else}
       <h5 class="alert alert-warning">ukjent gruppetype</h5>
     {/if}
@@ -510,45 +450,6 @@
 
   .group-svg > :global(svg) {
     height: 7rem;
-  }
-
-  /* Teaching group grid - different from StudentsWithSubjects */
-  .teaching-grid {
-    display: grid;
-    grid-template-columns: 3fr repeat(var(--columns-count, 8), 1fr);
-    grid-auto-rows: minmax(5rem, 1fr);
-    align-items: stretch;
-    gap: 0;
-  }
-
-  .teaching-grid .item {
-    padding: 0.5rem;
-    min-height: 3rem;
-    display: flex;
-    align-items: center;
-    align-self: stretch;
-    justify-content: space-between;
-    border-right: 1px solid var(--bs-border-color);
-    border-bottom: 1px solid var(--bs-border-color);
-  }
-
-  .add-observation-button {
-    display: flex;
-    margin-left: auto;
-  }
-
-  .teaching-grid .item.header-row {
-    background-color: var(--bs-light);
-    font-weight: 800;
-  }
-
-  .column-header {
-    transform: rotate(-60deg);
-    font-size: 0.8rem;
-    padding: 0.1rem 0.1rem 0.1rem 0.3rem;
-    max-width: 5rem;
-    background-color: var(--pkt-color-surface-strong-light-green);
-    border: 1px solid var(--pkt-color-grays-gray-100);
   }
 
   .goal-row {

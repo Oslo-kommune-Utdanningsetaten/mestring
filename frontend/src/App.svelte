@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Router, Route } from 'svelte-tiny-router'
   import { onMount } from 'svelte'
-  import { checkAuth, isLoggingInUser } from './stores/auth'
+  import { checkAuth, isLoggingInUser, login } from './stores/auth'
   import { loadData, currentUser, dataStore } from './stores/data'
   import { apiHealth } from './stores/apiHealth'
   import { addAlert } from './stores/alerts'
@@ -18,8 +18,8 @@
   import Groups from './views/Groups.svelte'
   import Students from './views/Students.svelte'
   import Status from './views/Status.svelte'
-  import Navigation from './components/Navigation.svelte'
   import Profile from './views/Profile.svelte'
+  import NotFound from './views/NotFound.svelte'
   // Admin views
   import Users from './views/admin/Users.svelte'
   import AdminGroups from './views/admin/Groups.svelte'
@@ -27,8 +27,10 @@
   import MasterySchemas from './views/admin/MasterySchemas.svelte'
   import DataMaintenanceTask from './views/admin/DataMaintenanceTask.svelte'
   import Schools from './views/admin/Schools.svelte'
+  // Conponents
+  import Navigation from './components/Navigation.svelte'
   import AlertBar from './components/AlertBar.svelte'
-
+  import Footer from './components/Footer.svelte'
   const API_CHECK_INTERVAL = 60 * 1000 // every 60 seconds
 
   // All routes in the app
@@ -75,34 +77,37 @@
   })
 </script>
 
-<header class="m-0 p-0 vw-100">
-  <Navigation />
-  <AlertBar />
-</header>
+<div class="d-flex flex-column min-vh-100">
+  <header class="m-0 p-0">
+    <Navigation />
+    <AlertBar />
+  </header>
 
-<main class="container-md py-3">
-  {#if $isLoggingInUser}
-    <div class="d-flex align-items-center gap-2 text-secondary small py-2">
-      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-      <span>Logger inn...</span>
-    </div>
-  {:else}
-    <Router>
-      {#each routes as route}
-        {#if $dataStore.hasUserAccessToPath(route.path)}
-          <Route path={route.path} component={route.component} />
-        {/if}
-      {/each}
-      <!-- Fallback route: no "path" prop means it always matches -->
-      <Route>
-        <div>
-          <h4>Unrecognized path :/</h4>
-          <p>The page you're looking for doesn't exist.</p>
-        </div>
-      </Route>
-    </Router>
-  {/if}
-</main>
+  <main class="container-md py-3 flex-grow-1">
+    {#if $isLoggingInUser}
+      <div class="d-flex align-items-center gap-2 text-secondary small py-2">
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span>Logger inn...</span>
+      </div>
+    {:else}
+      <Router>
+        {#each routes as route}
+          {#if $dataStore.hasUserAccessToPath(route.path)}
+            <Route path={route.path} component={route.component} />
+          {/if}
+        {/each}
+        <!-- Fallback route: no "path" prop means it always matches -->
+        <Route>
+          <NotFound />
+        </Route>
+      </Router>
+    {/if}
+  </main>
+
+  <footer class="bg-light">
+    <Footer />
+  </footer>
+</div>
 
 <style>
 </style>

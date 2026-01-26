@@ -67,12 +67,6 @@
             </li>
           {/if}
 
-          <li class="nav-item">
-            <Link to="/about" className={`nav-link ${isAboutActive ? 'active' : ''}`}>
-              Om&nbsp;tjenesten
-            </Link>
-          </li>
-
           {#if $dataStore.hasUserAccessToPath('/admin')}
             <li class="nav-item dropdown">
               <a
@@ -136,7 +130,7 @@
       </ul>
 
       <!-- Logo outside collapsible area for desktop -->
-      <a href="https://www.oslo.kommune.no" class="logo-image" target="_blank">
+      <a href="https://www.oslo.kommune.no" class="logo-image ms-3" target="_blank">
         <img class="oslologo" alt="Oslo kommune logo" src={oslologoUrl} />
       </a>
     </div>
@@ -148,7 +142,6 @@
     display: inline-block;
     width: 100px;
     max-width: 100px;
-    padding-left: 30px;
   }
 
   .goal-icon-wrapper {

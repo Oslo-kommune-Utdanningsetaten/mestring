@@ -944,6 +944,10 @@ export type GoalsListData = {
          */
         group?: string;
         /**
+         * Include related observations in the response
+         */
+        includeObservations?: boolean;
+        /**
          * Which field to use when ordering the results.
          */
         ordering?: string;

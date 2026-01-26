@@ -85,8 +85,23 @@ export const fetchGoalsForSubjectAndStudent = async (
 
 export const goalsWithCalculatedMastery = async (
   studentId: string,
-  studentGoals: GoalType[]
+  studentGoals: (GoalType & { observations?: ObservationType[] })[]
 ): Promise<GoalDecorated[]> => {
+  // Check if observations are already included (from includeObservations=true)
+  const hasInlineObservations = studentGoals.some(goal => Array.isArray(goal.observations))
+
+  if (hasInlineObservations) {
+    // Use inline observations - no additional API calls needed
+    return studentGoals.map(goal => {
+      const observations = goal.observations || []
+      const decoratedGoal: GoalDecorated = { ...goal }
+      decoratedGoal.masteryData = inferMastery(goal, observations)
+      decoratedGoal.observations = observations
+      return decoratedGoal
+    })
+  }
+
+  // Fallback: fetch observations separately (legacy behavior)
   const observationsPromises = studentGoals.map(goal =>
     observationsList({
       query: { goal: goal.id, student: studentId },
@@ -194,6 +209,17 @@ export const abbreviateName = (fullName: string): string => {
 
 export const isNumber = (value: any) => {
   return typeof value === 'number'
+}
+
+// Count total observations per subject for a set of decorated goals
+export const countObservationsBySubjectId = (
+  goalsBySubjectId: Record<string, GoalDecorated[]>
+): Record<string, number> => {
+  const counts: Record<string, number> = {}
+  Object.entries(goalsBySubjectId).forEach(([subjectId, goals]) => {
+    counts[subjectId] = goals.reduce((sum, goal) => sum + (goal.observations?.length || 0), 0)
+  })
+  return counts
 }
 
 export const formatDateTime = (isoDate?: string | number | undefined) => {
