@@ -248,7 +248,7 @@
       onClick: () => handleEditGoal({}),
     }}
   />
-  {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentId: student.id } )}
+  {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentId: student.id, studentGroups: student.groups } )}
     <ButtonIcon
       options={{
         iconName: 'achievement',
@@ -258,7 +258,7 @@
       }}
     />
   {/if}
-  {#if $dataStore.hasUserAccessToFeature( 'status', 'read', { subjectId: subject.id, studentId: student.id } )}
+  {#if $dataStore.hasUserAccessToFeature( 'status', 'read', { subjectId: subject.id, studentId: student.id, studentGroups: student.groups } )}
     {#key statusesKey}
       <Statuses {student} {subject} />
     {/key}

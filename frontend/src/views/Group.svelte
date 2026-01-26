@@ -402,13 +402,13 @@
             </a>
             {#if $dataStore.currentSchool.isStatusEnabled}
               <div class="d-flex align-items-center gap-2">
-                {#if $dataStore.hasUserAccessToFeature( 'status', 'read', { subjectId: subject.id, studentId: student.id } )}
+                {#if $dataStore.hasUserAccessToFeature( 'status', 'read', { subjectId: subject.id, studentId: student.id, studentGroups: student.groups } )}
                   {#key statusesKey}
                     <Statuses {student} {subject} />
                   {/key}
                 {/if}
 
-                {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentId: student.id } )}
+                {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentId: student.id, studentGroups: student.groups } )}
                   <ButtonIcon
                     options={{
                       iconName: 'achievement',
