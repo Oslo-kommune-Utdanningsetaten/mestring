@@ -29,9 +29,8 @@
   import Schools from './views/admin/Schools.svelte'
   // Conponents
   import Navigation from './components/Navigation.svelte'
-  import ButtonMini from './components/ButtonMini.svelte'
   import AlertBar from './components/AlertBar.svelte'
-
+  import Footer from './components/Footer.svelte'
   const API_CHECK_INTERVAL = 60 * 1000 // every 60 seconds
 
   // All routes in the app
@@ -78,31 +77,37 @@
   })
 </script>
 
-<header class="m-0 p-0 vw-100">
-  <Navigation />
-  <AlertBar />
-</header>
+<div class="d-flex flex-column min-vh-100">
+  <header class="m-0 p-0">
+    <Navigation />
+    <AlertBar />
+  </header>
 
-<main class="container-md py-3">
-  {#if $isLoggingInUser}
-    <div class="d-flex align-items-center gap-2 text-secondary small py-2">
-      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-      <span>Logger inn...</span>
-    </div>
-  {:else}
-    <Router>
-      {#each routes as route}
-        {#if $dataStore.hasUserAccessToPath(route.path)}
-          <Route path={route.path} component={route.component} />
-        {/if}
-      {/each}
-      <!-- Fallback route: no "path" prop means it always matches -->
-      <Route>
-        <NotFound />
-      </Route>
-    </Router>
-  {/if}
-</main>
+  <main class="container-md py-3 flex-grow-1">
+    {#if $isLoggingInUser}
+      <div class="d-flex align-items-center gap-2 text-secondary small py-2">
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span>Logger inn...</span>
+      </div>
+    {:else}
+      <Router>
+        {#each routes as route}
+          {#if $dataStore.hasUserAccessToPath(route.path)}
+            <Route path={route.path} component={route.component} />
+          {/if}
+        {/each}
+        <!-- Fallback route: no "path" prop means it always matches -->
+        <Route>
+          <NotFound />
+        </Route>
+      </Router>
+    {/if}
+  </main>
+
+  <footer class="bg-light">
+    <Footer />
+  </footer>
+</div>
 
 <style>
 </style>
