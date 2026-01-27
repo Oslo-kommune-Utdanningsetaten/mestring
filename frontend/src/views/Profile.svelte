@@ -94,3 +94,9 @@
     </div>
   </div>
 </section>
+
+<style>
+  button {
+    border-radius: 0px;
+  }
+</style>
