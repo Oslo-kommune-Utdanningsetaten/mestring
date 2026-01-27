@@ -23,17 +23,17 @@
       ? students.filter(
           student =>
             student.id === nameFilter ||
-            student.name.toLowerCase().includes(nameFilter.toLowerCase())
+            student?.name?.toLowerCase().includes(nameFilter.toLowerCase())
         )
       : students
   )
+
   let selectedGroup = $derived<GroupType | undefined>(
     allGroups.find(group => group.id === selectedGroupId)
   )
   let headerText = $derived.by(() => {
-    let text = selectedGroup ? `Elever i gruppe: ${selectedGroup.displayName}` : 'Alle elever'
-    text = nameFilter ? `${text} med navn som inneholder "${nameFilter}"` : text
-    return text
+    const text = selectedGroup ? `Elever i gruppe: ${selectedGroup.displayName}` : 'Alle elever'
+    return nameFilter ? `${text} med navn som inneholder "${nameFilter}"` : text
   })
 
   const fetchStudents = async () => {
@@ -105,7 +105,13 @@
     </div>
     <div class="filter-item">
       <label for="filterStudentsByName" class="mb-1">Filtrer på navn:</label>
-      <input type="text" class="filterStudentsByName" placeholder="Navn" bind:value={nameFilter} />
+      <input
+        type="text"
+        id="filterStudentsByName"
+        class="filterStudentsByName"
+        placeholder="Navn"
+        bind:value={nameFilter}
+      />
     </div>
   </div>
 </section>

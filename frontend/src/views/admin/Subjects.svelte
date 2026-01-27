@@ -191,11 +191,12 @@
 <section class="pt-3">
   <h2 class="py-3">{headerText}</h2>
   <!-- Filter groups -->
-  <div class="d-flex align-items-center gap-2">
-    <div>
+  <div class="filters-container">
+    <div class="filter-item">
+      <label for="schoolSelect" class="mb-1">Filtrer på skole:</label>
       <select
         class="pkt-input"
-        id="groupSelect"
+        id="schoolSelect"
         onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
       >
         <option value="0" selected={!selectedSchool?.id}>Velg skole</option>
@@ -206,12 +207,16 @@
         {/each}
       </select>
     </div>
-    <input
-      type="text"
-      class="group-filter-input"
-      placeholder="Navn på fag"
-      bind:value={nameFilter}
-    />
+    <div class="filter-item">
+      <label for="subjectFilterInput" class="mb-1">Filtrer på navn:</label>
+      <input
+        type="text"
+        id="subjectFilterInput"
+        class="group-filter-input"
+        placeholder="Navn på fag"
+        bind:value={nameFilter}
+      />
+    </div>
   </div>
 
   <!-- Radio buttons for filtering subjects -->
@@ -327,11 +332,24 @@
 </Offcanvas>
 
 <style>
+  .filters-container {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+  }
+
+  .filter-item {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 20rem;
+    min-width: 3rem;
+    max-width: 25rem;
+  }
+
   .group-filter-input {
     border: 2px solid var(--bs-primary);
     height: 48px;
     padding: 0 15px;
-    margin-left: 10px;
   }
 
   .subjects-grid {
