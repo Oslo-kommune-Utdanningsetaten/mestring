@@ -115,7 +115,7 @@
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li><Link to="/profile" className="dropdown-item">Min side</Link></li>
                 <li>
-                  <a class="dropdown-item" href="#" onclick={logout}>Logg ut</a>
+                  <a class="dropdown-item" href="/" onclick={logout}>Logg ut</a>
                 </li>
               </ul>
             </li>
@@ -124,7 +124,7 @@
 
         {#if !$currentUser}
           <li class="nav-item">
-            <a class="nav-link" href="#" onclick={login}>Logg inn</a>
+            <a class="nav-link" href="/" onclick={login}>Logg inn</a>
           </li>
         {/if}
       </ul>
