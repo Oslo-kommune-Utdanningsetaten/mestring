@@ -192,7 +192,7 @@
   <h2 class="py-3">{headerText}</h2>
   <!-- Filter groups -->
   <div class="d-flex align-items-center gap-2">
-    <div class="pkt-inputwrapper">
+    <div>
       <select
         class="pkt-input"
         id="groupSelect"

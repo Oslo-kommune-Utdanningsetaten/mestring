@@ -133,7 +133,7 @@
     </div>
   </div>
   <div class="form-group mb-3">
-    <div class="pkt-inputwrapper">
+    <div>
       <pkt-select
         label="Mestringsskjema"
         name="goalMasterySchema"

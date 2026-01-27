@@ -89,7 +89,7 @@
         <span>Henter skoler...</span>
       </div>
     {:else}
-      <div class="pkt-inputwrapper">
+      <div>
         <select
           class="pkt-input"
           id="groupSelect"
