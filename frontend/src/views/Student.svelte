@@ -103,12 +103,12 @@
         <StudentSVG />
       </div>
       <div>
-        <h1 class="mb-0" title="Fornavn">
+        <h2 class="mb-0" title="Fornavn">
           {student.name.split(' ')[0]}
-        </h1>
-        <h5 class="mt-0 text-secondary" title="Etternavn">
+        </h2>
+        <div class="mt-0 text-secondary" title="Etternavn">
           {student.name.split(' ').slice(1).join(' ')}
-        </h5>
+        </div>
       </div>
     </div>
     <div class="my-4">
