@@ -72,7 +72,7 @@
     </pkt-tag>
   {:else}
     <pkt-tag iconName="group" {skin}>
-      <span title={title || label}>{label}</span>
+      <span>{label}</span>
     </pkt-tag>
   {/if}
 {/if}
