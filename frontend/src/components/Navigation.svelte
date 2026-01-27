@@ -24,19 +24,22 @@
 
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   {#if environmentWarning}
-    <div class="environment-warning-banner">
+    <div
+      class="environment-warning-banner"
+      title="Du bruerk en ikke-produksjonsversjon av applikasjonen"
+    >
       {environmentWarning}
     </div>
   {/if}
   <div class="container-md">
     <a class="navbar-brand fw-bold" href="/">
       <span class="me-1 goal-icon-wrapper">
-        <pkt-icon name="goal"></pkt-icon>
-        <span class="celebration-overlay">
+        <pkt-icon name="goal" title="Mestring logo" aria-hidden="true"></pkt-icon>
+        <span class="celebration-overlay" aria-hidden="true">
           <GoalIconCelebration />
         </span>
       </span>
-      {currentSchool?.displayName || 'INGEN SKOLE VALGT'}
+      <h1>{currentSchool?.displayName || 'INGEN SKOLE VALGT'}</h1>
     </a>
 
     <!-- Burger menu button -->
@@ -69,11 +72,13 @@
 
           {#if $dataStore.hasUserAccessToPath('/admin')}
             <li class="nav-item dropdown">
+              <!-- svelte-ignore a11y_invalid_attribute -->
               <a
                 class={`nav-link dropdown-toggle ${isAdminActive ? 'active' : ''}`}
                 id="navbarDropdown"
                 role="button"
                 data-bs-toggle="dropdown"
+                href="#"
               >
                 Admin
               </a>
@@ -109,13 +114,14 @@
                 id="navbarDropdown"
                 role="button"
                 data-bs-toggle="dropdown"
+                href="#"
               >
                 Profil
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li><Link to="/profile" className="dropdown-item">Min side</Link></li>
                 <li>
-                  <a class="dropdown-item" href="#" onclick={logout}>Logg ut</a>
+                  <a class="dropdown-item" href="/" onclick={logout}>Logg ut</a>
                 </li>
               </ul>
             </li>
@@ -124,7 +130,7 @@
 
         {#if !$currentUser}
           <li class="nav-item">
-            <a class="nav-link" href="#" onclick={login}>Logg inn</a>
+            <a class="nav-link" href="/" onclick={login}>Logg inn</a>
           </li>
         {/if}
       </ul>
@@ -138,6 +144,12 @@
 </nav>
 
 <style>
+  h1 {
+    font-size: 1.8rem;
+    display: inline-block;
+    padding-left: 0.5em;
+  }
+
   .logo-image {
     display: inline-block;
     width: 100px;

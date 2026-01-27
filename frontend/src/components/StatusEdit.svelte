@@ -155,9 +155,9 @@
 
     <!-- Goals, compacted for reference -->
     <div class="my-5 goals-section">
-      <h4>
+      <h3>
         Elevens mål i faget <ButtonIcon options={goalSectionToggleOptions} />
-      </h4>
+      </h3>
       {#if !localGoals}
         <p><em>Ingen mål for denne eleven i dette faget</em></p>
       {/if}
@@ -386,7 +386,7 @@
     background-color: var(--pkt-color-brand-neutrals-200);
     padding: 0.5rem;
 
-    h4 {
+    h3 {
       display: flex;
       align-items: center;
       gap: 0.5rem;

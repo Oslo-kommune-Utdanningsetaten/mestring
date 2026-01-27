@@ -23,17 +23,17 @@
       ? students.filter(
           student =>
             student.id === nameFilter ||
-            student.name.toLowerCase().includes(nameFilter.toLowerCase())
+            student?.name?.toLowerCase().includes(nameFilter.toLowerCase())
         )
       : students
   )
+
   let selectedGroup = $derived<GroupType | undefined>(
     allGroups.find(group => group.id === selectedGroupId)
   )
   let headerText = $derived.by(() => {
-    let text = selectedGroup ? `Elever i gruppe: ${selectedGroup.displayName}` : 'Alle elever'
-    text = nameFilter ? `${text} med navn som inneholder "${nameFilter}"` : text
-    return text
+    const text = selectedGroup ? `Elever i gruppe: ${selectedGroup.displayName}` : 'Alle elever'
+    return nameFilter ? `${text} med navn som inneholder "${nameFilter}"` : text
   })
 
   const fetchStudents = async () => {
@@ -84,11 +84,12 @@
   })
 </script>
 
-<section class="pt-3">
+<section class="my-4">
   <h2 class="py-3">{headerText}</h2>
   <!-- Filter groups -->
-  <div class="d-flex align-items-center gap-2">
-    <div class="pkt-inputwrapper">
+  <div class="filters-container">
+    <div class="filter-item">
+      <label for="groupSelect" class="mb-1 visually-hidden">Filtrer på gruppe:</label>
       <select
         class="pkt-input"
         id="groupSelect"
@@ -102,11 +103,20 @@
         {/each}
       </select>
     </div>
-    <input type="text" class="filterStudentsByName" placeholder="Navn" bind:value={nameFilter} />
+    <div class="filter-item">
+      <label for="filterStudentsByName" class="mb-1 visually-hidden">Filtrer på navn:</label>
+      <input
+        type="text"
+        id="filterStudentsByName"
+        class="filterStudentsByName"
+        placeholder="Navn"
+        bind:value={nameFilter}
+      />
+    </div>
   </div>
 </section>
 
-<section class="py-3">
+<section class="my-4">
   {#if isLoadingStudents}
     <div class="mt-3 spinner-border text-primary" role="status">
       <span class="visually-hidden">Henter data...</span>
@@ -120,12 +130,25 @@
 </section>
 
 <style>
+  .filters-container {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+  }
+
+  .filter-item {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 20rem;
+    min-width: 3rem;
+    max-width: 25rem;
+  }
+
   .filterStudentsByName {
     border: 2px solid var(--bs-primary);
     border-radius: 0;
     height: 48px;
     margin-top: 0px;
     padding-left: 15px;
-    margin-left: 10px;
   }
 </style>

@@ -9,7 +9,7 @@
   import type { MasterySchemaWithConfig } from '../types/models'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
-  import { formatDateHumanly } from '../utils/functions'
+  import { formatDateHumanly, getContrastFriendlyTextColor } from '../utils/functions'
   import ButtonMini from '../components/ButtonMini.svelte'
   import StatusEdit from '../components/StatusEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
@@ -183,7 +183,9 @@
                   status.masteryValue <= level.maxValue}
                 class:inactive={status.masteryValue < level.minValue ||
                   status.masteryValue > level.maxValue}
-                style="--level-color: {level.color}; background-color: var(--level-color);"
+                style="--level-color: {level.color}; background-color: var(--level-color); color: {getContrastFriendlyTextColor(
+                  level.color
+                )};"
               >
                 <strong>{level.title}</strong>
               </div>

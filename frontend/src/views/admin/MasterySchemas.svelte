@@ -9,7 +9,7 @@
   import type { MasterySchemaType, SchoolType } from '../../generated/types.gen'
   import type { MasterySchemaWithConfig } from '../../types/models'
   import { useTinyRouter } from 'svelte-tiny-router'
-  import { urlStringFrom } from '../../utils/functions'
+  import { urlStringFrom, getContrastFriendlyTextColor } from '../../utils/functions'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
@@ -133,17 +133,18 @@
 <section class="pt-3">
   <h2 class="mb-4">Mastery Schemas</h2>
   <!-- Filter groups -->
-  <div class="d-flex align-items-center gap-2">
-    {#if isLoadingSchools}
-      <div class="m-4">
-        <div class="spinner-border text-primary" role="status"></div>
-        <span>Henter skoler...</span>
-      </div>
-    {:else}
-      <div class="pkt-inputwrapper">
+  {#if isLoadingSchools}
+    <div class="m-4">
+      <div class="spinner-border text-primary" role="status"></div>
+      <span>Henter skoler...</span>
+    </div>
+  {:else}
+    <div class="filters-container">
+      <div class="filter-item">
+        <label for="schoolSelect" class="mb-1 visually-hidden">Filtrer på skole:</label>
         <select
           class="pkt-input"
-          id="groupSelect"
+          id="schoolSelect"
           onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
         >
           <option value="0" selected={!selectedSchool?.id}>Velg skole</option>
@@ -154,8 +155,8 @@
           {/each}
         </select>
       </div>
-    {/if}
-  </div>
+    </div>
+  {/if}
 </section>
 
 <section class="py-4">
@@ -214,7 +215,11 @@
 
               <div class="mb-4">
                 {#each masterySchema?.config?.levels || [] as level}
-                  <span class="p-2" style="background-color: {level.color || 'white'};">
+                  <span
+                    class="p-2"
+                    style="background-color: {level.color ||
+                      'white'};  color: {getContrastFriendlyTextColor(level.color)};"
+                  >
                     {level.title}
                   </span>
                 {/each}
@@ -277,3 +282,19 @@
     <MasterySchemaEdit masterySchema={masterySchemaWip} onDone={handleDone} />
   {/if}
 </Offcanvas>
+
+<style>
+  .filters-container {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+  }
+
+  .filter-item {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 20rem;
+    min-width: 3rem;
+    max-width: 25rem;
+  }
+</style>

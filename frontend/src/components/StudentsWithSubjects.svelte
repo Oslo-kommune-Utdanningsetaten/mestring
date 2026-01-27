@@ -171,6 +171,7 @@
     background-color: var(--bs-light);
     font-weight: 800;
     max-height: 4rem;
+    margin-bottom: 0.5rem;
   }
 
   .students-grid :global(.item.header:first-child),
@@ -197,5 +198,6 @@
     background-color: var(--pkt-color-surface-strong-light-green);
     border: 1px solid var(--pkt-color-grays-gray-100);
     overflow-wrap: break-word;
+    z-index: 2;
   }
 </style>

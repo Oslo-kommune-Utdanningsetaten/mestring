@@ -40,7 +40,7 @@
   }}
   aria-disabled={disabled ? 'true' : 'false'}
 >
-  <pkt-icon name={iconName} variant="large"></pkt-icon>
+  <pkt-icon name={iconName} variant="large" aria-hidden="true"></pkt-icon>
 </button>
 
 <style>

@@ -22,15 +22,19 @@
 
   const label: string = $derived(
     [
-      isGroupNameEnabled ? group.displayName : null,
+      isGroupNameEnabled ? group?.displayName : null,
       isGroupTypeNameEnabled
-        ? group.type === GROUP_TYPE_BASIS
+        ? group?.type === GROUP_TYPE_BASIS
           ? 'Basisgruppe'
           : 'Undervisningsgruppe'
         : null,
     ]
       .filter(Boolean)
       .join(' - ')
+  )
+
+  const accessibleLabel: string = $derived(
+    isGroupTypeChanged && isTypeWarningEnabled ? `${label} (endret gruppetype)` : label
   )
   const skin: string = $derived(group.type === GROUP_TYPE_BASIS ? 'blue' : 'green')
 
@@ -50,7 +54,7 @@
         class="p-0 m-0 border-0"
         title={title || label}
         {onclick}
-        aria-label={label}
+        aria-label={accessibleLabel}
       >
         <pkt-tag iconName="group" {skin}>
           <span>{label}</span>
@@ -59,7 +63,7 @@
               <pkt-icon
                 name="alert-warning"
                 class="pkt-icon--medium warning-icon"
-                aria-label="advarsel"
+                aria-hidden="true"
               ></pkt-icon>
             </span>
           {/if}
@@ -68,11 +72,11 @@
     </span>
   {:else if href}
     <pkt-tag iconName="group" {skin}>
-      <a {href} title={title || label}>{label}</a>
+      <a {href}>{label}</a>
     </pkt-tag>
   {:else}
     <pkt-tag iconName="group" {skin}>
-      <span title={title || label}>{label}</span>
+      <span>{label}</span>
     </pkt-tag>
   {/if}
 {/if}

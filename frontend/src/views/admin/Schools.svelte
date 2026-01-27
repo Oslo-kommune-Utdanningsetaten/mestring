@@ -390,6 +390,7 @@
         <h4 class="my-4">Fag</h4>
         <p class="mb-3">Hvilke fag er tilgjengelige på skolen?</p>
         <fieldset class="d-flex flex-wrap gap-4">
+          <legend class="visually-hidden">Velg hvilke fag som er tilgjengelige på skolen</legend>
           {#each subjectOptions as option}
             <pkt-radiobutton
               name={'subjectsAllowed-' + school.id}

@@ -1,12 +1,24 @@
 <script lang="ts">
   import { navigate } from 'svelte-tiny-router'
+  import type { Snippet } from 'svelte'
 
-  export let to: string
-  export let className: string = ''
+  const { to, title, className, children } = $props<{
+    to: string
+    className?: string
+    title?: string
+    children?: Snippet
+  }>()
+
+  const isExternal = $derived(to.startsWith('http'))
 
   const handleClick = (event: MouseEvent) => {
-    // Allow opening in new tabs with modifier keys
     if (event.ctrlKey || event.metaKey || event.shiftKey) {
+      // Allow opening in new tabs with modifier keys
+      return
+    }
+
+    if (isExternal) {
+      // External link, let the browser handle it
       return
     }
 
@@ -20,6 +32,12 @@
   }
 </script>
 
-<a href={to} class={className} onclick={handleClick}>
-  <slot></slot>
+<a
+  href={to}
+  class={className}
+  onclick={handleClick}
+  target={isExternal ? '_blank' : '_self'}
+  {title}
+>
+  {@render children?.()}
 </a>

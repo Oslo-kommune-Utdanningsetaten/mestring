@@ -114,7 +114,7 @@
   </div>
   <div>
     {#if userSchools.length > 0 || userGroups.length > 0}
-      <div class="pkt-inputwrapper">
+      <div>
         <pkt-select
           label=""
           name="userSchoolRole"

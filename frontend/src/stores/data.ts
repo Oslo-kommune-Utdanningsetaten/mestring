@@ -150,7 +150,9 @@ export const registerUserStatus = async (school: SchoolType) => {
       query: { school: school.id },
     }),
   ])
-  const schools = schoolsResult.data || []
+  const schools = ((schoolsResult.data || []) as SchoolType[]).sort((a, b) =>
+    a.displayName.localeCompare(b.displayName)
+  )
   const userSchools = userSchoolsResult.data || []
   const teacherGroups = teacherGroupsResult.data || []
   const studentGroups = studentGroupsResult.data || []

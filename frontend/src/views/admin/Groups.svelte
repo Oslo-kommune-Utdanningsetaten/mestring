@@ -209,17 +209,18 @@
 <section class="pt-3">
   <h2 class="py-3">{headerText}</h2>
   <!-- Filter groups -->
-  <div class="d-flex align-items-center gap-2">
-    {#if isLoadingSchools}
-      <div class="m-4">
-        <div class="spinner-border text-primary" role="status"></div>
-        <span>Henter skoler...</span>
-      </div>
-    {:else}
-      <div class="pkt-inputwrapper">
+  {#if isLoadingSchools}
+    <div class="m-4">
+      <div class="spinner-border text-primary" role="status"></div>
+      <span>Henter skoler...</span>
+    </div>
+  {:else}
+    <div class="filters-container">
+      <div class="filter-item">
+        <label for="schoolSelect" class="mb-1 visually-hidden">Filtrer på skole:</label>
         <select
           class="pkt-input"
-          id="groupSelect"
+          id="schoolSelect"
           onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
         >
           <option value="0" selected={!selectedSchool?.id}>Velg skole</option>
@@ -230,14 +231,18 @@
           {/each}
         </select>
       </div>
-      <input
-        type="text"
-        class="group-filter-input"
-        placeholder="Navn på gruppe"
-        bind:value={nameFilter}
-      />
-    {/if}
-  </div>
+      <div class="filter-item">
+        <label for="groupFilterInput" class="mb-1 visually-hidden">Filtrer på navn:</label>
+        <input
+          type="text"
+          id="groupFilterInput"
+          class="group-filter-input"
+          placeholder="Navn på gruppe"
+          bind:value={nameFilter}
+        />
+      </div>
+    </div>
+  {/if}
   <!-- Radio buttons for enabled status -->
   <div class="d-flex flex-wrap gap-3 mt-3">
     <fieldset class="border p-3 rounded">
@@ -358,13 +363,26 @@
 </section>
 
 <style>
+  .filters-container {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+  }
+
+  .filter-item {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 20rem;
+    min-width: 3rem;
+    max-width: 25rem;
+  }
+
   .group-filter-input {
     border: 2px solid var(--bs-primary);
     border-radius: 0;
     height: 48px;
     margin-top: 0px;
     padding-left: 15px;
-    margin-left: 10px;
   }
 
   .group-grid-row {
