@@ -36,7 +36,7 @@
           <GoalIconCelebration />
         </span>
       </span>
-      {currentSchool?.displayName || 'INGEN SKOLE VALGT'}
+      <h1>{currentSchool?.displayName || 'INGEN SKOLE VALGT'}</h1>
     </a>
 
     <!-- Burger menu button -->
@@ -138,6 +138,12 @@
 </nav>
 
 <style>
+  h1 {
+    font-size: 1.8rem;
+    display: inline-block;
+    padding-left: 0.5em;
+  }
+
   .logo-image {
     display: inline-block;
     width: 100px;
