@@ -77,13 +77,15 @@
   })
 </script>
 
+<a href="#main-content" class="skip-link">Hopp til hovedinnhold</a>
+
 <div class="d-flex flex-column min-vh-100">
   <header class="m-0 p-0">
     <Navigation />
     <AlertBar />
   </header>
 
-  <main class="container-md py-3 flex-grow-1">
+  <main id="main-content" class="container-md py-3 flex-grow-1">
     {#if $isLoggingInUser}
       <div class="d-flex align-items-center gap-2 text-secondary small py-2">
         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -110,4 +112,19 @@
 </div>
 
 <style>
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--pkt-color-blue-oslo-blue);
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    z-index: 100;
+    border-radius: 0 0 4px 0;
+  }
+
+  .skip-link:focus {
+    top: 0;
+  }
 </style>
