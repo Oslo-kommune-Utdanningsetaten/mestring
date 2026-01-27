@@ -3,10 +3,16 @@
 
   export let to: string
   export let className: string = ''
+  const isExternal = to.startsWith('http')
 
   const handleClick = (event: MouseEvent) => {
-    // Allow opening in new tabs with modifier keys
     if (event.ctrlKey || event.metaKey || event.shiftKey) {
+      // Allow opening in new tabs with modifier keys
+      return
+    }
+
+    if (isExternal) {
+      // External link, let the browser handle it
       return
     }
 
@@ -20,6 +26,6 @@
   }
 </script>
 
-<a href={to} class={className} onclick={handleClick}>
+<a href={to} class={className} onclick={handleClick} target={isExternal ? '_blank' : '_self'}>
   <slot></slot>
 </a>
