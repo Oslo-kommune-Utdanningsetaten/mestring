@@ -45,7 +45,11 @@
   </div>
 {:else if statuses.length > 0}
   <div class="statuses-container">
-    <pkt-icon class="watermark-icon pkt-icon--large" name="achievement"></pkt-icon>
+    <pkt-icon
+      class="watermark-icon pkt-icon--large"
+      name="achievement"
+      aria-hidden="true"
+    ></pkt-icon>
     {#each statuses as status (status.id)}
       <span class="status-item" title={status.title}>
         <Link to={`/statuses/${status.id}/`}>{status.title}</Link>

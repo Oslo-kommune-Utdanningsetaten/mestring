@@ -282,7 +282,7 @@
   <!-- Group Header -->
   <section>
     <div class="d-flex align-items-center gap-3 mb-3">
-      <div class="group-svg" title="Gruppe">
+      <div class="group-svg" title="Gruppe" aria-hidden="true">
         <GroupSVG />
       </div>
       <div>

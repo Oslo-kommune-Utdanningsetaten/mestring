@@ -99,7 +99,7 @@
 <section class="py-3">
   {#if student}
     <div class="d-flex align-items-center gap-3">
-      <div class="student-svg" title="Elev">
+      <div class="student-svg" title="Elev" aria-hidden="true">
         <StudentSVG />
       </div>
       <div>

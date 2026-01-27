@@ -24,15 +24,18 @@
 
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   {#if environmentWarning}
-    <div class="environment-warning-banner">
+    <div
+      class="environment-warning-banner"
+      title="Du bruerk en ikke-produksjonsversjon av applikasjonen"
+    >
       {environmentWarning}
     </div>
   {/if}
   <div class="container-md">
     <a class="navbar-brand fw-bold" href="/">
       <span class="me-1 goal-icon-wrapper">
-        <pkt-icon name="goal"></pkt-icon>
-        <span class="celebration-overlay">
+        <pkt-icon name="goal" title="Mestring logo" aria-hidden="true"></pkt-icon>
+        <span class="celebration-overlay" aria-hidden="true">
           <GoalIconCelebration />
         </span>
       </span>
@@ -69,11 +72,13 @@
 
           {#if $dataStore.hasUserAccessToPath('/admin')}
             <li class="nav-item dropdown">
+              <!-- svelte-ignore a11y_invalid_attribute -->
               <a
                 class={`nav-link dropdown-toggle ${isAdminActive ? 'active' : ''}`}
                 id="navbarDropdown"
                 role="button"
                 data-bs-toggle="dropdown"
+                href="#"
               >
                 Admin
               </a>
@@ -109,6 +114,7 @@
                 id="navbarDropdown"
                 role="button"
                 data-bs-toggle="dropdown"
+                href="#"
               >
                 Profil
               </a>
