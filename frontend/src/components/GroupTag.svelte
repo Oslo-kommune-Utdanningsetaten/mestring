@@ -72,7 +72,7 @@
     </span>
   {:else if href}
     <pkt-tag iconName="group" {skin}>
-      <a {href} title={title || label}>{label}</a>
+      <a {href}>{label}</a>
     </pkt-tag>
   {:else}
     <pkt-tag iconName="group" {skin}>
