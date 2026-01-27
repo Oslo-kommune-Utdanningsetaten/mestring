@@ -1,9 +1,15 @@
 <script lang="ts">
   import { navigate } from 'svelte-tiny-router'
+  import type { Snippet } from 'svelte'
 
-  export let to: string
-  export let className: string = ''
-  const isExternal = to.startsWith('http')
+  const { to, title, className, children } = $props<{
+    to: string
+    className?: string
+    title?: string
+    children?: Snippet
+  }>()
+
+  const isExternal = $derived(to.startsWith('http'))
 
   const handleClick = (event: MouseEvent) => {
     if (event.ctrlKey || event.metaKey || event.shiftKey) {
@@ -26,6 +32,12 @@
   }
 </script>
 
-<a href={to} class={className} onclick={handleClick} target={isExternal ? '_blank' : '_self'}>
-  <slot></slot>
+<a
+  href={to}
+  class={className}
+  onclick={handleClick}
+  target={isExternal ? '_blank' : '_self'}
+  {title}
+>
+  {@render children?.()}
 </a>

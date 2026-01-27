@@ -26,7 +26,10 @@
         <li><Link to="/about">Tilgjengelighet</Link></li>
       </ul>
       <div class="mt-1">
-        <Link to="https://github.com/Oslo-kommune-Utdanningsetaten/mestring">
+        <Link
+          to="https://github.com/Oslo-kommune-Utdanningsetaten/mestring"
+          title="Mestring på GitHub"
+        >
           <pkt-icon name="github" class="pkt-icon--medium"></pkt-icon>
         </Link>
         <a
