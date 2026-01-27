@@ -89,7 +89,7 @@
   <!-- Filter groups -->
   <div class="filters-container">
     <div class="filter-item">
-      <label for="groupSelect" class="mb-1">Filtrer på gruppe:</label>
+      <label for="groupSelect" class="mb-1 visually-hidden">Filtrer på gruppe:</label>
       <select
         class="pkt-input"
         id="groupSelect"
@@ -104,7 +104,7 @@
       </select>
     </div>
     <div class="filter-item">
-      <label for="filterStudentsByName" class="mb-1">Filtrer på navn:</label>
+      <label for="filterStudentsByName" class="mb-1 visually-hidden">Filtrer på navn:</label>
       <input
         type="text"
         id="filterStudentsByName"

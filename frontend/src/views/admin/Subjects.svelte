@@ -191,9 +191,9 @@
 <section class="pt-3">
   <h2 class="py-3">{headerText}</h2>
   <!-- Filter groups -->
-  <div class="filters-container">
+  <div class="filters-container mt-3">
     <div class="filter-item">
-      <label for="schoolSelect" class="mb-1">Filtrer på skole:</label>
+      <label for="schoolSelect" class="mb-1 visually-hidden">Filtrer på skole:</label>
       <select
         class="pkt-input"
         id="schoolSelect"
@@ -208,7 +208,7 @@
       </select>
     </div>
     <div class="filter-item">
-      <label for="subjectFilterInput" class="mb-1">Filtrer på navn:</label>
+      <label for="subjectFilterInput" class="mb-1 visually-hidden">Filtrer på navn:</label>
       <input
         type="text"
         id="subjectFilterInput"
@@ -220,8 +220,8 @@
   </div>
 
   <!-- Radio buttons for filtering subjects -->
-  <fieldset>
-    <legend class="visually-hidden">Filtrer fag</legend>
+  <fieldset class="mt-3 border p-3 rounded">
+    <legend class="w-auto fs-6 pb-2">Filtrer fag</legend>
     {#each subjectFetchOptions as option}
       <label class="my-2 ms-1 d-block">
         <input

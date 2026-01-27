@@ -90,7 +90,7 @@
   {:else}
     <div class="filters-container">
       <div class="filter-item">
-        <label for="schoolSelect" class="mb-1">Filtrer på skole:</label>
+        <label for="schoolSelect" class="mb-1 visually-hidden">Filtrer på skole:</label>
         <select
           class="pkt-input"
           id="schoolSelect"
@@ -105,7 +105,7 @@
         </select>
       </div>
       <div class="filter-item">
-        <label for="userFilterInput" class="mb-1">Filtrer på navn:</label>
+        <label for="userFilterInput" class="mb-1 visually-hidden">Filtrer på navn:</label>
         <input
           type="text"
           id="userFilterInput"

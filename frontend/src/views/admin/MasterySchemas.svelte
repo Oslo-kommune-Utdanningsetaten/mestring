@@ -141,7 +141,7 @@
   {:else}
     <div class="filters-container">
       <div class="filter-item">
-        <label for="schoolSelect" class="mb-1">Filtrer på skole:</label>
+        <label for="schoolSelect" class="mb-1 visually-hidden">Filtrer på skole:</label>
         <select
           class="pkt-input"
           id="schoolSelect"
