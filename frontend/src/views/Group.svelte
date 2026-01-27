@@ -286,9 +286,9 @@
         <GroupSVG />
       </div>
       <div>
-        <h1 class="mb-2" title="Gruppe">
+        <h2 class="mb-2" title="Gruppe">
           {group.displayName}
-        </h1>
+        </h2>
         {#if subject}
           <h5 class="text-secondary" title={subject.grepCode}>{subject.displayName}</h5>
         {/if}
@@ -308,7 +308,7 @@
   {#if currentSchool?.isGroupGoalEnabled && group.subjectId}
     <section>
       <div class="d-flex align-items-center gap-2">
-        <h2>Mål</h2>
+        <h3>Mål</h3>
         <ButtonIcon
           options={{
             iconName: 'goal',
@@ -378,7 +378,7 @@
 
   <!-- Students Section -->
   <section>
-    <h2 class="mb-3">Elever</h2>
+    <h3 class="mb-3">Elever</h3>
     {#if group.type === GROUP_TYPE_BASIS}
       <StudentsWithSubjects {students} {subjects} groups={allGroups} />
     {:else if group.type === GROUP_TYPE_TEACHING && subject}
@@ -392,7 +392,7 @@
         onEditStatus={handleEditStatus}
       />
     {:else}
-      <h5 class="alert alert-warning">ukjent gruppetype</h5>
+      <div class="alert alert-warning">ukjent gruppetype</div>
     {/if}
   </section>
 {/if}
@@ -444,6 +444,10 @@
 </Offcanvas>
 
 <style>
+  h2 {
+    font-size: 2.5rem;
+  }
+
   section {
     margin-bottom: 2rem;
   }
