@@ -9,7 +9,7 @@
   import type { MasterySchemaType, SchoolType } from '../../generated/types.gen'
   import type { MasterySchemaWithConfig } from '../../types/models'
   import { useTinyRouter } from 'svelte-tiny-router'
-  import { urlStringFrom } from '../../utils/functions'
+  import { urlStringFrom, getContrastFriendlyTextColor } from '../../utils/functions'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
@@ -215,7 +215,11 @@
 
               <div class="mb-4">
                 {#each masterySchema?.config?.levels || [] as level}
-                  <span class="p-2" style="background-color: {level.color || 'white'};">
+                  <span
+                    class="p-2"
+                    style="background-color: {level.color ||
+                      'white'};  color: {getContrastFriendlyTextColor(level.color)};"
+                  >
                     {level.title}
                   </span>
                 {/each}

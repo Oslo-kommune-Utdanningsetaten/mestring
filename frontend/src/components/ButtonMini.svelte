@@ -59,7 +59,6 @@
     {variant}
     class={classes}
     {iconName}
-    {title}
     {color}
     onclick={() => onClick()}
     {disabled}

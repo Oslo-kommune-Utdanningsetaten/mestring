@@ -222,6 +222,59 @@ export const countObservationsBySubjectId = (
   return counts
 }
 
+// Calculate be color luminance and determine if text should be white or black
+export const getContrastFriendlyTextColor = (bgColor: string) => {
+  // Convert hex to RGB
+  let r = 0,
+    g = 0,
+    b = 0
+
+  if (bgColor.startsWith('#')) {
+    const hex = bgColor.replace('#', '')
+    if (hex.length === 3) {
+      r = parseInt(hex[0] + hex[0], 16)
+      g = parseInt(hex[1] + hex[1], 16)
+      b = parseInt(hex[2] + hex[2], 16)
+    } else if (hex.length === 6) {
+      r = parseInt(hex.substring(0, 2), 16)
+      g = parseInt(hex.substring(2, 4), 16)
+      b = parseInt(hex.substring(4, 6), 16)
+    }
+  } else if (bgColor.startsWith('rgb')) {
+    const matches = bgColor.match(/\d+/g)
+    if (matches) {
+      r = parseInt(matches[0])
+      g = parseInt(matches[1])
+      b = parseInt(matches[2])
+    }
+  }
+
+  // Normalize RGB values from 0-255 range to 0-1 range
+  const normalize = (val: number) => val / 255
+  const [rNorm, gNorm, bNorm] = [normalize(r), normalize(g), normalize(b)]
+
+  // Apply sRGB gamma correction to convert from display space to linear light values
+  // Source: https://www.w3.org/TR/WCAG20/#relativeluminancedef
+  const gammaCorrect = (val: number) =>
+    val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4)
+
+  // Calculate relative luminance (perceived brightness to human eye)
+  // Source: https://www.w3.org/TR/WCAG20/#relativeluminancedef
+  // Weights based on human eye sensitivity (we're most sensitive to green, least to blue):
+  const bgLuminance =
+    0.2126 * gammaCorrect(rNorm) + 0.7152 * gammaCorrect(gNorm) + 0.0722 * gammaCorrect(bNorm)
+
+  // Calculate contrast ratios against white and black text
+  // Source: https://www.w3.org/TR/WCAG20/#contrast-ratiodef
+  const whiteLuminance = 1
+  const blackLuminance = 0
+
+  const contrastWithWhite = (whiteLuminance + 0.05) / (bgLuminance + 0.05)
+  const contrastWithBlack = (bgLuminance + 0.05) / (blackLuminance + 0.05)
+
+  return contrastWithWhite > contrastWithBlack ? '#ffffff' : '#000000'
+}
+
 export const formatDateTime = (isoDate?: string | number | undefined) => {
   if (!isoDate) return null
   return format(new Date(isoDate), 'yyyy-MM-dd HH:mm')

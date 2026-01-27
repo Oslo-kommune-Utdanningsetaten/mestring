@@ -1,6 +1,7 @@
 <script lang="ts">
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import type { MasterySchemaWithConfig } from '../types/models'
+  import { getContrastFriendlyTextColor } from '../utils/functions'
 
   let {
     masterySchema,
@@ -85,7 +86,9 @@
           class="rung px-2"
           style="width: {(index + 1) * widthMultiplier}%; height: {calculateRungHeight(
             index
-          )}%; background-color: {masteryLevel.color};"
+          )}%; background-color: {masteryLevel.color}; color: {getContrastFriendlyTextColor(
+            masteryLevel.color
+          )};"
         >
           {masteryLevel.title}
         </span>
