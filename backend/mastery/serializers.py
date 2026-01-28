@@ -112,7 +112,7 @@ class GoalSerializer(BaseModelSerializer):
     def get_fields(self):
         fields = super().get_fields()
         # Add computed/property fields
-        fields['is_personal'] = serializers.BooleanField(read_only=True)
+        fields['is_individual'] = serializers.BooleanField(read_only=True)
         return fields
 
 

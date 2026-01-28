@@ -46,7 +46,7 @@ export type GoalType = {
     schoolId: string;
     previousGoalId?: string | null;
     masterySchemaId?: string | null;
-    readonly isPersonal: boolean;
+    readonly isIndividual: boolean;
 };
 
 export type GroupType = {
@@ -169,7 +169,7 @@ export type PatchedGoalType = {
     schoolId?: string;
     previousGoalId?: string | null;
     masterySchemaId?: string | null;
-    readonly isPersonal?: boolean;
+    readonly isIndividual?: boolean;
 };
 
 export type PatchedGroupType = {
@@ -952,7 +952,7 @@ export type GoalsListData = {
          */
         ordering?: string;
         /**
-         * Filter goals by the student owning them. Using this parameter will return both personal goals and group goals where the student is a member.
+         * Filter goals by the student owning them. Using this parameter will return both individual goals and group goals where the student is a member.
          */
         student?: string;
         /**

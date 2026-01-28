@@ -65,7 +65,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         - School inspectors and admins: All observations with goals at their schools
         - Teaching group teachers:
           - Observations on group goals in groups they teach
-          - Observations on personal goals for students they teach in that subject
+          - Observations on individual goals for students they teach in that subject
         - Basis group teachers: All observations for students in their basis group
         - Students: Observations about themselves (if visible)
         """
@@ -92,12 +92,12 @@ class ObservationAccessPolicy(BaseAccessPolicy):
                 # Observations on goals at their schools
                 filters |= Q(goal__school_id__in=school_employee_ids)
 
-            # Teaching group teachers: Observations on group goals + personal goals for students they teach
+            # Teaching group teachers: Observations on group goals + individual goals for students they teach
             if teacher_teaching_group_ids:
                 # Observations on group goals in groups they teach
                 filters |= Q(goal__group_id__in=teacher_teaching_group_ids)
 
-                # Observations on personal goals where teacher teaches that subject to that student
+                # Observations on individual goals where teacher teaches that subject to that student
                 memberships_in_teacher_group_on_subject = UserGroup.objects.filter(
                     user_id=OuterRef('goal__student_id'),
                     group_id__in=teacher_teaching_group_ids,
@@ -123,7 +123,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         """
         Teachers can create observations based on goal type:
         - Group goal observations: Must teach that group
-        - Personal goal observations: Must be basis group teacher OR teach that subject to that student
+        - Individual goal observations: Must be basis group teacher OR teach that subject to that student
         """
         try:
             goal_id = request.data.get("goal_id")
@@ -138,7 +138,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             if goal.group_id:
                 return requester.teacher_groups.filter(id=goal.group_id).exists()
 
-            # Personal goal: Basis group teacher OR teaches that subject to that student
+            # Individual goal: Basis group teacher OR teaches that subject to that student
             if goal.student_id:
                 is_basis_teacher = requester.teacher_groups.filter(
                     type='basis',
@@ -189,7 +189,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         Teachers can modify observations based on goal type and ownership:
         - Must be the creator of the observation OR have created_by is None
         - Group goal observations: Must teach that group
-        - Personal goal observations: Must be basis group teacher OR teach that subject to that student
+        - Individual goal observations: Must be basis group teacher OR teach that subject to that student
         """
         try:
             target_observation = view.get_object()
@@ -203,7 +203,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             if target_observation.goal and target_observation.goal.group_id:
                 return requester.teacher_groups.filter(id=target_observation.goal.group_id).exists()
 
-            # Personal goal: Basis group teacher OR teaches that subject to that student
+            # Individual goal: Basis group teacher OR teaches that subject to that student
             basis_group_ids = requester.teacher_groups.filter(
                 type='basis', school_id=target_observation.goal.school_id).values_list(
                 'id', flat=True)

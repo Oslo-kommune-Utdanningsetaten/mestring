@@ -203,7 +203,7 @@ def test_subject_filter_by_users(school, student, other_student, teacher, studen
     """
     Test that the 'users' query parameter correctly filters subjects by:
     1. Users who are members of groups connected to the subject
-    2. Users who have personal goals connected to the subject
+    2. Users who have individual goals connected to the subject
     """
     # Create subjects
     subject_with_group = Subject.objects.create(
@@ -213,7 +213,7 @@ def test_subject_filter_by_users(school, student, other_student, teacher, studen
         grep_group_code="mathg1",
     )
 
-    subject_with_personal_goal = Subject.objects.create(
+    subject_with_individual_goal = Subject.objects.create(
         display_name="Norwegian",
         short_name="Norsk",
         grep_code="nor1",
@@ -239,23 +239,23 @@ def test_subject_filter_by_users(school, student, other_student, teacher, studen
     teaching_group.add_member(student, student_role)
     teaching_group.add_member(teacher, teacher_role)
 
-    # Create a personal goal for student connected to subject_with_personal_goal
+    # Create a individual goal for student connected to subject_with_individual_goal
     Goal.objects.create(
-        title="Personal Norwegian Goal",
+        title="Individual Norwegian Goal",
         description="Improve Norwegian skills",
         student=student,
-        subject=subject_with_personal_goal,
+        subject=subject_with_individual_goal,
         school=school,
     )
 
     client = APIClient()
     client.force_authenticate(user=teacher)
 
-    # Test filtering by single user, returns both subjects: one via group membership, one via personal goal
+    # Test filtering by single user, returns both subjects: one via group membership, one via individual goal
     resp = client.get('/api/subjects/', {'school': school.id, 'students': student.id})
     assert resp.status_code == 200
     received_ids = {s['id'] for s in resp.json()}
-    expected_ids = {subject_with_group.id, subject_with_personal_goal.id}
+    expected_ids = {subject_with_group.id, subject_with_individual_goal.id}
     assert received_ids == expected_ids
 
     # Test filtering by unrelated user, returns no subjects
@@ -263,7 +263,7 @@ def test_subject_filter_by_users(school, student, other_student, teacher, studen
     assert resp.status_code == 200
     assert resp.json() == []
 
-    # Create a personal goal for other_student
+    # Create a individual goal for other_student
     Goal.objects.create(
         title="Other Student English Goal",
         description="Improve English skills",
@@ -276,7 +276,7 @@ def test_subject_filter_by_users(school, student, other_student, teacher, studen
     resp = client.get('/api/subjects/', {'school': school.id, 'students': f'{student.id},{other_student.id}'})
     assert resp.status_code == 200
     received_ids = {s['id'] for s in resp.json()}
-    expected_ids = {subject_with_group.id, subject_with_personal_goal.id, subject_unrelated.id}
+    expected_ids = {subject_with_group.id, subject_with_individual_goal.id, subject_unrelated.id}
     assert received_ids == expected_ids
 
     # Test that teacher can see subjects they're connected to via group

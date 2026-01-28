@@ -42,25 +42,25 @@ def invalid_group(school):
 
 
 @pytest.fixture
-def observation(student, goal_personal):
+def observation(student, goal_individual):
     return models.Observation.objects.create(
         student=student,
-        goal=goal_personal,
+        goal=goal_individual,
         is_visible_to_student=True
     )
 
 
 @pytest.fixture
-def other_observation(other_student, goal_personal):
+def other_observation(other_student, goal_individual):
     return models.Observation.objects.create(
         student=other_student,
-        goal=goal_personal,
+        goal=goal_individual,
         is_visible_to_student=True
     )
 
 
 @pytest.fixture
-def personal_goal(db, school, student, subject_owned_by_school):
+def individual_goal(db, school, student, subject_owned_by_school):
     return models.Goal.objects.create(
         title="Lese 2 bøker",
         student=student,
@@ -80,7 +80,7 @@ def group_goal(db, school, valid_group, student, student_role):
 
 
 @pytest.fixture
-def other_student_personal_goal(db, school, other_student):
+def other_student_individual_goal(db, school, other_student):
     return models.Goal.objects.create(
         title="Lese 2 bøker",
         student=other_student,
@@ -239,8 +239,8 @@ def test_soft_delete_observation(school, student, observation, other_observation
 
 
 @pytest.mark.django_db
-def test_soft_delete_personal_goal(
-        school, student, personal_goal, group_goal, other_student_personal_goal):
+def test_soft_delete_individual_goal(
+        school, student, individual_goal, group_goal, other_student_individual_goal):
     now = timezone.now()
     options = {
         "groups_earlier_than": now,
@@ -250,34 +250,34 @@ def test_soft_delete_personal_goal(
     result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
-    personal_goal.refresh_from_db()
+    individual_goal.refresh_from_db()
     group_goal.refresh_from_db()
-    other_student_personal_goal.refresh_from_db()
+    other_student_individual_goal.refresh_from_db()
     assert final_chunk["is_done"] is True
     assert changes["group"]["soft-deleted"] == 0
-    assert personal_goal.deleted_at is None
+    assert individual_goal.deleted_at is None
     assert group_goal.deleted_at is None
-    assert other_student_personal_goal.deleted_at is None
+    assert other_student_individual_goal.deleted_at is None
 
-    # Soft-delete personal goal for soft-deleted student
+    # Soft-delete individual goal for soft-deleted student
     student.deleted_at = now
     student.save()
     result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
-    personal_goal.refresh_from_db()
+    individual_goal.refresh_from_db()
     group_goal.refresh_from_db()
-    other_student_personal_goal.refresh_from_db()
+    other_student_individual_goal.refresh_from_db()
     assert final_chunk["is_done"] is True
     assert changes["goal"]["soft-deleted"] == 1
-    assert personal_goal.deleted_at is not None
+    assert individual_goal.deleted_at is not None
     assert group_goal.deleted_at is None
-    assert other_student_personal_goal.deleted_at is None
+    assert other_student_individual_goal.deleted_at is None
 
 
 @pytest.mark.django_db
 def test_soft_delete_group_goal(
-        school, personal_goal, group_goal, other_student_personal_goal, valid_group):
+        school, individual_goal, group_goal, other_student_individual_goal, valid_group):
     now = timezone.now()
     options = {
         "groups_earlier_than": now,
@@ -287,14 +287,14 @@ def test_soft_delete_group_goal(
     result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
-    personal_goal.refresh_from_db()
+    individual_goal.refresh_from_db()
     group_goal.refresh_from_db()
-    other_student_personal_goal.refresh_from_db()
+    other_student_individual_goal.refresh_from_db()
     assert final_chunk["is_done"] is True
     assert changes["group"]["soft-deleted"] == 0
-    assert personal_goal.deleted_at is None
+    assert individual_goal.deleted_at is None
     assert group_goal.deleted_at is None
-    assert other_student_personal_goal.deleted_at is None
+    assert other_student_individual_goal.deleted_at is None
 
     # Soft-delete group goal for soft-deleted group
     valid_group.deleted_at = now
@@ -302,14 +302,14 @@ def test_soft_delete_group_goal(
     result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
-    personal_goal.refresh_from_db()
+    individual_goal.refresh_from_db()
     group_goal.refresh_from_db()
-    other_student_personal_goal.refresh_from_db()
+    other_student_individual_goal.refresh_from_db()
     assert final_chunk["is_done"] is True
     assert changes["goal"]["soft-deleted"] == 1
     assert group_goal.deleted_at is not None
-    assert personal_goal.deleted_at is None
-    assert other_student_personal_goal.deleted_at is None
+    assert individual_goal.deleted_at is None
+    assert other_student_individual_goal.deleted_at is None
 
 
 @pytest.mark.django_db
@@ -485,13 +485,13 @@ def test_hard_delete_observation(school, observation):
 
 
 @pytest.mark.django_db
-def test_hard_delete_goal(school, personal_goal):
+def test_hard_delete_goal(school, individual_goal):
     now = timezone.now()
     options = {
         "groups_earlier_than": now,
         "memberships_earlier_than": now,
     }
-    goal_id = personal_goal.id
+    goal_id = individual_goal.id
     # Initial cleanup -> no deletes
     result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
@@ -501,8 +501,8 @@ def test_hard_delete_goal(school, personal_goal):
     assert models.Goal.objects.filter(id=goal_id).exists()
 
     # Almost, but not quite ready for delete
-    personal_goal.deleted_at = now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_GOAL-1)
-    personal_goal.save()
+    individual_goal.deleted_at = now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_GOAL-1)
+    individual_goal.save()
     result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
@@ -511,8 +511,8 @@ def test_hard_delete_goal(school, personal_goal):
     assert models.Goal.objects.filter(id=goal_id).exists()
 
     # Hard-delete goal which is has been soft-deleted a sufficient time
-    personal_goal.deleted_at = now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_GOAL)
-    personal_goal.save()
+    individual_goal.deleted_at = now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_GOAL)
+    individual_goal.save()
     result = update_data_integrity(school.org_number, options)
     final_chunk = list(result)[-1]
     changes = final_chunk["result"]["changes"]
