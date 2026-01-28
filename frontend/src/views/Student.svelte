@@ -66,7 +66,7 @@
     studentGoalsCount = result.data?.length || 0
   }
 
-  const handleCreateAllPersonalGoals = async () => {
+  const handleCreateAllIndividualGoals = async () => {
     if (!student || $dataStore.currentSchool.subjectsAllowed !== SUBJECTS_ALLOWED_CUSTOM) return
     const schoolSubjects = $dataStore.subjects
     // This works because schoolSubjects are only custom subjects (not the whole shebang)
@@ -129,7 +129,7 @@
               iconName: 'goal',
               classes: 'm-2',
               title: `Opprett ${individualGoalcount} individuelle mål for hvert fag`,
-              onClick: () => handleCreateAllPersonalGoals(),
+              onClick: () => handleCreateAllIndividualGoals(),
               variant: 'icon-left',
               skin: 'primary',
             }}

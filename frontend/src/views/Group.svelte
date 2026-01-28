@@ -120,7 +120,7 @@
     goalWip = {
       ...goal,
       groupId: group?.id || null,
-      isGoalPersonal: false,
+      isGoalIndividual: false,
       sortOrder: goal?.sortOrder || (groupGoals?.length ? groupGoals.length + 1 : 1),
       masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,
       isRelevant: goal?.id ? goal?.isRelevant : true,
@@ -402,7 +402,7 @@
   }}
 >
   {#if goalWip}
-    <GoalEdit goal={goalWip} {group} isGoalPersonal={false} onDone={handleGoalDone} />
+    <GoalEdit goal={goalWip} {group} isGoalIndividual={false} onDone={handleGoalDone} />
   {/if}
 </Offcanvas>
 

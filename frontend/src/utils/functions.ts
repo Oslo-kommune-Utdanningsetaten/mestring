@@ -121,7 +121,7 @@ export const goalsWithCalculatedMastery = async (
 
 // For a single student, output goals grouped by subjectId, with mastery data calculated
 // If a goal does not have a subjectId, look up via the groupId
-// Goals are sorted by sortOrder, then personal goals first
+// Goals are sorted by sortOrder, then individual goals first
 export const goalsWithCalculatedMasteryBySubjectId = async (
   studentId: string,
   studentGoals: GoalType[],
@@ -132,7 +132,7 @@ export const goalsWithCalculatedMasteryBySubjectId = async (
   decoratedGoals.forEach((goal: GoalDecorated) => {
     let subjectId = goal.subjectId
     if (!subjectId) {
-      // goal is not personal, look up subject via group
+      // goal is not individual, look up subject via group
       if (goal.groupId) {
         const group = groups.find(g => g.id === goal.groupId)
         if (group?.subjectId) {
@@ -149,8 +149,8 @@ export const goalsWithCalculatedMasteryBySubjectId = async (
     goalsBySubjectId[subjectId]
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .sort((a, b) => {
-        if (!a.isPersonal && b.isPersonal) return 1
-        if (a.isPersonal && !b.isPersonal) return -1
+        if (!a.isIndividual && b.isIndividual) return 1
+        if (a.isIndividual && !b.isIndividual) return -1
         return 0
       })
   })

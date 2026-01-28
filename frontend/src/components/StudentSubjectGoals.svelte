@@ -79,7 +79,7 @@
     isStatusEditorOpen = true
   }
 
-  // Remember, we're only editing personal goals here
+  // Remember, we're only editing individual goals here
   const handleEditGoal = async (goal: GoalDecorated | null) => {
     if (goal.id) {
       goalWip = {
@@ -90,12 +90,12 @@
         masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,
       }
     } else {
-      const personalGoalsCount = goalsForSubject?.filter(g => g.isPersonal).length
+      const individualGoalsCount = goalsForSubject?.filter(g => g.isIndividual).length
       const newGoal = {
         subjectId: subject.id,
         studentId: student.id,
-        isPersonal: true,
-        sortOrder: personalGoalsCount + 1,
+        isIndividual: true,
+        sortOrder: individualGoalsCount + 1,
         masterySchemaId: $dataStore.defaultMasterySchema?.id,
         schoolId: $dataStore.currentSchool.id,
         isRelevant: true,
@@ -203,7 +203,7 @@
     const { oldIndex, newIndex } = event
     if (oldIndex === undefined || newIndex === undefined) return
 
-    const localGoals = [...goalsForSubject.filter(g => g.isPersonal)] // only personal goals are draggable
+    const localGoals = [...goalsForSubject.filter(g => g.isIndividual)] // only individual goals are draggable
     // Remove moved goal and capture it
     const [movedGoal] = localGoals.splice(oldIndex, 1)
     // Insert moved goal at new index
@@ -294,7 +294,7 @@
     <div class="goal-primary-row">
       <!-- Drag handle -->
       <span class="item">
-        {#if goal.isPersonal && goalsForSubject.filter(g => g.isPersonal).length > 1}
+        {#if goal.isIndividual && goalsForSubject.filter(g => g.isIndividual).length > 1}
           <ButtonMini
             options={{
               size: 'tiny',
@@ -312,7 +312,7 @@
       </span>
 
       <!-- Goal type icon -->
-      {#if goal.isPersonal}
+      {#if goal.isIndividual}
         <span class="individual-goal-icon item" title="Individuelt mål">
           <pkt-icon name="person" aria-hidden="true"></pkt-icon>
         </span>
@@ -410,7 +410,7 @@
         {/if}
       </div>
       <div class="my-3">
-        {#if goal.isPersonal}
+        {#if goal.isIndividual}
           <ButtonMini
             options={{
               iconName: 'edit',
@@ -451,12 +451,12 @@
 
 {#if goalsForSubject?.length}
   <div bind:this={goalsListElement} class="list-group mt-2">
-    {#each goalsForSubject.filter(goal => goal.isPersonal) as goal, index (`${goal.id}-${expandedGoals[goal.id]}`)}
+    {#each goalsForSubject.filter(goal => goal.isIndividual) as goal, index (`${goal.id}-${expandedGoals[goal.id]}`)}
       {@render goalInList(goal, index)}
     {/each}
   </div>
   <div class="list-group mt-4">
-    {#each goalsForSubject.filter(goal => !goal.isPersonal) as goal, index (`${goal.id}-${expandedGoals[goal.id]}`)}
+    {#each goalsForSubject.filter(goal => !goal.isIndividual) as goal, index (`${goal.id}-${expandedGoals[goal.id]}`)}
       {@render goalInList(goal, index)}
     {/each}
   </div>
@@ -472,7 +472,7 @@
   }}
 >
   {#if goalWip}
-    <GoalEdit goal={goalWip} {student} {subject} isGoalPersonal={true} onDone={handleGoalDone} />
+    <GoalEdit goal={goalWip} {student} {subject} isGoalIndividual={true} onDone={handleGoalDone} />
   {/if}
 </Offcanvas>
 

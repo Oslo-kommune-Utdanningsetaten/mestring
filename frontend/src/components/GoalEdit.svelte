@@ -13,7 +13,7 @@
   import { NONE_FIELD_VALUE } from '../utils/constants'
   import { addAlert } from '../stores/alerts'
 
-  // This component is used for both personal and group goals!
+  // This component is used for both individual and group goals!
   // If group is passed, student AND subject should be null
   // If student is passed, group should be null
 
@@ -23,13 +23,13 @@
     group = null,
     goal = null,
     onDone,
-    isGoalPersonal,
+    isGoalIndividual,
   } = $props<{
     student?: UserType | null
     subject?: SubjectType | null
     group?: GroupType | null
     goal?: GoalType | null
-    isGoalPersonal: boolean
+    isGoalIndividual: boolean
     onDone?: () => void | Promise<void>
   }>()
 
@@ -41,13 +41,13 @@
 
   // What determines if we can edit the goal?
   let isFormValid = $derived(
-    !!localGoal.masterySchemaId && (isGoalPersonal ? !!localGoal.subjectId : !!subjectViaGroup)
+    !!localGoal.masterySchemaId && (isGoalIndividual ? !!localGoal.subjectId : !!subjectViaGroup)
   )
 
   const getTitle = () => {
     const action = localGoal.id ? 'Redigerer' : 'Nytt'
-    const goalType = isGoalPersonal ? 'individuelt ' : 'gruppe'
-    const target = isGoalPersonal ? student?.name : group?.displayName
+    const goalType = isGoalIndividual ? 'individuelt ' : 'gruppe'
+    const target = isGoalIndividual ? student?.name : group?.displayName
     return `${action} ${goalType}mål for ${target}`
   }
 
@@ -113,7 +113,7 @@
   <hr />
   <div class="form-group mb-3">
     <div class="pkt-inputwrapper">
-      {#if isGoalPersonal}
+      {#if isGoalIndividual}
         <pkt-select
           label="Fag"
           name="goalSubject"
