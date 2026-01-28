@@ -87,8 +87,8 @@
     } catch (error) {
       console.error('Error deleting status:', error)
       addAlert({
-        type: 'warning',
-        message: `Kunne ikke slette status "${status.title}". Hvis du tror dette er en feil, kontakt support.`,
+        type: 'danger',
+        message: `Kunne ikke slette status "${status.title}". Hvis du mener dette er en feil, kontakt support.`,
       })
     }
   }

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ObservationType, StatusType, UserType } from '../generated/types.gen'
   import { usersRetrieve } from '../generated/sdk.gen'
-  import { formatDateTime, formatDateHumanly, abbreviateName } from '../utils/functions'
+  import { formatDateTime, formatDateTimeWithToday, abbreviateName } from '../utils/functions'
   import { onMount } from 'svelte'
 
   const { item } = $props<{ item: ObservationType | StatusType }>()
@@ -41,9 +41,9 @@
 
 <span title={titleData}>
   {#if hasBeenEdited}
-    {formatDateHumanly(updatedAt)}, {updator?.name ? abbreviateName(updator.name) : 'ukjent'}*
+    {formatDateTimeWithToday(updatedAt)}, {updator?.name ? abbreviateName(updator.name) : 'ukjent'}*
   {:else}
-    {formatDateHumanly(createdAt)}, {creator?.name ? abbreviateName(creator.name) : 'ukjent'}
+    {formatDateTimeWithToday(createdAt)}, {creator?.name ? abbreviateName(creator.name) : 'ukjent'}
   {/if}
 </span>
 

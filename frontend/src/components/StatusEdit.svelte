@@ -19,6 +19,7 @@
   import SparkbarChart from './SparkbarChart.svelte'
   import { fetchGoalsForSubjectAndStudent, formatMonthName } from '../utils/functions'
   import type { GoalDecorated } from '../types/models'
+  import { addAlert } from '../stores/alerts'
 
   let { status, student, subject, goals, onDone } = $props<{
     status: StatusType | {} | null
@@ -111,20 +112,31 @@
     localStatus.schoolId = $dataStore.currentSchool?.id
     localStatus.title =
       localStatus.title?.trim() || generateTitle(localStatus.beginAt!, localStatus.endAt!)
+    let action = undefined
     try {
       if (localStatus.id) {
-        const result = await statusUpdate({
+        await statusUpdate({
           path: { id: localStatus.id },
           body: localStatus as any,
         })
+        action = 'Oppdaterte'
       } else {
-        const result = await statusCreate({
+        await statusCreate({
           body: localStatus as any,
         })
+        action = 'Opprettet ny'
       }
+      addAlert({
+        type: 'success',
+        message: `${action} status for ${localStudent?.name}.`,
+      })
       onDone()
     } catch (error) {
       console.error('Error saving status:', error)
+      addAlert({
+        type: 'danger',
+        message: `Noe gikk galt ved lagring av status for ${localStudent?.name}.`,
+      })
     }
   }
 

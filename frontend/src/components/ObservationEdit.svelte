@@ -1,12 +1,13 @@
 <script lang="ts">
   import type { ObservationType, GoalType, UserType } from '../generated/types.gen'
   import { observationsCreate, observationsUpdate } from '../generated/sdk.gen'
-  import type { GoalDecorated, MasterySchemaWithConfig } from '../types/models'
+  import type { MasterySchemaWithConfig } from '../types/models'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore, currentUser } from '../stores/data'
   import ButtonMini from './ButtonMini.svelte'
   import ValueInputVertical from './ValueInputVertical.svelte'
   import ValueInputHorizontal from './ValueInputHorizontal.svelte'
+  import { addAlert } from '../stores/alerts'
 
   const { student, goal, observation, onDone } = $props<{
     student: UserType | null
@@ -40,20 +41,31 @@
     localObservation.goalId = goal?.id
     localObservation.observerId = $currentUser?.id
     localObservation.observedAt = new Date().toISOString()
+    let action = undefined
     try {
       if (localObservation.id) {
-        const result = await observationsUpdate({
+        await observationsUpdate({
           path: { id: localObservation.id },
           body: localObservation as any,
         })
+        action = 'Oppdaterte'
       } else {
-        const result = await observationsCreate({
+        await observationsCreate({
           body: localObservation as any,
         })
+        action = 'Opprettet ny'
       }
+      addAlert({
+        type: 'success',
+        message: `${action} observasjon for ${student.name}.`,
+      })
       onDone()
     } catch (error) {
       console.error('Error saving Observation:', error)
+      addAlert({
+        type: 'danger',
+        message: `Noe gikk galt ved lagring av observasjon for ${student.name}.`,
+      })
     }
   }
 </script>
