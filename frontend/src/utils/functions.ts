@@ -299,3 +299,25 @@ export const formatDateDistance = (isoDate?: string | number | undefined) => {
   if (!isoDate) return null
   return formatDistanceToNow(new Date(isoDate), { addSuffix: true, locale: noLocale })
 }
+
+// format function that returns the string "I dag" if the date is today (or the date if not today), followed by hours and minutes
+export const formatDateTimeWithToday = (
+  isoDate?: string | number | undefined,
+  options?: { includeTime?: boolean }
+) => {
+  if (!isoDate) return null
+  const date = new Date(isoDate)
+  const today = new Date()
+  const isToday =
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  const includeTime = options?.includeTime ?? true
+  if (isToday) {
+    return includeTime ? `I dag ${format(date, ' HH:mm:ss')}` : 'I dag'
+  } else {
+    return includeTime
+      ? format(date, 'dd. LLLL yyyy HH:mm', { locale: noLocale })
+      : format(date, 'dd. LLLL yyyy', { locale: noLocale })
+  }
+}

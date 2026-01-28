@@ -517,6 +517,9 @@
 <style>
   div.observation-item > span {
     font-family: 'Courier New', Courier, monospace !important;
+    font-size: 0.95rem;
+    letter-spacing: -0.07em;
+    padding-left: 0.1rem;
   }
 
   h3 {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fly } from 'svelte/transition'
   import { alerts, removeAlert } from '../stores/alerts'
-  import { formatDateDistance } from '../utils/functions'
+  import { formatDateTimeWithToday } from '../utils/functions'
 </script>
 
 <div class="alert-bar-container">
@@ -12,8 +12,8 @@
       in:fly={{ y: 100, duration: 650 }}
       out:fly={{ y: -100, duration: 650 }}
     >
-      <span class="timestamp">{formatDateDistance(alert?.timestamp)}</span>
-      <span>{alert.message}</span>
+      <span class="timestamp">{formatDateTimeWithToday(alert?.timestamp)}</span>
+      <span>👉 {alert.message}</span>
       <button
         type="button"
         class="btn-close ms-auto"
