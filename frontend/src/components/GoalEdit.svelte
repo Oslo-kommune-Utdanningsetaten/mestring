@@ -11,6 +11,7 @@
   import { setLocalStorageItem } from '../stores/localStorage'
   import ButtonMini from './ButtonMini.svelte'
   import { NONE_FIELD_VALUE } from '../utils/constants'
+  import { addAlert } from '../stores/alerts'
 
   // This component is used for both personal and group goals!
   // If group is passed, student AND subject should be null
@@ -68,22 +69,33 @@
   }
 
   const handleSave = async () => {
+    let action = undefined
     try {
       if (localGoal.id) {
         await goalsUpdate({
           path: { id: localGoal.id },
           body: localGoal as GoalType,
         })
+        action = 'Oppdaterte'
       } else {
         await goalsCreate({
           body: localGoal as GoalCreateType,
         })
+        action = 'Opprettet nytt'
       }
+      addAlert({
+        type: 'success',
+        message: `${action} mål for ${student.name}.`,
+      })
       if (onDone) {
         await onDone()
       }
     } catch (error) {
       console.error('Error saving goal:', error)
+      addAlert({
+        type: 'danger',
+        message: `Noe gikk galt ved lagring av mål for ${student.name}.`,
+      })
     }
   }
 

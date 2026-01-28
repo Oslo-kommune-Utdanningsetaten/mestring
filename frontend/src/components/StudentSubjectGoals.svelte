@@ -20,11 +20,13 @@
   import ButtonIcon from './ButtonIcon.svelte'
   import Offcanvas from './Offcanvas.svelte'
   import Statuses from '../components/Statuses.svelte'
+  import AuthorInfo from './AuthorInfo.svelte'
 
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { getLocalStorageItem } from '../stores/localStorage'
-  import { formatDateDistance, fetchGoalsForSubjectAndStudent } from '../utils/functions'
-  import AuthorInfo from './AuthorInfo.svelte'
+  import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
+  import { addAlert } from '../stores/alerts'
+  import { add } from 'date-fns'
 
   const { subject, student, onRefreshRequired } = $props<{
     subject: SubjectType
@@ -159,18 +161,34 @@
   const handleDeleteObservation = async (observationId: string) => {
     try {
       await observationsDestroy({ path: { id: observationId } })
+      addAlert({
+        type: 'success',
+        message: `Slettet observasjon`,
+      })
       await fetchGoals()
     } catch (error) {
       console.error('Error deleting observation:', error)
+      addAlert({
+        type: 'danger',
+        message: `Kunne ikke slette observasjon. Hvis du mener dette er en feil, kontakt support.`,
+      })
     }
   }
 
   const handleDeleteGoal = async (goalId: string) => {
     try {
       await goalsDestroy({ path: { id: goalId } })
+      addAlert({
+        type: 'success',
+        message: 'Slettet mål',
+      })
       await fetchGoals()
     } catch (error) {
       console.error('Error deleting goal:', error)
+      addAlert({
+        type: 'danger',
+        message: `Kunne ikke slette mål. Hvis du mener dette er en feil, kontakt support.`,
+      })
     }
   }
 

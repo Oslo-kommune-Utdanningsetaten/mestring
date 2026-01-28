@@ -30,14 +30,12 @@
   import StatusEdit from '../components/StatusEdit.svelte'
   import GoalEdit from '../components/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
-  import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
   import GroupTag from '../components/GroupTag.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
   import { dataStore } from '../stores/data'
   import { goalsWithCalculatedMastery, abbreviateName } from '../utils/functions'
-  import SparkbarChart from '../components/SparkbarChart.svelte'
-  import Statuses from '../components/Statuses.svelte'
+  import { addAlert } from '../stores/alerts'
 
   const { groupId } = $props<{ groupId: string }>()
 
@@ -111,17 +109,6 @@
     }
   }
 
-  const getMasterySchmemaForGoal = (goal: GoalType) => {
-    return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
-  }
-
-  // Get the calculated mastery for a specific student's goal
-  const getDecoratedGoalFor = (studentId: string, goalId: string) => {
-    const studentGoals = goalsWithCalculatedMasteryByStudentId[studentId] || []
-    const goal = studentGoals.find(g => g.id === goalId)
-    return goal || null
-  }
-
   // Does any student have observations for this goal
   const isGoalInUse = (goalId: string): boolean => {
     return Object.values(goalsWithCalculatedMasteryByStudentId).some(studentGoals =>
@@ -144,9 +131,17 @@
   const handleDeleteGoal = async (goalId: string) => {
     try {
       await goalsDestroy({ path: { id: goalId } })
+      addAlert({
+        type: 'success',
+        message: 'Slettet mål',
+      })
       await fetchGroupData()
     } catch (error) {
       console.error('Error deleting goal:', error)
+      addAlert({
+        type: 'danger',
+        message: `Kunne ikke slette mål. Hvis du mener dette er en feil, kontakt support.`,
+      })
     }
   }
 
