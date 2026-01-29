@@ -330,10 +330,10 @@ export type PatchedUserType = {
     lastActivityAt?: string | null;
     disabledAt?: string | null;
     isSuperadmin?: boolean;
-    readonly groups?: Array<string | null>;
-    readonly schools?: Array<string>;
     readonly createdById?: string;
     readonly updatedById?: string;
+    readonly groupIds?: Array<string>;
+    readonly schoolIds?: Array<string>;
 };
 
 export type PatchedUserSchoolType = {
@@ -450,10 +450,10 @@ export type UserType = {
     lastActivityAt?: string | null;
     disabledAt?: string | null;
     isSuperadmin?: boolean;
-    readonly groups: Array<string | null>;
-    readonly schools: Array<string>;
     readonly createdById: string;
     readonly updatedById: string;
+    readonly groupIds: Array<string>;
+    readonly schoolIds: Array<string>;
 };
 
 export type UserSchoolType = {

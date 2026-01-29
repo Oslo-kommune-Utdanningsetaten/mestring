@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from mastery import models
-from django.db.models import ForeignKey
+from django.db.models import ForeignKey, ManyToManyField
 from mastery.access_policies.observation import ObservationAccessPolicy
 
 
@@ -17,7 +17,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
         'updated_by',
     )
 
-    # Base serializer that rewrites foreign key fields
+    # Fields override, used for renaming foreign key fields
     def get_fields(self):
         fields = super().get_fields()
 
@@ -30,32 +30,60 @@ class BaseModelSerializer(serializers.ModelSerializer):
             if isinstance(field_instance, serializers.ModelSerializer):
                 explicitly_nested_fields.add(field_name)
 
-        # Add FK ID fields and remove original FK fields
+        # Rename FK ID fields
         for field in self.Meta.model._meta.get_fields():
+            original_field_name = field.name
+
+            # Skip rename if this field is explicitly declared as nested
+            if original_field_name in explicitly_nested_fields:
+                continue
+            # Skip rename if the field is not in the serializer fields
+            if not original_field_name in fields:
+                continue
+
+            # Rename FK ID field (e.g. student --> student_id)
             if isinstance(field, ForeignKey):
-                name = field.name
+                # Remove original field
+                del fields[original_field_name]
+                new_field_name = f"{original_field_name}_id"
 
-                # Skip conversion if this field is explicitly declared as nested
-                if name in explicitly_nested_fields:
-                    continue
-
-                qs = field.remote_field.model.objects.all()
-                # Add the ID field
-                if name in self.READ_ONLY_FK_FIELDS:
-                    fields[f"{name}_id"] = serializers.PrimaryKeyRelatedField(
-                        source=name,
+                if original_field_name in self.READ_ONLY_FK_FIELDS:
+                    fields[new_field_name] = serializers.PrimaryKeyRelatedField(
+                        source=original_field_name,
                         read_only=True
                     )
                 else:
-                    fields[f"{name}_id"] = serializers.PrimaryKeyRelatedField(
-                        source=name,
+                    request = self.context.get('request')
+                    # Ensure access policy is applied to the related field queryset
+                    qs = field.remote_field.model.objects.all()
+                    policy_class = getattr(field.remote_field.model, 'access_policy', None)
+                    if request and policy_class:
+                        policy = policy_class()
+                        qs = policy.scope_queryset(request, qs)
+                    fields[new_field_name] = serializers.PrimaryKeyRelatedField(
+                        source=original_field_name,
                         queryset=qs,
                         required=not field.null,
                         allow_null=field.null
                     )
-                # Remove the original field to avoid duplication
-                if name in fields:
-                    del fields[name]
+
+            # Rename many-to-many FK ID field (e.g. groups --> group_ids)
+            if isinstance(field, ManyToManyField):
+                # Remove original field
+                del fields[original_field_name]
+                new_field_name = original_field_name
+
+                # remove pluralization if present
+                if new_field_name.endswith('s'):
+                    new_field_name = new_field_name[:-1]
+
+                # Add the new field with '_ids' suffix
+                new_field_name = f"{new_field_name}_ids"
+                fields[new_field_name] = serializers.PrimaryKeyRelatedField(
+                    source=original_field_name,
+                    many=True,
+                    read_only=True,
+                )
 
         # Ensure base model metadata fields are read-only when present
         for field_name in self.READ_ONLY_BASE_FIELDS:
@@ -67,17 +95,6 @@ class BaseModelSerializer(serializers.ModelSerializer):
             if lookup_name in fields:
                 fields[lookup_name].read_only = True
         return fields
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        # On outgoing data, rename all FK fields `foo` → `fooId`
-        for field in self.Meta.model._meta.get_fields():
-            if isinstance(field, ForeignKey) and field.name in data:
-                val = data[field.name]
-                # only rename if it's not already a nested dict/list
-                if not isinstance(val, (dict, list)):
-                    data[f"{field.name}Id"] = data.pop(field.name)
-        return data
 
 
 class SubjectSerializer(BaseModelSerializer):
