@@ -116,7 +116,7 @@
     {#if userSchools.length > 0 || userGroups.length > 0}
       <div>
         <pkt-select
-          label=""
+          label="⚠️Angi rolle"
           name="userSchoolRole"
           value={selectedSchoolRole}
           onchange={(e: Event) => {
