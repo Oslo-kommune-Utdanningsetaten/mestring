@@ -130,7 +130,7 @@
 
         {#if !$currentUser}
           <li class="nav-item">
-            <a class="nav-link" href="/" onclick={login}>Logg inn</a>
+            <a class="nav-link" href="#" onclick={login}>Logg inn</a>
           </li>
         {/if}
       </ul>
