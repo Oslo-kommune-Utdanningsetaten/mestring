@@ -125,30 +125,34 @@
         </p>
       </div>
       <div class="d-flex gap-2">
-        <ButtonMini
-          options={{
-            title: 'Rediger status',
-            skin: 'secondary',
-            iconName: 'edit',
-            variant: 'icon-left',
-            classes: 'me-2',
-            onClick: handleEditStatus,
-          }}
-        >
-          Rediger
-        </ButtonMini>
-        <ButtonMini
-          options={{
-            title: 'Slett status',
-            skin: 'secondary',
-            iconName: 'trash-can',
-            variant: 'icon-left',
-            classes: 'me-2',
-            onClick: handleDelete,
-          }}
-        >
-          Slett
-        </ButtonMini>
+        {#if $dataStore.hasUserAccessToFeature( 'status', 'edit', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
+          <ButtonMini
+            options={{
+              title: 'Rediger status',
+              skin: 'secondary',
+              iconName: 'edit',
+              variant: 'icon-left',
+              classes: 'me-2',
+              onClick: handleEditStatus,
+            }}
+          >
+            Rediger
+          </ButtonMini>
+        {/if}
+        {#if $dataStore.hasUserAccessToFeature( 'status', 'delete', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
+          <ButtonMini
+            options={{
+              title: 'Slett status',
+              skin: 'secondary',
+              iconName: 'trash-can',
+              variant: 'icon-left',
+              classes: 'me-2',
+              onClick: handleDelete,
+            }}
+          >
+            Slett
+          </ButtonMini>
+        {/if}
       </div>
     </div>
 

@@ -24,8 +24,10 @@ import {
   STUDENT_PATHS,
   TEACHER_PATHS,
   RESTRICTED_PATHS,
+  GROUP_TYPE_BASIS,
+  GROUP_TYPE_TEACHING,
 } from '../utils/constants'
-import type { AppData, UserDecorated } from '../types/models'
+import type { AppData, UserDecorated, HasUserAccessToFeatureOptions } from '../types/models'
 
 const setMasterySchemas = (schemas: MasterySchemaType[]) => {
   // Default mastery schema is either system default, or user's preferred, or simply first in list
@@ -62,7 +64,7 @@ const hasUserAccessToPath = (path: string): boolean => {
 const hasUserAccessToFeature = (
   resource: string,
   action: string,
-  options: Record<string, string> = {}
+  options: HasUserAccessToFeatureOptions = {}
 ): boolean => {
   const currentData = get(dataStore) as AppData
   const currentSchool = currentData.currentSchool
@@ -70,24 +72,39 @@ const hasUserAccessToFeature = (
     return false
   }
   const currentUser = currentData.currentUser
-  if (!currentUser) {
-    return false
-  }
-  const { isSchoolAdmin, isSchoolInspector, isSuperadmin } = currentUser
+  if (!currentUser) return false
+
+  const { isSchoolAdmin, isSuperadmin } = currentUser
+
+  if (isSchoolAdmin || isSuperadmin) return true
+
   if (resource === 'status') {
     if (['create', 'update', 'delete'].includes(action)) {
-      if (isSchoolAdmin || isSuperadmin) {
-        return true
-      }
-      const { studentId, subjectId } = options
-      // FIXME: This is a simplified check; the following logic should be implemented
-      // Return true if user is teacher of the student in the subject
-      // Return true if the user is a teacher of the basis group of the student
-      return currentUser.teacherGroups.length > 0
-    } else if (action === 'read') {
-      return (
-        isSchoolAdmin || isSchoolInspector || isSuperadmin || currentUser.teacherGroups.length > 0
-      )
+      // Early negative return if user has no teacher groups
+      if (currentUser.teacherGroups.length < 1) return false
+
+      const { subjectId, studentGroupIds } = options
+      // Early negative return if no student groups provided
+      if (!studentGroupIds) return false
+
+      return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
+        // Teaching group
+        if (
+          teacherGroup.type === GROUP_TYPE_TEACHING &&
+          subjectId &&
+          teacherGroup.subjectId === subjectId &&
+          studentGroupIds.includes(teacherGroup.id)
+        ) {
+          // User is a teacher of the student in the subject
+          return true
+        }
+        // Basis group
+        if (teacherGroup.type === GROUP_TYPE_BASIS && studentGroupIds.includes(teacherGroup.id)) {
+          // User is teacher in the basis group to which the student belongs
+          return true
+        }
+        return false
+      })
     }
   }
   return false

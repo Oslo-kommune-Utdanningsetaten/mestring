@@ -123,13 +123,11 @@
       </a>
       {#if $dataStore.currentSchool.isStatusEnabled}
         <div class="status-controls">
-          {#if $dataStore.hasUserAccessToFeature( 'status', 'read', { subjectId: subject.id, studentId: student.id } )}
-            {#key statusesKey}
-              <Statuses {student} {subject} />
-            {/key}
-          {/if}
+          {#key statusesKey}
+            <Statuses {student} {subject} />
+          {/key}
 
-          {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentId: student.id } )}
+          {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
             <ButtonIcon
               options={{
                 iconName: 'achievement',
