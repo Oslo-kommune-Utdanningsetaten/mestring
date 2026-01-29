@@ -52,7 +52,7 @@ class StatusAccessPolicy(BaseAccessPolicy):
         - School inspectors and admins: All statuses at their schools
         - Teaching group teachers:
           - Statuses on group goals in groups they teach
-          - Statuses on personal goals for students they teach in that subject
+          - Statuses on individual goals for students they teach in that subject
         - Basis group teachers: Statuses for students in their basis group
         - Students: Statuses about themselves, if current date is after end_at
         """

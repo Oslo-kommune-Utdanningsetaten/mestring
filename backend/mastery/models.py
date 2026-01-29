@@ -320,9 +320,9 @@ class MasterySchema(BaseModel):
 
 class Goal(BaseModel):
     """
-    A Goal represents something a student should strive towards. A Goal is either for all students in a Group (if goal.group is set), or personal for a specific student (if goal.student is set)
+    A Goal represents something a student should strive towards. A Goal is either for all students in a Group (if goal.group is set), or individual for a specific student (if goal.student is set)
 
-    The integer value sort_order is relative to goal.subject (for personal goals) or goal.group.subject (for group goals) and won't make sense to use across subjects.
+    The integer value sort_order is relative to goal.subject (for individual goals) or goal.group.subject (for group goals) and won't make sense to use across subjects.
     """
     title = models.CharField(max_length=200, null=True)
     description = models.TextField(null=True)
@@ -344,7 +344,7 @@ class Goal(BaseModel):
                 name='goal_group_or_student'),]
 
     @property
-    def is_personal(self):
+    def is_individual(self):
         return self.group is None and self.student is not None
 
 

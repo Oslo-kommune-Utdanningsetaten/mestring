@@ -20,7 +20,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
             "principal": ["authenticated"],
             "effect": "allow",
         },
-        # Students can create personal goals for themselves
+        # Students can create individual goals for themselves
         {
             "action": ["create"],
             "principal": ["role:student"],
@@ -34,7 +34,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
             "effect": "allow",
             "condition": "can_teacher_create_goal"
         },
-        # Students can only modify their own personal goals
+        # Students can only modify their own individual goals
         {
             "action": ["update", "partial_update", "destroy"],
             "principal": ["role:student"],
@@ -64,9 +64,9 @@ class GoalAccessPolicy(BaseAccessPolicy):
         - School inspectors: All goals for students at their schools
         - Teaching group teachers:
           - Group goals in groups they teach
-          - Personal goals for students they teach in that subject
-        - Basis group teachers: Personal goals + group goals for students in their basis group
-        - Students: Their own personal goals + group goals in groups they're in
+          - Individual goals for students they teach in that subject
+        - Basis group teachers: Individual goals + group goals for students in their basis group
+        - Students: Their own individual goals + group goals in groups they're in
         """
         requester = request.user
         if not requester:
@@ -91,7 +91,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
             if school_employee_ids:
                 filters |= Q(school_id__in=school_employee_ids)
 
-            # Teaching group teachers: Group goals + personal goals for students they teach
+            # Teaching group teachers: Group goals + individual goals for students they teach
             if teacher_group_ids:
                 # Group goals in groups they teach
                 filters |= Q(group_id__in=teacher_group_ids)
@@ -111,7 +111,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
                 filters |= Q(student__groups__id__in=teacher_basis_group_ids)
                 filters |= Q(group__members__groups__id__in=teacher_basis_group_ids)
 
-            # Students: Own personal goals + group goals in their groups
+            # Students: Own individual goals + group goals in their groups
             filters |= Q(student=requester)
             if student_group_ids:
                 filters |= Q(group_id__in=student_group_ids)
@@ -122,13 +122,13 @@ class GoalAccessPolicy(BaseAccessPolicy):
             return qs.none()
 
     def can_student_create_goal(self, request, view, action):
-        """Students can only create personal goals for themselves."""
+        """Students can only create individual goals for themselves."""
         try:
             requester = request.user
             student_id = request.data.get('student_id')
             group_id = request.data.get('group_id')
 
-            # Must be creating a personal goal
+            # Must be creating a individual goal
             if group_id is not None:
                 return False
 
@@ -142,7 +142,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
         """
         Teachers can create goals based on goal type:
         - Group goals: Must teach that group
-        - Personal goals: Must be basis group teacher OR teach that subject to that student
+        - Individual goals: Must be basis group teacher OR teach that subject to that student
         """
         try:
             requester = request.user
@@ -153,7 +153,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
             if group_id is not None:
                 return requester.teacher_groups.filter(id=group_id).exists()
 
-            # Personal goal: Basis group teacher OR teaches that subject to that student
+            # Individual goal: Basis group teacher OR teaches that subject to that student
             if student_id is not None:
                 subject_id = request.data.get('subject_id') or request.data.get('subject')
 
@@ -177,7 +177,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
             return False
 
     def can_student_modify_goal(self, request, view, action):
-        """Students can only modify their own personal goals as long as they have created them."""
+        """Students can only modify their own individual goals as long as they have created them."""
         try:
             target_goal = view.get_object()
             requester = request.user
@@ -192,7 +192,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
         """
         Teachers can modify goals based on goal type:
         - Group goals: Must teach that group
-        - Personal goals: Must be basis group teacher OR teach that subject to that student
+        - Individual goals: Must be basis group teacher OR teach that subject to that student
         """
         try:
             target_goal = view.get_object()
@@ -202,7 +202,7 @@ class GoalAccessPolicy(BaseAccessPolicy):
             if target_goal.group_id:
                 return requester.teacher_groups.filter(id=target_goal.group_id).exists()
 
-            # Personal goal: Basis group teacher OR teaches that subject to that student
+            # Individual goal: Basis group teacher OR teaches that subject to that student
             basis_group_ids = requester.teacher_groups.filter(type='basis').values_list('id', flat=True)
             is_basis_teacher = target_goal.student.groups.filter(id__in=basis_group_ids).exists()
 

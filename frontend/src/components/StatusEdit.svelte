@@ -178,8 +178,7 @@
           {#each localGoals as goal}
             <div class="goal-row">
               <span class="goal-sort-order">{goal.sortOrder}</span>
-
-              {#if goal.isPersonal}
+              {#if goal.isIndividual}
                 <span class="individual-goal-icon" title="Individuelt mål">
                   <pkt-icon name="person"></pkt-icon>
                 </span>

@@ -547,7 +547,7 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
         parameters=[
             OpenApiParameter(
                 name='student',
-                description='Filter goals by the student owning them. Using this parameter will return both personal goals and group goals where the student is a member.',
+                description='Filter goals by the student owning them. Using this parameter will return both individual goals and group goals where the student is a member.',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
@@ -611,18 +611,18 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 raise ValidationError(
                     {'error': 'wrong-parameter',
                      'message':
-                     'group and subject parameters cannot be used together (goals are either personal or group).'})
+                     'group and subject parameters cannot be used together (goals are either individual or group).'})
 
             if group_param:
                 qs = qs.filter(group_id=group_param)
             if student_param:
-                # Student can be either the owner of a personal goal or a member of a group goal
+                # Student can be either the owner of a individual goal or a member of a group goal
                 qs = qs.filter(
                     Q(student_id=student_param) |
                     Q(group__user_groups__user_id=student_param)
                 )
             if subject_param:
-                # Subject can be either on a personal goal or a group goal
+                # Subject can be either on a individual goal or a group goal
                 qs = qs.filter(
                     Q(subject_id=subject_param) |
                     Q(group__subject_id=subject_param)

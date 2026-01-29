@@ -19,11 +19,11 @@ def fix_goal_school_references(apps, schema_editor):
             group = Group.objects.get(id=goal.group_id)
             correct_school_id = group.school_id
         if not correct_school_id and goal.subject_id:
-            # Personal goals: get school from subject
+            # Individual goals: get school from subject
             subject = Subject.objects.get(id=goal.subject_id)
             correct_school_id = subject.owned_by_school_id
         if not correct_school_id and goal.student_id:
-            # Personal goals: get school from user group membership
+            # Individual goals: get school from user group membership
             user_group = UserGroup.objects.filter(
                 user_id=goal.student_id
             ).first()

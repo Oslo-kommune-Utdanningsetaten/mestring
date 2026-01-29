@@ -112,7 +112,7 @@ def soft_delete_users(school, now, maintained_earlier_than):
 
 def soft_delete_observations(school, now):
     # If student is soft-deleted -> mark as deleted
-    on_personal_goals_on_school = Q(
+    on_individual_goals_on_school = Q(
         goal__student__isnull=False,
         goal__subject__owned_by_school=school
     )
@@ -120,14 +120,14 @@ def soft_delete_observations(school, now):
     observations = models.Observation.objects.filter(
         deleted_at__isnull=True,
         student__deleted_at__isnull=False
-    ).filter(on_personal_goals_on_school | on_group_goals_on_school)
+    ).filter(on_individual_goals_on_school | on_group_goals_on_school)
     count = observations.count()
     observations.update(deleted_at=now)
     return count
 
 
 def soft_delete_goals(school, now):
-    # If student (i.e. this is a personal goal) AND student is soft-deleted -> mark as deleted
+    # If student (i.e. this is a individual goal) AND student is soft-deleted -> mark as deleted
     # OR
     # If group (i.e. this is a group goal) AND group is soft-deleted -> mark as deleted
     goals = models.Goal.objects.filter(
@@ -175,7 +175,7 @@ def hard_delete_groups(school, now):
 
 def hard_delete_users(now):
     # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_USER days, hard delete
-    # Note: This will cascade delete UserGroups, Personal Goals and Observations
+    # Note: This will cascade delete UserGroups, Individual Goals and Observations
     # Note: Users exist across schools, so no school filtering here
     users = models.User.objects.filter(
         deleted_at__lt=now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_USER)
@@ -187,7 +187,7 @@ def hard_delete_users(now):
 
 def hard_delete_observations(school, now):
     # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_OBSERVATION days, hard delete
-    on_personal_goals_on_school = Q(
+    on_individual_goals_on_school = Q(
         goal__student__isnull=False,
         goal__subject__owned_by_school=school
     )
@@ -195,7 +195,7 @@ def hard_delete_observations(school, now):
 
     observations = models.Observation.objects.filter(
         deleted_at__lt=now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_OBSERVATION)
-    ).filter(on_personal_goals_on_school | on_group_goals_on_school)
+    ).filter(on_individual_goals_on_school | on_group_goals_on_school)
     count = observations.count()
     observations.delete()
     return count
