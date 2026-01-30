@@ -4,20 +4,20 @@
   // Matomo Analytics
   const matomoSiteId = import.meta.env.VITE_MATOMO_SITE_ID
   const matomoUrl = import.meta.env.VITE_MATOMO_URL
+
   const currentWindow: any = window
   const scriptId = 'matomo-script'
   let schoolOrgNumber = $derived($dataStore.currentSchool?.orgNumber)
 
-  if (!currentWindow._paq) currentWindow._paq = []
-  const _paq = currentWindow._paq
+  const addCommand = (command: any[]) => {
+    if (!currentWindow._paq) currentWindow._paq = [] // initialize the command queue
+    currentWindow._paq.push(command)
+  }
 
-  _paq.push(['trackPageView'])
-  _paq.push(['enableLinkTracking'])
-
-  // Only inject the script once
   if (!document.getElementById(scriptId)) {
-    _paq.push(['setTrackerUrl', matomoUrl + 'matomo.php'])
-    _paq.push(['setSiteId', matomoSiteId])
+    addCommand(['enableLinkTracking'])
+    addCommand(['setTrackerUrl', matomoUrl + 'matomo.php'])
+    addCommand(['setSiteId', matomoSiteId])
 
     const script = document.createElement('script')
     script.async = true
@@ -27,9 +27,12 @@
   }
 
   $effect(() => {
-    // Update custom dimension when schoolOrgNumber changes
-    console.log('Updating Matomo custom dimension with schoolOrgNumber:', schoolOrgNumber)
-    _paq.push(['setCustomDimension', 1, null])
-    _paq.push(['setCustomDimension', 1, schoolOrgNumber])
+    console.log('Setting Matomo schoolOrgNumber to', schoolOrgNumber)
+    // To reset the visit, set visit and delete existing cookies
+    addCommand(['appendToTrackingUrl', 'new_visit=1'])
+    addCommand(['deleteCookies'])
+    // Update custom dimension with schoolOrgNumber
+    addCommand(['setCustomDimension', 1, schoolOrgNumber])
+    addCommand(['trackPageView'])
   })
 </script>
