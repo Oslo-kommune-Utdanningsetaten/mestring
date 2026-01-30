@@ -28,10 +28,8 @@
 
   $effect(() => {
     if (!schoolOrgNumber) return
-    console.log('Setting Matomo schoolOrgNumber to', schoolOrgNumber)
-    // To reset the visit, set visit and delete existing cookies
+    // Reset visit
     addCommand(['appendToTrackingUrl', 'new_visit=1'])
-    addCommand(['deleteCookies'])
     // Update custom dimension with schoolOrgNumber
     addCommand(['setCustomDimension', 1, schoolOrgNumber])
     addCommand(['trackPageView'])
