@@ -2,10 +2,11 @@
   import { navigate } from 'svelte-tiny-router'
   import type { Snippet } from 'svelte'
 
-  const { to, title, className, children } = $props<{
+  const { to, title, className, children, onclick } = $props<{
     to: string
     className?: string
     title?: string
+    onclick?: (event: MouseEvent) => void
     children?: Snippet
   }>()
 
@@ -30,12 +31,15 @@
       navigate(to)
     })
   }
+
+  // if onclick is provided, use it; otherwise, use handleClick
+  const onClickFunction = $derived(onclick || handleClick)
 </script>
 
 <a
   href={to}
   class={className}
-  onclick={handleClick}
+  onclick={onClickFunction}
   target={isExternal ? '_blank' : '_self'}
   {title}
 >

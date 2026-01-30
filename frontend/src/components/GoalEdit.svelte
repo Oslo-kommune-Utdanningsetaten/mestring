@@ -44,10 +44,11 @@
     !!localGoal.masterySchemaId && (isGoalIndividual ? !!localGoal.subjectId : !!subjectViaGroup)
   )
 
+  const target = $derived(isGoalIndividual ? student?.name : group?.displayName)
+
   const getTitle = () => {
     const action = localGoal.id ? 'Redigerer' : 'Nytt'
     const goalType = isGoalIndividual ? 'individuelt ' : 'gruppe'
-    const target = isGoalIndividual ? student?.name : group?.displayName
     return `${action} ${goalType}mål for ${target}`
   }
 
@@ -85,7 +86,7 @@
       }
       addAlert({
         type: 'success',
-        message: `${action} mål for ${student.name}.`,
+        message: `${action} mål for ${target}.`,
       })
       if (onDone) {
         await onDone()
@@ -94,7 +95,7 @@
       console.error('Error saving goal:', error)
       addAlert({
         type: 'danger',
-        message: `Noe gikk galt ved lagring av mål for ${student.name}.`,
+        message: `Noe gikk galt ved lagring av mål for ${target}.`,
       })
     }
   }

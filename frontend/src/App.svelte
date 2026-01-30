@@ -31,6 +31,7 @@
   import Navigation from './components/Navigation.svelte'
   import AlertBar from './components/AlertBar.svelte'
   import Footer from './components/Footer.svelte'
+  import Analytics from './components/Analytics.svelte'
   const API_CHECK_INTERVAL = 60 * 1000 // every 60 seconds
 
   // All routes in the app
@@ -78,7 +79,7 @@
 </script>
 
 <a href="#main-content" class="skip-link">Hopp til hovedinnhold</a>
-
+<Analytics />
 <div class="d-flex flex-column min-vh-100">
   <header class="m-0 p-0">
     <Navigation />
