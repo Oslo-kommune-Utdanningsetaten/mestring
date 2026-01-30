@@ -79,9 +79,9 @@
 </script>
 
 <a href="#main-content" class="skip-link">Hopp til hovedinnhold</a>
-{#if $dataStore.currentSchool}
-  <Analytics />
-{/if}
+
+<Analytics />
+
 <div class="d-flex flex-column min-vh-100">
   <header class="m-0 p-0">
     <Navigation />

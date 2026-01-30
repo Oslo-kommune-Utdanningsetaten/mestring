@@ -27,6 +27,7 @@
   }
 
   $effect(() => {
+    if (!schoolOrgNumber) return
     console.log('Setting Matomo schoolOrgNumber to', schoolOrgNumber)
     // To reset the visit, set visit and delete existing cookies
     addCommand(['appendToTrackingUrl', 'new_visit=1'])
