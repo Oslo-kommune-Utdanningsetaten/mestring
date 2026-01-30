@@ -113,6 +113,36 @@ services:
       - prod
       - dev
 
+  matomo-db:
+    image: mariadb:11.3
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MATOMO_DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MATOMO_DB_NAME}
+      - MYSQL_USER=${MATOMO_DB_USERNAME}
+      - MYSQL_PASSWORD=${MATOMO_DB_PASSWORD}
+    volumes:
+      - matomo-db-data:/var/lib/mysql
+
+  matomo:
+    image: matomo:5.7
+    restart: always
+    ports:
+      - '8081:80'
+    environment:
+      - MATOMO_DATABASE_HOST=${MATOMO_DB_HOST}
+      - MATOMO_DATABASE_ADAPTER=${MATOMO_DB_ADAPTER}
+      - MATOMO_DATABASE_DBNAME=${MATOMO_DB_NAME}
+      - MATOMO_DATABASE_TABLES_PREFIX=${MATOMO_DB_TABLES_PREFIX}
+      - MATOMO_DATABASE_USERNAME=${MATOMO_DB_USERNAME}
+      - MATOMO_DATABASE_PASSWORD=${MATOMO_DB_PASSWORD}
+    volumes:
+      - matomo-data:/var/www/html
+    depends_on:
+      - matomo-db
+
 volumes:
   postgres-data:
     driver: local
+  matomo-db-data:
+  matomo-data:
