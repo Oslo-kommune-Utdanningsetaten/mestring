@@ -90,7 +90,7 @@
         masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,
       }
     } else {
-      const individualGoalsCount = goalsForSubject?.filter(g => g.isIndividual).length
+      const individualGoalsCount = goalsForSubject?.filter(g => g.isIndividual).length || 0
       const newGoal = {
         subjectId: subject.id,
         studentId: student.id,

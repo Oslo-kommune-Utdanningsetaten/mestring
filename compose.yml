@@ -123,6 +123,9 @@ services:
       - MYSQL_PASSWORD=${MATOMO_DB_PASSWORD}
     volumes:
       - matomo-db-data:/var/lib/mysql
+    profiles:
+      - prod
+      - dev
 
   matomo:
     image: matomo:5.7
@@ -140,6 +143,9 @@ services:
       - matomo-data:/var/www/html
     depends_on:
       - matomo-db
+    profiles:
+      - prod
+      - dev
 
 volumes:
   postgres-data:
