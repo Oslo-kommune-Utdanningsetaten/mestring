@@ -36,16 +36,19 @@ const init = () => {
   isInitialized = true
 }
 
+// Queue a command to be sent to Matomo
 export const addAnalyticsCommand = (command: any[]) => {
   init()
   if (!isEnabled) return
   currentWindow._paq.push(command)
 }
 
+// Track a custom event
 export const trackEvent = (category: string, action: string, name?: string, value?: number) => {
   addAnalyticsCommand(['trackEvent', category, action, name, value])
 }
 
+// Track a page view, needed on SPA route changes
 export const trackPageView = (pageUrl?: string) => {
   addAnalyticsCommand(['setCustomUrl', pageUrl || window.location.href])
   addAnalyticsCommand(['trackPageView'])
