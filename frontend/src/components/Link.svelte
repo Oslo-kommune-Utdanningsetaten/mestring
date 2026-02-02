@@ -1,5 +1,6 @@
 <script lang="ts">
   import { navigate } from 'svelte-tiny-router'
+  import { trackPageView } from '../stores/analytics'
   import type { Snippet } from 'svelte'
 
   const { to, title, className, children, onclick } = $props<{
@@ -28,6 +29,7 @@
     // Allow Bootstrap dropdowns to close by letting the event bubble
     // Bootstrap listens for clicks on .dropdown-item elements
     requestAnimationFrame(() => {
+      trackPageView(to)
       navigate(to)
     })
   }
