@@ -44,7 +44,13 @@ export const addAnalyticsCommand = (command: any[]) => {
 }
 
 // Track a custom event
-export const trackEvent = (category: string, action: string, name?: string, value?: number) => {
+// Only support detailed tracking of Goals for now: Use name (type) and value (1=group, 2=individual)
+export const trackEvent = (
+  category: 'Goals' | 'Observations' | 'Status',
+  action: 'Create' | 'Update' | 'Delete',
+  name?: 'type',
+  value?: 1 | 2
+) => {
   addAnalyticsCommand(['trackEvent', category, action, name, value])
 }
 

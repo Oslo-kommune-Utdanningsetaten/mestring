@@ -20,6 +20,7 @@
   import { fetchGoalsForSubjectAndStudent, formatMonthName } from '../utils/functions'
   import type { GoalDecorated } from '../types/models'
   import { addAlert } from '../stores/alerts'
+  import { trackEvent } from '../stores/analytics'
 
   let { status, student, subject, goals, onDone } = $props<{
     status: StatusType | {} | null
@@ -119,11 +120,13 @@
           path: { id: localStatus.id },
           body: localStatus as any,
         })
+        trackEvent('Status', 'Update')
         action = 'Oppdaterte'
       } else {
         await statusCreate({
           body: localStatus as any,
         })
+        trackEvent('Status', 'Create')
         action = 'Opprettet ny'
       }
       addAlert({

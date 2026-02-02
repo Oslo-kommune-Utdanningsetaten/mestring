@@ -6,7 +6,6 @@
     goalsList,
     groupsList,
     subjectsList,
-    subjectsDestroy,
   } from '../generated/sdk.gen'
   import { SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
@@ -14,6 +13,7 @@
   import StudentSVG from '../assets/education.svg.svelte'
   import GroupTag from '../components/GroupTag.svelte'
   import { dataStore } from '../stores/data'
+  import { trackEvent } from '../stores/analytics'
 
   const { studentId } = $props<{ studentId: string }>()
   const individualGoalcount = 3
@@ -83,6 +83,7 @@
         await goalsCreate({
           body: goal,
         })
+        trackEvent('Goals', 'Create', 'type', 2)
       }
     }
 

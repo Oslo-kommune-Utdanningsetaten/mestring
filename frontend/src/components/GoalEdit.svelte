@@ -12,6 +12,7 @@
   import ButtonMini from './ButtonMini.svelte'
   import { NONE_FIELD_VALUE } from '../utils/constants'
   import { addAlert } from '../stores/alerts'
+  import { trackEvent } from '../stores/analytics'
 
   // This component is used for both individual and group goals!
   // If group is passed, student AND subject should be null
@@ -77,11 +78,13 @@
           path: { id: localGoal.id },
           body: localGoal as GoalType,
         })
+        trackEvent('Goals', 'Update', 'type', isGoalIndividual ? 2 : 1)
         action = 'Oppdaterte'
       } else {
         await goalsCreate({
           body: localGoal as GoalCreateType,
         })
+        trackEvent('Goals', 'Create', 'type', isGoalIndividual ? 2 : 1)
         action = 'Opprettet nytt'
       }
       addAlert({

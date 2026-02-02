@@ -26,7 +26,7 @@
   import { getLocalStorageItem } from '../stores/localStorage'
   import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
   import { addAlert } from '../stores/alerts'
-  import { add } from 'date-fns'
+  import { trackEvent } from '../stores/analytics'
 
   const { subject, student, onRefreshRequired } = $props<{
     subject: SubjectType
@@ -111,6 +111,7 @@
         await goalsCreate({
           body: newGoal,
         })
+        trackEvent('Goals', 'Create', 'type', 2)
         return onRefreshRequired()
       } else {
         // open the goal editor with prefilled values
@@ -165,6 +166,7 @@
         type: 'success',
         message: `Slettet observasjon`,
       })
+      trackEvent('Observations', 'Delete')
       await fetchGoals()
     } catch (error) {
       console.error('Error deleting observation:', error)
@@ -182,6 +184,7 @@
         type: 'success',
         message: 'Slettet mål',
       })
+      trackEvent('Goals', 'Delete')
       await fetchGoals()
     } catch (error) {
       console.error('Error deleting goal:', error)

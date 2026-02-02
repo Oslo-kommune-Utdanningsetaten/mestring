@@ -15,6 +15,7 @@
   import Offcanvas from '../components/Offcanvas.svelte'
   import AuthorInfo from '../components/AuthorInfo.svelte'
   import { addAlert } from '../stores/alerts'
+  import { trackEvent } from '../stores/analytics'
 
   let { statusId } = $props<{
     statusId: string
@@ -78,6 +79,7 @@
     if (!window.confirm(confirmMessage)) return
     try {
       await statusDestroy({ path: { id: statusId } })
+      trackEvent('Status', 'Delete')
 
       window.history.back() // Navigate back to whence it came!
       addAlert({
