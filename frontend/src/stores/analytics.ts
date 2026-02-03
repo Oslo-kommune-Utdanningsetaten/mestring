@@ -1,7 +1,8 @@
 import type { deploymentEnvironment } from '../types/models'
+import { getCookie } from './cookieJar'
 
 const currentDeploymentEnv = import.meta.env.VITE_SERVER_DEPLOYMENT as deploymentEnvironment
-const analyticsEnvironments: deploymentEnvironment[] = ['production', 'development', 'localhost']
+const analyticsEnvironments: deploymentEnvironment[] = ['production', 'development']
 const matomoSiteId = import.meta.env.VITE_MATOMO_SITE_ID
 const matomoUrl = import.meta.env.VITE_MATOMO_URL
 const scriptId = 'matomo-script'
@@ -12,9 +13,10 @@ let isInitialized = false
 let isEnabled = false
 
 const init = () => {
-  if (isInitialized) return
   // Lazy initialization, only set up stuff on first pass
-  isEnabled = analyticsEnvironments.includes(currentDeploymentEnv)
+  if (isInitialized) return
+  isEnabled =
+    analyticsEnvironments.includes(currentDeploymentEnv) && getCookie('cookie_consent') === 'all'
 
   if (isEnabled) {
     // Initialize the _paq array (piwik asynchronous queue)
@@ -36,7 +38,7 @@ const init = () => {
   isInitialized = true
 }
 
-// Queue a command to be sent to Matomo
+// Queue a command for Matomo to execute
 export const addAnalyticsCommand = (command: any[]) => {
   init()
   if (!isEnabled) return

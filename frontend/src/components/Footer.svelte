@@ -1,6 +1,6 @@
 <script lang="ts">
   import Link from './Link.svelte'
-  import ButtonIcon from './ButtonIcon.svelte'
+  import CookieConsent from './CookieConsent.svelte'
   import { version } from '../../package.json'
 </script>
 
@@ -30,6 +30,7 @@
             Tilgjengelighet
           </Link>
         </li>
+        <li><CookieConsent /></li>
       </ul>
       <div class="mt-1">
         <Link
