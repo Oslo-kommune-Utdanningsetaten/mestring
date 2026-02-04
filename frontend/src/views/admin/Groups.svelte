@@ -8,6 +8,7 @@
   import { dataStore } from '../../stores/data'
   import GroupTag from '../../components/GroupTag.svelte'
   import ButtonIcon from '../../components/ButtonIcon.svelte'
+  import Link from '../../components/Link.svelte'
   import { NONE_FIELD_VALUE } from '../../utils/constants'
 
   const router = useTinyRouter()
@@ -300,9 +301,9 @@
         <!-- Data rows -->
         {#each filteredGroups as group (group.id)}
           <div class="group-grid-row">
-            <a href="/groups/{group.id}">
+            <Link to="/groups/{group.id}">
               {group.displayName}
-            </a>
+            </Link>
             <GroupTag
               {group}
               title="Endre gruppetype"

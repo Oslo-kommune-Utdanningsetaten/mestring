@@ -1,5 +1,6 @@
 <script lang="ts">
   import PersonSVG from '../assets/person.svg.svelte'
+  import Link from '../components/Link.svelte'
 </script>
 
 <h2 class="my-3">Om tjenesten</h2>
@@ -10,30 +11,20 @@
       mestring fagene
     </li>
     <li>
-      Utviklet av Seksjon for Læringsteknologi i <a
-        href="https://www.oslo.kommune.no/etater-foretak-og-ombud/utdanningsetaten/"
-        target="_blank"
-      >
+      Utviklet av Seksjon for Læringsteknologi i
+      <Link to="https://www.oslo.kommune.no/etater-foretak-og-ombud/utdanningsetaten/">
         Utdanningsetaten
-      </a>
+      </Link>
       i tett samarbeid med
-      <a href="https://haukasen.osloskolen.no/" target="_blank">Haukåsen skole</a>
+      <Link to="https://haukasen.osloskolen.no/">Haukåsen skole</Link>
     </li>
     <li>
-      Kildekoden er åpen og tilgjengelig på <a
-        href="https://github.com/Oslo-kommune-Utdanningsetaten/mestring/"
-        target="_blank"
-      >
-        GitHub
-      </a>
+      Kildekoden er åpen og tilgjengelig på
+      <Link to="https://github.com/Oslo-kommune-Utdanningsetaten/mestring/">GitHub</Link>
     </li>
     <li>
-      Her finner du <a
-        href="https://github.com/Oslo-kommune-Utdanningsetaten/mestring/issues"
-        target="_blank"
-      >
-        oppgavene
-      </a>
+      Her finner du
+      <Link to="https://github.com/Oslo-kommune-Utdanningsetaten/mestring/issues">oppgavene</Link>
       vi jobber med
     </li>
   </ul>
@@ -43,7 +34,7 @@
   <h3>Hva betyr ikonene?</h3>
   <p class="my-3">
     Ikonene i mestring er hentet fra
-    <a href="https://punkt.oslo.kommune.no/latest/ikoner/" target="_blank">Punkt</a>
+    <Link to="https://punkt.oslo.kommune.no/latest/ikoner/">Punkt</Link>
     og har følgende betydning:
   </p>
   <div class="icon-grid mt-4">

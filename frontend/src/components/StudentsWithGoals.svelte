@@ -6,6 +6,7 @@
   import SparkbarChart from './SparkbarChart.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
   import Statuses from './Statuses.svelte'
+  import Link from './Link.svelte'
 
   let {
     students,
@@ -118,9 +119,7 @@
   {/each}
   {#each sortedStudents as student (student.id)}
     <span class="item student-cell">
-      <a href={`/students/${student.id}`}>
-        {student.name}
-      </a>
+      <Link to={`/students/${student.id}`}>{student.name}</Link>
       {#if $dataStore.currentSchool.isStatusEnabled}
         <div class="status-controls">
           {#key statusesKey}

@@ -2,6 +2,7 @@
   import { dataStore, setCurrentSchool, currentUser } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
   import type { GroupType, SchoolType } from '../generated/types.gen'
+  import Link from '../components/Link.svelte'
 
   let schools = $derived<SchoolType[]>($dataStore.currentUser.schools || [])
   let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
@@ -78,12 +79,12 @@
       {#if groups.length > 0}
         <div class="list-group list-group-flush">
           {#each groups as group}
-            <a
-              href={urlStringFrom({ groupId: group.id }, { path: '/students', mode: 'replace' })}
-              class="list-group-item list-group-item-action"
+            <Link
+              to={urlStringFrom({ groupId: group.id }, { path: '/students', mode: 'replace' })}
+              className="list-group-item"
             >
               {group.displayName}
-            </a>
+            </Link>
           {/each}
         </div>
       {:else}

@@ -8,6 +8,8 @@
   import ButtonIcon from '../../components/ButtonIcon.svelte'
   import SubjectEdit from '../../components/SubjectEdit.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
+  import Link from '../../components/Link.svelte'
+  import GroupTag from '../../components/GroupTag.svelte'
   import { dataStore } from '../../stores/data'
 
   const router = useTinyRouter()
@@ -163,9 +165,7 @@
 
 {#snippet groupsInfo(groups: GroupType[])}
   {#each groups as group, index (group.id)}
-    <a class="bg-info px-1 group-link" href="/groups/{group.id}">
-      {group.displayName}
-    </a>
+    <GroupTag {group} href="/groups/{group.id}" isGroupNameEnabled={true} />
   {/each}
 {/snippet}
 

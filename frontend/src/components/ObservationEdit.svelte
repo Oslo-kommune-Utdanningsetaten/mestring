@@ -8,6 +8,7 @@
   import ValueInputVertical from './ValueInputVertical.svelte'
   import ValueInputHorizontal from './ValueInputHorizontal.svelte'
   import { addAlert } from '../stores/alerts'
+  import { trackEvent } from '../stores/analytics'
 
   const { student, goal, observation, onDone } = $props<{
     student: UserType | null
@@ -48,11 +49,13 @@
           path: { id: localObservation.id },
           body: localObservation as any,
         })
+        trackEvent('Observations', 'Update')
         action = 'Oppdaterte'
       } else {
         await observationsCreate({
           body: localObservation as any,
         })
+        trackEvent('Observations', 'Create')
         action = 'Opprettet ny'
       }
       addAlert({

@@ -3,6 +3,7 @@
   import type { UserType, SubjectType } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
+  import Link from './Link.svelte'
   import { MISSING_REASON_NO_OBSERVATIONS, MISSING_REASON_NO_GOALS } from '../utils/constants'
 
   type MasteryState = {
@@ -22,9 +23,7 @@
 </script>
 
 <span class="item student-name">
-  <a href={`/students/${student.id}`}>
-    {student.name}
-  </a>
+  <Link to={`/students/${student.id}`}>{student.name}</Link>
 </span>
 {#each subjects as subject}
   <span class="item">

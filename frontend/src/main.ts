@@ -9,6 +9,7 @@ import '@oslokommune/punkt-elements/dist/pkt-button.js'
 import '@oslokommune/punkt-elements/dist/pkt-combobox.js'
 import '@oslokommune/punkt-elements/dist/pkt-textinput.js'
 import '@oslokommune/punkt-elements/dist/pkt-input-wrapper.js'
+import '@oslokommune/punkt-elements/dist/pkt-consent.js'
 
 import './utils/configureHttpClient'
 

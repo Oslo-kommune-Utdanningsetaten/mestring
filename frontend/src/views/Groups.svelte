@@ -5,6 +5,7 @@
   import { usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType } from '../generated/types.gen'
   import GroupTag from '../components/GroupTag.svelte'
+  import Link from '../components/Link.svelte'
 
   let currentSchool = $derived($dataStore.currentSchool)
   let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
@@ -52,9 +53,9 @@
     {#each groups as group}
       <div class="card shadow-sm p-3">
         <h3 class="mt-1 mb-3" title={group.feideId}>
-          <a href="/groups/{group.id}">
+          <Link to="/groups/{group.id}">
             {group.displayName}
-          </a>
+          </Link>
         </h3>
 
         <div class="d-flex align-items-center gap-2">
@@ -80,8 +81,8 @@
         <div class="mt-3 mb-1">
           {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
             {#if currentSchool.isStudentListEnabled || $dataStore.hasUserAccessToPath('/students')}
-              <a
-                href={urlStringFrom(
+              <Link
+                to={urlStringFrom(
                   { groupId: group.id },
                   {
                     path: '/students',
@@ -91,7 +92,7 @@
               >
                 {groupMembers[group.id].students.length}
                 {groupMembers[group.id].students.length === 1 ? 'elev' : 'elever'}
-              </a>
+              </Link>
             {:else}
               {groupMembers[group.id].students.length}
               {groupMembers[group.id].students.length === 1 ? 'elev' : 'elever'}

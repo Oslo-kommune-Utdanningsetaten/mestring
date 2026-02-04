@@ -1,11 +1,13 @@
 <script lang="ts">
   import { navigate } from 'svelte-tiny-router'
+  import { trackPageView } from '../stores/analytics'
   import type { Snippet } from 'svelte'
 
-  const { to, title, className, children } = $props<{
+  const { to, title, className, children, onclick } = $props<{
     to: string
     className?: string
     title?: string
+    onclick?: (event: MouseEvent) => void
     children?: Snippet
   }>()
 
@@ -27,15 +29,31 @@
     // Allow Bootstrap dropdowns to close by letting the event bubble
     // Bootstrap listens for clicks on .dropdown-item elements
     requestAnimationFrame(() => {
+      trackPageView(to)
       navigate(to)
     })
+  }
+
+  const onClickFunction = (event: MouseEvent) => {
+    // First, call any custom click handler
+    if (onclick) {
+      onclick(event)
+
+      // Respect handlers that prevent default behavior
+      if (event.defaultPrevented) {
+        return
+      }
+    }
+
+    // Then perform the default navigation + tracking behavior
+    handleClick(event)
   }
 </script>
 
 <a
   href={to}
   class={className}
-  onclick={handleClick}
+  onclick={onClickFunction}
   target={isExternal ? '_blank' : '_self'}
   {title}
 >

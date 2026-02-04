@@ -36,6 +36,7 @@
   import { dataStore } from '../stores/data'
   import { goalsWithCalculatedMastery, abbreviateName } from '../utils/functions'
   import { addAlert } from '../stores/alerts'
+  import { trackEvent } from '../stores/analytics'
 
   const { groupId } = $props<{ groupId: string }>()
 
@@ -135,6 +136,7 @@
         type: 'success',
         message: 'Slettet mål',
       })
+      trackEvent('Goals', 'Delete')
       await fetchGroupData()
     } catch (error) {
       console.error('Error deleting goal:', error)

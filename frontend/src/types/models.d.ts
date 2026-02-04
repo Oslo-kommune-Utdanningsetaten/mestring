@@ -1,4 +1,5 @@
 // Data structure types which only exist in the frontend
+export type deploymentEnvironment = 'localhost' | 'development' | 'production'
 
 export type Mastery = {
   mastery: number

@@ -193,25 +193,20 @@ a:hover {
   border-radius: 50%;
 }
 
-.mini-button {
-  button {
-    height: 1.5rem;
-    width: 1.5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+.custom-button {
+  background-color: var(--bs-primary);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: 2px solid var(--bs-primary-hover);
+  border-radius: 0px;
+  cursor: pointer;
 }
 
-.mini-button.bordered {
-  button {
-    border: 1px solid rgba(from var(--bs-primary) r g b / 0.3);
-    border-radius: 2px;
-  }
-  :hover {
-    border: 1px solid rgba(from var(--bs-primary) r g b / 0.5);
-    border-radius: 2px;
-  }
+.custom-button:hover {
+  background-color: var(--bs-primary-hover);
+  border: 2px solid var(--bs-primary);
+  text-decoration: underline;
 }
 
 .rounded button {

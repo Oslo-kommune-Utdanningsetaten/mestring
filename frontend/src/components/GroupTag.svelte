@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { GroupType } from '../generated/types.gen'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
+  import Link from './Link.svelte'
 
   const {
     group,
@@ -33,9 +34,6 @@
       .join(' - ')
   )
 
-  const accessibleLabel: string = $derived(
-    isGroupTypeChanged && isTypeWarningEnabled ? `${label} (endret gruppetype)` : label
-  )
   const skin: string = $derived(group.type === GROUP_TYPE_BASIS ? 'blue' : 'green')
 
   const isGroupTypeChanged = $derived.by(() => {
@@ -44,6 +42,10 @@
       group.feideId.split(':')[3] === 'u' ? GROUP_TYPE_TEACHING : GROUP_TYPE_BASIS
     return originalType !== group.type
   })
+
+  const accessibleLabel: string = $derived(
+    isGroupTypeChanged && isTypeWarningEnabled ? `${label} (endret gruppetype)` : label
+  )
 </script>
 
 {#if group}
@@ -72,7 +74,7 @@
     </span>
   {:else if href}
     <pkt-tag iconName="group" {skin}>
-      <a {href}>{label}</a>
+      <Link to={href}>{label}</Link>
     </pkt-tag>
   {:else}
     <pkt-tag iconName="group" {skin}>

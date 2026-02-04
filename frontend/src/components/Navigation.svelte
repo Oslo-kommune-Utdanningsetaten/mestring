@@ -32,7 +32,7 @@
     </div>
   {/if}
   <div class="container-md">
-    <a class="navbar-brand fw-bold" href="/">
+    <Link className="navbar-brand" to="/">
       <span class="me-1 goal-icon-wrapper">
         <pkt-icon name="goal" title="Mestring logo" aria-hidden="true"></pkt-icon>
         <span class="celebration-overlay" aria-hidden="true">
@@ -40,7 +40,7 @@
         </span>
       </span>
       <h1>{currentSchool?.displayName || 'INGEN SKOLE VALGT'}</h1>
-    </a>
+    </Link>
 
     <!-- Burger menu button -->
     <button
@@ -121,7 +121,7 @@
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li><Link to="/profile" className="dropdown-item">Min side</Link></li>
                 <li>
-                  <a class="dropdown-item" href="/" onclick={logout}>Logg ut</a>
+                  <Link to="/" className="dropdown-item" onclick={logout}>Logg ut</Link>
                 </li>
               </ul>
             </li>

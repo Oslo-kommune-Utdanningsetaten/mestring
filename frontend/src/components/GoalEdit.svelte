@@ -12,6 +12,7 @@
   import ButtonMini from './ButtonMini.svelte'
   import { NONE_FIELD_VALUE } from '../utils/constants'
   import { addAlert } from '../stores/alerts'
+  import { trackEvent } from '../stores/analytics'
 
   // This component is used for both individual and group goals!
   // If group is passed, student AND subject should be null
@@ -44,10 +45,11 @@
     !!localGoal.masterySchemaId && (isGoalIndividual ? !!localGoal.subjectId : !!subjectViaGroup)
   )
 
+  const target = $derived(isGoalIndividual ? student?.name : group?.displayName)
+
   const getTitle = () => {
     const action = localGoal.id ? 'Redigerer' : 'Nytt'
     const goalType = isGoalIndividual ? 'individuelt ' : 'gruppe'
-    const target = isGoalIndividual ? student?.name : group?.displayName
     return `${action} ${goalType}mål for ${target}`
   }
 
@@ -76,16 +78,18 @@
           path: { id: localGoal.id },
           body: localGoal as GoalType,
         })
+        trackEvent('Goals', 'Update', 'type', isGoalIndividual ? 2 : 1)
         action = 'Oppdaterte'
       } else {
         await goalsCreate({
           body: localGoal as GoalCreateType,
         })
+        trackEvent('Goals', 'Create', 'type', isGoalIndividual ? 2 : 1)
         action = 'Opprettet nytt'
       }
       addAlert({
         type: 'success',
-        message: `${action} mål for ${student.name}.`,
+        message: `${action} mål for ${target}.`,
       })
       if (onDone) {
         await onDone()
@@ -94,7 +98,7 @@
       console.error('Error saving goal:', error)
       addAlert({
         type: 'danger',
-        message: `Noe gikk galt ved lagring av mål for ${student.name}.`,
+        message: `Noe gikk galt ved lagring av mål for ${target}.`,
       })
     }
   }

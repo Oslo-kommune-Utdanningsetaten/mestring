@@ -25,3 +25,8 @@ export const PUBLIC_PATHS = ['', 'about']
 export const STUDENT_PATHS = ['', 'about', 'groups', 'profile', 'statuses']
 export const TEACHER_PATHS = ['', 'about', 'groups', 'profile', 'statuses', 'students']
 export const RESTRICTED_PATHS = ['', 'about', 'groups', 'profile', 'statuses', 'students', 'users']
+
+export enum CookieConsent {
+  ALL = 'all',
+  NECESSARY = 'only-necessary',
+}
