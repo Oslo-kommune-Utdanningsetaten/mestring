@@ -34,8 +34,20 @@
     })
   }
 
-  // if onclick is provided, use it; otherwise, use handleClick
-  const onClickFunction = $derived(onclick || handleClick)
+  const onClickFunction = (event: MouseEvent) => {
+    // First, call any custom click handler
+    if (onclick) {
+      onclick(event)
+
+      // Respect handlers that prevent default behavior
+      if (event.defaultPrevented) {
+        return
+      }
+    }
+
+    // Then perform the default navigation + tracking behavior
+    handleClick(event)
+  }
 </script>
 
 <a
