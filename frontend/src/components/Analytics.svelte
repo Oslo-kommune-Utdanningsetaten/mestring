@@ -11,5 +11,7 @@
     // Update custom dimension with schoolOrgNumber
     addAnalyticsCommand(['setCustomDimension', 1, schoolOrgNumber])
     addAnalyticsCommand(['trackPageView'])
+    // Remove new_visit params to avoid that all subsequent page views are marked as new visits
+    addAnalyticsCommand(['appendToTrackingUrl', ''])
   })
 </script>
