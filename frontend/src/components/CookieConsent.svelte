@@ -2,7 +2,7 @@
   import Link from './Link.svelte'
   import { setCookie, getCookie } from '../stores/cookieJar'
   const cookieName = 'cookie_consent'
-  let isExpanded = $derived(getCookie(cookieName) === null)
+  let isExpanded = $state(getCookie(cookieName) === null)
 
   const toggleBanner = () => {
     isExpanded = !isExpanded
