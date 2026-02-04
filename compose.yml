@@ -131,7 +131,7 @@ services:
     image: matomo:5.7
     restart: always
     ports:
-      - '8081:80'
+      - 8081:80
     environment:
       - MATOMO_DATABASE_HOST=${MATOMO_DB_HOST}
       - MATOMO_DATABASE_ADAPTER=${MATOMO_DB_ADAPTER}
