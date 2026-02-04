@@ -1,5 +1,6 @@
 import type { deploymentEnvironment } from '../types/models'
 import { getCookie } from './cookieJar'
+import { COOKIE_CONSENT_ALL } from '../utils/constants'
 
 const currentDeploymentEnv = import.meta.env.VITE_SERVER_DEPLOYMENT as deploymentEnvironment
 const analyticsEnvironments: deploymentEnvironment[] = ['production', 'development']
@@ -16,7 +17,8 @@ const init = () => {
   // Lazy initialization, only set up stuff on first pass
   if (isInitialized) return
   isEnabled =
-    analyticsEnvironments.includes(currentDeploymentEnv) && getCookie('cookie_consent') === 'all'
+    analyticsEnvironments.includes(currentDeploymentEnv) &&
+    getCookie('cookie_consent') === COOKIE_CONSENT_ALL
 
   if (isEnabled) {
     // Initialize the _paq array (piwik asynchronous queue)
