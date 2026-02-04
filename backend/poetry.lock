@@ -562,14 +562,14 @@ tests = ["black", "django", "flake8", "flake8-bugbear", "hypothesis", "mypy", "p
 
 [[package]]
 name = "django"
-version = "5.2.9"
+version = "5.2.11"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "django-5.2.9-py3-none-any.whl", hash = "sha256:3a4ea88a70370557ab1930b332fd2887a9f48654261cdffda663fef5976bb00a"},
-    {file = "django-5.2.9.tar.gz", hash = "sha256:16b5ccfc5e8c27e6c0561af551d2ea32852d7352c67d452ae3e76b4f6b2ca495"},
+    {file = "django-5.2.11-py3-none-any.whl", hash = "sha256:e7130df33ada9ab5e5e929bc19346a20fe383f5454acb2cc004508f242ee92c0"},
+    {file = "django-5.2.11.tar.gz", hash = "sha256:7f2d292ad8b9ee35e405d965fbbad293758b858c34bbf7f3df551aeeac6f02d3"},
 ]
 
 [package.dependencies]
@@ -1723,4 +1723,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.14"
-content-hash = "68098791c794690815e5a8508b9fd54c247c0d167585876a258763a160d6b49e"
+content-hash = "cb98de34a2469f62f8a2a7c9b7edf08faff91845aab64e644a73f30561b20b97"
