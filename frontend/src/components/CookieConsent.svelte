@@ -1,7 +1,7 @@
 <script lang="ts">
   import Link from './Link.svelte'
   import { setCookie, getCookie } from '../stores/cookieJar'
-  import { COOKIE_CONSENT_ALL, COOKIE_CONSENT_NECESSARY } from '../utils/constants'
+  import { CookieConsent } from '../utils/constants'
   const cookieName = 'cookie_consent'
   let isExpanded = $state(getCookie(cookieName) === null)
 
@@ -9,7 +9,7 @@
     isExpanded = !isExpanded
   }
 
-  const handleConsent = (choice: typeof COOKIE_CONSENT_ALL | typeof COOKIE_CONSENT_NECESSARY) => {
+  const handleConsent = (choice: typeof CookieConsent.ALL | typeof CookieConsent.NECESSARY) => {
     setCookie(cookieName, choice)
     isExpanded = false
   }
@@ -26,14 +26,14 @@
         velger, samler vi ikke inn personlig informasjon.
       </span>
       <div class="buttons-section py-4">
-        <button class="custom-button" onclick={() => handleConsent(COOKIE_CONSENT_ALL)}>
+        <button class="custom-button" onclick={() => handleConsent(CookieConsent.ALL)}>
           Godta alle
         </button>
         <span class="d-flex align-items-center">
           Muliggjør å logge på, samt sende anonymisert navigasjons-statistikk til Seksjon for
           læringsteknologi
         </span>
-        <button class="custom-button" onclick={() => handleConsent(COOKIE_CONSENT_NECESSARY)}>
+        <button class="custom-button" onclick={() => handleConsent(CookieConsent.NECESSARY)}>
           Kun nødvendige
         </button>
         <span class="d-flex align-items-center">Muliggjør å logge på</span>
