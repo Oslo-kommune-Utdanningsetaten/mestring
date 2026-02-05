@@ -107,7 +107,7 @@ class SchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
             ),
             OpenApiParameter(
                 name='roles',
-                description='Filter users by roles the users have. Comma-separated list of role names (e.g., student,teacher)',
+                description='Filter users by roles the users have. Comma-separated list of role names (student, teacher, staff, admin,inspector)',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY

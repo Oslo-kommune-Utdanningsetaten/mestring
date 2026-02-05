@@ -4,6 +4,7 @@
   import { urlStringFrom } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
   import { useTinyRouter } from 'svelte-tiny-router'
+  import { UserRoles } from '../../utils/constants'
   import User from '../../components/User.svelte'
 
   const router = useTinyRouter()
@@ -12,6 +13,14 @@
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingUsers = $state<boolean>(false)
   let selectedSchool = $state<SchoolType | null>($dataStore.currentSchool)
+  let selectedRoles = $state<string[]>([
+    UserRoles.TEACHER,
+    UserRoles.ADMIN,
+    UserRoles.INSPECTOR,
+    UserRoles.STAFF,
+  ])
+  let deletedSelection = $state<'include' | 'only' | 'exclude'>('include')
+
   let nameFilter = $state<string>('')
   let filteredUsers = $derived(
     nameFilter
@@ -22,6 +31,23 @@
         )
       : users
   )
+
+  // Options for filtering by role
+  const roleOptions = [
+    { value: 'all', label: 'Alle' },
+    { value: UserRoles.TEACHER, label: 'Lærere' },
+    { value: UserRoles.STUDENT, label: 'Elever' },
+    { value: UserRoles.ADMIN, label: 'Admins' },
+    { value: UserRoles.INSPECTOR, label: 'Inspektører' },
+    { value: UserRoles.STAFF, label: 'Skoleansatte uten rolle' },
+  ] as const
+
+  // Options for filtering by deleted
+  const deletedOptions = [
+    { value: 'include', label: 'All' },
+    { value: 'only', label: 'Deleted' },
+    { value: 'exclude', label: 'Non-deleted' },
+  ] as const
 
   let headerText = $derived.by(() => {
     let text = selectedSchool ? `Brukere ved: ${selectedSchool.displayName}` : 'Alle brukere'
@@ -41,9 +67,12 @@
 
   const fetchUsers = async () => {
     if (!selectedSchool) return
+    const roles = selectedRoles.includes('all') ? [] : selectedRoles
     try {
       isLoadingUsers = true
-      const result = await usersList({ query: { school: selectedSchool.id } })
+      const result = await usersList({
+        query: { school: selectedSchool.id, deleted: deletedSelection, roles: roles.join(',') },
+      })
       users = result.data || []
     } catch (error) {
       console.error('Error fetching users:', error)
@@ -54,7 +83,6 @@
   }
 
   const handleSchoolSelect = (schoolId: string): void => {
-    console.log('Selected school ID:', schoolId)
     if (schoolId && schoolId !== '0') {
       router.navigate(urlStringFrom({ school: schoolId }, { path: '/admin/users', mode: 'merge' }))
     } else {
@@ -62,8 +90,40 @@
     }
   }
 
+  const handleRoleSelect = (role: string): void => {
+    let newRoles = []
+    if (selectedRoles.includes(role)) {
+      newRoles = selectedRoles.filter(r => r !== role)
+    } else {
+      newRoles = [...selectedRoles, role]
+    }
+    if (newRoles.includes('all')) {
+      // 'all' is present, if it was added, remove all other options, if it was removed, keep all other options
+      newRoles = role === 'all' ? ['all'] : newRoles.filter(r => r !== 'all')
+    }
+    if (newRoles.length === 0) {
+      // If no roles are selected, default to 'all'
+      newRoles = ['all']
+    }
+    selectedRoles = newRoles
+  }
+
+  const getResultDescription = (): string => {
+    const count = filteredUsers.length
+    let result = `${count} brukere`
+    if (count === 0) result = 'Ingen brukere'
+    if (count === 1) result = '1 bruker'
+    return result
+  }
+
   $effect(() => {
     fetchSchools()
+  })
+
+  $effect(() => {
+    if (!router.getQueryParam('school') && $dataStore.currentSchool) {
+      handleSchoolSelect($dataStore.currentSchool.id)
+    }
   })
 
   $effect(() => {
@@ -115,6 +175,41 @@
         />
       </div>
     </div>
+    <!-- Radio buttons for role status -->
+    <div class="d-flex flex-wrap gap-3 mt-3">
+      <fieldset class="border p-3 rounded">
+        <legend class="w-auto fs-6">Brukere med rolle</legend>
+        {#each roleOptions as option (option.value)}
+          <label class="my-2 ms-1 d-block">
+            <input
+              type="checkbox"
+              name="roleOptions"
+              value={option.value}
+              onclick={() => handleRoleSelect(option.value)}
+              checked={selectedRoles.includes(option.value)}
+              disabled={option.value === 'all' && selectedRoles.length === 1}
+            />
+            <span class="ms-2">{option.label}</span>
+          </label>
+        {/each}
+      </fieldset>
+
+      <!-- Radio buttons for deleted status -->
+      <fieldset class="border p-3 rounded">
+        <legend class="w-auto fs-6">Deleted?</legend>
+        {#each deletedOptions as option}
+          <label class="my-2 ms-1 d-block">
+            <input
+              type="radio"
+              name="deletedOptions"
+              value={option.value}
+              bind:group={deletedSelection}
+            />
+            <span class="ms-2">{option.label}</span>
+          </label>
+        {/each}
+      </fieldset>
+    </div>
   {/if}
 </section>
 
@@ -128,6 +223,7 @@
     {:else if filteredUsers.length === 0}
       <div class="m-4">Ingen brukere funnet</div>
     {:else}
+      <div class="my-4">Fant {getResultDescription()}</div>
       <div class="card shadow-sm">
         <!-- Header row -->
         <div class="user-grid-row header fw-bold">

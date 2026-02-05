@@ -30,3 +30,11 @@ export enum CookieConsent {
   ALL = 'all',
   NECESSARY = 'only-necessary',
 }
+
+export enum UserRoles {
+  STUDENT = 'student',
+  TEACHER = 'teacher',
+  STAFF = 'staff',
+  ADMIN = 'admin',
+  INSPECTOR = 'inspector',
+}

@@ -104,7 +104,7 @@
                   <Link to="/admin/mastery-schemas" className="dropdown-item">Mastery Schemas</Link>
                 </li>
                 <li>
-                  <Link to="/analytics/" className="dropdown-item">Analytics</Link>
+                  <Link to="/analytics/index.php" className="dropdown-item">Analytics</Link>
                 </li>
               </ul>
             </li>
