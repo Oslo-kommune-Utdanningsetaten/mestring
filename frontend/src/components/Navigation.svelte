@@ -103,6 +103,9 @@
                 <li>
                   <Link to="/admin/mastery-schemas" className="dropdown-item">Mastery Schemas</Link>
                 </li>
+                <li>
+                  <Link to="/analytics/" className="dropdown-item">Analytics</Link>
+                </li>
               </ul>
             </li>
           {/if}

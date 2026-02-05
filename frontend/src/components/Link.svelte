@@ -5,8 +5,8 @@
 
   const { to, title, className, children, onclick } = $props<{
     to: string
-    className?: string
     title?: string
+    className?: string
     onclick?: (event: MouseEvent) => void
     children?: Snippet
   }>()
