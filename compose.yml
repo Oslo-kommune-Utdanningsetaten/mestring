@@ -128,7 +128,7 @@ services:
       - dev
 
   matomo:
-    image: matomo:5.7
+    build: ./matomo
     restart: always
     ports:
       - 8081:80
@@ -139,6 +139,9 @@ services:
       - MATOMO_DATABASE_TABLES_PREFIX=${MATOMO_DB_TABLES_PREFIX}
       - MATOMO_DATABASE_USERNAME=${MATOMO_DB_USERNAME}
       - MATOMO_DATABASE_PASSWORD=${MATOMO_DB_PASSWORD}
+      - MATOMO_GENERAL_TRUSTED_HOSTS=mestring.osloskolen.no
+      - MATOMO_GENERAL_ASSUME_SECURE_PROTOCOL=1
+      - MATOMO_GENERAL_FORCE_SSL=1
     volumes:
       - matomo-data:/var/www/html
     depends_on:
