@@ -227,12 +227,12 @@
       <div class="card shadow-sm">
         <!-- Header row -->
         <div class="user-grid-row header fw-bold">
-          <span>Bruker</span>
-          <span>Tilknytninger</span>
-          <span>Rolle</span>
+          <span>User</span>
+          <span>Affiliations</span>
+          <span>Role</span>
         </div>
         <!-- Data rows -->
-        {#each filteredUsers as user}
+        {#each filteredUsers as user (user.id)}
           <User {user} school={selectedSchool} />
         {/each}
       </div>

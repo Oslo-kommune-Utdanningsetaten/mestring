@@ -1,7 +1,9 @@
 <script lang="ts">
+  import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript'
   import type { GroupType } from '../generated/types.gen'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
   import Link from './Link.svelte'
+  import { is } from 'date-fns/locale'
 
   const {
     group,
@@ -11,6 +13,7 @@
     isGroupTypeNameEnabled,
     onclick,
     href,
+    classes,
   } = $props<{
     group: GroupType | null
     title?: string
@@ -19,6 +22,7 @@
     isGroupTypeNameEnabled?: boolean
     onclick?: () => void
     href?: string
+    classes?: string
   }>()
 
   const label: string = $derived(
@@ -58,7 +62,7 @@
         {onclick}
         aria-label={accessibleLabel}
       >
-        <pkt-tag iconName="group" {skin}>
+        <pkt-tag iconName="group" {skin} class={classes}>
           <span>{label}</span>
           {#if isGroupTypeChanged && isTypeWarningEnabled}
             <span class="colored-icon">
@@ -73,12 +77,24 @@
       </button>
     </span>
   {:else if href}
-    <pkt-tag iconName="group" {skin}>
-      <Link to={href}>{label}</Link>
+    <pkt-tag iconName="group" {skin} class={classes}>
+      <Link to={href}>
+        <span
+          class={group.isEnabled ? '' : 'disabled'}
+          title={group.isEnabled ? 'Enabled' : 'Disabled'}
+        >
+          {label}
+        </span>
+      </Link>
     </pkt-tag>
   {:else}
-    <pkt-tag iconName="group" {skin}>
-      <span>{label}</span>
+    <pkt-tag iconName="group" {skin} class={classes}>
+      <span
+        class={group.isEnabled ? '' : 'disabled'}
+        title={group.isEnabled ? 'Enabled' : 'Disabled'}
+      >
+        {label}
+      </span>
     </pkt-tag>
   {/if}
 {/if}
@@ -111,5 +127,12 @@
   button:hover {
     transform: scale(1.1);
     transition: transform 0.3s ease;
+  }
+
+  .disabled {
+    text-decoration: line-through;
+    text-decoration-thickness: 3px;
+    text-decoration-color: color-mix(in srgb, var(--pkt-color-brand-red-1000) 80%, transparent);
+    opacity: 0.7;
   }
 </style>

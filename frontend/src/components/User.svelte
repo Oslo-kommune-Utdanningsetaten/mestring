@@ -7,6 +7,7 @@
     NestedUserSchoolType,
     RoleType,
     SchoolType,
+    GroupType,
   } from '../generated/types.gen'
   import {
     userGroupsList,
@@ -17,6 +18,7 @@
   import { SCHOOL_ADMIN_ROLE, SCHOOL_INSPECTOR_ROLE, NONE_FIELD_VALUE } from '../utils/constants'
   import { dataStore } from '../stores/data'
   import ButtonMini from './ButtonMini.svelte'
+  import GroupTag from './GroupTag.svelte'
 
   const { user, school } = $props<{ user: UserType; school: SchoolType }>()
   const adminRole = $derived<RoleType>(
@@ -35,13 +37,19 @@
   let selectedSchoolRole = $derived(
     isSchoolAdmin ? SCHOOL_ADMIN_ROLE : isSchoolInspector ? SCHOOL_INSPECTOR_ROLE : NONE_FIELD_VALUE
   )
+  let teacherGroups = $derived(
+    <GroupType[]>(userGroups.filter(ug => ug.role.name === 'teacher') || []).map(ug => ug.group)
+  )
+  let studentGroups = $derived(
+    <GroupType[]>(userGroups.filter(ug => ug.role.name === 'student') || []).map(ug => ug.group)
+  )
 
   const fetchUserAffiliations = async () => {
     try {
       isLoadingData = true
       const groupsResult = await userGroupsList({ query: { user: user.id, school: school.id } })
       const schoolsResult = await userSchoolsList({ query: { user: user.id, school: school.id } })
-      userGroups = groupsResult.data || []
+      userGroups = (groupsResult.data || []).sort((a, b) => a.role.name.localeCompare(b.role.name))
       userSchools = schoolsResult.data || []
       hasLoadedData = true
     } catch (error) {
@@ -91,6 +99,10 @@
       fetchUserAffiliations()
     }
   }
+
+  $effect(() => {
+    fetchUserAffiliations()
+  })
 </script>
 
 <div class="user-grid-row">
@@ -101,14 +113,34 @@
   <div>
     {#if hasLoadedData}
       <div class="small">
-        <div>
+        <div class="mb-1">
           <strong>Direkte til skolen:</strong>
           {userSchools.map(us => us.role.name).join(', ') || 'Ingen'}
         </div>
-        <div>
-          <strong>Grupper på skolen:</strong>
-          {userGroups.map(ug => ug.group.displayName).join(', ') || 'Ingen'}
+        <div class="d-flex gap-1 mb-1">
+          <strong>Lærer:</strong>
+          {#each teacherGroups as group (group.id)}
+            <GroupTag
+              {group}
+              isGroupNameEnabled={true}
+              href={group.isEnabled ? `/groups/${group.id}/` : undefined}
+            />
+          {/each}
         </div>
+        <div class="d-flex gap-1">
+          <strong>Elev:</strong>
+          {#each studentGroups as group (group.id)}
+            <GroupTag
+              {group}
+              isGroupNameEnabled={true}
+              href={group.isEnabled ? `/groups/${group.id}/` : undefined}
+            />
+          {/each}
+        </div>
+      </div>
+    {:else}
+      <div class="spinner-border spinner-border-sm text-primary" role="status">
+        <span class="visually-hidden">Laster...</span>
       </div>
     {/if}
   </div>
@@ -116,7 +148,6 @@
     {#if userSchools.length > 0 || userGroups.length > 0}
       <div>
         <pkt-select
-          label="⚠️Angi rolle"
           name="userSchoolRole"
           value={selectedSchoolRole}
           onchange={(e: Event) => {
@@ -125,28 +156,13 @@
             handleRoleChange(roleName)
           }}
         >
-          <option value={NONE_FIELD_VALUE}>Ingen</option>
+          <option value={NONE_FIELD_VALUE}>none</option>
           {#each relevantSchoolRoles as option}
             <option value={option}>
               {option}
             </option>
           {/each}
         </pkt-select>
-      </div>
-    {:else}
-      <div class="pkt-input-check">
-        <ButtonMini
-          options={{
-            title: 'Hent tilknytninger',
-            iconName: 'process-back',
-            skin: 'secondary',
-            variant: 'icon-only',
-            classes: '',
-            onClick: () => fetchUserAffiliations(),
-          }}
-        >
-          Hent tilknytninger
-        </ButtonMini>
       </div>
     {/if}
   </div>
