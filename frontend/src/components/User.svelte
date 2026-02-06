@@ -17,8 +17,8 @@
   } from '../generated/sdk.gen'
   import { SCHOOL_ADMIN_ROLE, SCHOOL_INSPECTOR_ROLE, NONE_FIELD_VALUE } from '../utils/constants'
   import { dataStore } from '../stores/data'
-  import ButtonMini from './ButtonMini.svelte'
   import GroupTag from './GroupTag.svelte'
+  import { formatDate } from '../utils/functions'
 
   const { user, school } = $props<{ user: UserType; school: SchoolType }>()
   const adminRole = $derived<RoleType>(
@@ -43,6 +43,14 @@
   let studentGroups = $derived(
     <GroupType[]>(userGroups.filter(ug => ug.role.name === 'student') || []).map(ug => ug.group)
   )
+
+  let newestMembership: NestedUserGroupType | null = $derived(
+    [...userGroups].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )[0]
+  )
+
+  //let latestMembership: any = {}
 
   const fetchUserAffiliations = async () => {
     try {
@@ -110,6 +118,8 @@
     <div class="fw-semibold">{user.name}</div>
     <div class="text-muted small">{user.email || 'Ingen e-post'}</div>
   </div>
+  <div class="text-muted small">{formatDate(user.createdAt)}</div>
+  <div class="text-muted small">{formatDate(newestMembership?.createdAt)}</div>
   <div>
     {#if hasLoadedData}
       <div class="small">
@@ -117,7 +127,7 @@
           <strong>Direkte til skolen:</strong>
           {userSchools.map(us => us.role.name).join(', ') || 'Ingen'}
         </div>
-        <div class="d-flex gap-1 mb-1">
+        <div class="d-flex flex-wrap gap-1 mb-1">
           <strong>Lærer:</strong>
           {#each teacherGroups as group (group.id)}
             <GroupTag
@@ -127,7 +137,7 @@
             />
           {/each}
         </div>
-        <div class="d-flex gap-1">
+        <div class="d-flex flex-wrap gap-1">
           <strong>Elev:</strong>
           {#each studentGroups as group (group.id)}
             <GroupTag

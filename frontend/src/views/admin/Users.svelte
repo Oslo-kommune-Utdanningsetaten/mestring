@@ -228,6 +228,8 @@
         <!-- Header row -->
         <div class="user-grid-row header fw-bold">
           <span>User</span>
+          <span>Cr.</span>
+          <span>Mem.</span>
           <span>Affiliations</span>
           <span>Role</span>
         </div>
