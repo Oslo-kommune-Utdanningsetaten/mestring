@@ -37,6 +37,7 @@ export type UserDecorated = UserType & {
   allGroups?: GroupType[]
   teacherGroups?: GroupType[]
   studentGroups?: GroupType[]
+  userSchools?: NestedUserSchoolType[]
   schools?: SchoolType[]
   isSchoolAdmin?: boolean
   isSchoolInspector?: boolean

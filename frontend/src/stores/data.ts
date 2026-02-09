@@ -13,6 +13,7 @@ import {
   setLocalStorageItem,
   removeLocalStorageItem,
 } from '../stores/localStorage'
+import { fetchUserData } from '../utils/functions'
 import {
   SUBJECTS_ALLOWED_ALL,
   SUBJECTS_ALLOWED_CUSTOM,
@@ -144,37 +145,21 @@ export const setCurrentUser = (user: UserDecorated | null) => {
 
 export const registerUserStatus = async (school: SchoolType) => {
   const user = get(dataStore).currentUser
-  const [
-    schoolsResult,
-    userSchoolsResult,
-    teacherGroupsResult,
-    studentGroupsResult,
-    allGroupsResult,
-  ] = await Promise.all([
+  const [userData, schoolsResult, allGroupsResult] = await Promise.all([
+    fetchUserData(user.id, school.id),
     schoolsList({
       query: { isServiceEnabled: true },
-    }),
-    userSchoolsList({
-      query: { user: user.id, school: school.id },
-    }),
-    groupsList({
-      query: { user: user.id, school: school.id, roles: TEACHER_ROLE },
-    }),
-    groupsList({
-      query: { user: user.id, school: school.id, roles: STUDENT_ROLE },
     }),
     groupsList({
       query: { school: school.id },
     }),
   ])
+  const { teacherGroups, studentGroups, userSchools } = userData
+  const allGroups = allGroupsResult.data || []
+
   const schools = ((schoolsResult.data || []) as SchoolType[]).sort((a, b) =>
     a.displayName.localeCompare(b.displayName)
   )
-  const userSchools = userSchoolsResult.data || []
-  const teacherGroups = teacherGroupsResult.data || []
-  const studentGroups = studentGroupsResult.data || []
-  const allGroups = allGroupsResult.data || []
-
   const isSchoolAdmin = !!userSchools.some(
     userSchool => userSchool.role.name === SCHOOL_ADMIN_ROLE && userSchool.school.id === school.id
   )
@@ -188,6 +173,7 @@ export const registerUserStatus = async (school: SchoolType) => {
     allGroups,
     teacherGroups,
     studentGroups,
+    userSchools,
     isSchoolAdmin,
     isSchoolInspector,
   }

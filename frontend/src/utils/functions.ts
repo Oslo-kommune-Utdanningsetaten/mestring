@@ -1,14 +1,9 @@
 import type { Mastery, GoalDecorated } from '../types/models'
-import type {
-  GoalType,
-  SubjectType,
-  ObservationType,
-  GroupType,
-  StatusType,
-} from '../generated/types.gen'
-import { goalsList, observationsList, usersRetrieve } from '../generated/sdk.gen'
+import type { GoalType, SubjectType, ObservationType, GroupType } from '../generated/types.gen'
+import { goalsList, observationsList, userGroupsList, userSchoolsList } from '../generated/sdk.gen'
 import { nb as noLocale } from 'date-fns/locale'
 import { format, formatDistanceToNow } from 'date-fns'
+import { TEACHER_ROLE, STUDENT_ROLE } from './constants'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
   [key: string]: string
@@ -274,6 +269,25 @@ export const getContrastFriendlyTextColor = (bgColor: string) => {
   const contrastWithBlack = (bgLuminance + 0.05) / (blackLuminance + 0.05)
 
   return contrastWithWhite > contrastWithBlack ? '#ffffff' : '#000000'
+}
+
+export const fetchUserData = async (userId: string, schoolId: string) => {
+  const [userGroupsResult, userSchoolsResult] = await Promise.all([
+    userGroupsList({
+      query: { user: userId, school: schoolId },
+    }),
+    userSchoolsList({
+      query: { user: userId, school: schoolId },
+    }),
+  ])
+  const teacherGroups = (userGroupsResult.data || [])
+    .filter(ug => ug.role.name === TEACHER_ROLE)
+    .map(ug => ug.group)
+  const studentGroups = (userGroupsResult.data || [])
+    .filter(ug => ug.role.name === STUDENT_ROLE)
+    .map(ug => ug.group)
+  const userSchools = userSchoolsResult.data || []
+  return { teacherGroups, studentGroups, userSchools }
 }
 
 export const formatDateTime = (isoDate?: string | number | undefined) => {

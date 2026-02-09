@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { UserType, SchoolType } from '../../generated/types.gen'
+  import type { UserType, SchoolType, UserDecorated } from '../../generated/types.gen'
   import { usersList, schoolsList } from '../../generated/sdk.gen'
-  import { urlStringFrom } from '../../utils/functions'
+  import { urlStringFrom, fetchUserData } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { UserRoles } from '../../utils/constants'
@@ -31,6 +31,7 @@
         )
       : users
   )
+  let decoratedUsersById = $state<Record<string, UserDecorated>>({})
 
   // Options for filtering by role
   const roleOptions = [
@@ -74,11 +75,30 @@
         query: { school: selectedSchool.id, deleted: deletedSelection, roles: roles.join(',') },
       })
       users = result.data || []
+      users.forEach(user => {
+        if (!decoratedUsersById[user.id]) {
+          fetchUserAffiliations(user)
+        }
+      })
     } catch (error) {
       console.error('Error fetching users:', error)
       users = []
     } finally {
       isLoadingUsers = false
+    }
+  }
+
+  const fetchUserAffiliations = async (user: UserType) => {
+    if (!selectedSchool) return
+    try {
+      const { teacherGroups, studentGroups, userSchools } = await fetchUserData(
+        user.id,
+        selectedSchool.id
+      )
+      const decoratedUser = { ...user, teacherGroups, studentGroups, userSchools }
+      decoratedUsersById = { ...decoratedUsersById, [user.id]: decoratedUser }
+    } catch (error) {
+      console.error('Error fetching user data:', user.id, error)
     }
   }
 
@@ -235,7 +255,7 @@
         </div>
         <!-- Data rows -->
         {#each filteredUsers as user (user.id)}
-          <User {user} school={selectedSchool} />
+          <User {user} decoratedUser={decoratedUsersById[user.id]} school={selectedSchool} />
         {/each}
       </div>
     {/if}
