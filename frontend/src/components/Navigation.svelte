@@ -26,7 +26,7 @@
   {#if environmentWarning}
     <div
       class="environment-warning-banner"
-      title="Du bruerk en ikke-produksjonsversjon av applikasjonen"
+      title="Du bruker en ikke-produksjonsversjon av applikasjonen"
     >
       {environmentWarning}
     </div>
@@ -87,24 +87,24 @@
                   <Link to="/admin/schools" className="dropdown-item">Skoler</Link>
                 </li>
                 <li>
-                  <Link to="/admin/users" className="dropdown-item">Brukere</Link>
+                  <Link to="/admin/groups" className="dropdown-item">Grupper</Link>
                 </li>
                 <li>
                   <Link to="/admin/subjects" className="dropdown-item">Fag</Link>
                 </li>
                 <li>
-                  <Link to="/admin/groups" className="dropdown-item">Grupper</Link>
+                  <Link to="/admin/users" className="dropdown-item">Brukere</Link>
+                </li>
+                <li>
+                  <Link to="/admin/mastery-schemas" className="dropdown-item">Mastery Schemas</Link>
                 </li>
                 <li>
                   <Link to="/admin/data-maintenance-tasks" className="dropdown-item">
                     Bakgrunnsjobber
                   </Link>
                 </li>
-                <li>
-                  <Link to="/admin/mastery-schemas" className="dropdown-item">Mastery Schemas</Link>
-                </li>
-                <li>
-                  <Link to="/analytics/index.php" className="dropdown-item">Analytics</Link>
+                <li class="ms-3 mt-1">
+                  <a href="/analytics/index.php" target="_blank">Analytics</a>
                 </li>
               </ul>
             </li>
