@@ -101,31 +101,39 @@
     <div class="text-muted small">{formatDate(newestMembership?.createdAt)}</div>
     <div class="small">
       <div class="mb-1">
-        <strong>Direkte til skolen:</strong>
-        {decoratedUser.userSchools
-          .map((userSchool: NestedUserSchoolType) => userSchool.role.name)
-          .join(', ') || 'Ingen'}
+        <span class="group-type-heading">Direkte til skolen:</span>
+        <strong>
+          {decoratedUser.userSchools
+            .map((userSchool: NestedUserSchoolType) => userSchool.role.name)
+            .join(', ') || 'Ingen'}
+        </strong>
       </div>
-      <div class="d-flex flex-wrap gap-1 mb-1">
-        <strong>Lærer:</strong>
+
+      <div class="group-type-heading">Lærer</div>
+      <ul class="group-list">
         {#each decoratedUser.teacherGroups as group (group.id)}
-          <GroupTag
-            {group}
-            isGroupNameEnabled={true}
-            href={group.isEnabled ? `/groups/${group.id}/` : undefined}
-          />
+          <li>
+            <GroupTag
+              {group}
+              isGroupNameEnabled={true}
+              href={group.isEnabled ? `/groups/${group.id}/` : undefined}
+            />
+          </li>
         {/each}
-      </div>
-      <div class="d-flex flex-wrap gap-1">
-        <strong>Elev:</strong>
+      </ul>
+
+      <div class="group-type-heading">Elev</div>
+      <ul class="group-list">
         {#each decoratedUser.studentGroups as group (group.id)}
-          <GroupTag
-            {group}
-            isGroupNameEnabled={true}
-            href={group.isEnabled ? `/groups/${group.id}/` : undefined}
-          />
+          <li>
+            <GroupTag
+              {group}
+              isGroupNameEnabled={true}
+              href={group.isEnabled ? `/groups/${group.id}/` : undefined}
+            />
+          </li>
         {/each}
-      </div>
+      </ul>
     </div>
   {:else}
     <div class="spinner-border spinner-border-sm text-primary" role="status">
@@ -155,3 +163,18 @@
     {/if}
   </div>
 </div>
+
+<style>
+  .group-type-heading {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+  }
+
+  .group-list {
+    list-style: none;
+    padding-left: 0;
+    li {
+      margin-top: 2px;
+    }
+  }
+</style>
