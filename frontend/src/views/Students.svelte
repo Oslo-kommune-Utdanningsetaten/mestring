@@ -125,7 +125,7 @@
   {:else if students.length === 0}
     <div class="mt-3">Her var det tomt, gitt.</div>
   {:else}
-    <StudentsWithSubjects students={filteredStudents} {subjects} groups={allGroups} />
+    <StudentsWithSubjects students={filteredStudents} {subjects} />
   {/if}
 </section>
 

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { UserType, SubjectType, GroupType } from '../generated/types.gen'
   import type { Mastery } from '../types/models'
+  import { dataStore } from '../stores/data'
   import { goalsList } from '../generated/sdk.gen'
   import {
     goalsWithCalculatedMasteryBySubjectId,
@@ -13,12 +14,12 @@
   let {
     students,
     subjects,
-    groups,
   }: {
     students: UserType[]
     subjects: SubjectType[]
-    groups: GroupType[]
   } = $props()
+
+  const allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
 
   // Sort state
   type SortKey = 'name' | string // 'name' or subjectId
@@ -51,9 +52,8 @@
           const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(
             student.id,
             studentGoals,
-            groups
+            allGroups
           )
-
           const masteryBySubjectId: Record<string, MasteryState> = {}
           subjects.forEach(subject => {
             const goals = goalsBySubjectId[subject.id] || []

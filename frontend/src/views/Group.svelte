@@ -44,7 +44,6 @@
   let goalsListElement = $state<HTMLElement | null>(null)
   let group = $state<GroupType | null>(null)
   let sortableInstance: Sortable | null = null
-  let allGroups = $state<GroupType[]>([])
   let teachers = $state<UserType[]>([])
   let students = $state<UserType[]>([])
   let groupGoals = $state<GoalType[]>([])
@@ -377,7 +376,7 @@
   <section>
     <h3 class="mb-3">Elever</h3>
     {#if group.type === GROUP_TYPE_BASIS}
-      <StudentsWithSubjects {students} {subjects} groups={allGroups} />
+      <StudentsWithSubjects {students} {subjects} />
     {:else if group.type === GROUP_TYPE_TEACHING && subject}
       <StudentsWithGoals
         {students}

@@ -128,6 +128,7 @@ export const goalsWithCalculatedMasteryBySubjectId = async (
   groups: GroupType[]
 ) => {
   const decoratedGoals = await goalsWithCalculatedMastery(studentId, studentGoals)
+  //console.log('Decorated goals with mastery data:', studentId, decoratedGoals)
   let goalsBySubjectId: Record<string, GoalDecorated[]> = {}
   decoratedGoals.forEach((goal: GoalDecorated) => {
     let subjectId = goal.subjectId
