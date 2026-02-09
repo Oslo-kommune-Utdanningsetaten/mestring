@@ -13,6 +13,7 @@
   import { dataStore } from '../stores/data'
   import GroupTag from './GroupTag.svelte'
   import { formatDate } from '../utils/functions'
+  import SinceSchoolStart from './SinceSchoolStart.svelte'
 
   const { user, decoratedUser, school } = $props<{
     user: UserType
@@ -94,9 +95,15 @@
     <div class="text-muted small">{user.email || 'Ingen e-post'}</div>
     <div class="text-muted small">{user.id}</div>
   </div>
-  <div class="text-muted small">{formatDate(user.createdAt)}</div>
+  <div>
+    <div class="text-muted small">{formatDate(user.createdAt)}</div>
+    <SinceSchoolStart dateAsString={user.createdAt} />
+  </div>
   {#if decoratedUser}
-    <div class="text-muted small">{formatDate(newestMembership?.createdAt)}</div>
+    <div>
+      <div class="text-muted small">{formatDate(newestMembership?.createdAt)}</div>
+      <SinceSchoolStart dateAsString={newestMembership?.createdAt} />
+    </div>
     <div class="small">
       <div class="mb-1">
         <span class="group-type-heading">Direkte til skolen:</span>
