@@ -280,14 +280,11 @@ export const fetchUserData = async (userId: string, schoolId: string) => {
       query: { user: userId, school: schoolId },
     }),
   ])
-  const teacherGroups = (userGroupsResult.data || [])
-    .filter(ug => ug.role.name === TEACHER_ROLE)
-    .map(ug => ug.group)
-  const studentGroups = (userGroupsResult.data || [])
-    .filter(ug => ug.role.name === STUDENT_ROLE)
-    .map(ug => ug.group)
+  const userGroups = userGroupsResult.data || []
+  const teacherGroups = userGroups.filter(ug => ug.role.name === TEACHER_ROLE).map(ug => ug.group)
+  const studentGroups = userGroups.filter(ug => ug.role.name === STUDENT_ROLE).map(ug => ug.group)
   const userSchools = userSchoolsResult.data || []
-  return { teacherGroups, studentGroups, userSchools }
+  return { teacherGroups, studentGroups, userGroups, userSchools }
 }
 
 export const formatDateTime = (isoDate?: string | number | undefined) => {

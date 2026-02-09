@@ -33,6 +33,64 @@
   )
   let decoratedUsersById = $state<Record<string, UserDecorated>>({})
 
+  // Sort state
+  type SortKey = 'name' | 'createdAt' | 'newestMembership'
+  let sortBy = $state<SortKey>('name')
+  let sortDirection = $state<'asc' | 'desc'>('asc')
+
+  // Sorted users list
+  let sortedUsers = $derived.by(() => {
+    const sorted = [...filteredUsers]
+    sorted.sort((a, b) => {
+      let comparison: number
+      if (sortBy === 'name') {
+        comparison = a.name.localeCompare(b.name, 'no')
+      } else if (sortBy === 'createdAt') {
+        comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      } else if (sortBy === 'newestMembership') {
+        const decoratedA = decoratedUsersById[a.id]
+        const decoratedB = decoratedUsersById[b.id]
+        if (!decoratedA || !decoratedB) return 0
+
+        const userGroupsA = decoratedA.userGroups
+        const userGroupsB = decoratedB.userGroups
+
+        const newestA = [...userGroupsA].sort(
+          (x, y) => new Date(y.createdAt).getTime() - new Date(x.createdAt).getTime()
+        )[0]
+        const newestB = [...userGroupsB].sort(
+          (x, y) => new Date(y.createdAt).getTime() - new Date(x.createdAt).getTime()
+        )[0]
+
+        if (!newestA && !newestB) return 0
+        if (!newestA) return 1
+        if (!newestB) return -1
+
+        comparison = new Date(newestA.createdAt).getTime() - new Date(newestB.createdAt).getTime()
+      } else {
+        comparison = 0
+      }
+      return sortDirection === 'asc' ? comparison : -comparison
+    })
+    return [...sorted]
+  })
+
+  const handleHeaderClick = (key: SortKey) => {
+    if (sortBy === key) {
+      // Toggle direction
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'
+    } else {
+      // New sort key
+      sortBy = key
+      sortDirection = 'asc'
+    }
+  }
+
+  const getSortIndicator = (key: SortKey): string => {
+    if (sortBy !== key) return ''
+    return sortDirection === 'asc' ? '▲' : '▼'
+  }
+
   // Options for filtering by role
   const roleOptions = [
     { value: 'all', label: 'Alle' },
@@ -91,11 +149,11 @@
   const fetchUserAffiliations = async (user: UserType) => {
     if (!selectedSchool) return
     try {
-      const { teacherGroups, studentGroups, userSchools } = await fetchUserData(
+      const { teacherGroups, studentGroups, userGroups, userSchools } = await fetchUserData(
         user.id,
         selectedSchool.id
       )
-      const decoratedUser = { ...user, teacherGroups, studentGroups, userSchools }
+      const decoratedUser = { ...user, teacherGroups, studentGroups, userSchools, userGroups }
       decoratedUsersById = { ...decoratedUsersById, [user.id]: decoratedUser }
     } catch (error) {
       console.error('Error fetching user data:', user.id, error)
@@ -129,7 +187,7 @@
   }
 
   const getResultDescription = (): string => {
-    const count = filteredUsers.length
+    const count = sortedUsers.length
     let result = `${count} brukere`
     if (count === 0) result = 'Ingen brukere'
     if (count === 1) result = '1 bruker'
@@ -247,14 +305,32 @@
       <div class="card shadow-sm">
         <!-- Header row -->
         <div class="user-grid-row header fw-bold">
-          <span>User</span>
-          <span>Cr.</span>
-          <span>Mem.</span>
+          <button
+            class="sortable-header"
+            onclick={() => handleHeaderClick('name')}
+            title="Sorter etter brukernavn"
+          >
+            User{getSortIndicator('name')}
+          </button>
+          <button
+            class="sortable-header"
+            onclick={() => handleHeaderClick('createdAt')}
+            title="Sorter etter opprettelsesdato"
+          >
+            Created{getSortIndicator('createdAt')}
+          </button>
+          <button
+            class="sortable-header"
+            onclick={() => handleHeaderClick('newestMembership')}
+            title="Sorter etter nyeste gruppemedlemskap"
+          >
+            Newest mb.ship{getSortIndicator('newestMembership')}
+          </button>
           <span>Affiliations</span>
           <span>Role</span>
         </div>
         <!-- Data rows -->
-        {#each filteredUsers as user (user.id)}
+        {#each sortedUsers as user (user.id)}
           <User {user} decoratedUser={decoratedUsersById[user.id]} school={selectedSchool} />
         {/each}
       </div>
@@ -285,5 +361,27 @@
     height: 48px;
     margin-top: 0px;
     padding-left: 15px;
+  }
+
+  .user-grid-row.header {
+    padding-bottom: 1rem;
+  }
+
+  .sortable-header {
+    cursor: pointer;
+    border: 1px solid var(--pkt-color-grays-gray-100);
+    background-color: var(--pkt-color-surface-strong-light-green);
+    font-weight: 800;
+    padding: 0.1rem 0.3rem 0.1rem 0.3rem;
+    text-align: left;
+    transform: rotate(-60deg);
+    font-size: 0.8rem;
+    max-width: 6rem;
+    overflow-wrap: break-word;
+    z-index: 2;
+  }
+
+  .sortable-header:hover {
+    background-color: var(--bs-gray-300);
   }
 </style>

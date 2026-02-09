@@ -35,18 +35,15 @@
   let selectedSchoolRole = $derived(
     isSchoolAdmin ? SCHOOL_ADMIN_ROLE : isSchoolInspector ? SCHOOL_INSPECTOR_ROLE : NONE_FIELD_VALUE
   )
-  let userGroups = $derived(
-    decoratedUser ? decoratedUser.teacherGroups.concat(decoratedUser.studentGroups) : []
-  )
 
   let newestMembership: NestedUserGroupType | null = $derived(
-    [...userGroups].sort(
+    [...decoratedUser.userGroups].sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )[0]
   )
 
   const hasUserAnyAffiliations = $derived(
-    decoratedUser && (decoratedUser.userSchools.length > 0 || userGroups.length > 0)
+    decoratedUser && (decoratedUser.userSchools.length > 0 || decoratedUser.userGroups.length > 0)
   )
 
   const handleRoleChange = async (roleName: string) => {
@@ -95,6 +92,7 @@
   <div>
     <div class="fw-semibold">{user.name}</div>
     <div class="text-muted small">{user.email || 'Ingen e-post'}</div>
+    <div class="text-muted small">{user.id}</div>
   </div>
   <div class="text-muted small">{formatDate(user.createdAt)}</div>
   {#if decoratedUser}
@@ -174,7 +172,7 @@
     list-style: none;
     padding-left: 0;
     li {
-      margin-top: 2px;
+      margin-top: 4px;
     }
   }
 </style>
