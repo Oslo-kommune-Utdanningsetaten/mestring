@@ -1,14 +1,13 @@
 <script lang="ts">
-  import type { UserType, SchoolType, UserDecorated } from '../../generated/types.gen'
+  import { useTinyRouter } from 'svelte-tiny-router'
+  import type { UserType, SchoolType } from '../../generated/types.gen'
   import { usersList, schoolsList } from '../../generated/sdk.gen'
   import { urlStringFrom, fetchUserData } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
-  import { useTinyRouter } from 'svelte-tiny-router'
   import { UserRoles } from '../../utils/constants'
   import User from '../../components/User.svelte'
 
   const router = useTinyRouter()
-  let users = $state<UserType[]>([])
   let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingUsers = $state<boolean>(false)
@@ -20,9 +19,12 @@
     UserRoles.STAFF,
   ])
   let deletedSelection = $state<'include' | 'only' | 'exclude'>('include')
-
   let nameFilter = $state<string>('')
-  let filteredUsers = $derived(
+
+  // Array of fetched users
+  let users = $state<UserType[]>([])
+  // Array of users after filtering by name
+  let filteredUsers = $derived<UserType[]>(
     nameFilter
       ? users.filter(
           user =>
@@ -31,6 +33,7 @@
         )
       : users
   )
+  // Map of userId to decorated user data with affiliations
   let decoratedUsersById = $state<Record<string, UserDecorated>>({})
 
   // Sort state
@@ -135,7 +138,7 @@
       users = result.data || []
       users.forEach(user => {
         if (!decoratedUsersById[user.id]) {
-          fetchUserAffiliations(user)
+          fetchUserAffiliations(user.id)
         }
       })
     } catch (error) {
@@ -146,17 +149,22 @@
     }
   }
 
-  const fetchUserAffiliations = async (user: UserType) => {
+  const fetchUserAffiliations = async (userId: string) => {
     if (!selectedSchool) return
     try {
       const { teacherGroups, studentGroups, userGroups, userSchools } = await fetchUserData(
-        user.id,
+        userId,
         selectedSchool.id
       )
+      const user = users.find(u => u.id === userId)
+      if (!user) {
+        console.error('User not found for ID:', userId)
+        return
+      }
       const decoratedUser = { ...user, teacherGroups, studentGroups, userSchools, userGroups }
-      decoratedUsersById = { ...decoratedUsersById, [user.id]: decoratedUser }
+      decoratedUsersById = { ...decoratedUsersById, [userId]: decoratedUser }
     } catch (error) {
-      console.error('Error fetching user data:', user.id, error)
+      console.error('Error fetching user data:', userId, error)
     }
   }
 
@@ -326,12 +334,17 @@
           >
             Newest mb.ship{getSortIndicator('newestMembership')}
           </button>
-          <span>Affiliations</span>
-          <span>Role</span>
+          <span>Groups</span>
+          <span>School access</span>
         </div>
         <!-- Data rows -->
         {#each sortedUsers as user (user.id)}
-          <User {user} decoratedUser={decoratedUsersById[user.id]} school={selectedSchool} />
+          <User
+            {user}
+            decoratedUser={decoratedUsersById[user.id]}
+            school={selectedSchool}
+            onUserUpdate={fetchUserAffiliations}
+          />
         {/each}
       </div>
     {/if}

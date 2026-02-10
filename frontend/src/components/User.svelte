@@ -15,10 +15,11 @@
   import { formatDate } from '../utils/functions'
   import SinceSchoolStart from './SinceSchoolStart.svelte'
 
-  const { user, decoratedUser, school } = $props<{
+  const { user, decoratedUser, school, onUserUpdate } = $props<{
     user: UserType
     decoratedUser: UserDecorated
     school: SchoolType
+    onUserUpdate: (userId: string) => Promise<void>
   }>()
 
   let isSchoolInspector = $derived(
@@ -41,10 +42,6 @@
     [...decoratedUser.userGroups].sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )[0]
-  )
-
-  const hasUserAnyAffiliations = $derived(
-    decoratedUser && (decoratedUser.userSchools.length > 0 || decoratedUser.userGroups.length > 0)
   )
 
   const handleRoleChange = async (roleName: string) => {
@@ -82,9 +79,9 @@
         })
       }
     } catch (error) {
-      console.error('Error changing role:', error)
+      console.error('Error while changing role:', error)
     } finally {
-      console.log('Finished role change process')
+      onUserUpdate(decoratedUser.id)
     }
   }
 </script>
@@ -105,15 +102,6 @@
       <SinceSchoolStart dateAsString={newestMembership?.createdAt} />
     </div>
     <div class="small">
-      <div class="mb-1">
-        <span class="group-type-heading">Direkte til skolen:</span>
-        <strong>
-          {decoratedUser.userSchools
-            .map((userSchool: NestedUserSchoolType) => userSchool.role.name)
-            .join(', ') || 'Ingen'}
-        </strong>
-      </div>
-
       <div class="group-type-heading">Lærer</div>
       <ul class="group-list">
         {#each decoratedUser.teacherGroups as group (group.id)}
@@ -140,33 +128,37 @@
         {/each}
       </ul>
     </div>
+
+    <div>
+      <div class="mb-1">
+        <strong>
+          {decoratedUser.userSchools
+            .map((userSchool: NestedUserSchoolType) => userSchool.role.name)
+            .join(', ') || 'Ingen'}
+        </strong>
+      </div>
+      <pkt-select
+        name="userSchoolRole"
+        value={selectedSchoolRole}
+        onchange={(e: Event) => {
+          const target = e.target as HTMLSelectElement | null
+          const roleName = target?.value || NONE_FIELD_VALUE
+          handleRoleChange(roleName)
+        }}
+      >
+        <option value={NONE_FIELD_VALUE}>none</option>
+        {#each relevantSchoolRoles as option}
+          <option value={option}>
+            {option}
+          </option>
+        {/each}
+      </pkt-select>
+    </div>
   {:else}
     <div class="spinner-border spinner-border-sm text-primary" role="status">
       <span class="visually-hidden">Laster...</span>
     </div>
   {/if}
-  <div>
-    {#if hasUserAnyAffiliations}
-      <div>
-        <pkt-select
-          name="userSchoolRole"
-          value={selectedSchoolRole}
-          onchange={(e: Event) => {
-            const target = e.target as HTMLSelectElement | null
-            const roleName = target?.value || NONE_FIELD_VALUE
-            handleRoleChange(roleName)
-          }}
-        >
-          <option value={NONE_FIELD_VALUE}>none</option>
-          {#each relevantSchoolRoles as option}
-            <option value={option}>
-              {option}
-            </option>
-          {/each}
-        </pkt-select>
-      </div>
-    {/if}
-  </div>
 </div>
 
 <style>
