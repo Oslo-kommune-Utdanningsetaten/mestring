@@ -10,7 +10,6 @@
   let currentSchool = $derived($dataStore.currentSchool)
   let isHomeActive = $derived($currentPath === '/')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
-  let isAboutActive = $derived($currentPath === '/about')
   let isAdminActive = $derived($currentPath.startsWith('/admin'))
   let isProfileActive = $derived($currentPath.startsWith('/profile'))
   let environmentWarning = $derived(
@@ -32,13 +31,13 @@
     </div>
   {/if}
   <div class="container-md">
-    <Link className="navbar-brand" to="/">
-      <span class="me-1 goal-icon-wrapper">
-        <pkt-icon name="goal" title="Mestring logo" aria-hidden="true"></pkt-icon>
-        <span class="celebration-overlay" aria-hidden="true">
-          <GoalIconCelebration />
-        </span>
+    <span class="me-1 goal-icon-wrapper">
+      <pkt-icon name="goal" title="Mestring logo" aria-hidden="true"></pkt-icon>
+      <span class="celebration-overlay" aria-hidden="true">
+        <GoalIconCelebration />
       </span>
+    </span>
+    <Link className="navbar-brand" to="/">
       <h1>{currentSchool?.displayName || 'INGEN SKOLE VALGT'}</h1>
     </Link>
 
