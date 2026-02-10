@@ -300,6 +300,12 @@
     </div>
   </section>
 
+  {#if !group.isEnabled}
+    <h3 class="my-5">
+      ⚠️ Denne gruppa er deaktivert! Kontakt en admin dersom du mener den burde være aktivert.
+    </h3>
+  {/if}
+
   <!-- Group goals Section -->
   {#if currentSchool?.isGroupGoalEnabled && group.subjectId}
     <section>

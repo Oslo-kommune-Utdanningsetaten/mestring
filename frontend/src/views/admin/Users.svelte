@@ -1,6 +1,7 @@
 <script lang="ts">
   import { useTinyRouter } from 'svelte-tiny-router'
   import type { UserType, SchoolType } from '../../generated/types.gen'
+  import type { UserDecorated } from '../../types/models.d.ts'
   import { usersList, schoolsList } from '../../generated/sdk.gen'
   import { urlStringFrom, fetchUserData } from '../../utils/functions'
   import { dataStore } from '../../stores/data'

@@ -106,11 +106,7 @@
       <ul class="group-list">
         {#each decoratedUser.teacherGroups as group (group.id)}
           <li>
-            <GroupTag
-              {group}
-              isGroupNameEnabled={true}
-              href={group.isEnabled ? `/groups/${group.id}/` : undefined}
-            />
+            <GroupTag {group} isGroupNameEnabled={true} href={`/groups/${group.id}/`} />
           </li>
         {/each}
       </ul>
@@ -119,11 +115,7 @@
       <ul class="group-list">
         {#each decoratedUser.studentGroups as group (group.id)}
           <li>
-            <GroupTag
-              {group}
-              isGroupNameEnabled={true}
-              href={group.isEnabled ? `/groups/${group.id}/` : undefined}
-            />
+            <GroupTag {group} isGroupNameEnabled={true} href={`/groups/${group.id}/`} />
           </li>
         {/each}
       </ul>
