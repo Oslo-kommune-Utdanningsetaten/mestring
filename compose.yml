@@ -60,7 +60,7 @@ services:
       - ./backend/.env
     environment:
       DJANGO_DEBUG: 'False'
-      DB_HOST: 'postgres'
+      DB_HOST: ${DB_HOST}
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     profiles:
@@ -101,12 +101,12 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      DB_HOST: 'postgres'
+      DB_HOST: ${DB_HOST}
       DJANGO_DEBUG: 'False'
       LOG_FILE: 'debug-taskrunner.log'
       DB_CONN_MAX_AGE: 0
     depends_on:
-      postgres:
+      backend:
         condition: service_healthy
     restart: always
     profiles:
