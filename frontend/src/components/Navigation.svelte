@@ -30,13 +30,17 @@
       {environmentWarning}
     </div>
   {/if}
+
   <div class="container-md">
+    <!-- Mestring app logo -->
     <span class="me-1 goal-icon-wrapper">
       <pkt-icon name="goal" title="Mestring logo" aria-hidden="true"></pkt-icon>
       <span class="celebration-overlay" aria-hidden="true">
         <GoalIconCelebration />
       </span>
     </span>
+
+    <!-- Main heading, school name -->
     <Link className="navbar-brand" to="/">
       <h1>{currentSchool?.displayName || 'INGEN SKOLE VALGT'}</h1>
     </Link>
@@ -163,6 +167,7 @@
     display: inline-flex;
     width: 28px;
     aspect-ratio: 1 / 1;
+    margin-bottom: 0.6rem;
   }
 
   .goal-icon-wrapper :global(pkt-icon) {
