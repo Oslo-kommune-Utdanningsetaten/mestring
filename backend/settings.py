@@ -8,7 +8,6 @@ load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_HOST = os.environ.get('DB_HOST', 'localhost')
 SERVER_DEPLOYMENT = os.environ.get("SERVER_DEPLOYMENT")
 SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: only set this to True in a development environment
@@ -102,7 +101,7 @@ DATABASES = {
         'NAME': os.environ.get('POSTGRES_DB_NAME'),
         'USER': os.environ.get('POSTGRES_USER'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': DB_HOST,
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': '5432',
         'OPTIONS': {
             'client_encoding': 'UTF8'
