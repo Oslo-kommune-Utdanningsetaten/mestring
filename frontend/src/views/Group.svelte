@@ -287,6 +287,8 @@
         </h2>
         {#if subject}
           <h5 class="text-secondary" title={subject.grepCode}>{subject.displayName}</h5>
+        {:else if group.type === GROUP_TYPE_TEACHING}
+          <h5 class="text-secondary">[mangler fag]</h5>
         {/if}
       </div>
     </div>
@@ -383,7 +385,7 @@
     <h3 class="mb-3">Elever</h3>
     {#if group.type === GROUP_TYPE_BASIS}
       <StudentsWithSubjects {students} {subjects} />
-    {:else if group.type === GROUP_TYPE_TEACHING && subject}
+    {:else if group.type === GROUP_TYPE_TEACHING}
       <StudentsWithGoals
         {students}
         goals={groupGoals}
@@ -394,7 +396,12 @@
         onEditStatus={handleEditStatus}
       />
     {:else}
-      <div class="alert alert-warning">ukjent gruppetype</div>
+      <div class="alert alert-warning">
+        <div>Hm, denne gruppa har en uventet datastruktur</div>
+        <pre>
+            {JSON.stringify(group, null, 2)}
+          </pre>
+      </div>
     {/if}
   </section>
 {/if}

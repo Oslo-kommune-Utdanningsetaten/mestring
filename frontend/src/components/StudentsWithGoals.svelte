@@ -20,7 +20,7 @@
     students: UserType[]
     goals: GoalType[]
     goalsWithMasteryByStudentId: Record<string, GoalDecorated[]>
-    subject: SubjectType
+    subject?: SubjectType | null
     statusesKey?: number
     onEditObservation: (
       goal: GoalDecorated,
@@ -120,7 +120,7 @@
   {#each sortedStudents as student (student.id)}
     <span class="item student-cell">
       <Link to={`/students/${student.id}`}>{student.name}</Link>
-      {#if $dataStore.currentSchool.isStatusEnabled}
+      {#if $dataStore.currentSchool.isStatusEnabled && subject}
         <div class="status-controls">
           {#key statusesKey}
             <Statuses {student} {subject} />
