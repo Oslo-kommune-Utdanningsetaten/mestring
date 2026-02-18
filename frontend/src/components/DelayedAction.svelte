@@ -50,7 +50,6 @@
     class="delayed-action"
     style="--delay: {delay}s"
     {title}
-    aria-label={title}
     onclick={handleAbort}
     onkeydown={e => {
       if (e.key === 'Enter' || e.key === ' ') {
