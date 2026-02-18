@@ -20,7 +20,7 @@ export const alerts = writable<AlertType[]>([])
 
 export const addAlert = (newAlert: Partial<AlertType>) => {
   // Don't add alert to store if we already have one with same message
-  if (get(alerts).some(alert => alert.message === newAlert.message)) return
+  //if (get(alerts).some(alert => alert.message === newAlert.message)) return
   newAlert.id = ++nextAlertId
   newAlert.timestamp = Date.now()
   newAlert.isPersistent = newAlert.isPersistent || false
@@ -30,6 +30,10 @@ export const addAlert = (newAlert: Partial<AlertType>) => {
 export const removeAlert = (id?: number) => {
   if (id === undefined) return
   alerts.update(currentAlerts => currentAlerts.filter(alert => id !== alert.id))
+}
+
+export const removeAllAlerts = () => {
+  alerts.set([])
 }
 
 // every alertFlushInterval, remove non-persistent alerts older than alertTTL
