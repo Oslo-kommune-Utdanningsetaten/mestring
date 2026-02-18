@@ -2,18 +2,16 @@
   interface Props {
     onAction: () => void
     onAbort: () => void
-    delay?: number
-    title?: string
+    delay?: number // seconds until the action is executed
   }
 
-  const defaultDelay = 10
-  const defaultTitle = 'Klikk for å avbryte'
-
-  const { onAction, delay = defaultDelay, title = defaultTitle, onAbort }: Props = $props()
+  const defaultDelay = 6
+  const { onAction, delay = defaultDelay, onAbort }: Props = $props()
 
   let secondsLeft = $state(0)
   let intervalId: ReturnType<typeof setInterval> | null = $state(null)
   let isActive = $state(false)
+  const title = $derived<string>(`Sletting om ${secondsLeft} sekunder. Klikk for å avbryte.`)
 
   const startCountdown = () => {
     intervalId = setInterval(() => {
@@ -33,7 +31,7 @@
     }
   }
 
-  const abort = () => {
+  const handleAbort = () => {
     clearCountdown()
     isActive = false
     secondsLeft = 0
@@ -50,41 +48,65 @@
 {#if isActive}
   <button
     class="delayed-action"
+    style="--delay: {delay}s"
     {title}
     aria-label={title}
-    onclick={abort}
+    onclick={handleAbort}
     onkeydown={e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
-        abort()
+        handleAbort()
       }
     }}
   >
-    Slettes om {secondsLeft}
+    <span class="button-text">Avbryt sletting</span>
   </button>
 {/if}
 
 <style>
-  .delayed-action {
-    height: 32px;
-    width: 100px;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 0.7rem;
-    white-space: nowrap;
-    cursor: pointer;
-    border: 1px solid var(--bs-gray);
-    border-radius: 3px;
-    background-color: var(--pkt-color-signal-red-100, #fde8e8);
-    color: var(--pkt-color-signal-red-700, #c30000);
-    padding: 0 4px;
-    margin-left: 8px;
-    transition: background-color 0.2s;
+  @keyframes fill-progress {
+    to {
+      width: 100%;
+    }
   }
 
-  .delayed-action:hover {
-    background-color: var(--pkt-color-grays-gray-100, #f0f0f0);
-    color: inherit;
+  @keyframes reveal-white-text {
+    to {
+      clip-path: inset(0);
+    }
+  }
+
+  .delayed-action {
+    position: relative;
+    overflow: hidden;
+    background: var(--pkt-color-signal-red-100, #fde8e8);
+    color: var(--pkt-color-signal-red-900, #8b0000);
+    border: 1px solid var(--bs-gray);
+    border-radius: 3px;
+    margin-left: 8px;
+  }
+
+  .button-text {
+    position: relative;
+    z-index: 2;
+  }
+
+  .button-text::before {
+    content: 'Avbryt sletting';
+    position: absolute;
+    left: 0;
+    color: white;
+    animation: reveal-white-text var(--delay) linear forwards;
+    clip-path: inset(0 100% 0 0);
+  }
+
+  .delayed-action::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 0;
+    background: var(--pkt-color-signal-red-500, #e02020);
+    animation: fill-progress var(--delay) linear forwards;
+    z-index: 1;
   }
 </style>

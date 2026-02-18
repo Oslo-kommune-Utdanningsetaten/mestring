@@ -386,15 +386,17 @@
                 {observation.masteryValue}
               </span>
               <span>
-                <ButtonIcon
-                  options={{
-                    iconName: 'trash-can',
-                    title: 'Slett observasjon',
-                    classes: 'bordered',
-                    onClick: () => handleDeleteObservation(observation.id),
-                    delayActionFor: 10,
-                  }}
-                />
+                {#key observation.id}
+                  <ButtonIcon
+                    options={{
+                      iconName: 'trash-can',
+                      title: 'Slett observasjon',
+                      classes: 'bordered',
+                      onClick: () => handleDeleteObservation(observation.id),
+                      delayActionFor: 4,
+                    }}
+                  />
+                {/key}
                 {#if index === goal?.observations.length - 1}
                   <ButtonIcon
                     options={{

@@ -67,12 +67,7 @@
     <pkt-icon name={iconName} variant="large" aria-hidden="true"></pkt-icon>
   </button>
   {#if delayActionFor && hasBeenClicked}
-    <DelayedAction
-      onAction={onClick}
-      onAbort={handleAbort}
-      delay={delayActionFor}
-      title={delayActionTitle}
-    />
+    <DelayedAction onAction={onClick} onAbort={handleAbort} delay={delayActionFor} />
   {/if}
 </div>
 
