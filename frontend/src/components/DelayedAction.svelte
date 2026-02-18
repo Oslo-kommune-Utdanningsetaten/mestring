@@ -85,6 +85,10 @@
     margin-left: 8px;
   }
 
+  .delayed-action:hover {
+    filter: brightness(80%);
+  }
+
   .button-text {
     position: relative;
     z-index: 2;
