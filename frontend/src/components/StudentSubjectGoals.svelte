@@ -392,6 +392,7 @@
                     title: 'Slett observasjon',
                     classes: 'bordered',
                     onClick: () => handleDeleteObservation(observation.id),
+                    delayActionFor: 10,
                   }}
                 />
                 {#if index === goal?.observations.length - 1}

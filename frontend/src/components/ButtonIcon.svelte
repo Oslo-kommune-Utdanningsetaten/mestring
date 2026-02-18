@@ -1,5 +1,6 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-button.js'
+  import DelayedAction from './DelayedAction.svelte'
 
   interface Props {
     options: {
@@ -8,6 +9,8 @@
       title?: string
       disabled?: boolean
       onClick?: () => void
+      delayActionFor?: number
+      delayActionTitle?: string
     }
     children?: any
   }
@@ -17,33 +20,69 @@
   const classes = $derived(options.classes || 'me-2')
   const title = $derived(options.title || 'TITTEL MANGLER')
   const disabled = $derived<boolean>(options.disabled || false)
+  const delayActionFor = $derived(options.delayActionFor)
+  const delayActionTitle = $derived(options.delayActionTitle || 'Klikk for å avbryte')
+
+  let hasBeenClicked = $state(false)
+
   const onClick = $derived(
     options.onClick ||
       (() => {
         console.warn('No onClick function provided')
       })
   )
-</script>
 
-<button
-  {title}
-  aria-label={title}
-  class={`button-icon ${classes} ${disabled ? 'disabled' : ''}`}
-  tabindex={disabled ? undefined : 0}
-  onclick={() => !disabled && onClick()}
-  onkeydown={(e: any) => {
+  const handleClick = () => {
     if (disabled) return
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
+    if (delayActionFor) {
+      // onClick will be executed after delay
+      hasBeenClicked = true
+    } else {
+      // Execute onClick immediately
       onClick()
     }
-  }}
-  aria-disabled={disabled ? 'true' : 'false'}
->
-  <pkt-icon name={iconName} variant="large" aria-hidden="true"></pkt-icon>
-</button>
+  }
+
+  const handleAbort = () => {
+    hasBeenClicked = false
+  }
+</script>
+
+<div class="button-icon-wrapper">
+  <button
+    {title}
+    aria-label={title}
+    class={`button-icon ${classes} ${disabled ? 'disabled' : ''}`}
+    tabindex={disabled ? undefined : 0}
+    onclick={handleClick}
+    onkeydown={(e: any) => {
+      if (disabled) return
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        handleClick()
+      }
+    }}
+    aria-disabled={disabled ? 'true' : 'false'}
+  >
+    <pkt-icon name={iconName} variant="large" aria-hidden="true"></pkt-icon>
+  </button>
+  {#if delayActionFor && hasBeenClicked}
+    <DelayedAction
+      onAction={onClick}
+      onAbort={handleAbort}
+      delay={delayActionFor}
+      title={delayActionTitle}
+    />
+  {/if}
+</div>
 
 <style>
+  .button-icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+  }
+
   .button-icon {
     width: 32px;
     height: 32px;
