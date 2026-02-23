@@ -1,10 +1,9 @@
 <script lang="ts">
-  import PersonSVG from '../assets/person.svg.svelte'
   import Link from '../components/Link.svelte'
 </script>
 
-<h2 class="my-3">Om tjenesten</h2>
 <section class="my-4">
+  <h2 class="my-3">Om tjenesten</h2>
   <ul>
     <li>
       mestring.osloskolen.no er en prototype på hvordan det går an holde oversikt over elevers
@@ -30,7 +29,38 @@
   </ul>
 </section>
 
-<section class="my-3">
+<section class="my-4">
+  <h3>Hvem har tilgang til hva?</h3>
+  <p class="my-3">
+    <span class="fw-bold">Lærer i undervisningsgruppe</span>
+    kan opprette mål og observasjoner for elevene gruppa, i faget som undervises.
+  </p>
+  <p class="my-3">
+    <span class="fw-bold">Lærer i basisgruppe</span>
+    kan se mål og observasjoner for "sine" elever, i alle fag. Kan opprette individuelle mål (og observasjonerpå
+    disse) for "sine" elever i alle fag.
+  </p>
+  <p class="my-3">
+    <span class="fw-bold">Skoleinspektør</span>
+    kan se mål og observasjoner for alle elever ved sin skole.
+  </p>
+  <p class="my-3">
+    <span class="fw-bold">Skoleadmin</span>
+    kan se og redigere mål og observasjoner for alle elever ved sin skole.
+  </p>
+  <p class="my-3">
+    <span class="fw-bold">Superadmin</span>
+    kan se og redigere mål og observasjoner for alle elever ved alle skoler. Kan også endre globale innstillinger
+    for skolene.
+  </p>
+</section>
+
+<section class="my-4">
+  <h3>Hvor lenge lagres data?</h3>
+  <p class="my-3">TBA</p>
+</section>
+
+<section class="my-4">
   <h3>Hva betyr ikonene?</h3>
   <p class="my-3">
     Ikonene i mestring er hentet fra
