@@ -10,6 +10,14 @@ from mastery.data_import.import_school import import_school_from_feide
 from mastery.data_import.helpers import get_school_fetched_stats
 from mastery.access_policies import ImportAccessPolicy
 from mastery import models
+from .api_functions import get_request_param
+from mastery.constants import (
+    DAYS_BEFORE_HARD_DELETE_OF_GROUP,
+    DAYS_BEFORE_HARD_DELETE_OF_OBSERVATION,
+    DAYS_BEFORE_HARD_DELETE_OF_GOAL,
+    DAYS_BEFORE_HARD_DELETE_OF_USER,
+    HOURS_BEFORE_HARD_DELETE_OF_USER_GROUP,
+)
 
 
 # Used by frontend to check status of API and DB
@@ -28,6 +36,53 @@ def ping(request):
         db_status = "down"
         http_status = 503
     return Response({"api": "up", "db": db_status}, status=http_status)
+
+
+@extend_schema(
+    operation_id="fetch_metadata",
+    summary="Get service metadata",
+    description="Display various metrics related to roles and data longevity",
+    parameters=[
+        OpenApiParameter(
+            name='org_number',
+            description='Scope data by org number. Needed for school specific role info.',
+            required=False,
+            type={'type': 'string'},
+            location=OpenApiParameter.QUERY
+        )
+    ]
+)
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@ensure_csrf_cookie  # Hand out CSRF cookie to the client
+def fetch_metadata(request):
+    org_number, _ = get_request_param(request.query_params, 'org_number')
+    result = {
+        "delete_rules": {
+            "group": f"Grupper som ikke var i forrige import fra Feide, vil bli slettet etter {DAYS_BEFORE_HARD_DELETE_OF_GROUP} dager.",
+            "observation": f"Observasjoner som tilhører slettede elever, vil bli slettet etter {DAYS_BEFORE_HARD_DELETE_OF_OBSERVATION} dager.",
+            "goal": f"Mål som tilhører slettede elever eller grupper, vil bli slettet etter {DAYS_BEFORE_HARD_DELETE_OF_GOAL} dager.",
+            "user": f"Brukere som ikke har aktive gruppe-tilknytninger, vil bli slettet etter {DAYS_BEFORE_HARD_DELETE_OF_USER} dager.",
+            "membership": f"Bruker-gruppe-tilknytninger (medlemskap i grupper) som ikke var i forrige import fra Feide, vil bli slettet etter {HOURS_BEFORE_HARD_DELETE_OF_USER_GROUP} {'time' if HOURS_BEFORE_HARD_DELETE_OF_USER_GROUP == 1 else 'timer'}.",
+        },
+        "role_counts": {
+            "superadmin": models.User.objects.filter(is_superadmin=True).count(),
+        }
+    }
+    if org_number:
+        school = models.School.objects.filter(org_number=org_number).first()
+        if school:
+            result["role_counts"]["teacher_basis"] = models.User.objects.filter(
+                user_groups__group__school=school, user_groups__group__type="basis",
+                user_groups__role__name="teacher").distinct().count()
+            result["role_counts"]["teacher_teaching"] = models.User.objects.filter(
+                user_groups__group__school=school, user_groups__group__type="teaching",
+                user_groups__role__name="teacher").distinct().count()
+            result["role_counts"]["admin"] = models.User.objects.filter(
+                user_schools__school=school, user_schools__role__name="admin").distinct().count()
+            result["role_counts"]["inspector"] = models.User.objects.filter(
+                user_schools__school=school, user_schools__role__name="inspector").distinct().count()
+    return Response(result, status=200)
 
 
 @extend_schema(

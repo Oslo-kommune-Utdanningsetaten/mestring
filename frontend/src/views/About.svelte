@@ -1,10 +1,40 @@
 <script lang="ts">
+  import { fetchMetadata } from '../generated/sdk.gen'
+  import { dataStore } from '../stores/data'
   import Link from '../components/Link.svelte'
+  let metadata = $state<Record<string, any>>({})
+
+  const fetchServiceMetadata = async () => {
+    try {
+      const options = $dataStore.currentSchool
+        ? { query: { orgNumber: $dataStore.currentSchool.orgNumber } }
+        : {}
+      const metadataResult = await fetchMetadata(options)
+      metadata = metadataResult.data || {}
+    } catch (error) {
+      console.error('Error fetching service metadata:', error)
+    }
+  }
+
+  $effect(() => {
+    const currentSchool = $dataStore.currentSchool
+    fetchServiceMetadata()
+  })
 </script>
 
-<section class="my-4">
+{#snippet rolesCount(role: string)}
+  {#if Object.hasOwn(metadata, 'roleCounts') && Object.hasOwn(metadata.roleCounts, role)}
+    <span>
+      {metadata.roleCounts[role] +
+        ` ${metadata.roleCounts[role] == 1 ? 'person' : 'personer'} har denne rollen.`}
+    </span>
+  {/if}
+{/snippet}
+
+<!-- About the app -->
+<section class="mt-3 mb-5">
   <h2 class="my-3">Om tjenesten</h2>
-  <ul>
+  <ul class="my-3">
     <li>
       mestring.osloskolen.no er en prototype på hvordan det går an holde oversikt over elevers
       mestring fagene
@@ -29,38 +59,56 @@
   </ul>
 </section>
 
-<section class="my-4">
+<!-- Access info -->
+<section class="my-5">
   <h3>Hvem har tilgang til hva?</h3>
-  <p class="my-3">
-    <span class="fw-bold">Lærer i undervisningsgruppe</span>
-    kan opprette mål og observasjoner for elevene gruppa, i faget som undervises.
-  </p>
-  <p class="my-3">
-    <span class="fw-bold">Lærer i basisgruppe</span>
-    kan se mål og observasjoner for "sine" elever, i alle fag. Kan opprette individuelle mål (og observasjonerpå
-    disse) for "sine" elever i alle fag.
-  </p>
-  <p class="my-3">
-    <span class="fw-bold">Skoleinspektør</span>
-    kan se mål og observasjoner for alle elever ved sin skole.
-  </p>
-  <p class="my-3">
-    <span class="fw-bold">Skoleadmin</span>
-    kan se og redigere mål og observasjoner for alle elever ved sin skole.
-  </p>
-  <p class="my-3">
-    <span class="fw-bold">Superadmin</span>
-    kan se og redigere mål og observasjoner for alle elever ved alle skoler. Kan også endre globale innstillinger
-    for skolene.
-  </p>
+  <ul class="my-3">
+    <li>
+      <span class="fw-bold">Lærer i undervisningsgruppe</span>
+      kan opprette mål og observasjoner for elevene gruppa, i faget som undervises. {@render rolesCount(
+        'teacherTeaching'
+      )}
+    </li>
+    <li>
+      <span class="fw-bold">Lærer i basisgruppe</span>
+      kan se mål og observasjoner for sine elever, i alle fag. Kan opprette individuelle mål (og observasjonerpå
+      disse) for sine elever i alle fag. {@render rolesCount('teacherBasis')}
+    </li>
+    <li>
+      <span class="fw-bold">Skoleinspektør</span>
+      kan se mål og observasjoner for alle elever ved sin skole. {@render rolesCount('inspector')}
+    </li>
+    <li>
+      <span class="fw-bold">Skoleadmin</span>
+      kan se og redigere mål og observasjoner for alle elever ved sin skole. {@render rolesCount(
+        'admin'
+      )}
+    </li>
+    <li>
+      <span class="fw-bold">Superadmin</span>
+      kan se og redigere mål og observasjoner for alle elever ved alle skoler. Kan også endre globale
+      innstillinger for skolene. {@render rolesCount('superadmin')}
+    </li>
+  </ul>
 </section>
 
-<section class="my-4">
+<!-- Data retention info -->
+<section class="my-5">
   <h3>Hvor lenge lagres data?</h3>
-  <p class="my-3">TBA</p>
+  {#if metadata.deleteRules}
+    <ul class="my-3">
+      {#each Object.values(metadata.deleteRules) as deleteRule}
+        <li>
+          {deleteRule}
+        </li>
+      {/each}
+    </ul>
+  {:else}
+    asdf
+  {/if}
 </section>
 
-<section class="my-4">
+<section class="my-5">
   <h3>Hva betyr ikonene?</h3>
   <p class="my-3">
     Ikonene i mestring er hentet fra
@@ -134,6 +182,10 @@
 </section>
 
 <style>
+  li {
+    margin-bottom: 0.8rem;
+  }
+
   .icon-grid {
     display: flex;
     flex-wrap: wrap;

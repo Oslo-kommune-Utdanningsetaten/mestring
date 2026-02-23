@@ -1358,6 +1358,25 @@ export type MasterySchemasUpdateResponses = {
 
 export type MasterySchemasUpdateResponse = MasterySchemasUpdateResponses[keyof MasterySchemasUpdateResponses];
 
+export type FetchMetadataData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Scope data by org number. Needed for school specific role info.
+         */
+        orgNumber?: string;
+    };
+    url: '/api/metadata/';
+};
+
+export type FetchMetadataResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
 export type ObservationsListData = {
     body?: never;
     path?: never;
@@ -2296,7 +2315,7 @@ export type UsersListData = {
          */
         groups?: string;
         /**
-         * Filter users by roles the users have. Comma-separated list of role names (e.g., student,teacher)
+         * Filter users by roles the users have. Comma-separated list of role names (student, teacher, staff, admin,inspector)
          */
         roles?: string;
         /**

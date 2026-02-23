@@ -8,6 +8,7 @@ SERVER_DEPLOYMENT = os.environ.get("SERVER_DEPLOYMENT")
 urlpatterns = [
     path('api/', include('mastery.urls')),
     path('api/ping/', custom.ping, name='ping'),
+    path('api/metadata/', custom.fetch_metadata, name='fetch_metadata'),
     path('auth/feidelogin/', auth.feidelogin, name='feide_login'),
     path('auth/feidecallback', auth.feidecallback, name='feide_callback'),
     path('auth/logout/', auth.feidelogout, name='feide-logout'),
