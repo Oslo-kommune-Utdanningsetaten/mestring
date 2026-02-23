@@ -21,7 +21,7 @@
   )
 </script>
 
-<nav class="navbar navbar-expand-md navbar-light bg-light">
+<nav class="navbar navbar-expand-md bg-light">
   {#if environmentWarning}
     <div
       class="environment-warning-banner"
@@ -32,20 +32,19 @@
   {/if}
 
   <div class="container-md">
-    <!-- Mestring app logo -->
-    <span class="me-1 goal-icon-wrapper">
-      <pkt-icon name="goal" title="Mestring logo" aria-hidden="true"></pkt-icon>
-      <span class="celebration-overlay" aria-hidden="true">
-        <GoalIconCelebration />
+    <Link className="navbar-brand d-flex align-items-center" to="/">
+      <!-- Mestring icon -->
+      <span class="goal-icon-wrapper me-2">
+        <pkt-icon name="goal" title="Mestring logo" aria-hidden="true"></pkt-icon>
+        <span class="celebration-overlay" aria-hidden="true">
+          <GoalIconCelebration />
+        </span>
       </span>
-    </span>
 
-    <!-- Main heading, school name -->
-    <Link className="navbar-brand" to="/">
       <h1>{currentSchool?.displayName || 'INGEN SKOLE VALGT'}</h1>
     </Link>
 
-    <!-- Burger menu button -->
+    <!-- Burger menu button, visible on narrow displays -->
     <button
       class="navbar-toggler"
       type="button"
@@ -60,11 +59,14 @@
 
     <!-- Collapsible content -->
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
+      <ul class="navbar-nav ms-auto align-items-center">
         {#if $currentUser}
+          <!-- Home (aka "my groups") -->
           <li class="nav-item">
             <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
           </li>
+
+          <!-- Students -->
           {#if currentSchool?.isStudentListEnabled || $dataStore.hasUserAccessToPath('/students')}
             <li class="nav-item">
               <Link to="/students" className={`nav-link ${isStudentsActive ? 'active' : ''}`}>
@@ -73,6 +75,7 @@
             </li>
           {/if}
 
+          <!-- Admin menu -->
           {#if $dataStore.hasUserAccessToPath('/admin')}
             <li class="nav-item dropdown">
               <!-- svelte-ignore a11y_invalid_attribute -->
@@ -113,6 +116,7 @@
             </li>
           {/if}
 
+          <!-- User profile menu -->
           {#if $dataStore.hasUserAccessToPath('/profile')}
             <li class="nav-item dropdown" title="Logget på som {$currentUser.name}">
               <a
@@ -134,6 +138,7 @@
           {/if}
         {/if}
 
+        <!-- Login -->
         {#if !$currentUser}
           <li class="nav-item">
             <a class="nav-link" href="#" onclick={login}>Logg inn</a>
@@ -141,9 +146,9 @@
         {/if}
       </ul>
 
-      <!-- Logo outside collapsible area for desktop -->
-      <a href="https://www.oslo.kommune.no" class="logo-image ms-3" target="_blank">
-        <img class="oslologo" alt="Oslo kommune logo" src={oslologoUrl} />
+      <!-- Oslo kommune logo -->
+      <a href="https://www.oslo.kommune.no" class="oslo-logo ms-3" target="_blank">
+        <img alt="Oslo kommune logo" src={oslologoUrl} />
       </a>
     </div>
   </div>
@@ -152,31 +157,22 @@
 <style>
   h1 {
     font-size: 1.8rem;
-    display: inline-block;
-    padding-left: 0.5em;
-  }
-
-  .logo-image {
-    display: inline-block;
-    width: 100px;
-    max-width: 100px;
+    line-height: 1;
+    margin: 0;
   }
 
   .goal-icon-wrapper {
     position: relative;
     display: inline-flex;
-    width: 28px;
+    flex-shrink: 0;
+    width: 40px;
     aspect-ratio: 1 / 1;
-    margin-bottom: 0.6rem;
   }
 
   .goal-icon-wrapper :global(pkt-icon) {
     display: block;
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
   }
 
   .goal-icon-wrapper .celebration-overlay {
@@ -185,6 +181,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .oslo-logo img {
+    width: 100px;
   }
 
   nav.navbar {
