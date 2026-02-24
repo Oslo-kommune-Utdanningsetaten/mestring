@@ -20,14 +20,12 @@
 
   const {
     student = null,
-    subject = null,
     group = null,
     goal = null,
     onDone,
     isGoalIndividual,
   } = $props<{
     student?: UserType | null
-    subject?: SubjectType | null
     group?: GroupType | null
     goal?: GoalType | null
     isGoalIndividual: boolean

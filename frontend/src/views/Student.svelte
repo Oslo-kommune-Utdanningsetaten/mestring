@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { GoalCreateType, UserType, SubjectType, GroupType } from '../generated/types.gen'
+  import type { GoalDecorated } from '../types/models'
   import {
     usersRetrieve,
     goalsCreate,
@@ -9,11 +10,16 @@
   } from '../generated/sdk.gen'
   import { SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
+  import GoalEdit from '../components/GoalEdit.svelte'
+  import Offcanvas from '../components/Offcanvas.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
+  import ButtonIcon from '../components/ButtonIcon.svelte'
   import StudentSVG from '../assets/education.svg.svelte'
   import GroupTag from '../components/GroupTag.svelte'
   import { dataStore } from '../stores/data'
   import { trackEvent } from '../stores/analytics'
+  import { getLocalStorageItem } from '../stores/localStorage'
+  import { addAlert } from '../stores/alerts'
 
   const { studentId } = $props<{ studentId: string }>()
   const individualGoalcount = 3
@@ -22,6 +28,9 @@
   let groups = $state<GroupType[]>([])
   let currentSchool = $derived($dataStore.currentSchool)
   let studentGoalsCount = $state<number>(0)
+
+  let goalWip = $state<GoalDecorated | null>(null)
+  let isGoalEditorOpen = $state<boolean>(false)
 
   const fetchStudentData = async (userId: string) => {
     try {
@@ -90,6 +99,38 @@
     fetchStudentData(student.id)
   }
 
+  // Remember, we're only editing individual goals here
+  const handleEditGoal = async (goal: GoalDecorated | null) => {
+    if (!student) return
+
+    if (goal.id) {
+      // editing existing goal
+      goalWip = {
+        ...goal,
+        subjectId: goal?.subjectId || getLocalStorageItem('preferredSubjectId'),
+        studentId: student.id,
+        sortOrder: goal?.sortOrder,
+        masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,
+      }
+    } else {
+      // new goal
+      goalWip = {
+        studentId: student.id,
+        isIndividual: true,
+        masterySchemaId: $dataStore.defaultMasterySchema?.id,
+        schoolId: $dataStore.currentSchool.id,
+        isRelevant: true,
+      }
+    }
+    isGoalEditorOpen = true
+  }
+
+  const handleCloseEditGoal = () => {
+    isGoalEditorOpen = false
+    goalWip = null
+    fetchStudentData(studentId)
+  }
+
   $effect(() => {
     if (currentSchool && currentSchool.id) {
       fetchStudentData(studentId)
@@ -137,6 +178,15 @@
           >
             Opprett {individualGoalcount} individuelle mål for hvert fag
           </ButtonMini>
+        {:else}
+          <ButtonIcon
+            options={{
+              iconName: 'goal',
+              classes: 'bordered',
+              title: 'Legg til nytt individuelt mål',
+              onClick: () => handleEditGoal({}),
+            }}
+          />
         {/if}
       </div>
       {#if subjects.length > 0}
@@ -159,6 +209,13 @@
     <div class="m-2">Fant ikke eleven</div>
   {/if}
 </section>
+
+<!-- offcanvas for creating/editing goals -->
+<Offcanvas bind:isOpen={isGoalEditorOpen} ariaLabel="Rediger mål" onClosed={handleCloseEditGoal}>
+  {#if goalWip}
+    <GoalEdit goal={goalWip} {student} isGoalIndividual={true} onDone={handleCloseEditGoal} />
+  {/if}
+</Offcanvas>
 
 <style>
   .student-svg > :global(svg) {

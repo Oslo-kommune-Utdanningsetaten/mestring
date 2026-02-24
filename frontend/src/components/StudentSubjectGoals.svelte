@@ -477,7 +477,7 @@
   }}
 >
   {#if goalWip}
-    <GoalEdit goal={goalWip} {student} {subject} isGoalIndividual={true} onDone={handleGoalDone} />
+    <GoalEdit goal={goalWip} {student} isGoalIndividual={true} onDone={handleGoalDone} />
   {/if}
 </Offcanvas>
 
