@@ -317,7 +317,7 @@
           options={{
             iconName: 'goal',
             title: `Legg til nytt gruppemål for ${group.displayName}`,
-            classes: 'bordered',
+            classes: 'bordered ms-1',
             onClick: () => handleEditGoal(null),
           }}
         />

@@ -3,15 +3,21 @@
     onAction: () => void
     onAbort: () => void
     delay?: number // seconds until the action is executed
+    buttonText?: string
   }
 
   const defaultDelay = 6
-  const { onAction, delay = defaultDelay, onAbort }: Props = $props()
+  const {
+    onAction,
+    delay = defaultDelay,
+    onAbort,
+    buttonText = 'Avbryt sletting',
+  }: Props = $props()
 
   let secondsLeft = $state(0)
   let intervalId: ReturnType<typeof setInterval> | null = $state(null)
   let isActive = $state(false)
-  const title = $derived<string>(`Sletting om ${secondsLeft} sekunder. Klikk for å avbryte.`)
+  const title = $derived<string>(`Sletting om ${secondsLeft} sekunder. Trykk for å avbryte.`)
 
   const startCountdown = () => {
     intervalId = setInterval(() => {
@@ -58,7 +64,7 @@
       }
     }}
   >
-    <span class="button-text">Avbryt sletting</span>
+    <span class="button-text">{buttonText}</span>
   </button>
 {/if}
 

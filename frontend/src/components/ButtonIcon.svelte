@@ -21,7 +21,6 @@
   const title = $derived(options.title || 'TITTEL MANGLER')
   const disabled = $derived<boolean>(options.disabled || false)
   const delayActionFor = $derived(options.delayActionFor)
-  const delayActionTitle = $derived(options.delayActionTitle || 'Klikk for å avbryte')
 
   let hasBeenClicked = $state(false)
 

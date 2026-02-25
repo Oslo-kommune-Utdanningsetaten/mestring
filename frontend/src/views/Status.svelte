@@ -16,6 +16,7 @@
   import AuthorInfo from '../components/AuthorInfo.svelte'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
+  import Link from '../components/Link.svelte'
 
   let { statusId } = $props<{
     statusId: string
@@ -113,11 +114,13 @@
     <!-- Name and subject -->
     <h2 class="my-3">
       Status for
-      <mark>{student.name}</mark>
+      <mark><Link to="/students/{student.id}">{student.name}</Link></mark>
       i faget
       <mark>{subject.shortName || subject.displayName}</mark>
       , {status.title}
     </h2>
+
+    <hr />
 
     <!-- Updated by info and action buttons -->
     <div class="d-flex justify-content-between align-items-center my-3">
@@ -150,6 +153,7 @@
               variant: 'icon-left',
               classes: 'me-2',
               onClick: handleDelete,
+              delayActionFor: 4,
             }}
           >
             Slett

@@ -1,5 +1,6 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-button.js'
+  import DelayedAction from './DelayedAction.svelte'
 
   interface Props {
     options: {
@@ -11,6 +12,8 @@
       color?: string
       disabled?: boolean
       onClick?: () => void
+      delayActionFor?: number
+      delayActionTitle?: string
       size?: 'tiny' | 'small' | 'medium' | 'large'
     }
     children?: any
@@ -31,6 +34,24 @@
     (() => {
       console.warn('No onClick function provided')
     })
+  const delayActionFor = options.delayActionFor
+
+  let hasBeenClicked = $state(false)
+
+  const handleClick = () => {
+    if (disabled) return
+    if (delayActionFor) {
+      // onClick will be executed after delay
+      hasBeenClicked = true
+    } else {
+      // Execute onClick immediately
+      onClick()
+    }
+  }
+
+  const handleAbort = () => {
+    hasBeenClicked = false
+  }
 </script>
 
 {#if isTiny}
@@ -41,12 +62,12 @@
     class={`mini-icon-button ${classes}`}
     role="button"
     tabindex={disabled ? undefined : '0'}
-    onclick={() => !disabled && onClick()}
+    onclick={() => !disabled && handleClick()}
     onkeydown={(e: any) => {
       if (disabled) return
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
-        onClick()
+        handleClick()
       }
     }}
     aria-disabled={disabled ? 'true' : 'false'}
@@ -60,12 +81,12 @@
     class={classes}
     {iconName}
     {color}
-    onclick={() => onClick()}
+    onclick={() => handleClick()}
     {disabled}
     onkeydown={(e: any) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
-        onClick()
+        handleClick()
       }
     }}
     role="button"
@@ -77,6 +98,10 @@
       {title}
     {/if}
   </pkt-button>
+{/if}
+
+{#if delayActionFor && hasBeenClicked}
+  <DelayedAction onAction={onClick} onAbort={handleAbort} delay={delayActionFor} />
 {/if}
 
 <style>

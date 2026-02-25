@@ -435,6 +435,7 @@
               classes: 'my-2',
               title: 'Slett individuelt mål',
               onClick: () => handleDeleteGoal(goal.id),
+              delayActionFor: 4,
               disabled: goal.observations?.length > 0,
               variant: 'icon-left',
               skin: 'secondary',
