@@ -77,22 +77,22 @@ export type MasterySchemaWithConfig = MasterySchemaType & {
 
 export type SchoolImportStatus = {
   groups: {
-    fetchedCount: number | null
-    fetchedAt: string | null
-    dbCount: number | null
-    diff: number | null
+    fetchedCount: number | undefined
+    fetchedAt: string | undefined
+    dbCount: number | undefined
+    diff: number | undefined
   }
   users: {
-    fetchedCount: number | null
-    fetchedAt: string | null
-    dbCount: number | null
-    diff: number | null
+    fetchedCount: number | undefined
+    fetchedAt: string | undefined
+    dbCount: number | undefined
+    diff: number | undefined
   }
   memberships: {
-    fetchedCount: number | null
-    fetchedAt: string | null
-    dbCount: number | null
-    diff: number | null
+    fetchedCount: number | undefined
+    fetchedAt: string | undefined
+    dbCount: number | undefined
+    diff: number | undefined
   }
-  lastImportAt: string | null
+  lastImportAt: string | undefined
 }

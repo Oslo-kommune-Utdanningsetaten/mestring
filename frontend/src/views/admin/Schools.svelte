@@ -43,28 +43,29 @@
 
       if (result.response.status === 200 && result.data) {
         const data = result.data as SchoolImportStatus
+        const { groups, users, memberships, lastImportAt } = data
         importStatus = {
           ...importStatus,
           [orgNumber]: {
             groups: {
-              fetchedCount: data.groups?.fetchedCount ?? null,
-              fetchedAt: data.groups?.fetchedAt ?? null,
-              dbCount: data.groups?.dbCount ?? 0,
-              diff: data.groups?.diff ?? null,
+              fetchedCount: groups?.fetchedCount,
+              fetchedAt: groups?.fetchedAt,
+              dbCount: groups?.dbCount || 0,
+              diff: groups?.diff,
             },
             users: {
-              fetchedCount: data.users?.fetchedCount ?? null,
-              fetchedAt: data.users?.fetchedAt ?? null,
-              dbCount: data.users?.dbCount ?? 0,
-              diff: data.users?.diff ?? null,
+              fetchedCount: users?.fetchedCount,
+              fetchedAt: users?.fetchedAt,
+              dbCount: users?.dbCount || 0,
+              diff: users?.diff,
             },
             memberships: {
-              fetchedCount: data.memberships?.fetchedCount ?? null,
-              fetchedAt: data.users?.fetchedAt ?? null,
-              dbCount: data.memberships?.dbCount ?? 0,
-              diff: data.memberships?.diff ?? null,
+              fetchedCount: memberships?.fetchedCount,
+              fetchedAt: users?.fetchedAt,
+              dbCount: memberships?.dbCount || 0,
+              diff: memberships?.diff,
             },
-            lastImportAt: data.lastImportAt ?? null,
+            lastImportAt: lastImportAt,
           },
         }
       }
@@ -189,7 +190,7 @@
     }
   }
 
-  type SubjectsAllowed = 'only-custom' | 'only-group' | 'all'
+  type SubjectsAllowed = 'only-custom' | 'only-feide' | 'all'
 
   const updateSubjectsAllowed = async (school: SchoolType, value: SubjectsAllowed) => {
     if (school.subjectsAllowed === value) return
