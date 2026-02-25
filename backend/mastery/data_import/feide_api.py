@@ -131,6 +131,7 @@ def fetch_groups_from_feide(org_number: str):
     school_dir = os.path.join(data_dir, org_number)
     os.makedirs(school_dir, exist_ok=True)
     groups_file = os.path.join(school_dir, 'groups.json')
+    logger.debug(f"Want to write {all_results}")
     with open(groups_file, "w", encoding="utf-8") as f:
         json.dump(all_results, f, indent=2, ensure_ascii=False)
 
