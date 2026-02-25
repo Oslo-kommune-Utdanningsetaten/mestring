@@ -264,7 +264,7 @@
   <ButtonIcon
     options={{
       iconName: 'goal',
-      classes: 'bordered',
+      classes: 'bordered ms-1',
       title: 'Legg til nytt individuelt mål',
       onClick: () => handleEditGoal({}),
     }}
@@ -273,7 +273,7 @@
     <ButtonIcon
       options={{
         iconName: 'achievement',
-        classes: 'bordered',
+        classes: 'bordered ms-1',
         title: 'Legg til ny status',
         onClick: () => handleEditStatus(null),
       }}
