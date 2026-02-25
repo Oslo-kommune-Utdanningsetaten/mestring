@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { goalsCreate, goalsUpdate } from '../generated/sdk.gen'
+  import { goalsCreate, goalsUpdate, masterySchemasDestroy } from '../generated/sdk.gen'
   import type {
     GoalType,
     GroupType,
@@ -146,31 +146,33 @@
       {/if}
     </div>
   </div>
-  <div class="form-group mb-3">
-    <div>
-      <pkt-select
-        label="Mestringsskjema"
-        name="goalMasterySchema"
-        fullwidth={true}
-        value={localGoal.masterySchemaId || NONE_FIELD_VALUE}
-        hasError={!localGoal.masterySchemaId || localGoal.masterySchemaId === NONE_FIELD_VALUE}
-        requiredText="Velg et mestringsskjema"
-        disabled={!localGoal.isRelevant}
-        onchange={(e: Event) => {
-          const target = e.target as HTMLSelectElement | null
-          const msid = target?.value || NONE_FIELD_VALUE
-          handleChangeMasterySchema(msid)
-        }}
-      >
-        <option disabled value={NONE_FIELD_VALUE}>Velg mestringsskjema</option>
-        {#each masterySchemas as masterySchema}
-          <option disabled={!masterySchema.isDefault} value={masterySchema.id}>
-            {masterySchema.title}
-          </option>
-        {/each}
-      </pkt-select>
+  {#if masterySchemas.length > 1}
+    <div class="form-group mb-3">
+      <div>
+        <pkt-select
+          label="Mestringsskjema"
+          name="goalMasterySchema"
+          fullwidth={true}
+          value={localGoal.masterySchemaId || NONE_FIELD_VALUE}
+          hasError={!localGoal.masterySchemaId || localGoal.masterySchemaId === NONE_FIELD_VALUE}
+          requiredText="Velg et mestringsskjema"
+          disabled={!localGoal.isRelevant}
+          onchange={(e: Event) => {
+            const target = e.target as HTMLSelectElement | null
+            const msid = target?.value || NONE_FIELD_VALUE
+            handleChangeMasterySchema(msid)
+          }}
+        >
+          <option disabled value={NONE_FIELD_VALUE}>Velg mestringsskjema</option>
+          {#each masterySchemas as masterySchema}
+            <option disabled={!masterySchema.isDefault} value={masterySchema.id}>
+              {masterySchema.title}
+            </option>
+          {/each}
+        </pkt-select>
+      </div>
     </div>
-  </div>
+  {/if}
 
   <div class="form-group mb-3">
     <label for="goalSortOrder" class="form-label">Rekkefølge</label>
