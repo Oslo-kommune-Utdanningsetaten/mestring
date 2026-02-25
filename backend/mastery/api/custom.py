@@ -449,14 +449,14 @@ def fetch_school_import_status(request, org_number):
     fetched_stats = get_school_fetched_stats(org_number)
 
     # Latest finished tasks (for timestamps only)
-    last_groups_task = (
+    last_fetch_groups_task = (
         models.DataMaintenanceTask.objects
         .filter(job_name="fetch_groups_from_feide", status="finished")
         .filter(job_params__org_number=org_number)
         .order_by("-finished_at")
         .first()
     )
-    last_users_task = (
+    last_fetch_users_task = (
         models.DataMaintenanceTask.objects
         .filter(job_name="fetch_memberships_from_feide", status="finished")
         .filter(job_params__org_number=org_number)
@@ -472,10 +472,10 @@ def fetch_school_import_status(request, org_number):
     )
 
     # Extract timestamps from finished_at field
-    groups_fetched_at = last_groups_task.finished_at.isoformat(
-    ) if last_groups_task and last_groups_task.finished_at else None
-    users_fetched_at = last_users_task.finished_at.isoformat(
-    ) if last_users_task and last_users_task.finished_at else None
+    groups_fetched_at = last_fetch_groups_task.finished_at.isoformat(
+    ) if last_fetch_groups_task and last_fetch_groups_task.finished_at else None
+    users_fetched_at = last_fetch_users_task.finished_at.isoformat(
+    ) if last_fetch_users_task and last_fetch_users_task.finished_at else None
     last_import_at = last_import_task.finished_at.isoformat(
     ) if last_import_task and last_import_task.finished_at else None
 
