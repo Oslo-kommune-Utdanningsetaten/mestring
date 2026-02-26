@@ -1,6 +1,6 @@
 
 from django.utils import timezone
-from .feide_api import fetch_school_group
+from .fetch_groups import fetch_school_group
 from .helpers import get_feide_access_token
 from mastery import models
 import time

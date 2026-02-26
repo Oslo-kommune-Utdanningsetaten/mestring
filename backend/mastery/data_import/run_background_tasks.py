@@ -1,4 +1,5 @@
-from mastery.data_import.feide_api import fetch_groups_from_feide, fetch_memberships_from_feide
+from mastery.data_import.fetch_groups import fetch_groups_from_feide
+from mastery.data_import.fetch_memberships import fetch_memberships_from_feide
 import names
 import logging
 import threading
