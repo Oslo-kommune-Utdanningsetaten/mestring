@@ -93,8 +93,11 @@ def count_fetched_memberships_and_users(org_number):
         if not isinstance(group_data, dict):
             continue
 
-        # Count all members (teachers + students)
-        for member_list in [group_data.get('teachers', []), group_data.get('students', [])]:
+        # Count all members (teachers + students + other)
+        for member_list in [
+                group_data.get('teachers', []),
+                group_data.get('students', []),
+                group_data.get('other', [])]:
             for member in member_list:
                 if isinstance(member, dict) and 'feide_id' in member:
                     unique_users.add(member['feide_id'])

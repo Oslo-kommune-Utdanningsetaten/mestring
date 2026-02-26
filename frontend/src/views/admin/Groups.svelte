@@ -281,6 +281,9 @@
 
 <section class="py-3">
   {#if selectedSchool}
+    <div class="my-4">
+      Viser {filteredGroups.length} gruppe{filteredGroups.length == 1 ? '' : 'r'}
+    </div>
     <div class="card shadow-sm w-100">
       {#if isLoadingGroups}
         <div class="m-4">

@@ -195,14 +195,6 @@
     selectedRoles = newRoles
   }
 
-  const getResultDescription = (): string => {
-    const count = sortedUsers.length
-    let result = `${count} brukere`
-    if (count === 0) result = 'Ingen brukere'
-    if (count === 1) result = '1 bruker'
-    return result
-  }
-
   $effect(() => {
     fetchSchools()
   })
@@ -310,7 +302,7 @@
     {:else if filteredUsers.length === 0}
       <div class="m-4">Ingen brukere funnet</div>
     {:else}
-      <div class="my-4">Fant {getResultDescription()}</div>
+      <div class="my-4">Viser {sortedUsers.length} bruker{sortedUsers.length == 1 ? '' : 'e'}</div>
       <div class="card shadow-sm">
         <!-- Header row -->
         <div class="user-grid-row header fw-bold">

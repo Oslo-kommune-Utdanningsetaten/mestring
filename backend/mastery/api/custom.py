@@ -479,15 +479,15 @@ def fetch_school_import_status(request, org_number):
     last_import_at = last_import_task.finished_at.isoformat(
     ) if last_import_task and last_import_task.finished_at else None
 
-    # DB counts
+    # DB counts (exclude soft-deleted records)
     groups_db_count = models.Group.objects.filter(
-        school=school, type__in=["basis", "teaching"]
+        school=school, type__in=["basis", "teaching"], deleted_at__isnull=True
     ).count()
     users_db_count = models.User.objects.filter(
-        groups__school=school
+        user_groups__group__school=school, deleted_at__isnull=True
     ).distinct().count()
     user_groups_db_count = models.UserGroup.objects.filter(
-        group__school=school
+        group__school=school, deleted_at__isnull=True
     ).count()
 
     # Calculate diffs using helper data
