@@ -81,7 +81,10 @@
               </td>
               <td>{task.id}</td>
               <td>{task.displayName || '-'}</td>
-              <td>{formatDateTime(task.createdAt)}</td>
+              <td>
+                <span class="timestamp">{formatDateTime(task.createdAt)?.split(' ')[0]}</span>
+                <span class="timestamp">{formatDateTime(task.createdAt)?.split(' ')[1]}</span>
+              </td>
               <td>{task.attempts}</td>
             </tr>
             {#if openRows[task.id]}
@@ -97,4 +100,8 @@
 </section>
 
 <style>
+  .timestamp {
+    background-color: var(--pkt-color-grays-gray-200);
+    padding: 0.1rem 0.2rem;
+  }
 </style>

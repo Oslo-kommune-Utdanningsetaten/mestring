@@ -488,7 +488,16 @@
                     {importStatus[school.orgNumber].users.diff ?? '—'}
                   </td>
                   <td class="border-0 text-center py-2 small text-muted">
-                    {formatDateTime(importStatus[school.orgNumber].users.fetchedAt)}
+                    <span class="timestamp">
+                      {formatDateTime(importStatus[school.orgNumber].users.fetchedAt)?.split(
+                        ' '
+                      )[0]}
+                    </span>
+                    <span class="timestamp">
+                      {formatDateTime(importStatus[school.orgNumber].users.fetchedAt)?.split(
+                        ' '
+                      )[1]}
+                    </span>
                   </td>
                 </tr>
 
@@ -510,7 +519,16 @@
                     {importStatus[school.orgNumber].groups.diff ?? '—'}
                   </td>
                   <td class="border-0 text-center py-2 small text-muted">
-                    {formatDateTime(importStatus[school.orgNumber].groups.fetchedAt)}
+                    <span class="timestamp">
+                      {formatDateTime(importStatus[school.orgNumber].groups.fetchedAt)?.split(
+                        ' '
+                      )[0]}
+                    </span>
+                    <span class="timestamp">
+                      {formatDateTime(importStatus[school.orgNumber].groups.fetchedAt)?.split(
+                        ' '
+                      )[1]}
+                    </span>
                   </td>
                 </tr>
 
@@ -532,7 +550,16 @@
                     {importStatus[school.orgNumber].memberships.diff ?? '—'}
                   </td>
                   <td class="border-0 text-center py-2 small text-muted">
-                    {formatDateTime(importStatus[school.orgNumber].memberships.fetchedAt)}
+                    <span class="timestamp">
+                      {formatDateTime(importStatus[school.orgNumber].memberships.fetchedAt)?.split(
+                        ' '
+                      )[0]}
+                    </span>
+                    <span class="timestamp">
+                      {formatDateTime(importStatus[school.orgNumber].memberships.fetchedAt)?.split(
+                        ' '
+                      )[1]}
+                    </span>
                   </td>
                 </tr>
               </tbody>
@@ -595,4 +622,8 @@
 </section>
 
 <style>
+  .timestamp {
+    background-color: var(--pkt-color-grays-gray-200);
+    padding: 0.1rem 0.2rem;
+  }
 </style>
