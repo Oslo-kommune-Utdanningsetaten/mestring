@@ -10,6 +10,9 @@
     schoolsList,
     schoolsPartialUpdate,
     updateDataIntegrity,
+    estimateGroupsImport,
+    estimateUsersImport,
+    estimateMembershipsImport,
   } from '../../generated/sdk.gen'
   import type { SchoolImportStatus } from '../../types/models'
   import { formatDateTime } from '../../utils/functions'
@@ -21,10 +24,15 @@
   import ButtonMini from '../../components/ButtonMini.svelte'
   import { addAlert } from '../../stores/alerts'
   import { dataStore } from '../../stores/data'
+  import { es } from 'date-fns/locale'
+  import Offcanvas from '../../components/Offcanvas.svelte'
+  import ImportEstimate from '../../components/ImportEstimate.svelte'
 
   const router = useTinyRouter()
   let schools = $state<SchoolType[]>([])
   let feideOrgInput: HTMLInputElement
+  let currentEstimate = $state<Record<string, any> | null>(null)
+  let isEstimateContainerOpen = $state<boolean>(false)
 
   // Radio options for subject config
   const subjectOptions = [
@@ -102,6 +110,19 @@
       })
       schools = []
     }
+  }
+
+  const handleUpdateEstimate = async (orgNumber: string, dataType: string) => {
+    isEstimateContainerOpen = true
+    let result = null
+    if (dataType === 'groups') {
+      result = await estimateGroupsImport({ path: { org_number: orgNumber } })
+    } else if (dataType === 'users') {
+      result = await estimateUsersImport({ path: { org_number: orgNumber } })
+    } else if (dataType === 'memberships') {
+      result = await estimateMembershipsImport({ path: { org_number: orgNumber } })
+    }
+    currentEstimate = result?.data || null
   }
 
   const toggleServiceEnabled = async (school: SchoolType) => {
@@ -456,6 +477,7 @@
 
         <!-- Import status -->
         <h4 class="mt-4 mb-3">Importstatus</h4>
+
         {#if importStatus[school.orgNumber]}
           <div class="table-responsive">
             <table class="table table-sm align-middle">
@@ -464,43 +486,16 @@
                   <th class="border-0 fw-semibold text-dark small pb-2">Type</th>
                   <th class="border-0 fw-semibold text-dark small text-center pb-2">Hentet</th>
                   <th class="border-0 fw-semibold text-dark small text-center pb-2">Database</th>
-                  <th class="border-0 fw-semibold text-dark small text-center pb-2">Forskjell</th>
-                  <th class="border-0 fw-semibold text-dark small text-center pb-2">Sist hentet</th>
+                  <th class="border-0 fw-semibold text-dark small text-center pb-2">
+                    Diff on import
+                  </th>
+                  <th class="border-0 fw-semibold text-dark small text-center pb-2">
+                    Diff on clean
+                  </th>
                 </tr>
               </thead>
 
               <tbody>
-                <!-- Users -->
-                <tr class="border-0">
-                  <td class="border-0 py-2">
-                    <div class="d-flex align-items-center">
-                      <pkt-icon name="person" size="16" class="me-2 text-muted"></pkt-icon>
-                      <span class="small">Brukere</span>
-                    </div>
-                  </td>
-                  <td class="border-0 text-center py-2 small">
-                    {importStatus[school.orgNumber].users.fetchedCount ?? '—'}
-                  </td>
-                  <td class="border-0 text-center py-2 small">
-                    {importStatus[school.orgNumber].users.dbCount ?? '—'}
-                  </td>
-                  <td class="border-0 text-center py-2 small">
-                    {importStatus[school.orgNumber].users.diff ?? '—'}
-                  </td>
-                  <td class="border-0 text-center py-2 small text-muted">
-                    <span class="timestamp">
-                      {formatDateTime(importStatus[school.orgNumber].users.fetchedAt)?.split(
-                        ' '
-                      )[0]}
-                    </span>
-                    <span class="timestamp">
-                      {formatDateTime(importStatus[school.orgNumber].users.fetchedAt)?.split(
-                        ' '
-                      )[1]}
-                    </span>
-                  </td>
-                </tr>
-
                 <!-- Groups -->
                 <tr class="border-0">
                   <td class="border-0 py-2">
@@ -510,26 +505,63 @@
                     </div>
                   </td>
                   <td class="border-0 text-center py-2 small">
-                    {importStatus[school.orgNumber].groups.fetchedCount ?? '—'}
+                    <span
+                      title={`Sist hentet: ${formatDateTime(importStatus[school.orgNumber].groups.fetchedAt)}`}
+                    >
+                      {importStatus[school.orgNumber].groups.fetchedCount ?? '—'}
+                    </span>
                   </td>
                   <td class="border-0 text-center py-2 small">
                     {importStatus[school.orgNumber].groups.dbCount ?? '—'}
                   </td>
                   <td class="border-0 text-center py-2 small">
-                    {importStatus[school.orgNumber].groups.diff ?? '—'}
+                    <ButtonMini
+                      options={{
+                        title: 'Sjekk import',
+                        iconName: 'arrow-circle',
+                        skin: 'primary',
+                        variant: 'icon-left',
+                        onClick: () => handleUpdateEstimate(school.orgNumber, 'groups'),
+                      }}
+                    >
+                      {importStatus[school.orgNumber].groups.diff ?? '—'}
+                    </ButtonMini>
                   </td>
-                  <td class="border-0 text-center py-2 small text-muted">
-                    <span class="timestamp">
-                      {formatDateTime(importStatus[school.orgNumber].groups.fetchedAt)?.split(
-                        ' '
-                      )[0]}
-                    </span>
-                    <span class="timestamp">
-                      {formatDateTime(importStatus[school.orgNumber].groups.fetchedAt)?.split(
-                        ' '
-                      )[1]}
+                  <td class="border-0 text-center py-2 small"></td>
+                </tr>
+
+                <!-- Users -->
+                <tr class="border-0">
+                  <td class="border-0 py-2">
+                    <div class="d-flex align-items-center">
+                      <pkt-icon name="person" size="16" class="me-2 text-muted"></pkt-icon>
+                      <span class="small">Brukere</span>
+                    </div>
+                  </td>
+                  <td class="border-0 text-center py-2 small">
+                    <span
+                      title={`Sist hentet: ${formatDateTime(importStatus[school.orgNumber].users.fetchedAt)}`}
+                    >
+                      {importStatus[school.orgNumber].users.fetchedCount ?? '—'}
                     </span>
                   </td>
+                  <td class="border-0 text-center py-2 small">
+                    {importStatus[school.orgNumber].users.dbCount ?? '—'}
+                  </td>
+                  <td class="border-0 text-center py-2 small">
+                    <ButtonMini
+                      options={{
+                        title: 'Sjekk import',
+                        iconName: 'arrow-circle',
+                        skin: 'primary',
+                        variant: 'icon-left',
+                        onClick: () => handleUpdateEstimate(school.orgNumber, 'users'),
+                      }}
+                    >
+                      {importStatus[school.orgNumber].users.diff ?? '—'}
+                    </ButtonMini>
+                  </td>
+                  <td class="border-0 text-center py-2 small"></td>
                 </tr>
 
                 <!-- Memberships -->
@@ -541,26 +573,29 @@
                     </div>
                   </td>
                   <td class="border-0 text-center py-2 small">
-                    {importStatus[school.orgNumber].memberships.fetchedCount ?? '—'}
+                    <span
+                      title={`Sist hentet: ${formatDateTime(importStatus[school.orgNumber].memberships.fetchedAt)}`}
+                    >
+                      {importStatus[school.orgNumber].memberships.fetchedCount ?? '—'}
+                    </span>
                   </td>
                   <td class="border-0 text-center py-2 small">
                     {importStatus[school.orgNumber].memberships.dbCount ?? '—'}
                   </td>
                   <td class="border-0 text-center py-2 small">
-                    {importStatus[school.orgNumber].memberships.diff ?? '—'}
+                    <ButtonMini
+                      options={{
+                        title: 'Sjekk import',
+                        iconName: 'arrow-circle',
+                        skin: 'primary',
+                        variant: 'icon-left',
+                        onClick: () => handleUpdateEstimate(school.orgNumber, 'memberships'),
+                      }}
+                    >
+                      {importStatus[school.orgNumber].memberships.diff ?? '—'}
+                    </ButtonMini>
                   </td>
-                  <td class="border-0 text-center py-2 small text-muted">
-                    <span class="timestamp">
-                      {formatDateTime(importStatus[school.orgNumber].memberships.fetchedAt)?.split(
-                        ' '
-                      )[0]}
-                    </span>
-                    <span class="timestamp">
-                      {formatDateTime(importStatus[school.orgNumber].memberships.fetchedAt)?.split(
-                        ' '
-                      )[1]}
-                    </span>
-                  </td>
+                  <td class="border-0 text-center py-2 small"></td>
                 </tr>
               </tbody>
             </table>
@@ -621,9 +656,31 @@
   {/each}
 </section>
 
+<!-- offcanvas for creating/editing goals -->
+<Offcanvas
+  bind:isOpen={isEstimateContainerOpen}
+  ariaLabel="Estimat for import"
+  onClosed={() => {
+    currentEstimate = null
+  }}
+>
+  {#if currentEstimate}
+    <ImportEstimate data={currentEstimate} />
+  {:else}
+    <div class="spinner-border centered" style="width: 10rem; height: 10rem;" role="status">
+      <span class="visually-hidden">Laster...</span>
+    </div>
+  {/if}
+</Offcanvas>
+
 <style>
   .timestamp {
     background-color: var(--pkt-color-grays-gray-200);
     padding: 0.1rem 0.2rem;
+  }
+  .centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
   }
 </style>

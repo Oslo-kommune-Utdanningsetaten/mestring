@@ -855,6 +855,63 @@ export type DataMaintenanceTasksUpdateResponses = {
 
 export type DataMaintenanceTasksUpdateResponse = DataMaintenanceTasksUpdateResponses[keyof DataMaintenanceTasksUpdateResponses];
 
+export type EstimateGroupsImportData = {
+    body?: never;
+    path: {
+        /**
+         * Organization number of the school
+         */
+        orgNumber: string;
+    };
+    query?: never;
+    url: '/api/estimate/groups/{org_number}/';
+};
+
+export type EstimateGroupsImportResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
+export type EstimateMembershipsImportData = {
+    body?: never;
+    path: {
+        /**
+         * Organization number of the school
+         */
+        orgNumber: string;
+    };
+    query?: never;
+    url: '/api/estimate/memberships/{org_number}/';
+};
+
+export type EstimateMembershipsImportResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
+export type EstimateUsersImportData = {
+    body?: never;
+    path: {
+        /**
+         * Organization number of the school
+         */
+        orgNumber: string;
+    };
+    query?: never;
+    url: '/api/estimate/users/{org_number}/';
+};
+
+export type EstimateUsersImportResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
 export type FetchGroupsForSchoolData = {
     body?: never;
     path: {

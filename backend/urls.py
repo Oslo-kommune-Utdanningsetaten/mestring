@@ -47,6 +47,21 @@ urlpatterns = [
         'api/fetch/school_import_status/<str:org_number>/',
         custom.fetch_school_import_status,
         name='fetch_school_import_status'
+    ),
+    path(
+        'api/estimate/groups/<str:org_number>/',
+        custom.estimate_groups_import_for_school,
+        name='estimate_groups_import_for_school'
+    ),
+    path(
+        'api/estimate/users/<str:org_number>/',
+        custom.estimate_users_import_for_school,
+        name='estimate_users_import_for_school'
+    ),
+    path(
+        'api/estimate/memberships/<str:org_number>/',
+        custom.estimate_memberships_import_for_school,
+        name='estimate_memberships_import_for_school'
     )
 ]
 

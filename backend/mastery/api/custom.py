@@ -8,6 +8,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from mastery.data_import.import_school import import_school_from_feide
 from mastery.data_import.helpers import get_school_fetched_stats
+from mastery.data_import.estimate_import import estimate_groups_import, estimate_users_import, estimate_memberships_import
 from mastery.access_policies import ImportAccessPolicy
 from mastery import models
 from .api_functions import get_request_param
@@ -525,3 +526,105 @@ def fetch_school_import_status(request, org_number):
         },
         "lastImportAt": last_import_at,
     })
+
+
+@extend_schema(
+    operation_id="estimate_groups_import",
+    summary="Estimate groups import",
+    description="Returns the list of Feide groups that would be newly created on import (i.e. fetched but not yet in the database).",
+    parameters=[
+        OpenApiParameter(
+            name='org_number',
+            description='Organization number of the school',
+            required=True,
+            type={'type': 'string'},
+            location=OpenApiParameter.PATH
+        )
+    ]
+)
+@api_view(["GET"])
+@permission_classes([ImportAccessPolicy])
+def estimate_groups_import_for_school(request, org_number):
+    """
+    Return the groups that exist in fetched data but are not yet imported into the database.
+    """
+    try:
+        new_groups = estimate_groups_import(org_number)
+        return Response({
+            "orgNumber": org_number,
+            "newGroupCount": len(new_groups),
+            "newGroups": list(new_groups.values()),
+        })
+    except Exception as e:
+        return Response(
+            {"status": "error", "message": str(e)},
+            status=400,
+        )
+
+
+@extend_schema(
+    operation_id="estimate_users_import",
+    summary="Estimate users import",
+    description="Returns the list of Feide users that would be newly created on import (i.e. fetched but not yet in the database).",
+    parameters=[
+        OpenApiParameter(
+            name='org_number',
+            description='Organization number of the school',
+            required=True,
+            type={'type': 'string'},
+            location=OpenApiParameter.PATH
+        )
+    ]
+)
+@api_view(["GET"])
+@permission_classes([ImportAccessPolicy])
+def estimate_users_import_for_school(request, org_number):
+    """
+    Return the users that exist in fetched data but are not yet imported into the database.
+    """
+    try:
+        new_users = estimate_users_import(org_number)
+        return Response({
+            "orgNumber": org_number,
+            "newUserCount": len(new_users),
+            "newUsers": [{"feideId": fid, "name": name} for fid, name in new_users.items()],
+        })
+    except Exception as e:
+        return Response(
+            {"status": "error", "message": str(e)},
+            status=400,
+        )
+
+
+@extend_schema(
+    operation_id="estimate_memberships_import",
+    summary="Estimate memberships import",
+    description="Returns the list of memberships (user+group+role combinations) that would be newly created on import.",
+    parameters=[
+        OpenApiParameter(
+            name='org_number',
+            description='Organization number of the school',
+            required=True,
+            type={'type': 'string'},
+            location=OpenApiParameter.PATH
+        )
+    ]
+)
+@api_view(["GET"])
+@permission_classes([ImportAccessPolicy])
+def estimate_memberships_import_for_school(request, org_number):
+    """
+    Return the memberships that exist in fetched data but are not yet imported into the database.
+    """
+    try:
+        new_memberships = estimate_memberships_import(org_number)
+        return Response({
+            "orgNumber": org_number,
+            "newMembershipCount": len(new_memberships),
+            "newMemberships": list(new_memberships.values()),
+        })
+    except Exception as e:
+        return Response(
+            {"status": "error", "message": str(e)},
+            status=400,
+        )

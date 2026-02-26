@@ -56,7 +56,7 @@
     <div class="alert alert-secondary py-2 px-3">Ingen jobber funnet.</div>
   {:else}
     <div class="table-responsive small">
-      <table class="table table-sm table-hover align-middle mb-0">
+      <table class="table table-sm table-hover table-striped align-middle mb-0">
         <thead class="table-light">
           <tr>
             <th>status</th>
