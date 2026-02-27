@@ -855,6 +855,25 @@ export type DataMaintenanceTasksUpdateResponses = {
 
 export type DataMaintenanceTasksUpdateResponse = DataMaintenanceTasksUpdateResponses[keyof DataMaintenanceTasksUpdateResponses];
 
+export type EstimateCleanupData = {
+    body?: never;
+    path: {
+        /**
+         * Organization number of the school
+         */
+        orgNumber: string;
+    };
+    query?: never;
+    url: '/api/estimate/cleanup/{orgNumber}/';
+};
+
+export type EstimateCleanupResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
 export type EstimateGroupsImportData = {
     body?: never;
     path: {

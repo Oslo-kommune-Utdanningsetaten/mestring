@@ -18,7 +18,9 @@ logger = logging.getLogger(__name__)
 # Data which has been soft-deleted for some time is hard-deleted
 def update_data_integrity(org_number, options):
 
-    logger.debug("Activating cleaner bot for organization: %s", org_number)
+    dry_run = options.get("dry_run", False)
+
+    logger.debug("Activating cleaner bot for organization: %s (dry_run=%s)", org_number, dry_run)
 
     school = models.School.objects.filter(org_number=org_number).first()
     if not school:
@@ -43,11 +45,12 @@ def update_data_integrity(org_number, options):
     # Soft delete
     logger.debug("Begin soft-delete: %s", options)
     try:
-        changes["group"]["soft-deleted"] = soft_delete_groups(school, now, groups_earlier_than)
-        changes["user"]["soft-deleted"] = soft_delete_users(school, now, memberships_earlier_than)
-        changes["observation"]["soft-deleted"] = soft_delete_observations(school, now)
-        changes["goal"]["soft-deleted"] = soft_delete_goals(school, now)
-        changes["user_group"]["soft-deleted"] = soft_delete_user_groups(school, now, memberships_earlier_than)
+        changes["group"]["soft-deleted"] = soft_delete_groups(school, now, groups_earlier_than, dry_run)
+        changes["user"]["soft-deleted"] = soft_delete_users(school, now, memberships_earlier_than, dry_run)
+        changes["observation"]["soft-deleted"] = soft_delete_observations(school, now, dry_run)
+        changes["goal"]["soft-deleted"] = soft_delete_goals(school, now, dry_run)
+        changes["user_group"]["soft-deleted"] = soft_delete_user_groups(
+            school, now, memberships_earlier_than, dry_run)
     except Exception as e:
         logger.error(f"Soft deletion failed for school {school.org_number}: {e}")
         errors.append({"error": "soft-delete-failed",
@@ -57,11 +60,11 @@ def update_data_integrity(org_number, options):
     # Hard delete
     logger.debug(f"Begin hard-delete of anything soft-deleted a sufficiently long time ago")
     try:
-        changes["group"]["hard-deleted"] = hard_delete_groups(school, now)
-        changes["user"]["hard-deleted"] = hard_delete_users(now)
-        changes["observation"]["hard-deleted"] = hard_delete_observations(school, now)
-        changes["goal"]["hard-deleted"] = hard_delete_goals(school, now)
-        changes["user_group"]["hard-deleted"] = hard_delete_user_groups(school, now)
+        changes["group"]["hard-deleted"] = hard_delete_groups(school, now, dry_run)
+        changes["user"]["hard-deleted"] = hard_delete_users(now, dry_run)
+        changes["observation"]["hard-deleted"] = hard_delete_observations(school, now, dry_run)
+        changes["goal"]["hard-deleted"] = hard_delete_goals(school, now, dry_run)
+        changes["user_group"]["hard-deleted"] = hard_delete_user_groups(school, now, dry_run)
     except Exception as e:
         logger.error(f"Hard deletion failed for school {school.org_number}: {e}")
         errors.append({"error": "hard-delete-failed",
@@ -72,6 +75,7 @@ def update_data_integrity(org_number, options):
         "result": {
             "entity": "all",
             "action": "update_data_integrity",
+            "dry_run": dry_run,
             "errors": errors,
             "changes": changes,
         },
@@ -79,7 +83,7 @@ def update_data_integrity(org_number, options):
     }
 
 
-def soft_delete_groups(school, now, maintained_earlier_than):
+def soft_delete_groups(school, now, maintained_earlier_than, dry_run=False):
     # If not maintained since maintained_earlier_than AND not deleted AND group is valid -> mark as deleted
     # Note: DO NOT mess with invalid groups
     groups = models.Group.objects.filter(
@@ -87,12 +91,14 @@ def soft_delete_groups(school, now, maintained_earlier_than):
         school=school,
         maintained_at__lt=maintained_earlier_than
     ).within_validity_period()
+    if dry_run:
+        return list(groups.values("id", "feide_id", "display_name", "type"))
     count = groups.count()
     groups.update(deleted_at=now)
     return count
 
 
-def soft_delete_users(school, now, maintained_earlier_than):
+def soft_delete_users(school, now, maintained_earlier_than, dry_run=False):
     # If not superadmin AND not maintained since maintained_earlier_than AND no non-deleted UserGroups -> mark as deleted
     # Note: Users are school-agnostic, but only consider users linked to this school via UserGroups
     users = models.User.objects.annotate(
@@ -105,12 +111,14 @@ def soft_delete_users(school, now, maintained_earlier_than):
         maintained_at__lt=maintained_earlier_than,
         active_user_groups_count=0
     )
+    if dry_run:
+        return list(users.values("id", "feide_id", "name"))
     count = users.count()
     users.update(deleted_at=now)
     return count
 
 
-def soft_delete_observations(school, now):
+def soft_delete_observations(school, now, dry_run=False):
     # If student is soft-deleted -> mark as deleted
     on_individual_goals_on_school = Q(
         goal__student__isnull=False,
@@ -121,12 +129,14 @@ def soft_delete_observations(school, now):
         deleted_at__isnull=True,
         student__deleted_at__isnull=False
     ).filter(on_individual_goals_on_school | on_group_goals_on_school)
+    if dry_run:
+        return list(observations.values("id", "student__name", "student__feide_id", "goal__title"))
     count = observations.count()
     observations.update(deleted_at=now)
     return count
 
 
-def soft_delete_goals(school, now):
+def soft_delete_goals(school, now, dry_run=False):
     # If student (i.e. this is a individual goal) AND student is soft-deleted -> mark as deleted
     # OR
     # If group (i.e. this is a group goal) AND group is soft-deleted -> mark as deleted
@@ -136,12 +146,14 @@ def soft_delete_goals(school, now):
         Q(student_id__isnull=False, student__deleted_at__isnull=False) |
         Q(group_id__isnull=False, group__deleted_at__isnull=False, group__school=school)
     )
+    if dry_run:
+        return list(goals.values("id", "title", "student__name", "group__display_name"))
     count = goals.count()
     goals.update(deleted_at=now)
     return count
 
 
-def soft_delete_user_groups(school, now, maintained_earlier_than):
+def soft_delete_user_groups(school, now, maintained_earlier_than, dry_run=False):
     # IF Group is soft-deleted -> mark as deleted
     # OR
     # If UserGroup not maintained AND Group is valid -> mark as deleted
@@ -156,36 +168,42 @@ def soft_delete_user_groups(school, now, maintained_earlier_than):
             group__school=school
         )
     )
+    if dry_run:
+        return list(user_groups.values("id", "user__name", "user__feide_id", "group__display_name", "role__name"))
     count = user_groups.count()
     user_groups.update(deleted_at=now)
     return count
 
 
-def hard_delete_groups(school, now):
+def hard_delete_groups(school, now, dry_run=False):
     # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_GROUP days, hard delete
     groups = models.Group.objects.filter(
         deleted_at__lt=now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_GROUP),
         school=school
     )
     # Note: This will cascade delete UserGroups
+    if dry_run:
+        return list(groups.values("id", "feide_id", "display_name", "type", "deleted_at"))
     count = groups.count()
     groups.delete()
     return count
 
 
-def hard_delete_users(now):
+def hard_delete_users(now, dry_run=False):
     # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_USER days, hard delete
     # Note: This will cascade delete UserGroups, Individual Goals and Observations
     # Note: Users exist across schools, so no school filtering here
     users = models.User.objects.filter(
         deleted_at__lt=now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_USER)
     )
+    if dry_run:
+        return list(users.values("id", "feide_id", "name", "deleted_at"))
     count = users.count()
     users.delete()
     return count
 
 
-def hard_delete_observations(school, now):
+def hard_delete_observations(school, now, dry_run=False):
     # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_OBSERVATION days, hard delete
     on_individual_goals_on_school = Q(
         goal__student__isnull=False,
@@ -196,12 +214,14 @@ def hard_delete_observations(school, now):
     observations = models.Observation.objects.filter(
         deleted_at__lt=now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_OBSERVATION)
     ).filter(on_individual_goals_on_school | on_group_goals_on_school)
+    if dry_run:
+        return list(observations.values("id", "student__name", "student__feide_id", "goal__title", "deleted_at"))
     count = observations.count()
     observations.delete()
     return count
 
 
-def hard_delete_goals(school, now):
+def hard_delete_goals(school, now, dry_run=False):
     # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_GOAL days, hard delete
     # Note: This will fail if there are Observations linked to the Goal
     goals = models.Goal.objects.filter(
@@ -210,18 +230,24 @@ def hard_delete_goals(school, now):
         Q(student_id__isnull=False, subject__owned_by_school=school) |
         Q(group_id__isnull=False, group__school=school)
     )
+    if dry_run:
+        return list(goals.values("id", "title", "student__name", "group__display_name", "deleted_at"))
     count = goals.count()
     goals.delete()
     return count
 
 
-def hard_delete_user_groups(school, now):
+def hard_delete_user_groups(school, now, dry_run=False):
     # If deleted_at older than HOURS_BEFORE_HARD_DELETE_OF_USER_GROUP hours, hard delete
     # Note: The short delay is to quickly update group memberships
     user_groups = models.UserGroup.objects.filter(
         deleted_at__lt=now - timezone.timedelta(hours=HOURS_BEFORE_HARD_DELETE_OF_USER_GROUP),
         group__school=school
     )
+    if dry_run:
+        return list(
+            user_groups.values(
+                "id", "user__name", "user__feide_id", "group__display_name", "role__name", "deleted_at"))
     count = user_groups.count()
     user_groups.delete()
     return count

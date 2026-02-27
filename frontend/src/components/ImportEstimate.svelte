@@ -73,6 +73,8 @@
         {/each}
       </tbody>
     </table>
+  {:else}
+    <pre>{JSON.stringify(data, null, 2)}</pre>
   {/if}
 
   <ButtonMini
@@ -83,6 +85,6 @@
       onClick: () => onDone(),
     }}
   >
-    Close import additions
+    Close this thing
   </ButtonMini>
 </section>

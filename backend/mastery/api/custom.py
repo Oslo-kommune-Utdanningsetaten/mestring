@@ -9,6 +9,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from mastery.data_import.import_school import import_school_from_feide
 from mastery.data_import.helpers import get_school_fetched_stats
 from mastery.data_import.estimate_import import estimate_groups_import, estimate_users_import, estimate_memberships_import
+from mastery.data_import.cleaner_bot import update_data_integrity as run_cleaner_bot
 from mastery.access_policies import ImportAccessPolicy
 from mastery import models
 from .api_functions import get_request_param
@@ -628,6 +629,82 @@ def estimate_memberships_import_for_school(request, org_number):
             "orgNumber": org_number,
             "newMembershipCount": len(new_memberships),
             "newMemberships": list(new_memberships.values()),
+        })
+    except Exception as e:
+        return Response(
+            {"status": "error", "message": str(e)},
+            status=400,
+        )
+
+
+@extend_schema(
+    operation_id="estimate_cleanup",
+    summary="Estimate cleanup",
+    description="Dry-run the cleaner bot to show which rows would be soft-deleted and hard-deleted, without actually modifying any data.",
+    parameters=[
+        OpenApiParameter(
+            name='org_number',
+            description='Organization number of the school',
+            required=True,
+            type={'type': 'string'},
+            location=OpenApiParameter.PATH
+        )
+    ]
+)
+@api_view(["GET"])
+@permission_classes([ImportAccessPolicy])
+def estimate_cleanup_for_school(request, org_number):
+    try:
+        school = models.School.objects.filter(org_number=org_number).first()
+        if not school:
+            return Response(
+                {"message": f"School not found for org {org_number}"},
+                status=404,
+            )
+
+        previous_import_groups_task = (
+            models.DataMaintenanceTask.objects
+            .filter(
+                job_name="import_groups",
+                job_params={"org_number": org_number},
+                status="finished"
+            )
+            .order_by("-finished_at")
+            .first()
+        )
+
+        previous_import_memberships_task = (
+            models.DataMaintenanceTask.objects
+            .filter(
+                job_name="import_memberships",
+                job_params={"org_number": org_number},
+                status="finished"
+            )
+            .order_by("-finished_at")
+            .first()
+        )
+
+        if not previous_import_groups_task or not previous_import_memberships_task:
+            return Response(
+                {"status": "error",
+                 "message": "Run import before estimating cleanup."},
+                status=400)
+
+        options = {
+            "groups_earlier_than": previous_import_groups_task.started_at,
+            "memberships_earlier_than": previous_import_memberships_task.started_at,
+            "dry_run": True,
+        }
+
+        # run_cleaner_bot is a generator; consume the single result
+        result = None
+        for chunk in run_cleaner_bot(org_number, options):
+            result = chunk
+
+        return Response({
+            "orgNumber": org_number,
+            "changes": result["result"]["changes"],
+            "errors": result["result"]["errors"],
         })
     except Exception as e:
         return Response(

@@ -11,6 +11,7 @@
     estimateGroupsImport,
     estimateUsersImport,
     estimateMembershipsImport,
+    estimateCleanup,
     schoolsRetrieve,
   } from '../../generated/sdk.gen'
   import type { SchoolImportStatus } from '../../types/models'
@@ -132,6 +133,8 @@
       result = await estimateUsersImport({ path: { orgNumber: school.orgNumber } })
     } else if (dataType === 'memberships') {
       result = await estimateMembershipsImport({ path: { orgNumber: school.orgNumber } })
+    } else if (dataType === 'cleanup') {
+      result = await estimateCleanup({ path: { orgNumber: school.orgNumber } })
     }
     currentEstimate = result?.data || null
   }
@@ -483,7 +486,7 @@
         <hr class="border border-3 opacity-50" />
 
         {#if importStatus}
-          <h4 class="mt-4 mb-3">Import timeline</h4>
+          <h4 class="mt-4 mb-3">Latest events</h4>
           <table class="table mb-2">
             <thead>
               <tr class="border-bottom">
@@ -522,8 +525,8 @@
                 <th class="text-center">Fetched</th>
                 <th class="text-center">Database</th>
                 <th class="text-center">Fetch vs DB</th>
-                <th class="text-center">Import additions</th>
-                <th class="text-center">Clean removals</th>
+                <th class="text-center">Import adds</th>
+                <th class="text-center">Cleanerbot removes</th>
               </tr>
             </thead>
 
@@ -561,6 +564,19 @@
                   </ButtonMini>
                 </td>
                 <td class="border-0 text-center py-2 small"></td>
+                <td class="border-0 text-center py-2 small">
+                  <ButtonMini
+                    options={{
+                      title: 'Check cleanup estimate',
+                      iconName: 'arrow-circle',
+                      skin: 'secondary',
+                      variant: 'icon-left',
+                      onClick: () => handleUpdateEstimate('cleanup'),
+                    }}
+                  >
+                    Check
+                  </ButtonMini>
+                </td>
               </tr>
 
               <!-- Users -->

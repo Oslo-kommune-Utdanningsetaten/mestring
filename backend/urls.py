@@ -62,7 +62,12 @@ urlpatterns = [
         'api/estimate/memberships/<str:org_number>/',
         custom.estimate_memberships_import_for_school,
         name='estimate_memberships_import_for_school'
-    )
+    ),
+    path(
+        'api/estimate/cleanup/<str:org_number>/',
+        custom.estimate_cleanup_for_school,
+        name='estimate_cleanup_for_school'
+    ),
 ]
 
 if SERVER_DEPLOYMENT in ['localhost']:
