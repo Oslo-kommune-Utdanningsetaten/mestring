@@ -32,13 +32,14 @@ def estimate_groups_import(org_number):
     # groups.json is a dict with keys: owners, schools, teaching, basis, subjects
     # Flatten basis + teaching groups (the ones that become Group model rows)
     all_groups = groups_data.get("basis", []) + groups_data.get("teaching", [])
-    incoming_groups_by_id = {}
-    for group in all_groups:
-        incoming_groups_by_id[group.get("id")] = group
-    current_groups = models.Group.objects.filter(school__org_number=org_number, deleted_at__isnull=True)
-    for group in current_groups:
-        if group.feide_id in incoming_groups_by_id:
-            del incoming_groups_by_id[group.feide_id]
+    incoming_groups_by_id = {group.get("id"): group for group in all_groups}
+    # Single query fetching only feide_id instead of full objects
+    existing_feide_ids = set(
+        models.Group.objects.filter(school__org_number=org_number, deleted_at__isnull=True)
+        .values_list('feide_id', flat=True)
+    )
+    for feide_id in existing_feide_ids:
+        incoming_groups_by_id.pop(feide_id, None)
     return incoming_groups_by_id
 
 
@@ -50,12 +51,14 @@ def estimate_users_import(org_number):
         for members in memberships_data.values() for role in ("teachers", "students")
         for m in members.get(role, [])}
 
-    current_users = models.User.objects.filter(
-        user_groups__group__school__org_number=org_number, deleted_at__isnull=True).distinct()
-    # return a dict (key: feide_id, value: user_data) of incoming users that are not in our database yet
-    for user in current_users:
-        if user.feide_id in incoming_users_by_id:
-            del incoming_users_by_id[user.feide_id]
+    # Single query fetching only feide_id instead of full User objects
+    existing_feide_ids = set(
+        models.User.objects.filter(
+            user_groups__group__school__org_number=org_number, deleted_at__isnull=True
+        ).values_list('feide_id', flat=True)
+    )
+    for feide_id in existing_feide_ids:
+        incoming_users_by_id.pop(feide_id, None)
     return incoming_users_by_id
 
 
@@ -64,20 +67,32 @@ def estimate_memberships_import(org_number):
     memberships_data = data_from_file(org_number, "memberships")
     incoming_memberships = {}
 
+    # Create lookup dict {feide_id: display_name} for all groups at school
+    group_names = dict(
+        models.Group.objects.filter(school__org_number=org_number, deleted_at__isnull=True)
+        .values_list('feide_id', 'display_name')
+    )
+
     for group_id, roles in memberships_data.items():
+        group_name = group_names.get(group_id)
         for role in ("teacher", "student"):
             for membership in roles.get(f"{role}s", []):
                 key = f"{group_id} // {role} // {membership['feide_id']}"
                 incoming_memberships[key] = {
-                    "group_id": group_id, "group_name": models.Group.objects.filter(
-                        feide_id=group_id, school__org_number=org_number).first().display_name,
+                    "group_id": group_id,
+                    "group_name": group_name,
                     "role": role,
                     "feide_id": membership["feide_id"],
                     "user_name": membership["name"], }
-    current_user_groups = models.UserGroup.objects.filter(
-        group__school__org_number=org_number, deleted_at__isnull=True)
-    for user_group in current_user_groups:
-        key = f"{user_group.group.feide_id} // {user_group.role.name} // {user_group.user.feide_id}"
-        if key in incoming_memberships:
-            del incoming_memberships[key]
+
+    # Single query with select_related to avoid N+1 on group/role/user FK access
+    existing_keys = set(
+        models.UserGroup.objects.filter(
+            group__school__org_number=org_number, deleted_at__isnull=True
+        ).select_related('group', 'role', 'user')
+        .values_list('group__feide_id', 'role__name', 'user__feide_id')
+    )
+    for group_feide_id, role_name, user_feide_id in existing_keys:
+        key = f"{group_feide_id} // {role_name} // {user_feide_id}"
+        incoming_memberships.pop(key, None)
     return incoming_memberships

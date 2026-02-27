@@ -660,6 +660,7 @@
 <Offcanvas
   bind:isOpen={isEstimateContainerOpen}
   ariaLabel="Estimat for import"
+  width={'70vw'}
   onClosed={() => {
     currentEstimate = null
   }}
@@ -678,6 +679,7 @@
     background-color: var(--pkt-color-grays-gray-200);
     padding: 0.1rem 0.2rem;
   }
+
   .centered {
     position: absolute;
     top: 50%;

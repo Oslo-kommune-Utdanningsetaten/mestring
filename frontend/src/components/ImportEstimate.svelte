@@ -51,8 +51,8 @@
       </tbody>
     </table>
   {:else if dataType === 'memberships'}
-    <h2 class="my-3">Nye brukere ({data.newMembershipCount})</h2>
-    <table class="table table-sm table-hover table-striped table-success align-middle mb-0">
+    <h2 class="my-3">Nye medlemskap ({data.newMembershipCount})</h2>
+    <table class="table table-sm table-hover table-striped align-middle mb-0">
       <thead class="table-light">
         <tr>
           <th>Bruker</th>
@@ -62,7 +62,7 @@
       </thead>
       <tbody>
         {#each data.newMemberships as membership}
-          <tr class:table-info={membership.role === 'teacher'}>
+          <tr class:table-warning={membership.role === 'teacher'}>
             <td>{membership.userName}</td>
             <td>{membership.role}</td>
             <td>{membership.groupName}</td>
