@@ -525,8 +525,12 @@
                 <th class="text-center">Fetched</th>
                 <th class="text-center">Database</th>
                 <th class="text-center">Fetch vs DB</th>
-                <th class="text-center">Import adds</th>
-                <th class="text-center">Cleanerbot removes</th>
+                <th class="text-center" title="What will happen if the import runs?">
+                  WWHI:Import
+                </th>
+                <th class="text-center" title="What will happen if the cleanerbot runs?">
+                  WWHI:Cleanerbot
+                </th>
               </tr>
             </thead>
 
@@ -563,7 +567,6 @@
                     Check
                   </ButtonMini>
                 </td>
-                <td class="border-0 text-center py-2 small"></td>
                 <td class="border-0 text-center py-2 small">
                   <ButtonMini
                     options={{
@@ -611,7 +614,19 @@
                     Check
                   </ButtonMini>
                 </td>
-                <td class="border-0 text-center py-2 small"></td>
+                <td class="border-0 text-center py-2 small">
+                  <ButtonMini
+                    options={{
+                      title: 'Check cleanup estimate',
+                      iconName: 'arrow-circle',
+                      skin: 'secondary',
+                      variant: 'icon-left',
+                      onClick: () => handleUpdateEstimate('cleanup'),
+                    }}
+                  >
+                    Check
+                  </ButtonMini>
+                </td>
               </tr>
 
               <!-- Memberships -->
@@ -648,7 +663,19 @@
                     Check
                   </ButtonMini>
                 </td>
-                <td class="border-0 text-center py-2 small"></td>
+                <td class="border-0 text-center py-2 small">
+                  <ButtonMini
+                    options={{
+                      title: 'Check cleanup estimate',
+                      iconName: 'arrow-circle',
+                      skin: 'secondary',
+                      variant: 'icon-left',
+                      onClick: () => handleUpdateEstimate('cleanup'),
+                    }}
+                  >
+                    Check
+                  </ButtonMini>
+                </td>
               </tr>
             </tbody>
           </table>
