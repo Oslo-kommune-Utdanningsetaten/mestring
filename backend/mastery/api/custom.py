@@ -471,22 +471,36 @@ def fetch_school_import_status(request, org_number):
         .order_by("-finished_at")
         .first()
     )
+    last_cleanerbot_task = (
+        models.DataMaintenanceTask.objects
+        .filter(job_name="update_data_integrity", status="finished")
+        .filter(job_params__org_number=org_number)
+        .order_by("-finished_at")
+        .first()
+    )
 
     # Extract timestamps from finished_at field
     groups_fetched_at = last_fetch_groups_task.finished_at.isoformat(
     ) if last_fetch_groups_task and last_fetch_groups_task.finished_at else None
+
     users_fetched_at = last_fetch_users_task.finished_at.isoformat(
     ) if last_fetch_users_task and last_fetch_users_task.finished_at else None
+
     last_import_at = last_import_task.finished_at.isoformat(
     ) if last_import_task and last_import_task.finished_at else None
+
+    last_cleanup_at = last_cleanerbot_task.finished_at.isoformat(
+    ) if last_cleanerbot_task and last_cleanerbot_task.finished_at else None
 
     # DB counts (exclude soft-deleted records)
     groups_db_count = models.Group.objects.filter(
         school=school, type__in=["basis", "teaching"], deleted_at__isnull=True
     ).count()
+
     users_db_count = models.User.objects.filter(
         user_groups__group__school=school, deleted_at__isnull=True
     ).distinct().count()
+
     user_groups_db_count = models.UserGroup.objects.filter(
         group__school=school, deleted_at__isnull=True
     ).count()
@@ -525,6 +539,7 @@ def fetch_school_import_status(request, org_number):
             "diff": user_groups_diff,
         },
         "lastImportAt": last_import_at,
+        "lastCleanupAt": last_cleanup_at,
     })
 
 

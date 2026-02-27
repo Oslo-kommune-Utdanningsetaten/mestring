@@ -95,4 +95,5 @@ export type SchoolImportStatus = {
     diff: number | undefined
   }
   lastImportAt: string | undefined
+  lastCleanupAt: string | undefined
 }

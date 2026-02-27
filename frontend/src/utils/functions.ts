@@ -2,7 +2,7 @@ import type { Mastery, GoalDecorated } from '../types/models'
 import type { GoalType, SubjectType, ObservationType, GroupType } from '../generated/types.gen'
 import { goalsList, observationsList, userGroupsList, userSchoolsList } from '../generated/sdk.gen'
 import { nb as noLocale } from 'date-fns/locale'
-import { format, formatDistanceToNow } from 'date-fns'
+import { format, formatDistance, formatDistanceToNow } from 'date-fns'
 import { TEACHER_ROLE, STUDENT_ROLE } from './constants'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
@@ -307,9 +307,17 @@ export const formatMonthName = (isoDate?: string | number | undefined) => {
   return format(new Date(isoDate), 'LLLL', { locale: noLocale })
 }
 
-export const formatDateDistance = (isoDate?: string | number | undefined) => {
-  if (!isoDate) return null
-  return formatDistanceToNow(new Date(isoDate), { addSuffix: true, locale: noLocale })
+export const formatDateDistance = (
+  laterIsoDate: string | number | undefined,
+  earlierIsoDate?: string | number | undefined
+) => {
+  if (!laterIsoDate) return null
+  return earlierIsoDate
+    ? formatDistance(new Date(laterIsoDate), new Date(earlierIsoDate), {
+        addSuffix: false,
+        locale: noLocale,
+      })
+    : formatDistanceToNow(new Date(laterIsoDate), { addSuffix: true, locale: noLocale })
 }
 
 // format function that returns the string "I dag" if the date is today (or the date if not today), followed by hours and minutes

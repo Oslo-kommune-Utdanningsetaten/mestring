@@ -14,7 +14,7 @@
     schoolsRetrieve,
   } from '../../generated/sdk.gen'
   import type { SchoolImportStatus } from '../../types/models'
-  import { formatDateTime } from '../../utils/functions'
+  import { formatDateTime, formatDateDistance } from '../../utils/functions'
   import {
     SUBJECTS_ALLOWED_ALL,
     SUBJECTS_ALLOWED_CUSTOM,
@@ -54,7 +54,7 @@
 
       if (result.response.status === 200 && result.data) {
         const data = result.data as SchoolImportStatus
-        const { groups, users, memberships, lastImportAt } = data
+        const { groups, users, memberships, lastImportAt, lastCleanupAt } = data
         importStatus = {
           groups: {
             fetchedCount: groups?.fetchedCount,
@@ -75,6 +75,7 @@
             diff: memberships?.diff,
           },
           lastImportAt: lastImportAt,
+          lastCleanupAt: lastCleanupAt,
         }
         importTimeline = [
           {
@@ -86,6 +87,11 @@
             type: 'import',
             label: 'Last import',
             timestamp: lastImportAt,
+          },
+          {
+            type: 'cleanup',
+            label: 'Last cleanup',
+            timestamp: lastCleanupAt,
           },
         ].sort((a, b) => {
           const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0
@@ -477,8 +483,8 @@
         <hr class="border border-3 opacity-50" />
 
         {#if importStatus}
-          <h4 class="mt-4 mb-3">Timeline</h4>
-          <table class="table mb-4">
+          <h4 class="mt-4 mb-3">Import timeline</h4>
+          <table class="table mb-2">
             <thead>
               <tr class="border-bottom">
                 {#each importTimeline as event}
@@ -488,9 +494,18 @@
             </thead>
             <tbody>
               <tr>
-                {#each importTimeline as event}
+                {#each importTimeline as event, index}
                   <td class="border-0 py-2 small">
                     {event.timestamp ? formatDateTime(event.timestamp) : '—'}
+                    <br />
+                    <span class="text-muted">
+                      {#if index > 0}
+                        {formatDateDistance(importTimeline[index - 1].timestamp, event.timestamp)} etter
+                        {importTimeline[index - 1].type}
+                      {:else}
+                        {formatDateDistance(event.timestamp)}
+                      {/if}
+                    </span>
                   </td>
                 {/each}
               </tr>

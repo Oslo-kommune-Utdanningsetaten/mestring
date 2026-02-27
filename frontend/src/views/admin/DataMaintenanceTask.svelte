@@ -25,8 +25,8 @@
       const result = await dataMaintenanceTasksList()
       tasks = result.data || []
       tasks = tasks.sort((a, b) => {
-        const dateA = new Date(a.createdAt || '').getTime() || 0
-        const dateB = new Date(b.createdAt || '').getTime() || 0
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0
         return dateB - dateA // Ascending order
       })
     } catch (error) {
