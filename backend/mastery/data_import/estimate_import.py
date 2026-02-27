@@ -1,5 +1,6 @@
 import os
 import json
+from urllib.parse import unquote
 from django.utils import timezone
 from .helpers import does_file_exist
 from mastery import models
@@ -80,7 +81,8 @@ def estimate_memberships_import(org_number):
                 key = f"{group_id} // {role} // {membership['feide_id']}"
                 incoming_memberships[key] = {
                     "group_id": group_id,
-                    "group_name": group_name,
+                    # fallback to part of feide_id if group not found in DB (i.e. the group itself is also new)
+                    "group_name": group_name or unquote(group_id.split(':')[5]),
                     "role": role,
                     "feide_id": membership["feide_id"],
                     "user_name": membership["name"], }

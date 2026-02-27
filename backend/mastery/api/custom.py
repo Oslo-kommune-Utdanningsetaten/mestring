@@ -531,7 +531,7 @@ def fetch_school_import_status(request, org_number):
 @extend_schema(
     operation_id="estimate_groups_import",
     summary="Estimate groups import",
-    description="Returns the list of Feide groups that would be newly created on import (i.e. fetched but not yet in the database).",
+    description="Return the groups that exist in fetched data but are not yet imported into the database.",
     parameters=[
         OpenApiParameter(
             name='org_number',
@@ -545,9 +545,6 @@ def fetch_school_import_status(request, org_number):
 @api_view(["GET"])
 @permission_classes([ImportAccessPolicy])
 def estimate_groups_import_for_school(request, org_number):
-    """
-    Return the groups that exist in fetched data but are not yet imported into the database.
-    """
     try:
         new_groups = estimate_groups_import(org_number)
         return Response({
@@ -565,7 +562,7 @@ def estimate_groups_import_for_school(request, org_number):
 @extend_schema(
     operation_id="estimate_users_import",
     summary="Estimate users import",
-    description="Returns the list of Feide users that would be newly created on import (i.e. fetched but not yet in the database).",
+    description="Return the users that exist in fetched data but are not yet imported into the database.",
     parameters=[
         OpenApiParameter(
             name='org_number',
@@ -579,9 +576,6 @@ def estimate_groups_import_for_school(request, org_number):
 @api_view(["GET"])
 @permission_classes([ImportAccessPolicy])
 def estimate_users_import_for_school(request, org_number):
-    """
-    Return the users that exist in fetched data but are not yet imported into the database.
-    """
     try:
         new_users = estimate_users_import(org_number)
         return Response({
@@ -599,7 +593,7 @@ def estimate_users_import_for_school(request, org_number):
 @extend_schema(
     operation_id="estimate_memberships_import",
     summary="Estimate memberships import",
-    description="Returns the list of memberships (user+group+role combinations) that would be newly created on import.",
+    description="Return the memberships (user+group+role combinations) that exist in fetched data but are not yet imported into the database.",
     parameters=[
         OpenApiParameter(
             name='org_number',
@@ -613,9 +607,6 @@ def estimate_users_import_for_school(request, org_number):
 @api_view(["GET"])
 @permission_classes([ImportAccessPolicy])
 def estimate_memberships_import_for_school(request, org_number):
-    """
-    Return the memberships that exist in fetched data but are not yet imported into the database.
-    """
     try:
         new_memberships = estimate_memberships_import(org_number)
         return Response({

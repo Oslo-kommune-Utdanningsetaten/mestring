@@ -32,9 +32,9 @@
   const { schoolId } = $props<{ schoolId: string }>()
 
   let school = $state<SchoolType>()
-
   let currentEstimate = $state<Record<string, any> | null>(null)
   let isEstimateContainerOpen = $state<boolean>(false)
+  let importTimeline = $state<Record<string, string | undefined>[]>([])
 
   // Radio options for subject config
   const subjectOptions = [
@@ -43,7 +43,7 @@
     { value: SUBJECTS_ALLOWED_CUSTOM, label: 'Kun egendefinerte fag' },
   ] as const
 
-  let importStatus = $state<Record<string, SchoolImportStatus>>({})
+  let importStatus = $state<SchoolImportStatus | undefined>(undefined)
 
   const loadImportStatusForSchool = async () => {
     if (!school) return
@@ -56,29 +56,42 @@
         const data = result.data as SchoolImportStatus
         const { groups, users, memberships, lastImportAt } = data
         importStatus = {
-          ...importStatus,
-          [school.orgNumber]: {
-            groups: {
-              fetchedCount: groups?.fetchedCount,
-              fetchedAt: groups?.fetchedAt,
-              dbCount: groups?.dbCount || 0,
-              diff: groups?.diff,
-            },
-            users: {
-              fetchedCount: users?.fetchedCount,
-              fetchedAt: users?.fetchedAt,
-              dbCount: users?.dbCount || 0,
-              diff: users?.diff,
-            },
-            memberships: {
-              fetchedCount: memberships?.fetchedCount,
-              fetchedAt: users?.fetchedAt,
-              dbCount: memberships?.dbCount || 0,
-              diff: memberships?.diff,
-            },
-            lastImportAt: lastImportAt,
+          groups: {
+            fetchedCount: groups?.fetchedCount,
+            fetchedAt: groups?.fetchedAt,
+            dbCount: groups?.dbCount || 0,
+            diff: groups?.diff,
           },
+          users: {
+            fetchedCount: users?.fetchedCount,
+            fetchedAt: users?.fetchedAt,
+            dbCount: users?.dbCount || 0,
+            diff: users?.diff,
+          },
+          memberships: {
+            fetchedCount: memberships?.fetchedCount,
+            fetchedAt: users?.fetchedAt,
+            dbCount: memberships?.dbCount || 0,
+            diff: memberships?.diff,
+          },
+          lastImportAt: lastImportAt,
         }
+        importTimeline = [
+          {
+            type: 'fetch',
+            label: 'Last fetch',
+            timestamp: groups?.fetchedAt || users?.fetchedAt || memberships?.fetchedAt,
+          },
+          {
+            type: 'import',
+            label: 'Last import',
+            timestamp: lastImportAt,
+          },
+        ].sort((a, b) => {
+          const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0
+          const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0
+          return timeA - timeB
+        })
       }
     } catch (error) {
       addAlert({
@@ -322,31 +335,33 @@
   })
 </script>
 
-<section class="container py-3">
+<div class="container py-3">
   {#if school}
-    <div class="border border-3 mb-4" class:opacity-25={!school.isServiceEnabled}>
-      <div class="p-4">
-        <div class="d-flex align-items-center">
-          <h3>{school.displayName}</h3>
-          <pkt-checkbox
-            id={'service-' + school.id}
-            class="ms-auto"
-            label={school.isServiceEnabled ? 'Aktivert' : 'Deaktivert'}
-            labelPosition="right"
-            isSwitch="true"
-            aria-checked={school.isServiceEnabled}
-            checked={school.isServiceEnabled}
-            onchange={() => toggleServiceEnabled()}
-          ></pkt-checkbox>
-        </div>
+    <div class="p-4" class:opacity-25={!school.isServiceEnabled}>
+      <div class="d-flex align-items-center">
+        <h2>{school.displayName}</h2>
+        <pkt-checkbox
+          id={'service-' + school.id}
+          class="ms-auto"
+          label={school.isServiceEnabled ? 'Aktivert' : 'Deaktivert'}
+          labelPosition="right"
+          isSwitch="true"
+          aria-checked={school.isServiceEnabled}
+          checked={school.isServiceEnabled}
+          onchange={() => toggleServiceEnabled()}
+        ></pkt-checkbox>
+      </div>
 
-        <div class="text-muted small">
-          {school.orgNumber}, Oppdatert {formatDateTime(school.updatedAt)}
-        </div>
-        <hr />
+      <div class="text-muted small">
+        {school.orgNumber}
+      </div>
+      <div class="text-muted small">
+        Sist oppdatert {formatDateTime(school.updatedAt)}
+      </div>
 
-        <!-- Subjects -->
-        <h4 class="my-4">Fag</h4>
+      <!-- Subjects -->
+      <section class="border border-3 p-3 my-3">
+        <h3 class="mb-3">Fag</h3>
         <p class="mb-3">Hvilke fag er tilgjengelige på skolen?</p>
         <fieldset class="d-flex flex-wrap gap-4">
           <legend class="visually-hidden">Velg hvilke fag som er tilgjengelige på skolen</legend>
@@ -360,10 +375,11 @@
             ></pkt-radiobutton>
           {/each}
         </fieldset>
-        <hr />
+      </section>
 
-        <!-- Groups -->
-        <h4 class="my-4">Grupper</h4>
+      <!-- Groups -->
+      <section class="border border-3 p-3 my-3">
+        <h3 class="mb-3">Grupper</h3>
         <pkt-checkbox
           id={'group-goal-' + school.id}
           label={`Gruppemål ${school.isGroupGoalEnabled ? '' : 'IKKE'} tilgjengelig`}
@@ -384,10 +400,11 @@
           checked={school.isGoalTitleEnabled}
           onchange={() => toggleGoalTitleEnabled()}
         ></pkt-checkbox>
-        <hr />
+      </section>
 
-        <!-- Status -->
-        <h4 class="my-4">Status</h4>
+      <!-- Status -->
+      <section class="border border-3 p-3 my-3">
+        <h3 class="mb-3">Status</h3>
         <pkt-checkbox
           id={'status-' + school.id}
           label={`Status ${school.isStatusEnabled ? '' : 'IKKE'} tilgjengelig`}
@@ -397,10 +414,11 @@
           checked={school.isStatusEnabled}
           onchange={() => toggleStatusEnabled()}
         ></pkt-checkbox>
-        <hr />
+      </section>
 
-        <!-- Groups -->
-        <h4 class="my-4">Navigasjon for lærere</h4>
+      <!-- Teacher navigation -->
+      <section class="border border-3 p-3 my-3">
+        <h3 class="mb-3">Navigasjon for lærere</h3>
         <pkt-checkbox
           id={'student-list-' + school.id}
           label={`Elevliste ${school.isStudentListEnabled ? '' : 'IKKE'} synlig`}
@@ -410,185 +428,202 @@
           checked={school.isStudentListEnabled}
           onchange={() => toggleStudentListEnabled()}
         ></pkt-checkbox>
-        <hr />
+      </section>
 
-        <!-- Data import stuff -->
-        <h4 class="mt-4 mb-3">Import</h4>
+      <!-- Data import stuff -->
+      <section class="border border-3 p-3 my-3">
+        <h3 class="mb-3">Import</h3>
 
-        {#if importStatus[school.orgNumber]}
-          <div class="table-responsive">
-            <table class="table table-sm align-middle">
-              <thead>
-                <tr class="border-bottom">
-                  <th class="border-0 fw-semibold text-dark small pb-2">Type</th>
-                  <th class="border-0 fw-semibold text-dark small text-center pb-2">Hentet</th>
-                  <th class="border-0 fw-semibold text-dark small text-center pb-2">Database</th>
-                  <th class="border-0 fw-semibold text-dark small text-center pb-2">
-                    Diff on import
-                  </th>
-                  <th class="border-0 fw-semibold text-dark small text-center pb-2">
-                    Diff on clean
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <!-- Groups -->
-                <tr class="border-0">
-                  <td class="border-0 py-2">
-                    <div class="d-flex align-items-center">
-                      <pkt-icon name="group" size="16" class="me-2 text-muted"></pkt-icon>
-                      <span class="small">Grupper</span>
-                    </div>
-                  </td>
-                  <td class="border-0 text-center py-2 small">
-                    <span
-                      title={`Sist hentet: ${formatDateTime(importStatus[school.orgNumber].groups.fetchedAt)}`}
-                    >
-                      {importStatus[school.orgNumber].groups.fetchedCount ?? '—'}
-                    </span>
-                  </td>
-                  <td class="border-0 text-center py-2 small">
-                    {importStatus[school.orgNumber].groups.dbCount ?? '—'}
-                  </td>
-                  <td class="border-0 text-center py-2 small">
-                    <ButtonMini
-                      options={{
-                        title: 'Sjekk import',
-                        iconName: 'arrow-circle',
-                        skin: 'primary',
-                        variant: 'icon-left',
-                        onClick: () => handleUpdateEstimate('groups'),
-                      }}
-                    >
-                      {importStatus[school.orgNumber].groups.diff ?? '—'}
-                    </ButtonMini>
-                  </td>
-                  <td class="border-0 text-center py-2 small"></td>
-                </tr>
-
-                <!-- Users -->
-                <tr class="border-0">
-                  <td class="border-0 py-2">
-                    <div class="d-flex align-items-center">
-                      <pkt-icon name="person" size="16" class="me-2 text-muted"></pkt-icon>
-                      <span class="small">Brukere</span>
-                    </div>
-                  </td>
-                  <td class="border-0 text-center py-2 small">
-                    <span
-                      title={`Sist hentet: ${formatDateTime(importStatus[school.orgNumber].users.fetchedAt)}`}
-                    >
-                      {importStatus[school.orgNumber].users.fetchedCount ?? '—'}
-                    </span>
-                  </td>
-                  <td class="border-0 text-center py-2 small">
-                    {importStatus[school.orgNumber].users.dbCount ?? '—'}
-                  </td>
-                  <td class="border-0 text-center py-2 small">
-                    <ButtonMini
-                      options={{
-                        title: 'Sjekk import',
-                        iconName: 'arrow-circle',
-                        skin: 'primary',
-                        variant: 'icon-left',
-                        onClick: () => handleUpdateEstimate('users'),
-                      }}
-                    >
-                      {importStatus[school.orgNumber].users.diff ?? '—'}
-                    </ButtonMini>
-                  </td>
-                  <td class="border-0 text-center py-2 small"></td>
-                </tr>
-
-                <!-- Memberships -->
-                <tr class="border-0">
-                  <td class="border-0 py-2">
-                    <div class="d-flex align-items-center">
-                      <pkt-icon name="holding-hands" size="16" class="me-2 text-muted"></pkt-icon>
-                      <span class="small">Medlemskap</span>
-                    </div>
-                  </td>
-                  <td class="border-0 text-center py-2 small">
-                    <span
-                      title={`Sist hentet: ${formatDateTime(importStatus[school.orgNumber].memberships.fetchedAt)}`}
-                    >
-                      {importStatus[school.orgNumber].memberships.fetchedCount ?? '—'}
-                    </span>
-                  </td>
-                  <td class="border-0 text-center py-2 small">
-                    {importStatus[school.orgNumber].memberships.dbCount ?? '—'}
-                  </td>
-                  <td class="border-0 text-center py-2 small">
-                    <ButtonMini
-                      options={{
-                        title: 'Sjekk import',
-                        iconName: 'arrow-circle',
-                        skin: 'primary',
-                        variant: 'icon-left',
-                        onClick: () => handleUpdateEstimate('memberships'),
-                      }}
-                    >
-                      {importStatus[school.orgNumber].memberships.diff ?? '—'}
-                    </ButtonMini>
-                  </td>
-                  <td class="border-0 text-center py-2 small"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {#if importStatus[school.orgNumber].lastImportAt}
-            <div class="d-flex align-items-center mt-3 pt-3 border-top">
-              <pkt-icon name="clock" size="16" class="me-2 text-muted"></pkt-icon>
-              <span class="text-muted small">
-                Sist import: {formatDateTime(importStatus[school.orgNumber].lastImportAt)}
-              </span>
-            </div>
-          {/if}
-        {/if}
-
-        <div>
+        <div class="mb-3">
           <!-- Request fetch job, feide to file -->
           <ButtonMini
             options={{
-              title: 'Hent grupper og brukere fra Feide',
-              iconName: 'group',
+              title: 'Fetch users and groups Feide',
+              iconName: 'download',
               skin: 'secondary',
               variant: 'icon-left',
               onClick: () => handleFetchUsersAndGroups(),
             }}
           >
-            Hent grupper fra Feide
+            Fetch from Feide
           </ButtonMini>
 
           <!-- Request import job, file to database -->
           <ButtonMini
             options={{
-              title: 'Importér grupper og brukere til databasen',
-              iconName: 'download',
+              title: 'Import groups and users to database',
+              iconName: 'process-iteration',
               skin: 'secondary',
               variant: 'icon-left',
               onClick: () => handleImportGroupsAndUsers(),
             }}
           >
-            Importér til database
+            Import to database
           </ButtonMini>
 
           <!-- Cleanerbot -->
           <ButtonMini
             options={{
-              title: 'Aktivér cleanerbot',
+              title: 'Activate cleanerbot for school',
               iconName: 'obstacle',
               skin: 'secondary',
               variant: 'icon-left',
               onClick: () => handleActivateCleanerBotForSchool(),
             }}
           >
-            Aktivér cleanerbot
+            Run cleanerbot
           </ButtonMini>
         </div>
-      </div>
+
+        <hr class="border border-3 opacity-50" />
+
+        {#if importStatus}
+          <h4 class="mt-4 mb-3">Timeline</h4>
+          <table class="table mb-4">
+            <thead>
+              <tr class="border-bottom">
+                {#each importTimeline as event}
+                  <th>{event.label}</th>
+                {/each}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                {#each importTimeline as event}
+                  <td class="border-0 py-2 small">
+                    {event.timestamp ? formatDateTime(event.timestamp) : '—'}
+                  </td>
+                {/each}
+              </tr>
+            </tbody>
+          </table>
+
+          <hr class="border border-3 opacity-50" />
+
+          <h4 class="mt-4 mb-3">Data insight</h4>
+          <table class="table table-sm align-middle mt-4">
+            <thead>
+              <tr class="border-bottom">
+                <th>Type</th>
+                <th class="text-center">Fetched</th>
+                <th class="text-center">Database</th>
+                <th class="text-center">Fetch vs DB</th>
+                <th class="text-center">Import additions</th>
+                <th class="text-center">Clean removals</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <!-- Groups -->
+              <tr class="border-0">
+                <td class="border-0 py-2">
+                  <div class="d-flex align-items-center">
+                    <pkt-icon name="group" size="16" class="me-2 text-muted"></pkt-icon>
+                    <span class="small">Groups</span>
+                  </div>
+                </td>
+                <td class="border-0 text-center py-2 small">
+                  <span title={`Sist hentet: ${formatDateTime(importStatus.groups.fetchedAt)}`}>
+                    {importStatus.groups.fetchedCount ?? '—'}
+                  </span>
+                </td>
+                <td class="border-0 text-center py-2 small">
+                  {importStatus.groups.dbCount ?? '—'}
+                </td>
+                <td class="border-0 text-center py-2 small">
+                  {importStatus.groups.diff ?? '—'}
+                </td>
+                <td class="border-0 text-center py-2 small">
+                  <ButtonMini
+                    options={{
+                      title: 'Sjekk import',
+                      iconName: 'arrow-circle',
+                      skin: 'secondary',
+                      variant: 'icon-left',
+                      onClick: () => handleUpdateEstimate('groups'),
+                    }}
+                  >
+                    Check
+                  </ButtonMini>
+                </td>
+                <td class="border-0 text-center py-2 small"></td>
+              </tr>
+
+              <!-- Users -->
+              <tr class="border-0">
+                <td class="border-0 py-2">
+                  <div class="d-flex align-items-center">
+                    <pkt-icon name="person" size="16" class="me-2 text-muted"></pkt-icon>
+                    <span class="small">Users</span>
+                  </div>
+                </td>
+                <td class="border-0 text-center py-2 small">
+                  <span title={`Sist hentet: ${formatDateTime(importStatus.users.fetchedAt)}`}>
+                    {importStatus.users.fetchedCount ?? '—'}
+                  </span>
+                </td>
+                <td class="border-0 text-center py-2 small">
+                  {importStatus.users.dbCount ?? '—'}
+                </td>
+                <td class="border-0 text-center py-2 small">
+                  {importStatus.users.diff ?? '—'}
+                </td>
+                <td class="border-0 text-center py-2 small">
+                  <ButtonMini
+                    options={{
+                      title: 'Sjekk import',
+                      iconName: 'arrow-circle',
+                      skin: 'secondary',
+                      variant: 'icon-left',
+                      onClick: () => handleUpdateEstimate('users'),
+                    }}
+                  >
+                    Check
+                  </ButtonMini>
+                </td>
+                <td class="border-0 text-center py-2 small"></td>
+              </tr>
+
+              <!-- Memberships -->
+              <tr class="border-0">
+                <td class="border-0 py-2">
+                  <div class="d-flex align-items-center">
+                    <pkt-icon name="holding-hands" size="16" class="me-2 text-muted"></pkt-icon>
+                    <span class="small">Memberships</span>
+                  </div>
+                </td>
+                <td class="border-0 text-center py-2 small">
+                  <span
+                    title={`Sist hentet: ${formatDateTime(importStatus.memberships.fetchedAt)}`}
+                  >
+                    {importStatus.memberships.fetchedCount ?? '—'}
+                  </span>
+                </td>
+                <td class="border-0 text-center py-2 small">
+                  {importStatus.memberships.dbCount ?? '—'}
+                </td>
+                <td class="border-0 text-center py-2 small">
+                  {importStatus.memberships.diff ?? '—'}
+                </td>
+                <td class="border-0 text-center py-2 small">
+                  <ButtonMini
+                    options={{
+                      title: 'Sjekk import',
+                      iconName: 'arrow-circle',
+                      skin: 'secondary',
+                      variant: 'icon-left',
+                      onClick: () => handleUpdateEstimate('memberships'),
+                    }}
+                  >
+                    Check
+                  </ButtonMini>
+                </td>
+                <td class="border-0 text-center py-2 small"></td>
+              </tr>
+            </tbody>
+          </table>
+        {/if}
+      </section>
     </div>
   {:else}
     <div class="d-flex flex-column align-items-center py-5">
@@ -598,7 +633,7 @@
       <div class="text-muted mt-3">Laster skoleinformasjon...</div>
     </div>
   {/if}
-</section>
+</div>
 
 <!-- offcanvas for creating/editing goals -->
 <Offcanvas
@@ -610,7 +645,12 @@
   }}
 >
   {#if currentEstimate}
-    <ImportEstimate data={currentEstimate} />
+    <ImportEstimate
+      data={currentEstimate}
+      onDone={() => {
+        isEstimateContainerOpen = false
+      }}
+    />
   {:else}
     <div class="spinner-border centered" style="width: 10rem; height: 10rem;" role="status">
       <span class="visually-hidden">Laster...</span>
@@ -619,11 +659,6 @@
 </Offcanvas>
 
 <style>
-  .timestamp {
-    background-color: var(--pkt-color-grays-gray-200);
-    padding: 0.1rem 0.2rem;
-  }
-
   .centered {
     position: absolute;
     top: 50%;

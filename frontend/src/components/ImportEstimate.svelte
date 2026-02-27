@@ -1,8 +1,10 @@
 <script lang="ts">
   import { getAnchorPath } from 'svelte-jsoneditor'
+  import ButtonMini from './ButtonMini.svelte'
 
-  const { data } = $props<{
+  const { data, onDone } = $props<{
     data: Record<string, unknown>
+    onDone: () => void
   }>()
 
   let dataType = $derived.by(() => {
@@ -15,8 +17,8 @@
 
 <section class="m-3">
   {#if dataType === 'groups'}
-    <h2 class="my-3">Nye grupper ({data.newGroupCount})</h2>
-    <table class="table table-sm table-hover table-striped table-success align-middle mb-0">
+    <h2 class="my-3">Additional groups: {data.newGroupCount}</h2>
+    <table class="table table-sm table-hover table-striped table-success align-middle mb-4">
       <thead class="table-light">
         <tr>
           <th>Navn</th>
@@ -33,8 +35,8 @@
       </tbody>
     </table>
   {:else if dataType === 'users'}
-    <h2 class="my-3">Nye brukere ({data.newUserCount})</h2>
-    <table class="table table-sm table-hover table-striped table-success align-middle mb-0">
+    <h2 class="my-3">Additional users: {data.newUserCount}</h2>
+    <table class="table table-sm table-hover table-striped table-success align-middle mb-4">
       <thead class="table-light">
         <tr>
           <th>Navn</th>
@@ -51,8 +53,9 @@
       </tbody>
     </table>
   {:else if dataType === 'memberships'}
-    <h2 class="my-3">Nye medlemskap ({data.newMembershipCount})</h2>
-    <table class="table table-sm table-hover table-striped align-middle mb-0">
+    <h2 class="my-3">Additional memberships: {data.newMembershipCount}</h2>
+
+    <table class="table table-sm table-hover table-striped align-middle mb-4">
       <thead class="table-light">
         <tr>
           <th>Bruker</th>
@@ -71,4 +74,15 @@
       </tbody>
     </table>
   {/if}
+
+  <ButtonMini
+    options={{
+      title: 'Lukk',
+      skin: 'secondary',
+      variant: 'label-only',
+      onClick: () => onDone(),
+    }}
+  >
+    Close import additions
+  </ButtonMini>
 </section>
