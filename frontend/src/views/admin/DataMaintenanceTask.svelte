@@ -1,12 +1,18 @@
 <script lang="ts">
+  import { useTinyRouter } from 'svelte-tiny-router'
   import { type DataMaintenanceTaskType } from '../../generated/types.gen'
   import { dataMaintenanceTasksList } from '../../generated/sdk.gen'
   import { formatDateTime } from '../../utils/functions'
   import { TASK_STATES } from '../../utils/constants'
+  import Link from '../../components/Link.svelte'
+  import ButtonMini from '../../components/ButtonMini.svelte'
+
+  const router = useTinyRouter()
 
   let tasks = $state<DataMaintenanceTaskType[]>([])
   let isLoading = $state<boolean>(false)
   let openRows = $state<Record<string, boolean>>({})
+  let backLink = $derived(router.getQueryParam('back') || null)
 
   const handleRowClick = (taskId: string) => {
     openRows[taskId] = !openRows[taskId]
@@ -21,7 +27,7 @@
       tasks = tasks.sort((a, b) => {
         const dateA = new Date(a.createdAt || '').getTime() || 0
         const dateB = new Date(b.createdAt || '').getTime() || 0
-        return dateB - dateA // Descending order
+        return dateB - dateA // Ascending order
       })
     } catch (error) {
       console.error('Error fetching tasks:', error)
@@ -37,17 +43,24 @@
 </script>
 
 <section class="py-3">
-  <div class="d-flex align-items-center justify-content-between mb-3 w-100">
-    <h2 class="m-0">Bakgrunnsjobber</h2>
-    <div class="d-flex gap-2">
-      <button class="btn btn-outline-secondary btn-sm" onclick={fetchTasks} disabled={isLoading}>
-        {#if isLoading}
-          <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-        {:else}
-          Oppdater
-        {/if}
-      </button>
-    </div>
+  <div class="d-flex align-items-center mb-3 w-100">
+    <h2 class="me-3">Bakgrunnsjobber</h2>
+    <ButtonMini
+      options={{
+        title: 'Oppdater liste med bakgrunnsjobber',
+        iconName: 'process-forward',
+        skin: 'secondary',
+        variant: 'icon-left',
+        onClick: () => fetchTasks(),
+      }}
+    >
+      Oppdater
+    </ButtonMini>
+  </div>
+  <div class="my-3">
+    {#if backLink}
+      <Link to={backLink}>Tilbake til skolen</Link>
+    {/if}
   </div>
 
   {#if isLoading}

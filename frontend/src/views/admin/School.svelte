@@ -226,7 +226,6 @@
     const confirmed = confirm(`Er du helt sikker på at du vil kjøre ryddejobb for ${orgNumber}?`)
 
     if (!confirmed) return
-
     try {
       const result = await updateDataIntegrity({
         path: { orgNumber: orgNumber },
@@ -237,7 +236,7 @@
           type: 'success',
           message: `Bakgrunnsjobb opprettet for sletting av snargh for ${orgNumber}`,
         })
-        router.navigate('/admin/data-maintenance-tasks')
+        router.navigate('/admin/data-maintenance-tasks/?back=/admin/schools/' + school.id)
       } else if (result.response.status === 400) {
         addAlert({
           type: 'warning',
@@ -276,7 +275,7 @@
           type: 'success',
           message: `Opprettet bakgrunnsjobber for henting av grupper og brukere for ${orgNumber}`,
         })
-        router.navigate('/admin/data-maintenance-tasks')
+        router.navigate('/admin/data-maintenance-tasks/?back=/admin/schools/' + school.id)
       } else if (result.response.status === 409) {
         addAlert({
           type: 'warning',
@@ -310,7 +309,7 @@
           type: 'success',
           message: `Bakgrunnsjobb opprettet for import av grupper og brukere for ${orgNumber}`,
         })
-        router.navigate('/admin/data-maintenance-tasks')
+        router.navigate('/admin/data-maintenance-tasks/?back=/admin/schools/' + school.id)
       } else if (result.response.status === 409) {
         addAlert({
           type: 'warning',
