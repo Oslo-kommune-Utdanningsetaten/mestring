@@ -437,7 +437,7 @@
 
       <!-- Data import stuff -->
       <section class="border border-3 p-3 my-3">
-        <h3 class="mb-3">Import</h3>
+        <h3 class="mb-3">Data maintenance</h3>
 
         <div class="mb-3">
           <!-- Request fetch job, feide to file -->
@@ -470,7 +470,7 @@
           <ButtonMini
             options={{
               title: 'Activate cleanerbot for school',
-              iconName: 'obstacle',
+              iconName: 'cupboard',
               skin: 'secondary',
               variant: 'icon-left',
               onClick: () => handleActivateCleanerBotForSchool(),
@@ -568,7 +568,7 @@
                 <td class="border-0 py-2">
                   <div class="d-flex align-items-center">
                     <pkt-icon name="person" size="16" class="me-2 text-muted"></pkt-icon>
-                    <span class="small">Users</span>
+                    <span class="small">Users (teachers & students)</span>
                   </div>
                 </td>
                 <td class="border-0 text-center py-2 small">
