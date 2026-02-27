@@ -27,6 +27,7 @@
   import MasterySchemas from './views/admin/MasterySchemas.svelte'
   import DataMaintenanceTask from './views/admin/DataMaintenanceTask.svelte'
   import Schools from './views/admin/Schools.svelte'
+  import School from './views/admin/School.svelte'
   // Conponents
   import Navigation from './components/Navigation.svelte'
   import AlertBar from './components/AlertBar.svelte'
@@ -50,6 +51,7 @@
     { path: '/admin/mastery-schemas', component: MasterySchemas },
     { path: '/admin/data-maintenance-tasks', component: DataMaintenanceTask },
     { path: '/admin/schools', component: Schools },
+    { path: '/admin/schools/:schoolId', component: School },
   ]
 
   onMount(() => {

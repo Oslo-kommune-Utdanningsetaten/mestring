@@ -149,6 +149,7 @@ SPECTACULAR_SETTINGS = {
     'CAMELIZE_NAMES': False,
     'POSTPROCESSING_HOOKS': [
         'drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields',
+        'mastery.schema_hooks.camelize_path_parameter_variables',
         'drf_spectacular.hooks.postprocess_schema_enums'
     ],
     'SCHEMA_PATH_PREFIX': '/api',

@@ -79,7 +79,7 @@ export const dataMaintenanceTasksUpdate = <ThrowOnError extends boolean = false>
  */
 export const estimateGroupsImport = <ThrowOnError extends boolean = false>(options: Options<EstimateGroupsImportData, ThrowOnError>) => {
     return (options.client ?? client).get<EstimateGroupsImportResponses, unknown, ThrowOnError>({
-        url: '/api/estimate/groups/{org_number}/',
+        url: '/api/estimate/groups/{orgNumber}/',
         ...options
     });
 };
@@ -91,7 +91,7 @@ export const estimateGroupsImport = <ThrowOnError extends boolean = false>(optio
  */
 export const estimateMembershipsImport = <ThrowOnError extends boolean = false>(options: Options<EstimateMembershipsImportData, ThrowOnError>) => {
     return (options.client ?? client).get<EstimateMembershipsImportResponses, unknown, ThrowOnError>({
-        url: '/api/estimate/memberships/{org_number}/',
+        url: '/api/estimate/memberships/{orgNumber}/',
         ...options
     });
 };
@@ -103,7 +103,7 @@ export const estimateMembershipsImport = <ThrowOnError extends boolean = false>(
  */
 export const estimateUsersImport = <ThrowOnError extends boolean = false>(options: Options<EstimateUsersImportData, ThrowOnError>) => {
     return (options.client ?? client).get<EstimateUsersImportResponses, unknown, ThrowOnError>({
-        url: '/api/estimate/users/{org_number}/',
+        url: '/api/estimate/users/{orgNumber}/',
         ...options
     });
 };
@@ -115,7 +115,7 @@ export const estimateUsersImport = <ThrowOnError extends boolean = false>(option
  */
 export const fetchGroupsForSchool = <ThrowOnError extends boolean = false>(options: Options<FetchGroupsForSchoolData, ThrowOnError>) => {
     return (options.client ?? client).post<FetchGroupsForSchoolResponses, unknown, ThrowOnError>({
-        url: '/api/fetch/groups/feide/{org_number}/',
+        url: '/api/fetch/groups/feide/{orgNumber}/',
         ...options
     });
 };
@@ -127,7 +127,7 @@ export const fetchGroupsForSchool = <ThrowOnError extends boolean = false>(optio
  */
 export const fetchGroupsAndUsers = <ThrowOnError extends boolean = false>(options: Options<FetchGroupsAndUsersData, ThrowOnError>) => {
     return (options.client ?? client).post<FetchGroupsAndUsersResponses, unknown, ThrowOnError>({
-        url: '/api/fetch/groups_and_users/feide/{org_number}/',
+        url: '/api/fetch/groups_and_users/feide/{orgNumber}/',
         ...options
     });
 };
@@ -139,7 +139,7 @@ export const fetchGroupsAndUsers = <ThrowOnError extends boolean = false>(option
  */
 export const fetchMembershipsForSchool = <ThrowOnError extends boolean = false>(options: Options<FetchMembershipsForSchoolData, ThrowOnError>) => {
     return (options.client ?? client).post<FetchMembershipsForSchoolResponses, unknown, ThrowOnError>({
-        url: '/api/fetch/memberships/feide/{org_number}/',
+        url: '/api/fetch/memberships/feide/{orgNumber}/',
         ...options
     });
 };
@@ -151,7 +151,7 @@ export const fetchMembershipsForSchool = <ThrowOnError extends boolean = false>(
  */
 export const fetchSchoolImportStatus = <ThrowOnError extends boolean = false>(options: Options<FetchSchoolImportStatusData, ThrowOnError>) => {
     return (options.client ?? client).get<FetchSchoolImportStatusResponses, unknown, ThrowOnError>({
-        url: '/api/fetch/school_import_status/{org_number}/',
+        url: '/api/fetch/school_import_status/{orgNumber}/',
         ...options
     });
 };
@@ -271,7 +271,7 @@ export const groupsUpdate = <ThrowOnError extends boolean = false>(options: Opti
  */
 export const feideImportSchool = <ThrowOnError extends boolean = false>(options: Options<FeideImportSchoolData, ThrowOnError>) => {
     return (options.client ?? client).post<FeideImportSchoolResponses, unknown, ThrowOnError>({
-        url: '/api/import/school/feide/{org_number}/',
+        url: '/api/import/school/feide/{orgNumber}/',
         ...options
     });
 };
@@ -283,7 +283,7 @@ export const feideImportSchool = <ThrowOnError extends boolean = false>(options:
  */
 export const importGroupsAndUsers = <ThrowOnError extends boolean = false>(options: Options<ImportGroupsAndUsersData, ThrowOnError>) => {
     return (options.client ?? client).post<ImportGroupsAndUsersResponses, unknown, ThrowOnError>({
-        url: '/api/import/school_groups_and_users/{org_number}/',
+        url: '/api/import/school_groups_and_users/{orgNumber}/',
         ...options
     });
 };
@@ -295,7 +295,7 @@ export const importGroupsAndUsers = <ThrowOnError extends boolean = false>(optio
  */
 export const updateDataIntegrity = <ThrowOnError extends boolean = false>(options: Options<UpdateDataIntegrityData, ThrowOnError>) => {
     return (options.client ?? client).post<UpdateDataIntegrityResponses, unknown, ThrowOnError>({
-        url: '/api/import/update_data_integrity/{org_number}/',
+        url: '/api/import/update_data_integrity/{orgNumber}/',
         ...options
     });
 };

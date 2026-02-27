@@ -864,7 +864,7 @@ export type EstimateGroupsImportData = {
         orgNumber: string;
     };
     query?: never;
-    url: '/api/estimate/groups/{org_number}/';
+    url: '/api/estimate/groups/{orgNumber}/';
 };
 
 export type EstimateGroupsImportResponses = {
@@ -883,7 +883,7 @@ export type EstimateMembershipsImportData = {
         orgNumber: string;
     };
     query?: never;
-    url: '/api/estimate/memberships/{org_number}/';
+    url: '/api/estimate/memberships/{orgNumber}/';
 };
 
 export type EstimateMembershipsImportResponses = {
@@ -902,7 +902,7 @@ export type EstimateUsersImportData = {
         orgNumber: string;
     };
     query?: never;
-    url: '/api/estimate/users/{org_number}/';
+    url: '/api/estimate/users/{orgNumber}/';
 };
 
 export type EstimateUsersImportResponses = {
@@ -921,7 +921,7 @@ export type FetchGroupsForSchoolData = {
         orgNumber: string;
     };
     query?: never;
-    url: '/api/fetch/groups/feide/{org_number}/';
+    url: '/api/fetch/groups/feide/{orgNumber}/';
 };
 
 export type FetchGroupsForSchoolResponses = {
@@ -940,7 +940,7 @@ export type FetchGroupsAndUsersData = {
         orgNumber: string;
     };
     query?: never;
-    url: '/api/fetch/groups_and_users/feide/{org_number}/';
+    url: '/api/fetch/groups_and_users/feide/{orgNumber}/';
 };
 
 export type FetchGroupsAndUsersResponses = {
@@ -959,7 +959,7 @@ export type FetchMembershipsForSchoolData = {
         orgNumber: string;
     };
     query?: never;
-    url: '/api/fetch/memberships/feide/{org_number}/';
+    url: '/api/fetch/memberships/feide/{orgNumber}/';
 };
 
 export type FetchMembershipsForSchoolResponses = {
@@ -978,7 +978,7 @@ export type FetchSchoolImportStatusData = {
         orgNumber: string;
     };
     query?: never;
-    url: '/api/fetch/school_import_status/{org_number}/';
+    url: '/api/fetch/school_import_status/{orgNumber}/';
 };
 
 export type FetchSchoolImportStatusResponses = {
@@ -1261,7 +1261,7 @@ export type FeideImportSchoolData = {
         orgNumber: string;
     };
     query?: never;
-    url: '/api/import/school/feide/{org_number}/';
+    url: '/api/import/school/feide/{orgNumber}/';
 };
 
 export type FeideImportSchoolResponses = {
@@ -1280,7 +1280,7 @@ export type ImportGroupsAndUsersData = {
         orgNumber: string;
     };
     query?: never;
-    url: '/api/import/school_groups_and_users/{org_number}/';
+    url: '/api/import/school_groups_and_users/{orgNumber}/';
 };
 
 export type ImportGroupsAndUsersResponses = {
@@ -1299,7 +1299,7 @@ export type UpdateDataIntegrityData = {
         orgNumber: string;
     };
     query?: never;
-    url: '/api/import/update_data_integrity/{org_number}/';
+    url: '/api/import/update_data_integrity/{orgNumber}/';
 };
 
 export type UpdateDataIntegrityResponses = {
