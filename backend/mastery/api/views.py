@@ -1,5 +1,5 @@
 from .. import models, serializers
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -611,6 +611,17 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
             if include_observations_param and student_param:
                 # Include observations only when filtering by student
                 self.serializer_class = serializers.GoalWithObservationsSerializer
+
+                # Prefetch observations with access-policy scoping applied once,
+                # instead of per-goal queries in the serializer (N+1 fix)
+                from mastery.access_policies.observation import ObservationAccessPolicy
+                observation_policy = ObservationAccessPolicy()
+                observation_qs = observation_policy.scope_queryset(
+                    self.request, models.Observation.objects.all()).filter(
+                    student_id=student_param)
+                qs = qs.prefetch_related(
+                    Prefetch('observations', queryset=observation_qs, to_attr='prefetched_observations')
+                )
                 return qs
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs

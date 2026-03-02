@@ -37,55 +37,6 @@
   }
   let dataByStudentId = $state<Record<string, StudentData>>({})
 
-  // Fetch data for all students
-  $effect(() => {
-    const fetchAllStudentData = async () => {
-      const newData: Record<string, StudentData> = {}
-
-      await Promise.all(
-        students.map(async student => {
-          const result = await goalsList({
-            query: { student: student.id, includeObservations: true },
-          })
-          const studentGoals = result.data || []
-
-          const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(
-            student.id,
-            studentGoals,
-            allGroups
-          )
-          const masteryBySubjectId: Record<string, MasteryState> = {}
-          subjects.forEach(subject => {
-            const goals = goalsBySubjectId[subject.id] || []
-            if (goals.length > 0) {
-              const masteryAggregate = aggregateMasterys(goals)
-              if (masteryAggregate) {
-                masteryBySubjectId[subject.id] = { mastery: masteryAggregate }
-              } else {
-                masteryBySubjectId[subject.id] = { missingReason: MISSING_REASON_NO_OBSERVATIONS }
-              }
-            } else {
-              masteryBySubjectId[subject.id] = { missingReason: MISSING_REASON_NO_GOALS }
-            }
-          })
-
-          const observationCountBySubjectId = countObservationsBySubjectId(goalsBySubjectId)
-
-          newData[student.id] = {
-            masteryBySubjectId,
-            observationCountBySubjectId,
-          }
-        })
-      )
-
-      dataByStudentId = newData
-    }
-
-    if (students.length > 0) {
-      fetchAllStudentData()
-    }
-  })
-
   // Sorted students list
   let sortedStudents = $derived.by(() => {
     const sorted = [...students]
@@ -105,6 +56,48 @@
     return sorted
   })
 
+  const fetchAllStudentData = async () => {
+    const newData: Record<string, StudentData> = {}
+
+    await Promise.all(
+      students.map(async student => {
+        const result = await goalsList({
+          query: { student: student.id, includeObservations: true },
+        })
+        const studentGoals = result.data || []
+
+        const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(
+          student.id,
+          studentGoals,
+          allGroups
+        )
+        const masteryBySubjectId: Record<string, MasteryState> = {}
+        subjects.forEach(subject => {
+          const goals = goalsBySubjectId[subject.id] || []
+          if (goals.length > 0) {
+            const masteryAggregate = aggregateMasterys(goals)
+            if (masteryAggregate) {
+              masteryBySubjectId[subject.id] = { mastery: masteryAggregate }
+            } else {
+              masteryBySubjectId[subject.id] = { missingReason: MISSING_REASON_NO_OBSERVATIONS }
+            }
+          } else {
+            masteryBySubjectId[subject.id] = { missingReason: MISSING_REASON_NO_GOALS }
+          }
+        })
+
+        const observationCountBySubjectId = countObservationsBySubjectId(goalsBySubjectId)
+
+        newData[student.id] = {
+          masteryBySubjectId,
+          observationCountBySubjectId,
+        }
+      })
+    )
+
+    dataByStudentId = newData
+  }
+
   const handleHeaderClick = (key: SortKey) => {
     if (sortBy === key) {
       // Toggle direction
@@ -120,6 +113,13 @@
     if (sortBy !== key) return ''
     return sortDirection === 'asc' ? ' ▲' : ' ▼'
   }
+
+  // Fetch data for all students
+  $effect(() => {
+    if (students.length > 0) {
+      fetchAllStudentData()
+    }
+  })
 </script>
 
 <div class="students-grid" aria-label="Elevliste" style="--columns-count: {subjects.length}">
