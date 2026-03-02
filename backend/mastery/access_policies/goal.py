@@ -204,11 +204,14 @@ class GoalAccessPolicy(BaseAccessPolicy):
 
             # Individual goal: Basis group teacher OR teaches that subject to that student
             basis_group_ids = requester.teacher_groups.filter(type='basis').values_list('id', flat=True)
-            is_basis_teacher = target_goal.student.groups.filter(id__in=basis_group_ids).exists()
+            is_basis_teacher = UserGroup.objects.filter(
+                user_id=target_goal.student_id,
+                group_id__in=basis_group_ids
+            ).exists()
 
             # Check if teaches this subject to this student
             is_teacher_of_subject = requester.teacher_groups.filter(
-                subject=target_goal.subject,
+                subject_id=target_goal.subject_id,
                 members__id=target_goal.student_id
             ).exists()
 

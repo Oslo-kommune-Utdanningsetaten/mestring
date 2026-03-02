@@ -52,15 +52,10 @@ class GroupAccessPolicy(BaseAccessPolicy):
     # True if requester is admin at the group's school
     def is_admin_at_school(self, request, view, action):
         group = view.get_object()
-        if not group:
-            return False
-        school_id = self.scope_queryset(
-            request, Group.objects.filter(id=group.id)).values_list(
-            "school_id", flat=True).first()
-        if not school_id:
+        if not group or not group.school_id:
             return False
         return UserSchool.objects.filter(
             user_id=request.user.id,
-            school_id=school_id,
+            school_id=group.school_id,
             role__name="admin"
         ).exists()

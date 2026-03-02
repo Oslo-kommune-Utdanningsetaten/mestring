@@ -132,22 +132,27 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             if not goal_id:
                 return False
 
-            goal = Goal.objects.get(id=goal_id)
+            # Fetch only the fields needed for permission check
+            goal = Goal.objects.filter(id=goal_id).values(
+                'group_id', 'student_id', 'subject_id'
+            ).first()
+            if not goal:
+                return False
 
             # Group goal: Must teach that group
-            if goal.group_id:
-                return requester.teacher_groups.filter(id=goal.group_id).exists()
+            if goal['group_id']:
+                return requester.teacher_groups.filter(id=goal['group_id']).exists()
 
             # Individual goal: Basis group teacher OR teaches that subject to that student
-            if goal.student_id:
+            if goal['student_id']:
                 is_basis_teacher = requester.teacher_groups.filter(
                     type='basis',
-                    members__id=goal.student_id
+                    members__id=goal['student_id']
                 ).exists()
 
                 teaches_subject = requester.teacher_groups.filter(
-                    subject_id=goal.subject_id,
-                    members__id=goal.student_id
+                    subject_id=goal['subject_id'],
+                    members__id=goal['student_id']
                 ).exists()
 
                 return is_basis_teacher or teaches_subject
@@ -199,20 +204,30 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             if target_observation.created_by_id != requester.id:
                 return False
 
+            # Get goal info without loading the full object
+            goal = Goal.objects.filter(id=target_observation.goal_id).values(
+                'group_id', 'subject_id', 'school_id'
+            ).first()
+            if not goal:
+                return False
+
             # Group goal: Must teach that group
-            if target_observation.goal and target_observation.goal.group_id:
-                return requester.teacher_groups.filter(id=target_observation.goal.group_id).exists()
+            if goal['group_id']:
+                return requester.teacher_groups.filter(id=goal['group_id']).exists()
 
             # Individual goal: Basis group teacher OR teaches that subject to that student
             basis_group_ids = requester.teacher_groups.filter(
-                type='basis', school_id=target_observation.goal.school_id).values_list(
+                type='basis', school_id=goal['school_id']).values_list(
                 'id', flat=True)
-            is_basis_teacher = target_observation.student.groups.filter(id__in=basis_group_ids).exists()
+            is_basis_teacher = UserGroup.objects.filter(
+                user_id=target_observation.student_id,
+                group_id__in=basis_group_ids
+            ).exists()
 
             teaches_subject_at_school = requester.teacher_groups.filter(
-                subject=target_observation.goal.subject,
+                subject_id=goal['subject_id'],
                 members__id=target_observation.student_id,
-                school_id=target_observation.goal.school_id
+                school_id=goal['school_id']
             ).exists()
 
             return is_basis_teacher or teaches_subject_at_school
@@ -226,21 +241,27 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         try:
             if action == 'create':
                 goal_id = request.data.get("goal_id")
-                goal = Goal.objects.get(id=goal_id)
+                if not goal_id:
+                    return False
+                school_id = Goal.objects.filter(id=goal_id).values_list('school_id', flat=True).first()
             elif action in ['update', 'partial_update', 'destroy']:
                 observation = view.get_object()
-                if not observation:
+                if not observation or not observation.goal_id:
                     return False
-                goal = observation.goal
+                school_id = Goal.objects.filter(
+                    id=observation.goal_id).values_list(
+                    'school_id', flat=True).first()
+            else:
+                return False
 
-            if not goal or not goal.school_id:
+            if not school_id:
                 return False
 
             school_admin_ids = UserSchool.objects.filter(
                 user_id=request.user.id, role__name="admin").values_list("school_id", flat=True).distinct()
 
-            return goal.school_id in school_admin_ids
+            return school_id in school_admin_ids
 
         except Exception:
-            logger.exception("SubjectAccessPolicy.belongs_to_school")
+            logger.exception("ObservationAccessPolicy.is_admin_at_school")
             return False

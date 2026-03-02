@@ -65,9 +65,10 @@ class SubjectAccessPolicy(BaseAccessPolicy):
                 subject = view.get_object()
                 if not subject:
                     return False
-                school_id = self.scope_queryset(
-                    request, Subject.objects.filter(id=subject.id)).values_list(
-                    "owned_by_school_id", flat=True).first()
+                school_id = subject.owned_by_school_id
+            else:
+                return False
+                
             if not school_id:
                 return False
 

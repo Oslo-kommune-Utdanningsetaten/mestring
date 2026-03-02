@@ -138,7 +138,7 @@ class StatusAccessPolicy(BaseAccessPolicy):
             school_id = target_status.school_id
 
             teaches_subject = requester.teacher_groups.filter(
-                subject=target_status.subject,
+                subject_id=target_status.subject_id,
                 members__id=target_status.student_id,
                 school_id=school_id
             ).exists()

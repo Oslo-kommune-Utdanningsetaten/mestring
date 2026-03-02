@@ -119,7 +119,7 @@ class Subject(BaseModel):
     @property
     def is_feide_synchronized(self):
         """Convenience property to check if subject is Feide synchronized"""
-        return self.owned_by_school is None
+        return self.owned_by_school_id is None
 
 
 class User(BaseModel):
@@ -345,7 +345,7 @@ class Goal(BaseModel):
 
     @property
     def is_individual(self):
-        return self.group is None and self.student is not None
+        return self.group_id is None and self.student_id is not None
 
 
 class Situation(BaseModel):
