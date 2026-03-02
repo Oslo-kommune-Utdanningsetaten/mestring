@@ -543,7 +543,12 @@
                 <th>Type</th>
                 <th class="text-center">Fetched</th>
                 <th class="text-center">Database</th>
-                <th class="text-center">Fetch vs DB</th>
+                <th
+                  class="text-center"
+                  title="Note: Even if this number is zero, there can still be a diff!"
+                >
+                  Fetch vs DB
+                </th>
                 <th class="text-center" title="What will happen if the import runs?">
                   WWHI:Import
                 </th>
