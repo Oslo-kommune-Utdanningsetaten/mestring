@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { getAnchorPath } from 'svelte-jsoneditor'
   import ButtonMini from './ButtonMini.svelte'
 
   const { data, onDone } = $props<{

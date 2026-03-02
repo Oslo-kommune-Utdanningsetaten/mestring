@@ -19,7 +19,6 @@
   import { dataStore } from '../stores/data'
   import { trackEvent } from '../stores/analytics'
   import { getLocalStorageItem } from '../stores/localStorage'
-  import { addAlert } from '../stores/alerts'
 
   const { studentId } = $props<{ studentId: string }>()
   const individualGoalcount = 3

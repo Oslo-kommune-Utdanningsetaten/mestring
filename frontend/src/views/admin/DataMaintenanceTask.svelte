@@ -115,6 +115,6 @@
 <style>
   .timestamp {
     background-color: var(--pkt-color-grays-gray-200);
-    padding: 0.1rem 0.2rem;
+    padding: 0.05rem 0.2rem;
   }
 </style>

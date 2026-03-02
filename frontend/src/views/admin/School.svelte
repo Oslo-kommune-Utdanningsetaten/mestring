@@ -25,15 +25,29 @@
   import { addAlert } from '../../stores/alerts'
   import Offcanvas from '../../components/Offcanvas.svelte'
   import ImportEstimate from '../../components/ImportEstimate.svelte'
+  import CleanerbotEstimate from '../../components/CleanerbotEstimate.svelte'
 
   type SubjectsAllowed = 'only-custom' | 'only-feide' | 'all'
+
+  interface CleanerbotData {
+    orgNumber: string
+    changes: {
+      group: { 'soft-deleted': any[]; 'hard-deleted': any[] }
+      user: { 'soft-deleted': any[]; 'hard-deleted': any[] }
+      userGroup: { 'soft-deleted': any[]; 'hard-deleted': any[] }
+      goal: { 'soft-deleted': any[]; 'hard-deleted': any[] }
+      observation: { 'soft-deleted': any[]; 'hard-deleted': any[] }
+    }
+    errors: string[]
+  }
 
   const router = useTinyRouter()
 
   const { schoolId } = $props<{ schoolId: string }>()
 
   let school = $state<SchoolType>()
-  let currentEstimate = $state<Record<string, any> | null>(null)
+  let importDataEstimate = $state<Record<string, any> | null>(null)
+  let cleanerbotDataEstimate = $state<CleanerbotData | null>(null)
   let isEstimateContainerOpen = $state<boolean>(false)
   let importTimeline = $state<Record<string, string | undefined>[]>([])
 
@@ -123,7 +137,7 @@
     }
   }
 
-  const handleUpdateEstimate = async (dataType: string) => {
+  const handleUpdateImportEstimate = async (dataType: string) => {
     if (!school) return
     isEstimateContainerOpen = true
     let result = null
@@ -133,10 +147,15 @@
       result = await estimateUsersImport({ path: { orgNumber: school.orgNumber } })
     } else if (dataType === 'memberships') {
       result = await estimateMembershipsImport({ path: { orgNumber: school.orgNumber } })
-    } else if (dataType === 'cleanup') {
-      result = await estimateCleanup({ path: { orgNumber: school.orgNumber } })
     }
-    currentEstimate = result?.data || null
+    importDataEstimate = result?.data || null
+  }
+
+  const handleUpdateCleanerbotEstimate = async (dataType: string) => {
+    if (!school) return
+    isEstimateContainerOpen = true
+    const result = await estimateCleanup({ path: { orgNumber: school.orgNumber } })
+    cleanerbotDataEstimate = (result?.data as CleanerbotData) ?? null
   }
 
   const toggleServiceEnabled = async () => {
@@ -561,20 +580,20 @@
                       iconName: 'arrow-circle',
                       skin: 'secondary',
                       variant: 'icon-left',
-                      onClick: () => handleUpdateEstimate('groups'),
+                      onClick: () => handleUpdateImportEstimate('groups'),
                     }}
                   >
                     Check
                   </ButtonMini>
                 </td>
-                <td class="border-0 text-center py-2 small">
+                <td class="border-0 text-center py-2 small" rowspan="3">
                   <ButtonMini
                     options={{
                       title: 'Check cleanup estimate',
                       iconName: 'arrow-circle',
                       skin: 'secondary',
                       variant: 'icon-left',
-                      onClick: () => handleUpdateEstimate('cleanup'),
+                      onClick: () => handleUpdateCleanerbotEstimate('cleanup'),
                     }}
                   >
                     Check
@@ -608,20 +627,7 @@
                       iconName: 'arrow-circle',
                       skin: 'secondary',
                       variant: 'icon-left',
-                      onClick: () => handleUpdateEstimate('users'),
-                    }}
-                  >
-                    Check
-                  </ButtonMini>
-                </td>
-                <td class="border-0 text-center py-2 small">
-                  <ButtonMini
-                    options={{
-                      title: 'Check cleanup estimate',
-                      iconName: 'arrow-circle',
-                      skin: 'secondary',
-                      variant: 'icon-left',
-                      onClick: () => handleUpdateEstimate('cleanup'),
+                      onClick: () => handleUpdateImportEstimate('users'),
                     }}
                   >
                     Check
@@ -657,20 +663,7 @@
                       iconName: 'arrow-circle',
                       skin: 'secondary',
                       variant: 'icon-left',
-                      onClick: () => handleUpdateEstimate('memberships'),
-                    }}
-                  >
-                    Check
-                  </ButtonMini>
-                </td>
-                <td class="border-0 text-center py-2 small">
-                  <ButtonMini
-                    options={{
-                      title: 'Check cleanup estimate',
-                      iconName: 'arrow-circle',
-                      skin: 'secondary',
-                      variant: 'icon-left',
-                      onClick: () => handleUpdateEstimate('cleanup'),
+                      onClick: () => handleUpdateImportEstimate('memberships'),
                     }}
                   >
                     Check
@@ -698,12 +691,19 @@
   ariaLabel="Estimat for import"
   width={'70vw'}
   onClosed={() => {
-    currentEstimate = null
+    importDataEstimate = null
   }}
 >
-  {#if currentEstimate}
+  {#if importDataEstimate}
     <ImportEstimate
-      data={currentEstimate}
+      data={importDataEstimate}
+      onDone={() => {
+        isEstimateContainerOpen = false
+      }}
+    />
+  {:else if cleanerbotDataEstimate}
+    <CleanerbotEstimate
+      data={cleanerbotDataEstimate}
       onDone={() => {
         isEstimateContainerOpen = false
       }}
@@ -718,7 +718,7 @@
 <style>
   .centered {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 40%;
+    left: 40%;
   }
 </style>
