@@ -82,11 +82,19 @@ export const goalsWithCalculatedMastery = async (
   studentId: string,
   studentGoals: (GoalType & { observations?: ObservationType[] })[]
 ): Promise<GoalDecorated[]> => {
+  // Empty array case - no work needed
+  if (studentGoals.length === 0) {
+    return []
+  }
+
   // Check if observations are already included (from includeObservations=true)
   const hasInlineObservations = studentGoals.some(goal => Array.isArray(goal.observations))
 
   if (hasInlineObservations) {
     // Use inline observations - no additional API calls needed
+    console.log(
+      `✓ Using inline observations for student ${studentId} (${studentGoals.length} goals)`
+    )
     return studentGoals.map(goal => {
       const observations = goal.observations || []
       const decoratedGoal: GoalDecorated = { ...goal }
@@ -95,7 +103,12 @@ export const goalsWithCalculatedMastery = async (
       return decoratedGoal
     })
   }
-
+  console.warn(
+    `⚠ No inline observations for student ${studentId}. Goals:`,
+    studentGoals.length,
+    'Sample goal keys:',
+    studentGoals[0] ? Object.keys(studentGoals[0]) : 'none'
+  )
   // Fallback: fetch observations separately (legacy behavior)
   const observationsPromises = studentGoals.map(goal =>
     observationsList({

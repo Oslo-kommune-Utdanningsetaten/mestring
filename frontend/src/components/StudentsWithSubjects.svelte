@@ -62,7 +62,7 @@
     await Promise.all(
       students.map(async student => {
         const result = await goalsList({
-          query: { student: student.id, includeObservations: true },
+          query: { student: student.id, include_observations: true },
         })
         const studentGoals = result.data || []
 
