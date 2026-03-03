@@ -78,6 +78,7 @@ export const fetchGoalsForSubjectAndStudent = async (
   }
 }
 
+// We assume goals passed in are decorated with observations (via includeObservations=true)
 export const goalsWithCalculatedMastery = async (
   studentId: string,
   studentGoals: (GoalType & { observations?: ObservationType[] })[]
@@ -86,58 +87,26 @@ export const goalsWithCalculatedMastery = async (
   if (studentGoals.length === 0) {
     return []
   }
-
-  // Check if observations are already included (from includeObservations=true)
-  const hasInlineObservations = studentGoals.some(goal => Array.isArray(goal.observations))
-
-  if (hasInlineObservations) {
-    // Use inline observations - no additional API calls needed
-    console.log(
-      `✓ Using inline observations for student ${studentId} (${studentGoals.length} goals)`
-    )
-    return studentGoals.map(goal => {
-      const observations = goal.observations || []
-      const decoratedGoal: GoalDecorated = { ...goal }
-      decoratedGoal.masteryData = inferMastery(goal, observations)
-      decoratedGoal.observations = observations
-      return decoratedGoal
-    })
-  }
-  console.warn(
-    `⚠ No inline observations for student ${studentId}. Goals:`,
-    studentGoals.length,
-    'Sample goal keys:',
-    studentGoals[0] ? Object.keys(studentGoals[0]) : 'none'
-  )
-  // Fallback: fetch observations separately (legacy behavior)
-  const observationsPromises = studentGoals.map(goal =>
-    observationsList({
-      query: { goal: goal.id, student: studentId },
-    })
-  )
-  const observationsResults = await Promise.all(observationsPromises)
-  const result = [] as GoalDecorated[]
-  studentGoals.forEach((goal, index) => {
-    const observations = observationsResults[index]?.data || []
+  return studentGoals.map(goal => {
+    const observations = goal.observations || []
     const decoratedGoal: GoalDecorated = { ...goal }
     decoratedGoal.masteryData = inferMastery(goal, observations)
     decoratedGoal.observations = observations
-    result.push(decoratedGoal)
+    return decoratedGoal
   })
-  return result
 }
 
 // For a single student, output goals grouped by subjectId, with mastery data calculated
 // If a goal does not have a subjectId, look up via the groupId
 // Goals are sorted by sortOrder, then individual goals first
+// We assume goals passed in are decorated with observations (via includeObservations=true)
 export const goalsWithCalculatedMasteryBySubjectId = async (
   studentId: string,
   studentGoals: GoalType[],
   groups: GroupType[]
 ) => {
   const decoratedGoals = await goalsWithCalculatedMastery(studentId, studentGoals)
-  //console.log('Decorated goals with mastery data:', studentId, decoratedGoals)
-  let goalsBySubjectId: Record<string, GoalDecorated[]> = {}
+  const goalsBySubjectId: Record<string, GoalDecorated[]> = {}
   decoratedGoals.forEach((goal: GoalDecorated) => {
     let subjectId = goal.subjectId
     if (!subjectId) {

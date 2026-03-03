@@ -36,6 +36,11 @@
       <MasteryLevelBadge isBadgeEmpty={true} />
     {:else if masteryBySubjectId?.[subject.id]?.missingReason === MISSING_REASON_NO_GOALS}
       <MasteryLevelBadge isBadgeVoid={true} />
+    {:else}
+      <div class="d-flex align-items-center gap-2 text-secondary small py-2">
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span>Laster data...</span>
+      </div>
     {/if}
   </span>
 {/each}
