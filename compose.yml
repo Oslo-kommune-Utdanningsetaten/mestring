@@ -53,7 +53,7 @@ services:
       - -c
       - |
         python manage.py migrate
-        gunicorn wsgi -b :8000 -w 9
+        gunicorn wsgi -b :8000 -w 9 --max-requests 1000 --max-requests-jitter 100
     ports:
       - 8000:8000
     env_file:
