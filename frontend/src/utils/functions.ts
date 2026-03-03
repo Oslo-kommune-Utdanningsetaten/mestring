@@ -66,7 +66,9 @@ export const fetchGoalsForSubjectAndStudent = async (
   studentGroups: GroupType[]
 ): Promise<GoalDecorated[]> => {
   try {
-    const goalsResult = await goalsList({ query: { student: studentId, subject: subjectId } })
+    const goalsResult = await goalsList({
+      query: { student: studentId, subject: subjectId, includeObservations: true },
+    })
     const goals = goalsResult.data || []
     const groupIds = goals.map(goal => goal.groupId).filter(Boolean) as string[]
     const groups = studentGroups.filter((group: GroupType) => groupIds.includes(group.id))
