@@ -199,9 +199,10 @@ def test_school_admin_subject_access(school_admin, school, other_school, client,
 
 
 @pytest.mark.django_db
-def test_subject_filter_by_users(school, student, other_student, teacher, student_role, teacher_role):
+def test_subject_filter_by_users(
+        school, student, other_student, teacher, school_admin, student_role, teacher_role):
     """
-    Test that the 'users' query parameter correctly filters subjects by:
+    Test that the 'students' query parameter correctly filters subjects by:
     1. Users who are members of groups connected to the subject
     2. Users who have individual goals connected to the subject
     """
@@ -284,4 +285,13 @@ def test_subject_filter_by_users(school, student, other_student, teacher, studen
     assert resp.status_code == 200
     received_ids = {s['id'] for s in resp.json()}
     expected_ids = {subject_with_group.id}
+    assert received_ids == expected_ids
+
+    # Test school admin filtering by multiple users, returns subjects connected to either user
+    client.force_authenticate(user=school_admin)
+    resp = client.get('/api/subjects/', {'school': school.id,
+                      'students': f'{student.id},{other_student.id}'})
+    assert resp.status_code == 200
+    received_ids = {s['id'] for s in resp.json()}
+    expected_ids = {subject_with_group.id, subject_with_individual_goal.id, subject_unrelated.id}
     assert received_ids == expected_ids
