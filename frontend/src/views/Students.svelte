@@ -118,12 +118,16 @@
 
 <section class="my-4">
   {#if isLoadingStudents}
-    <div class="mt-3 spinner-border text-primary" role="status">
-      <span class="visually-hidden">Henter data...</span>
+    <div class="d-flex align-items-center gap-2 text-secondary small py-2">
+      <span
+        class="spinner-border spinner-border-sm"
+        role="status"
+        aria-label="Henter elever"
+      ></span>
+      <span>Henter elever...</span>
     </div>
-    <span>Henter data...</span>
   {:else if students.length === 0}
-    <div class="mt-3">Her var det tomt, gitt.</div>
+    <div class="mt-3">Her var det tomt</div>
   {:else}
     <StudentsWithSubjects students={filteredStudents} {subjects} />
   {/if}
