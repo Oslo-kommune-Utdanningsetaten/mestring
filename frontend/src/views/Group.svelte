@@ -83,7 +83,7 @@
 
       // Fetch goals for the group
       const goalsResult = await goalsList({
-        query: { group: groupId },
+        query: { group: groupId, includeObservations: true },
       })
       teachers = teachersResult.data || []
       students = studentsResult.data || []
@@ -92,9 +92,20 @@
       // For each student, fetch their goals with calculated mastery
       await Promise.all(
         students.map(async student => {
-          return goalsWithCalculatedMastery(student.id, groupGoals).then(calculatedGoals => {
-            goalsWithCalculatedMasteryByStudentId[student.id] = calculatedGoals
+          const groupGoalsWithOnlyStudentObservations = groupGoals.map((goal: GoalDecorated) => {
+            const studentObservations =
+              goal.observations?.filter((obs: ObservationType) => obs.studentId === student.id) ||
+              []
+            return {
+              ...goal,
+              observations: studentObservations,
+            }
           })
+          return goalsWithCalculatedMastery(student.id, groupGoalsWithOnlyStudentObservations).then(
+            calculatedGoals => {
+              goalsWithCalculatedMasteryByStudentId[student.id] = calculatedGoals
+            }
+          )
         })
       )
       // Fetch subjects for students
