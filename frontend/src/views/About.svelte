@@ -32,12 +32,12 @@
 {/snippet}
 
 <!-- About the app -->
-<section class="mt-3 mb-5">
+<section class="mt-3 mb-5" id="about">
   <h2 class="my-3">Om tjenesten</h2>
   <ul class="my-3">
     <li>
-      mestring.osloskolen.no er en prototype på hvordan det går an holde oversikt over elevers
-      mestring fagene
+      Denne tjenesten (kjent som "Mestring") er en prototype på hvordan det går an holde oversikt
+      over elevers mestring fagene.
     </li>
     <li>
       Utviklet av Seksjon for Læringsteknologi i
@@ -45,22 +45,22 @@
         Utdanningsetaten
       </Link>
       i tett samarbeid med
-      <Link to="https://haukasen.osloskolen.no/">Haukåsen skole</Link>
+      <Link to="https://haukasen.osloskolen.no/">Haukåsen skole</Link>.
     </li>
     <li>
       Kildekoden er åpen og tilgjengelig på
-      <Link to="https://github.com/Oslo-kommune-Utdanningsetaten/mestring/">GitHub</Link>
+      <Link to="https://github.com/Oslo-kommune-Utdanningsetaten/mestring/">GitHub</Link>.
     </li>
     <li>
       Her finner du
       <Link to="https://github.com/Oslo-kommune-Utdanningsetaten/mestring/issues">oppgavene</Link>
-      vi jobber med
+      vi jobber med.
     </li>
   </ul>
 </section>
 
 <!-- Access info -->
-<section class="my-5">
+<section class="my-5" id="access">
   <h3>Hvem har tilgang til hva?</h3>
   <ul class="my-3">
     <li>
@@ -93,7 +93,7 @@
 </section>
 
 <!-- Data retention info -->
-<section class="my-5">
+<section class="my-5" id="storage">
   <h3>Hvor lenge lagres data?</h3>
   {#if metadata.deleteRules}
     <ul class="my-3">
@@ -108,7 +108,7 @@
   {/if}
 </section>
 
-<section class="my-5">
+<section class="my-5" id="icons">
   <h3>Hva betyr ikonene?</h3>
   <p class="my-3">
     Ikonene i mestring er hentet fra
