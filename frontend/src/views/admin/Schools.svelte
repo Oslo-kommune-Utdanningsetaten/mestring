@@ -42,8 +42,8 @@
   const handleImportSchool = async (orgNumber: string) => {
     try {
       const result = await feideImportSchool({
-        path: { org_number: orgNumber },
-      } as any)
+        path: { orgNumber },
+      })
       if (result.response.status === 201) {
         addAlert({
           type: 'success',
