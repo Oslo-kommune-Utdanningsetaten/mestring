@@ -174,6 +174,22 @@
     }
   }
 
+  const toggleServiceEnabledForStudents = async () => {
+    if (!school) return
+    try {
+      await schoolsPartialUpdate({
+        path: { id: school.id },
+        body: { isServiceEnabledForStudents: !school.isServiceEnabledForStudents },
+      })
+      await fetchSchool()
+    } catch (error) {
+      addAlert({
+        type: 'danger',
+        message: `Feil ved oppdatering av elev-tilgang for skole ${school.displayName}`,
+      })
+    }
+  }
+
   // Toggle whether group goals can be created at the school
   const toggleGroupGoalEnabled = async () => {
     if (!school) return
@@ -454,6 +470,24 @@
           aria-checked={school.isStudentListEnabled}
           checked={school.isStudentListEnabled}
           onchange={() => toggleStudentListEnabled()}
+        ></pkt-checkbox>
+      </section>
+
+      <!-- Student access -->
+      <section
+        class="border border-3 p-3 my-3"
+        title="Skrudd av i påvente av diskusjon rundt elev-tilgang"
+      >
+        <h3 class="mb-3">Tilgang for elever</h3>
+        <pkt-checkbox
+          id={'student-access-' + school.id}
+          label={`Elever har ${school.isServiceEnabledForStudents ? '' : 'IKKE'} tilgang til tjenesten`}
+          labelPosition="right"
+          isSwitch="true"
+          aria-checked={school.isServiceEnabledForStudents}
+          checked={school.isServiceEnabledForStudents}
+          onchange={() => toggleServiceEnabledForStudents()}
+          disabled={true}
         ></pkt-checkbox>
       </section>
 
