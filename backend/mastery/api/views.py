@@ -511,7 +511,11 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
                 if student_ids:
                     qs = qs.filter(
                         # when querying by student_ids, include only subjects where the groups are enabled
-                        Q(groups__user_groups__user_id__in=student_ids, groups__is_enabled=True) |
+                        Q(
+                            groups__user_groups__user_id__in=student_ids,
+                            groups__user_groups__deleted_at__isnull=True,
+                            groups__is_enabled=True
+                        ) |
                         Q(goals__student_id__in=student_ids)
                     )
 
@@ -602,7 +606,7 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 # Student can be either the owner of a individual goal or a member of a group goal
                 qs = qs.filter(
                     Q(student_id=student_param) |
-                    Q(group__user_groups__user_id=student_param)
+                    Q(group__user_groups__user_id=student_param, group__user_groups__deleted_at__isnull=True)
                 )
             if subject_param:
                 # Subject can be either on a individual goal or a group goal
