@@ -129,39 +129,34 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 raise ValidationError(
                     {'error': 'missing-parameter', 'message': 'The "school" query parameter is required.'})
 
-            # When both groups and roles are specified, combine in a single filter
-            # to ensure users have the specified roles in the specified groups
-            if groups_param and roles_param:
-                group_ids = [group.strip() for group in groups_param.split(',') if group]
-                role_names = [role.strip() for role in roles_param.split(',') if role]
-                if group_ids and role_names:
-                    qs = qs.filter(
-                        user_groups__group_id__in=group_ids,
-                        user_groups__role__name__in=role_names,
-                        user_groups__group__school_id=school_param
-                    )
-            elif groups_param:
-                # Filter by groups only
+            # Build filters additively based on provided parameters
+            # Start with base filters for both possible paths (user_groups and user_schools)
+            user_group_filters = Q(
+                user_groups__group__school_id=school_param,
+                user_groups__deleted_at__isnull=True
+            )
+            user_school_filters = Q(user_schools__school_id=school_param)
+
+            # Add group filter if specified (only applies to user_groups path)
+            if groups_param:
                 group_ids = [group.strip() for group in groups_param.split(',') if group]
                 if group_ids:
-                    qs = qs.filter(
-                        user_groups__group_id__in=group_ids,
-                        user_groups__group__school_id=school_param
-                    )
-            elif roles_param:
-                # Filter by roles only (check both group memberships and school employment)
+                    user_group_filters &= Q(user_groups__group_id__in=group_ids)
+
+            # Add role filter if specified (applies to both paths)
+            if roles_param:
                 role_names = [role.strip() for role in roles_param.split(',') if role]
                 if role_names:
-                    qs = qs.filter(
-                        Q(user_groups__role__name__in=role_names, user_groups__group__school_id=school_param) |
-                        Q(user_schools__role__name__in=role_names, user_schools__school_id=school_param)
-                    )
+                    user_group_filters &= Q(user_groups__role__name__in=role_names)
+                    user_school_filters &= Q(user_schools__role__name__in=role_names)
+
+            # Apply filters: if groups specified, only via user_groups; otherwise both paths
+            if groups_param:
+                # Groups param restricts to only the user_groups path
+                qs = qs.filter(user_group_filters)
             else:
-                # Filter by school only: include users in groups (via UserGroup) OR users employed (via UserSchool)
-                qs = qs.filter(
-                    Q(user_groups__group__school_id=school_param) |
-                    Q(user_schools__school_id=school_param)
-                )
+                # No groups: users can match via either user_groups OR user_schools
+                qs = qs.filter(user_group_filters | user_school_filters)
         return qs.distinct()
 
 
@@ -400,31 +395,38 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
                 logger.warning(
                     'The "roles" parameter was provided without the "user" parameter. This is probably a unintended.')
 
+            # Apply school filter
             qs = qs.filter(school_id=school_param)
+
+            # Apply type filter if specified
             if type_param:
                 qs = qs.filter(type=type_param.lower())
 
-            # When both user and roles are specified, they must be combined in a single filter
-            # to ensure we're filtering on the SAME UserGroup record
-            if user_param and roles_param:
-                role_names = [role.strip() for role in roles_param.split(',') if role]
-                if role_names:
-                    qs = qs.filter(user_groups__user_id=user_param, user_groups__role__name__in=role_names)
-            elif user_param:
-                qs = qs.filter(user_groups__user_id=user_param)
-            elif roles_param:
-                role_names = [role.strip() for role in roles_param.split(',') if role]
-                if role_names:
-                    qs = qs.filter(user_groups__role__name__in=role_names)
+            # Build user_groups filters additively if user or roles are specified
+            if user_param or roles_param:
+                user_groups_filters = Q(user_groups__deleted_at__isnull=True)
 
+                if user_param:
+                    user_groups_filters &= Q(user_groups__user_id=user_param)
+
+                if roles_param:
+                    role_names = [role.strip() for role in roles_param.split(',') if role]
+                    if role_names:
+                        user_groups_filters &= Q(user_groups__role__name__in=role_names)
+
+                qs = qs.filter(user_groups_filters)
+
+            # Apply subject filter if specified
             if subject_param:
                 qs = qs.filter(subject_id=subject_param)
+
+            # Apply ids filter if specified
             if ids_param:
                 ids = [id.strip() for id in ids_param.split(',') if id]
                 if ids:
                     qs = qs.filter(id__in=ids)
 
-            # enabled filter
+            # Apply enabled filter
             if enabled_param:
                 if enabled_param == 'exclude':
                     qs = qs.filter(is_enabled=False)  # Only disabled groups
