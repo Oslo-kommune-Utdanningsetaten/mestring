@@ -53,10 +53,6 @@
       subjects = (subjectsResult.data || []).sort((a, b) =>
         a.displayName.localeCompare(b.displayName)
       )
-      console.log(
-        'Fetched subjects',
-        subjects.map((s: any) => ({ id: s.id, name: s.grepcode }))
-      )
     } catch (error) {
       console.error('Error fetching members', { selectedGroupId, error })
       students = []
