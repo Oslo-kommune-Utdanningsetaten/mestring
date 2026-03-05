@@ -162,7 +162,7 @@
 
     <!-- Goals and mastery -->
     <div class="card shadow-sm">
-      <div class="d-flex align-items-center gap-2 mb-3 card-header">
+      <div class="d-flex align-items-center gap-2 card-header">
         <h2>Mål</h2>
         {#if studentGoalsCount === 0 && $dataStore.currentSchool.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM}
           <ButtonMini

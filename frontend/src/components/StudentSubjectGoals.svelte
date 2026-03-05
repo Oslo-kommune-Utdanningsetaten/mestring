@@ -257,7 +257,7 @@
   })
 </script>
 
-<div class="d-flex align-items-center gap-2 mb-3">
+<div class="d-flex align-items-center gap-2 mt-2">
   <h3>
     {subject ? subject.displayName : 'Ukjent'}
   </h3>
@@ -461,7 +461,7 @@
       {@render goalInList(goal, index)}
     {/each}
   </div>
-  <div class="list-group mt-4">
+  <div class="list-group mt-2">
     {#each goalsForSubject.filter(goal => !goal.isIndividual) as goal, index (`${goal.id}-${expandedGoals[goal.id]}`)}
       {@render goalInList(goal, index)}
     {/each}
