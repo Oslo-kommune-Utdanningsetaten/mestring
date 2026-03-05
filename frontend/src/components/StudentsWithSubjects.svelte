@@ -136,7 +136,11 @@
       title="Sorter etter antall observasjoner i {subject.displayName}"
     >
       <span class="column-header">
-        {subject.shortName}{getSortIndicator(subject.id)}
+        {#if subject.ownedBySchoolId}
+          {subject.shortName}{getSortIndicator(subject.id)}
+        {:else}
+          {subject.grepCode}{getSortIndicator(subject.id)}
+        {/if}
       </span>
     </button>
   {/each}
