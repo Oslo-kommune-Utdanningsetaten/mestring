@@ -75,11 +75,21 @@ def fetch_metadata(request):
         school = models.School.objects.filter(org_number=org_number).first()
         if school:
             result["role_counts"]["teacher_basis"] = models.User.objects.filter(
-                user_groups__group__school=school, user_groups__group__type="basis",
-                user_groups__role__name="teacher").distinct().count()
+                user_groups__group__school=school,
+                user_groups__group__type="basis",
+                user_groups__role__name="teacher",
+                user_groups__deleted_at__isnull=True,
+                user_groups__group__deleted_at__isnull=True,
+                deleted_at__isnull=True
+            ).distinct().count()
             result["role_counts"]["teacher_teaching"] = models.User.objects.filter(
-                user_groups__group__school=school, user_groups__group__type="teaching",
-                user_groups__role__name="teacher").distinct().count()
+                user_groups__group__school=school,
+                user_groups__group__type="teaching",
+                user_groups__role__name="teacher",
+                user_groups__deleted_at__isnull=True,
+                user_groups__group__deleted_at__isnull=True,
+                deleted_at__isnull=True
+            ).distinct().count()
             result["role_counts"]["admin"] = models.User.objects.filter(
                 user_schools__school=school, user_schools__role__name="admin").distinct().count()
             result["role_counts"]["inspector"] = models.User.objects.filter(
@@ -499,11 +509,16 @@ def fetch_school_import_status(request, org_number):
     ).count()
 
     users_db_count = models.User.objects.filter(
-        user_groups__group__school=school, deleted_at__isnull=True
+        deleted_at__isnull=True,
+        user_groups__group__school=school,
+        user_groups__deleted_at__isnull=True,
+        user_groups__group__deleted_at__isnull=True
     ).distinct().count()
 
     user_groups_db_count = models.UserGroup.objects.filter(
-        group__school=school, deleted_at__isnull=True
+        deleted_at__isnull=True,
+        group__school=school,
+        group__deleted_at__isnull=True
     ).count()
 
     # Calculate diffs using helper data
