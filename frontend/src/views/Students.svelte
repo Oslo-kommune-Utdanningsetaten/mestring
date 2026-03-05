@@ -10,14 +10,14 @@
   import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
 
   const router = useTinyRouter()
-  let selectedGroupId = $state<string | undefined>(undefined)
+  let currentSchool = $derived($dataStore.currentSchool)
+  let selectedGroupId = $derived(router.getQueryParam('groupId'))
   let allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
   let students = $state<UserType[]>([])
   let isLoadingStudents = $state<boolean>(false)
   let nameFilter = $state<string>('')
   let subjects = $state<SubjectType[]>([])
 
-  let currentSchool = $derived($dataStore.currentSchool)
   let filteredStudents = $derived(
     nameFilter
       ? students.filter(
@@ -53,6 +53,10 @@
       subjects = (subjectsResult.data || []).sort((a, b) =>
         a.displayName.localeCompare(b.displayName)
       )
+      console.log(
+        'Fetched subjects',
+        subjects.map((s: any) => ({ id: s.id, name: s.grepcode }))
+      )
     } catch (error) {
       console.error('Error fetching members', { selectedGroupId, error })
       students = []
@@ -71,14 +75,6 @@
 
   $effect(() => {
     if (currentSchool && currentSchool.id) {
-      fetchStudents()
-    }
-  })
-
-  $effect(() => {
-    const newGroupId = router.getQueryParam('groupId')
-    if (newGroupId !== selectedGroupId) {
-      selectedGroupId = newGroupId
       fetchStudents()
     }
   })
