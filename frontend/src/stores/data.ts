@@ -72,39 +72,66 @@ const hasUserAccessToFeature = (
   if (!currentSchool || !currentSchool.isStatusEnabled) {
     return false
   }
-  const currentUser = currentData.currentUser
+  const { currentUser, subjects } = currentData
   if (!currentUser) return false
-
   const { isSchoolAdmin, isSuperadmin } = currentUser
-
   if (isSchoolAdmin || isSuperadmin) return true
+  const { subjectId, studentGroupIds, studentId, groupId } = options
+  const subject = subjects.find(s => s.id === subjectId)
 
   if (resource === 'status') {
     if (['create', 'update', 'delete'].includes(action)) {
-      // Early negative return if user has no teacher groups
-      if (currentUser.teacherGroups.length < 1) return false
-
-      const { subjectId, studentGroupIds } = options
       // Early negative return if no student groups provided
-      if (!studentGroupIds) return false
 
       return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
-        // Teaching group
+        // Teacher teaches the subject to this student
         if (
-          teacherGroup.type === GROUP_TYPE_TEACHING &&
+          [GROUP_TYPE_TEACHING, GROUP_TYPE_BASIS].includes(teacherGroup.type) &&
           subjectId &&
           teacherGroup.subjectId === subjectId &&
-          studentGroupIds.includes(teacherGroup.id)
+          studentGroupIds?.includes(teacherGroup.id)
         ) {
           // User is a teacher of the student in the subject
           return true
         }
-        // Basis group
-        if (teacherGroup.type === GROUP_TYPE_BASIS && studentGroupIds.includes(teacherGroup.id)) {
-          // User is teacher in the basis group to which the student belongs
+        // User is teacher in the basis group to which the student belongs and the subject is owned by the school
+        if (
+          teacherGroup.type === GROUP_TYPE_BASIS &&
+          studentGroupIds?.includes(teacherGroup.id) &&
+          subject?.ownedBySchoolId
+        ) {
           return true
         }
         return false
+      })
+    }
+  } else if (resource === 'goal') {
+    if (['create', 'update', 'delete'].includes(action)) {
+      return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
+        // User is teacher in the basis group to which the student belongs and (the subject is owned by the school OR the basis group has a subject)
+        if (
+          teacherGroup.type === GROUP_TYPE_BASIS &&
+          studentGroupIds?.includes(teacherGroup.id) &&
+          (subject?.ownedBySchoolId ||
+            (!!teacherGroup?.subjectId && teacherGroup?.subjectId === subjectId))
+        ) {
+          console.log('Access granted')
+          return true
+        }
+        // User is teacher in this group
+        if (groupId && groupId === teacherGroup.id) {
+          return true
+        }
+        return false
+      })
+    }
+  } else if (resource === 'observation') {
+    if (['create', 'update', 'delete'].includes(action)) {
+      // Early negative return if no group provided
+      if (!groupId) return false
+      // User must be teacher in the group to mess with observations
+      return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
+        return teacherGroup.id === groupId
       })
     }
   }

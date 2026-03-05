@@ -33,7 +33,7 @@
   import GroupTag from '../components/GroupTag.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
-  import { dataStore } from '../stores/data'
+  import { currentUser, dataStore } from '../stores/data'
   import { goalsWithCalculatedMastery, abbreviateName } from '../utils/functions'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
@@ -324,14 +324,16 @@
     <section>
       <div class="d-flex align-items-center gap-2">
         <h3>Mål</h3>
-        <ButtonIcon
-          options={{
-            iconName: 'goal',
-            title: `Legg til nytt gruppemål for ${group.displayName}`,
-            classes: 'bordered ms-1',
-            onClick: () => handleEditGoal(null),
-          }}
-        />
+        {#if $dataStore.hasUserAccessToFeature('goal', 'create', { groupId: group.id })}
+          <ButtonIcon
+            options={{
+              iconName: 'goal',
+              title: `Legg til nytt gruppemål for ${group.displayName}`,
+              classes: 'bordered ms-1',
+              onClick: () => handleEditGoal(null),
+            }}
+          />
+        {/if}
       </div>
 
       <div bind:this={goalsListElement} class="list-group mt-3">

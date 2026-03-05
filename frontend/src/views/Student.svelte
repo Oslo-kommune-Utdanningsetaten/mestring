@@ -164,28 +164,30 @@
     <div class="card shadow-sm">
       <div class="d-flex align-items-center gap-2 card-header">
         <h2>Mål</h2>
-        {#if studentGoalsCount === 0 && $dataStore.currentSchool.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM}
-          <ButtonMini
-            options={{
-              iconName: 'goal',
-              classes: 'm-2',
-              title: `Opprett ${individualGoalcount} individuelle mål for hvert fag`,
-              onClick: () => handleCreateAllIndividualGoals(),
-              variant: 'icon-left',
-              skin: 'primary',
-            }}
-          >
-            Opprett {individualGoalcount} individuelle mål for hvert fag
-          </ButtonMini>
-        {:else}
-          <ButtonIcon
-            options={{
-              iconName: 'goal',
-              classes: 'bordered ms-1',
-              title: 'Legg til nytt individuelt mål',
-              onClick: () => handleEditGoal({}),
-            }}
-          />
+        {#if $dataStore.hasUserAccessToFeature( 'goal', 'create', { studentId: student.id, studentGroupIds: student.groupIds } )}
+          {#if studentGoalsCount === 0 && $dataStore.currentSchool.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM}
+            <ButtonMini
+              options={{
+                iconName: 'goal',
+                classes: 'm-2',
+                title: `Opprett ${individualGoalcount} individuelle mål for hvert fag`,
+                onClick: () => handleCreateAllIndividualGoals(),
+                variant: 'icon-left',
+                skin: 'primary',
+              }}
+            >
+              Opprett {individualGoalcount} individuelle mål for hvert fag
+            </ButtonMini>
+          {:else}
+            <ButtonIcon
+              options={{
+                iconName: 'goal',
+                classes: 'bordered ms-1',
+                title: 'Legg til nytt individuelt mål',
+                onClick: () => handleEditGoal({}),
+              }}
+            />
+          {/if}
         {/if}
       </div>
       {#if subjects.length > 0}

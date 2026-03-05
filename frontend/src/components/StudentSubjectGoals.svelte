@@ -261,14 +261,16 @@
   <h3>
     {subject ? subject.displayName : 'Ukjent'}
   </h3>
-  <ButtonIcon
-    options={{
-      iconName: 'goal',
-      classes: 'bordered ms-1',
-      title: 'Legg til nytt individuelt mål',
-      onClick: () => handleEditGoal({}),
-    }}
-  />
+  {#if $dataStore.hasUserAccessToFeature( 'goal', 'create', { subjectId: subject.id, studentId: student.id, studentGroupIds: student.groupIds } )}
+    <ButtonIcon
+      options={{
+        iconName: 'goal',
+        classes: 'bordered ms-1',
+        title: 'Legg til nytt individuelt mål',
+        onClick: () => handleEditGoal({}),
+      }}
+    />
+  {/if}
   {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
     <ButtonIcon
       options={{
@@ -345,15 +347,17 @@
 
       <!-- New observation button -->
       <span class="item">
-        <ButtonIcon
-          options={{
-            iconName: 'bullseye',
-            title: 'Ny observasjon',
-            classes: 'bordered',
-            disabled: !goal.isRelevant,
-            onClick: () => handleEditObservation(goal, null),
-          }}
-        />
+        {#if $dataStore.hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, subjectId: subject.id, studentGroupIds: student.groupIds } )}
+          <ButtonIcon
+            options={{
+              iconName: 'bullseye',
+              title: 'Ny observasjon',
+              classes: 'bordered',
+              disabled: !goal.isRelevant,
+              onClick: () => handleEditObservation(goal, null),
+            }}
+          />
+        {/if}
       </span>
 
       <!-- Toggle goal info -->

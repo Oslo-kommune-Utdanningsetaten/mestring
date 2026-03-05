@@ -155,15 +155,17 @@
           <MasteryLevelBadge isBadgeEmpty={true} />
         {/if}
         <span class="add-observation-button">
-          <ButtonIcon
-            options={{
-              iconName: 'bullseye',
-              title: 'Legg til observasjon',
-              classes: 'bordered',
-              disabled: !goal.isRelevant,
-              onClick: () => onEditObservation(decoGoal || goal, null, student),
-            }}
-          />
+          {#if $dataStore.hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId } )}
+            <ButtonIcon
+              options={{
+                iconName: 'bullseye',
+                title: 'Legg til observasjon',
+                classes: 'bordered',
+                disabled: !goal.isRelevant,
+                onClick: () => onEditObservation(decoGoal || goal, null, student),
+              }}
+            />
+          {/if}
         </span>
       </span>
     {/each}
