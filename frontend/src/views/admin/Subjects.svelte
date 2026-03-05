@@ -17,12 +17,15 @@
   let subjectWip = $state<SubjectType | null>(null)
   let isSubjectEditorOpen = $state(false)
   let schools = $state<SchoolType[]>([])
-  let selectedSchool = $derived<SchoolType | null>(null)
   let isLoadingSubjects = $state<boolean>(false)
   let isLoadingSchools = $state<boolean>(false)
   let subjectFetchSelection = $state<string>('only-school-owned')
   let groupsBySubjectId = $state<Record<string, GroupType[]>>({})
   let nameFilter = $state<string>('')
+  let selectedSchool = $derived.by(() => {
+    const schoolIdFromUrl = router.getQueryParam('school')
+    return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
+  })
 
   // Radio options for subject filtering
   const subjectFetchOptions = [
@@ -140,23 +143,6 @@
   })
 
   $effect(() => {
-    if (!router.getQueryParam('school') && $dataStore.currentSchool) {
-      handleSchoolSelect($dataStore.currentSchool.id)
-    }
-  })
-
-  $effect(() => {
-    const schoolIdFromUrl = router.getQueryParam('school')
-    const nextSchool = schoolIdFromUrl
-      ? (schools.find(school => school.id === schoolIdFromUrl) ?? null)
-      : null
-    // Only assign school if it changed
-    if (nextSchool?.id !== selectedSchool?.id) {
-      selectedSchool = nextSchool
-    }
-  })
-
-  $effect(() => {
     if (selectedSchool) {
       fetchSubjects()
     }
@@ -199,7 +185,6 @@
         id="schoolSelect"
         onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
       >
-        <option value="0" selected={!selectedSchool?.id}>Velg skole</option>
         {#each schools as school}
           <option value={school.id} selected={school.id === selectedSchool?.id}>
             {school.displayName}

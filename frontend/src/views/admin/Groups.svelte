@@ -18,7 +18,11 @@
   let isLoadingGroups = $state<boolean>(false)
   let enabledSelection = $state<'include' | 'only' | 'exclude'>('only')
   let deletedSelection = $state<'include' | 'only' | 'exclude'>('include')
-  let selectedSchool = $state<SchoolType | null>(null)
+  let selectedSchool = $derived.by(() => {
+    const schoolIdFromUrl = router.getQueryParam('school')
+    return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
+  })
+
   let nameFilter = $state<string>('')
   let openRows = $state<Record<string, boolean>>({})
 
@@ -184,23 +188,6 @@
   })
 
   $effect(() => {
-    if (!router.getQueryParam('school') && $dataStore.currentSchool) {
-      handleSchoolSelect($dataStore.currentSchool.id)
-    }
-  })
-
-  $effect(() => {
-    const schoolIdFromUrl = router.getQueryParam('school')
-    const nextSchool = schoolIdFromUrl
-      ? (schools.find(school => school.id === schoolIdFromUrl) ?? null)
-      : null
-    // Only assign school if it changed
-    if (nextSchool?.id !== selectedSchool?.id) {
-      selectedSchool = nextSchool
-    }
-  })
-
-  $effect(() => {
     if (selectedSchool) {
       fetchGroups()
     }
@@ -224,7 +211,6 @@
           id="schoolSelect"
           onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
         >
-          <option value="0" selected={!selectedSchool?.id}>Velg skole</option>
           {#each schools as school}
             <option value={school.id} selected={school.id === selectedSchool?.id}>
               {school.displayName}

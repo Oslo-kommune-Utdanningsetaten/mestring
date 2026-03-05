@@ -12,7 +12,6 @@
   let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingUsers = $state<boolean>(false)
-  let selectedSchool = $state<SchoolType | null>($dataStore.currentSchool)
   let selectedRoles = $state<string[]>([
     UserRoles.TEACHER,
     UserRoles.ADMIN,
@@ -21,6 +20,11 @@
   ])
   let deletedSelection = $state<'include' | 'only' | 'exclude'>('include')
   let nameFilter = $state<string>('')
+
+  let selectedSchool = $derived.by(() => {
+    const schoolIdFromUrl = router.getQueryParam('school')
+    return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
+  })
 
   // Array of fetched users
   let users = $state<UserType[]>([])
@@ -200,18 +204,6 @@
   })
 
   $effect(() => {
-    if (!router.getQueryParam('school') && $dataStore.currentSchool) {
-      handleSchoolSelect($dataStore.currentSchool.id)
-    }
-  })
-
-  $effect(() => {
-    const selectedSchoolId = router.getQueryParam('school')
-    if (selectedSchoolId) {
-      selectedSchool = schools.find(school => school.id === selectedSchoolId) || null
-    } else {
-      selectedSchool = null
-    }
     if (selectedSchool && selectedSchool.id) {
       fetchUsers()
     }
@@ -235,7 +227,6 @@
           id="schoolSelect"
           onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
         >
-          <option value="0" selected={!selectedSchool?.id}>Velg skole</option>
           {#each schools as school}
             <option value={school.id} selected={school.id === selectedSchool?.id}>
               {school.displayName}

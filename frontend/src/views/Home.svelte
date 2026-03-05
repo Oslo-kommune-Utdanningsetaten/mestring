@@ -6,11 +6,7 @@
   import ButtonMini from '../components/ButtonMini.svelte'
 
   const router = useTinyRouter()
-  let errorFromUrl = $state<string | undefined>(undefined)
-
-  $effect(() => {
-    errorFromUrl = router.getQueryParam('error')
-  })
+  const errorFromUrl = $derived(router.getQueryParam('error'))
 </script>
 
 {#if $currentUser}

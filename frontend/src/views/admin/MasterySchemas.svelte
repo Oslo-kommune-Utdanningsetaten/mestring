@@ -22,8 +22,11 @@
   let isEditorOpen = $state<boolean>(false)
   let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
-  let selectedSchool = $state<SchoolType | null>(null)
   let masterySchemas = $derived<MasterySchemaWithConfig[]>([])
+  let selectedSchool = $derived.by(() => {
+    const schoolIdFromUrl = router.getQueryParam('school')
+    return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
+  })
 
   const fetchSchools = async () => {
     try {
@@ -111,21 +114,12 @@
   }
 
   $effect(() => {
-    const schoolId = router.getQueryParam('school') || null
-    fetchSchools().then(() => {
-      selectedSchool = schools.find(school => school.id === schoolId) || null
-      fetchMasterySchemas()
-    })
+    fetchSchools()
   })
 
   $effect(() => {
-    if ($dataStore.currentSchool && !selectedSchool) {
-      router.navigate(
-        urlStringFrom(
-          { school: $dataStore.currentSchool.id },
-          { path: '/admin/mastery-schemas', mode: 'merge' }
-        )
-      )
+    if (selectedSchool && selectedSchool.id) {
+      fetchMasterySchemas()
     }
   })
 </script>
@@ -147,7 +141,6 @@
           id="schoolSelect"
           onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
         >
-          <option value="0" selected={!selectedSchool?.id}>Velg skole</option>
           {#each schools as school}
             <option value={school.id} selected={school.id === selectedSchool?.id}>
               {school.displayName}
