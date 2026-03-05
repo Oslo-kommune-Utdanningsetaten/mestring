@@ -1,6 +1,6 @@
 from .base import BaseAccessPolicy
 from django.db.models import Q
-from mastery.models import UserSchool, Group
+from mastery.models import UserSchool, Group, UserGroup
 import logging
 logger = logging.getLogger(__name__)
 
@@ -40,10 +40,24 @@ class GroupAccessPolicy(BaseAccessPolicy):
             ).values_list("school_id", flat=True).distinct()
             teacher_groups = user.teacher_groups
             student_groups = user.student_groups
+
+            # Basis groups where user is a teacher
+            basis_teacher_groups = teacher_groups.filter(type='basis')
+            # Students in those basis groups
+            student_ids_in_basis_groups = UserGroup.objects.filter(
+                group__in=basis_teacher_groups,
+                role__name='student'
+            ).values_list('user_id', flat=True).distinct()
+            # Groups those students are members of
+            groups_of_basis_students = Group.objects.filter(
+                members__id__in=student_ids_in_basis_groups
+            ).distinct().values('id')
+
             return qs.filter(
                 Q(id__in=teacher_groups.values("id"), is_enabled=True) |
                 Q(id__in=student_groups.values("id"), is_enabled=True) |
-                Q(school_id__in=school_admin_ids)
+                Q(school_id__in=school_admin_ids) |
+                Q(id__in=groups_of_basis_students, is_enabled=True)
             ).distinct()
         except Exception:
             logger.exception("GroupAccessPolicy.scope_queryset")

@@ -1,6 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
-from mastery.models import Group
+from mastery.models import Group, User
 
 
 @pytest.mark.django_db
@@ -262,3 +262,129 @@ def test_group_filtering_by_user_and_role_bug(school, teacher_role, student_role
     data = resp.json()
     assert len(data) == 1
     assert data[0]['id'] == group.id
+
+
+@pytest.mark.django_db
+def test_basis_teacher_can_access_student_groups(
+        school, basis_group, teacher, student, other_student, teacher_role, student_role):
+    """
+    Test that teachers in basis groups can access all groups their students are members of.
+    """
+
+    # Basis group with a teacher and two students
+    basis_group.add_member(teacher, teacher_role)
+    basis_group.add_member(student, student_role)
+    basis_group.add_member(other_student, student_role)
+
+    # Teaching groups where the basis group students are also members
+    teaching_group_1 = Group.objects.create(
+        feide_id="fc:group:teaching-1",
+        display_name="Math 7a",
+        type="teaching",
+        school=school,
+        is_enabled=True
+    )
+    teaching_group_1.add_member(student, student_role)
+
+    teaching_group_2 = Group.objects.create(
+        feide_id="fc:group:teaching-2",
+        display_name="English 7a",
+        type="teaching",
+        school=school,
+        is_enabled=True
+    )
+    teaching_group_2.add_member(other_student, student_role)
+
+    # Teaching group with both students
+    teaching_group_3 = Group.objects.create(
+        feide_id="fc:group:teaching-3",
+        display_name="Science 7a",
+        type="teaching",
+        school=school,
+        is_enabled=True
+    )
+    teaching_group_3.add_member(student, student_role)
+    teaching_group_3.add_member(other_student, student_role)
+
+    # Teaching group with a student NOT in the basis group (should not be visible)
+    student_not_in_basis = User.objects.create(
+        name="Student Not In Basis",
+        feide_id="student-not-in-basis@example.com",
+        email="student-not-in-basis@example.com"
+    )
+    teaching_group_not_visible = Group.objects.create(
+        feide_id="fc:group:teaching-not-visible",
+        display_name="Art 7a",
+        type="teaching",
+        school=school,
+        is_enabled=True
+    )
+    teaching_group_not_visible.add_member(student_not_in_basis, student_role)
+
+    # Disabled teaching group with basis students (should not be visible)
+    disabled_teaching_group = Group.objects.create(
+        feide_id="fc:group:teaching-disabled",
+        display_name="Music 7a (disabled)",
+        type="teaching",
+        school=school,
+        is_enabled=False
+    )
+    disabled_teaching_group.add_member(student, student_role)
+
+    client = APIClient()
+    client.force_authenticate(user=teacher)
+
+    # Teacher should see:
+    # 1. Their own basis group (as teacher)
+    # 2. All teaching groups where their basis students are members (if enabled)
+    resp = client.get('/api/groups/', {'school': school.id})
+    assert resp.status_code == 200
+    data = resp.json()
+    received_ids = {group['id'] for group in data}
+
+    # Expected groups: basis_group + all enabled teaching groups with basis students
+    expected_ids = {basis_group.id, teaching_group_1.id, teaching_group_2.id, teaching_group_3.id}
+    assert received_ids == expected_ids, f"Expected {expected_ids}, but got {received_ids}"
+
+    # Verify the teacher can retrieve each of these groups
+    for group_id in expected_ids:
+        resp = client.get(f'/api/groups/{group_id}/')
+        assert resp.status_code == 200
+
+    # Verify the teacher cannot retrieve groups they shouldn't have access to
+    resp = client.get(f'/api/groups/{teaching_group_not_visible.id}/')
+    assert resp.status_code == 404
+
+    resp = client.get(f'/api/groups/{disabled_teaching_group.id}/')
+    assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_basis_teacher_without_students_sees_only_own_group(
+        school, basis_group, teacher, teacher_role):
+    """
+    Test that a basis group teacher without students only sees their own basis group.
+    """
+
+    # Basis group with only a teacher (no students)
+    basis_group.add_member(teacher, teacher_role)
+
+    # Other groups that should not be visible
+    other_group = Group.objects.create(
+        feide_id="fc:group:other",
+        display_name="Other Group",
+        type="teaching",
+        school=school,
+        is_enabled=True
+    )
+
+    client = APIClient()
+    client.force_authenticate(user=teacher)
+
+    # Teacher should only see their own basis group
+    resp = client.get('/api/groups/', {'school': school.id})
+    assert resp.status_code == 200
+    data = resp.json()
+    received_ids = {group['id'] for group in data}
+
+    assert received_ids == {basis_group.id}
