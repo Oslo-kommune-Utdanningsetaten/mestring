@@ -3,9 +3,17 @@
   import { urlStringFrom } from '../utils/functions'
   import type { GroupType, SchoolType } from '../generated/types.gen'
   import Link from '../components/Link.svelte'
+  import GroupTag from '../components/GroupTag.svelte'
 
-  let schools = $derived<SchoolType[]>($dataStore.currentUser.schools || [])
-  let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
+  const schools = $derived<SchoolType[]>($dataStore.currentUser.schools || [])
+  const { allGroups, teacherGroups, studentGroups } = $derived($dataStore.currentUser || [])
+  const otherGroups = $derived.by(() => {
+    const teacherGroupIds = new Set(teacherGroups.map((g: GroupType) => g.id))
+    const studentGroupIds = new Set(studentGroups.map((g: GroupType) => g.id))
+    return allGroups.filter(
+      (g: GroupType) => !teacherGroupIds.has(g.id) && !studentGroupIds.has(g.id)
+    )
+  })
 
   const handleSelectSchool = (school: SchoolType) => {
     setCurrentSchool(school)
@@ -18,7 +26,7 @@
   <!-- User Information -->
   <div class="card mb-3">
     <div class="card-header">
-      <h5>Brukerinformasjon</h5>
+      <h3>Brukerinformasjon</h3>
     </div>
     <div class="card-body">
       <div class="row">
@@ -41,7 +49,7 @@
   <!-- School selection -->
   <div class="card">
     <div class="card-header">
-      <h5>Aktiv skole</h5>
+      <h3>Aktiv skole</h3>
     </div>
     <div class="card-body">
       {#if schools.length > 0}
@@ -70,27 +78,43 @@
   <!-- Usergroup -->
   <div class="card mb-3">
     <div class="card-header d-flex">
-      <h5 class="mb-0">
-        Grupper jeg har tilgang til
-        <span class="text-muted">({groups.length})</span>
-      </h5>
+      <h3 class="mb-0">Grupper jeg har tilgang til ({allGroups?.length})</h3>
     </div>
     <div class="card-body">
-      {#if groups.length > 0}
-        <div class="list-group list-group-flush">
-          {#each groups as group}
-            <Link
-              to={urlStringFrom({ groupId: group.id }, { path: '/students', mode: 'replace' })}
-              className="list-group-item"
-            >
-              {group.displayName}
-            </Link>
+      <!-- Teacher groups -->
+      <h4 class="mt-1 mb-2">Som lærer</h4>
+      {#if teacherGroups?.length > 0}
+        <div class="d-flex flex-wrap gap-2">
+          {#each teacherGroups as group}
+            <GroupTag {group} isGroupNameEnabled={true} href={`/groups/${group.id}/`} />
           {/each}
         </div>
       {:else}
-        <div class="text-center py-4 text-muted">
-          <div>Ingen grupper funnet</div>
+        <span class="text-muted">Ikke medlem av noen grupper som lærer</span>
+      {/if}
+
+      <!-- Student groups -->
+      <h4 class="mt-4 mb-2">Som elev</h4>
+      {#if studentGroups?.length > 0}
+        <div class="d-flex flex-wrap gap-2">
+          {#each studentGroups as group}
+            <GroupTag {group} isGroupNameEnabled={true} href={`/groups/${group.id}/`} />
+          {/each}
         </div>
+      {:else}
+        <span class="text-muted">Ikke medlem av noen grupper som elev</span>
+      {/if}
+
+      <!-- Other groups -->
+      <h4 class="mt-4 mb-2">Øvirge tilganger</h4>
+      {#if otherGroups?.length > 0}
+        <div class="d-flex flex-wrap gap-2">
+          {#each otherGroups as group}
+            <GroupTag {group} isGroupNameEnabled={true} href={`/groups/${group.id}/`} />
+          {/each}
+        </div>
+      {:else}
+        <span class="text-muted">Ingen øvrige tilganger</span>
       {/if}
     </div>
   </div>
