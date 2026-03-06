@@ -7,10 +7,12 @@
     masterySchema,
     masteryValue = $bindable(),
     label = 'Mastery Value',
+    isInputEnabled = true,
   }: {
-    masterySchema: MasterySchemaWithConfig | null
+    masterySchema: MasterySchemaWithConfig
     masteryValue: number
     label?: string
+    isInputEnabled?: boolean
   } = $props()
 
   const calculations = $derived(useMasteryCalculations(masterySchema))
@@ -54,16 +56,16 @@
   </label>
 
   <div class="d-flex gap-1 position-relative">
-    <input
-      id="mastery-slider"
-      type="range"
-      min={calculations.minValue}
-      max={calculations.maxValue}
-      step={calculations.sliderValueIncrement}
-      class="slider"
-      bind:value={masteryValue}
-    />
-    {#if masterySchema?.config?.isValueIndicatorEnabled}
+    {#if masterySchema?.config?.isValueIndicatorEnabled && isInputEnabled}
+      <input
+        id="mastery-slider"
+        type="range"
+        min={calculations.minValue}
+        max={calculations.maxValue}
+        step={calculations.sliderValueIncrement}
+        class="slider"
+        bind:value={masteryValue}
+      />
       <div id="valueIndicatorContainer">
         <div
           id="valueIndicator"
@@ -78,6 +80,7 @@
       {#if masterySchema?.config?.isIncrementIndicatorEnabled}
         <div
           id="incrementIndicator"
+          title={`${safeMasteryValue}`}
           style="bottom: clamp(0%, {thumbYPosition + yOffset}%, calc(100% - 10px));"
         ></div>
       {/if}

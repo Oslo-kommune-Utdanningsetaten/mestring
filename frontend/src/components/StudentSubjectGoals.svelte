@@ -15,6 +15,7 @@
   import SparkbarChart from './SparkbarChart.svelte'
   import GoalEdit from './GoalEdit.svelte'
   import ObservationEdit from './ObservationEdit.svelte'
+  import ObservationView from './ObservationView.svelte'
   import StatusEdit from './StatusEdit.svelte'
   import ButtonMini from './ButtonMini.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
@@ -44,6 +45,7 @@
   let goalsListElement = $state<HTMLElement | null>(null)
   let isGoalEditorOpen = $state<boolean>(false)
   let isObservationEditorOpen = $state<boolean>(false)
+  let isObservationViewerOpen = $state<boolean>(false)
   let isStatusEditorOpen = $state<boolean>(false)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
 
@@ -126,7 +128,7 @@
     if (onRefreshRequired) onRefreshRequired()
   }
 
-  const handleEditObservation = (goal: GoalDecorated, observation: ObservationType | null) => {
+  const handleEditObservation = (observation: ObservationType | null, goal: GoalDecorated) => {
     if (observation?.id) {
       // edit existing observation
       observationWip = observation
@@ -138,6 +140,19 @@
     }
     goalForObservation = { ...goal }
     isObservationEditorOpen = true
+  }
+
+  const handleViewObservation = (observation: ObservationType, goal: GoalType) => {
+    if (observation) {
+      observationWip = observation
+      isObservationViewerOpen = true
+      goalForObservation = { ...goal }
+    } else {
+      addAlert({
+        type: 'danger',
+        message: 'Kunne ikke finne observasjon. Hvis du mener dette er en feil, kontakt support.',
+      })
+    }
   }
 
   const handleCloseEditObservation = () => {
@@ -354,7 +369,7 @@
               title: 'Ny observasjon',
               classes: 'bordered',
               disabled: !goal.isRelevant,
-              onClick: () => handleEditObservation(goal, null),
+              onClick: () => handleEditObservation(null, goal),
             }}
           />
         {/if}
@@ -390,26 +405,38 @@
                 {observation.masteryValue}
               </span>
               <span>
-                {#key observation.id}
-                  <ButtonIcon
-                    options={{
-                      iconName: 'trash-can',
-                      title: 'Slett observasjon',
-                      classes: 'bordered',
-                      onClick: () => handleDeleteObservation(observation.id),
-                      delayActionFor: 4,
-                    }}
-                  />
-                {/key}
-                {#if index === goal?.observations.length - 1}
-                  <ButtonIcon
-                    options={{
-                      iconName: 'edit',
-                      title: 'Rediger observasjon',
-                      classes: 'bordered',
-                      onClick: () => handleEditObservation(goal, observation),
-                    }}
-                  />
+                <ButtonIcon
+                  options={{
+                    iconName: 'eye',
+                    title: 'Se observasjon',
+                    classes: 'bordered',
+                    onClick: () => handleViewObservation(observation, goal),
+                  }}
+                />
+                {#if $dataStore.hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById } )}
+                  {#if index === goal?.observations.length - 1}
+                    <ButtonIcon
+                      options={{
+                        iconName: 'edit',
+                        title: 'Rediger observasjon',
+                        classes: 'bordered',
+                        onClick: () => handleEditObservation(observation, goal),
+                      }}
+                    />
+                  {/if}
+                {/if}
+                {#if $dataStore.hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById } )}
+                  {#key observation.id}
+                    <ButtonIcon
+                      options={{
+                        iconName: 'trash-can',
+                        title: 'Slett observasjon',
+                        classes: 'bordered',
+                        onClick: () => handleDeleteObservation(observation.id),
+                        delayActionFor: 4,
+                      }}
+                    />
+                  {/key}
                 {/if}
               </span>
             </div>
@@ -520,6 +547,27 @@
       observation={observationWip}
       goal={goalForObservation}
       onDone={handleObservationDone}
+    />
+  {/if}
+</Offcanvas>
+
+<!-- offcanvas for viewing observations -->
+<Offcanvas
+  bind:isOpen={isObservationViewerOpen}
+  ariaLabel="Se observasjon"
+  onClosed={() => {
+    observationWip = null
+  }}
+>
+  {#if observationWip}
+    <ObservationView
+      {student}
+      observation={observationWip}
+      goal={goalForObservation}
+      onDone={() => {
+        observationWip = null
+        isObservationViewerOpen = false
+      }}
     />
   {/if}
 </Offcanvas>

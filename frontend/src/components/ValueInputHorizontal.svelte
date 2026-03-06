@@ -7,10 +7,12 @@
     masterySchema,
     masteryValue = $bindable(),
     label = 'Mastery Value',
+    isInputEnabled = true,
   }: {
     masterySchema: MasterySchemaWithConfig
     masteryValue: number
     label?: string
+    isInputEnabled?: boolean
   } = $props()
 
   const calculations = $derived(useMasteryCalculations(masterySchema))
@@ -44,12 +46,12 @@
   })
 </script>
 
-<div class="mb-4">
+<div class="mt-4 mb-0">
   <label class="form-label" for="mastery-slider">
     {label}
   </label>
 
-  <div class="stairs-container d-flex align-items-end mb-3">
+  <div class="stairs-container d-flex align-items-end mb-5">
     {#each calculations.masteryLevels as masteryLevel, index}
       <span
         class="rung flex-grow d-flex align-items-end justify-content-center text-center"
@@ -59,41 +61,49 @@
           masteryLevel.color
         )};"
       >
-        <span class="pb-2 mx-2">
+        <span class="pb-1 mx-2 lh-sm">
           {masteryLevel.title}
         </span>
       </span>
     {/each}
     {#if masterySchema?.config?.isIncrementIndicatorEnabled}
+      <!-- bar visualizing mastery position -->
       <div
         id="incrementIndicator"
+        title={`${safeMasteryValue}`}
         style="left: clamp(0%, {thumbXPosition + xOffset}%, calc(100% - 10px));"
       ></div>
     {/if}
   </div>
 
-  <div class="input-container d-flex align-items-end my-5">
-    <input
-      id="mastery-slider"
-      type="range"
-      min={calculations.minValue}
-      max={calculations.maxValue}
-      step={calculations.sliderValueIncrement}
-      class="slider"
-      bind:value={masteryValue}
-    />
-    {#if masterySchema?.config?.isIncrementIndicatorEnabled}
+  {#if masterySchema?.config?.isIncrementIndicatorEnabled && isInputEnabled}
+    <div class="input-container d-flex align-items-end my-5">
+      <!-- mastery value number -->
       <div
         id="valueIndicator"
         style="left: clamp(0%, calc({thumbXPosition + xOffset}% - 0.5rem), calc(100%));"
       >
         {safeMasteryValue}
       </div>
-    {/if}
-  </div>
+      <!-- slider input -->
+      <input
+        id="mastery-slider"
+        type="range"
+        min={calculations.minValue}
+        max={calculations.maxValue}
+        step={calculations.sliderValueIncrement}
+        class="slider"
+        bind:value={masteryValue}
+      />
+    </div>
+  {/if}
 </div>
 
 <style>
+  label {
+    font-weight: 600;
+  }
+
   .stairs-container {
     position: relative;
     height: 200px;
@@ -102,6 +112,7 @@
 
   .input-container {
     position: relative;
+    height: 20px;
     width: 100%;
   }
 
@@ -116,7 +127,7 @@
 
   #valueIndicator {
     position: absolute;
-    bottom: 1.5em;
+    bottom: 2em;
     left: 0;
     text-align: center;
     width: auto;
