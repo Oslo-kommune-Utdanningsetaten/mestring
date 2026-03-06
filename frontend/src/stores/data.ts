@@ -76,7 +76,7 @@ const hasUserAccessToFeature = (
   if (!currentUser) return false
   const { isSchoolAdmin, isSuperadmin } = currentUser
   if (isSchoolAdmin || isSuperadmin) return true
-  const { subjectId, studentGroupIds, studentId, groupId } = options
+  const { subjectId, studentGroupIds, studentId, groupId, createdById } = options
   const subject = subjects.find(s => s.id === subjectId)
 
   if (resource === 'status') {
@@ -126,12 +126,34 @@ const hasUserAccessToFeature = (
       })
     }
   } else if (resource === 'observation') {
-    if (['create', 'update', 'delete'].includes(action)) {
-      // Early negative return if no group provided
-      if (!groupId) return false
-      // User must be teacher in the group to mess with observations
+    if (['create'].includes(action)) {
       return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
-        return teacherGroup.id === groupId
+        // Teacher teaches the subject to this student
+        if (
+          [GROUP_TYPE_TEACHING, GROUP_TYPE_BASIS].includes(teacherGroup.type) &&
+          subjectId &&
+          teacherGroup.subjectId === subjectId &&
+          studentGroupIds?.includes(teacherGroup.id)
+        ) {
+          // User is a teacher of the student in the subject
+          return true
+        }
+        // User is teacher in the basis group to which the student belongs and the subject is owned by the school
+        if (
+          teacherGroup.type === GROUP_TYPE_BASIS &&
+          studentGroupIds?.includes(teacherGroup.id) &&
+          subject?.ownedBySchoolId
+        ) {
+          return true
+        }
+        return false
+      })
+    } else if (['update', 'delete'].includes(action)) {
+      return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
+        // User is teacher in this group and the observation was created by the user
+        if (groupId && groupId === teacherGroup.id && createdById === currentUser.id) {
+          return true
+        }
       })
     }
   }

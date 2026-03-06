@@ -27,6 +27,7 @@ export type HasUserAccessToFeatureOptions = {
   studentId?: string
   studentGroupIds?: string[]
   groupId?: string | null
+  createdById?: string
 }
 
 export type GoalDecorated = GoalType & {
