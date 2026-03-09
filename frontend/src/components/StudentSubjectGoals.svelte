@@ -447,33 +447,36 @@
       </div>
       <div class="my-3">
         {#if goal.isIndividual}
-          <ButtonMini
-            options={{
-              iconName: 'edit',
-              classes: 'my-2 me-2',
-              title: 'Rediger individuelt mål',
-              onClick: () => handleEditGoal(goal),
-              variant: 'icon-left',
-              skin: 'secondary',
-            }}
-          >
-            Rediger individuelt mål
-          </ButtonMini>
-
-          <ButtonMini
-            options={{
-              iconName: 'trash-can',
-              classes: 'my-2',
-              title: 'Slett individuelt mål',
-              onClick: () => handleDeleteGoal(goal.id),
-              delayActionFor: 4,
-              disabled: goal.observations?.length > 0,
-              variant: 'icon-left',
-              skin: 'secondary',
-            }}
-          >
-            Slett mål
-          </ButtonMini>
+          {#if $dataStore.hasUserAccessToFeature( 'goal', 'update', { studentId: student.id, studentGroupIds: student.groupIds } )}
+            <ButtonMini
+              options={{
+                iconName: 'edit',
+                classes: 'my-2 me-2',
+                title: 'Rediger individuelt mål',
+                onClick: () => handleEditGoal(goal),
+                variant: 'icon-left',
+                skin: 'secondary',
+              }}
+            >
+              Rediger individuelt mål
+            </ButtonMini>
+          {/if}
+          {#if $dataStore.hasUserAccessToFeature( 'goal', 'delete', { studentId: student.id, studentGroupIds: student.groupIds } )}
+            <ButtonMini
+              options={{
+                iconName: 'trash-can',
+                classes: 'my-2',
+                title: 'Slett individuelt mål',
+                onClick: () => handleDeleteGoal(goal.id),
+                delayActionFor: 4,
+                disabled: goal.observations?.length > 0,
+                variant: 'icon-left',
+                skin: 'secondary',
+              }}
+            >
+              Slett mål
+            </ButtonMini>
+          {/if}
         {:else}
           <p>
             Dette målet er ikke individuelt, men gitt for <Link to={`/groups/${goal.groupId}/`}>

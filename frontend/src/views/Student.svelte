@@ -25,8 +25,8 @@
   let student = $state<UserType | null>(null)
   let subjects = $state<SubjectType[]>([])
   let groups = $state<GroupType[]>([])
-  let currentSchool = $derived($dataStore.currentSchool)
-  let studentGoalsCount = $state<number>(0)
+  let { currentSchool } = $derived($dataStore)
+  let studentGoalsCount = $state<number | undefined>(undefined)
 
   let goalWip = $state<GoalDecorated | null>(null)
   let isGoalEditorOpen = $state<boolean>(false)
@@ -71,11 +71,11 @@
 
   const countStudentGoals = async () => {
     const result = await goalsList({ query: { student: studentId } })
-    studentGoalsCount = result.data?.length || 0
+    studentGoalsCount = result.data?.length
   }
 
   const handleCreateAllIndividualGoals = async () => {
-    if (!student || $dataStore.currentSchool.subjectsAllowed !== SUBJECTS_ALLOWED_CUSTOM) return
+    if (!student || currentSchool.subjectsAllowed !== SUBJECTS_ALLOWED_CUSTOM) return
     const schoolSubjects = $dataStore.subjects
     // This works because schoolSubjects are only custom subjects (not the whole shebang)
     for (const subject of schoolSubjects) {
@@ -85,7 +85,7 @@
           subjectId: subject.id,
           sortOrder: i + 1,
           masterySchemaId: $dataStore.defaultMasterySchema?.id,
-          schoolId: $dataStore.currentSchool.id,
+          schoolId: currentSchool.id,
           isRelevant: true,
         }
         await goalsCreate({
@@ -117,7 +117,7 @@
         studentId: student.id,
         isIndividual: true,
         masterySchemaId: $dataStore.defaultMasterySchema?.id,
-        schoolId: $dataStore.currentSchool.id,
+        schoolId: currentSchool.id,
         isRelevant: true,
       }
     }
@@ -165,7 +165,7 @@
       <div class="d-flex align-items-center gap-2 card-header">
         <h2>Mål</h2>
         {#if $dataStore.hasUserAccessToFeature( 'goal', 'create', { studentId: student.id, studentGroupIds: student.groupIds } )}
-          {#if studentGoalsCount === 0 && $dataStore.currentSchool.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM}
+          {#if studentGoalsCount === 0 && currentSchool.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM}
             <ButtonMini
               options={{
                 iconName: 'goal',
@@ -190,6 +190,7 @@
           {/if}
         {/if}
       </div>
+
       {#if subjects.length > 0}
         <ul class="list-group list-group-flush">
           {#each subjects as subject (subject.id)}

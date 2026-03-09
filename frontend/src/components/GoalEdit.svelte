@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { goalsCreate, goalsUpdate, masterySchemasDestroy } from '../generated/sdk.gen'
+  import { goalsCreate, goalsUpdate, subjectsList } from '../generated/sdk.gen'
   import type {
     GoalType,
     GroupType,
@@ -10,7 +10,7 @@
   import { dataStore } from '../stores/data'
   import { setLocalStorageItem } from '../stores/localStorage'
   import ButtonMini from './ButtonMini.svelte'
-  import { NONE_FIELD_VALUE } from '../utils/constants'
+  import { NONE_FIELD_VALUE, SUBJECTS_ALLOWED_CUSTOM, GROUP_TYPE_BASIS } from '../utils/constants'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
 
@@ -22,21 +22,26 @@
     student = null,
     group = null,
     goal = null,
+    subjects = null,
     onDone,
     isGoalIndividual,
   } = $props<{
     student?: UserType | null
     group?: GroupType | null
     goal?: GoalType | null
+    subjects?: SubjectType[] | null
     isGoalIndividual: boolean
     onDone?: () => void | Promise<void>
   }>()
 
   let localGoal = $state<Partial<GoalType>>({})
   let subjectViaGroup = $derived(
-    group ? $dataStore.subjects.find(s => s.id === group?.subjectId) : null
+    group
+      ? (subjects || $dataStore.subjects).find((s: SubjectType) => s.id === group?.subjectId)
+      : null
   )
   let masterySchemas = $derived($dataStore.masterySchemas)
+  let { currentSchool } = $derived($dataStore)
 
   // What determines if we can edit the goal?
   let isFormValid = $derived(
@@ -105,7 +110,7 @@
   $effect(() => {
     localGoal = {
       ...goal,
-      schoolId: $dataStore.currentSchool?.id,
+      schoolId: currentSchool?.id,
     }
   })
 </script>
@@ -131,7 +136,7 @@
           }}
         >
           <option disabled value={NONE_FIELD_VALUE}>Velg fag</option>
-          {#each $dataStore.subjects as aSubject}
+          {#each subjects || $dataStore.subjects as aSubject}
             <option value={aSubject.id}>
               {aSubject.displayName}
             </option>
@@ -146,6 +151,7 @@
       {/if}
     </div>
   </div>
+
   {#if masterySchemas.length > 1}
     <div class="form-group mb-3">
       <div>
@@ -186,7 +192,7 @@
     />
   </div>
 
-  {#if $dataStore.currentSchool.isGoalTitleEnabled}
+  {#if currentSchool.isGoalTitleEnabled}
     <div class="form-group mb-3">
       <label for="goalTitle" class="form-label">Tittel</label>
       <input

@@ -1,6 +1,6 @@
 import type { Mastery, GoalDecorated } from '../types/models'
 import type { GoalType, SubjectType, ObservationType, GroupType } from '../generated/types.gen'
-import { goalsList, observationsList, userGroupsList, userSchoolsList } from '../generated/sdk.gen'
+import { goalsList, userGroupsList, userSchoolsList } from '../generated/sdk.gen'
 import { nb as noLocale } from 'date-fns/locale'
 import { format, formatDistance, formatDistanceToNow } from 'date-fns'
 import { TEACHER_ROLE, STUDENT_ROLE } from './constants'

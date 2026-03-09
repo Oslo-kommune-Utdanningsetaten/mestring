@@ -1,18 +1,15 @@
 <script lang="ts">
   import { dataStore, setCurrentSchool, currentUser } from '../stores/data'
-  import { urlStringFrom } from '../utils/functions'
   import type { GroupType, SchoolType } from '../generated/types.gen'
-  import Link from '../components/Link.svelte'
   import GroupTag from '../components/GroupTag.svelte'
 
   const schools = $derived<SchoolType[]>($dataStore.currentUser.schools || [])
   const { allGroups, teacherGroups, studentGroups } = $derived($dataStore.currentUser || [])
   const otherGroups = $derived.by(() => {
-    const teacherGroupIds = new Set(teacherGroups.map((g: GroupType) => g.id))
-    const studentGroupIds = new Set(studentGroups.map((g: GroupType) => g.id))
-    return allGroups.filter(
-      (g: GroupType) => !teacherGroupIds.has(g.id) && !studentGroupIds.has(g.id)
-    )
+    if (!allGroups || !teacherGroups || !studentGroups) return []
+    return allGroups
+      .filter((g: GroupType) => !teacherGroups.map((tg: GroupType) => tg.id).includes(g.id))
+      .filter((g: GroupType) => !studentGroups.map((sg: GroupType) => sg.id).includes(g.id))
   })
 
   const handleSelectSchool = (school: SchoolType) => {

@@ -69,17 +69,18 @@ const hasUserAccessToFeature = (
 ): boolean => {
   const currentData = get(dataStore) as AppData
   const currentSchool = currentData.currentSchool
-  if (!currentSchool || !currentSchool.isStatusEnabled) {
-    return false
-  }
+  if (!currentSchool) return false // no school, no access
   const { currentUser, subjects } = currentData
-  if (!currentUser) return false
+  if (!currentUser) return false // not logged in, no access
   const { isSchoolAdmin, isSuperadmin } = currentUser
-  if (isSchoolAdmin || isSuperadmin) return true
+  if (isSchoolAdmin || isSuperadmin) return true // school admins and superadmins have access to everything
   const { subjectId, studentGroupIds, studentId, groupId, createdById } = options
   const subject = subjects.find(s => s.id === subjectId)
 
   if (resource === 'status') {
+    if (!currentSchool.isStatusEnabled) {
+      return false
+    }
     if (['create', 'update', 'delete'].includes(action)) {
       // Early negative return if no student groups provided
 
@@ -108,17 +109,22 @@ const hasUserAccessToFeature = (
   } else if (resource === 'goal') {
     if (['create', 'update', 'delete'].includes(action)) {
       return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
-        // User is teacher in the basis group to which the student belongs and (the subject is owned by the school OR the basis group has a subject)
+        // Unspecified subject and user is teacher of the student
+        // Used when creating an individual goal and the subject is not yet selected
+        if (!subject && studentGroupIds?.includes(teacherGroup.id)) {
+          return true
+        }
+        // User is teacher in a group to which the student belongs and (the subject is owned by the school OR the group has a subject)
+        // Used when creating an individual goal and the subject is selected
         if (
-          teacherGroup.type === GROUP_TYPE_BASIS &&
           studentGroupIds?.includes(teacherGroup.id) &&
           (subject?.ownedBySchoolId ||
             (!!teacherGroup?.subjectId && teacherGroup?.subjectId === subjectId))
         ) {
-          console.log('Access granted')
           return true
         }
         // User is teacher in this group
+        // Used when creating/editing a group goal
         if (groupId && groupId === teacherGroup.id) {
           return true
         }
