@@ -321,7 +321,7 @@ export const formatDateTimeWithToday = (
     return includeTime ? `I dag ${format(date, ' HH:mm:ss')}` : 'I dag'
   } else {
     return includeTime
-      ? format(date, 'dd. LLLL yyyy HH:mm', { locale: noLocale })
-      : format(date, 'dd. LLLL yyyy', { locale: noLocale })
+      ? format(date, 'd. LLLL yyyy HH:mm', { locale: noLocale })
+      : format(date, 'd. LLLL yyyy', { locale: noLocale })
   }
 }

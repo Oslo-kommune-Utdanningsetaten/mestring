@@ -56,22 +56,27 @@
       </span>
     </div>
 
+    <hr />
+
     {#if masterySchema?.config?.isMasteryValueInputEnabled}
-      {#if renderDirection() === 'vertical'}
-        <ValueInputVertical
-          {masterySchema}
-          bind:masteryValue={localObservation.masteryValue}
-          label=""
-          isInputEnabled={false}
-        />
-      {:else}
-        <ValueInputHorizontal
-          {masterySchema}
-          bind:masteryValue={localObservation.masteryValue}
-          label=""
-          isInputEnabled={false}
-        />
-      {/if}
+      <div class="form-group mb-5">
+        <h4 class="mb-2">Mestring</h4>
+        {#if renderDirection() === 'vertical'}
+          <ValueInputVertical
+            {masterySchema}
+            bind:masteryValue={localObservation.masteryValue}
+            label=""
+            isInputEnabled={false}
+          />
+        {:else}
+          <ValueInputHorizontal
+            {masterySchema}
+            bind:masteryValue={localObservation.masteryValue}
+            label=""
+            isInputEnabled={false}
+          />
+        {/if}
+      </div>
     {/if}
 
     {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
