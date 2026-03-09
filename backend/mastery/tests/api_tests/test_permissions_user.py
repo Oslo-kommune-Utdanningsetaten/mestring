@@ -212,7 +212,7 @@ def test_user_self_access(teaching_group_with_members, school):
 @pytest.mark.django_db
 def test_teacher_user_access(
         school, teaching_group_with_members, other_teaching_group_with_members,
-        other_school_teaching_group_with_members):
+        other_school_teaching_group_with_members, superadmin):
     teacher = teaching_group_with_members.get_teachers().first()
     student = teaching_group_with_members.get_students().first()
     other_teacher = other_teaching_group_with_members.get_teachers().first()
@@ -231,6 +231,10 @@ def test_teacher_user_access(
 
     # Teacher can retrieve other teacher
     resp = client.get(f'/api/users/{other_teacher.id}/')
+    assert resp.status_code == 200
+
+    # Teacher can retrieve superadmin
+    resp = client.get(f'/api/users/{superadmin.id}/')
     assert resp.status_code == 200
 
     # Teacher can list users at their school
@@ -266,7 +270,7 @@ def test_teacher_user_access(
 @pytest.mark.django_db
 def test_student_user_access(
         school, student_role, teaching_group_with_members, other_teaching_group_with_members,
-        other_school_teaching_group_with_members):
+        other_school_teaching_group_with_members, superadmin):
     teacher = teaching_group_with_members.get_teachers().first()
     student = teaching_group_with_members.get_students().first()
     other_teacher = other_teaching_group_with_members.get_teachers().first()
@@ -277,6 +281,10 @@ def test_student_user_access(
 
     # Student can retrieve other teacher
     resp = client.get(f'/api/users/{other_teacher.id}/')
+    assert resp.status_code == 200
+
+    # Student can retrieve superadmin
+    resp = client.get(f'/api/users/{superadmin.id}/')
     assert resp.status_code == 200
 
     # Student can list teachers at their school

@@ -21,27 +21,28 @@ class UserAccessPolicy(BaseAccessPolicy):
     ]
 
     def scope_queryset(self, request, qs):
-        user = request.user
-        if not user:
+        requester = request.user
+        if not requester:
             return qs.none()
-        if user.is_superadmin:
+        if requester.is_superadmin:
             return qs
         try:
-            groups_where_current_user_is_teacher = user.teacher_groups
-            groups_where_current_user_is_student = user.student_groups
+            groups_where_current_user_is_teacher = requester.teacher_groups
+            groups_where_current_user_is_student = requester.student_groups
 
-            # All schools where user is admin or inspector
+            # All schools where requester is admin or inspector
             school_employee_ids = UserSchool.objects.filter(
-                user_id=user.id, role__name__in=["admin", "inspector"]
+                user_id=requester.id, role__name__in=["admin", "inspector"]
             ).values_list("school_id", flat=True).distinct()
 
-            # All teacher user IDs from schools the user is member of
+            # All teacher user IDs from schools the requester is member of
             teacher_ids = User.objects.filter(
-                user_groups__group__school__in=user.get_schools(),
+                user_groups__group__school__in=requester.get_schools(),
                 user_groups__role__name='teacher'
             ).values_list('id', flat=True)
 
-            filters = Q(id=user.id)  # always include self
+            filters = Q(id=requester.id)  # Always include self
+            filters |= Q(is_superadmin=True)  # Superadmins are visible to everyone
             filters |= Q(user_groups__group__in=groups_where_current_user_is_teacher)
             filters |= Q(user_groups__group__in=groups_where_current_user_is_student)
             filters |= Q(id__in=teacher_ids)
