@@ -130,7 +130,6 @@ const hasUserAccessToFeature = (
       return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
         // Teacher teaches the subject to this student
         if (
-          [GROUP_TYPE_TEACHING, GROUP_TYPE_BASIS].includes(teacherGroup.type) &&
           subjectId &&
           teacherGroup.subjectId === subjectId &&
           studentGroupIds?.includes(teacherGroup.id)

@@ -155,7 +155,7 @@
           <MasteryLevelBadge isBadgeEmpty={true} />
         {/if}
         <span class="add-observation-button">
-          {#if $dataStore.hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId } )}
+          {#if $dataStore.hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, subjectId: subject?.id, studentGroupIds: student.groupIds } )}
             <ButtonIcon
               options={{
                 iconName: 'bullseye',
