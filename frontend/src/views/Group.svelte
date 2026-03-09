@@ -279,11 +279,16 @@
   </div>
 {:else if !group}
   <div class="alert alert-warning">
-    <h4>Fant ikke gruppen</h4>
-    <p>
-      Gruppe <span class="fw-bold">{groupId}</span>
-      eksisterer ikke, eller du mangler tilgang.
-    </p>
+    <h4>Fant ikke noen gruppe med ID "{groupId}"</h4>
+    <p class="mt-4">Det kan være flere grunner til dette:</p>
+    <ul>
+      <li>Brukeren du er logget på med mangler tilgang</li>
+      <li>Den har aldri eksistert</li>
+      <li>Er slettet</li>
+      <li>Er skrudd av for visning</li>
+      <li>Har gått ut på dato (en gruppe varer typisk et skoleår)</li>
+    </ul>
+    <p>Hvis du mener dette er en feil, kontakt support.</p>
   </div>
 {:else}
   <!-- Group Header -->
