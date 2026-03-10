@@ -42,7 +42,7 @@
   let decoratedUsersById = $state<Record<string, UserDecorated>>({})
 
   // Sort state
-  type SortKey = 'name' | 'createdAt' | 'newestMembership'
+  type SortKey = 'name' | 'createdAt' | 'newestMembership' | 'lastActivityAt'
   let sortBy = $state<SortKey>('name')
   let sortDirection = $state<'asc' | 'desc'>('asc')
 
@@ -53,8 +53,10 @@
       let comparison: number
       if (sortBy === 'name') {
         comparison = a.name.localeCompare(b.name, 'no')
-      } else if (sortBy === 'createdAt') {
-        comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      } else if (sortBy === 'createdAt' || sortBy === 'lastActivityAt') {
+        const timeA = a[sortBy] || ('0' as string)
+        const timeB = b[sortBy] || ('0' as string)
+        comparison = new Date(timeA).getTime() - new Date(timeB).getTime()
       } else if (sortBy === 'newestMembership') {
         const decoratedA = decoratedUsersById[a.id]
         const decoratedB = decoratedUsersById[b.id]
@@ -310,6 +312,13 @@
             title="Sorter etter opprettelsesdato"
           >
             Created{getSortIndicator('createdAt')}
+          </button>
+          <button
+            class="sortable-header"
+            onclick={() => handleHeaderClick('lastActivityAt')}
+            title="Sorter etter aktivitetsdato"
+          >
+            Active{getSortIndicator('lastActivityAt')}
           </button>
           <button
             class="sortable-header"

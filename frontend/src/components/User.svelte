@@ -96,6 +96,16 @@
     <div class="text-muted small">{formatDate(user.createdAt)}</div>
     <SinceSchoolStart dateAsString={user.createdAt} />
   </div>
+  <div>
+    <div class="text-muted small">
+      {#if user.lastActivityAt}
+        {formatDate(user.lastActivityAt)}
+        <SinceSchoolStart dateAsString={user.lastActivityAt} />
+      {:else}
+        Ingen aktivitet
+      {/if}
+    </div>
+  </div>
   {#if decoratedUser}
     <div>
       <div class="text-muted small">{formatDate(newestMembership?.createdAt)}</div>
