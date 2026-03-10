@@ -1,5 +1,5 @@
 from .. import models, serializers
-from django.db.models import Q, Prefetch
+from django.db.models import Q, Prefetch, Exists, OuterRef
 from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -500,9 +500,9 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
                     {'error': 'missing-parameter', 'message': 'The "school" query parameter is required.'})
 
             qs = qs.filter(
-                Q(groups__school_id=school_param) |
                 Q(owned_by_school_id=school_param) |
-                Q(goals__school_id=school_param)
+                Exists(models.Group.objects.filter(subject_id=OuterRef('pk'), school_id=school_param)) |
+                Exists(models.Goal.objects.filter(subject_id=OuterRef('pk'), school_id=school_param))
             )
 
             if student_ids_param:
@@ -511,12 +511,20 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
                 if student_ids:
                     qs = qs.filter(
                         # when querying by student_ids, include only subjects where the groups are enabled
-                        Q(
-                            groups__user_groups__user_id__in=student_ids,
-                            groups__user_groups__deleted_at__isnull=True,
-                            groups__is_enabled=True
+                        Exists(
+                            models.UserGroup.objects.filter(
+                                group__subject_id=OuterRef('pk'),
+                                user_id__in=student_ids,
+                                deleted_at__isnull=True,
+                                group__is_enabled=True
+                            )
                         ) |
-                        Q(goals__student_id__in=student_ids)
+                        Exists(
+                            models.Goal.objects.filter(
+                                subject_id=OuterRef('pk'),
+                                student_id__in=student_ids
+                            )
+                        )
                     )
 
             if is_owned_set:
