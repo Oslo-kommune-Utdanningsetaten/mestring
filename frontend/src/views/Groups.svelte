@@ -6,6 +6,7 @@
   import type { GroupType, UserType } from '../generated/types.gen'
   import GroupTag from '../components/GroupTag.svelte'
   import Link from '../components/Link.svelte'
+  import GroupObservationsBarChart from '../components/GroupObservationsBarChart.svelte'
 
   let currentSchool = $derived($dataStore.currentSchool)
   let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
@@ -102,6 +103,7 @@
               <span class="visually-hidden">Henter data...</span>
             </div>
           {/if}
+          <GroupObservationsBarChart {group} width={300} height={150} />
         </div>
       </div>
     {/each}

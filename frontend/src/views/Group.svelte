@@ -33,7 +33,8 @@
   import GroupTag from '../components/GroupTag.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
-  import { currentUser, dataStore } from '../stores/data'
+  import GroupObservationsBarChart from '../components/GroupObservationsBarChart.svelte'
+  import { dataStore } from '../stores/data'
   import { goalsWithCalculatedMastery, abbreviateName } from '../utils/functions'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
@@ -316,6 +317,10 @@
         </pkt-tag>
       {/each}
     </div>
+  </section>
+
+  <section>
+    <GroupObservationsBarChart {group} width={300} height={150} />
   </section>
 
   {#if !group.isEnabled}

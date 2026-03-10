@@ -1,13 +1,11 @@
 <script lang="ts">
-  import type { MasteryConfigLevel, MasterySchemaWithConfig } from '../types/models'
-  import { useMasteryCalculations, getMasteryColorByValue } from '../utils/masteryHelpers'
-
   type BarRect = {
     x: number
     y: number
     width: number
     height: number
     color: string
+    xLabel: string | null
   }
 
   interface Props {
@@ -17,6 +15,7 @@
     width: number
     height: number
     title?: string
+    xLabels?: string[]
     colorLookup?: (value: number) => string
   }
 
@@ -28,6 +27,7 @@
     width,
     height,
     title: providedTitle,
+    xLabels = [],
     colorLookup = yValue => 'rgb(100, 100, 100)',
   }: Props = $props()
 
@@ -35,6 +35,10 @@
   const hasSufficientData = $derived(
     Array.isArray(data) && data.length > 0 && data.every(n => Number.isFinite(n))
   )
+
+  const fontSize = $derived(Math.max(height * 0.09, 8))
+  const labelPadding = $derived(fontSize * 1.5)
+  const totalHeight = $derived(height + (xLabels.length > 0 ? labelPadding : 0))
 
   const bars = $derived<BarRect[]>(
     (() => {
@@ -60,6 +64,7 @@
           width: barWidth,
           height: barHeight,
           color,
+          xLabel: xLabels[index] || null,
         }
       })
     })()
@@ -70,13 +75,13 @@
   <svg
     class="sparkbar-chart"
     {width}
-    {height}
-    viewBox={`0 0 ${width} ${height}`}
+    height={totalHeight}
+    viewBox={`0 0 ${width} ${totalHeight}`}
     role="img"
     aria-label={title}
   >
     <title>{title}</title>
-    {#each bars as bar, index (index)}
+    {#each bars as bar}
       <rect
         x={bar.x}
         y={bar.y}
@@ -85,6 +90,17 @@
         fill={bar.color}
         aria-hidden="true"
       />
+      {#if bar.xLabel}
+        <text
+          x={bar.x + bar.width / 2}
+          y={height + fontSize * 1.2}
+          text-anchor="middle"
+          font-size={fontSize}
+          fill="currentColor"
+        >
+          {bar.xLabel}
+        </text>
+      {/if}
     {/each}
   </svg>
 {/if}

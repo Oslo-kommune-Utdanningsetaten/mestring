@@ -1462,9 +1462,17 @@ export type ObservationsListData = {
          */
         deleted?: 'exclude' | 'include' | 'only';
         /**
+         * Filter observations by when they were created, using ISO format date string. E.g. 2025-12-24 will return observations created on or after December 24st, 2025.
+         */
+        from?: string;
+        /**
          * Filter observations by goal.
          */
         goal?: string;
+        /**
+         * Filter observations by students who are member of this group. Basis groups will return observations accross subjects. Teaching groups will return observations for the subject of the group.
+         */
+        group?: string;
         /**
          * Filter observations by who has done the observing.
          */
@@ -1473,6 +1481,10 @@ export type ObservationsListData = {
          * Filter observations by the observed student.
          */
         student?: string;
+        /**
+         * Filter observations by when they were created, using ISO format date string. E.g. 2025-12-24 will return observations created on or before December 24st, 2025.
+         */
+        to?: string;
     };
     url: '/api/observations/';
 };

@@ -1,8 +1,7 @@
 from .. import models, serializers
 from django.db.models import Q, Prefetch, Exists, OuterRef
-from django.utils import timezone
+from datetime import datetime
 from rest_framework import viewsets
-from rest_framework.response import Response
 from rest_framework.filters import OrderingFilter
 from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
@@ -711,8 +710,29 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
+                name='group',
+                description='Filter observations by students who are member of this group. Basis groups will return observations accross subjects. Teaching groups will return observations for the subject of the group.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='goal',
                 description='Filter observations by goal.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='from',
+                description='Filter observations by when they were created, using ISO format date string. E.g. 2025-12-24 will return observations created on or after December 24st, 2025.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='to',
+                description='Filter observations by when they were created, using ISO format date string. E.g. 2025-12-24 will return observations created on or before December 24st, 2025.',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
@@ -740,11 +760,14 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
             student_param, _ = get_request_param(self.request.query_params, 'student')
             observer_param, _ = get_request_param(self.request.query_params, 'observer')
             goal_param, _ = get_request_param(self.request.query_params, 'goal')
+            group_param, _ = get_request_param(self.request.query_params, 'group')
+            from_param, _ = get_request_param(self.request.query_params, 'from')
+            to_param, _ = get_request_param(self.request.query_params, 'to')
 
-            if (not student_param) and (not observer_param) and (not goal_param):
+            if (not student_param) and (not observer_param) and (not goal_param) and (not group_param):
                 raise ValidationError(
                     {'error': 'missing-parameter',
-                     'message': 'At least one of "student", "observer" or "goal" parameters are required.'})
+                     'message': 'At least one of "student", "observer", "group" or "goal" parameters are required.'})
 
             if student_param:
                 qs = qs.filter(
@@ -754,7 +777,45 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
                 qs = qs.filter(observer_id=observer_param)
             if goal_param:
                 qs = qs.filter(goal_id=goal_param)
-
+            if group_param:
+                group = models.Group.objects.filter(
+                    id=group_param, deleted_at__isnull=True, is_enabled=True).first()
+                if group and group.type == 'basis':
+                    print('BASIS group:', group)
+                    # For basis groups, include observations which point at users who are student members of the group
+                    user_groups = models.UserGroup.objects.filter(
+                        group_id=group_param,
+                        group__is_enabled=True,
+                        group__deleted_at__isnull=True,
+                        role__name='student',
+                        deleted_at__isnull=True
+                    )
+                    print('Matching user_groups', user_groups)
+                    qs = qs.filter(
+                        Q(student_id__in=user_groups.values_list('user_id', flat=True))
+                    )
+                elif group and group.type == 'teaching':
+                    # For teaching group, include observations which belong to the groups subject (either via goal->group or directly on the goal)
+                    qs = qs.filter(
+                        Q(goal__group__id=group_param) |
+                        Q(goal__subject_id=group.subject_id)
+                    )
+            if from_param:
+                try:
+                    from_date = datetime.fromisoformat(from_param).date()
+                except ValueError:
+                    raise ValidationError(
+                        {'error': 'invalid-parameter',
+                         'message': 'Invalid date format for "from" parameter. Use ISO format (YYYY-MM-DD).'})
+                qs = qs.filter(observed_at__date__gte=from_date)
+            if to_param:
+                try:
+                    to_date = datetime.fromisoformat(to_param).date()
+                except ValueError:
+                    raise ValidationError(
+                        {'error': 'invalid-parameter',
+                         'message': 'Invalid date format for "to" parameter. Use ISO format (YYYY-MM-DD).'})
+                qs = qs.filter(observed_at__date__lte=to_date)
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs
 
