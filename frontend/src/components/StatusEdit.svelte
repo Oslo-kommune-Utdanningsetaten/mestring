@@ -16,7 +16,7 @@
   import ValueInputVertical from './ValueInputVertical.svelte'
   import ValueInputHorizontal from './ValueInputHorizontal.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
-  import SparkbarChart from './SparkbarChart.svelte'
+  import MasteryBarChart from './MasteryBarChart.svelte'
   import { fetchGoalsForSubjectAndStudent, formatMonthName } from '../utils/functions'
   import type { GoalDecorated } from '../types/models'
   import { addAlert } from '../stores/alerts'
@@ -205,7 +205,7 @@
                     masteryData={goal.masteryData}
                     masterySchema={getMasterySchmemaForGoal(goal)}
                   />
-                  <SparkbarChart
+                  <MasteryBarChart
                     data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
                     masterySchema={getMasterySchmemaForGoal(goal)}
                   />

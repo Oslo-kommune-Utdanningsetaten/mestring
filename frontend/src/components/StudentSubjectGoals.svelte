@@ -12,7 +12,7 @@
   import { observationsDestroy, goalsDestroy, goalsUpdate, goalsCreate } from '../generated/sdk.gen'
   import Link from './Link.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
-  import SparkbarChart from './SparkbarChart.svelte'
+  import MasteryBarChart from './MasteryBarChart.svelte'
   import GoalEdit from './GoalEdit.svelte'
   import ObservationEdit from './ObservationEdit.svelte'
   import ObservationView from './ObservationView.svelte'
@@ -353,7 +353,7 @@
             masteryData={goal.masteryData}
             masterySchema={getMasterySchmemaForGoal(goal)}
           />
-          <SparkbarChart
+          <MasteryBarChart
             data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
             masterySchema={getMasterySchmemaForGoal(goal)}
           />

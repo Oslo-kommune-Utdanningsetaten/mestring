@@ -3,7 +3,7 @@
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
-  import SparkbarChart from './SparkbarChart.svelte'
+  import MasteryBarChart from './MasteryBarChart.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
   import Statuses from './Statuses.svelte'
   import Link from './Link.svelte'
@@ -147,7 +147,7 @@
             masteryData={decoGoal.masteryData}
             masterySchema={getMasterySchemaForGoal(goal)}
           />
-          <SparkbarChart
+          <MasteryBarChart
             data={getObservationValues(decoGoal)}
             masterySchema={getMasterySchemaForGoal(goal)}
           />
