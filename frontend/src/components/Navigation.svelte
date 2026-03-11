@@ -2,7 +2,7 @@
   import { dataStore, currentUser } from '../stores/data'
   import { login, logout } from '../stores/auth'
   import { currentPath } from '../stores/navigation'
-
+  import { hasUserAccessToPath } from '../stores/data'
   import Link from './Link.svelte'
   import GoalIconCelebration from './GoalIconCelebration.svelte'
   import oslologoUrl from '@oslokommune/punkt-assets/dist/logos/oslologo.svg?url'
@@ -60,14 +60,14 @@
     <!-- Collapsible content -->
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto align-items-center">
-        {#if $currentUser}
+        {#if currentUser}
           <!-- Home (aka "my groups") -->
           <li class="nav-item">
             <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
           </li>
 
           <!-- Students -->
-          {#if currentSchool?.isStudentListEnabled || $dataStore.hasUserAccessToPath('/students')}
+          {#if currentSchool?.isStudentListEnabled}
             <li class="nav-item">
               <Link to="/students" className={`nav-link ${isStudentsActive ? 'active' : ''}`}>
                 Elever
@@ -76,7 +76,7 @@
           {/if}
 
           <!-- Admin menu -->
-          {#if $dataStore.hasUserAccessToPath('/admin')}
+          {#if $hasUserAccessToPath('/admin')}
             <li class="nav-item dropdown">
               <!-- svelte-ignore a11y_invalid_attribute -->
               <a
@@ -89,35 +89,61 @@
                 Admin
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <li>
-                  <Link to="/admin/schools" className="dropdown-item">Skoler</Link>
-                </li>
-                <li>
-                  <Link to="/admin/groups" className="dropdown-item">Grupper</Link>
-                </li>
-                <li>
-                  <Link to="/admin/subjects" className="dropdown-item">Fag</Link>
-                </li>
-                <li>
-                  <Link to="/admin/users" className="dropdown-item">Brukere</Link>
-                </li>
-                <li>
-                  <Link to="/admin/mastery-schemas" className="dropdown-item">Mastery Schemas</Link>
-                </li>
-                <li>
-                  <Link to="/admin/data-maintenance-tasks" className="dropdown-item">
-                    Bakgrunnsjobber
-                  </Link>
-                </li>
-                <li class="ms-3 mt-1">
-                  <a href="/analytics/index.php" target="_blank">Analytics</a>
-                </li>
+                {#if $hasUserAccessToPath('/admin/schools')}
+                  <li>
+                    <Link to="/admin/schools" className="dropdown-item">Alle skoler</Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/students')}
+                  <li class="nav-item">
+                    <Link to="/students" className="dropdown-item">Elever</Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/admin/users')}
+                  <li>
+                    <Link to="/admin/users" className="dropdown-item">Brukere</Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/admin/stats')}
+                  <li>
+                    <Link to="/admin/stats" className="dropdown-item">Statistikk</Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/admin/groups')}
+                  <li>
+                    <Link to="/admin/groups" className="dropdown-item">Grupper</Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/admin/subjects')}
+                  <li>
+                    <Link to="/admin/subjects" className="dropdown-item">Fag</Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/admin/mastery-schemas')}
+                  <li>
+                    <Link to="/admin/mastery-schemas" className="dropdown-item">
+                      Mastery Schemas
+                    </Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/admin/data-maintenance-tasks')}
+                  <li>
+                    <Link to="/admin/data-maintenance-tasks" className="dropdown-item">
+                      Bakgrunnsjobber
+                    </Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/admin/analytics')}
+                  <li class="ms-3 mt-1">
+                    <a href="/analytics/index.php" target="_blank">Analytics</a>
+                  </li>
+                {/if}
               </ul>
             </li>
           {/if}
 
           <!-- User profile menu -->
-          {#if $dataStore.hasUserAccessToPath('/profile')}
+          {#if $hasUserAccessToPath('/profile')}
             <li class="nav-item dropdown" title="Logget på som {$currentUser.name}">
               <a
                 class={`nav-link dropdown-toggle ${isProfileActive ? 'active' : ''}`}

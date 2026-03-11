@@ -89,7 +89,7 @@
 </script>
 
 <section class="container py-3">
-  <h2>Dataimport og konfig for skoler</h2>
+  <h2>Alle skoler</h2>
 
   <!-- Add new school by org number -->
   <div class="py-4">

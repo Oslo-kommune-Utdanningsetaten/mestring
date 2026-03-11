@@ -1,5 +1,9 @@
+import { USER_ROLES } from '../utils/constants'
+
 // Data structure types which only exist in the frontend
 export type deploymentEnvironment = 'localhost' | 'development' | 'production'
+
+export type UserRoleType = (typeof USER_ROLES)[keyof typeof USER_ROLES]
 
 export type Mastery = {
   mastery: number
@@ -12,12 +16,6 @@ export type AppData = {
   currentSchool: SchoolType | null
   currentUser: BasicUserType | null
   masterySchemas: MasterySchemaType[]
-  hasUserAccessToPath: (path: string) => boolean
-  hasUserAccessToFeature: (
-    resource: string,
-    action: string,
-    options?: HasUserAccessToFeatureOptions
-  ) => boolean
   roles: RoleType[]
   defaultMasterySchema?: MasterySchemaType | null
 }
@@ -44,6 +42,7 @@ export type UserDecorated = UserType & {
   isSchoolAdmin?: boolean
   isSchoolInspector?: boolean
   isSuperadmin?: boolean
+  roles: UserRoleType[]
 }
 
 export type MasteryLevel = {

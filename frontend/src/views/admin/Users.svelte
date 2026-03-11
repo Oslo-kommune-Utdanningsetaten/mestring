@@ -5,7 +5,7 @@
   import { usersList, schoolsList } from '../../generated/sdk.gen'
   import { urlStringFrom, fetchUserData } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
-  import { UserRoles } from '../../utils/constants'
+  import { USER_ROLES } from '../../utils/constants'
   import User from '../../components/User.svelte'
 
   const router = useTinyRouter()
@@ -13,10 +13,10 @@
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingUsers = $state<boolean>(false)
   let selectedRoles = $state<string[]>([
-    UserRoles.TEACHER,
-    UserRoles.ADMIN,
-    UserRoles.INSPECTOR,
-    UserRoles.STAFF,
+    USER_ROLES.TEACHER,
+    USER_ROLES.ADMIN,
+    USER_ROLES.INSPECTOR,
+    USER_ROLES.STAFF,
   ])
   let deletedSelection = $state<'include' | 'only' | 'exclude'>('include')
   let nameFilter = $state<string>('')
@@ -104,11 +104,11 @@
   // Options for filtering by role
   const roleOptions = [
     { value: 'all', label: 'Alle' },
-    { value: UserRoles.TEACHER, label: 'Lærere' },
-    { value: UserRoles.STUDENT, label: 'Elever' },
-    { value: UserRoles.ADMIN, label: 'Admins' },
-    { value: UserRoles.INSPECTOR, label: 'Inspektører' },
-    { value: UserRoles.STAFF, label: 'Skoleansatte uten rolle' },
+    { value: USER_ROLES.TEACHER, label: 'Lærere' },
+    { value: USER_ROLES.STUDENT, label: 'Elever' },
+    { value: USER_ROLES.ADMIN, label: 'Admins' },
+    { value: USER_ROLES.INSPECTOR, label: 'Inspektører' },
+    { value: USER_ROLES.STAFF, label: 'Skoleansatte uten rolle' },
   ] as const
 
   // Options for filtering by deleted

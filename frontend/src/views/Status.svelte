@@ -10,12 +10,13 @@
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
   import { formatDateHumanly, getContrastFriendlyTextColor } from '../utils/functions'
+  import { hasUserAccessToFeature } from '../stores/data'
+  import { addAlert } from '../stores/alerts'
+  import { trackEvent } from '../stores/analytics'
   import ButtonMini from '../components/ButtonMini.svelte'
   import StatusEdit from '../components/StatusEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
   import AuthorInfo from '../components/AuthorInfo.svelte'
-  import { addAlert } from '../stores/alerts'
-  import { trackEvent } from '../stores/analytics'
   import Link from '../components/Link.svelte'
 
   let { statusId } = $props<{
@@ -130,7 +131,7 @@
         </p>
       </div>
       <div class="d-flex gap-2">
-        {#if $dataStore.hasUserAccessToFeature( 'status', 'edit', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
+        {#if $hasUserAccessToFeature( 'status', 'edit', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
           <ButtonMini
             options={{
               title: 'Rediger status',
@@ -144,7 +145,7 @@
             Rediger
           </ButtonMini>
         {/if}
-        {#if $dataStore.hasUserAccessToFeature( 'status', 'delete', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
+        {#if $hasUserAccessToFeature( 'status', 'delete', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
           <ButtonMini
             options={{
               title: 'Slett status',

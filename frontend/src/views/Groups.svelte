@@ -1,12 +1,12 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
   import { urlStringFrom, abbreviateName } from '../utils/functions'
+  import { hasUserAccessToPath } from '../stores/data'
   import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
   import { usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType } from '../generated/types.gen'
   import GroupTag from '../components/GroupTag.svelte'
   import Link from '../components/Link.svelte'
-  import GroupObservationsBarChart from '../components/GroupObservationsBarChart.svelte'
 
   let currentSchool = $derived($dataStore.currentSchool)
   let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
@@ -81,7 +81,7 @@
         <!-- students -->
         <div class="mt-3 mb-1">
           {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
-            {#if currentSchool.isStudentListEnabled || $dataStore.hasUserAccessToPath('/students')}
+            {#if currentSchool.isStudentListEnabled || $hasUserAccessToPath('/students')}
               <Link
                 to={urlStringFrom(
                   { groupId: group.id },
@@ -103,7 +103,6 @@
               <span class="visually-hidden">Henter data...</span>
             </div>
           {/if}
-          <GroupObservationsBarChart {group} width={300} height={150} />
         </div>
       </div>
     {/each}

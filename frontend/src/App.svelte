@@ -1,58 +1,26 @@
 <script lang="ts">
   import { Router, Route } from 'svelte-tiny-router'
   import { onMount } from 'svelte'
-  import { checkAuth, isLoggingInUser, login } from './stores/auth'
-  import { loadData, currentUser, dataStore } from './stores/data'
+  import { checkAuth, isLoggingInUser } from './stores/auth'
+  import { loadData, currentUser } from './stores/data'
   import { apiHealth } from './stores/apiHealth'
   import { addAlert } from './stores/alerts'
+  import { ROUTES } from './utils/constants'
+  import { hasUserAccessToPath } from './stores/data'
 
   import 'bootstrap/dist/css/bootstrap.min.css'
   import './styles/bootstrap-overrides.css'
   import 'bootstrap/dist/js/bootstrap.min.js'
   import './styles/app.css'
-  // Views
-  import Home from './views/Home.svelte'
-  import About from './views/About.svelte'
-  import Student from './views/Student.svelte'
-  import Group from './views/Group.svelte'
-  import Groups from './views/Groups.svelte'
-  import Students from './views/Students.svelte'
-  import Status from './views/Status.svelte'
-  import Profile from './views/Profile.svelte'
+
   import NotFound from './views/NotFound.svelte'
-  // Admin views
-  import Users from './views/admin/Users.svelte'
-  import AdminGroups from './views/admin/Groups.svelte'
-  import Subjects from './views/admin/Subjects.svelte'
-  import MasterySchemas from './views/admin/MasterySchemas.svelte'
-  import DataMaintenanceTask from './views/admin/DataMaintenanceTask.svelte'
-  import Schools from './views/admin/Schools.svelte'
-  import School from './views/admin/School.svelte'
+
   // Conponents
   import Navigation from './components/Navigation.svelte'
   import AlertBar from './components/AlertBar.svelte'
   import Footer from './components/Footer.svelte'
   import Analytics from './components/Analytics.svelte'
   const API_CHECK_INTERVAL = 60 * 1000 // every 60 seconds
-
-  // All routes in the app
-  const routes = [
-    { path: '/', component: Home },
-    { path: '/about', component: About },
-    { path: '/groups', component: Groups },
-    { path: '/groups/:groupId', component: Group },
-    { path: '/profile', component: Profile },
-    { path: '/students', component: Students },
-    { path: '/statuses/:statusId', component: Status },
-    { path: '/students/:studentId', component: Student },
-    { path: '/admin/users', component: Users },
-    { path: '/admin/groups', component: AdminGroups },
-    { path: '/admin/subjects', component: Subjects },
-    { path: '/admin/mastery-schemas', component: MasterySchemas },
-    { path: '/admin/data-maintenance-tasks', component: DataMaintenanceTask },
-    { path: '/admin/schools', component: Schools },
-    { path: '/admin/schools/:schoolId', component: School },
-  ]
 
   onMount(() => {
     apiHealth.checkHealth()
@@ -98,8 +66,8 @@
       </div>
     {:else}
       <Router>
-        {#each routes as route}
-          {#if $dataStore.hasUserAccessToPath(route.path)}
+        {#each ROUTES as route}
+          {#if $hasUserAccessToPath(route.path)}
             <Route path={route.path} component={route.component} />
           {/if}
         {/each}

@@ -36,6 +36,7 @@
   import GroupObservationsBarChart from '../components/GroupObservationsBarChart.svelte'
   import { dataStore } from '../stores/data'
   import { goalsWithCalculatedMastery, abbreviateName } from '../utils/functions'
+  import { hasUserAccessToFeature } from '../stores/data'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
 
@@ -319,7 +320,7 @@
     <section>
       <div class="d-flex align-items-center gap-2">
         <h3>Mål</h3>
-        {#if $dataStore.hasUserAccessToFeature('goal', 'create', { groupId: group.id })}
+        {#if $hasUserAccessToFeature('goal', 'create', { groupId: group.id })}
           <ButtonIcon
             options={{
               iconName: 'goal',

@@ -2,6 +2,7 @@
   import type { GoalType, UserType, SubjectType, ObservationType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
+  import { hasUserAccessToFeature } from '../stores/data'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import MasteryBarChart from './MasteryBarChart.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
@@ -126,7 +127,7 @@
             <Statuses {student} {subject} />
           {/key}
 
-          {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
+          {#if $hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
             <ButtonIcon
               options={{
                 iconName: 'achievement',
@@ -155,7 +156,7 @@
           <MasteryLevelBadge isBadgeEmpty={true} />
         {/if}
         <span class="add-observation-button">
-          {#if $dataStore.hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, subjectId: subject?.id, studentGroupIds: student.groupIds } )}
+          {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, subjectId: subject?.id, studentGroupIds: student.groupIds } )}
             <ButtonIcon
               options={{
                 iconName: 'bullseye',

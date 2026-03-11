@@ -9,6 +9,7 @@
     subjectsList,
   } from '../generated/sdk.gen'
   import { SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
+  import { hasUserAccessToFeature } from '../stores/data'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
   import GoalEdit from '../components/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
@@ -164,7 +165,7 @@
     <div class="card shadow-sm">
       <div class="d-flex align-items-center gap-2 card-header">
         <h2>Mål</h2>
-        {#if $dataStore.hasUserAccessToFeature( 'goal', 'create', { studentId: student.id, studentGroupIds: student.groupIds } )}
+        {#if $hasUserAccessToFeature( 'goal', 'create', { studentId: student.id, studentGroupIds: student.groupIds } )}
           {#if studentGoalsCount === 0 && currentSchool.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM}
             <ButtonMini
               options={{

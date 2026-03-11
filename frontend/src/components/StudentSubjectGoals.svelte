@@ -26,6 +26,7 @@
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { getLocalStorageItem } from '../stores/localStorage'
   import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
+  import { hasUserAccessToFeature } from '../stores/data'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
 
@@ -276,7 +277,7 @@
   <h3>
     {subject ? subject.displayName : 'Ukjent'}
   </h3>
-  {#if $dataStore.hasUserAccessToFeature( 'goal', 'create', { subjectId: subject.id, studentId: student.id, studentGroupIds: student.groupIds } )}
+  {#if $hasUserAccessToFeature( 'goal', 'create', { subjectId: subject.id, studentId: student.id, studentGroupIds: student.groupIds } )}
     <ButtonIcon
       options={{
         iconName: 'goal',
@@ -286,7 +287,7 @@
       }}
     />
   {/if}
-  {#if $dataStore.hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
+  {#if $hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
     <ButtonIcon
       options={{
         iconName: 'achievement',
@@ -362,7 +363,7 @@
 
       <!-- New observation button -->
       <span class="item">
-        {#if $dataStore.hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, subjectId: subject.id, studentGroupIds: student.groupIds } )}
+        {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, subjectId: subject.id, studentGroupIds: student.groupIds } )}
           <ButtonIcon
             options={{
               iconName: 'bullseye',
@@ -413,7 +414,7 @@
                     onClick: () => handleViewObservation(observation, goal),
                   }}
                 />
-                {#if $dataStore.hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById } )}
+                {#if $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById } )}
                   {#if index === goal?.observations.length - 1}
                     <ButtonIcon
                       options={{
@@ -425,7 +426,7 @@
                     />
                   {/if}
                 {/if}
-                {#if $dataStore.hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById } )}
+                {#if $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById } )}
                   {#key observation.id}
                     <ButtonIcon
                       options={{
@@ -447,7 +448,7 @@
       </div>
       <div class="my-3">
         {#if goal.isIndividual}
-          {#if $dataStore.hasUserAccessToFeature( 'goal', 'update', { studentId: student.id, studentGroupIds: student.groupIds } )}
+          {#if $hasUserAccessToFeature( 'goal', 'update', { studentId: student.id, studentGroupIds: student.groupIds } )}
             <ButtonMini
               options={{
                 iconName: 'edit',
@@ -461,7 +462,7 @@
               Rediger individuelt mål
             </ButtonMini>
           {/if}
-          {#if $dataStore.hasUserAccessToFeature( 'goal', 'delete', { studentId: student.id, studentGroupIds: student.groupIds } )}
+          {#if $hasUserAccessToFeature( 'goal', 'delete', { studentId: student.id, studentGroupIds: student.groupIds } )}
             <ButtonMini
               options={{
                 iconName: 'trash-can',
