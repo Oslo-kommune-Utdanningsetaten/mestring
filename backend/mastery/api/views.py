@@ -738,6 +738,13 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
+                name='school',
+                description='Filter observations by goal.school_id',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='deleted',
                 description='Filter observations by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
                 required=False,
@@ -761,10 +768,11 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
             observer_param, _ = get_request_param(self.request.query_params, 'observer')
             goal_param, _ = get_request_param(self.request.query_params, 'goal')
             group_param, _ = get_request_param(self.request.query_params, 'group')
+            school_param, _ = get_request_param(self.request.query_params, 'school')
             from_param, _ = get_request_param(self.request.query_params, 'from')
             to_param, _ = get_request_param(self.request.query_params, 'to')
 
-            if (not student_param) and (not observer_param) and (not goal_param) and (not group_param):
+            if (not student_param) and (not observer_param) and (not goal_param) and (not group_param) and (not school_param):
                 raise ValidationError(
                     {'error': 'missing-parameter',
                      'message': 'At least one of "student", "observer", "group" or "goal" parameters are required.'})
@@ -777,6 +785,8 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
                 qs = qs.filter(observer_id=observer_param)
             if goal_param:
                 qs = qs.filter(goal_id=goal_param)
+            if school_param:
+                qs = qs.filter(goal__school_id=school_param)
             if group_param:
                 group = models.Group.objects.filter(
                     id=group_param, deleted_at__isnull=True, is_enabled=True).first()

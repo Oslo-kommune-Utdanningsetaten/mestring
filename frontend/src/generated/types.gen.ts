@@ -1478,6 +1478,10 @@ export type ObservationsListData = {
          */
         observer?: string;
         /**
+         * Filter observations by goal.school_id
+         */
+        school?: string;
+        /**
          * Filter observations by the observed student.
          */
         student?: string;

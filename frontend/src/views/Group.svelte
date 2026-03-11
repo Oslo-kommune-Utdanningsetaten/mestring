@@ -28,7 +28,7 @@
   import GroupTag from '../components/GroupTag.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
-  import GroupObservationsBarChart from '../components/GroupObservationsBarChart.svelte'
+  import GroupObservationsBarChart from '../components/ObservationsBarChart.svelte'
   import { dataStore } from '../stores/data'
   import { goalsWithCalculatedMastery } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/data'
@@ -297,10 +297,6 @@
         <UserTag user={teacher} role={USER_ROLES.TEACHER} allUsers={teachers} />
       {/each}
     </div>
-  </section>
-
-  <section>
-    <GroupObservationsBarChart {group} width={300} height={150} />
   </section>
 
   {#if !group.isEnabled}

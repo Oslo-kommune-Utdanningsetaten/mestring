@@ -3,16 +3,18 @@
   import type { GroupType, ObservationType } from '../generated'
   import { observationsList } from '../generated/sdk.gen'
   import BarChart from './BarChart.svelte'
+  import { currentSchool } from '../stores/data'
 
   interface Props {
-    group: GroupType
+    groupId?: string
+    schoolId?: string
     width?: number
     height?: number
     title?: string
   }
 
   // Props with sane defaults
-  const { group, width = 200, height = 100, title: providedTitle }: Props = $props()
+  const { groupId, schoolId, width = 200, height = 100, title: providedTitle }: Props = $props()
 
   let observations = $state<ObservationType[]>([])
   let data = $state<number[]>([])
@@ -25,11 +27,20 @@
     return now.getMonth() < 7 ? `${now.getFullYear()}-01-01` : `${now.getFullYear() - 1}-08-01`
   })
   let xLabels = $state<string[]>([])
+  let yMaxValue = $derived.by(() => (hasSufficientData ? Math.max(...data, 10) : 10))
 
   const fetchObservations = async () => {
-    const obsResults = await observationsList({
-      query: { group: group.id, from: fromDate },
-    })
+    const query: any = {
+      from: fromDate,
+    }
+    if (groupId) {
+      query['group'] = groupId
+    }
+    if (schoolId) {
+      query['school'] = schoolId
+    }
+
+    const obsResults = await observationsList({ query })
     observations = obsResults.data || []
     calculateDataAndLabels()
   }
@@ -57,7 +68,7 @@
 {#if hasSufficientData}
   <BarChart
     {data}
-    yMaxValue={10}
+    {yMaxValue}
     yResolution={1}
     {width}
     {height}
