@@ -31,17 +31,20 @@
       query: { group: group.id, from: fromDate },
     })
     observations = obsResults.data || []
-    // group observations by week number, counting how many observations fall into each week
-    const obsByWeek: Record<number, number> = {}
+    calculateDataAndLabels()
+  }
+
+  // group observation counts by week number and build week numbers xLabels array
+  const calculateDataAndLabels = () => {
+    const observationsByWeek: Record<number, number> = {}
     observations.forEach(obs => {
       const week = getISOWeek(new Date(obs.observedAt || obs.createdAt))
-      obsByWeek[week] = (obsByWeek[week] || 0) + 1
+      observationsByWeek[week] = (observationsByWeek[week] || 0) + 1
     })
-    console.log('Observations by week:', obsByWeek)
     const beginAtWeek = getISOWeek(new Date(fromDate))
     const endAtWeek = getISOWeek(new Date())
     for (let week = beginAtWeek; week <= endAtWeek; week++) {
-      data.push(obsByWeek[week] || 0)
+      data.push(observationsByWeek[week] || 0)
       xLabels.push(`${week}`)
     }
   }
@@ -51,7 +54,19 @@
   })
 </script>
 
-<BarChart {data} yMaxValue={10} yResolution={1} {width} {height} {title} {xLabels}></BarChart>
+{#if hasSufficientData}
+  <BarChart
+    {data}
+    yMaxValue={10}
+    yResolution={1}
+    {width}
+    {height}
+    {title}
+    {xLabels}
+    colorLookup={() => 'var(--pkt-color-brand-dark-green-1000)'}
+    options={{ isValueOnHoverEnabled: true, isGlowOnHoverEnabled: true }}
+  ></BarChart>
+{/if}
 
 <style>
 </style>
