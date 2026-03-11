@@ -18,10 +18,6 @@ import Schools from '../views/admin/Schools.svelte'
 import School from '../views/admin/School.svelte'
 import SchoolStats from '../views/admin/SchoolStats.svelte'
 
-export const TEACHER_ROLE = 'teacher'
-export const STUDENT_ROLE = 'student'
-export const SCHOOL_ADMIN_ROLE = 'admin'
-export const SCHOOL_INSPECTOR_ROLE = 'inspector'
 export const SUBJECTS_ALLOWED_ALL = 'all'
 export const SUBJECTS_ALLOWED_CUSTOM = 'only-custom'
 export const SUBJECTS_ALLOWED_FEIDE = 'only-feide'
@@ -126,7 +122,7 @@ export const ROUTES = [
   },
   {
     path: '/admin',
-    component: undefined,
+    component: undefined, // placeholder, as we just check for access to the admin menu
     isPublic: false,
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
@@ -168,7 +164,7 @@ export const ROUTES = [
   },
   {
     path: '/admin/analytics',
-    component: null,
+    component: null, // placeholder, as we redirect to an external analytics dashboard,
     isPublic: false,
     accessibleBy: [USER_ROLES.SUPERADMIN],
   },

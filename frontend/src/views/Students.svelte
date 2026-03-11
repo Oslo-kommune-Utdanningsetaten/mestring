@@ -5,7 +5,7 @@
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
-  import { STUDENT_ROLE } from '../utils/constants'
+  import { USER_ROLES } from '../utils/constants'
   import { subjectsList, usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
 
@@ -41,8 +41,8 @@
     try {
       isLoadingStudents = true
       const queryOptions = selectedGroupId
-        ? { groups: selectedGroupId, school: currentSchool.id, roles: STUDENT_ROLE }
-        : { school: currentSchool.id, roles: STUDENT_ROLE }
+        ? { groups: selectedGroupId, school: currentSchool.id, roles: USER_ROLES.STUDENT }
+        : { school: currentSchool.id, roles: USER_ROLES.STUDENT }
       const studentsResult = await usersList({
         query: queryOptions,
       })

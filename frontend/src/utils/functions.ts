@@ -3,7 +3,7 @@ import type { GoalType, SubjectType, ObservationType, GroupType } from '../gener
 import { goalsList, userGroupsList, userSchoolsList } from '../generated/sdk.gen'
 import { nb as noLocale } from 'date-fns/locale'
 import { format, formatDistance, formatDistanceToNow } from 'date-fns'
-import { TEACHER_ROLE, STUDENT_ROLE } from './constants'
+import { USER_ROLES } from './constants'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
   [key: string]: string
@@ -265,8 +265,12 @@ export const fetchUserData = async (userId: string, schoolId: string) => {
     }),
   ])
   const userGroups = userGroupsResult.data || []
-  const teacherGroups = userGroups.filter(ug => ug.role.name === TEACHER_ROLE).map(ug => ug.group)
-  const studentGroups = userGroups.filter(ug => ug.role.name === STUDENT_ROLE).map(ug => ug.group)
+  const teacherGroups = userGroups
+    .filter(ug => ug.role.name === USER_ROLES.TEACHER)
+    .map(ug => ug.group)
+  const studentGroups = userGroups
+    .filter(ug => ug.role.name === USER_ROLES.STUDENT)
+    .map(ug => ug.group)
   const userSchools = userSchoolsResult.data || []
   return { teacherGroups, studentGroups, userGroups, userSchools }
 }

@@ -17,12 +17,7 @@
     StatusType,
   } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
-  import {
-    TEACHER_ROLE,
-    STUDENT_ROLE,
-    GROUP_TYPE_BASIS,
-    GROUP_TYPE_TEACHING,
-  } from '../utils/constants'
+  import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import GroupSVG from '../assets/group.svg.svelte'
   import ButtonIcon from '../components/ButtonIcon.svelte'
@@ -74,10 +69,10 @@
           path: { id: groupId },
         }),
         await usersList({
-          query: { groups: groupId, school: currentSchool.id, roles: TEACHER_ROLE },
+          query: { groups: groupId, school: currentSchool.id, roles: USER_ROLES.TEACHER },
         }),
         await usersList({
-          query: { groups: groupId, school: currentSchool.id, roles: STUDENT_ROLE },
+          query: { groups: groupId, school: currentSchool.id, roles: USER_ROLES.STUDENT },
         }),
         await goalsList({
           query: { group: groupId, includeObservations: true },

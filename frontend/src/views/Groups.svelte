@@ -2,7 +2,7 @@
   import { dataStore } from '../stores/data'
   import { urlStringFrom, abbreviateName } from '../utils/functions'
   import { hasUserAccessToPath } from '../stores/data'
-  import { TEACHER_ROLE, STUDENT_ROLE } from '../utils/constants'
+  import { USER_ROLES } from '../utils/constants'
   import { usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType } from '../generated/types.gen'
   import GroupTag from '../components/GroupTag.svelte'
@@ -16,10 +16,10 @@
     groups.forEach(async group => {
       try {
         const teachersResult = await usersList({
-          query: { groups: group.id, school: currentSchool.id, roles: TEACHER_ROLE },
+          query: { groups: group.id, school: currentSchool.id, roles: USER_ROLES.TEACHER },
         })
         const studentsResult = await usersList({
-          query: { groups: group.id, school: currentSchool.id, roles: STUDENT_ROLE },
+          query: { groups: group.id, school: currentSchool.id, roles: USER_ROLES.STUDENT },
         })
         const teachers = teachersResult.data || []
         const students = studentsResult.data || []

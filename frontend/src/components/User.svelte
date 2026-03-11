@@ -9,7 +9,7 @@
   } from '../generated/types.gen'
   import type { UserDecorated } from '../types/models.d.ts'
   import { userSchoolsDestroy, userSchoolsCreate } from '../generated/sdk.gen'
-  import { SCHOOL_ADMIN_ROLE, SCHOOL_INSPECTOR_ROLE, NONE_FIELD_VALUE } from '../utils/constants'
+  import { USER_ROLES, NONE_FIELD_VALUE } from '../utils/constants'
   import { dataStore } from '../stores/data'
   import GroupTag from './GroupTag.svelte'
   import { formatDate } from '../utils/functions'
@@ -25,17 +25,17 @@
   let isSchoolInspector = $derived(
     !!decoratedUser.userSchools.find(
       (us: NestedUserSchoolType) =>
-        us.role.name === SCHOOL_INSPECTOR_ROLE && us.school.id === school.id
+        us.role.name === USER_ROLES.INSPECTOR && us.school.id === school.id
     )
   )
   let isSchoolAdmin = $derived(
     !!decoratedUser.userSchools.find(
-      (us: NestedUserSchoolType) => us.role.name === SCHOOL_ADMIN_ROLE && us.school.id === school.id
+      (us: NestedUserSchoolType) => us.role.name === USER_ROLES.ADMIN && us.school.id === school.id
     )
   )
-  const relevantSchoolRoles = [SCHOOL_INSPECTOR_ROLE, SCHOOL_ADMIN_ROLE]
+  const relevantSchoolRoles = [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN]
   let selectedSchoolRole = $derived(
-    isSchoolAdmin ? SCHOOL_ADMIN_ROLE : isSchoolInspector ? SCHOOL_INSPECTOR_ROLE : NONE_FIELD_VALUE
+    isSchoolAdmin ? USER_ROLES.ADMIN : isSchoolInspector ? USER_ROLES.INSPECTOR : NONE_FIELD_VALUE
   )
 
   let newestMembership: NestedUserGroupType | null = $derived(
