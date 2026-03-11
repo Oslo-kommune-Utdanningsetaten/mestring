@@ -68,24 +68,22 @@
     try {
       isLoading = true
 
-      // Fetch group details
-      const groupResult = await groupsRetrieve({
-        path: { id: groupId },
-      })
+      const [groupResult, teachersResult, studentsResult, goalsResult] = await Promise.all([
+        await groupsRetrieve({
+          path: { id: groupId },
+        }),
+        await usersList({
+          query: { groups: groupId, school: currentSchool.id, roles: TEACHER_ROLE },
+        }),
+        await usersList({
+          query: { groups: groupId, school: currentSchool.id, roles: STUDENT_ROLE },
+        }),
+        await goalsList({
+          query: { group: groupId, includeObservations: true },
+        }),
+      ])
+
       group = groupResult.data || null
-
-      // Fetch group members, this can be optimized to a single call, then filtered by role
-      const teachersResult = await usersList({
-        query: { groups: groupId, school: currentSchool.id, roles: TEACHER_ROLE },
-      })
-      const studentsResult = await usersList({
-        query: { groups: groupId, school: currentSchool.id, roles: STUDENT_ROLE },
-      })
-
-      // Fetch goals for the group
-      const goalsResult = await goalsList({
-        query: { group: groupId, includeObservations: true },
-      })
       teachers = teachersResult.data || []
       students = studentsResult.data || []
       groupGoals = goalsResult.data || []
@@ -278,20 +276,7 @@
   <div class="spinner-border text-primary" role="status">
     <span class="visually-hidden">Henter data...</span>
   </div>
-{:else if !group}
-  <div class="alert alert-warning">
-    <h4>Fant ikke noen gruppe med ID "{groupId}"</h4>
-    <p class="mt-4">Det kan være flere grunner til dette:</p>
-    <ul>
-      <li>Brukeren du er logget på med mangler tilgang</li>
-      <li>Den har aldri eksistert</li>
-      <li>Er slettet</li>
-      <li>Er skrudd av for visning</li>
-      <li>Har gått ut på dato (en gruppe varer typisk et skoleår)</li>
-    </ul>
-    <p>Hvis du mener dette er en feil, kontakt support.</p>
-  </div>
-{:else}
+{:else if group}
   <!-- Group Header -->
   <section>
     <div class="d-flex align-items-center gap-3 mb-3">
@@ -428,6 +413,19 @@
       </div>
     {/if}
   </section>
+{:else}
+  <div class="alert alert-warning">
+    <h4>Fant ikke noen gruppe med ID "{groupId}"</h4>
+    <p class="mt-4">Det kan være flere grunner til dette:</p>
+    <ul>
+      <li>Den har aldri eksistert</li>
+      <li>Er slettet</li>
+      <li>Er skrudd av for visning</li>
+      <li>Har gått ut på dato (en gruppe varer typisk et skoleår)</li>
+      <li>Brukeren du er logget på med mangler tilgang</li>
+    </ul>
+    <p>Hvis du mener dette er en feil, kontakt support.</p>
+  </div>
 {/if}
 
 <!-- Offcanvas for creating/editing goals -->
