@@ -1,9 +1,7 @@
 <script lang="ts">
-  import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript'
   import type { GroupType } from '../generated/types.gen'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
   import Link from './Link.svelte'
-  import { is } from 'date-fns/locale'
 
   const {
     group,

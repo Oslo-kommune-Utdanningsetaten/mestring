@@ -1,11 +1,12 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
-  import { urlStringFrom, abbreviateName } from '../utils/functions'
+  import { urlStringFrom } from '../utils/functions'
   import { hasUserAccessToPath } from '../stores/data'
   import { USER_ROLES } from '../utils/constants'
   import { usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType } from '../generated/types.gen'
   import GroupTag from '../components/GroupTag.svelte'
+  import UserTag from '../components/UserTag.svelte'
   import Link from '../components/Link.svelte'
 
   let currentSchool = $derived($dataStore.currentSchool)
@@ -65,9 +66,11 @@
           <!-- teachers -->
           {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
             {#each groupMembers[group.id].teachers as teacher}
-              <pkt-tag iconName="lecture" skin="yellow">
-                <span title={teacher.feideId}>{abbreviateName(teacher.name)}</span>
-              </pkt-tag>
+              <UserTag
+                user={teacher}
+                role={USER_ROLES.TEACHER}
+                allUsers={groupMembers[group.id].teachers}
+              />
             {/each}
           {/if}
         </div>

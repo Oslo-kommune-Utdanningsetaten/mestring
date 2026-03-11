@@ -180,11 +180,15 @@ export const findAverage = (numbers: number[]): number => {
   return numbers.reduce((sum, currentValue) => sum + currentValue, 0) / numbers.length
 }
 
-export const abbreviateName = (fullName: string): string => {
+export const abbreviateName = (fullName: string, otherNames?: string[]): string => {
   const names = fullName.split(' ')
   const first = names[0]
-  const rest = names.slice(1)
-  return `${first} ${rest.map(n => n.charAt(0).toUpperCase() + '.').join(' ')}`
+  if (!otherNames || otherNames?.map(name => name.split(' ')[0]).includes(first)) {
+    // There are other people with the same first name, so include initials of last names
+    const rest = names.slice(1)
+    return `${first} ${rest.map(n => n.charAt(0).toUpperCase() + '.').join(' ')}`
+  }
+  return first
 }
 
 export const isNumber = (value: any) => {

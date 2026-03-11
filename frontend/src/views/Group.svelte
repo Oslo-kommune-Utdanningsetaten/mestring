@@ -30,10 +30,11 @@
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
   import GroupObservationsBarChart from '../components/GroupObservationsBarChart.svelte'
   import { dataStore } from '../stores/data'
-  import { goalsWithCalculatedMastery, abbreviateName } from '../utils/functions'
+  import { goalsWithCalculatedMastery } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/data'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
+  import UserTag from '../components/UserTag.svelte'
 
   const { groupId } = $props<{ groupId: string }>()
 
@@ -293,9 +294,7 @@
     <div class="d-flex align-items-center gap-2 mt-1">
       <GroupTag {group} isGroupTypeNameEnabled={true} />
       {#each teachers as teacher}
-        <pkt-tag iconName="lecture" skin="yellow">
-          <span>{abbreviateName(teacher.name)}</span>
-        </pkt-tag>
+        <UserTag user={teacher} role={USER_ROLES.TEACHER} allUsers={teachers} />
       {/each}
     </div>
   </section>
