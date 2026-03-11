@@ -32,7 +32,12 @@
   {/if}
 
   <div class="container-md">
-    <Link className="navbar-brand d-flex align-items-center" to="/">
+    <Link
+      className="navbar-brand d-flex align-items-center"
+      to={$hasUserAccessToPath('/admin/schools/:schoolId')
+        ? `/admin/schools/${currentSchool?.id}`
+        : '/'}
+    >
       <!-- Mestring icon -->
       <span class="goal-icon-wrapper me-2">
         <pkt-icon name="goal" title="Mestring logo" aria-hidden="true"></pkt-icon>
