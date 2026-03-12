@@ -46,7 +46,7 @@
   const fontSize = $derived(Math.max(height * 0.09, 8))
   const topPadding = $derived(xLabels.length > 0 ? fontSize : 0)
   const bottomPadding = $derived(fontSize * 1.5)
-  const leftPadding = $derived(yLabelsAt ? fontSize * 1.5 : 0)
+  const leftPadding = $derived(yLabelsAt ? fontSize * 3 : 0)
   const totalHeight = $derived(height + topPadding + (xLabels.length > 0 ? bottomPadding : 0))
   const totalWidth = $derived(width + leftPadding)
   const gapLabelRatio = 0.2
