@@ -109,11 +109,6 @@
                     <Link to="/admin/users" className="dropdown-item">Brukere</Link>
                   </li>
                 {/if}
-                {#if $hasUserAccessToPath('/admin/stats')}
-                  <li>
-                    <Link to="/admin/stats" className="dropdown-item">Statistikk</Link>
-                  </li>
-                {/if}
                 {#if $hasUserAccessToPath('/admin/groups')}
                   <li>
                     <Link to="/admin/groups" className="dropdown-item">Grupper</Link>
@@ -124,10 +119,20 @@
                     <Link to="/admin/subjects" className="dropdown-item">Fag</Link>
                   </li>
                 {/if}
+                {#if $hasUserAccessToPath('/admin/stats')}
+                  <li>
+                    <Link to="/admin/stats" className="dropdown-item">Statistikk</Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/admin/analytics')}
+                  <li class="ms-3 mt-1">
+                    <a href="/analytics/index.php" target="_blank">Bruksanalyse</a>
+                  </li>
+                {/if}
                 {#if $hasUserAccessToPath('/admin/mastery-schemas')}
                   <li>
                     <Link to="/admin/mastery-schemas" className="dropdown-item">
-                      Mastery Schemas
+                      Mestringsskjemaer
                     </Link>
                   </li>
                 {/if}
@@ -136,11 +141,6 @@
                     <Link to="/admin/data-maintenance-tasks" className="dropdown-item">
                       Bakgrunnsjobber
                     </Link>
-                  </li>
-                {/if}
-                {#if $hasUserAccessToPath('/admin/analytics')}
-                  <li class="ms-3 mt-1">
-                    <a href="/analytics/index.php" target="_blank">Analytics</a>
                   </li>
                 {/if}
               </ul>
