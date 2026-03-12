@@ -28,6 +28,36 @@
   let xLabels = $state<string[]>([])
   let yMaxValue = $derived.by(() => (hasSufficientData ? Math.max(...data, 15) : 10))
 
+  const yLabelsAt = $derived.by(() => {
+    if (!hasSufficientData || yMaxValue <= 0) return 1
+
+    const targetTicks = 3 // aim for around 3 ticks on the y-axis
+    const roughInterval = yMaxValue / targetTicks
+
+    // Find the magnitude (power of 10)
+    const magnitude = Math.pow(10, Math.floor(Math.log10(roughInterval)))
+
+    // Normalize to 1-10 range
+    const normalized = roughInterval / magnitude
+
+    // Round to nice number (1, 2, 5, or 10)
+    let niceFraction
+    if (normalized <= 1.5) {
+      niceFraction = 1
+    } else if (normalized <= 3.5) {
+      niceFraction = 2
+    } else if (normalized <= 7.5) {
+      niceFraction = 5
+    } else {
+      niceFraction = 10
+    }
+
+    const interval = niceFraction * magnitude
+
+    // Ensure at least 1 for integer counts
+    return Math.max(1, Math.round(interval))
+  })
+
   const fetchObservations = async () => {
     const query: any = {
       from: fromDate,
@@ -73,7 +103,7 @@
     {height}
     {title}
     {xLabels}
-    yLabelsAt={5}
+    {yLabelsAt}
     xAxis={0.5}
     yAxis={1}
     colorLookup={() => 'var(--pkt-color-brand-dark-green-1000)'}
