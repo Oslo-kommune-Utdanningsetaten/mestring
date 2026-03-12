@@ -14,6 +14,7 @@
   import GroupTag from './GroupTag.svelte'
   import { formatDate } from '../utils/functions'
   import SinceSchoolStart from './SinceSchoolStart.svelte'
+  import Link from './Link.svelte'
 
   const { user, decoratedUser, school, onUserUpdate } = $props<{
     user: UserType
@@ -88,7 +89,7 @@
 
 <div class="user-grid-row">
   <div>
-    <div class="fw-semibold">{user.name}</div>
+    <div class="fw-semibold"><Link to="/admin/users/{user.id}">{user.name}</Link></div>
     <div class="text-muted small">{user.email || 'Ingen e-post'}</div>
     <div class="text-muted small">{user.id}</div>
   </div>

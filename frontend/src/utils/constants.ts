@@ -133,6 +133,12 @@ export const ROUTES = [
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
   {
+    path: '/admin/users/:userId',
+    component: Profile,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+  },
+  {
     path: '/admin/users',
     component: Users,
     isPublic: false,
