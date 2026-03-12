@@ -65,6 +65,7 @@ services:
       - 'host.docker.internal:host-gateway'
     profiles:
       - prod
+      - dev
     restart: always
     depends_on:
       postgres:
@@ -101,7 +102,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      DB_HOST: ${DB_HOST}
+      DB_HOST: ${CONTAINER_DB_HOST}
       DJANGO_DEBUG: 'False'
       LOG_FILE: 'debug-taskrunner.log'
       DB_CONN_MAX_AGE: 0
@@ -125,7 +126,6 @@ services:
       - matomo-db-data:/var/lib/mysql
     profiles:
       - prod
-      - dev
 
   matomo:
     build: ./matomo
@@ -148,7 +148,6 @@ services:
       - matomo-db
     profiles:
       - prod
-      - dev
 
 volumes:
   postgres-data:
