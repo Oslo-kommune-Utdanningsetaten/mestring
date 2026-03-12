@@ -34,7 +34,7 @@
     yResolution,
     width,
     height,
-    title: providedTitle,
+    title,
     xLabels = [],
     yLabelsAt,
     xAxis = 0,
@@ -43,9 +43,8 @@
     options = { isValueOnHoverEnabled: false, isGlowOnHoverEnabled: false },
   }: Props = $props()
 
-  const title = $derived(providedTitle || '')
   const fontSize = $derived(Math.max(height * 0.09, 8))
-  const topPadding = $derived(fontSize)
+  const topPadding = $derived(xLabels.length > 0 ? fontSize : 0)
   const bottomPadding = $derived(fontSize * 1.5)
   const leftPadding = $derived(yLabelsAt ? fontSize * 1.5 : 0)
   const totalHeight = $derived(height + topPadding + (xLabels.length > 0 ? bottomPadding : 0))
@@ -87,10 +86,9 @@
       if (!yLabelsAt || yLabelsAt <= 0) return []
 
       const labels: Array<{ value: number; y: number }> = []
-      const yChunkHeight = (height * yResolution) / yMaxValue
-
+      const yLabelStepHeight = (height * yResolution) / yMaxValue
       for (let value = yLabelsAt; value <= yMaxValue; value += yLabelsAt) {
-        const y = height - yChunkHeight * value + topPadding
+        const y = height - yLabelStepHeight * value + topPadding
         labels.push({ value, y })
       }
       return labels
@@ -108,6 +106,7 @@
 >
   <title>{title}</title>
   {#each bars as bar, index}
+    <!-- bars -->
     <rect
       class:bar={options.isGlowOnHoverEnabled}
       x={bar.x}
@@ -120,6 +119,7 @@
       onmouseleave={() => (hoverIndex = -1)}
     ></rect>
     {#if bar.xLabel}
+      <!-- x-axis labels-->
       <text
         x={bar.x + bar.width / 2}
         y={height + topPadding + fontSize * 1.2}
@@ -132,6 +132,7 @@
     {/if}
   {/each}
   {#if xAxis > 0}
+    <!-- x-axis -->
     <line
       x1={leftPadding}
       y1={height + topPadding}
@@ -143,6 +144,7 @@
     />
   {/if}
   {#if yAxis > 0}
+    <!-- y-axis -->
     <line
       x1={leftPadding}
       y1={topPadding}
@@ -154,6 +156,7 @@
     />
   {/if}
   {#each yLabels as label}
+    <!-- y-axis ticks -->
     <line
       x1={leftPadding}
       y1={label.y}
@@ -163,6 +166,7 @@
       stroke-width={1}
       vector-effect="non-scaling-stroke"
     />
+    <!-- y-axis labels -->
     <text
       x={leftPadding - fontSize * 0.3}
       y={label.y}
@@ -174,8 +178,10 @@
       {label.value}
     </text>
   {/each}
+  {#if yLabels.length > 0}{/if}
   {#if options.isValueOnHoverEnabled && hoverIndex >= 0}
     {@const bar = bars[hoverIndex]}
+    <!-- on hover bar values -->
     <circle
       class="tooltip-bg"
       cx={bar.x + bar.width / 2}

@@ -1,9 +1,8 @@
 <script lang="ts">
   import { getISOWeek } from 'date-fns'
-  import type { GroupType, ObservationType } from '../generated'
+  import type { ObservationType } from '../generated'
   import { observationsList } from '../generated/sdk.gen'
   import BarChart from './BarChart.svelte'
-  import { currentSchool } from '../stores/data'
 
   interface Props {
     groupId?: string
@@ -27,7 +26,7 @@
     return now.getMonth() < 7 ? `${now.getFullYear()}-01-01` : `${now.getFullYear()}-08-01`
   })
   let xLabels = $state<string[]>([])
-  let yMaxValue = $derived.by(() => (hasSufficientData ? Math.max(...data, 10) : 10))
+  let yMaxValue = $derived.by(() => (hasSufficientData ? Math.max(...data, 15) : 10))
 
   const fetchObservations = async () => {
     const query: any = {
