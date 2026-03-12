@@ -89,6 +89,7 @@
     {#if isProfileMode}
       <h2 class="mb-4">Min side</h2>
     {/if}
+
     <!-- User Information -->
     <div class="card mb-3">
       <div class="card-header">
@@ -147,7 +148,7 @@
       </div>
     {/if}
 
-    <!-- Usergroup -->
+    <!-- Group access -->
     <div class="card mb-3">
       <div class="card-header d-flex">
         <h3 class="mb-0">Tilgang til grupper ({groupsCount})</h3>
