@@ -24,7 +24,7 @@
   const title = $derived(providedTitle ?? (hasSufficientData ? data.join(', ') : 'Mangler data'))
   const fromDate = $derived.by(() => {
     const now = new Date()
-    return now.getMonth() < 7 ? `${now.getFullYear()}-01-01` : `${now.getFullYear() - 1}-08-01`
+    return now.getMonth() < 7 ? `${now.getFullYear()}-01-01` : `${now.getFullYear()}-08-01`
   })
   let xLabels = $state<string[]>([])
   let yMaxValue = $derived.by(() => (hasSufficientData ? Math.max(...data, 10) : 10))
@@ -74,6 +74,9 @@
     {height}
     {title}
     {xLabels}
+    yLabelsAt={5}
+    xAxis={0.5}
+    yAxis={1}
     colorLookup={() => 'var(--pkt-color-brand-dark-green-1000)'}
     options={{ isValueOnHoverEnabled: true, isGlowOnHoverEnabled: true }}
   ></BarChart>

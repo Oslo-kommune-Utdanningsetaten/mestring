@@ -46,8 +46,9 @@
 <section class="pt-3">
   <h2 class="mb-4">Statistikk for {currentSchool?.displayName}</h2>
   <div class="border border-3 mb-4 p-3">
+    <h3 class="mb-2">Hele skolen</h3>
     <!-- Observations for whole school -->
-    <ObservationsBarChart schoolId={currentSchool.id} width={500} height={250} />
+    <ObservationsBarChart schoolId={currentSchool.id} width={300} height={150} />
   </div>
 
   {#if groups.length > 1}
@@ -67,7 +68,7 @@
         {/if}
 
         <!-- students -->
-        <div class="mt-2 mb-1 border border-1">
+        <div class="mt-2 mb-1">
           <!-- Observations for group -->
           <ObservationsBarChart groupId={group.id} width={300} height={150} />
         </div>

@@ -17,6 +17,9 @@
     height: number
     title?: string
     xLabels?: string[]
+    yLabelsAt?: number
+    xAxis?: number
+    yAxis?: number
     colorLookup?: (value: number) => string
     options?: {
       isValueOnHoverEnabled?: boolean
@@ -33,14 +36,20 @@
     height,
     title: providedTitle,
     xLabels = [],
+    yLabelsAt,
+    xAxis = 0,
+    yAxis = 0,
     colorLookup = yValue => 'rgb(100, 100, 100)',
     options = { isValueOnHoverEnabled: false, isGlowOnHoverEnabled: false },
   }: Props = $props()
 
   const title = $derived(providedTitle || '')
   const fontSize = $derived(Math.max(height * 0.09, 8))
-  const labelPadding = $derived(fontSize * 1.5)
-  const totalHeight = $derived(height + (xLabels.length > 0 ? labelPadding : 0))
+  const topPadding = $derived(fontSize)
+  const bottomPadding = $derived(fontSize * 1.5)
+  const leftPadding = $derived(yLabelsAt ? fontSize * 1.5 : 0)
+  const totalHeight = $derived(height + topPadding + (xLabels.length > 0 ? bottomPadding : 0))
+  const totalWidth = $derived(width + leftPadding)
   const gapLabelRatio = 0.2
   let hoverIndex = $state<number>(-1)
 
@@ -56,8 +65,8 @@
 
       return data.map((value, index) => {
         const barHeight = yChunkHeight * value
-        const x = index * baseWidth + gap / 2
-        const y = height - barHeight
+        const x = index * baseWidth + gap / 2 + leftPadding
+        const y = height - barHeight + topPadding
         const color = colorLookup(value)
 
         return {
@@ -72,13 +81,28 @@
       })
     })()
   )
+
+  const yLabels = $derived<Array<{ value: number; y: number }>>(
+    (() => {
+      if (!yLabelsAt || yLabelsAt <= 0) return []
+
+      const labels: Array<{ value: number; y: number }> = []
+      const yChunkHeight = (height * yResolution) / yMaxValue
+
+      for (let value = yLabelsAt; value <= yMaxValue; value += yLabelsAt) {
+        const y = height - yChunkHeight * value + topPadding
+        labels.push({ value, y })
+      }
+      return labels
+    })()
+  )
 </script>
 
 <svg
   class="bar-chart"
-  {width}
+  width={totalWidth}
   height={totalHeight}
-  viewBox={`0 0 ${width} ${totalHeight}`}
+  viewBox={`0 0 ${totalWidth} ${totalHeight}`}
   role="img"
   aria-label={title}
 >
@@ -98,7 +122,7 @@
     {#if bar.xLabel}
       <text
         x={bar.x + bar.width / 2}
-        y={height + fontSize * 1.2}
+        y={height + topPadding + fontSize * 1.2}
         text-anchor="middle"
         font-size={fontSize}
         fill="currentColor"
@@ -106,6 +130,49 @@
         {bar.xLabel}
       </text>
     {/if}
+  {/each}
+  {#if xAxis > 0}
+    <line
+      x1={leftPadding}
+      y1={height + topPadding}
+      x2={width + leftPadding}
+      y2={height + topPadding}
+      stroke="currentColor"
+      stroke-width={xAxis}
+      vector-effect="non-scaling-stroke"
+    />
+  {/if}
+  {#if yAxis > 0}
+    <line
+      x1={leftPadding}
+      y1={topPadding}
+      x2={leftPadding}
+      y2={height + topPadding}
+      stroke="currentColor"
+      stroke-width={yAxis}
+      vector-effect="non-scaling-stroke"
+    />
+  {/if}
+  {#each yLabels as label}
+    <line
+      x1={leftPadding}
+      y1={label.y}
+      x2={leftPadding + fontSize * 0.2}
+      y2={label.y}
+      stroke="currentColor"
+      stroke-width={1}
+      vector-effect="non-scaling-stroke"
+    />
+    <text
+      x={leftPadding - fontSize * 0.3}
+      y={label.y}
+      text-anchor="end"
+      dominant-baseline="middle"
+      font-size={fontSize}
+      fill="currentColor"
+    >
+      {label.value}
+    </text>
   {/each}
   {#if options.isValueOnHoverEnabled && hoverIndex >= 0}
     {@const bar = bars[hoverIndex]}
