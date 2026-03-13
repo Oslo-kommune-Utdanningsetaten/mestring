@@ -27,8 +27,14 @@
         color: '#38a87f',
       },
     ],
-    renderDirection: 'horizontal',
-    increment: 1,
+    valueInput: 'sliderHorizontal',
+    inputIncrement: 1,
+    flatTrendThreshold: 5,
+    isValueIndicatorEnabled: true,
+    isFeedforwardInputEnabled: true,
+    isIncrementIndicatorEnabled: true,
+    isMasteryValueInputEnabled: true,
+    isMasteryDescriptionInputEnabled: true,
   }
 
   const { masterySchema, onDone } = $props<{

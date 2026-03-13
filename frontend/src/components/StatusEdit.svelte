@@ -13,8 +13,7 @@
   import { dataStore } from '../stores/data'
   import ButtonMini from './ButtonMini.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
-  import ValueInputVertical from './ValueInputVertical.svelte'
-  import ValueInputHorizontal from './ValueInputHorizontal.svelte'
+  import MasteryValueInput from './MasteryValueInput.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import MasteryBarChart from './MasteryBarChart.svelte'
   import { fetchGoalsForSubjectAndStudent, formatMonthName } from '../utils/functions'
@@ -46,18 +45,12 @@
   const masterySchema: MasterySchemaWithConfig = $derived($dataStore.defaultMasterySchema)
   const calculations = $derived(useMasteryCalculations(masterySchema))
 
-  let localStatus = $state<Partial<StatusType> & { masteryValue: number }>({
-    masteryValue: calculations.defaultValue,
-  })
+  let localStatus = $state<Partial<StatusType> & { masteryValue?: number }>({})
 
   let validationErrors = $state<{ beginAt?: string; endAt?: string }>({})
 
   const getMasterySchmemaForGoal = (goal: GoalType) => {
     return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
-  }
-
-  const renderDirection = (): 'horizontal' | 'vertical' | 'unknown' => {
-    return masterySchema?.config?.renderDirection || 'unknown'
   }
 
   const fetchStudentData = async () => {
@@ -81,6 +74,7 @@
     localStatus = {
       ...localStatus,
       title: generateTitle(localStatus.beginAt!, localStatus.endAt!),
+      masteryValue: localStatus?.masteryValue ?? calculations.defaultValue,
     }
   }
 
@@ -285,19 +279,11 @@
       <div class="row my-5">
         <h3 class="col-4">Mestring</h3>
         <div class="col-8">
-          {#if renderDirection() === 'vertical'}
-            <ValueInputVertical
-              {masterySchema}
-              bind:masteryValue={localStatus.masteryValue}
-              label="Totalt sett, i denne perioden"
-            />
-          {:else}
-            <ValueInputHorizontal
-              {masterySchema}
-              bind:masteryValue={localStatus.masteryValue}
-              label="Totalt sett, i denne perioden"
-            />
-          {/if}
+          <MasteryValueInput
+            {masterySchema}
+            bind:value={localStatus.masteryValue}
+            title="Totalt sett, i denne perioden"
+          />
         </div>
       </div>
     {/if}

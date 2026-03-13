@@ -184,8 +184,9 @@
         <div class="col-8">
           <div
             class="mastery-scale"
-            class:mastery-scale-horizontal={masterySchema?.config?.renderDirection === 'horizontal'}
-            class:mastery-scale-vertical={masterySchema?.config?.renderDirection === 'vertical'}
+            class:mastery-scale-horizontal={masterySchema?.config?.valueInput ===
+              'sliderHorizontal'}
+            class:mastery-scale-vertical={masterySchema?.config?.valueInput === 'sliderVertical'}
           >
             {#each calculations.masteryLevels as level}
               <div

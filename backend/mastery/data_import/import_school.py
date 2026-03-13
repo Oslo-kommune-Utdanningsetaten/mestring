@@ -131,7 +131,7 @@ def ensure_default_mastery_schema_exists(school):
                 }
             ],
             "input_increment": 1,
-            "render_direction": "horizontal",
+            "value_input": "sliderHorizontal",
             "flat_trend_threshold": 5,
             "is_value_indicator_enabled": True,
             "is_mastery_value_input_enabled": True,
