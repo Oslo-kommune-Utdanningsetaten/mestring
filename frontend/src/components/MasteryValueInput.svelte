@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { MasterySchemaType } from '../generated'
-  import SliderInputVertical from './inputs/SliderInputVertical.svelte'
-  import SliderInputHorizontal from './inputs/SliderInputHorizontal.svelte'
+  import SliderVertical from './inputs/SliderVertical.svelte'
+  import SliderHorizontal from './inputs/SliderHorizontal.svelte'
+  import StarsHorizontal from './inputs/StarsHorizontal.svelte'
 
   let {
     masterySchema,
@@ -16,8 +17,10 @@
 
 <div class="mb-4">
   {#if masterySchema?.config?.valueInput === 'sliderVertical'}
-    <SliderInputVertical {masterySchema} bind:masteryValue={value} label={title || ''} />
+    <SliderVertical {masterySchema} bind:masteryValue={value} label={title || ''} />
   {:else if masterySchema?.config?.valueInput === 'sliderHorizontal'}
-    <SliderInputHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
+    <SliderHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
+  {:else if masterySchema?.config?.valueInput === 'starsHorizontal'}
+    <StarsHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
   {/if}
 </div>
