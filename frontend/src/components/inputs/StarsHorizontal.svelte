@@ -26,6 +26,12 @@
     return targetValue !== null && value <= targetValue
   }
 
+  // Get the color for a specific star value from its corresponding mastery level
+  const getStarColor = (value: number): string => {
+    const level = masteryLevels.find((ml: any) => ml.minValue === value)
+    return level?.color || '#ff9e0b' // fallback color
+  }
+
   const handleStarClick = (value: number) => {
     if (isInputEnabled) {
       masteryValue = value
@@ -46,11 +52,12 @@
   </label>
 
   <div class="radio">
-    {#each values as value}
+    {#each values as value, index}
       <label
         for="rating-{value}"
         title="{value} stjerne{value > 1 ? 'r' : ''}"
         class:highlighted={isValueHighlighted(value)}
+        style="--star-color: {getStarColor(value)}"
         onmouseenter={() => (hoveredValue = value)}
         onmouseleave={() => (hoveredValue = null)}
         onclick={() => handleStarClick(value)}
@@ -109,7 +116,7 @@
     position: absolute;
     width: 6px;
     height: 6px;
-    background-color: #ff9e0b;
+    background-color: var(--star-color);
     border-radius: 50%;
     opacity: 0;
     transform: scale(0);
@@ -143,8 +150,8 @@
 
   /* Apply highlighted styles when star should be filled */
   .radio label.highlighted svg {
-    fill: #ff9e0b;
-    filter: drop-shadow(0 0 15px rgba(255, 158, 11, 0.9));
+    fill: var(--star-color);
+    filter: drop-shadow(0 0 15px var(--star-color));
     animation: shimmer 1s ease infinite alternate;
   }
 
@@ -164,10 +171,10 @@
 
   @keyframes shimmer {
     0% {
-      filter: drop-shadow(0 0 10px rgba(255, 158, 11, 0.5));
+      filter: drop-shadow(0 0 10px color-mix(in srgb, var(--star-color) 50%, transparent));
     }
     100% {
-      filter: drop-shadow(0 0 20px rgba(255, 158, 11, 1));
+      filter: drop-shadow(0 0 20px var(--star-color));
     }
   }
 </style>
