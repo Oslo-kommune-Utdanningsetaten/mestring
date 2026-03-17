@@ -20,8 +20,9 @@
     $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
   )
   const calculations = $derived(useMasteryCalculations(masterySchema))
-
   let localObservation = $state<Partial<ObservationType> & { masteryValue?: number }>({})
+
+  const studentFirstName = $derived(student?.name.split(' ')[0] || 'eleven')
 
   // Update localObservation when observation prop changes
   $effect(() => {
@@ -69,7 +70,7 @@
 
 <div class="observation-edit p-4">
   {#if localObservation}
-    <h3 class="pb-2">
+    <h3>
       {localObservation.id ? 'Redigerer' : 'Ny'} observasjon
     </h3>
 
@@ -82,26 +83,30 @@
     {/if}
 
     {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
-      <div class="form-group my-4">
-        <label for="description" class="form-label">Beskrivelse/tilbakemelding</label>
+      <div class="form-group">
+        <label for="description" class="form-label visually-hidden">
+          Beskrivelse/tilbakemelding
+        </label>
         <textarea
           id="description"
           class="form-control rounded-0 border-2 border-primary"
           bind:value={localObservation.masteryDescription}
-          placeholder="Kort beskrivelse av elevens mestringsnivå"
+          placeholder="Kort beskrivelse av {studentFirstName}{studentFirstName.endsWith('s')
+            ? "\'"
+            : "'s"} mestringsnivå"
           rows="4"
         ></textarea>
       </div>
     {/if}
 
     {#if masterySchema?.config?.isFeedforwardInputEnabled}
-      <div class="form-group mb-3">
-        <label for="feedforward" class="form-label">Fremovermelding</label>
+      <div class="form-group">
+        <label for="feedforward" class="form-label visually-hidden">Fremovermelding</label>
         <textarea
           id="feedforward"
           class="form-control rounded-0 border-2 border-primary"
           bind:value={localObservation.feedforward}
-          placeholder="Konkret, hva kan eleven gjøre for å forbedre seg?"
+          placeholder="Konkret, hva kan {studentFirstName} gjøre for å forbedre seg?"
           rows="4"
         ></textarea>
       </div>
@@ -143,5 +148,9 @@
   .observation-edit {
     width: 100%;
     max-width: 100%;
+  }
+
+  .form-group {
+    margin-top: 2.5rem;
   }
 </style>

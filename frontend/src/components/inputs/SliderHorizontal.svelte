@@ -46,7 +46,7 @@
   })
 </script>
 
-<div class="mt-4 mb-0">
+<div class="mt-4 mb-4">
   <label class="form-label" for="mastery-slider">
     {label}
   </label>

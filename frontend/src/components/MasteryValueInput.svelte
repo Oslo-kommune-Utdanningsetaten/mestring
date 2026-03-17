@@ -15,12 +15,13 @@
   }>()
 </script>
 
-<div class="mb-4">
-  {#if masterySchema?.config?.valueInput === 'sliderVertical'}
-    <SliderVertical {masterySchema} bind:masteryValue={value} label={title || ''} />
-  {:else if masterySchema?.config?.valueInput === 'sliderHorizontal'}
-    <SliderHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
-  {:else if masterySchema?.config?.valueInput === 'starsHorizontal'}
-    <StarsHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
-  {/if}
-</div>
+{#if masterySchema?.config?.valueInput === 'sliderVertical'}
+  <SliderVertical {masterySchema} bind:masteryValue={value} label={title || ''} />
+{:else if masterySchema?.config?.valueInput === 'sliderHorizontal'}
+  <SliderHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
+{:else if masterySchema?.config?.valueInput === 'starsHorizontal'}
+  <StarsHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
+{/if}
+
+<style>
+</style>

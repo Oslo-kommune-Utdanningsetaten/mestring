@@ -19,15 +19,14 @@
   const { masteryLevels } = $derived(calculations)
   const values = $derived(masteryLevels.map((level: any) => level.minValue))
 
-  // Hover state management
   let hoveredValue = $state<number | null>(null)
 
-  function isValueHighlighted(value: number): boolean {
+  const isValueHighlighted = (value: number): boolean => {
     const targetValue = hoveredValue ?? masteryValue
     return targetValue !== null && value <= targetValue
   }
 
-  function handleStarClick(value: number) {
+  const handleStarClick = (value: number) => {
     if (isInputEnabled) {
       masteryValue = value
     }
@@ -41,7 +40,11 @@
   })
 </script>
 
-<div class="mt-4 mb-0">
+<div class="mt-4 mb-4">
+  <label class="form-label" for="mastery-slider">
+    {label}
+  </label>
+
   <div class="radio">
     {#each values as value}
       <label
@@ -71,10 +74,15 @@
 </div>
 
 <style>
+  .form-label {
+    font-weight: 600;
+  }
+
   .radio {
     display: flex;
     justify-content: center;
     gap: 10px;
+    margin: 2rem 0rem 3rem 0rem;
   }
 
   .radio input {
