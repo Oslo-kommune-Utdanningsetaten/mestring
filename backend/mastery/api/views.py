@@ -87,7 +87,14 @@ class SchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
             ),
             OpenApiParameter(
                 name='roles',
-                description='Filter users by roles the users have. Comma-separated list of role names (student, teacher, staff, admin,inspector)',
+                description='Filter users by roles the users have. Comma-separated list of role names (student, teacher, staff, admin, inspector)',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='teacher',
+                description='Filter users by what kind of groups the teach. Implies roles=teacher. Value should be either "basis" or "teaching".',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
@@ -123,6 +130,7 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
             school_param, _ = get_request_param(self.request.query_params, 'school')
             roles_param, _ = get_request_param(self.request.query_params, 'roles')
             groups_param, _ = get_request_param(self.request.query_params, 'groups')
+            teacher_param, _ = get_request_param(self.request.query_params, 'teacher')
 
             if not school_param:
                 raise ValidationError(
@@ -148,6 +156,11 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 if role_names:
                     user_group_filters &= Q(user_groups__role__name__in=role_names)
                     user_school_filters &= Q(user_schools__role__name__in=role_names)
+
+            # Add filter for what kind of teacher the user is
+            if teacher_param:
+                user_group_filters &= Q(user_groups__group__type=teacher_param,
+                                        user_groups__role__name__in=['teacher'])
 
             # Apply filters: if groups specified, only via user_groups; otherwise both paths
             if groups_param:

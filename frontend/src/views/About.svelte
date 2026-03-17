@@ -2,13 +2,13 @@
   import { fetchMetadata } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
   import Link from '../components/Link.svelte'
+  import UsersWithRole from './UsersByRole.svelte'
   let metadata = $state<Record<string, any>>({})
+  const currentSchool = $derived($dataStore.currentSchool)
 
   const fetchServiceMetadata = async () => {
     try {
-      const options = $dataStore.currentSchool
-        ? { query: { orgNumber: $dataStore.currentSchool.orgNumber } }
-        : {}
+      const options = currentSchool ? { query: { orgNumber: currentSchool.orgNumber } } : {}
       const metadataResult = await fetchMetadata(options)
       metadata = metadataResult.data || {}
     } catch (error) {
@@ -17,7 +17,6 @@
   }
 
   $effect(() => {
-    const currentSchool = $dataStore.currentSchool
     fetchServiceMetadata()
   })
 </script>
@@ -26,7 +25,7 @@
   {#if Object.hasOwn(metadata, 'roleCounts') && Object.hasOwn(metadata.roleCounts, role)}
     <span>
       {metadata.roleCounts[role] +
-        ` ${metadata.roleCounts[role] == 1 ? 'person' : 'personer'} har denne rollen.`}
+        ` ${metadata.roleCounts[role] == 1 ? 'person' : 'personer'} har denne rollen`}
     </span>
   {/if}
 {/snippet}
@@ -65,29 +64,37 @@
   <ul class="my-3">
     <li>
       <span class="fw-bold">Lærer i undervisningsgruppe</span>
-      kan opprette mål og observasjoner for elevene gruppa, i faget som undervises. {@render rolesCount(
-        'teacherTeaching'
-      )}
+      kan opprette mål og observasjoner for elevene gruppa, i faget som undervises.
+      <Link to="/users?role=teacher&teacherType=teaching">
+        {@render rolesCount('teacherTeaching')}
+      </Link>.
     </li>
     <li>
       <span class="fw-bold">Lærer i basisgruppe</span>
-      kan se mål og observasjoner for sine elever, i alle fag. Kan opprette individuelle mål (og observasjonerpå
-      disse) for sine elever i alle fag. {@render rolesCount('teacherBasis')}
+      kan se mål og observasjoner for sine elever, i alle fag. Kan opprette individuelle mål (og observasjoner
+      på disse) for sine elever i alle fag. <Link to="/users?role=teacher&teacherType=basis">
+        {@render rolesCount('teacherBasis')}
+      </Link>.
     </li>
     <li>
       <span class="fw-bold">Skoleinspektør</span>
-      kan se mål og observasjoner for alle elever ved sin skole. {@render rolesCount('inspector')}
+      kan se mål og observasjoner for alle elever ved sin skole. <Link to="/users?role=inspector">
+        {@render rolesCount('inspector')}
+      </Link>.
     </li>
     <li>
       <span class="fw-bold">Skoleadmin</span>
-      kan se og redigere mål og observasjoner for alle elever ved sin skole. {@render rolesCount(
-        'admin'
-      )}
+      kan se og redigere mål og observasjoner for alle elever ved sin skole. <Link
+        to="/users?role=admin"
+      >
+        {@render rolesCount('admin')}
+      </Link>.
     </li>
     <li>
       <span class="fw-bold">Superadmin</span>
       kan se og redigere mål og observasjoner for alle elever ved alle skoler. Kan også endre globale
-      innstillinger for skolene. {@render rolesCount('superadmin')}
+      innstillinger for skolene.
+      {@render rolesCount('superadmin')}
     </li>
   </ul>
 </section>

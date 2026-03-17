@@ -28,7 +28,6 @@
   import GroupTag from '../components/GroupTag.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
-  import GroupObservationsBarChart from '../components/ObservationsBarChart.svelte'
   import { dataStore } from '../stores/data'
   import { goalsWithCalculatedMastery } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/data'
@@ -299,85 +298,85 @@
     </div>
   </section>
 
-  {#if !group.isEnabled}
+  {#if group.isEnabled}
+    <!-- Group goals Section -->
+    {#if currentSchool?.isGroupGoalEnabled && group.subjectId}
+      <section>
+        <div class="d-flex align-items-center gap-2">
+          <h3>Mål</h3>
+          {#if $hasUserAccessToFeature('goal', 'create', { groupId: group.id })}
+            <ButtonIcon
+              options={{
+                iconName: 'goal',
+                title: `Legg til nytt gruppemål for ${group.displayName}`,
+                classes: 'bordered ms-1',
+                onClick: () => handleEditGoal(null),
+              }}
+            />
+          {/if}
+        </div>
+
+        <div bind:this={goalsListElement} class="list-group mt-3">
+          {#each groupGoals as goal, index (goal.id)}
+            <div class="list-group-item goal-row {goal.isRelevant ? '' : 'hatched-background'}">
+              <!-- Drag handle -->
+              <span>
+                <pkt-icon
+                  title="Endre rekkefølge"
+                  class="me-2 row-handle-draggable"
+                  name="drag"
+                  role="button"
+                  tabindex="0"
+                ></pkt-icon>
+              </span>
+              <!-- Numbering -->
+              <span>
+                {goal.sortOrder || index + 1}
+              </span>
+              <!-- Goal type icon -->
+              <span class="goal-type-icon"><GroupSVG /></span>
+              <!-- Goal title -->
+              <span>
+                {$dataStore.currentSchool.isGoalTitleEnabled ? goal.title : ''}
+              </span>
+              <!-- Actions -->
+              <span>
+                {#if isGoalInUse(goal.id)}
+                  <pkt-icon
+                    name="lock-locked"
+                    size="small"
+                    title="Målet er i bruk av en eller flere elever"
+                  ></pkt-icon>
+                {:else}
+                  <ButtonIcon
+                    options={{
+                      iconName: 'trash-can',
+                      title: 'Slett mål',
+                      classes: 'bordered',
+                      disabled: !goal.isRelevant || isGoalInUse(goal.id),
+                      onClick: () => handleDeleteGoal(goal.id),
+                      delayActionFor: 5,
+                    }}
+                  />
+                  <ButtonIcon
+                    options={{
+                      iconName: 'edit',
+                      title: 'Rediger mål',
+                      classes: 'bordered',
+                      onClick: () => handleEditGoal(goal),
+                    }}
+                  />
+                {/if}
+              </span>
+            </div>
+          {/each}
+        </div>
+      </section>
+    {/if}
+  {:else}
     <h3 class="my-5">
       ⚠️ Denne gruppa er deaktivert! Kontakt en admin dersom du mener den burde være aktivert.
     </h3>
-  {/if}
-
-  <!-- Group goals Section -->
-  {#if currentSchool?.isGroupGoalEnabled && group.subjectId}
-    <section>
-      <div class="d-flex align-items-center gap-2">
-        <h3>Mål</h3>
-        {#if $hasUserAccessToFeature('goal', 'create', { groupId: group.id })}
-          <ButtonIcon
-            options={{
-              iconName: 'goal',
-              title: `Legg til nytt gruppemål for ${group.displayName}`,
-              classes: 'bordered ms-1',
-              onClick: () => handleEditGoal(null),
-            }}
-          />
-        {/if}
-      </div>
-
-      <div bind:this={goalsListElement} class="list-group mt-3">
-        {#each groupGoals as goal, index (goal.id)}
-          <div class="list-group-item goal-row {goal.isRelevant ? '' : 'hatched-background'}">
-            <!-- Drag handle -->
-            <span>
-              <pkt-icon
-                title="Endre rekkefølge"
-                class="me-2 row-handle-draggable"
-                name="drag"
-                role="button"
-                tabindex="0"
-              ></pkt-icon>
-            </span>
-            <!-- Numbering -->
-            <span>
-              {goal.sortOrder || index + 1}
-            </span>
-            <!-- Goal type icon -->
-            <span class="goal-type-icon"><GroupSVG /></span>
-            <!-- Goal title -->
-            <span>
-              {$dataStore.currentSchool.isGoalTitleEnabled ? goal.title : ''}
-            </span>
-            <!-- Actions -->
-            <span>
-              {#if isGoalInUse(goal.id)}
-                <pkt-icon
-                  name="lock-locked"
-                  size="small"
-                  title="Målet er i bruk av en eller flere elever"
-                ></pkt-icon>
-              {:else}
-                <ButtonIcon
-                  options={{
-                    iconName: 'trash-can',
-                    title: 'Slett mål',
-                    classes: 'bordered',
-                    disabled: !goal.isRelevant || isGoalInUse(goal.id),
-                    onClick: () => handleDeleteGoal(goal.id),
-                    delayActionFor: 5,
-                  }}
-                />
-                <ButtonIcon
-                  options={{
-                    iconName: 'edit',
-                    title: 'Rediger mål',
-                    classes: 'bordered',
-                    onClick: () => handleEditGoal(goal),
-                  }}
-                />
-              {/if}
-            </span>
-          </div>
-        {/each}
-      </div>
-    </section>
   {/if}
 
   <!-- Students Section -->

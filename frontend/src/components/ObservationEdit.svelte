@@ -119,7 +119,7 @@
           iconName: 'check',
           skin: 'primary',
           variant: 'label-only',
-          classes: 'm-2',
+          classes: 'me-2 mt-2',
           onClick: () => handleSave(),
         }}
       >

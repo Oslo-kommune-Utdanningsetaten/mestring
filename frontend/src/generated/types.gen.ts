@@ -2407,13 +2407,17 @@ export type UsersListData = {
          */
         groups?: string;
         /**
-         * Filter users by roles the users have. Comma-separated list of role names (student, teacher, staff, admin,inspector)
+         * Filter users by roles the users have. Comma-separated list of role names (student, teacher, staff, admin, inspector)
          */
         roles?: string;
         /**
          * Filter users by School ID (users in any group of that school)
          */
         school: string;
+        /**
+         * Filter users by what kind of groups the teach. Implies roles=teacher. Value should be either "basis" or "teaching".
+         */
+        teacher?: string;
     };
     url: '/api/users/';
 };

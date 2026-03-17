@@ -17,6 +17,7 @@ import DataMaintenanceTask from '../views/admin/DataMaintenanceTask.svelte'
 import Schools from '../views/admin/Schools.svelte'
 import School from '../views/admin/School.svelte'
 import SchoolStats from '../views/admin/SchoolStats.svelte'
+import UsersByRole from '../views/UsersByRole.svelte'
 
 export const SUBJECTS_ALLOWED_ALL = 'all'
 export const SUBJECTS_ALLOWED_CUSTOM = 'only-custom'
@@ -86,6 +87,12 @@ export const ROUTES = [
   {
     path: '/groups',
     component: Groups,
+    isPublic: false,
+    accessibleBy: allRoles,
+  },
+  {
+    path: '/users',
+    component: UsersByRole,
     isPublic: false,
     accessibleBy: allRoles,
   },
