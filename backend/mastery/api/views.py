@@ -86,6 +86,13 @@ class SchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
+                name='ids',
+                description='Only return users with these IDs (comma-separated list of user ids)',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='roles',
                 description='Filter users by roles the users have. Comma-separated list of role names (student, teacher, staff, admin, inspector)',
                 required=False,
@@ -128,6 +135,7 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
+            ids_param, _ = get_request_param(self.request.query_params, 'ids')
             roles_param, _ = get_request_param(self.request.query_params, 'roles')
             groups_param, _ = get_request_param(self.request.query_params, 'groups')
             teacher_param, _ = get_request_param(self.request.query_params, 'teacher')
@@ -161,6 +169,12 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
             if teacher_param:
                 user_group_filters &= Q(user_groups__group__type=teacher_param,
                                         user_groups__role__name__in=['teacher'])
+
+            # Add user id filter if specified
+            if ids_param:
+                user_ids = [user_id.strip() for user_id in ids_param.split(',') if user_id]
+                if user_ids:
+                    qs = qs.filter(id__in=user_ids)
 
             # Apply filters: if groups specified, only via user_groups; otherwise both paths
             if groups_param:
