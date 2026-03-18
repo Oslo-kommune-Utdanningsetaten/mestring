@@ -88,7 +88,7 @@ class SchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
             OpenApiParameter(
                 name='ids',
                 description='Only return users with these IDs (comma-separated list of user ids)',
-                required=True,
+                required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),

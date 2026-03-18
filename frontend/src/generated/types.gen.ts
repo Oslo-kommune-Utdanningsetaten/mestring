@@ -2413,7 +2413,7 @@ export type UsersListData = {
         /**
          * Only return users with these IDs (comma-separated list of user ids)
          */
-        ids: string;
+        ids?: string;
         /**
          * Filter users by roles the users have. Comma-separated list of role names (student, teacher, staff, admin, inspector)
          */
