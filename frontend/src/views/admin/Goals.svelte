@@ -207,6 +207,7 @@
   .header {
     background-color: var(--pkt-color-brand-neutrals-100);
     padding: 0.5rem;
+    border-bottom: 1px solid var(--pkt-color-grays-gray-100);
   }
 
   .sort-button {
@@ -236,5 +237,6 @@
   /* Add padding to all data cells for consistency */
   .goals-grid > div:not(.sort-button) {
     padding: 0.5rem 0.5rem 0.5rem 1rem;
+    border-bottom: 1px solid var(--pkt-color-grays-gray-100);
   }
 </style>
