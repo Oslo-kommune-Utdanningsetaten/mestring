@@ -40,11 +40,7 @@
           <pkt-icon name="github" class="pkt-icon--medium"></pkt-icon>
         </Link>
         <a
-          href="mailto:TBA"
-          onclick={event => {
-            event.preventDefault()
-            alert('Kommer snart!')
-          }}
+          href="mailto:dlv@osloskolen.no?subject=Forespørsel om Mestring"
           title="Kontakt via e-post"
         >
           <pkt-icon name="email" class="pkt-icon--medium"></pkt-icon>
