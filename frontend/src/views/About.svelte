@@ -62,6 +62,17 @@
   </ul>
 </section>
 
+<!-- General guidelines -->
+<section class="mt-3 mb-5" id="guidelines">
+  <h2 class="my-3">Retningslinjer for bruk</h2>
+  <ul class="my-3">
+    <li>Minimér informasjon som kan knyttes til personer.</li>
+    <li>Der det er mulig, bruk nøytrale, ikke-sensitive formuleringer.</li>
+    <li>Husk å låse PCen, slik at andre ikke kan få tilgang til elevinformasjon via din bruker.</li>
+    <li>Ikke ta utskrifter - papir har en tendens til å bli liggende der andre har tilgang.</li>
+  </ul>
+</section>
+
 <!-- Access info -->
 <section class="my-5" id="access">
   <h3>Hvem har tilgang til hva?</h3>
