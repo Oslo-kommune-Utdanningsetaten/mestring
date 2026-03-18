@@ -69,12 +69,15 @@ def fetch_metadata(request):
         },
         "role_counts": {
             "superadmin": models.User.objects.filter(is_superadmin=True).count(),
+            "teacher": {},
+            "admin": 0,
+            "inspector": 0,
         }
     }
     if org_number:
         school = models.School.objects.filter(org_number=org_number).first()
         if school:
-            result["role_counts"]["teacher_basis"] = models.User.objects.filter(
+            result["role_counts"]["teacher"]["basis"] = models.User.objects.filter(
                 user_groups__group__school=school,
                 user_groups__group__type="basis",
                 user_groups__role__name="teacher",
@@ -82,7 +85,7 @@ def fetch_metadata(request):
                 user_groups__group__deleted_at__isnull=True,
                 deleted_at__isnull=True
             ).distinct().count()
-            result["role_counts"]["teacher_teaching"] = models.User.objects.filter(
+            result["role_counts"]["teacher"]["teaching"] = models.User.objects.filter(
                 user_groups__group__school=school,
                 user_groups__group__type="teaching",
                 user_groups__role__name="teacher",

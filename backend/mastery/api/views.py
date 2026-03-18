@@ -553,6 +553,13 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
     list=extend_schema(
         parameters=[
             OpenApiParameter(
+                name='school',
+                description='Filter goals by school',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='student',
                 description='Filter goals by the student owning them. Using this parameter will return both individual goals and group goals where the student is a member.',
                 required=False,
@@ -603,22 +610,25 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
         qs = apply_deleted_filter(self.request.query_params, qs)
 
         if self.action == 'list':
+            school_param, _ = get_request_param(self.request.query_params, 'school')
             group_param, _ = get_request_param(self.request.query_params, 'group')
             student_param, _ = get_request_param(self.request.query_params, 'student')
             subject_param, _ = get_request_param(self.request.query_params, 'subject')
             include_observations_param, _ = get_request_param(
                 self.request.query_params, 'include_observations')
 
-            if (not student_param) and (not subject_param) and (not group_param):
+            if (not school_param) and (not student_param) and (not subject_param) and (not group_param):
                 raise ValidationError(
                     {'error': 'missing-parameter',
-                     'message': 'At least one of "subject", "group" or "student" parameters are required.'})
+                     'message': 'At least one of "school", "subject", "group" or "student" parameters are required.'})
 
             if (group_param and subject_param):
                 raise ValidationError(
                     {'error': 'wrong-parameter',
                      'message':
                      'group and subject parameters cannot be used together (goals are either individual or group).'})
+
+            qs = qs.filter(school_id=school_param)
 
             if group_param:
                 qs = qs.filter(group_id=group_param)

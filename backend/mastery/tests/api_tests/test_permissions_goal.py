@@ -14,16 +14,20 @@ def test_non_user_goal_access(goal_with_group):
 
 
 @pytest.mark.django_db
-def test_superadmin_goal_access(superadmin, goal_with_group, goal_individual_other_student):
+def test_superadmin_goal_access(school, superadmin, goal_with_group, goal_individual_other_student):
     client = APIClient()
     client.force_authenticate(user=superadmin)
 
-    # Even superadmin needs at least one of subject, group, user (params) to list all goals
+    # Even superadmin needs school param to list all goals
     resp = client.get(f'/api/goals/')
     assert resp.status_code == 400
 
+    # Superadmin can list all goals at school
+    resp = client.get(f'/api/goals/', {'school': school.id})
+    assert resp.status_code == 200
+
     # Superadmin can list goals by group
-    resp = client.get(f'/api/goals/', {'group': goal_with_group.group.id})
+    resp = client.get(f'/api/goals/', {'group': goal_with_group.group.id, 'school': school.id})
     assert resp.status_code == 200
     data = resp.json()
     expected_ids = {goal_with_group.id}
@@ -33,7 +37,7 @@ def test_superadmin_goal_access(superadmin, goal_with_group, goal_individual_oth
 
     # Superadmin can list goals by user
     resp = client.get(
-        f'/api/goals/', {'student': goal_with_group.group.get_students().first().id})
+        f'/api/goals/', {'student': goal_with_group.group.get_students().first().id, 'school': school.id})
     assert resp.status_code == 200
     data = resp.json()
     received_ids = {goal['id'] for goal in data}
@@ -42,7 +46,8 @@ def test_superadmin_goal_access(superadmin, goal_with_group, goal_individual_oth
     assert expected_ids.issubset(received_ids)
 
     # Superadmin can list individual goals by subject
-    resp = client.get(f'/api/goals/', {'subject': goal_individual_other_student.subject.id})
+    resp = client.get(
+        f'/api/goals/', {'subject': goal_individual_other_student.subject.id, 'school': school.id})
     assert resp.status_code == 200
     data = resp.json()
     received_ids = {goal['id'] for goal in data}
@@ -59,10 +64,10 @@ def test_superadmin_goal_access(superadmin, goal_with_group, goal_individual_oth
 
 @pytest.mark.django_db
 def test_school_inspector_goal_access(
-        school_inspector, school, goal_with_group, goal_individual, goal_individual_other_student, student,
-        teaching_group_with_members, other_teaching_group_with_members, other_school_teaching_group,
-        other_school_student, other_school_group_goal, other_school_individual_goal, subject_owned_by_school,
-        student_role):
+        school_inspector, school, other_school, goal_with_group, goal_individual,
+        goal_individual_other_student, student, teaching_group_with_members,
+    other_teaching_group_with_members, other_school_teaching_group, other_school_student,
+        other_school_group_goal, other_school_individual_goal, subject_owned_by_school, student_role):
     """
     Test access for school inspectors.
     School inspectors have read only access to all goals group and individual for students at their school
@@ -78,31 +83,31 @@ def test_school_inspector_goal_access(
     ################### List ###################
 
     # School inspector can list goals in groups at their school
-    resp = client.get('/api/goals/', {'group': goal_with_group.group.id})
+    resp = client.get('/api/goals/', {'group': goal_with_group.group.id, 'school': school.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
     excepted_ids = {goal_with_group.id}
     assert received_ids == excepted_ids
 
     # School inspector cannot list goals in groups at other schools
-    resp = client.get('/api/goals/', {'group': other_school_teaching_group.id})
+    resp = client.get('/api/goals/', {'group': other_school_teaching_group.id, 'school': other_school.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
     # School inspector can list goals for students at their school
-    resp = client.get('/api/goals/', {'student': student.id})
+    resp = client.get('/api/goals/', {'student': student.id, 'school': school.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
     excepted_ids = {goal_individual.id, goal_with_group.id}
     assert received_ids == excepted_ids
 
     # School inspector cannot list goals for students at other schools
-    resp = client.get('/api/goals/', {'student': other_school_student.id})
+    resp = client.get('/api/goals/', {'student': other_school_student.id, 'school': other_school.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
     # School inspector can list goals by subject at their school
-    resp = client.get('/api/goals/', {'subject': subject_owned_by_school.id})
+    resp = client.get('/api/goals/', {'subject': subject_owned_by_school.id, 'school': school.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
     excepted_ids = {goal_individual.id, goal_individual_other_student.id}
@@ -208,7 +213,7 @@ def test_student_goal_access(
 
     # Student can list individual and group goals
     # Should not include: individual_goal_other, group_goal_other
-    resp = client.get('/api/goals/', {'student': student.id})
+    resp = client.get('/api/goals/', {'student': student.id, 'school': school.id})
     assert resp.status_code == 200
     received_ids = {group['id'] for group in resp.json()}
     assert individual_goal_self.id in received_ids
@@ -217,7 +222,7 @@ def test_student_goal_access(
     assert group_goal_other.id not in received_ids
 
     # Student can list group goals by own group
-    resp = client.get('/api/goals/', {'group': goal_with_group.group.id})
+    resp = client.get('/api/goals/', {'group': goal_with_group.group.id, 'school': school.id})
     assert resp.status_code == 200
     data = resp.json()
     received_ids = {group['id'] for group in data}
@@ -226,12 +231,12 @@ def test_student_goal_access(
 
     # Studen cannot list by other group (out of scope)
     resp = client.get(
-        '/api/goals/', {'group': other_teaching_group_with_members.id})
+        '/api/goals/', {'group': other_teaching_group_with_members.id, 'school': school.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
     # Student can list individual goal by subject
-    resp = client.get('/api/goals/', {'subject': subject_owned_by_school.id})
+    resp = client.get('/api/goals/', {'subject': subject_owned_by_school.id, 'school': school.id})
     assert resp.status_code == 200
     received_ids = {group['id'] for group in resp.json()}
     assert individual_goal_self.id in received_ids
@@ -356,7 +361,7 @@ def test_student_goal_access(
     )
 
     client.force_authenticate(user=student_without_groups)
-    resp = client.get('/api/goals/', {'student': student_without_groups.id})
+    resp = client.get('/api/goals/', {'student': student_without_groups.id, 'school': school.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
     assert individual_goal_no_groups.id in received_ids
@@ -420,13 +425,17 @@ def test_teaching_group_teacher_goal_access(
     resp = client.get('/api/goals/')
     assert resp.status_code == 400
 
+    # Endpoint is usable with school param
+    resp = client.get('/api/goals/', {'school': school.id})
+    assert resp.status_code == 200
+
     # Endpoint is unusable with both group and subject params
     resp = client.get(
         '/api/goals/', {'group': teaching_group_with_members.id, 'subject': subject_owned_by_school.id})
     assert resp.status_code == 400
 
     # Can list goals in groups they teach
-    resp = client.get('/api/goals/', {'group': teaching_group_with_members.id})
+    resp = client.get('/api/goals/', {'group': teaching_group_with_members.id, 'school': school.id})
     assert resp.status_code == 200
     received_ids = {group['id'] for group in resp.json()}
     assert goal_with_group.id in received_ids
@@ -435,12 +444,12 @@ def test_teaching_group_teacher_goal_access(
 
     # Teacher can't list goals for groups they don't teach => empty
     resp = client.get(
-        '/api/goals/', {'group': other_teaching_group_with_members.id})
+        '/api/goals/', {'group': other_teaching_group_with_members.id, 'school': school.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
     # Teacher can list goals for students they teach
-    resp = client.get('/api/goals/', {'student': student.id})
+    resp = client.get('/api/goals/', {'student': student.id, 'school': school.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
     assert goal_with_group.id in received_ids  # Group goal
@@ -450,12 +459,12 @@ def test_teaching_group_teacher_goal_access(
     assert group_goal_other.id not in received_ids
 
     # Teacher cannot list goals of unaffiliated students
-    resp = client.get('/api/goals/', {'student': other_student.id})
+    resp = client.get('/api/goals/', {'student': other_student.id, 'school': school.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
     # Teacher can list individual goals in subjects they teach
-    resp = client.get('/api/goals/', {'subject': subject_with_group.id})
+    resp = client.get('/api/goals/', {'subject': subject_with_group.id, 'school': school.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
     assert individual_goal_in_taught_subject.id in received_ids
@@ -641,8 +650,12 @@ def test_basis_group_teacher_goal_access(
     resp = client.get('/api/goals/')
     assert resp.status_code == 400
 
+    # Endpoint is usable with school param
+    resp = client.get('/api/goals/', {'school': school.id})
+    assert resp.status_code == 200
+
     # Basis teacher can see all goals (individual and group) for students in their basis group
-    resp = client.get('/api/goals/', {'student': student.id})
+    resp = client.get('/api/goals/', {'student': student.id, 'school': school.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
     assert individual_goal.id in received_ids
@@ -651,7 +664,7 @@ def test_basis_group_teacher_goal_access(
     assert individual_goal_other.id not in received_ids
 
     # Basis teacher can list individual goals by subject for their students
-    resp = client.get('/api/goals/', {'subject': subject_owned_by_school.id})
+    resp = client.get('/api/goals/', {'subject': subject_owned_by_school.id, 'school': school.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
     assert individual_goal.id in received_ids
@@ -797,20 +810,24 @@ def test_school_admin_goal_access(
     resp = client.get('/api/goals/')
     assert resp.status_code == 400
 
+    # Endpoint is usable with school param
+    resp = client.get('/api/goals/', {'school': school.id})
+    assert resp.status_code == 200
+
     # Can list group goals for groups at their school
-    resp = client.get('/api/goals/', {'group': teaching_group_with_members.id})
+    resp = client.get('/api/goals/', {'group': teaching_group_with_members.id, 'school': school.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
     expected_ids = {goal_with_group.id}
     assert received_ids == expected_ids
 
     # Cannot list group goals from other schools
-    resp = client.get('/api/goals/', {'group': other_school_teaching_group.id})
+    resp = client.get('/api/goals/', {'group': other_school_teaching_group.id, 'school': other_school.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
     # Can list individual goals by subject owned by their school
-    resp = client.get('/api/goals/', {'subject': subject_owned_by_school.id})
+    resp = client.get('/api/goals/', {'subject': subject_owned_by_school.id, 'school': school.id})
     assert resp.status_code == 200
     received_ids = {goal['id'] for goal in resp.json()}
     expected_ids = {goal_individual.id, goal_individual_other_student.id}

@@ -7,11 +7,12 @@ import Groups from '../views/Groups.svelte'
 import Students from '../views/Students.svelte'
 import Status from '../views/Status.svelte'
 import Profile from '../views/Profile.svelte'
-import NotFound from '../views/NotFound.svelte'
+
 // Admin views
 import Users from '../views/admin/Users.svelte'
 import AdminGroups from '../views/admin/Groups.svelte'
 import Subjects from '../views/admin/Subjects.svelte'
+import Goals from '../views/admin/Goals.svelte'
 import MasterySchemas from '../views/admin/MasterySchemas.svelte'
 import DataMaintenanceTask from '../views/admin/DataMaintenanceTask.svelte'
 import Schools from '../views/admin/Schools.svelte'
@@ -136,6 +137,12 @@ export const ROUTES = [
   {
     path: '/admin/stats',
     component: SchoolStats,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+  },
+  {
+    path: '/admin/goals',
+    component: Goals,
     isPublic: false,
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },

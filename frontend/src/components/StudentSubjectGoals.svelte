@@ -61,6 +61,7 @@
     goalsForSubject = await fetchGoalsForSubjectAndStudent(
       subject.id,
       student.id,
+      $dataStore.currentSchool?.id!,
       $dataStore.currentUser.allGroups
     )
   }

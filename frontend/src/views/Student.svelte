@@ -71,7 +71,7 @@
   }
 
   const countStudentGoals = async () => {
-    const result = await goalsList({ query: { student: studentId } })
+    const result = await goalsList({ query: { student: studentId, school: currentSchool.id } })
     studentGoalsCount = result.data?.length
   }
 

@@ -75,7 +75,7 @@
           query: { groups: groupId, school: currentSchool.id, roles: USER_ROLES.STUDENT },
         }),
         await goalsList({
-          query: { group: groupId, includeObservations: true },
+          query: { group: groupId, includeObservations: true, school: currentSchool.id },
         }),
       ])
 

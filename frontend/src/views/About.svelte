@@ -2,7 +2,7 @@
   import { fetchMetadata } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
   import Link from '../components/Link.svelte'
-  import UsersWithRole from './UsersByRole.svelte'
+  import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
   let metadata = $state<Record<string, any>>({})
   const currentSchool = $derived($dataStore.currentSchool)
 
@@ -16,16 +16,20 @@
     }
   }
 
+  const getRoleCount = (role: string, teacherType?: string) => {
+    return teacherType ? metadata.roleCounts[role][teacherType] : metadata.roleCounts[role]
+  }
+
   $effect(() => {
     fetchServiceMetadata()
   })
 </script>
 
-{#snippet rolesCount(role: string)}
+{#snippet rolesCount(role: string, teacherType?: string)}
   {#if Object.hasOwn(metadata, 'roleCounts') && Object.hasOwn(metadata.roleCounts, role)}
     <span>
-      {metadata.roleCounts[role] +
-        ` ${metadata.roleCounts[role] == 1 ? 'person' : 'personer'} har denne rollen`}
+      {getRoleCount(role, teacherType) +
+        ` ${getRoleCount(role, teacherType) == 1 ? 'person' : 'personer'} har denne rollen`}
     </span>
   {/if}
 {/snippet}
@@ -65,36 +69,40 @@
     <li>
       <span class="fw-bold">Lærer i undervisningsgruppe</span>
       kan opprette mål og observasjoner for elevene gruppa, i faget som undervises.
-      <Link to="/users?role=teacher&teacherType=teaching">
-        {@render rolesCount('teacherTeaching')}
+      <Link to="/users?role={USER_ROLES.TEACHER}&teacherType={GROUP_TYPE_TEACHING}">
+        {@render rolesCount(USER_ROLES.TEACHER, GROUP_TYPE_TEACHING)}
       </Link>.
     </li>
     <li>
       <span class="fw-bold">Lærer i basisgruppe</span>
       kan se mål og observasjoner for sine elever, i alle fag. Kan opprette individuelle mål (og observasjoner
-      på disse) for sine elever i alle fag. <Link to="/users?role=teacher&teacherType=basis">
-        {@render rolesCount('teacherBasis')}
+      på disse) for sine elever i alle fag. <Link
+        to="/users?role={USER_ROLES.TEACHER}&teacherType={GROUP_TYPE_BASIS}"
+      >
+        {@render rolesCount(USER_ROLES.TEACHER, GROUP_TYPE_BASIS)}
       </Link>.
     </li>
     <li>
       <span class="fw-bold">Skoleinspektør</span>
-      kan se mål og observasjoner for alle elever ved sin skole. <Link to="/users?role=inspector">
-        {@render rolesCount('inspector')}
+      kan se mål og observasjoner for alle elever ved sin skole. <Link
+        to="/users?role={USER_ROLES.INSPECTOR}"
+      >
+        {@render rolesCount(USER_ROLES.INSPECTOR)}
       </Link>.
     </li>
     <li>
       <span class="fw-bold">Skoleadmin</span>
       kan se og redigere mål og observasjoner for alle elever ved sin skole. <Link
-        to="/users?role=admin"
+        to="/users?role={USER_ROLES.ADMIN}"
       >
-        {@render rolesCount('admin')}
+        {@render rolesCount(USER_ROLES.ADMIN)}
       </Link>.
     </li>
     <li>
       <span class="fw-bold">Superadmin</span>
       kan se og redigere mål og observasjoner for alle elever ved alle skoler. Kan også endre globale
       innstillinger for skolene.
-      {@render rolesCount('superadmin')}
+      {@render rolesCount(USER_ROLES.SUPERADMIN)}
     </li>
   </ul>
 </section>

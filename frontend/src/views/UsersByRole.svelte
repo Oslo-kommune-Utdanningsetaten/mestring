@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { UserType } from '../generated/types.gen'
   import { usersList } from '../generated/sdk.gen'
-  import { formatDateTime, formatDateTimeWithToday, abbreviateName } from '../utils/functions'
   import Link from '../components/Link.svelte'
   import { dataStore } from '../stores/data'
   import { useTinyRouter } from 'svelte-tiny-router'

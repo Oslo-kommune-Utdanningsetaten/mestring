@@ -168,8 +168,8 @@ export const fetchSchoolImportStatus = <ThrowOnError extends boolean = false>(op
     });
 };
 
-export const goalsList = <ThrowOnError extends boolean = false>(options?: Options<GoalsListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<GoalsListResponses, unknown, ThrowOnError>({
+export const goalsList = <ThrowOnError extends boolean = false>(options: Options<GoalsListData, ThrowOnError>) => {
+    return (options.client ?? client).get<GoalsListResponses, unknown, ThrowOnError>({
         url: '/api/goals/',
         ...options
     });

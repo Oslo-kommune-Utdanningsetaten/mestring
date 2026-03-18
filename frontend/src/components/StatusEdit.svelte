@@ -55,11 +55,13 @@
 
   const fetchStudentData = async () => {
     const userResult = await usersRetrieve({ path: { id: status.studentId } })
+    const currentSchoolId = $dataStore.currentSchool?.id
     localStudent = userResult.data!
     if (!localStudent) return
     localGoals = await fetchGoalsForSubjectAndStudent(
       subject.id,
       localStudent.id,
+      currentSchoolId,
       $dataStore.currentUser.allGroups
     )
   }

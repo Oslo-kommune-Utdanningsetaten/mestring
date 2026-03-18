@@ -1010,7 +1010,7 @@ export type FetchSchoolImportStatusResponses = {
 export type GoalsListData = {
     body?: never;
     path?: never;
-    query?: {
+    query: {
         /**
          * Filter goals by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
@@ -1027,6 +1027,10 @@ export type GoalsListData = {
          * Which field to use when ordering the results.
          */
         ordering?: string;
+        /**
+         * Filter goals by school
+         */
+        school: string;
         /**
          * Filter goals by the student owning them. Using this parameter will return both individual goals and group goals where the student is a member.
          */

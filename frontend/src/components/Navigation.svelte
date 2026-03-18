@@ -104,6 +104,11 @@
                     <Link to="/students" className="dropdown-item">Elever</Link>
                   </li>
                 {/if}
+                {#if $hasUserAccessToPath('/admin/goals')}
+                  <li class="nav-item">
+                    <Link to="/admin/goals" className="dropdown-item">Mål</Link>
+                  </li>
+                {/if}
                 {#if $hasUserAccessToPath('/admin/users')}
                   <li>
                     <Link to="/admin/users" className="dropdown-item">Brukere</Link>
