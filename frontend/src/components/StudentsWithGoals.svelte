@@ -142,7 +142,7 @@
     </span>
     {#each goals as goal (goal.id)}
       {@const decoGoal = getDecoratedGoalFor(student.id, goal.id)}
-      <span class="item gap-1">
+      <span class="item gap-2">
         {#if decoGoal?.masteryData}
           <MasteryLevelBadge
             masteryData={decoGoal.masteryData}
@@ -176,15 +176,15 @@
 <style>
   .teaching-grid {
     display: grid;
-    grid-template-columns: 3fr repeat(var(--columns-count, 8), 1fr);
-    grid-auto-rows: minmax(5rem, 1fr);
+    grid-template-columns: minmax(20rem, 4fr) repeat(var(--columns-count, 8), 1fr);
+    grid-auto-rows: minmax(2rem, 1fr);
     align-items: stretch;
     gap: 0;
   }
 
   .teaching-grid .item {
-    padding: 0.5rem;
-    min-height: 3rem;
+    padding: 0rem 0.5rem 0rem 0.5rem;
+    min-height: 2rem;
     display: flex;
     align-items: center;
     align-self: stretch;
@@ -201,8 +201,6 @@
   .sortable {
     cursor: pointer;
     border: none;
-    border-right: 1px solid var(--bs-border-color);
-    border-bottom: 1px solid var(--bs-border-color);
     background-color: var(--bs-light);
     font-weight: 800;
   }
@@ -233,9 +231,15 @@
   .column-header {
     transform: rotate(-60deg);
     font-size: 0.8rem;
-    padding: 0.1rem 0.1rem 0.1rem 0.3rem;
-    max-width: 5rem;
-    background-color: var(--pkt-color-surface-strong-light-green);
+    padding: 0.1rem 0.5rem 0.1rem 0.5rem;
+    width: min-content;
+    max-width: 8rem;
+    background-color: color-mix(
+      in srgb,
+      var(--pkt-color-surface-strong-light-green) 70%,
+      transparent
+    );
     border: 1px solid var(--pkt-color-grays-gray-100);
+    z-index: 2;
   }
 </style>
