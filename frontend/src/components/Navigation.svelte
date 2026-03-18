@@ -130,8 +130,13 @@
                   </li>
                 {/if}
                 {#if $hasUserAccessToPath('/admin/analytics')}
-                  <li class="ms-3 mt-1">
-                    <a href="/analytics/index.php" target="_blank">Bruksanalyse</a>
+                  <li>
+                    <Link
+                      to="https://mestring.osloskolen.no/analytics/index.php"
+                      className="dropdown-item"
+                    >
+                      Analytics
+                    </Link>
                   </li>
                 {/if}
                 {#if $hasUserAccessToPath('/admin/mastery-schemas')}
