@@ -8,7 +8,7 @@
   import type { UserRoleType, UserDecorated } from '../types/models'
 
   const { userId } = $props<{ userId?: string }>()
-  const isProfileMode = $derived(!userId)
+  const isProfileMode = $derived($currentUser.id === userId)
 
   // For admin viewing another user's profile
   let otherUser = $state<UserDecorated | undefined>(undefined)
@@ -105,10 +105,12 @@
             <strong>E-post</strong>
             <div class="text-muted">{user.email}</div>
           </div>
-          <div class="col-md-3 mb-2">
-            <strong>Intern ID</strong>
-            <div class="text-muted">{user.id}</div>
-          </div>
+          {#if isProfileMode}
+            <div class="col-md-3 mb-2">
+              <strong>Intern ID</strong>
+              <div class="text-muted">{user.id}</div>
+            </div>
+          {/if}
           <div class="col-md-3 mb-2">
             <strong>Roller</strong>
             <div class="text-muted">{userRoles.join(', ')}</div>
