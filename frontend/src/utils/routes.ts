@@ -53,7 +53,7 @@ export const ROUTES = [
     path: '/users',
     component: UsersByRole,
     isPublic: false,
-    accessibleBy: allRoles,
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
   {
     path: '/groups/:groupId',

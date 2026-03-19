@@ -1,10 +1,13 @@
 <script lang="ts">
+  import Link from '../components/Link.svelte'
   import { fetchMetadata } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
-  import Link from '../components/Link.svelte'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
+  import { hasUserAccessToPath } from '../stores/access'
+
   let metadata = $state<Record<string, any>>({})
   const currentSchool = $derived($dataStore.currentSchool)
+  const currentUser = $derived($dataStore.currentUser)
 
   const fetchServiceMetadata = async () => {
     try {
@@ -17,20 +20,26 @@
   }
 
   const getRoleCount = (role: string, teacherType?: string) => {
+    if (!metadata.roleCounts) {
+      return 0
+    }
     return teacherType ? metadata.roleCounts[role][teacherType] : metadata.roleCounts[role]
   }
 
   $effect(() => {
-    fetchServiceMetadata()
+    if (currentUser) fetchServiceMetadata()
   })
 </script>
 
 {#snippet rolesCount(role: string, teacherType?: string)}
-  {#if Object.hasOwn(metadata, 'roleCounts') && Object.hasOwn(metadata.roleCounts, role)}
-    <span>
-      {getRoleCount(role, teacherType) +
-        ` ${getRoleCount(role, teacherType) == 1 ? 'person' : 'personer'} har denne rollen`}
-    </span>
+  {@const linkTo = `/users?role=${role}${teacherType ? `&teacherType=${teacherType}` : ''}`}
+  {@const count = getRoleCount(role, teacherType)}
+  {#if currentUser && $hasUserAccessToPath('/users')}
+    <Link to={linkTo}>
+      {count + ` ${count == 1 ? 'person' : 'personer'} har denne rollen`}.
+    </Link>
+  {:else if currentUser}
+    {count + ` ${count == 1 ? 'person' : 'personer'} har denne rollen`}.
   {/if}
 {/snippet}
 
@@ -67,8 +76,8 @@
   <h2 class="my-3">Retningslinjer for bruk</h2>
   <ul class="my-3">
     <li>Minimér informasjon som kan knyttes til personer.</li>
-    <li>Der det er mulig, bruk nøytrale, ikke-sensitive formuleringer.</li>
-    <li>Husk å låse PCen, slik at andre ikke kan få tilgang til elevinformasjon via din bruker.</li>
+    <li>Der det er mulig, bruk nøytrale, ikke-sensitive formuleringer om personer.</li>
+    <li>Husk å låse PCen, slik at andre ikke kan få tilgang til informasjon via din bruker.</li>
     <li>Ikke ta utskrifter - papir har en tendens til å bli liggende der andre har tilgang.</li>
   </ul>
 </section>
@@ -80,34 +89,23 @@
     <li>
       <span class="fw-bold">Lærer i undervisningsgruppe</span>
       kan opprette mål og observasjoner for elevene gruppa, i faget som undervises.
-      <Link to="/users?role={USER_ROLES.TEACHER}&teacherType={GROUP_TYPE_TEACHING}">
-        {@render rolesCount(USER_ROLES.TEACHER, GROUP_TYPE_TEACHING)}
-      </Link>.
+      {@render rolesCount(USER_ROLES.TEACHER, GROUP_TYPE_TEACHING)}
     </li>
     <li>
       <span class="fw-bold">Lærer i basisgruppe</span>
       kan se mål og observasjoner for sine elever, i alle fag. Kan opprette individuelle mål (og observasjoner
-      på disse) for sine elever i alle fag. <Link
-        to="/users?role={USER_ROLES.TEACHER}&teacherType={GROUP_TYPE_BASIS}"
-      >
-        {@render rolesCount(USER_ROLES.TEACHER, GROUP_TYPE_BASIS)}
-      </Link>.
+      på disse) for sine elever i alle fag.
+      {@render rolesCount(USER_ROLES.TEACHER, GROUP_TYPE_BASIS)}
     </li>
     <li>
       <span class="fw-bold">Skoleinspektør</span>
-      kan se mål og observasjoner for alle elever ved sin skole. <Link
-        to="/users?role={USER_ROLES.INSPECTOR}"
-      >
-        {@render rolesCount(USER_ROLES.INSPECTOR)}
-      </Link>.
+      kan se mål og observasjoner for alle elever ved sin skole.
+      {@render rolesCount(USER_ROLES.INSPECTOR)}
     </li>
     <li>
       <span class="fw-bold">Skoleadmin</span>
-      kan se og redigere mål og observasjoner for alle elever ved sin skole. <Link
-        to="/users?role={USER_ROLES.ADMIN}"
-      >
-        {@render rolesCount(USER_ROLES.ADMIN)}
-      </Link>.
+      kan se og redigere mål og observasjoner for alle elever ved sin skole.
+      {@render rolesCount(USER_ROLES.ADMIN)}
     </li>
     <li>
       <span class="fw-bold">Superadmin</span>

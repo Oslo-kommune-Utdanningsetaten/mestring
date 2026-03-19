@@ -139,6 +139,7 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
             roles_param, _ = get_request_param(self.request.query_params, 'roles')
             groups_param, _ = get_request_param(self.request.query_params, 'groups')
             teacher_param, _ = get_request_param(self.request.query_params, 'teacher')
+            include_superadmins = False
 
             if not school_param:
                 raise ValidationError(
@@ -164,6 +165,7 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 if role_names:
                     user_group_filters &= Q(user_groups__role__name__in=role_names)
                     user_school_filters &= Q(user_schools__role__name__in=role_names)
+                    include_superadmins = 'superadmin' in role_names
 
             # Add filter for what kind of teacher the user is
             if teacher_param:
@@ -183,6 +185,10 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
             else:
                 # No groups: users can match via either user_groups OR user_schools
                 qs = qs.filter(user_group_filters | user_school_filters)
+
+            # If filtering by roles and superadmin is included, also include superadmins who may not have a UserSchool or UserGroup entry
+            if include_superadmins:
+                qs = qs | self.access_policy().scope_queryset(self.request, super().get_queryset()).filter(is_superadmin=True)
         return qs.distinct()
 
 
