@@ -5,8 +5,8 @@
   import { loadData, currentUser } from './stores/data'
   import { apiHealth } from './stores/apiHealth'
   import { addAlert } from './stores/alerts'
-  import { ROUTES } from './utils/constants'
-  import { hasUserAccessToPath } from './stores/data'
+  import { ROUTES } from './utils/routes'
+  import { hasUserAccessToPath } from './stores/access'
 
   import 'bootstrap/dist/css/bootstrap.min.css'
   import './styles/bootstrap-overrides.css'

@@ -14,11 +14,7 @@ import {
 } from '../stores/localStorage'
 import { fetchUserData } from '../utils/functions'
 import { SUBJECTS_ALLOWED_ALL, SUBJECTS_ALLOWED_CUSTOM, USER_ROLES } from '../utils/constants'
-import type { AppData, UserDecorated, HasUserAccessToFeatureOptions } from '../types/models'
-import {
-  hasUserAccessToPath as checkUserAccessToPath,
-  hasUserAccessToFeature as checkUserAccessToFeature,
-} from '../utils/access'
+import type { AppData, UserDecorated } from '../types/models'
 
 const setMasterySchemas = (schemas: MasterySchemaType[]) => {
   // Default mastery schema is either system default, or user's preferred, or simply first in list
@@ -58,19 +54,6 @@ export const dataStore = writable<AppData>({
 export const currentUser: UserDecorated = derived(dataStore, d => d.currentUser)
 export const currentSchool = derived(dataStore, d => d.currentSchool)
 export const subjects = derived(dataStore, d => d.subjects)
-
-// Reactive access control functions that automatically track store changes
-export const hasUserAccessToPath = derived(
-  currentUser,
-  $currentUser => (pathString: string) => checkUserAccessToPath($currentUser, pathString)
-)
-
-export const hasUserAccessToFeature = derived(
-  [currentUser, currentSchool, subjects],
-  ([$currentUser, $currentSchool, $subjects]) =>
-    (resource: string, action: string, options: HasUserAccessToFeatureOptions = {}) =>
-      checkUserAccessToFeature($currentUser, $currentSchool, $subjects, resource, action, options)
-)
 
 export const setCurrentUser = (user: UserDecorated | null) => {
   dataStore.update(data => ({ ...data, currentUser: user }))

@@ -2,7 +2,7 @@
   import { dataStore, currentUser } from '../stores/data'
   import { login, logout } from '../stores/auth'
   import { currentPath } from '../stores/navigation'
-  import { hasUserAccessToPath } from '../stores/data'
+  import { hasUserAccessToPath } from '../stores/access'
   import Link from './Link.svelte'
   import GoalIconCelebration from './GoalIconCelebration.svelte'
   import oslologoUrl from '@oslokommune/punkt-assets/dist/logos/oslologo.svg?url'

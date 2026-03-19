@@ -30,7 +30,7 @@
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
   import { dataStore } from '../stores/data'
   import { goalsWithCalculatedMastery } from '../utils/functions'
-  import { hasUserAccessToFeature } from '../stores/data'
+  import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
   import UserTag from '../components/UserTag.svelte'

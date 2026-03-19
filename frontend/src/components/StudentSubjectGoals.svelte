@@ -26,7 +26,7 @@
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { getLocalStorageItem } from '../stores/localStorage'
   import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
-  import { hasUserAccessToFeature } from '../stores/data'
+  import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
 

@@ -10,7 +10,7 @@
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
   import { formatDateHumanly, getContrastFriendlyTextColor } from '../utils/functions'
-  import { hasUserAccessToFeature } from '../stores/data'
+  import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
   import ButtonMini from '../components/ButtonMini.svelte'

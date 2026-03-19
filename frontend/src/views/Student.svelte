@@ -9,7 +9,7 @@
     subjectsList,
   } from '../generated/sdk.gen'
   import { SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
-  import { hasUserAccessToFeature } from '../stores/data'
+  import { hasUserAccessToFeature } from '../stores/access'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
   import GoalEdit from '../components/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
