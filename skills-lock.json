@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "skills": {
+    "punkt-components": {
+      "source": "oslokommune/punkt-skills",
+      "sourceType": "github",
+      "computedHash": "6243251e1931ae4b211e19902436a873e34db5b4effa7c03980431a45cbc9d02"
+    },
+    "punkt-css": {
+      "source": "oslokommune/punkt-skills",
+      "sourceType": "github",
+      "computedHash": "9024f36b6371ba313bb136ce82b264f4e66acdb2444628348d0ab66231afb7c4"
+    },
+    "svelte-code-writer": {
+      "source": "sveltejs/ai-tools",
+      "sourceType": "github",
+      "computedHash": "c0e2cce9855f8e312cbb0a05aef164b4659c672d7723e4e598ffa6bc94890542"
+    },
+    "svelte-core-bestpractices": {
+      "source": "sveltejs/ai-tools",
+      "sourceType": "github",
+      "computedHash": "bec11e369679027edf9d4acbe6d9788f8da33dc14b48b874f231d3ba13705324"
+    }
+  }
+}
