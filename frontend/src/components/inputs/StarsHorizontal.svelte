@@ -1,6 +1,5 @@
 <script lang="ts">
   import { useMasteryCalculations } from '../../utils/masteryHelpers'
-  import { getContrastFriendlyTextColor } from '../../utils/functions'
   import type { MasterySchemaWithConfig } from '../../types/models'
 
   let {

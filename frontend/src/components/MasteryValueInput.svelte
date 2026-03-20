@@ -3,6 +3,7 @@
   import SliderVertical from './inputs/SliderVertical.svelte'
   import SliderHorizontal from './inputs/SliderHorizontal.svelte'
   import StarsHorizontal from './inputs/StarsHorizontal.svelte'
+  import ToggleHorizontal from './inputs/ToggleHorizontal.svelte'
 
   let {
     masterySchema,
@@ -21,6 +22,8 @@
   <SliderHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
 {:else if masterySchema?.config?.valueInput === 'starsHorizontal'}
   <StarsHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
+{:else if masterySchema?.config?.valueInput === 'toggleHorizontal'}
+  <ToggleHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
 {/if}
 
 <style>
