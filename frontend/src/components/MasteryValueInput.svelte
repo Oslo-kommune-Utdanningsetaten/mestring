@@ -24,6 +24,10 @@
   <StarsHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
 {:else if masterySchema?.config?.valueInput === 'toggleHorizontal'}
   <ToggleHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
+{:else}
+  <p class="text-danger">
+    Ugyldig masterySchema.config: {masterySchema?.config?.valueInput}
+  </p>
 {/if}
 
 <style>

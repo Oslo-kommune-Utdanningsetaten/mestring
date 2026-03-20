@@ -17,20 +17,6 @@
 
   const calculations = $derived(useMasteryCalculations(masterySchema))
   const { masteryLevels } = $derived(calculations)
-  const values = $derived(masteryLevels.map((level: any) => level.minValue))
-
-  let hoveredValue = $state<number | null>(null)
-
-  const isValueHighlighted = (value: number): boolean => {
-    const targetValue = hoveredValue ?? masteryValue
-    return targetValue !== null && value <= targetValue
-  }
-
-  // Get the color for a specific star value from its corresponding mastery level
-  const getColor = (value: number): string => {
-    const level = masteryLevels.find((ml: any) => ml.minValue === value)
-    return level?.color || '#ff9e0b' // fallback color
-  }
 
   const handleClick = (value: number) => {
     if (isInputEnabled) {
@@ -53,16 +39,16 @@
 
   <div class="d-flex justify-content-center">
     <div class="radio-buttons">
-      {#each values as value, index}
-        <label class="radio" style="--particle-color: {getColor(value)}">
+      {#each masteryLevels as masteryLevel}
+        <label class="radio" style="--particle-color: {masteryLevel.color}">
           <input
             type="radio"
             name="radio"
-            {value}
+            value={masteryLevel.minValue}
             bind:group={masteryValue}
             disabled={!isInputEnabled}
           />
-          <span class="name">{value}</span>
+          <span class="name">{masteryLevel.title}</span>
         </label>
       {/each}
     </div>

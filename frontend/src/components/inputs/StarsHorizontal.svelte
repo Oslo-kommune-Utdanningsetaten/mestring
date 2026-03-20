@@ -16,19 +16,12 @@
 
   const calculations = $derived(useMasteryCalculations(masterySchema))
   const { masteryLevels } = $derived(calculations)
-  const values = $derived(masteryLevels.map((level: any) => level.minValue))
 
   let hoveredValue = $state<number | null>(null)
 
   const isValueHighlighted = (value: number): boolean => {
     const targetValue = hoveredValue ?? masteryValue
     return targetValue !== null && value <= targetValue
-  }
-
-  // Get the color for a specific star value from its corresponding mastery level
-  const getStarColor = (value: number): string => {
-    const level = masteryLevels.find((ml: any) => ml.minValue === value)
-    return level?.color || '#ff9e0b' // fallback color
   }
 
   const handleStarClick = (value: number) => {
@@ -51,22 +44,22 @@
   </label>
 
   <div class="radio">
-    {#each values as value, index}
+    {#each masteryLevels as masteryLevel}
       <label
-        for="rating-{value}"
-        title="{value} stjerne{value > 1 ? 'r' : ''}"
-        class:highlighted={isValueHighlighted(value)}
-        style="--star-color: {getStarColor(value)}"
-        onmouseenter={() => (hoveredValue = value)}
+        for="rating-{masteryLevel.minValue}"
+        title="{masteryLevel.minValue} stjerne{masteryLevel.minValue > 1 ? 'r' : ''}"
+        class:highlighted={isValueHighlighted(masteryLevel.minValue)}
+        style="--star-color: {masteryLevel.color}"
+        onmouseenter={() => (hoveredValue = masteryLevel.minValue)}
         onmouseleave={() => (hoveredValue = null)}
-        onclick={() => handleStarClick(value)}
+        onclick={() => handleStarClick(masteryLevel.minValue)}
       >
         <input
-          id="rating-{value}"
+          id="rating-{masteryLevel.minValue}"
           type="radio"
           name="mastery-stars"
           bind:value={masteryValue}
-          checked={masteryValue === value}
+          checked={masteryValue === masteryLevel.minValue}
           disabled={!isInputEnabled}
         />
         <svg viewBox="0 0 576 512" height="2em" xmlns="http://www.w3.org/2000/svg">
