@@ -10,6 +10,7 @@
   import type { MasterySchemaWithConfig } from '../../types/models'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { urlStringFrom, getContrastFriendlyTextColor } from '../../utils/functions'
+  import { VALUE_INPUT_VARIANTS } from '../../utils/constants'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
@@ -174,6 +175,8 @@
     >
       Nytt mestringsskjema
     </ButtonMini>
+
+    <p>Input variants: {VALUE_INPUT_VARIANTS.join(', ')}</p>
 
     <div class="pkt-input-check mt-3">
       <div class="pkt-input-check__input">

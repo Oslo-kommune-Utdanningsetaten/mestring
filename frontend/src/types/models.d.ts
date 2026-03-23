@@ -1,4 +1,4 @@
-import { USER_ROLES } from '../utils/constants'
+import { USER_ROLES, VALUE_INPUT_VARIANTS } from '../utils/constants'
 
 // Data structure types which only exist in the frontend
 export type deploymentEnvironment = 'localhost' | 'development' | 'production'
@@ -62,12 +62,7 @@ export type MasteryConfigLevel = {
 export type MasterySchemaConfig = {
   levels: MasteryConfigLevel[]
   inputIncrement: number
-  valueInput:
-    | 'sliderHorizontal'
-    | 'sliderVertical'
-    | 'sliderGiraffe'
-    | 'starsHorizontal'
-    | 'toggleHorizontal'
+  valueInput: (typeof VALUE_INPUT_VARIANTS)[number]
   flatTrendThreshold: number
   isIncrementIndicatorEnabled?: boolean
   isValueIndicatorEnabled?: boolean
