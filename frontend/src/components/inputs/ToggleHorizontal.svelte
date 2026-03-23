@@ -17,12 +17,6 @@
   const calculations = $derived(useMasteryCalculations(masterySchema))
   const { masteryLevels } = $derived(calculations)
 
-  const handleClick = (value: number) => {
-    if (isInputEnabled) {
-      masteryValue = value
-    }
-  }
-
   // Set default value when masteryValue is null/undefined and schema is available
   $effect(() => {
     if ((masteryValue === null || masteryValue === undefined) && calculations.hasLevels) {

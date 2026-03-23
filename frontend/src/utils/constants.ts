@@ -48,4 +48,5 @@ export const VALUE_INPUT_VARIANTS = [
   'sliderGiraffe',
   'starsHorizontal',
   'toggleHorizontal',
+  'toggleComicHorizontal',
 ] as const
