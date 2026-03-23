@@ -196,11 +196,11 @@
               <h3 class="card-title">
                 {masterySchema.title}
               </h3>
-              <h5 class="card-title">
-                {getSchoolName(masterySchema.schoolId)}
-              </h5>
-              <p class="card-text">
+              <p>
                 {masterySchema.description || 'Ingen beskrivelse'}
+              </p>
+              <p class="text-muted">
+                {getSchoolName(masterySchema.schoolId)}. ID: {masterySchema.id}
               </p>
 
               <div class="mb-4">
