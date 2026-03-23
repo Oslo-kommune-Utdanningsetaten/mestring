@@ -59,12 +59,20 @@
     fetchMasterySchemas()
   }
 
+  const handleNewMasterySchema = () => {
+    masterySchemaWip = { schoolId: selectedSchool?.id }
+    isEditorOpen = true
+  }
+
   const handleEditMasterySchema = (masterySchema: MasterySchemaType | null) => {
-    if (masterySchema) {
-      masterySchemaWip = { ...masterySchema }
-    } else {
-      masterySchemaWip = { schoolId: selectedSchool?.id }
-    }
+    masterySchemaWip = { ...masterySchema }
+    isEditorOpen = true
+  }
+
+  const handleCopyMasterySchema = (masterySchema: MasterySchemaType | null) => {
+    masterySchemaWip = { ...masterySchema }
+    delete masterySchemaWip.id
+    masterySchemaWip.title = 'KOPI: ' + masterySchemaWip.title
     isEditorOpen = true
   }
 
@@ -161,7 +169,7 @@
         skin: 'primary',
         variant: 'label-only',
         classes: '',
-        onClick: () => handleEditMasterySchema(null),
+        onClick: () => handleNewMasterySchema(),
       }}
     >
       Nytt mestringsskjema
@@ -235,6 +243,19 @@
                 }}
               >
                 Rediger
+              </ButtonMini>
+
+              <ButtonMini
+                options={{
+                  title: 'Kopier',
+                  iconName: 'copy',
+                  skin: 'secondary',
+                  variant: 'icon-left',
+                  classes: 'my-2 me-2',
+                  onClick: () => handleCopyMasterySchema(masterySchema),
+                }}
+              >
+                Kopier
               </ButtonMini>
 
               <ButtonMini

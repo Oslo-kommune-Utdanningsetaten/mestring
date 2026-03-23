@@ -113,7 +113,7 @@
     <MasteryValueInput
       masterySchema={localMasterySchema as MasterySchemaType}
       bind:value={placeholderMasteryValue}
-      title="Forhåndsvisning av mestringsverdi-input"
+      title="Forhåndsvisning av input"
     />
   </div>
 
