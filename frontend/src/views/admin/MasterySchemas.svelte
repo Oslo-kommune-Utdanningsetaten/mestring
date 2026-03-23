@@ -203,7 +203,7 @@
                 {masterySchema.description || 'Ingen beskrivelse'}
               </p>
               <p class="text-muted">
-                {getSchoolName(masterySchema.schoolId)}. ID: {masterySchema.id}
+                {getSchoolName(masterySchema.schoolId)} [{masterySchema.id}]
               </p>
 
               <div class="mb-4">
