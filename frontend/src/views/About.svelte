@@ -48,8 +48,8 @@
   <h2 class="my-3">Om tjenesten</h2>
   <ul class="my-3">
     <li>
-      Denne tjenesten (kjent som "Mestring") er en prototype på hvordan det går an holde oversikt
-      over elevers mestring fagene.
+      Denne tjenesten (kjent som "Mestring") er en prototype på tracking av elevenes utvikling i
+      tilrettelagt opplæring.
     </li>
     <li>
       Utviklet av Seksjon for Læringsteknologi i
@@ -61,10 +61,7 @@
     </li>
     <li>
       Kildekoden er åpen og tilgjengelig på
-      <Link to="https://github.com/Oslo-kommune-Utdanningsetaten/mestring/">GitHub</Link>.
-    </li>
-    <li>
-      Her finner du
+      <Link to="https://github.com/Oslo-kommune-Utdanningsetaten/mestring/">GitHub</Link>, og her er
       <Link to="https://github.com/Oslo-kommune-Utdanningsetaten/mestring/issues">oppgavene</Link>
       vi jobber med.
     </li>
@@ -128,7 +125,7 @@
       {/each}
     </ul>
   {:else}
-    asdf
+    <p>Logg på for å se oppdatert informasjon om datalagring.</p>
   {/if}
 </section>
 
