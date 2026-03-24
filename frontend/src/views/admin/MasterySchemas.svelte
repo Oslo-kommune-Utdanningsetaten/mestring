@@ -7,13 +7,15 @@
     masterySchemasPartialUpdate,
   } from '../../generated/sdk.gen'
   import type { MasterySchemaType, SchoolType } from '../../generated/types.gen'
-  import type { MasterySchemaWithConfig } from '../../types/models'
+  import type { MasterySchemaWithConfig, MasteryConfigLevel } from '../../types/models'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { urlStringFrom, getContrastFriendlyTextColor } from '../../utils/functions'
-  import ButtonMini from '../../components/ButtonMini.svelte'
-  import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
-  import Offcanvas from '../../components/Offcanvas.svelte'
+  import { VALUE_INPUT_VARIANTS } from '../../utils/constants'
   import { dataStore } from '../../stores/data'
+  import { useMasteryCalculations } from '../../utils/masteryHelpers'
+  import ButtonMini from '../../components/ButtonMini.svelte'
+  import Offcanvas from '../../components/Offcanvas.svelte'
+  import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
 
   const router = useTinyRouter()
   let masterySchemaWip: Partial<MasterySchemaWithConfig> | null =
@@ -26,6 +28,25 @@
   let selectedSchool = $derived.by(() => {
     const schoolIdFromUrl = router.getQueryParam('school')
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
+  })
+
+  const areSchemaValuesConsistent = $derived.by(() => {
+    let min: number | null = null
+    let max: number | null = null
+    let result = true
+    masterySchemas.forEach((schema, index) => {
+      const { minValue, maxValue } = useMasteryCalculations(schema)
+      if (index === 0) {
+        // first pass
+        min = minValue
+        max = maxValue
+      } else {
+        if (minValue !== min || maxValue !== max) {
+          result = false
+        }
+      }
+    })
+    return result
   })
 
   const fetchSchools = async () => {
@@ -121,6 +142,11 @@
     return schools.find(school => school.id === schoolId)?.displayName || '??'
   }
 
+  const getMasteryLevelsSummary = (masterySchema: MasterySchemaWithConfig) => {
+    const calculations = useMasteryCalculations(masterySchema)
+    return calculations.minValue + ' - ' + calculations.maxValue
+  }
+
   $effect(() => {
     fetchSchools()
   })
@@ -175,6 +201,15 @@
       Nytt mestringsskjema
     </ButtonMini>
 
+    {#if masterySchemas.length > 0 && !areSchemaValuesConsistent}
+      <div class="alert alert-warning mt-4">
+        Mestringsskjemaene for denne skolen har ulik range. Dette kan føre til inkonsistente
+        visninger og problemer med datakvalitet. Vurder å justere range i skjemaene slik at de er
+        like.
+      </div>
+    {/if}
+    <p>Input variants: {VALUE_INPUT_VARIANTS.join(', ')}</p>
+
     <div class="pkt-input-check mt-3">
       <div class="pkt-input-check__input">
         <input
@@ -200,7 +235,12 @@
                 {masterySchema.description || 'Ingen beskrivelse'}
               </p>
               <p class="text-muted">
-                {getSchoolName(masterySchema.schoolId)}. ID: {masterySchema.id}
+                Range: {getMasteryLevelsSummary(masterySchema)}
+                <br />
+                Input: {masterySchema.config.valueInput}
+                <br />
+                ID: {masterySchema.id}
+                <br />
               </p>
 
               <div class="mb-4">
@@ -214,15 +254,20 @@
                 ></pkt-checkbox>
               </div>
 
-              <div class="mb-4">
+              <div class="mb-4 d-flex gap-2">
                 {#each masterySchema?.config?.levels || [] as level}
-                  <span
-                    class="p-2"
-                    style="background-color: {level.color ||
-                      'white'};  color: {getContrastFriendlyTextColor(level.color)};"
-                  >
-                    {level.title}
-                  </span>
+                  <div class="d-flex flex-column align-items-center">
+                    <span
+                      class="p-2 w-100 text-center"
+                      style="background-color: {level.color ||
+                        'white'}; color: {getContrastFriendlyTextColor(level.color)};"
+                    >
+                      {level.title}
+                    </span>
+                    <span class="small text-muted py-1 bg-light w-100 text-center">
+                      {level.minValue}&nbsp;➡&nbsp;{level.maxValue}
+                    </span>
+                  </div>
                 {/each}
               </div>
 

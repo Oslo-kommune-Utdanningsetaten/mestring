@@ -41,3 +41,12 @@ export enum USER_ROLES {
   ADMIN = 'admin',
   SUPERADMIN = 'superadmin',
 }
+
+export const VALUE_INPUT_VARIANTS = [
+  'sliderHorizontal',
+  'sliderVertical',
+  'sliderGiraffe',
+  'starsHorizontal',
+  'toggleHorizontal',
+  'toggleComicHorizontal',
+] as const

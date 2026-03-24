@@ -153,4 +153,8 @@
   .form-group {
     margin-top: 2.5rem;
   }
+
+  textarea {
+    font-size: 1.2rem;
+  }
 </style>
