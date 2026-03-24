@@ -45,13 +45,6 @@ export type UserDecorated = UserType & {
   roles: UserRoleType[]
 }
 
-export type MasteryLevel = {
-  minValue: number
-  maxValue: number
-  color: string
-  text: string
-}
-
 export type MasteryConfigLevel = {
   minValue: number
   maxValue: number

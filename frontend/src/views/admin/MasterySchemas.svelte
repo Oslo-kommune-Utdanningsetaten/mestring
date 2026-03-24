@@ -7,14 +7,15 @@
     masterySchemasPartialUpdate,
   } from '../../generated/sdk.gen'
   import type { MasterySchemaType, SchoolType } from '../../generated/types.gen'
-  import type { MasterySchemaWithConfig } from '../../types/models'
+  import type { MasterySchemaWithConfig, MasteryConfigLevel } from '../../types/models'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { urlStringFrom, getContrastFriendlyTextColor } from '../../utils/functions'
   import { VALUE_INPUT_VARIANTS } from '../../utils/constants'
-  import ButtonMini from '../../components/ButtonMini.svelte'
-  import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
-  import Offcanvas from '../../components/Offcanvas.svelte'
   import { dataStore } from '../../stores/data'
+  import { useMasteryCalculations } from '../../utils/masteryHelpers'
+  import ButtonMini from '../../components/ButtonMini.svelte'
+  import Offcanvas from '../../components/Offcanvas.svelte'
+  import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
 
   const router = useTinyRouter()
   let masterySchemaWip: Partial<MasterySchemaWithConfig> | null =
@@ -122,6 +123,11 @@
     return schools.find(school => school.id === schoolId)?.displayName || '??'
   }
 
+  const getMasteryLevelsSummary = (masterySchema: MasterySchemaWithConfig) => {
+    const calculations = useMasteryCalculations(masterySchema)
+    return calculations.minValue + ' - ' + calculations.maxValue
+  }
+
   $effect(() => {
     fetchSchools()
   })
@@ -203,7 +209,12 @@
                 {masterySchema.description || 'Ingen beskrivelse'}
               </p>
               <p class="text-muted">
-                {getSchoolName(masterySchema.schoolId)} [{masterySchema.id}]
+                Range: {getMasteryLevelsSummary(masterySchema)}
+                <br />
+                Input: {masterySchema.config.valueInput}
+                <br />
+                ID: {masterySchema.id}
+                <br />
               </p>
 
               <div class="mb-4">
@@ -217,15 +228,20 @@
                 ></pkt-checkbox>
               </div>
 
-              <div class="mb-4">
+              <div class="mb-4 d-flex gap-2">
                 {#each masterySchema?.config?.levels || [] as level}
-                  <span
-                    class="p-2"
-                    style="background-color: {level.color ||
-                      'white'};  color: {getContrastFriendlyTextColor(level.color)};"
-                  >
-                    {level.title}
-                  </span>
+                  <div class="d-flex flex-column align-items-center">
+                    <span
+                      class="p-2 w-100 text-center"
+                      style="background-color: {level.color ||
+                        'white'}; color: {getContrastFriendlyTextColor(level.color)};"
+                    >
+                      {level.title}
+                    </span>
+                    <span class="small text-muted py-1 bg-light w-100 text-center">
+                      {level.minValue}&nbsp;➡&nbsp;{level.maxValue}
+                    </span>
+                  </div>
                 {/each}
               </div>
 
