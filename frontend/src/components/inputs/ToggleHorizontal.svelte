@@ -61,7 +61,7 @@
     background-color: #eee;
     box-sizing: border-box;
     box-shadow: 0 0 0px 1px rgba(0, 0, 0, 0.06);
-    min-width: 60%;
+    min-width: 70%;
     font-size: 14px;
     margin: 2rem 0rem 1rem 0rem;
   }

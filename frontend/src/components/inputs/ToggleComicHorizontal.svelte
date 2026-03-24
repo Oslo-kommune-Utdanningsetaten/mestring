@@ -31,7 +31,9 @@
   })
 
   const groupId = Math.random().toString(36).slice(2, 8)
-  const selectedIndex = $derived(masteryLevels.findIndex(l => l.minValue === masteryValue))
+  const selectedIndex = $derived(
+    masteryLevels.findIndex((level: any) => level.minValue === masteryValue)
+  )
   const selectedColor = $derived(masteryLevels[Math.max(0, selectedIndex)]?.color ?? '#ffd700')
 </script>
 
@@ -75,6 +77,7 @@
     box-shadow: 8px 8px 0px #000;
     overflow: hidden;
     width: fit-content;
+    min-width: 70%;
     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     font-style: italic;
     font-weight: 500;
