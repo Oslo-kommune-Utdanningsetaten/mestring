@@ -30,6 +30,25 @@
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
   })
 
+  const areSchemaValuesConsistent = $derived.by(() => {
+    let min: number | null = null
+    let max: number | null = null
+    let result = true
+    masterySchemas.forEach((schema, index) => {
+      const { minValue, maxValue } = useMasteryCalculations(schema)
+      if (index === 0) {
+        // first pass
+        min = minValue
+        max = maxValue
+      } else {
+        if (minValue !== min || maxValue !== max) {
+          result = false
+        }
+      }
+    })
+    return result
+  })
+
   const fetchSchools = async () => {
     try {
       const result = await schoolsList({})
@@ -182,6 +201,13 @@
       Nytt mestringsskjema
     </ButtonMini>
 
+    {#if masterySchemas.length > 0 && !areSchemaValuesConsistent}
+      <div class="alert alert-warning mt-4">
+        Mestringsskjemaene for denne skolen har ulik range. Dette kan føre til inkonsistente
+        visninger og problemer med datakvalitet. Vurder å justere range i skjemaene slik at de er
+        like.
+      </div>
+    {/if}
     <p>Input variants: {VALUE_INPUT_VARIANTS.join(', ')}</p>
 
     <div class="pkt-input-check mt-3">
