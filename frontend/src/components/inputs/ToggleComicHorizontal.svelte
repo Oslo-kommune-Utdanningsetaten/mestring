@@ -42,24 +42,24 @@
     {label}
   </label>
 
-  <div class="d-flex justify-content-center">
-    <div
-      class="comic-radio-group"
-      style="--option-count: {masteryLevels.length}; --selected-index: {selectedIndex}; --selected-color: {selectedColor}"
-    >
-      {#each masteryLevels as masteryLevel, i}
-        <input
-          type="radio"
-          name="mastery-{groupId}"
-          id="mastery-{groupId}-{i}"
-          value={masteryLevel.minValue}
-          bind:group={masteryValue}
-          disabled={!isInputEnabled}
-        />
-        <label for="mastery-{groupId}-{i}">{masteryLevel.title}</label>
-      {/each}
-      <div class="comic-glider"></div>
-    </div>
+  <div
+    class="comic-radio-group"
+    style="--option-count: {masteryLevels.length}; --selected-index: {selectedIndex}; --selected-color: {selectedColor}"
+  >
+    {#each masteryLevels as level, i}
+      <input
+        type="radio"
+        name="mastery-{groupId}"
+        id="mastery-{groupId}-{i}"
+        value={level.minValue}
+        bind:group={masteryValue}
+        disabled={!isInputEnabled}
+      />
+      <label for="mastery-{groupId}-{i}">
+        {level.title}
+      </label>
+    {/each}
+    <div class="comic-glider"></div>
   </div>
 </div>
 
@@ -81,7 +81,7 @@
     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     font-style: italic;
     font-weight: 500;
-    margin: 2rem 0 1rem 0;
+    margin: 2rem auto 1rem auto;
   }
 
   .comic-radio-group input {
@@ -108,6 +108,8 @@
       1px -1px 0 #fff,
       -1px 1px 0 #fff,
       1px 1px 0 #fff;
+    box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
   }
 
   .comic-radio-group input:checked + label {
