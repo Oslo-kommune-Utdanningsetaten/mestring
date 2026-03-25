@@ -958,7 +958,12 @@ export type FetchGroupsAndUsersData = {
          */
         orgNumber: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Whether to anonymize user data when fetching
+         */
+        anonymize?: boolean;
+    };
     url: '/api/fetch/groups_and_users/feide/{orgNumber}/';
 };
 

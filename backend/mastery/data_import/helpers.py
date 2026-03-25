@@ -2,6 +2,8 @@ import json
 import os
 import requests
 import logging
+import names
+import random
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(script_dir, "data")
@@ -26,7 +28,10 @@ def get_feide_access_token():
         raise Exception(f"Failed to get Feide access token: {e}")
 
 
-def create_user_item(member):
+fake_users_by_feide_id = {}
+
+
+def create_user_item(member, anonymize=False):
     """Helper function to create user item from Feide member data"""
     feide_id = member["userid_sec"][0].split(":")[1]
     email = feide_id.replace("@feide.", "@")
@@ -38,12 +43,32 @@ def create_user_item(member):
     else:
         affiliations = feide_affiliations if isinstance(feide_affiliations, list) else []
 
-    return {
-        "feide_id": feide_id,
-        "name": member["name"],
-        "email": email,
-        "affiliations": affiliations,
-    }
+    if anonymize:
+        # If anonymization is requested, generate fake users, consistent accross groups
+        if fake_users_by_feide_id.get(feide_id):
+            # Reuse previously generated fake user for this feide_id
+            user_item = fake_users_by_feide_id[feide_id]
+        else:
+            # Generate new fake user
+            first_name = names.get_first_name()
+            last_name = names.get_last_name()
+            anon_feide_id = first_name[0:3] + last_name[0:3] + str(
+                random.randrange(0, 1000)).zfill(3) + '@feide.osloskolen.no'
+            user_item = {}
+            user_item["name"] = f"{first_name} {last_name}"
+            user_item["feide_id"] = anon_feide_id
+            user_item["email"] = anon_feide_id.replace("@feide.", "@")
+            user_item["affiliations"] = affiliations
+            fake_users_by_feide_id[feide_id] = user_item
+    else:
+        # Return actual user data
+        user_item = {
+            "feide_id": feide_id,
+            "name": member["name"],
+            "email": email,
+            "affiliations": affiliations,
+        }
+    return user_item
 
 
 def does_file_exist(org_number, type):
