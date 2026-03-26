@@ -296,6 +296,7 @@ class MasterySchema(BaseModel):
     config = models.JSONField(null=True)
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='mastery_schemas')
     is_default = models.BooleanField(default=False)  # is this the default schema for the school
+    is_enabled = models.BooleanField(default=False)  # is the schema available for use for the school
 
     def get_value_range(self):
         """

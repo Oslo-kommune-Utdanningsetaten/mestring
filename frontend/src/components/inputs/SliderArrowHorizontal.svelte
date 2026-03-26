@@ -38,6 +38,34 @@
     return (index + 1) * (100 / calculations.masteryLevels.length)
   }
 
+  const parseColor = (color: string) => {
+    const rgb = color.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/)
+    if (rgb) return { r: parseInt(rgb[1]), g: parseInt(rgb[2]), b: parseInt(rgb[3]) }
+    const hex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color)
+    return hex
+      ? { r: parseInt(hex[1], 16), g: parseInt(hex[2], 16), b: parseInt(hex[3], 16) }
+      : { r: 0, g: 0, b: 0 }
+  }
+
+  const interpolateColor = (color1: string, color2: string, t: number) => {
+    const c1 = parseColor(color1)
+    const c2 = parseColor(color2)
+    const r = Math.round(c1.r + (c2.r - c1.r) * t)
+    const g = Math.round(c1.g + (c2.g - c1.g) * t)
+    const b = Math.round(c1.b + (c2.b - c1.b) * t)
+    return `rgb(${r}, ${g}, ${b})`
+  }
+
+  const rungColor = $derived(
+    calculations.masteryLevels.length >= 2
+      ? interpolateColor(
+          calculations.masteryLevels[0].color,
+          calculations.masteryLevels[calculations.masteryLevels.length - 1].color,
+          thumbXPosition / 100
+        )
+      : (calculations.masteryLevels[0]?.color ?? '#cccccc')
+  )
+
   // Set default value when masteryValue is null/undefined and schema is available
   $effect(() => {
     if ((masteryValue === null || masteryValue === undefined) && calculations.hasLevels) {
@@ -59,7 +87,11 @@
           : index === calculations.masteryLevels.length - 1
             ? 'justify-content-end text-end'
             : 'justify-content-center text-center'}"
-        style="width: {calculateRungWidth(index)}%; height:100%;"
+        style="width: {calculateRungWidth(
+          index
+        )}%; height:100%; background-color: {rungColor}; color: {getContrastFriendlyTextColor(
+          rungColor
+        )};"
       >
         <span class="pb-1 mx-2 lh-sm">
           {masteryLevel.title}
@@ -71,7 +103,7 @@
       <div
         id="incrementIndicator"
         title={`${safeMasteryValue}`}
-        style="width: clamp(0px, calc({thumbXPosition}% - 12px), calc(100% - 12px));"
+        style="width: clamp(0px, calc({thumbXPosition}% - 40px), calc(100%));"
       ></div>
     {/if}
   </div>
@@ -119,25 +151,25 @@
 
   #incrementIndicator {
     position: absolute;
-    left: 0;
+    left: 0px;
     top: 50%;
     transform: translateY(-50%);
-    height: 10px;
-    background-color: rgba(0, 0, 0, 0.5);
+    height: 20px;
+    background-color: rgba(0, 0, 0, 0.4);
     pointer-events: none;
   }
 
   #incrementIndicator::after {
     content: '';
     position: absolute;
-    right: -20px;
+    right: -40px;
     top: 50%;
     transform: translateY(-50%);
     width: 0;
     height: 0;
-    border-left: 20px solid rgba(0, 0, 0, 0.5);
-    border-top: 14px solid transparent;
-    border-bottom: 14px solid transparent;
+    border-left: 40px solid rgba(0, 0, 0, 0.4);
+    border-top: 20px solid transparent;
+    border-bottom: 20px solid transparent;
   }
 
   #valueIndicator {
