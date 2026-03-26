@@ -54,12 +54,12 @@
   <div class="stairs-container d-flex align-items-end mb-5">
     {#each calculations.masteryLevels as masteryLevel, index}
       <span
-        class="rung flex-grow d-flex align-items-end justify-content-center text-center"
-        style="width: {calculateRungWidth(index)}%; height: {calculateRungHeight(
-          index
-        )}%; background-color: {masteryLevel.color}; color: {getContrastFriendlyTextColor(
-          masteryLevel.color
-        )};"
+        class="rung flex-grow d-flex align-items-end {index === 0
+          ? 'justify-content-start text-start'
+          : index === calculations.masteryLevels.length - 1
+            ? 'justify-content-end text-end'
+            : 'justify-content-center text-center'}"
+        style="width: {calculateRungWidth(index)}%; height:100%;"
       >
         <span class="pb-1 mx-2 lh-sm">
           {masteryLevel.title}
@@ -67,11 +67,11 @@
       </span>
     {/each}
     {#if masterySchema?.config?.isIncrementIndicatorEnabled}
-      <!-- bar visualizing mastery position -->
+      <!-- horizontal arrow visualizing mastery position -->
       <div
         id="incrementIndicator"
         title={`${safeMasteryValue}`}
-        style="left: clamp(0%, {thumbXPosition + xOffset}%, calc(100% - 10px));"
+        style="width: clamp(0px, calc({thumbXPosition}% - 12px), calc(100% - 12px));"
       ></div>
     {/if}
   </div>
@@ -108,6 +108,7 @@
     position: relative;
     height: 200px;
     width: 100%;
+    border: 1px solid var(--bs-gray);
   }
 
   .input-container {
@@ -118,11 +119,25 @@
 
   #incrementIndicator {
     position: absolute;
-    bottom: 0;
     left: 0;
-    width: 10px;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.25);
+    top: 50%;
+    transform: translateY(-50%);
+    height: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+  }
+
+  #incrementIndicator::after {
+    content: '';
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 20px solid rgba(0, 0, 0, 0.5);
+    border-top: 14px solid transparent;
+    border-bottom: 14px solid transparent;
   }
 
   #valueIndicator {
