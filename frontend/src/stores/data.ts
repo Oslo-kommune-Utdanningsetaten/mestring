@@ -7,11 +7,7 @@ import {
   groupsList,
 } from '../generated/sdk.gen'
 import type { SchoolType, MasterySchemaType } from '../generated/types.gen'
-import {
-  getLocalStorageItem,
-  setLocalStorageItem,
-  removeLocalStorageItem,
-} from '../stores/localStorage'
+import { localStorage } from '../stores/localStorage'
 import { fetchUserData } from '../utils/functions'
 import { SUBJECTS_ALLOWED_ALL, SUBJECTS_ALLOWED_CUSTOM, USER_ROLES } from '../utils/constants'
 import type { AppData, UserDecorated } from '../types/models'
@@ -20,7 +16,7 @@ const setMasterySchemas = (schemas: MasterySchemaType[]) => {
   // Default mastery schema is either school default, or the user's preferred, or simply first in list
   const defaultSchema =
     schemas.find(schema => schema.isDefault) ||
-    schemas.find(schema => schema.id === getLocalStorageItem('preferredMasterySchemaId')) ||
+    schemas.find(schema => schema.id === localStorage<string>('preferredMasterySchemaId').get()) ||
     (schemas.length > 0 ? schemas[0] : null)
   dataStore.update(data => {
     return { ...data, masterySchemas: schemas, defaultMasterySchema: defaultSchema }
@@ -31,7 +27,7 @@ const setMasterySchemas = (schemas: MasterySchemaType[]) => {
 export const setCurrentSchool = (school: SchoolType) => {
   const currentData = get(dataStore) as AppData
   if (currentData.currentSchool?.id !== school?.id) {
-    setLocalStorageItem('currentSchool', school)
+    localStorage<SchoolType>('currentSchool').set(school)
     dataStore.update(data => {
       return { ...data, currentSchool: school }
     })
@@ -115,7 +111,7 @@ const loadSchools = async () => {
     return null
   }
 
-  let localStorageSchool = getLocalStorageItem('currentSchool') as SchoolType | null
+  let localStorageSchool = localStorage<SchoolType>('currentSchool').get()
   const previousSchool: SchoolType | undefined = schools.find(
     school => school.id === localStorageSchool?.id && school.isServiceEnabled
   )
@@ -132,7 +128,7 @@ const loadSchools = async () => {
     return
   }
   console.warn('No valid school found')
-  removeLocalStorageItem('currentSchool')
+  localStorage<SchoolType>('currentSchool').remove()
 }
 
 const registerMasterySchemas = async (school: SchoolType) => {

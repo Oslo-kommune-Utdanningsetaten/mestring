@@ -24,7 +24,7 @@
   import AuthorInfo from './AuthorInfo.svelte'
 
   import Sortable, { type SortableEvent } from 'sortablejs'
-  import { getLocalStorageItem } from '../stores/localStorage'
+  import { localStorage } from '../stores/localStorage'
   import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
@@ -88,7 +88,7 @@
     if (goal.id) {
       goalWip = {
         ...goal,
-        subjectId: goal?.subjectId || getLocalStorageItem('preferredSubjectId'),
+        subjectId: goal?.subjectId || localStorage<string>('preferredSubjectId').get(),
         studentId: student.id,
         sortOrder: goal?.sortOrder || (goalsForSubject?.length ? goalsForSubject.length + 1 : 1),
         masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,

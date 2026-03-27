@@ -19,7 +19,7 @@
   import GroupTag from '../components/GroupTag.svelte'
   import { dataStore } from '../stores/data'
   import { trackEvent } from '../stores/analytics'
-  import { getLocalStorageItem } from '../stores/localStorage'
+  import { localStorage } from '../stores/localStorage'
 
   const { studentId } = $props<{ studentId: string }>()
   const individualGoalcount = 3
@@ -107,7 +107,7 @@
       // editing existing goal
       goalWip = {
         ...goal,
-        subjectId: goal?.subjectId || getLocalStorageItem('preferredSubjectId'),
+        subjectId: goal?.subjectId || localStorage<string>('preferredSubjectId').get(),
         studentId: student.id,
         sortOrder: goal?.sortOrder,
         masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,

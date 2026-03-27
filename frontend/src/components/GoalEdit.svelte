@@ -8,7 +8,7 @@
     GoalCreateType,
   } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
-  import { setLocalStorageItem } from '../stores/localStorage'
+  import { localStorage } from '../stores/localStorage'
   import ButtonMini from './ButtonMini.svelte'
   import { NONE_FIELD_VALUE, SUBJECTS_ALLOWED_CUSTOM, GROUP_TYPE_BASIS } from '../utils/constants'
   import { addAlert } from '../stores/alerts'
@@ -62,7 +62,7 @@
   const handleChangeMasterySchema = (masterySchemaId: string) => {
     if (masterySchemaId !== NONE_FIELD_VALUE) {
       localGoal = { ...localGoal, masterySchemaId }
-      setLocalStorageItem('preferredMasterySchemaId', masterySchemaId)
+      localStorage<string>('preferredMasterySchemaId').set(masterySchemaId)
     }
   }
 
@@ -72,7 +72,7 @@
         ...goal,
         subjectId,
       }
-      setLocalStorageItem('preferredSubjectId', subjectId)
+      localStorage<string>('preferredSubjectId').set(subjectId)
     }
   }
 

@@ -8,7 +8,7 @@
   import ButtonIcon from './ButtonIcon.svelte'
   import Statuses from './Statuses.svelte'
   import Link from './Link.svelte'
-  import { localStorageStore } from '../stores/localStorage'
+  import { localStorage } from '../stores/localStorage'
 
   let {
     students,
@@ -84,7 +84,7 @@
     return sortDirection === 'asc' ? ' ▲' : ' ▼'
   }
 
-  const isMasteryBarChartVisible = localStorageStore('isMasteryBarChartVisible', false)
+  const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
 
   const getMasterySchemaForGoal = (goal: GoalType) => {
     return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
