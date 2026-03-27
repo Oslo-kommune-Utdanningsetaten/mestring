@@ -237,7 +237,6 @@
   }
 
   .column-header {
-    hyphens: auto;
     overflow-wrap: break-word;
     width: 100%;
     font-size: 0.8rem;
