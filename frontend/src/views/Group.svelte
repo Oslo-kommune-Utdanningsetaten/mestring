@@ -29,6 +29,7 @@
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
   import { dataStore } from '../stores/data'
+  import { localStorageStore } from '../stores/localStorage'
   import { goalsWithCalculatedMastery } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
@@ -57,6 +58,7 @@
   let subjects = $state<SubjectType[]>([])
   let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
+  const isMasteryBarChartVisible = localStorageStore('isMasteryBarChartVisible', true)
   const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
   const today = new Date()
 
@@ -121,6 +123,8 @@
       studentGoals.some(g => g.id === goalId && g.observations && g.observations.length > 0)
     )
   }
+
+  const toggleShowChart = () => isMasteryBarChartVisible.update(v => !v)
 
   const handleEditGoal = (goal: GoalDecorated | null) => {
     goalWip = {
@@ -382,9 +386,19 @@
   <!-- Students Section -->
   <section>
     <h3 class="mb-3">Elever</h3>
+
     {#if group.type === GROUP_TYPE_BASIS}
       <StudentsWithSubjects {students} {subjects} />
     {:else if group.type === GROUP_TYPE_TEACHING}
+      <pkt-checkbox
+        label={$isMasteryBarChartVisible ? 'Diagram vises' : 'Diagram skjules'}
+        labelPosition="right"
+        isSwitch="true"
+        aria-checked={$isMasteryBarChartVisible}
+        checked={$isMasteryBarChartVisible}
+        onchange={() => toggleShowChart()}
+      ></pkt-checkbox>
+
       <StudentsWithGoals
         {students}
         goals={groupGoals}

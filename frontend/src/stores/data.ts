@@ -17,7 +17,7 @@ import { SUBJECTS_ALLOWED_ALL, SUBJECTS_ALLOWED_CUSTOM, USER_ROLES } from '../ut
 import type { AppData, UserDecorated } from '../types/models'
 
 const setMasterySchemas = (schemas: MasterySchemaType[]) => {
-  // Default mastery schema is either system default, or user's preferred, or simply first in list
+  // Default mastery schema is either school default, or the user's preferred, or simply first in list
   const defaultSchema =
     schemas.find(schema => schema.isDefault) ||
     schemas.find(schema => schema.id === getLocalStorageItem('preferredMasterySchemaId')) ||

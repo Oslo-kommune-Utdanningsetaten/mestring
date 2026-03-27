@@ -40,14 +40,17 @@
       ? (subjects || $dataStore.subjects).find((s: SubjectType) => s.id === group?.subjectId)
       : null
   )
-  let masterySchemas = $derived($dataStore.masterySchemas)
+  let masterySchemas = $derived($dataStore.masterySchemas.filter(schema => schema.isEnabled))
+  let selectedMasterySchemaId = $derived(
+    localGoal.masterySchemaId || $dataStore.defaultMasterySchema.id
+  )
   let { currentSchool } = $derived($dataStore)
 
   // What determines if we can edit the goal?
   let isFormValid = $derived(
     !!localGoal.masterySchemaId && (isGoalIndividual ? !!localGoal.subjectId : !!subjectViaGroup)
   )
-
+  let titleInput = $state<HTMLInputElement | null>(null)
   const target = $derived(isGoalIndividual ? student?.name : group?.displayName)
 
   const getTitle = () => {
@@ -105,6 +108,14 @@
       })
     }
   }
+
+  $effect(() => {
+    if (titleInput) {
+      // so defer focus until Offcanvas is fully visible.
+      const id = setTimeout(() => titleInput?.focus(), 300)
+      return () => clearTimeout(id)
+    }
+  })
 
   // Update localGoal when goal prop changes
   $effect(() => {
@@ -171,7 +182,11 @@
         >
           <option disabled value={NONE_FIELD_VALUE}>Velg mestringsskjema</option>
           {#each masterySchemas as masterySchema}
-            <option disabled={!masterySchema.isDefault} value={masterySchema.id}>
+            <option
+              disabled={!masterySchema.isEnabled}
+              value={masterySchema.id}
+              selected={masterySchema.id === selectedMasterySchemaId}
+            >
               {masterySchema.title}
             </option>
           {/each}
@@ -200,6 +215,7 @@
         type="text"
         class="form-control rounded-0 border-2 border-primary input-field"
         bind:value={localGoal.title}
+        bind:this={titleInput}
         disabled={!localGoal.isRelevant}
         placeholder="Tittel på målet"
       />

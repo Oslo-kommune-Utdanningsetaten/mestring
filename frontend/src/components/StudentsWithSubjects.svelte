@@ -160,7 +160,7 @@
 <style>
   .students-grid {
     display: grid;
-    grid-template-columns: minmax(180px, 2fr) repeat(var(--columns-count, 8), 1fr);
+    grid-template-columns: auto repeat(var(--columns-count, 8), 1fr);
     align-items: start;
     gap: 0;
   }
@@ -198,13 +198,17 @@
   }
 
   .column-header {
-    transform: rotate(-60deg);
-    font-size: 0.8rem;
-    padding: 0.1rem 0.3rem 0.1rem 0.3rem;
-    max-width: 6rem;
-    background-color: var(--pkt-color-surface-strong-light-green);
-    border: 1px solid var(--pkt-color-grays-gray-100);
+    hyphens: auto;
     overflow-wrap: break-word;
+    width: 100%;
+    font-size: 0.8rem;
+    padding: 0.1rem 0.5rem 0.1rem 0.5rem;
+    background-color: color-mix(
+      in srgb,
+      var(--pkt-color-surface-strong-light-green) 70%,
+      transparent
+    );
+    border: 1px solid var(--pkt-color-grays-gray-100);
     z-index: 2;
   }
 </style>
