@@ -49,6 +49,7 @@
   let isObservationViewerOpen = $state<boolean>(false)
   let isStatusEditorOpen = $state<boolean>(false)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
+  const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
 
   const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
   const today = new Date()
@@ -355,10 +356,12 @@
             masteryData={goal.masteryData}
             masterySchema={getMasterySchmemaForGoal(goal)}
           />
-          <MasteryBarChart
-            data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
-            masterySchema={getMasterySchmemaForGoal(goal)}
-          />
+          {#if $isMasteryBarChartVisible}
+            <MasteryBarChart
+              data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
+              masterySchema={getMasterySchmemaForGoal(goal)}
+            />
+          {/if}
         {/if}
       </span>
 

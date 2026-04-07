@@ -124,8 +124,6 @@
     )
   }
 
-  const toggleShowChart = () => isMasteryBarChartVisible.set(!isMasteryBarChartVisible.get())
-
   const handleEditGoal = (goal: GoalDecorated | null) => {
     goalWip = {
       ...goal,
@@ -390,15 +388,6 @@
     {#if group.type === GROUP_TYPE_BASIS}
       <StudentsWithSubjects {students} {subjects} />
     {:else if group.type === GROUP_TYPE_TEACHING}
-      <pkt-checkbox
-        label={$isMasteryBarChartVisible ? 'Diagram vises' : 'Diagram skjules'}
-        labelPosition="right"
-        isSwitch="true"
-        aria-checked={$isMasteryBarChartVisible}
-        checked={$isMasteryBarChartVisible}
-        onchange={() => toggleShowChart()}
-      ></pkt-checkbox>
-
       <StudentsWithGoals
         {students}
         goals={groupGoals}
