@@ -199,12 +199,16 @@
     <label for="goalSortOrder" class="form-label">Rekkefølge</label>
     <input
       id="goalSortOrder"
-      type="integer"
+      type="number"
       class="form-control rounded-0 border-2 border-primary input-field"
+      class:border-warning={!localGoal.sortOrder || localGoal.sortOrder < 1}
       bind:value={localGoal.sortOrder}
       disabled={!localGoal.isRelevant}
       placeholder="Rekkefølge (tall)"
     />
+    {#if !localGoal.sortOrder || localGoal.sortOrder < 1}
+      <div class="small mt-1">Bruk et tall større enn 0</div>
+    {/if}
   </div>
 
   {#if currentSchool.isGoalTitleEnabled}
