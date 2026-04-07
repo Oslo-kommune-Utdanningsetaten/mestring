@@ -207,7 +207,7 @@
       placeholder="Rekkefølge (tall)"
     />
     {#if !localGoal.sortOrder || localGoal.sortOrder < 1}
-      <div class="small mt-1">Bruk et tall større enn 0</div>
+      <div class="small mt-1">Angi et tall større enn 0</div>
     {/if}
   </div>
 
