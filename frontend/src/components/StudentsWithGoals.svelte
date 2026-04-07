@@ -144,16 +144,16 @@
       {/if}
     </span>
     {#each goals as goal (goal.id)}
-      {@const decoGoal = getDecoratedGoalFor(student.id, goal.id)}
+      {@const decoratedGoal = getDecoratedGoalFor(student.id, goal.id)}
       <span class="item gap-1 goal-cell">
-        {#if decoGoal?.masteryData}
+        {#if decoratedGoal?.masteryData}
           <MasteryLevelBadge
-            masteryData={decoGoal.masteryData}
+            masteryData={decoratedGoal.masteryData}
             masterySchema={getMasterySchemaForGoal(goal)}
           />
           {#if $isMasteryBarChartVisible}
             <MasteryBarChart
-              data={getObservationValues(decoGoal)}
+              data={getObservationValues(decoratedGoal)}
               masterySchema={getMasterySchemaForGoal(goal)}
             />
           {/if}
@@ -168,7 +168,7 @@
                 title: 'Legg til observasjon',
                 classes: 'bordered',
                 disabled: !goal.isRelevant,
-                onClick: () => onEditObservation(decoGoal || goal, null, student),
+                onClick: () => onEditObservation(decoratedGoal || goal, null, student),
               }}
             />
           {/if}
