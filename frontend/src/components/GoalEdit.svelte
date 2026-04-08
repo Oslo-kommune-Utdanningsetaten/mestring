@@ -8,7 +8,7 @@
     GoalCreateType,
   } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
-  import { setLocalStorageItem } from '../stores/localStorage'
+  import { localStorage } from '../stores/localStorage'
   import ButtonMini from './ButtonMini.svelte'
   import { NONE_FIELD_VALUE, SUBJECTS_ALLOWED_CUSTOM, GROUP_TYPE_BASIS } from '../utils/constants'
   import { addAlert } from '../stores/alerts'
@@ -40,14 +40,17 @@
       ? (subjects || $dataStore.subjects).find((s: SubjectType) => s.id === group?.subjectId)
       : null
   )
-  let masterySchemas = $derived($dataStore.masterySchemas)
+  let masterySchemas = $derived($dataStore.masterySchemas.filter(schema => schema.isEnabled))
+  let selectedMasterySchemaId = $derived(
+    localGoal.masterySchemaId || $dataStore.defaultMasterySchema.id
+  )
   let { currentSchool } = $derived($dataStore)
 
   // What determines if we can edit the goal?
   let isFormValid = $derived(
     !!localGoal.masterySchemaId && (isGoalIndividual ? !!localGoal.subjectId : !!subjectViaGroup)
   )
-
+  let titleInput = $state<HTMLInputElement | null>(null)
   const target = $derived(isGoalIndividual ? student?.name : group?.displayName)
 
   const getTitle = () => {
@@ -59,7 +62,7 @@
   const handleChangeMasterySchema = (masterySchemaId: string) => {
     if (masterySchemaId !== NONE_FIELD_VALUE) {
       localGoal = { ...localGoal, masterySchemaId }
-      setLocalStorageItem('preferredMasterySchemaId', masterySchemaId)
+      localStorage<string>('preferredMasterySchemaId').set(masterySchemaId)
     }
   }
 
@@ -69,7 +72,7 @@
         ...goal,
         subjectId,
       }
-      setLocalStorageItem('preferredSubjectId', subjectId)
+      localStorage<string>('preferredSubjectId').set(subjectId)
     }
   }
 
@@ -105,6 +108,14 @@
       })
     }
   }
+
+  $effect(() => {
+    if (titleInput) {
+      // so defer focus until Offcanvas is fully visible.
+      const id = setTimeout(() => titleInput?.focus(), 300)
+      return () => clearTimeout(id)
+    }
+  })
 
   // Update localGoal when goal prop changes
   $effect(() => {
@@ -171,7 +182,11 @@
         >
           <option disabled value={NONE_FIELD_VALUE}>Velg mestringsskjema</option>
           {#each masterySchemas as masterySchema}
-            <option disabled={!masterySchema.isDefault} value={masterySchema.id}>
+            <option
+              disabled={!masterySchema.isEnabled}
+              value={masterySchema.id}
+              selected={masterySchema.id === selectedMasterySchemaId}
+            >
               {masterySchema.title}
             </option>
           {/each}
@@ -184,12 +199,16 @@
     <label for="goalSortOrder" class="form-label">Rekkefølge</label>
     <input
       id="goalSortOrder"
-      type="integer"
+      type="number"
       class="form-control rounded-0 border-2 border-primary input-field"
+      class:border-warning={!localGoal.sortOrder || localGoal.sortOrder < 1}
       bind:value={localGoal.sortOrder}
       disabled={!localGoal.isRelevant}
       placeholder="Rekkefølge (tall)"
     />
+    {#if !localGoal.sortOrder || localGoal.sortOrder < 1}
+      <div class="small mt-1">Angi et tall større enn 0</div>
+    {/if}
   </div>
 
   {#if currentSchool.isGoalTitleEnabled}
@@ -200,6 +219,7 @@
         type="text"
         class="form-control rounded-0 border-2 border-primary input-field"
         bind:value={localGoal.title}
+        bind:this={titleInput}
         disabled={!localGoal.isRelevant}
         placeholder="Tittel på målet"
       />

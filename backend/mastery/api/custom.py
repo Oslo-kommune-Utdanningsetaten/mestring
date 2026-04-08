@@ -246,6 +246,13 @@ def fetch_memberships_for_school(request, org_number):
             required=True,
             type={'type': 'string'},
             location=OpenApiParameter.PATH
+        ),
+        OpenApiParameter(
+            name='anonymize',
+            description='Whether to anonymize user data when fetching',
+            required=False,
+            type={'type': 'boolean'},
+            location=OpenApiParameter.QUERY
         )
     ]
 )
@@ -258,6 +265,9 @@ def fetch_groups_and_users(request, org_number):
             {"error": "unknown-school", "message": f"School not found for org {org_number}"},
             status=404,
         )
+
+    anonymize, _ = get_request_param(request.query_params, 'anonymize')
+    anonymize = bool(anonymize)
 
     # Check if there's already a (pending or running) task for this org_number
     existing_task = models.DataMaintenanceTask.objects.filter(
@@ -281,7 +291,7 @@ def fetch_groups_and_users(request, org_number):
     task2 = models.DataMaintenanceTask.objects.create(
         status="pending",
         job_name="fetch_memberships_from_feide",
-        job_params={"org_number": org_number},
+        job_params={"org_number": org_number, "anonymize": anonymize},
         display_name=f"Fetch memberships for {school.display_name}",
         earliest_run_at=timezone.now()
     )

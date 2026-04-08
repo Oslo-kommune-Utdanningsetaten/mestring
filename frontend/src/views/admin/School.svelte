@@ -305,13 +305,14 @@
     }
   }
 
-  const handleFetchUsersAndGroups = async () => {
+  const handleFetchUsersAndGroups = async (options: Record<string, any> = {}) => {
     if (!school) return
     const orgNumber = school.orgNumber
 
     try {
       const result = await fetchGroupsAndUsers({
         path: { orgNumber: orgNumber },
+        query: { anonymize: !!options.anonymize },
       })
 
       if (result.response.status === 201) {
@@ -507,6 +508,18 @@
             }}
           >
             Fetch from Feide
+          </ButtonMini>
+
+          <ButtonMini
+            options={{
+              title: 'Fetch users and groups Feide',
+              iconName: 'download',
+              skin: 'secondary',
+              variant: 'icon-left',
+              onClick: () => handleFetchUsersAndGroups({ anonymize: true }),
+            }}
+          >
+            Fetch ANONYMOUSLY
           </ButtonMini>
 
           <!-- Request import job, file to database -->

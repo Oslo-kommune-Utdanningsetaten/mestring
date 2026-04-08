@@ -3,12 +3,15 @@
   import { fetchUserData } from '../utils/functions'
   import { USER_ROLES } from '../utils/constants'
   import { dataStore, setCurrentSchool, currentUser } from '../stores/data'
-  import type { GroupType, SchoolType, UserType, UserSchoolType } from '../generated/types.gen'
+  import type { GroupType, SchoolType } from '../generated/types.gen'
+  import { localStorage } from '../stores/localStorage'
   import GroupTag from '../components/GroupTag.svelte'
   import type { UserRoleType, UserDecorated } from '../types/models'
 
   const { userId } = $props<{ userId?: string }>()
   const isProfileMode = $derived($currentUser.id && !userId)
+
+  const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
 
   // For admin viewing another user's profile
   let otherUser = $state<UserDecorated | undefined>(undefined)
@@ -76,6 +79,8 @@
     setCurrentSchool(school)
   }
 
+  const handleToggleShowChart = () => isMasteryBarChartVisible.set(!isMasteryBarChartVisible.get())
+
   $effect(() => {
     // Only load data when viewing another user's profile (admin mode)
     if (!isProfileMode && userId) {
@@ -116,6 +121,28 @@
         </div>
       </div>
     </div>
+
+    <!-- Settings -->
+    {#if isProfileMode}
+      <div class="card mb-3">
+        <div class="card-header">
+          <h3>Innstillinger</h3>
+        </div>
+        <div class="card-body">
+          <div class="mb-2">
+            <strong>Mini stolpediagram pr. elev</strong>
+            <pkt-checkbox
+              label={$isMasteryBarChartVisible ? 'Vises' : 'Skjules'}
+              labelPosition="right"
+              isSwitch="true"
+              aria-checked={$isMasteryBarChartVisible}
+              checked={$isMasteryBarChartVisible}
+              onchange={() => handleToggleShowChart()}
+            ></pkt-checkbox>
+          </div>
+        </div>
+      </div>
+    {/if}
 
     <!-- School selection -->
     {#if isProfileMode}
