@@ -129,6 +129,7 @@
 <div class="goal-edit p-4">
   <h3 class="pb-2">{getTitle()}</h3>
   <hr />
+  <!-- Subject -->
   <div class="form-group mb-3">
     <div class="pkt-inputwrapper">
       {#if isGoalIndividual}
@@ -163,6 +164,40 @@
     </div>
   </div>
 
+  <!-- Title -->
+  {#if currentSchool.isGoalTitleEnabled}
+    <div class="form-group mb-3">
+      <label for="goalTitle" class="form-label">Tittel</label>
+      <input
+        id="goalTitle"
+        type="text"
+        class="form-control rounded-0 border-2 border-primary input-field"
+        bind:value={localGoal.title}
+        bind:this={titleInput}
+        disabled={!localGoal.isRelevant}
+        placeholder="Tittel på målet"
+      />
+    </div>
+  {/if}
+
+  <!-- Sort order -->
+  <div class="form-group mb-3">
+    <label for="goalSortOrder" class="form-label">Rekkefølge</label>
+    <input
+      id="goalSortOrder"
+      type="number"
+      class="form-control rounded-0 border-2 border-primary input-field"
+      class:border-warning={!localGoal.sortOrder || localGoal.sortOrder < 1}
+      bind:value={localGoal.sortOrder}
+      disabled={!localGoal.isRelevant}
+      placeholder="Rekkefølge (tall)"
+    />
+    {#if !localGoal.sortOrder || localGoal.sortOrder < 1}
+      <div class="small mt-1">Angi et tall større enn 0</div>
+    {/if}
+  </div>
+
+  <!-- Mastery schema -->
   {#if masterySchemas.length > 1}
     <div class="form-group mb-3">
       <div>
@@ -195,37 +230,7 @@
     </div>
   {/if}
 
-  <div class="form-group mb-3">
-    <label for="goalSortOrder" class="form-label">Rekkefølge</label>
-    <input
-      id="goalSortOrder"
-      type="number"
-      class="form-control rounded-0 border-2 border-primary input-field"
-      class:border-warning={!localGoal.sortOrder || localGoal.sortOrder < 1}
-      bind:value={localGoal.sortOrder}
-      disabled={!localGoal.isRelevant}
-      placeholder="Rekkefølge (tall)"
-    />
-    {#if !localGoal.sortOrder || localGoal.sortOrder < 1}
-      <div class="small mt-1">Angi et tall større enn 0</div>
-    {/if}
-  </div>
-
-  {#if currentSchool.isGoalTitleEnabled}
-    <div class="form-group mb-3">
-      <label for="goalTitle" class="form-label">Tittel</label>
-      <input
-        id="goalTitle"
-        type="text"
-        class="form-control rounded-0 border-2 border-primary input-field"
-        bind:value={localGoal.title}
-        bind:this={titleInput}
-        disabled={!localGoal.isRelevant}
-        placeholder="Tittel på målet"
-      />
-    </div>
-  {/if}
-
+  <!-- Enabled -->
   <div>
     <pkt-checkbox
       class="mb-1"
