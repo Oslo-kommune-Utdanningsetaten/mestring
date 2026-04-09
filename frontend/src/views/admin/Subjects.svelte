@@ -247,7 +247,12 @@
       <span class="item header header-row">Handlinger</span>
       {#each filteredSubjects as subject (subject.id)}
         <!-- Fag navn -->
-        <span class="item header">{subject.displayName}</span>
+        <div class="item">
+          <div class="header">
+            {subject.displayName}
+          </div>
+          <div class="text-muted small">{subject.id}</div>
+        </div>
 
         <!-- Eies av -->
         <span class="item">
