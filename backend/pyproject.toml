@@ -29,7 +29,7 @@ names = "^0.3.0"
 
 [tool.poetry.group.dev.dependencies]
 daphne = "^4.1.0"
-poethepoet = "^0.32.2"
+poethepoet = "^0.44.0"
 
 
 [build-system]
