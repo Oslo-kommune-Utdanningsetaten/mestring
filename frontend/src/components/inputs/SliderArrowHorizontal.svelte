@@ -87,13 +87,9 @@
           : index === calculations.masteryLevels.length - 1
             ? 'justify-content-end text-end'
             : 'justify-content-center text-center'}"
-        style="width: {calculateRungWidth(
-          index
-        )}%; height:100%; background-color: {rungColor}; color: {getContrastFriendlyTextColor(
-          rungColor
-        )};"
+        style="width: {calculateRungWidth(index)}%; height:100%; background-color: {rungColor};"
       >
-        <span class="pb-1 mx-2 lh-sm">
+        <span class="pb-1 mx-2 lh-sm" style="color: {getContrastFriendlyTextColor(rungColor)};">
           {masteryLevel.title}
         </span>
       </span>
@@ -182,6 +178,11 @@
 
   .rung {
     font-size: medium;
+  }
+
+  .rung span {
+    font-size: 1.5rem;
+    font-weight: 600;
   }
 
   .slider {

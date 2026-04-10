@@ -21,6 +21,7 @@
   )
   const calculations = $derived(useMasteryCalculations(masterySchema))
   let localObservation = $state<Partial<ObservationType> & { masteryValue?: number }>({})
+  let formContainer = $state<HTMLElement | null>(null)
 
   const studentFirstName = $derived(student?.name.split(' ')[0] || 'eleven')
 
@@ -29,6 +30,16 @@
     localObservation = {
       ...observation,
       masteryValue: observation?.masteryValue ?? calculations.defaultValue,
+    }
+  })
+
+  $effect(() => {
+    if (formContainer) {
+      const id = setTimeout(
+        () => formContainer?.querySelector<HTMLElement>('input, textarea')?.focus(),
+        300
+      )
+      return () => clearTimeout(id)
     }
   })
 
@@ -68,7 +79,7 @@
   }
 </script>
 
-<div class="observation-edit p-4">
+<div class="observation-edit p-4" bind:this={formContainer}>
   {#if localObservation}
     <h3>
       {localObservation.id ? 'Redigerer' : 'Ny'} observasjon
@@ -91,9 +102,7 @@
           id="description"
           class="form-control rounded-0 border-2 border-primary"
           bind:value={localObservation.masteryDescription}
-          placeholder="Kort beskrivelse av {studentFirstName}{studentFirstName.endsWith('s')
-            ? "\'"
-            : "'s"} mestringsnivå"
+          placeholder="Kort beskrivelse av hva {studentFirstName} får til"
           rows="4"
         ></textarea>
       </div>
