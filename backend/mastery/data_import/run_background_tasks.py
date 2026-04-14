@@ -108,6 +108,7 @@ def do_work(task):
     '''
     job_params = task.job_params or {}
     org_number = job_params.get("org_number")
+    anonymize = job_params.get("anonymize", False)
     if not org_number:
         raise ValueError(f"Missing org_number for job_name '{task.job_name}'")
 
@@ -116,7 +117,7 @@ def do_work(task):
     elif task.job_name == "fetch_groups_from_feide":
         yield from fetch_groups_from_feide(org_number)
     elif task.job_name == "fetch_memberships_from_feide":
-        yield from fetch_memberships_from_feide(org_number)
+        yield from fetch_memberships_from_feide(org_number, anonymize=anonymize)
     elif task.job_name == "import_groups":
         yield from import_groups_from_file(org_number)
     elif task.job_name == "import_memberships":

@@ -209,6 +209,7 @@
 <style>
   .bar-chart {
     display: inline-block;
+    flex-shrink: 0;
   }
 
   .bar {

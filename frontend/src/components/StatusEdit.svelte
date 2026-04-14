@@ -8,18 +8,18 @@
     GoalType,
   } from '../generated/types.gen'
   import { statusCreate, statusUpdate, usersRetrieve } from '../generated/sdk.gen'
-  import type { MasterySchemaWithConfig } from '../types/models'
+  import type { MasterySchemaWithConfig, GoalDecorated } from '../types/models'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
+  import { fetchGoalsForSubjectAndStudent, formatMonthName } from '../utils/functions'
+  import { addAlert } from '../stores/alerts'
+  import { trackEvent } from '../stores/analytics'
   import ButtonMini from './ButtonMini.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
   import MasteryValueInput from './MasteryValueInput.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import MasteryBarChart from './MasteryBarChart.svelte'
-  import { fetchGoalsForSubjectAndStudent, formatMonthName } from '../utils/functions'
-  import type { GoalDecorated } from '../types/models'
-  import { addAlert } from '../stores/alerts'
-  import { trackEvent } from '../stores/analytics'
+  import { localStorage } from '../stores/localStorage'
 
   let { status, student, subject, goals, onDone } = $props<{
     status: StatusType | {} | null
@@ -33,6 +33,7 @@
   let localGoals = $state<GoalDecorated[] | null>(goals || null)
 
   let isGoalSectionExpanded = $state<boolean>(false)
+  const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
 
   const goalSectionToggleOptions = $derived.by(() => {
     return {
@@ -201,10 +202,12 @@
                     masteryData={goal.masteryData}
                     masterySchema={getMasterySchmemaForGoal(goal)}
                   />
-                  <MasteryBarChart
-                    data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
-                    masterySchema={getMasterySchmemaForGoal(goal)}
-                  />
+                  {#if $isMasteryBarChartVisible}
+                    <MasteryBarChart
+                      data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
+                      masterySchema={getMasterySchmemaForGoal(goal)}
+                    />
+                  {/if}
                 {:else}
                   Ingen observasjoner i dette målet
                 {/if}

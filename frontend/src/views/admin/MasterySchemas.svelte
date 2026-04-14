@@ -138,8 +138,18 @@
     }
   }
 
-  const getSchoolName = (schoolId: string | undefined) => {
-    return schools.find(school => school.id === schoolId)?.displayName || '??'
+  const toggleIsEnabled = async (masterySchema: MasterySchemaType) => {
+    try {
+      const current = masterySchema.isEnabled ?? false
+      await masterySchemasPartialUpdate({
+        path: { id: masterySchema.id },
+        body: { isEnabled: !current },
+      })
+    } catch (error) {
+      console.error('Error updating isEnabled:', error)
+    } finally {
+      await fetchMasterySchemas()
+    }
   }
 
   const getMasteryLevelsSummary = (masterySchema: MasterySchemaWithConfig) => {
@@ -208,6 +218,16 @@
         like.
       </div>
     {/if}
+    {#if masterySchemas.length > 0 && !masterySchemas.some(schema => schema.isEnabled)}
+      <div class="alert alert-warning mt-4">
+        Ingen av mestringsskjemaene for denne skolen er satt til enabled.
+      </div>
+    {/if}
+    {#if masterySchemas.length > 0 && !masterySchemas.some(schema => schema.isDefault)}
+      <div class="alert alert-warning mt-4">
+        Ingen av mestringsskjemaene for denne skolen er satt til default.
+      </div>
+    {/if}
     <p>Input variants: {VALUE_INPUT_VARIANTS.join(', ')}</p>
 
     <div class="pkt-input-check mt-3">
@@ -243,7 +263,7 @@
                 <br />
               </p>
 
-              <div class="mb-4">
+              <div class="mb-2">
                 <pkt-checkbox
                   label={masterySchema.isDefault ? 'Default schema for school' : 'Not default'}
                   labelPosition="right"
@@ -251,6 +271,17 @@
                   aria-checked={masterySchema.isDefault}
                   checked={masterySchema.isDefault}
                   onchange={() => toggleIsDefault(masterySchema)}
+                ></pkt-checkbox>
+              </div>
+
+              <div class="mb-4">
+                <pkt-checkbox
+                  label={masterySchema.isEnabled ? 'Currently enabled' : 'Currently disabled'}
+                  labelPosition="right"
+                  isSwitch="true"
+                  aria-checked={masterySchema.isEnabled}
+                  checked={masterySchema.isEnabled}
+                  onchange={() => toggleIsEnabled(masterySchema)}
                 ></pkt-checkbox>
               </div>
 

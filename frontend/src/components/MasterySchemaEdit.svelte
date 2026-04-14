@@ -62,6 +62,9 @@
 
   const handleSave = async () => {
     localMasterySchema.config = localJson
+    if (localMasterySchema.description === '') {
+      localMasterySchema.description = null
+    }
     try {
       if (localMasterySchema.id) {
         await masterySchemasUpdate({

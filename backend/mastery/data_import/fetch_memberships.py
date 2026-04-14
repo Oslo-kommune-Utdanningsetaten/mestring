@@ -14,7 +14,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(script_dir, 'data')
 
 
-def fetch_memberships_from_feide(org_number: str):
+def fetch_memberships_from_feide(org_number: str, anonymize=False):
     """Fetch memberships for one school by reading its groups.json and hitting Feide members API."""
     logger.debug("Starting membership fetch for organization: %s", org_number)
     token = get_feide_access_token()
@@ -73,7 +73,7 @@ def fetch_memberships_from_feide(org_number: str):
         # Track memberships by role
 
         for feide_member in feide_group_members:
-            user_item = create_user_item(feide_member)
+            user_item = create_user_item(feide_member, anonymize=anonymize)
             feide_id = user_item.get('feide_id')
             unique_users.add(feide_id)
 
