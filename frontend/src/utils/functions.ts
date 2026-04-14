@@ -87,10 +87,9 @@ export const fetchGoalsForSubjectAndStudent = async (
 }
 
 // We assume goals passed in are decorated with observations (via includeObservations=true)
-export const goalsWithCalculatedMastery = async (
-  studentId: string,
+export const goalsWithCalculatedMastery = (
   studentGoals: (GoalType & { observations?: ObservationType[] })[]
-): Promise<GoalDecorated[]> => {
+): GoalDecorated[] => {
   // Empty array case - no work needed
   if (studentGoals.length === 0) {
     return []
@@ -98,7 +97,7 @@ export const goalsWithCalculatedMastery = async (
   return studentGoals.map(goal => {
     const observations = goal.observations || []
     const decoratedGoal: GoalDecorated = { ...goal }
-    decoratedGoal.masteryData = inferMastery(goal, observations)
+    decoratedGoal.masteryData = inferMastery(observations)
     decoratedGoal.observations = observations
     return decoratedGoal
   })
@@ -113,7 +112,7 @@ export const goalsWithCalculatedMasteryBySubjectId = async (
   studentGoals: GoalType[],
   groups: GroupType[]
 ) => {
-  const decoratedGoals = await goalsWithCalculatedMastery(studentId, studentGoals)
+  const decoratedGoals = goalsWithCalculatedMastery(studentGoals)
   const goalsBySubjectId: Record<string, GoalDecorated[]> = {}
   decoratedGoals.forEach((goal: GoalDecorated) => {
     let subjectId = goal.subjectId
@@ -143,10 +142,7 @@ export const goalsWithCalculatedMasteryBySubjectId = async (
   return goalsBySubjectId
 }
 
-export const inferMastery = (
-  goal: GoalType,
-  observationsForGoal: ObservationType[]
-): Mastery | null => {
+export const inferMastery = (observationsForGoal: ObservationType[]): Mastery | null => {
   if (observationsForGoal.length === 0) {
     return null
   }

@@ -98,10 +98,8 @@
               observations: studentObservations,
             }
           })
-          return goalsWithCalculatedMastery(student.id, groupGoalsWithOnlyStudentObservations).then(
-            calculatedGoals => {
-              goalsWithCalculatedMasteryByStudentId[student.id] = calculatedGoals
-            }
+          goalsWithCalculatedMasteryByStudentId[student.id] = goalsWithCalculatedMastery(
+            groupGoalsWithOnlyStudentObservations
           )
         })
       )
