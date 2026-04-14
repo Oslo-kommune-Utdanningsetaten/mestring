@@ -203,6 +203,25 @@ class StatusSerializer(BaseModelSerializer):
         model = models.Status
         fields = '__all__'
 
+    def validate(self, attrs):
+        mastery_value = attrs.get('mastery_value')
+        mastery_schema = attrs.get('mastery_schema')
+
+        if mastery_schema is None and self.instance:
+            mastery_schema = self.instance.mastery_schema
+
+        if mastery_schema and mastery_value is not None:
+
+            schema_min, schema_max = mastery_schema.get_value_range()
+            if schema_min is None or schema_max is None:
+                return attrs
+
+            if mastery_value < schema_min or mastery_value > schema_max:
+                raise serializers.ValidationError(
+                    {'mastery_value': f'Must be between {schema_min} and {schema_max}'}
+                )
+        return attrs
+
 
 class SchoolSerializer(BaseModelSerializer):
     class Meta:

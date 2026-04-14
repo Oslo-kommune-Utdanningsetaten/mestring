@@ -77,6 +77,7 @@ export type MasterySchemaType = {
     description?: string | null;
     config?: unknown;
     isDefault?: boolean;
+    isEnabled?: boolean;
     readonly createdById: string;
     readonly updatedById: string;
     schoolId: string;
@@ -200,6 +201,7 @@ export type PatchedMasterySchemaType = {
     description?: string | null;
     config?: unknown;
     isDefault?: boolean;
+    isEnabled?: boolean;
     readonly createdById?: string;
     readonly updatedById?: string;
     schoolId?: string;
@@ -519,6 +521,7 @@ export type MasterySchemaCreateType = {
     description?: string | null;
     config?: unknown;
     isDefault?: boolean;
+    isEnabled?: boolean;
     schoolId: string;
 };
 
@@ -593,6 +596,7 @@ export type PatchedMasterySchemaCreateType = {
     description?: string | null;
     config?: unknown;
     isDefault?: boolean;
+    isEnabled?: boolean;
     schoolId?: string;
 };
 
@@ -958,7 +962,12 @@ export type FetchGroupsAndUsersData = {
          */
         orgNumber: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Whether to anonymize user data when fetching
+         */
+        anonymize?: boolean;
+    };
     url: '/api/fetch/groups_and_users/feide/{orgNumber}/';
 };
 

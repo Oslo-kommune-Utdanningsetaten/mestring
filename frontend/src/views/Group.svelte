@@ -29,6 +29,7 @@
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
   import { dataStore } from '../stores/data'
+  import { localStorage } from '../stores/localStorage'
   import { goalsWithCalculatedMastery } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
@@ -57,6 +58,7 @@
   let subjects = $state<SubjectType[]>([])
   let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
+  const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
   const today = new Date()
 
@@ -382,6 +384,7 @@
   <!-- Students Section -->
   <section>
     <h3 class="mb-3">Elever</h3>
+
     {#if group.type === GROUP_TYPE_BASIS}
       <StudentsWithSubjects {students} {subjects} />
     {:else if group.type === GROUP_TYPE_TEACHING}
