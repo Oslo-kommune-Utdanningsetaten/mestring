@@ -73,6 +73,7 @@
 
 <style>
   #valueIndicatorContainer {
+    position: relative;
     width: 3em;
     border: 1px solid var(--bs-gray-300);
   }
@@ -80,7 +81,7 @@
   #valueIndicator {
     position: absolute;
     bottom: 0;
-    left: 50px;
+    left: 0;
     width: 3em;
     height: 1.5em;
     line-height: 1.5em;

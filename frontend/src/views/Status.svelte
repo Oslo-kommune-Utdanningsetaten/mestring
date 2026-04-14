@@ -152,7 +152,7 @@
               variant: 'icon-left',
               classes: 'me-2',
               onClick: handleDelete,
-              delayActionFor: 4,
+              delayActionFor: 3,
             }}
           >
             Slett

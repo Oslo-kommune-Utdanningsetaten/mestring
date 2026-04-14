@@ -357,7 +357,7 @@
                       classes: 'bordered',
                       disabled: !goal.isRelevant || isGoalInUse(goal.id),
                       onClick: () => handleDeleteGoal(goal.id),
-                      delayActionFor: 5,
+                      delayActionFor: 3,
                     }}
                   />
                   <ButtonIcon

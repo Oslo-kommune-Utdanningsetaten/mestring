@@ -53,7 +53,7 @@
         id="mastery-{groupId}-{i}"
         value={level.minValue}
         bind:group={masteryValue}
-        disabled={!isInputEnabled}
+        disabled={!isInputEnabled || !masterySchema?.config?.isMasteryValueInputEnabled}
       />
       <label for="mastery-{groupId}-{i}">
         {level.title}

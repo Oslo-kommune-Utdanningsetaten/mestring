@@ -25,7 +25,7 @@
   }
 
   const handleStarClick = (value: number) => {
-    if (isInputEnabled) {
+    if (isInputEnabled && masterySchema?.config?.isMasteryValueInputEnabled) {
       masteryValue = value
     }
   }
@@ -60,7 +60,7 @@
           name="mastery-stars"
           bind:value={masteryValue}
           checked={masteryValue === masteryLevel.minValue}
-          disabled={!isInputEnabled}
+          disabled={!isInputEnabled || !masterySchema?.config?.isMasteryValueInputEnabled}
         />
         <svg viewBox="0 0 576 512" height="2em" xmlns="http://www.w3.org/2000/svg">
           <path

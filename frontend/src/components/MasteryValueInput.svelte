@@ -12,27 +12,49 @@
     masterySchema,
     value = $bindable(),
     title,
+    isInputEnabled = true,
   } = $props<{
     masterySchema: MasterySchemaType
     value?: number
     title?: string
+    isInputEnabled?: boolean
   }>()
 </script>
 
 {#if masterySchema?.config?.valueInput === 'sliderVertical'}
-  <SliderVertical {masterySchema} bind:masteryValue={value} label={title || ''} />
+  <SliderVertical {masterySchema} {isInputEnabled} bind:masteryValue={value} label={title || ''} />
 {:else if masterySchema?.config?.valueInput === 'sliderHorizontal'}
-  <SliderHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
+  <SliderHorizontal
+    {masterySchema}
+    {isInputEnabled}
+    bind:masteryValue={value}
+    label={title || ''}
+  />
 {:else if masterySchema?.config?.valueInput === 'starsHorizontal'}
-  <StarsHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
+  <StarsHorizontal {masterySchema} {isInputEnabled} bind:masteryValue={value} label={title || ''} />
 {:else if masterySchema?.config?.valueInput === 'toggleHorizontal'}
-  <ToggleHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
+  <ToggleHorizontal
+    {masterySchema}
+    {isInputEnabled}
+    bind:masteryValue={value}
+    label={title || ''}
+  />
 {:else if masterySchema?.config?.valueInput === 'sliderGiraffe'}
-  <SliderGiraffe {masterySchema} bind:masteryValue={value} label={title || ''} />
+  <SliderGiraffe {masterySchema} {isInputEnabled} bind:masteryValue={value} label={title || ''} />
 {:else if masterySchema?.config?.valueInput === 'toggleComicHorizontal'}
-  <ToggleComicHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
+  <ToggleComicHorizontal
+    {masterySchema}
+    {isInputEnabled}
+    bind:masteryValue={value}
+    label={title || ''}
+  />
 {:else if masterySchema?.config?.valueInput === 'sliderArrowHorizontal'}
-  <SliderArrowHorizontal {masterySchema} bind:masteryValue={value} label={title || ''} />
+  <SliderArrowHorizontal
+    {masterySchema}
+    {isInputEnabled}
+    bind:masteryValue={value}
+    label={title || ''}
+  />
 {:else}
   <p class="text-danger">
     Ugyldig masterySchema.config: {masterySchema?.config?.valueInput}

@@ -290,7 +290,7 @@
                 title: 'Slett',
                 classes: 'bordered',
                 onClick: () => handleDeleteSubject(subject.id),
-                delayActionFor: 5,
+                delayActionFor: 3,
               }}
             />
             <ButtonIcon

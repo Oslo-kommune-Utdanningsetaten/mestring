@@ -438,7 +438,7 @@
                         title: 'Slett observasjon',
                         classes: 'bordered',
                         onClick: () => handleDeleteObservation(observation.id),
-                        delayActionFor: 4,
+                        delayActionFor: 3,
                       }}
                     />
                   {/key}
@@ -473,7 +473,7 @@
                 classes: 'my-2',
                 title: 'Slett individuelt mål',
                 onClick: () => handleDeleteGoal(goal.id),
-                delayActionFor: 4,
+                delayActionFor: 3,
                 disabled: goal.observations?.length > 0,
                 variant: 'icon-left',
                 skin: 'secondary',

@@ -56,7 +56,7 @@
   </label>
 
   <div class="d-flex gap-1 position-relative">
-    {#if masterySchema?.config?.isValueIndicatorEnabled && isInputEnabled}
+    {#if masterySchema?.config?.isMasteryValueInputEnabled && isInputEnabled}
       <input
         id="mastery-slider"
         type="range"
@@ -66,6 +66,8 @@
         class="slider"
         bind:value={masteryValue}
       />
+    {/if}
+    {#if masterySchema?.config?.isValueIndicatorEnabled}
       <div id="valueIndicatorContainer">
         <div
           id="valueIndicator"
@@ -112,6 +114,7 @@
   }
 
   #valueIndicatorContainer {
+    position: relative;
     width: 3em;
     border: 1px solid var(--bs-gray-300);
   }
@@ -119,7 +122,7 @@
   #valueIndicator {
     position: absolute;
     bottom: 0;
-    left: 50px;
+    left: 0;
     width: 3em;
     height: 1.5em;
     line-height: 1.5em;

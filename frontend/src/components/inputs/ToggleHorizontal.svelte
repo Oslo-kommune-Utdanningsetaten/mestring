@@ -39,7 +39,7 @@
             name="radio"
             value={masteryLevel.minValue}
             bind:group={masteryValue}
-            disabled={!isInputEnabled}
+            disabled={!isInputEnabled || !masterySchema?.config?.isMasteryValueInputEnabled}
           />
           <span class="name">{masteryLevel.title}</span>
         </label>

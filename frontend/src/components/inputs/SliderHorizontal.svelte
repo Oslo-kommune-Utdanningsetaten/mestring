@@ -75,9 +75,8 @@
       ></div>
     {/if}
   </div>
-
-  {#if masterySchema?.config?.isIncrementIndicatorEnabled && isInputEnabled}
-    <div class="input-container d-flex align-items-end my-5">
+  <div class="input-container d-flex align-items-end my-5">
+    {#if masterySchema?.config?.isValueIndicatorEnabled}
       <!-- mastery value number -->
       <div
         id="valueIndicator"
@@ -85,6 +84,8 @@
       >
         {safeMasteryValue}
       </div>
+    {/if}
+    {#if masterySchema?.config?.isMasteryValueInputEnabled && isInputEnabled}
       <!-- slider input -->
       <input
         id="mastery-slider"
@@ -95,8 +96,8 @@
         class="slider"
         bind:value={masteryValue}
       />
-    </div>
-  {/if}
+    {/if}
+  </div>
 </div>
 
 <style>

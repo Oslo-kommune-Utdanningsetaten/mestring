@@ -6,7 +6,7 @@
     buttonText?: string
   }
 
-  const defaultDelay = 6
+  const defaultDelay = 4
   const {
     onAction,
     delay = defaultDelay,

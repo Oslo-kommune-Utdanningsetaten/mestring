@@ -57,6 +57,7 @@
         <h4 class="mb-2">Mestring</h4>
         <MasteryValueInput
           {masterySchema}
+          isInputEnabled={false}
           bind:value={localObservation.masteryValue}
           title="Hvor godt mestrer {student?.name} {goal?.title || 'dette målet'}?"
         />
