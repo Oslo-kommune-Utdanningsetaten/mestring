@@ -45,6 +45,7 @@ export enum USER_ROLES {
 export const VALUE_INPUT_VARIANTS = [
   'sliderHorizontal',
   'sliderVertical',
+  'sliderArrowHorizontal',
   'sliderGiraffe',
   'starsHorizontal',
   'toggleHorizontal',
