@@ -29,7 +29,6 @@
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
   import { dataStore } from '../stores/data'
-  import { localStorage } from '../stores/localStorage'
   import { goalsWithCalculatedMastery } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
@@ -37,6 +36,8 @@
   import UserTag from '../components/UserTag.svelte'
 
   const { groupId } = $props<{ groupId: string }>()
+  const today = new Date()
+  const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
 
   let isLoading = $state(true)
   let goalsListElement = $state<HTMLElement | null>(null)
@@ -58,9 +59,6 @@
   let subjects = $state<SubjectType[]>([])
   let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
-  const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
-  const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
-  const today = new Date()
 
   const fetchGroupData = async () => {
     try {
