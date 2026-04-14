@@ -142,17 +142,44 @@ export const goalsWithCalculatedMasteryBySubjectId = async (
   return goalsBySubjectId
 }
 
+// Returns the linear regression trend scaled to total change over the window
+// Returns 0 if fewer than 2 values are provided
+const calculateLinearRegressionTrend = (values: number[]): number => {
+  const n = values.length
+  if (n < 2) return 0
+  const meanIndex = (n - 1) / 2
+  const meanValue = values.reduce((sum, v) => sum + v, 0) / n
+  let covarianceSum = 0
+  let varianceSum = 0
+  for (let i = 0; i < n; i++) {
+    covarianceSum += (i - meanIndex) * (values[i] - meanValue)
+    varianceSum += (i - meanIndex) ** 2
+  }
+  const slope = varianceSum === 0 ? 0 : covarianceSum / varianceSum
+  const result = slope * (n - 1)
+  return Math.round(result * 10) / 10
+}
+
+// The simplest possible trend calculation, just comparing first and last value
+const calculateTrend = (values: number[]): number => {
+  const n = values.length
+  if (n < 2) return 0
+  const firstValue = values[0]
+  const lastValue = values[n - 1]
+  return lastValue - firstValue
+}
+
 export const inferMastery = (observationsForGoal: ObservationType[]): Mastery | null => {
   if (observationsForGoal.length === 0) {
     return null
   }
-  const firstValue = observationsForGoal[0]?.masteryValue
   const lastValue = observationsForGoal[observationsForGoal.length - 1]?.masteryValue
-  const trend = isNumber(lastValue) && isNumber(firstValue) ? lastValue - firstValue : 0
+  const masteryValues = observationsForGoal.map(o => o.masteryValue).filter(isNumber) as number[]
+  const trend = calculateLinearRegressionTrend(masteryValues)
   return {
     mastery: lastValue || 0,
     trend: trend,
-    title: `Siste verdi: ${lastValue}. Trend: ${trend}.`,
+    title: `Siste verdi: ${lastValue}. Trend: ${trend}`,
   }
 }
 
