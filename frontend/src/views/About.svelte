@@ -1,14 +1,17 @@
 <script lang="ts">
+  import Link from '../components/Link.svelte'
   import { fetchMetadata } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
-  import Link from '../components/Link.svelte'
+  import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
+  import { hasUserAccessToPath } from '../stores/access'
+
   let metadata = $state<Record<string, any>>({})
+  const currentSchool = $derived($dataStore.currentSchool)
+  const currentUser = $derived($dataStore.currentUser)
 
   const fetchServiceMetadata = async () => {
     try {
-      const options = $dataStore.currentSchool
-        ? { query: { orgNumber: $dataStore.currentSchool.orgNumber } }
-        : {}
+      const options = currentSchool ? { query: { orgNumber: currentSchool.orgNumber } } : {}
       const metadataResult = await fetchMetadata(options)
       metadata = metadataResult.data || {}
     } catch (error) {
@@ -16,18 +19,27 @@
     }
   }
 
+  const getRoleCount = (role: string, teacherType?: string) => {
+    if (!metadata.roleCounts) {
+      return 0
+    }
+    return teacherType ? metadata.roleCounts[role][teacherType] : metadata.roleCounts[role]
+  }
+
   $effect(() => {
-    const currentSchool = $dataStore.currentSchool
-    fetchServiceMetadata()
+    if (currentUser) fetchServiceMetadata()
   })
 </script>
 
-{#snippet rolesCount(role: string)}
-  {#if Object.hasOwn(metadata, 'roleCounts') && Object.hasOwn(metadata.roleCounts, role)}
-    <span>
-      {metadata.roleCounts[role] +
-        ` ${metadata.roleCounts[role] == 1 ? 'person' : 'personer'} har denne rollen.`}
-    </span>
+{#snippet rolesCount(role: string, teacherType?: string)}
+  {@const linkTo = `/users?role=${role}${teacherType ? `&teacherType=${teacherType}` : ''}`}
+  {@const count = getRoleCount(role, teacherType)}
+  {#if currentUser && $hasUserAccessToPath('/users')}
+    <Link to={linkTo}>
+      {count + ` ${count == 1 ? 'person' : 'personer'} har denne rollen`}.
+    </Link>
+  {:else if currentUser}
+    {count + ` ${count == 1 ? 'person' : 'personer'} har denne rollen`}.
   {/if}
 {/snippet}
 
@@ -36,8 +48,8 @@
   <h2 class="my-3">Om tjenesten</h2>
   <ul class="my-3">
     <li>
-      Denne tjenesten (kjent som "Mestring") er en prototype på hvordan det går an holde oversikt
-      over elevers mestring fagene.
+      Denne tjenesten (kjent som "Mestring") er en prototype på tracking av elevenes utvikling i
+      tilrettelagt opplæring.
     </li>
     <li>
       Utviklet av Seksjon for Læringsteknologi i
@@ -49,13 +61,21 @@
     </li>
     <li>
       Kildekoden er åpen og tilgjengelig på
-      <Link to="https://github.com/Oslo-kommune-Utdanningsetaten/mestring/">GitHub</Link>.
-    </li>
-    <li>
-      Her finner du
+      <Link to="https://github.com/Oslo-kommune-Utdanningsetaten/mestring/">GitHub</Link>, og her er
       <Link to="https://github.com/Oslo-kommune-Utdanningsetaten/mestring/issues">oppgavene</Link>
       vi jobber med.
     </li>
+  </ul>
+</section>
+
+<!-- General guidelines -->
+<section class="mt-3 mb-5" id="guidelines">
+  <h2 class="my-3">Retningslinjer for bruk</h2>
+  <ul class="my-3">
+    <li>Minimér informasjon som kan knyttes til personer.</li>
+    <li>Der det er mulig, bruk nøytrale, ikke-sensitive formuleringer om personer.</li>
+    <li>Husk å låse PCen, slik at andre ikke kan få tilgang til informasjon via din bruker.</li>
+    <li>Ikke ta utskrifter - papir har en tendens til å bli liggende der andre har tilgang.</li>
   </ul>
 </section>
 
@@ -65,29 +85,30 @@
   <ul class="my-3">
     <li>
       <span class="fw-bold">Lærer i undervisningsgruppe</span>
-      kan opprette mål og observasjoner for elevene gruppa, i faget som undervises. {@render rolesCount(
-        'teacherTeaching'
-      )}
+      kan opprette mål og observasjoner for elevene gruppa, i faget som undervises.
+      {@render rolesCount(USER_ROLES.TEACHER, GROUP_TYPE_TEACHING)}
     </li>
     <li>
       <span class="fw-bold">Lærer i basisgruppe</span>
-      kan se mål og observasjoner for sine elever, i alle fag. Kan opprette individuelle mål (og observasjonerpå
-      disse) for sine elever i alle fag. {@render rolesCount('teacherBasis')}
+      kan se mål og observasjoner for sine elever, i alle fag. Kan opprette individuelle mål (og observasjoner
+      på disse) for sine elever i alle fag.
+      {@render rolesCount(USER_ROLES.TEACHER, GROUP_TYPE_BASIS)}
     </li>
     <li>
       <span class="fw-bold">Skoleinspektør</span>
-      kan se mål og observasjoner for alle elever ved sin skole. {@render rolesCount('inspector')}
+      kan se mål og observasjoner for alle elever ved sin skole.
+      {@render rolesCount(USER_ROLES.INSPECTOR)}
     </li>
     <li>
       <span class="fw-bold">Skoleadmin</span>
-      kan se og redigere mål og observasjoner for alle elever ved sin skole. {@render rolesCount(
-        'admin'
-      )}
+      kan se og redigere mål og observasjoner for alle elever ved sin skole.
+      {@render rolesCount(USER_ROLES.ADMIN)}
     </li>
     <li>
       <span class="fw-bold">Superadmin</span>
       kan se og redigere mål og observasjoner for alle elever ved alle skoler. Kan også endre globale
-      innstillinger for skolene. {@render rolesCount('superadmin')}
+      innstillinger for skolene.
+      {@render rolesCount(USER_ROLES.SUPERADMIN)}
     </li>
   </ul>
 </section>
@@ -104,7 +125,7 @@
       {/each}
     </ul>
   {:else}
-    asdf
+    <p>Logg på for å se oppdatert informasjon om datalagring.</p>
   {/if}
 </section>
 

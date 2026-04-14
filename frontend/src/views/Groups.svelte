@@ -1,7 +1,7 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
-  import { hasUserAccessToPath } from '../stores/data'
+  import { hasUserAccessToPath } from '../stores/access'
   import { USER_ROLES } from '../utils/constants'
   import { usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType } from '../generated/types.gen'

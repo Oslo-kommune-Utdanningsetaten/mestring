@@ -26,7 +26,7 @@
     return now.getMonth() < 7 ? `${now.getFullYear()}-01-01` : `${now.getFullYear()}-08-01`
   })
   let xLabels = $state<string[]>([])
-  let yMaxValue = $derived.by(() => (hasSufficientData ? Math.max(...data, 15) : 10))
+  let yMaxValue = $derived.by(() => (hasSufficientData ? Math.max(...data, 10) : 10))
 
   const yLabelsAt = $derived.by(() => {
     if (!hasSufficientData || yMaxValue <= 0) return 1
@@ -40,17 +40,8 @@
     // Normalize to 1-10 range
     const normalized = roughInterval / magnitude
 
-    // Round to nice number (1, 2, 5, or 10)
-    let niceFraction
-    if (normalized <= 1.5) {
-      niceFraction = 1
-    } else if (normalized <= 3.5) {
-      niceFraction = 2
-    } else if (normalized <= 7.5) {
-      niceFraction = 5
-    } else {
-      niceFraction = 10
-    }
+    // Round to nice number (5 or 10)
+    const niceFraction = normalized <= 7.5 ? 5 : 10
 
     const interval = niceFraction * magnitude
 

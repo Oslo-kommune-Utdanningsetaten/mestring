@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { useMasteryCalculations } from '../utils/masteryHelpers'
-  import type { MasterySchemaWithConfig } from '../types/models'
-  import { getContrastFriendlyTextColor } from '../utils/functions'
+  import { useMasteryCalculations } from '../../utils/masteryHelpers'
+  import { getContrastFriendlyTextColor } from '../../utils/functions'
+  import type { MasterySchemaWithConfig } from '../../types/models'
 
   let {
     masterySchema,
@@ -46,7 +46,7 @@
   })
 </script>
 
-<div class="mt-4 mb-0">
+<div class="mt-4 mb-4">
   <label class="form-label" for="mastery-slider">
     {label}
   </label>

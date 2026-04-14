@@ -1,15 +1,27 @@
-import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, ROUTES } from '../utils/constants'
-import type { UserRoleType, UserDecorated, HasUserAccessToFeatureOptions } from '../types/models'
+import { derived } from 'svelte/store'
+import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
+import { ROUTES } from '../utils/routes'
 import type { GroupType, SchoolType, SubjectType } from '../generated/types.gen'
+import type { UserDecorated, UserRoleType, HasUserAccessToFeatureOptions } from '../types/models'
+import { currentUser, currentSchool, subjects } from './data'
 
-export const hasUserAccessToPath = (
-  currentUser: UserDecorated | null,
-  pathString: string
-): boolean => {
-  if (!currentUser) return false
-  const path = ROUTES.find(r => r.path === pathString)
+export const hasUserAccessToPath = derived(
+  currentUser,
+  $currentUser => (pathString: string) => checkUserAccessToPath($currentUser, pathString)
+)
+
+export const hasUserAccessToFeature = derived(
+  [currentUser, currentSchool, subjects],
+  ([$currentUser, $currentSchool, $subjects]) =>
+    (resource: string, action: string, options: HasUserAccessToFeatureOptions = {}) =>
+      checkUserAccessToFeature($currentUser, $currentSchool, $subjects, resource, action, options)
+)
+
+const checkUserAccessToPath = (currentUser: UserDecorated | null, pathString: string): boolean => {
+  const path = ROUTES.find(route => route.path === pathString)
   const { isPublic, accessibleBy } = path || {}
   if (isPublic) return true
+  if (!currentUser) return false
 
   // check for overlapping roles and accessibleBy
   if (accessibleBy) {
@@ -18,7 +30,7 @@ export const hasUserAccessToPath = (
   return false
 }
 
-export const hasUserAccessToFeature = (
+const checkUserAccessToFeature = (
   currentUser: UserDecorated | null,
   currentSchool: SchoolType | null,
   subjects: SubjectType[],
@@ -38,8 +50,6 @@ export const hasUserAccessToFeature = (
       return false
     }
     if (['create', 'update', 'delete'].includes(action)) {
-      // Early negative return if no student groups provided
-
       return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
         // Teacher teaches the subject to this student
         if (

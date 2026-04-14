@@ -2,10 +2,9 @@
   import type { ObservationType, GoalType, UserType } from '../generated/types.gen'
   import type { MasterySchemaWithConfig } from '../types/models'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
-  import { dataStore, currentUser } from '../stores/data'
+  import { dataStore } from '../stores/data'
   import ButtonMini from './ButtonMini.svelte'
-  import ValueInputVertical from './ValueInputVertical.svelte'
-  import ValueInputHorizontal from './ValueInputHorizontal.svelte'
+  import MasteryValueInput from './MasteryValueInput.svelte'
   import AuthorInfo from './AuthorInfo.svelte'
 
   const { student, goal, observation, onDone } = $props<{
@@ -20,18 +19,13 @@
   )
   const calculations = $derived(useMasteryCalculations(masterySchema))
 
-  const renderDirection = (): 'horizontal' | 'vertical' | 'unknown' => {
-    return masterySchema?.config?.renderDirection || 'unknown'
-  }
-
-  let localObservation = $state<Partial<ObservationType> & { masteryValue: number }>({
-    masteryValue: calculations.defaultValue,
-  })
+  let localObservation = $state<Partial<ObservationType> & { masteryValue?: number }>({})
 
   // Update localObservation when observation prop changes
   $effect(() => {
     localObservation = {
       ...observation,
+      masteryValue: observation?.masteryValue ?? calculations.defaultValue,
     }
   })
 </script>
@@ -61,21 +55,11 @@
     {#if masterySchema?.config?.isMasteryValueInputEnabled}
       <div class="form-group mb-5">
         <h4 class="mb-2">Mestring</h4>
-        {#if renderDirection() === 'vertical'}
-          <ValueInputVertical
-            {masterySchema}
-            bind:masteryValue={localObservation.masteryValue}
-            label=""
-            isInputEnabled={false}
-          />
-        {:else}
-          <ValueInputHorizontal
-            {masterySchema}
-            bind:masteryValue={localObservation.masteryValue}
-            label=""
-            isInputEnabled={false}
-          />
-        {/if}
+        <MasteryValueInput
+          {masterySchema}
+          bind:value={localObservation.masteryValue}
+          title="Hvor godt mestrer {student?.name} {goal?.title || 'dette målet'}?"
+        />
       </div>
     {/if}
 

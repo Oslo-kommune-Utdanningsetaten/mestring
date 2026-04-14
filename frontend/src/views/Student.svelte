@@ -8,8 +8,8 @@
     groupsList,
     subjectsList,
   } from '../generated/sdk.gen'
-  import { SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
-  import { hasUserAccessToFeature } from '../stores/data'
+  import { SUBJECTS_ALLOWED_CUSTOM, GROUP_TYPE_BASIS } from '../utils/constants'
+  import { hasUserAccessToFeature } from '../stores/access'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
   import GoalEdit from '../components/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
@@ -19,18 +19,33 @@
   import GroupTag from '../components/GroupTag.svelte'
   import { dataStore } from '../stores/data'
   import { trackEvent } from '../stores/analytics'
-  import { getLocalStorageItem } from '../stores/localStorage'
+  import { localStorage } from '../stores/localStorage'
 
   const { studentId } = $props<{ studentId: string }>()
   const individualGoalcount = 3
+
   let student = $state<UserType | null>(null)
   let subjects = $state<SubjectType[]>([])
   let groups = $state<GroupType[]>([])
-  let { currentSchool } = $derived($dataStore)
+  let { currentSchool, currentUser } = $derived($dataStore)
   let studentGoalsCount = $state<number | undefined>(undefined)
 
   let goalWip = $state<GoalDecorated | null>(null)
   let isGoalEditorOpen = $state<boolean>(false)
+
+  // Subjects the teacher teaches to this student via their common groups
+  const subjectsForGoalEdit = $derived.by(() => {
+    if (!student) return $dataStore.subjects
+    if (currentUser.isSuperadmin || currentUser.isSchoolAdmin) return $dataStore.subjects
+    const teacherGroups: GroupType[] = currentUser?.teacherGroups || []
+    const studentGroupIds = student.groupIds || []
+    const commonGroups = teacherGroups.filter((g: GroupType) => studentGroupIds.includes(g.id))
+    const subjectIds = new Set(commonGroups.map(g => g.subjectId).filter(Boolean))
+    const hasSharedBasisGroup = commonGroups.some(g => g.type === GROUP_TYPE_BASIS)
+    return $dataStore.subjects.filter(
+      s => subjectIds.has(s.id) || (hasSharedBasisGroup && !!s.ownedBySchoolId)
+    )
+  })
 
   const fetchStudentData = async (userId: string) => {
     try {
@@ -71,7 +86,7 @@
   }
 
   const countStudentGoals = async () => {
-    const result = await goalsList({ query: { student: studentId } })
+    const result = await goalsList({ query: { student: studentId, school: currentSchool.id } })
     studentGoalsCount = result.data?.length
   }
 
@@ -107,7 +122,7 @@
       // editing existing goal
       goalWip = {
         ...goal,
-        subjectId: goal?.subjectId || getLocalStorageItem('preferredSubjectId'),
+        subjectId: goal?.subjectId || localStorage<string>('preferredSubjectId').get(),
         studentId: student.id,
         sortOrder: goal?.sortOrder,
         masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,
@@ -216,7 +231,13 @@
 <!-- offcanvas for creating/editing goals -->
 <Offcanvas bind:isOpen={isGoalEditorOpen} ariaLabel="Rediger mål" onClosed={handleCloseEditGoal}>
   {#if goalWip}
-    <GoalEdit goal={goalWip} {student} isGoalIndividual={true} onDone={handleCloseEditGoal} />
+    <GoalEdit
+      goal={goalWip}
+      {student}
+      subjects={subjectsForGoalEdit}
+      isGoalIndividual={true}
+      onDone={handleCloseEditGoal}
+    />
   {/if}
 </Offcanvas>
 

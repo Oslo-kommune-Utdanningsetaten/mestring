@@ -1,10 +1,12 @@
 <script lang="ts">
   import ButtonMini from './ButtonMini.svelte'
+  import MasteryValueInput from './MasteryValueInput.svelte'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { JSONEditor } from 'svelte-jsoneditor'
   import { masterySchemasUpdate, masterySchemasCreate } from '../generated/sdk.gen'
   import type { MasterySchemaType, MasterySchemaCreateType } from '../generated/types.gen'
   import type { MasterySchemaConfig } from '../types/models'
+  import { useMasteryCalculations } from '../utils/masteryHelpers'
 
   const defaultConfig = {
     levels: [
@@ -27,29 +29,42 @@
         color: '#38a87f',
       },
     ],
-    renderDirection: 'horizontal',
-    increment: 1,
+    valueInput: 'sliderHorizontal',
+    inputIncrement: 1,
+    flatTrendThreshold: 5,
+    isValueIndicatorEnabled: true,
+    isFeedforwardInputEnabled: true,
+    isIncrementIndicatorEnabled: true,
+    isMasteryValueInputEnabled: true,
+    isMasteryDescriptionInputEnabled: true,
   }
 
   const { masterySchema, onDone } = $props<{
     masterySchema: Partial<MasterySchemaType> | null
     onDone: () => void
   }>()
-  let localMasterySchema = $state<Partial<MasterySchemaType>>({ ...masterySchema })
+  let localMasterySchema = $derived<Partial<MasterySchemaType>>({ ...masterySchema })
   let localJson = $derived<Partial<MasterySchemaConfig>>(
     localMasterySchema?.config || defaultConfig
   )
+  let calculations = $derived(useMasteryCalculations(masterySchema))
+  let placeholderMasteryValue = $derived(calculations.defaultValue)
 
   const handleJsonChange = (updatedContent: any) => {
     if (updatedContent.json) {
       localJson = updatedContent.json
+      localMasterySchema.config = localJson
     } else if (updatedContent.text) {
       localJson = JSON.parse(updatedContent.text)
+      localMasterySchema.config = localJson
     }
   }
 
   const handleSave = async () => {
     localMasterySchema.config = localJson
+    if (localMasterySchema.description === '') {
+      localMasterySchema.description = null
+    }
     try {
       if (localMasterySchema.id) {
         await masterySchemasUpdate({
@@ -97,7 +112,17 @@
     />
   </div>
 
-  <JSONEditor content={{ json: localJson }} onChange={handleJsonChange} />
+  <div>
+    <MasteryValueInput
+      masterySchema={localMasterySchema as MasterySchemaType}
+      bind:value={placeholderMasteryValue}
+      title="Forhåndsvisning av input"
+    />
+  </div>
+
+  <div style="height: 40vh;">
+    <JSONEditor content={{ json: localJson }} onChange={handleJsonChange} />
+  </div>
 
   <div class="d-flex gap-2 justify-content-start">
     <ButtonMini
@@ -106,7 +131,7 @@
         iconName: 'check',
         skin: 'primary',
         variant: 'label-only',
-        classes: 'm-2',
+        classes: 'mt-3',
         onClick: () => handleSave(),
       }}
     >
@@ -119,7 +144,7 @@
         iconName: 'close',
         skin: 'secondary',
         variant: 'label-only',
-        classes: 'm-2',
+        classes: 'mt-3 ms-3',
         onClick: () => onDone(),
       }}
     >
@@ -136,10 +161,5 @@
 
   input {
     height: 47px;
-  }
-
-  input,
-  select {
-    width: 100% !important;
   }
 </style>

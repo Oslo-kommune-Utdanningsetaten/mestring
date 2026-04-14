@@ -2,7 +2,7 @@
   import { dataStore, currentUser } from '../stores/data'
   import { login, logout } from '../stores/auth'
   import { currentPath } from '../stores/navigation'
-  import { hasUserAccessToPath } from '../stores/data'
+  import { hasUserAccessToPath } from '../stores/access'
   import Link from './Link.svelte'
   import GoalIconCelebration from './GoalIconCelebration.svelte'
   import oslologoUrl from '@oslokommune/punkt-assets/dist/logos/oslologo.svg?url'
@@ -104,6 +104,11 @@
                     <Link to="/students" className="dropdown-item">Elever</Link>
                   </li>
                 {/if}
+                {#if $hasUserAccessToPath('/admin/goals')}
+                  <li class="nav-item">
+                    <Link to="/admin/goals" className="dropdown-item">Mål</Link>
+                  </li>
+                {/if}
                 {#if $hasUserAccessToPath('/admin/users')}
                   <li>
                     <Link to="/admin/users" className="dropdown-item">Brukere</Link>
@@ -125,8 +130,13 @@
                   </li>
                 {/if}
                 {#if $hasUserAccessToPath('/admin/analytics')}
-                  <li class="ms-3 mt-1">
-                    <a href="/analytics/index.php" target="_blank">Bruksanalyse</a>
+                  <li>
+                    <Link
+                      to="https://mestring.osloskolen.no/analytics/index.php"
+                      className="dropdown-item"
+                    >
+                      Analytics
+                    </Link>
                   </li>
                 {/if}
                 {#if $hasUserAccessToPath('/admin/mastery-schemas')}

@@ -2,12 +2,13 @@
   import type { GoalType, UserType, SubjectType, ObservationType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
-  import { hasUserAccessToFeature } from '../stores/data'
+  import { hasUserAccessToFeature } from '../stores/access'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import MasteryBarChart from './MasteryBarChart.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
   import Statuses from './Statuses.svelte'
   import Link from './Link.svelte'
+  import { localStorage } from '../stores/localStorage'
 
   let {
     students,
@@ -83,6 +84,8 @@
     return sortDirection === 'asc' ? ' ▲' : ' ▼'
   }
 
+  const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
+
   const getMasterySchemaForGoal = (goal: GoalType) => {
     return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
   }
@@ -99,7 +102,7 @@
   }
 </script>
 
-<div class="teaching-grid my-3" aria-label="Elevliste" style="--columns-count: {goals.length}">
+<div class="students-grid my-3" aria-label="Elevliste" style="--columns-count: {goals.length}">
   <button
     class="item header header-row sortable"
     onclick={() => handleHeaderClick('name')}
@@ -141,17 +144,19 @@
       {/if}
     </span>
     {#each goals as goal (goal.id)}
-      {@const decoGoal = getDecoratedGoalFor(student.id, goal.id)}
-      <span class="item gap-1">
-        {#if decoGoal?.masteryData}
+      {@const decoratedGoal = getDecoratedGoalFor(student.id, goal.id)}
+      <span class="item gap-1 goal-cell">
+        {#if decoratedGoal?.masteryData}
           <MasteryLevelBadge
-            masteryData={decoGoal.masteryData}
+            masteryData={decoratedGoal.masteryData}
             masterySchema={getMasterySchemaForGoal(goal)}
           />
-          <MasteryBarChart
-            data={getObservationValues(decoGoal)}
-            masterySchema={getMasterySchemaForGoal(goal)}
-          />
+          {#if $isMasteryBarChartVisible}
+            <MasteryBarChart
+              data={getObservationValues(decoratedGoal)}
+              masterySchema={getMasterySchemaForGoal(goal)}
+            />
+          {/if}
         {:else}
           <MasteryLevelBadge isBadgeEmpty={true} />
         {/if}
@@ -163,7 +168,7 @@
                 title: 'Legg til observasjon',
                 classes: 'bordered',
                 disabled: !goal.isRelevant,
-                onClick: () => onEditObservation(decoGoal || goal, null, student),
+                onClick: () => onEditObservation(decoratedGoal || goal, null, student),
               }}
             />
           {/if}
@@ -174,17 +179,17 @@
 </div>
 
 <style>
-  .teaching-grid {
+  .students-grid {
     display: grid;
-    grid-template-columns: 3fr repeat(var(--columns-count, 8), 1fr);
-    grid-auto-rows: minmax(5rem, 1fr);
+    grid-template-columns: auto repeat(var(--columns-count, 8), minmax(4rem, 10rem));
+    grid-auto-rows: minmax(2rem, 1fr);
     align-items: stretch;
     gap: 0;
   }
 
-  .teaching-grid .item {
-    padding: 0.5rem;
-    min-height: 3rem;
+  .students-grid .item {
+    padding: 0rem 0.5rem 0rem 0.5rem;
+    min-height: 2rem;
     display: flex;
     align-items: center;
     align-self: stretch;
@@ -193,7 +198,7 @@
     border-bottom: 1px solid var(--bs-border-color);
   }
 
-  .teaching-grid .item.header-row {
+  .students-grid .item.header-row {
     background-color: var(--bs-light);
     font-weight: 800;
   }
@@ -201,8 +206,6 @@
   .sortable {
     cursor: pointer;
     border: none;
-    border-right: 1px solid var(--bs-border-color);
-    border-bottom: 1px solid var(--bs-border-color);
     background-color: var(--bs-light);
     font-weight: 800;
   }
@@ -227,15 +230,23 @@
 
   .add-observation-button {
     display: flex;
-    margin-left: auto;
+  }
+
+  .students-grid .goal-cell {
+    justify-content: center;
   }
 
   .column-header {
-    transform: rotate(-60deg);
+    overflow-wrap: break-word;
+    width: 100%;
     font-size: 0.8rem;
-    padding: 0.1rem 0.1rem 0.1rem 0.3rem;
-    max-width: 5rem;
-    background-color: var(--pkt-color-surface-strong-light-green);
+    padding: 0.1rem 0.5rem 0.1rem 0.5rem;
+    background-color: color-mix(
+      in srgb,
+      var(--pkt-color-surface-strong-light-green) 70%,
+      transparent
+    );
     border: 1px solid var(--pkt-color-grays-gray-100);
+    z-index: 2;
   }
 </style>

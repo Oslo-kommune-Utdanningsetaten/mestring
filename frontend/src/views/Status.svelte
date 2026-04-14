@@ -10,7 +10,7 @@
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
   import { formatDateHumanly, getContrastFriendlyTextColor } from '../utils/functions'
-  import { hasUserAccessToFeature } from '../stores/data'
+  import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
   import ButtonMini from '../components/ButtonMini.svelte'
@@ -184,8 +184,9 @@
         <div class="col-8">
           <div
             class="mastery-scale"
-            class:mastery-scale-horizontal={masterySchema?.config?.renderDirection === 'horizontal'}
-            class:mastery-scale-vertical={masterySchema?.config?.renderDirection === 'vertical'}
+            class:mastery-scale-horizontal={masterySchema?.config?.valueInput ===
+              'sliderHorizontal'}
+            class:mastery-scale-vertical={masterySchema?.config?.valueInput === 'sliderVertical'}
           >
             {#each calculations.masteryLevels as level}
               <div

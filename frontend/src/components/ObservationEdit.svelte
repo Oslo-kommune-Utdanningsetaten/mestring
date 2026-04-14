@@ -5,10 +5,9 @@
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore, currentUser } from '../stores/data'
   import ButtonMini from './ButtonMini.svelte'
-  import ValueInputVertical from './ValueInputVertical.svelte'
-  import ValueInputHorizontal from './ValueInputHorizontal.svelte'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
+  import MasteryValueInput from './MasteryValueInput.svelte'
 
   const { student, goal, observation, onDone } = $props<{
     student: UserType | null
@@ -21,21 +20,17 @@
     $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
   )
   const calculations = $derived(useMasteryCalculations(masterySchema))
+  let localObservation = $state<Partial<ObservationType> & { masteryValue?: number }>({})
 
-  let localObservation = $state<Partial<ObservationType> & { masteryValue: number }>({
-    masteryValue: calculations.defaultValue,
-  })
+  const studentFirstName = $derived(student?.name.split(' ')[0] || 'eleven')
 
   // Update localObservation when observation prop changes
   $effect(() => {
     localObservation = {
       ...observation,
+      masteryValue: observation?.masteryValue ?? calculations.defaultValue,
     }
   })
-
-  const renderDirection = (): 'horizontal' | 'vertical' | 'unknown' => {
-    return masterySchema?.config?.renderDirection || 'unknown'
-  }
 
   const handleSave = async () => {
     localObservation.studentId = student?.id
@@ -75,49 +70,43 @@
 
 <div class="observation-edit p-4">
   {#if localObservation}
-    <h3 class="pb-2">
+    <h3>
       {localObservation.id ? 'Redigerer' : 'Ny'} observasjon
     </h3>
 
     {#if masterySchema?.config?.isMasteryValueInputEnabled}
-      <div class="mb-4">
-        {#if renderDirection() === 'vertical'}
-          <ValueInputVertical
-            {masterySchema}
-            bind:masteryValue={localObservation.masteryValue}
-            label="Hvor ofte mestrer {student?.name} {goal?.title || 'dette målet'}?"
-          />
-        {:else}
-          <ValueInputHorizontal
-            {masterySchema}
-            bind:masteryValue={localObservation.masteryValue}
-            label="Hvor ofte mestrer {student?.name} {goal?.title || 'dette målet'}?"
-          />
-        {/if}
-      </div>
+      <MasteryValueInput
+        {masterySchema}
+        bind:value={localObservation.masteryValue}
+        title="Hvor godt mestrer {student?.name} {goal?.title || 'dette målet'}?"
+      />
     {/if}
 
     {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
-      <div class="form-group my-4">
-        <label for="description" class="form-label">Beskrivelse/tilbakemelding</label>
+      <div class="form-group">
+        <label for="description" class="form-label visually-hidden">
+          Beskrivelse/tilbakemelding
+        </label>
         <textarea
           id="description"
           class="form-control rounded-0 border-2 border-primary"
           bind:value={localObservation.masteryDescription}
-          placeholder="Kort beskrivelse av elevens mestringsnivå"
+          placeholder="Kort beskrivelse av {studentFirstName}{studentFirstName.endsWith('s')
+            ? "\'"
+            : "'s"} mestringsnivå"
           rows="4"
         ></textarea>
       </div>
     {/if}
 
     {#if masterySchema?.config?.isFeedforwardInputEnabled}
-      <div class="form-group mb-3">
-        <label for="feedforward" class="form-label">Fremovermelding</label>
+      <div class="form-group">
+        <label for="feedforward" class="form-label visually-hidden">Fremovermelding</label>
         <textarea
           id="feedforward"
           class="form-control rounded-0 border-2 border-primary"
           bind:value={localObservation.feedforward}
-          placeholder="Konkret, hva kan eleven gjøre for å forbedre seg?"
+          placeholder="Konkret, hva kan {studentFirstName} gjøre for å forbedre seg?"
           rows="4"
         ></textarea>
       </div>
@@ -130,7 +119,7 @@
           iconName: 'check',
           skin: 'primary',
           variant: 'label-only',
-          classes: 'm-2',
+          classes: 'me-2 mt-2',
           onClick: () => handleSave(),
         }}
       >
@@ -159,5 +148,13 @@
   .observation-edit {
     width: 100%;
     max-width: 100%;
+  }
+
+  .form-group {
+    margin-top: 2.5rem;
+  }
+
+  textarea {
+    font-size: 1.2rem;
   }
 </style>

@@ -7,13 +7,15 @@
     masterySchemasPartialUpdate,
   } from '../../generated/sdk.gen'
   import type { MasterySchemaType, SchoolType } from '../../generated/types.gen'
-  import type { MasterySchemaWithConfig } from '../../types/models'
+  import type { MasterySchemaWithConfig, MasteryConfigLevel } from '../../types/models'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { urlStringFrom, getContrastFriendlyTextColor } from '../../utils/functions'
-  import ButtonMini from '../../components/ButtonMini.svelte'
-  import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
-  import Offcanvas from '../../components/Offcanvas.svelte'
+  import { VALUE_INPUT_VARIANTS } from '../../utils/constants'
   import { dataStore } from '../../stores/data'
+  import { useMasteryCalculations } from '../../utils/masteryHelpers'
+  import ButtonMini from '../../components/ButtonMini.svelte'
+  import Offcanvas from '../../components/Offcanvas.svelte'
+  import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
 
   const router = useTinyRouter()
   let masterySchemaWip: Partial<MasterySchemaWithConfig> | null =
@@ -26,6 +28,25 @@
   let selectedSchool = $derived.by(() => {
     const schoolIdFromUrl = router.getQueryParam('school')
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
+  })
+
+  const areSchemaValuesConsistent = $derived.by(() => {
+    let min: number | null = null
+    let max: number | null = null
+    let result = true
+    masterySchemas.forEach((schema, index) => {
+      const { minValue, maxValue } = useMasteryCalculations(schema)
+      if (index === 0) {
+        // first pass
+        min = minValue
+        max = maxValue
+      } else {
+        if (minValue !== min || maxValue !== max) {
+          result = false
+        }
+      }
+    })
+    return result
   })
 
   const fetchSchools = async () => {
@@ -59,12 +80,20 @@
     fetchMasterySchemas()
   }
 
+  const handleNewMasterySchema = () => {
+    masterySchemaWip = { schoolId: selectedSchool?.id }
+    isEditorOpen = true
+  }
+
   const handleEditMasterySchema = (masterySchema: MasterySchemaType | null) => {
-    if (masterySchema) {
-      masterySchemaWip = { ...masterySchema }
-    } else {
-      masterySchemaWip = { schoolId: selectedSchool?.id }
-    }
+    masterySchemaWip = { ...masterySchema }
+    isEditorOpen = true
+  }
+
+  const handleCopyMasterySchema = (masterySchema: MasterySchemaType | null) => {
+    masterySchemaWip = { ...masterySchema }
+    delete masterySchemaWip.id
+    masterySchemaWip.title = 'KOPI: ' + masterySchemaWip.title
     isEditorOpen = true
   }
 
@@ -109,8 +138,23 @@
     }
   }
 
-  const getSchoolName = (schoolId: string | undefined) => {
-    return schools.find(school => school.id === schoolId)?.displayName || '??'
+  const toggleIsEnabled = async (masterySchema: MasterySchemaType) => {
+    try {
+      const current = masterySchema.isEnabled ?? false
+      await masterySchemasPartialUpdate({
+        path: { id: masterySchema.id },
+        body: { isEnabled: !current },
+      })
+    } catch (error) {
+      console.error('Error updating isEnabled:', error)
+    } finally {
+      await fetchMasterySchemas()
+    }
+  }
+
+  const getMasteryLevelsSummary = (masterySchema: MasterySchemaWithConfig) => {
+    const calculations = useMasteryCalculations(masterySchema)
+    return calculations.minValue + ' - ' + calculations.maxValue
   }
 
   $effect(() => {
@@ -161,11 +205,30 @@
         skin: 'primary',
         variant: 'label-only',
         classes: '',
-        onClick: () => handleEditMasterySchema(null),
+        onClick: () => handleNewMasterySchema(),
       }}
     >
       Nytt mestringsskjema
     </ButtonMini>
+
+    {#if masterySchemas.length > 0 && !areSchemaValuesConsistent}
+      <div class="alert alert-warning mt-4">
+        Mestringsskjemaene for denne skolen har ulik range. Dette kan føre til inkonsistente
+        visninger og problemer med datakvalitet. Vurder å justere range i skjemaene slik at de er
+        like.
+      </div>
+    {/if}
+    {#if masterySchemas.length > 0 && !masterySchemas.some(schema => schema.isEnabled)}
+      <div class="alert alert-warning mt-4">
+        Ingen av mestringsskjemaene for denne skolen er satt til enabled.
+      </div>
+    {/if}
+    {#if masterySchemas.length > 0 && !masterySchemas.some(schema => schema.isDefault)}
+      <div class="alert alert-warning mt-4">
+        Ingen av mestringsskjemaene for denne skolen er satt til default.
+      </div>
+    {/if}
+    <p>Input variants: {VALUE_INPUT_VARIANTS.join(', ')}</p>
 
     <div class="pkt-input-check mt-3">
       <div class="pkt-input-check__input">
@@ -188,14 +251,19 @@
               <h3 class="card-title">
                 {masterySchema.title}
               </h3>
-              <h5 class="card-title">
-                {getSchoolName(masterySchema.schoolId)}
-              </h5>
-              <p class="card-text">
+              <p>
                 {masterySchema.description || 'Ingen beskrivelse'}
               </p>
+              <p class="text-muted">
+                Range: {getMasteryLevelsSummary(masterySchema)}
+                <br />
+                Input: {masterySchema.config.valueInput}
+                <br />
+                ID: {masterySchema.id}
+                <br />
+              </p>
 
-              <div class="mb-4">
+              <div class="mb-2">
                 <pkt-checkbox
                   label={masterySchema.isDefault ? 'Default schema for school' : 'Not default'}
                   labelPosition="right"
@@ -207,14 +275,30 @@
               </div>
 
               <div class="mb-4">
+                <pkt-checkbox
+                  label={masterySchema.isEnabled ? 'Currently enabled' : 'Currently disabled'}
+                  labelPosition="right"
+                  isSwitch="true"
+                  aria-checked={masterySchema.isEnabled}
+                  checked={masterySchema.isEnabled}
+                  onchange={() => toggleIsEnabled(masterySchema)}
+                ></pkt-checkbox>
+              </div>
+
+              <div class="mb-4 d-flex gap-2">
                 {#each masterySchema?.config?.levels || [] as level}
-                  <span
-                    class="p-2"
-                    style="background-color: {level.color ||
-                      'white'};  color: {getContrastFriendlyTextColor(level.color)};"
-                  >
-                    {level.title}
-                  </span>
+                  <div class="d-flex flex-column align-items-center">
+                    <span
+                      class="p-2 w-100 text-center"
+                      style="background-color: {level.color ||
+                        'white'}; color: {getContrastFriendlyTextColor(level.color)};"
+                    >
+                      {level.title}
+                    </span>
+                    <span class="small text-muted py-1 bg-light w-100 text-center">
+                      {level.minValue}&nbsp;➡&nbsp;{level.maxValue}
+                    </span>
+                  </div>
                 {/each}
               </div>
 
@@ -235,6 +319,19 @@
                 }}
               >
                 Rediger
+              </ButtonMini>
+
+              <ButtonMini
+                options={{
+                  title: 'Kopier',
+                  iconName: 'copy',
+                  skin: 'secondary',
+                  variant: 'icon-left',
+                  classes: 'my-2 me-2',
+                  onClick: () => handleCopyMasterySchema(masterySchema),
+                }}
+              >
+                Kopier
               </ButtonMini>
 
               <ButtonMini

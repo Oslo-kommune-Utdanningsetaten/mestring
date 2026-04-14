@@ -69,12 +69,15 @@ def fetch_metadata(request):
         },
         "role_counts": {
             "superadmin": models.User.objects.filter(is_superadmin=True).count(),
+            "teacher": {},
+            "admin": 0,
+            "inspector": 0,
         }
     }
     if org_number:
         school = models.School.objects.filter(org_number=org_number).first()
         if school:
-            result["role_counts"]["teacher_basis"] = models.User.objects.filter(
+            result["role_counts"]["teacher"]["basis"] = models.User.objects.filter(
                 user_groups__group__school=school,
                 user_groups__group__type="basis",
                 user_groups__role__name="teacher",
@@ -82,7 +85,7 @@ def fetch_metadata(request):
                 user_groups__group__deleted_at__isnull=True,
                 deleted_at__isnull=True
             ).distinct().count()
-            result["role_counts"]["teacher_teaching"] = models.User.objects.filter(
+            result["role_counts"]["teacher"]["teaching"] = models.User.objects.filter(
                 user_groups__group__school=school,
                 user_groups__group__type="teaching",
                 user_groups__role__name="teacher",
@@ -243,6 +246,13 @@ def fetch_memberships_for_school(request, org_number):
             required=True,
             type={'type': 'string'},
             location=OpenApiParameter.PATH
+        ),
+        OpenApiParameter(
+            name='anonymize',
+            description='Whether to anonymize user data when fetching',
+            required=False,
+            type={'type': 'boolean'},
+            location=OpenApiParameter.QUERY
         )
     ]
 )
@@ -255,6 +265,9 @@ def fetch_groups_and_users(request, org_number):
             {"error": "unknown-school", "message": f"School not found for org {org_number}"},
             status=404,
         )
+
+    anonymize, _ = get_request_param(request.query_params, 'anonymize')
+    anonymize = bool(anonymize)
 
     # Check if there's already a (pending or running) task for this org_number
     existing_task = models.DataMaintenanceTask.objects.filter(
@@ -278,7 +291,7 @@ def fetch_groups_and_users(request, org_number):
     task2 = models.DataMaintenanceTask.objects.create(
         status="pending",
         job_name="fetch_memberships_from_feide",
-        job_params={"org_number": org_number},
+        job_params={"org_number": org_number, "anonymize": anonymize},
         display_name=f"Fetch memberships for {school.display_name}",
         earliest_run_at=timezone.now()
     )

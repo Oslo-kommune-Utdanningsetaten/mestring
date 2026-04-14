@@ -77,6 +77,7 @@ export type MasterySchemaType = {
     description?: string | null;
     config?: unknown;
     isDefault?: boolean;
+    isEnabled?: boolean;
     readonly createdById: string;
     readonly updatedById: string;
     schoolId: string;
@@ -200,6 +201,7 @@ export type PatchedMasterySchemaType = {
     description?: string | null;
     config?: unknown;
     isDefault?: boolean;
+    isEnabled?: boolean;
     readonly createdById?: string;
     readonly updatedById?: string;
     schoolId?: string;
@@ -519,6 +521,7 @@ export type MasterySchemaCreateType = {
     description?: string | null;
     config?: unknown;
     isDefault?: boolean;
+    isEnabled?: boolean;
     schoolId: string;
 };
 
@@ -593,6 +596,7 @@ export type PatchedMasterySchemaCreateType = {
     description?: string | null;
     config?: unknown;
     isDefault?: boolean;
+    isEnabled?: boolean;
     schoolId?: string;
 };
 
@@ -958,7 +962,12 @@ export type FetchGroupsAndUsersData = {
          */
         orgNumber: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Whether to anonymize user data when fetching
+         */
+        anonymize?: boolean;
+    };
     url: '/api/fetch/groups_and_users/feide/{orgNumber}/';
 };
 
@@ -1010,7 +1019,7 @@ export type FetchSchoolImportStatusResponses = {
 export type GoalsListData = {
     body?: never;
     path?: never;
-    query?: {
+    query: {
         /**
          * Filter goals by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
@@ -1027,6 +1036,10 @@ export type GoalsListData = {
          * Which field to use when ordering the results.
          */
         ordering?: string;
+        /**
+         * Filter goals by school
+         */
+        school: string;
         /**
          * Filter goals by the student owning them. Using this parameter will return both individual goals and group goals where the student is a member.
          */
@@ -2407,13 +2420,21 @@ export type UsersListData = {
          */
         groups?: string;
         /**
-         * Filter users by roles the users have. Comma-separated list of role names (student, teacher, staff, admin,inspector)
+         * Only return users with these IDs (comma-separated list of user ids)
+         */
+        ids?: string;
+        /**
+         * Filter users by roles the users have. Comma-separated list of role names (student, teacher, staff, admin, inspector)
          */
         roles?: string;
         /**
          * Filter users by School ID (users in any group of that school)
          */
         school: string;
+        /**
+         * Filter users by what kind of groups the teach. Implies roles=teacher. Value should be either "basis" or "teaching".
+         */
+        teacher?: string;
     };
     url: '/api/users/';
 };

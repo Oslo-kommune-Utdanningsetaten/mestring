@@ -86,8 +86,22 @@ class SchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
+                name='ids',
+                description='Only return users with these IDs (comma-separated list of user ids)',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='roles',
-                description='Filter users by roles the users have. Comma-separated list of role names (student, teacher, staff, admin,inspector)',
+                description='Filter users by roles the users have. Comma-separated list of role names (student, teacher, staff, admin, inspector)',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='teacher',
+                description='Filter users by what kind of groups the teach. Implies roles=teacher. Value should be either "basis" or "teaching".',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
@@ -121,8 +135,11 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
+            ids_param, _ = get_request_param(self.request.query_params, 'ids')
             roles_param, _ = get_request_param(self.request.query_params, 'roles')
             groups_param, _ = get_request_param(self.request.query_params, 'groups')
+            teacher_param, _ = get_request_param(self.request.query_params, 'teacher')
+            include_superadmins = False
 
             if not school_param:
                 raise ValidationError(
@@ -148,6 +165,18 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 if role_names:
                     user_group_filters &= Q(user_groups__role__name__in=role_names)
                     user_school_filters &= Q(user_schools__role__name__in=role_names)
+                    include_superadmins = 'superadmin' in role_names
+
+            # Add filter for what kind of teacher the user is
+            if teacher_param:
+                user_group_filters &= Q(user_groups__group__type=teacher_param,
+                                        user_groups__role__name__in=['teacher'])
+
+            # Add user id filter if specified
+            if ids_param:
+                user_ids = [user_id.strip() for user_id in ids_param.split(',') if user_id]
+                if user_ids:
+                    qs = qs.filter(id__in=user_ids)
 
             # Apply filters: if groups specified, only via user_groups; otherwise both paths
             if groups_param:
@@ -156,6 +185,10 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
             else:
                 # No groups: users can match via either user_groups OR user_schools
                 qs = qs.filter(user_group_filters | user_school_filters)
+
+            # If filtering by roles and superadmin is included, also include superadmins who may not have a UserSchool or UserGroup entry
+            if include_superadmins:
+                qs = qs | self.access_policy().scope_queryset(self.request, super().get_queryset()).filter(is_superadmin=True)
         return qs.distinct()
 
 
@@ -540,6 +573,13 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
     list=extend_schema(
         parameters=[
             OpenApiParameter(
+                name='school',
+                description='Filter goals by school',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='student',
                 description='Filter goals by the student owning them. Using this parameter will return both individual goals and group goals where the student is a member.',
                 required=False,
@@ -590,22 +630,25 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
         qs = apply_deleted_filter(self.request.query_params, qs)
 
         if self.action == 'list':
+            school_param, _ = get_request_param(self.request.query_params, 'school')
             group_param, _ = get_request_param(self.request.query_params, 'group')
             student_param, _ = get_request_param(self.request.query_params, 'student')
             subject_param, _ = get_request_param(self.request.query_params, 'subject')
             include_observations_param, _ = get_request_param(
                 self.request.query_params, 'include_observations')
 
-            if (not student_param) and (not subject_param) and (not group_param):
+            if (not school_param) and (not student_param) and (not subject_param) and (not group_param):
                 raise ValidationError(
                     {'error': 'missing-parameter',
-                     'message': 'At least one of "subject", "group" or "student" parameters are required.'})
+                     'message': 'At least one of "school", "subject", "group" or "student" parameters are required.'})
 
             if (group_param and subject_param):
                 raise ValidationError(
                     {'error': 'wrong-parameter',
                      'message':
                      'group and subject parameters cannot be used together (goals are either individual or group).'})
+
+            qs = qs.filter(school_id=school_param)
 
             if group_param:
                 qs = qs.filter(group_id=group_param)

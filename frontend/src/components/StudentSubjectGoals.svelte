@@ -24,9 +24,9 @@
   import AuthorInfo from './AuthorInfo.svelte'
 
   import Sortable, { type SortableEvent } from 'sortablejs'
-  import { getLocalStorageItem } from '../stores/localStorage'
+  import { localStorage } from '../stores/localStorage'
   import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
-  import { hasUserAccessToFeature } from '../stores/data'
+  import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
 
@@ -49,6 +49,7 @@
   let isObservationViewerOpen = $state<boolean>(false)
   let isStatusEditorOpen = $state<boolean>(false)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
+  const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
 
   const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
   const today = new Date()
@@ -61,6 +62,7 @@
     goalsForSubject = await fetchGoalsForSubjectAndStudent(
       subject.id,
       student.id,
+      $dataStore.currentSchool?.id!,
       $dataStore.currentUser.allGroups
     )
   }
@@ -87,7 +89,7 @@
     if (goal.id) {
       goalWip = {
         ...goal,
-        subjectId: goal?.subjectId || getLocalStorageItem('preferredSubjectId'),
+        subjectId: goal?.subjectId || localStorage<string>('preferredSubjectId').get(),
         studentId: student.id,
         sortOrder: goal?.sortOrder || (goalsForSubject?.length ? goalsForSubject.length + 1 : 1),
         masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,
@@ -354,10 +356,12 @@
             masteryData={goal.masteryData}
             masterySchema={getMasterySchmemaForGoal(goal)}
           />
-          <MasteryBarChart
-            data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
-            masterySchema={getMasterySchmemaForGoal(goal)}
-          />
+          {#if $isMasteryBarChartVisible}
+            <MasteryBarChart
+              data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
+              masterySchema={getMasterySchmemaForGoal(goal)}
+            />
+          {/if}
         {/if}
       </span>
 

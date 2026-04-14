@@ -345,7 +345,7 @@ def mastery_schema(db, school):
                 },
             ],
             "input_increment": 1,
-            "render_direction": "horizontal",
+            "value_input": "sliderHorizontal",
         },
     )
 
@@ -378,8 +378,7 @@ def mastery_schema_other_school(db, other_school):
                 },
             ],
             "inputIncrement": 1,
-            "renderDirection": "horizontal",
-            "isColorGradientEnabled": False
+            "valueInput": "sliderHorizontal",
         },
     )
 

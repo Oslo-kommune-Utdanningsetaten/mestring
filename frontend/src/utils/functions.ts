@@ -63,11 +63,17 @@ export const subjectNamesFromStudentGoals = (
 export const fetchGoalsForSubjectAndStudent = async (
   subjectId: string,
   studentId: string,
+  schoolId: string,
   studentGroups: GroupType[]
 ): Promise<GoalDecorated[]> => {
   try {
     const goalsResult = await goalsList({
-      query: { student: studentId, subject: subjectId, includeObservations: true },
+      query: {
+        student: studentId,
+        subject: subjectId,
+        includeObservations: true,
+        school: schoolId,
+      },
     })
     const goals = goalsResult.data || []
     const groupIds = goals.map(goal => goal.groupId).filter(Boolean) as string[]

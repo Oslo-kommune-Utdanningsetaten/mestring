@@ -23,6 +23,9 @@ backend/.venv
 # ai agent tooling
 .goose
 .gooseignore
+.agents
+.claude
+.github/skills
 
 # non-code files in notes
 notes/*.docx
