@@ -24,7 +24,7 @@
     "vite": "^6.4.2"
   },
   "dependencies": {
-    "@hey-api/openapi-ts": "^0.86.1",
+    "@hey-api/openapi-ts": "^0.94.5",
     "@oslokommune/punkt-assets": "^13.16.0",
     "@oslokommune/punkt-css": "^13.19.0",
     "@oslokommune/punkt-elements": "^13.20.0",
