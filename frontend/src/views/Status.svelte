@@ -77,8 +77,6 @@
 
   const handleDelete = async () => {
     if (!status) return
-    const confirmMessage = `Er du sikker på at du vil slette status "${status.title}"?`
-    if (!window.confirm(confirmMessage)) return
     try {
       await statusDestroy({ path: { id: statusId } })
       trackEvent('Status', 'Delete')
