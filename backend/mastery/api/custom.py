@@ -292,7 +292,7 @@ def fetch_groups_and_users(request, org_number):
         status="pending",
         job_name="fetch_memberships_from_feide",
         job_params={"org_number": org_number, "anonymize": anonymize},
-        display_name=f"Fetch memberships for {school.display_name}",
+        display_name=f"Fetch{' ANONYMOUS ' if anonymize else ' '}memberships for {school.display_name}",
         earliest_run_at=timezone.now()
     )
     return Response(status=201, data={"status": "tasks_created", "task_ids": [task.id, task2.id]})

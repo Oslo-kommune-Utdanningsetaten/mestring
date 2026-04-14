@@ -105,7 +105,7 @@ def fetch_memberships_from_feide(org_number: str, anonymize=False):
                 "is_done": False,
             }
 
-    # Write per-school users file
+    # Write per-school memberships file
     os.makedirs(school_dir, exist_ok=True)
     memberships_file = os.path.join(school_dir, 'memberships.json')
     with open(memberships_file, "w", encoding="utf-8") as file:

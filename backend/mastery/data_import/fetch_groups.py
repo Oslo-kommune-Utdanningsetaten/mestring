@@ -117,13 +117,13 @@ def fetch_groups_from_feide(org_number: str):
             }
 
     # Deduplicate subjects by code
-    seen = set()
+    seen_subjects = set()
     unique_subjects = []
     for subject in all_results['subjects']:
         code = subject.get('code')
-        if code and code not in seen:
+        if code and code not in seen_subjects:
             unique_subjects.append(subject)
-            seen.add(code)
+            seen_subjects.add(code)
     all_results['subjects'] = unique_subjects
 
     # Write to per-school file

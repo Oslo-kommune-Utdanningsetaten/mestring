@@ -44,27 +44,27 @@ def create_user_item(member, anonymize=False):
         affiliations = feide_affiliations if isinstance(feide_affiliations, list) else []
 
     if anonymize:
-        # If anonymization is requested, generate fake users, consistent accross groups
-        if fake_users_by_feide_id.get(feide_id):
-            # Reuse previously generated fake user for this feide_id
-            user_item = fake_users_by_feide_id[feide_id]
-        else:
+        # If anonymization is requested, generate fake users
+        # Reuse fake user for this feide_id, lest we create a new fake user for each group membership
+        user_item = fake_users_by_feide_id.get(feide_id)
+        if not user_item:
             # Generate new fake user
-            first_name = names.get_first_name()
-            last_name = names.get_last_name()
-            anon_feide_id = first_name[0:3] + last_name[0:3] + str(
+            anon_first_name = names.get_first_name()
+            anon_last_name = names.get_last_name()
+            anon_feide_id = anon_first_name[0:3] + anon_last_name[0:3] + str(
                 random.randrange(0, 1000)).zfill(3) + '@feide.osloskolen.no'
-            user_item = {}
-            user_item["name"] = f"{first_name} {last_name}"
-            user_item["feide_id"] = anon_feide_id
-            user_item["email"] = anon_feide_id.replace("@feide.", "@")
-            user_item["affiliations"] = affiliations
+            user_item = {
+                "name": f"{anon_first_name} {anon_last_name}",
+                "feide_id": anon_feide_id,
+                "email": anon_feide_id.replace("@feide.", "@"),
+                "affiliations": affiliations,
+            }
             fake_users_by_feide_id[feide_id] = user_item
     else:
         # Return actual user data
         user_item = {
-            "feide_id": feide_id,
             "name": member["name"],
+            "feide_id": feide_id,
             "email": email,
             "affiliations": affiliations,
         }
