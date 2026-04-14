@@ -1,0 +1,41 @@
+version: 2
+updates:
+  # Security updates for npm → target dev-server branch
+  - package-ecosystem: 'npm'
+    directory: '/frontend'
+    schedule:
+      interval: 'daily'
+    target-branch: 'dev-server'
+    applies-to: security-updates
+
+  # Ignore all regular version updates for npm
+  - package-ecosystem: 'npm'
+    directory: '/frontend'
+    schedule:
+      interval: 'daily'
+    ignore:
+      - dependency-name: '*'
+        update-types:
+          - 'version-update:semver-major'
+          - 'version-update:semver-minor'
+          - 'version-update:semver-patch'
+
+  # Security updates for pip → target dev-server branch
+  - package-ecosystem: 'pip'
+    directory: '/backend'
+    schedule:
+      interval: 'daily'
+    target-branch: 'dev-server'
+    applies-to: security-updates
+
+  # Ignore all regular version updates for pip
+  - package-ecosystem: 'pip'
+    directory: '/backend'
+    schedule:
+      interval: 'daily'
+    ignore:
+      - dependency-name: '*'
+        update-types:
+          - 'version-update:semver-major'
+          - 'version-update:semver-minor'
+          - 'version-update:semver-patch'
