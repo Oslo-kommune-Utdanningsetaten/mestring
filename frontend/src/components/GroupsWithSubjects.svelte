@@ -1,31 +1,43 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
-  import { groupsList } from '../generated/sdk.gen'
-  import type { GroupType } from '../generated/types.gen'
+  import { groupsList, observationsList } from '../generated/sdk.gen'
+  import type { GroupType, ObservationType } from '../generated/types.gen'
   import GroupRow from './GroupRow.svelte'
-  import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
-
-  let isLoading = $state<boolean>(true)
-  let groups = $derived<GroupType[]>([])
-  let currentSchool = $derived($dataStore.currentSchool)
-  let subjects = $derived($dataStore.subjects)
-  let areAllGroupsOfSameType = $derived(
-    groups.length > 0 ? groups.every(group => group.type === groups[0].type) : true
-  )
-  let groupType = $derived(areAllGroupsOfSameType ? groups[0].type : null)
+  import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
 
   const { groupIds } = $props<{
     groupIds: string[]
   }>()
+  let isLoading = $state<boolean>(true)
+  let currentSchool = $derived($dataStore.currentSchool)
+  let subjects = $derived($dataStore.subjects)
+  let groups = $derived<GroupType[]>(
+    $dataStore.currentUser.allGroups.filter((group: GroupType) => groupIds.includes(group.id))
+  )
+  let areAllGroupsOfSameType = $derived(
+    groups.length > 0 ? groups.every(group => group.type === groups[0].type) : true
+  )
+  let groupType = $derived(areAllGroupsOfSameType ? groups[0].type : null)
+  let observationsByGroupId = $derived<Record<string, ObservationType[]>>({})
 
   const fetchGroups = async () => {
     try {
       isLoading = true
-      const results = await groupsList({
-        query: { ids: groupIds.join(','), school: currentSchool.id },
-      })
-      groups = results.data || []
-      subjects = subjects.filter(subject => groups.some(group => group.subjectId === subject.id))
+      await Promise.all(
+        groups.map(async (group: GroupType) => {
+          const observationsResult = await observationsList({
+            query: { group: group.id, school: currentSchool.id },
+          })
+          observationsByGroupId = {
+            ...observationsByGroupId,
+            [group.id]: observationsResult.data || [],
+          }
+        })
+      )
+
+      const subjectsFromGroupGoals = subjects.filter(subject =>
+        groups.some(group => group.subjectId === subject.id)
+      )
     } catch (error) {
       console.error('Error fetching groups', { groupIds, error })
       groups = []
@@ -55,7 +67,7 @@
     {:else if groupType === GROUP_TYPE_TEACHING}
       <p class="mt-3">Sammenligning av undervisningsgrupper er ikke støttet ennå.</p>
     {:else if groupType === GROUP_TYPE_BASIS}
-      <pre>{JSON.stringify({ areAllGroupsOfSameType, groups }, null, 2)}</pre>
+      <pre>{JSON.stringify({ areAllGroupsOfSameType, observationsByGroupId }, null, 2)}</pre>
 
       <div class="groups-grid" aria-label="Gruppeliste" style="--columns-count: {subjects.length}">
         <span class="item header header-row">Group</span>
