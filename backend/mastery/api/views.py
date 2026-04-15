@@ -834,8 +834,7 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
                 group = models.Group.objects.filter(
                     id=group_param, deleted_at__isnull=True, is_enabled=True).first()
                 if group and group.type == 'basis':
-                    print('BASIS group:', group)
-                    # For basis groups, include observations which point at users who are student members of the group
+                    # For basis groups, include observations for student members of the group
                     user_groups = models.UserGroup.objects.filter(
                         group_id=group_param,
                         group__is_enabled=True,
@@ -843,7 +842,6 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
                         role__name='student',
                         deleted_at__isnull=True
                     )
-                    print('Matching user_groups', user_groups)
                     qs = qs.filter(
                         Q(student_id__in=user_groups.values_list('user_id', flat=True))
                     )
