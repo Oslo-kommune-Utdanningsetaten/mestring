@@ -10,6 +10,7 @@
   import UserTag from '../components/UserTag.svelte'
   import Link from '../components/Link.svelte'
   import GroupsCompare from '../components/GroupsCompare.svelte'
+  import GroupsWithSubjects from '../components/GroupsWithSubjects.svelte'
 
   let currentSchool = $derived($dataStore.currentSchool)
   let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
@@ -50,7 +51,7 @@
 </script>
 
 {#if groupIds.length}
-  <GroupsCompare {groupIds} />
+  <GroupsWithSubjects {groupIds} />
 {:else}
   <section class="py-3">
     <h2>Mine grupper</h2>
