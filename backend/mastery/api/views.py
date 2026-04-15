@@ -343,7 +343,7 @@ class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
             ),
             OpenApiParameter(
                 name='school',
-                description='Filter users by School ID (users in any group of that school)',
+                description='Filter groups by School ID (groups at school)',
                 required=True,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
