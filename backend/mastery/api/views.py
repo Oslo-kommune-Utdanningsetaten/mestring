@@ -482,7 +482,7 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
             OpenApiParameter(
                 name='school',
                 description='All subjects belonging to school, either directly via owned_by_school or via groups belonging to school',
-                required=False,
+                required=True,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),

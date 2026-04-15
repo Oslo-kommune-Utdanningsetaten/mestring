@@ -6,7 +6,7 @@
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
 
   let isLoading = $state<boolean>(true)
-  let groups = $derived<GroupType[]>(null)
+  let groups = $derived<GroupType[]>([])
   let currentSchool = $derived($dataStore.currentSchool)
   let subjects = $derived($dataStore.subjects)
   let areAllGroupsOfSameType = $derived(
@@ -19,11 +19,20 @@
   }>()
 
   const fetchGroups = async () => {
-    const results = await groupsList({
-      query: { ids: groupIds.join(','), school: currentSchool.id },
-    })
-    groups = results.data || []
-    subjects = subjects.filter(subject => groups.some(group => group.subjectId === subject.id))
+    try {
+      isLoading = true
+      const results = await groupsList({
+        query: { ids: groupIds.join(','), school: currentSchool.id },
+      })
+      groups = results.data || []
+      subjects = subjects.filter(subject => groups.some(group => group.subjectId === subject.id))
+    } catch (error) {
+      console.error('Error fetching groups', { groupIds, error })
+      groups = []
+      subjects = []
+    } finally {
+      isLoading = false
+    }
   }
 
   $effect(() => {
@@ -32,17 +41,16 @@
 </script>
 
 <section class="py-3">
-  {#if groups === null}
+  {#if isLoading}
     <div class="mt-3">Laster...</div>
   {:else}
-    <h2>Sammenligner {groupType} grupper</h2>
+    <h2>Sammenligner {groupType === GROUP_TYPE_BASIS ? 'basis' : 'undervisnings'}grupper</h2>
     <p class="text-muted">[{groupIds.join(', ')}]</p>
     {#if groups.length === 0}
-      <div class="mt-3">🫤</div>
+      <div class="mt-3">Ingen grupper å sammenligne 🫤</div>
     {:else if !areAllGroupsOfSameType}
       <p class="mt-3">
-        Du kan bare sammenligne like gruppetyper: Alle gruppene må enten være basis eller
-        undervisning.
+        Du kan bare sammenligne grupper av samme type: Enten basis eller undervisning.
       </p>
     {:else if groupType === GROUP_TYPE_TEACHING}
       <p class="mt-3">Sammenligning av undervisningsgrupper er ikke støttet ennå.</p>
