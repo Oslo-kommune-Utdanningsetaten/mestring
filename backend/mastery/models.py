@@ -365,6 +365,13 @@ class Observation(BaseModel):
     observed_at = models.DateTimeField(null=True)
     is_visible_to_student = models.BooleanField(default=True)
 
+    def save(self, **kwargs):
+        # Auto-derive subject from goal if not explicitly set
+        if self.goal_id and not self.subject_id:
+            self.subject_id = self.goal.subject_id or (
+                self.goal.group.subject_id if self.goal.group_id else None)
+        super().save(**kwargs)
+
     class Meta:
         ordering = ["observed_at"]
 

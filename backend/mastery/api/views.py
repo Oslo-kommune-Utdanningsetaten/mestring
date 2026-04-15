@@ -846,10 +846,10 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
                         Q(student_id__in=user_groups.values_list('user_id', flat=True))
                     )
                 elif group and group.type == 'teaching':
-                    # For teaching group, include observations which belong to the groups subject (either via goal->group or directly on the goal)
+                    # For teaching group, include observations which belong to the groups subject (either via goal->group or directly on the observation)
                     qs = qs.filter(
                         Q(goal__group__id=group_param) |
-                        Q(goal__subject_id=group.subject_id)
+                        Q(subject_id=group.subject_id)
                     )
             if from_param:
                 try:

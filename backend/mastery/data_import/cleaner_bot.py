@@ -122,7 +122,7 @@ def soft_delete_observations(school, now, dry_run=False):
     # If student is soft-deleted -> mark as deleted
     on_individual_goals_on_school = Q(
         goal__student__isnull=False,
-        goal__subject__owned_by_school=school
+        subject__owned_by_school=school
     )
     on_group_goals_on_school = Q(goal__group__school=school)
     observations = models.Observation.objects.filter(
@@ -207,7 +207,7 @@ def hard_delete_observations(school, now, dry_run=False):
     # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_OBSERVATION days, hard delete
     on_individual_goals_on_school = Q(
         goal__student__isnull=False,
-        goal__subject__owned_by_school=school
+        subject__owned_by_school=school
     )
     on_group_goals_on_school = Q(goal__group__school=school)
 

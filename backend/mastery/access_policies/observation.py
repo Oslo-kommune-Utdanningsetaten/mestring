@@ -101,7 +101,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
                 memberships_in_teacher_group_on_subject = UserGroup.objects.filter(
                     user_id=OuterRef('goal__student_id'),
                     group_id__in=teacher_teaching_group_ids,
-                    group__subject_id=OuterRef('goal__subject_id'),
+                    group__subject_id=OuterRef('subject_id'),
                 )
                 qs = qs.annotate(teacher_teaches_student_subject=Exists(
                     memberships_in_teacher_group_on_subject))
@@ -206,7 +206,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
 
             # Get goal info without loading the full object
             goal = Goal.objects.filter(id=target_observation.goal_id).values(
-                'group_id', 'subject_id', 'school_id'
+                'group_id', 'school_id'
             ).first()
             if not goal:
                 return False
@@ -225,7 +225,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             ).exists()
 
             teaches_subject_at_school = requester.teacher_groups.filter(
-                subject_id=goal['subject_id'],
+                subject_id=target_observation.subject_id,
                 members__id=target_observation.student_id,
                 school_id=goal['school_id']
             ).exists()
