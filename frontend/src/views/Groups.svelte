@@ -9,7 +9,6 @@
   import GroupTag from '../components/GroupTag.svelte'
   import UserTag from '../components/UserTag.svelte'
   import Link from '../components/Link.svelte'
-  import GroupsCompare from '../components/GroupsCompare.svelte'
   import GroupsWithSubjects from '../components/GroupsWithSubjects.svelte'
 
   let currentSchool = $derived($dataStore.currentSchool)
