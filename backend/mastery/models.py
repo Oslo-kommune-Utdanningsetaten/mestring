@@ -349,15 +349,6 @@ class Goal(BaseModel):
         return self.group_id is None and self.student_id is not None
 
 
-class Situation(BaseModel):
-    """
-    A Situation represents a case wherein student mastery is observed. This can be a lesson, a test, conversation, or any other situation where a student demonstrates mastery
-    """
-    title = models.CharField(max_length=200, null=False)
-    description = models.TextField(null=True)
-    happens_at = models.DateTimeField(null=True)
-
-
 class Observation(BaseModel):
     """
     An Observation represents an observation of a student, performed by a teacher or student. Only teachers, inspectors and admins can access an observation if is_visible_to_student is False.
@@ -367,7 +358,7 @@ class Observation(BaseModel):
                                 related_name='observations_received')
     observer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
                                  related_name='observations_performed')
-    situation = models.ForeignKey(Situation, on_delete=models.SET_NULL, null=True)
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name='observations')
     mastery_value = models.IntegerField(null=True)
     mastery_description = models.TextField(null=True)
     feedforward = models.TextField(null=True)

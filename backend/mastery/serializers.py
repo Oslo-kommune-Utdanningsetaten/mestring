@@ -133,12 +133,6 @@ class GoalSerializer(BaseModelSerializer):
         return fields
 
 
-class SituationSerializer(BaseModelSerializer):
-    class Meta:
-        model = models.Situation
-        fields = '__all__'
-
-
 class ObservationSerializer(BaseModelSerializer):
     class Meta:
         model = models.Observation

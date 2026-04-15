@@ -2,9 +2,9 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AuthStatusRetrieveData, AuthStatusRetrieveResponses, DataMaintenanceTasksCreateData, DataMaintenanceTasksCreateResponses, DataMaintenanceTasksDestroyData, DataMaintenanceTasksDestroyResponses, DataMaintenanceTasksListData, DataMaintenanceTasksListResponses, DataMaintenanceTasksPartialUpdateData, DataMaintenanceTasksPartialUpdateResponses, DataMaintenanceTasksRetrieveData, DataMaintenanceTasksRetrieveResponses, DataMaintenanceTasksUpdateData, DataMaintenanceTasksUpdateResponses, EstimateCleanupData, EstimateCleanupResponses, EstimateGroupsImportData, EstimateGroupsImportResponses, EstimateMembershipsImportData, EstimateMembershipsImportResponses, EstimateUsersImportData, EstimateUsersImportResponses, FeideImportSchoolData, FeideImportSchoolResponses, FetchGroupsAndUsersData, FetchGroupsAndUsersResponses, FetchGroupsForSchoolData, FetchGroupsForSchoolResponses, FetchMembershipsForSchoolData, FetchMembershipsForSchoolResponses, FetchMetadataData, FetchMetadataResponses, FetchSchoolImportStatusData, FetchSchoolImportStatusResponses, GoalsCreateData, GoalsCreateResponses, GoalsDestroyData, GoalsDestroyResponses, GoalsListData, GoalsListResponses, GoalsPartialUpdateData, GoalsPartialUpdateResponses, GoalsRetrieveData, GoalsRetrieveResponses, GoalsUpdateData, GoalsUpdateResponses, GroupsCreateData, GroupsCreateResponses, GroupsDestroyData, GroupsDestroyResponses, GroupsListData, GroupsListResponses, GroupsPartialUpdateData, GroupsPartialUpdateResponses, GroupsRetrieveData, GroupsRetrieveResponses, GroupsUpdateData, GroupsUpdateResponses, ImportGroupsAndUsersData, ImportGroupsAndUsersResponses, MasterySchemasCreateData, MasterySchemasCreateResponses, MasterySchemasDestroyData, MasterySchemasDestroyResponses, MasterySchemasListData, MasterySchemasListResponses, MasterySchemasPartialUpdateData, MasterySchemasPartialUpdateResponses, MasterySchemasRetrieveData, MasterySchemasRetrieveResponses, MasterySchemasUpdateData, MasterySchemasUpdateResponses, ObservationsCreateData, ObservationsCreateResponses, ObservationsDestroyData, ObservationsDestroyResponses, ObservationsListData, ObservationsListResponses, ObservationsPartialUpdateData, ObservationsPartialUpdateResponses, ObservationsRetrieveData, ObservationsRetrieveResponses, ObservationsUpdateData, ObservationsUpdateResponses, PingRetrieveData, PingRetrieveResponses, RolesCreateData, RolesCreateResponses, RolesDestroyData, RolesDestroyResponses, RolesListData, RolesListResponses, RolesPartialUpdateData, RolesPartialUpdateResponses, RolesRetrieveData, RolesRetrieveResponses, RolesUpdateData, RolesUpdateResponses, SchoolsCreateData, SchoolsCreateResponses, SchoolsDestroyData, SchoolsDestroyResponses, SchoolsListData, SchoolsListResponses, SchoolsPartialUpdateData, SchoolsPartialUpdateResponses, SchoolsRetrieveData, SchoolsRetrieveResponses, SchoolsUpdateData, SchoolsUpdateResponses, SituationsCreateData, SituationsCreateResponses, SituationsDestroyData, SituationsDestroyResponses, SituationsListData, SituationsListResponses, SituationsPartialUpdateData, SituationsPartialUpdateResponses, SituationsRetrieveData, SituationsRetrieveResponses, SituationsUpdateData, SituationsUpdateResponses, StatusCreateData, StatusCreateResponses, StatusDestroyData, StatusDestroyResponses, StatusListData, StatusListResponses, StatusPartialUpdateData, StatusPartialUpdateResponses, StatusRetrieveData, StatusRetrieveResponses, StatusUpdateData, StatusUpdateResponses, SubjectsCreateData, SubjectsCreateResponses, SubjectsDestroyData, SubjectsDestroyResponses, SubjectsListData, SubjectsListResponses, SubjectsPartialUpdateData, SubjectsPartialUpdateResponses, SubjectsRetrieveData, SubjectsRetrieveResponses, SubjectsUpdateData, SubjectsUpdateResponses, UpdateDataIntegrityData, UpdateDataIntegrityResponses, UserGroupsCreateData, UserGroupsCreateResponses, UserGroupsDestroyData, UserGroupsDestroyResponses, UserGroupsListData, UserGroupsListResponses, UserGroupsPartialUpdateData, UserGroupsPartialUpdateResponses, UserGroupsRetrieveData, UserGroupsRetrieveResponses, UserGroupsUpdateData, UserGroupsUpdateResponses, UserSchoolsCreateData, UserSchoolsCreateResponses, UserSchoolsDestroyData, UserSchoolsDestroyResponses, UserSchoolsListData, UserSchoolsListResponses, UserSchoolsPartialUpdateData, UserSchoolsPartialUpdateResponses, UserSchoolsRetrieveData, UserSchoolsRetrieveResponses, UserSchoolsUpdateData, UserSchoolsUpdateResponses, UsersCreateData, UsersCreateResponses, UsersDestroyData, UsersDestroyResponses, UsersListData, UsersListResponses, UsersPartialUpdateData, UsersPartialUpdateResponses, UsersRetrieveData, UsersRetrieveResponses, UsersUpdateData, UsersUpdateResponses } from './types.gen';
+import type { AuthStatusRetrieveData, AuthStatusRetrieveResponses, DataMaintenanceTasksCreateData, DataMaintenanceTasksCreateResponses, DataMaintenanceTasksDestroyData, DataMaintenanceTasksDestroyResponses, DataMaintenanceTasksListData, DataMaintenanceTasksListResponses, DataMaintenanceTasksPartialUpdateData, DataMaintenanceTasksPartialUpdateResponses, DataMaintenanceTasksRetrieveData, DataMaintenanceTasksRetrieveResponses, DataMaintenanceTasksUpdateData, DataMaintenanceTasksUpdateResponses, EstimateCleanupData, EstimateCleanupResponses, EstimateGroupsImportData, EstimateGroupsImportResponses, EstimateMembershipsImportData, EstimateMembershipsImportResponses, EstimateUsersImportData, EstimateUsersImportResponses, FeideImportSchoolData, FeideImportSchoolResponses, FetchGroupsAndUsersData, FetchGroupsAndUsersResponses, FetchGroupsForSchoolData, FetchGroupsForSchoolResponses, FetchMembershipsForSchoolData, FetchMembershipsForSchoolResponses, FetchMetadataData, FetchMetadataResponses, FetchSchoolImportStatusData, FetchSchoolImportStatusResponses, GoalsCreateData, GoalsCreateResponses, GoalsDestroyData, GoalsDestroyResponses, GoalsListData, GoalsListResponses, GoalsPartialUpdateData, GoalsPartialUpdateResponses, GoalsRetrieveData, GoalsRetrieveResponses, GoalsUpdateData, GoalsUpdateResponses, GroupsCreateData, GroupsCreateResponses, GroupsDestroyData, GroupsDestroyResponses, GroupsListData, GroupsListResponses, GroupsPartialUpdateData, GroupsPartialUpdateResponses, GroupsRetrieveData, GroupsRetrieveResponses, GroupsUpdateData, GroupsUpdateResponses, ImportGroupsAndUsersData, ImportGroupsAndUsersResponses, MasterySchemasCreateData, MasterySchemasCreateResponses, MasterySchemasDestroyData, MasterySchemasDestroyResponses, MasterySchemasListData, MasterySchemasListResponses, MasterySchemasPartialUpdateData, MasterySchemasPartialUpdateResponses, MasterySchemasRetrieveData, MasterySchemasRetrieveResponses, MasterySchemasUpdateData, MasterySchemasUpdateResponses, ObservationsCreateData, ObservationsCreateResponses, ObservationsDestroyData, ObservationsDestroyResponses, ObservationsListData, ObservationsListResponses, ObservationsPartialUpdateData, ObservationsPartialUpdateResponses, ObservationsRetrieveData, ObservationsRetrieveResponses, ObservationsUpdateData, ObservationsUpdateResponses, PingRetrieveData, PingRetrieveResponses, RolesCreateData, RolesCreateResponses, RolesDestroyData, RolesDestroyResponses, RolesListData, RolesListResponses, RolesPartialUpdateData, RolesPartialUpdateResponses, RolesRetrieveData, RolesRetrieveResponses, RolesUpdateData, RolesUpdateResponses, SchoolsCreateData, SchoolsCreateResponses, SchoolsDestroyData, SchoolsDestroyResponses, SchoolsListData, SchoolsListResponses, SchoolsPartialUpdateData, SchoolsPartialUpdateResponses, SchoolsRetrieveData, SchoolsRetrieveResponses, SchoolsUpdateData, SchoolsUpdateResponses, StatusCreateData, StatusCreateResponses, StatusDestroyData, StatusDestroyResponses, StatusListData, StatusListResponses, StatusPartialUpdateData, StatusPartialUpdateResponses, StatusRetrieveData, StatusRetrieveResponses, StatusUpdateData, StatusUpdateResponses, SubjectsCreateData, SubjectsCreateResponses, SubjectsDestroyData, SubjectsDestroyResponses, SubjectsListData, SubjectsListResponses, SubjectsPartialUpdateData, SubjectsPartialUpdateResponses, SubjectsRetrieveData, SubjectsRetrieveResponses, SubjectsUpdateData, SubjectsUpdateResponses, UpdateDataIntegrityData, UpdateDataIntegrityResponses, UserGroupsCreateData, UserGroupsCreateResponses, UserGroupsDestroyData, UserGroupsDestroyResponses, UserGroupsListData, UserGroupsListResponses, UserGroupsPartialUpdateData, UserGroupsPartialUpdateResponses, UserGroupsRetrieveData, UserGroupsRetrieveResponses, UserGroupsUpdateData, UserGroupsUpdateResponses, UserSchoolsCreateData, UserSchoolsCreateResponses, UserSchoolsDestroyData, UserSchoolsDestroyResponses, UserSchoolsListData, UserSchoolsListResponses, UserSchoolsPartialUpdateData, UserSchoolsPartialUpdateResponses, UserSchoolsRetrieveData, UserSchoolsRetrieveResponses, UserSchoolsUpdateData, UserSchoolsUpdateResponses, UsersCreateData, UsersCreateResponses, UsersDestroyData, UsersDestroyResponses, UsersListData, UsersListResponses, UsersPartialUpdateData, UsersPartialUpdateResponses, UsersRetrieveData, UsersRetrieveResponses, UsersUpdateData, UsersUpdateResponses } from './types.gen';
 
-export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
+export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
      * You can provide a client instance returned by `createClient()` instead of
      * individual options. This might be also useful if you want to implement a
@@ -18,862 +18,486 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: Record<string, unknown>;
 };
 
-export const dataMaintenanceTasksList = <ThrowOnError extends boolean = false>(options?: Options<DataMaintenanceTasksListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<DataMaintenanceTasksListResponses, unknown, ThrowOnError>({
-        url: '/api/data-maintenance-tasks/',
-        ...options
-    });
-};
+export const dataMaintenanceTasksList = <ThrowOnError extends boolean = false>(options?: Options<DataMaintenanceTasksListData, ThrowOnError>) => (options?.client ?? client).get<DataMaintenanceTasksListResponses, unknown, ThrowOnError>({ url: '/api/data-maintenance-tasks/', ...options });
 
-export const dataMaintenanceTasksCreate = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<DataMaintenanceTasksCreateResponses, unknown, ThrowOnError>({
-        url: '/api/data-maintenance-tasks/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const dataMaintenanceTasksCreate = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksCreateData, ThrowOnError>) => (options.client ?? client).post<DataMaintenanceTasksCreateResponses, unknown, ThrowOnError>({
+    url: '/api/data-maintenance-tasks/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const dataMaintenanceTasksDestroy = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<DataMaintenanceTasksDestroyResponses, unknown, ThrowOnError>({
-        url: '/api/data-maintenance-tasks/{id}/',
-        ...options
-    });
-};
+export const dataMaintenanceTasksDestroy = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksDestroyData, ThrowOnError>) => (options.client ?? client).delete<DataMaintenanceTasksDestroyResponses, unknown, ThrowOnError>({ url: '/api/data-maintenance-tasks/{id}/', ...options });
 
-export const dataMaintenanceTasksRetrieve = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<DataMaintenanceTasksRetrieveResponses, unknown, ThrowOnError>({
-        url: '/api/data-maintenance-tasks/{id}/',
-        ...options
-    });
-};
+export const dataMaintenanceTasksRetrieve = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksRetrieveData, ThrowOnError>) => (options.client ?? client).get<DataMaintenanceTasksRetrieveResponses, unknown, ThrowOnError>({ url: '/api/data-maintenance-tasks/{id}/', ...options });
 
-export const dataMaintenanceTasksPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<DataMaintenanceTasksPartialUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/data-maintenance-tasks/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const dataMaintenanceTasksPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<DataMaintenanceTasksPartialUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/data-maintenance-tasks/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const dataMaintenanceTasksUpdate = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<DataMaintenanceTasksUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/data-maintenance-tasks/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const dataMaintenanceTasksUpdate = <ThrowOnError extends boolean = false>(options: Options<DataMaintenanceTasksUpdateData, ThrowOnError>) => (options.client ?? client).put<DataMaintenanceTasksUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/data-maintenance-tasks/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Estimate cleanup
  *
  * Dry-run the cleaner bot to show which rows would be soft-deleted and hard-deleted, without actually modifying any data.
  */
-export const estimateCleanup = <ThrowOnError extends boolean = false>(options: Options<EstimateCleanupData, ThrowOnError>) => {
-    return (options.client ?? client).get<EstimateCleanupResponses, unknown, ThrowOnError>({
-        url: '/api/estimate/cleanup/{orgNumber}/',
-        ...options
-    });
-};
+export const estimateCleanup = <ThrowOnError extends boolean = false>(options: Options<EstimateCleanupData, ThrowOnError>) => (options.client ?? client).get<EstimateCleanupResponses, unknown, ThrowOnError>({ url: '/api/estimate/cleanup/{orgNumber}/', ...options });
 
 /**
  * Estimate groups import
  *
  * Return the groups that exist in fetched data but are not yet imported into the database.
  */
-export const estimateGroupsImport = <ThrowOnError extends boolean = false>(options: Options<EstimateGroupsImportData, ThrowOnError>) => {
-    return (options.client ?? client).get<EstimateGroupsImportResponses, unknown, ThrowOnError>({
-        url: '/api/estimate/groups/{orgNumber}/',
-        ...options
-    });
-};
+export const estimateGroupsImport = <ThrowOnError extends boolean = false>(options: Options<EstimateGroupsImportData, ThrowOnError>) => (options.client ?? client).get<EstimateGroupsImportResponses, unknown, ThrowOnError>({ url: '/api/estimate/groups/{orgNumber}/', ...options });
 
 /**
  * Estimate memberships import
  *
  * Return the memberships (user+group+role combinations) that exist in fetched data but are not yet imported into the database.
  */
-export const estimateMembershipsImport = <ThrowOnError extends boolean = false>(options: Options<EstimateMembershipsImportData, ThrowOnError>) => {
-    return (options.client ?? client).get<EstimateMembershipsImportResponses, unknown, ThrowOnError>({
-        url: '/api/estimate/memberships/{orgNumber}/',
-        ...options
-    });
-};
+export const estimateMembershipsImport = <ThrowOnError extends boolean = false>(options: Options<EstimateMembershipsImportData, ThrowOnError>) => (options.client ?? client).get<EstimateMembershipsImportResponses, unknown, ThrowOnError>({ url: '/api/estimate/memberships/{orgNumber}/', ...options });
 
 /**
  * Estimate users import
  *
  * Return the users that exist in fetched data but are not yet imported into the database.
  */
-export const estimateUsersImport = <ThrowOnError extends boolean = false>(options: Options<EstimateUsersImportData, ThrowOnError>) => {
-    return (options.client ?? client).get<EstimateUsersImportResponses, unknown, ThrowOnError>({
-        url: '/api/estimate/users/{orgNumber}/',
-        ...options
-    });
-};
+export const estimateUsersImport = <ThrowOnError extends boolean = false>(options: Options<EstimateUsersImportData, ThrowOnError>) => (options.client ?? client).get<EstimateUsersImportResponses, unknown, ThrowOnError>({ url: '/api/estimate/users/{orgNumber}/', ...options });
 
 /**
  * Fetch groups for school
  *
  * Fetch Feide groups for a single school (by org number) and store them at data_import/data/schools/<org>/groups.json. Returns simple counts.
  */
-export const fetchGroupsForSchool = <ThrowOnError extends boolean = false>(options: Options<FetchGroupsForSchoolData, ThrowOnError>) => {
-    return (options.client ?? client).post<FetchGroupsForSchoolResponses, unknown, ThrowOnError>({
-        url: '/api/fetch/groups/feide/{orgNumber}/',
-        ...options
-    });
-};
+export const fetchGroupsForSchool = <ThrowOnError extends boolean = false>(options: Options<FetchGroupsForSchoolData, ThrowOnError>) => (options.client ?? client).post<FetchGroupsForSchoolResponses, unknown, ThrowOnError>({ url: '/api/fetch/groups/feide/{orgNumber}/', ...options });
 
 /**
  * Fetch group and user data for a school
  *
  * Fetch group memberships for a single school (by org number) and store at data_import/data/schools/<org>/users.json. Also fetch groups into data_import/data/schools/<org>/memberships.json.
  */
-export const fetchGroupsAndUsers = <ThrowOnError extends boolean = false>(options: Options<FetchGroupsAndUsersData, ThrowOnError>) => {
-    return (options.client ?? client).post<FetchGroupsAndUsersResponses, unknown, ThrowOnError>({
-        url: '/api/fetch/groups_and_users/feide/{orgNumber}/',
-        ...options
-    });
-};
+export const fetchGroupsAndUsers = <ThrowOnError extends boolean = false>(options: Options<FetchGroupsAndUsersData, ThrowOnError>) => (options.client ?? client).post<FetchGroupsAndUsersResponses, unknown, ThrowOnError>({ url: '/api/fetch/groups_and_users/feide/{orgNumber}/', ...options });
 
 /**
  * Fetch group memberships for school
  *
  * Fetch group memberships for a single school (by org number) and store at data_import/data/schools/<org>/users.json
  */
-export const fetchMembershipsForSchool = <ThrowOnError extends boolean = false>(options: Options<FetchMembershipsForSchoolData, ThrowOnError>) => {
-    return (options.client ?? client).post<FetchMembershipsForSchoolResponses, unknown, ThrowOnError>({
-        url: '/api/fetch/memberships/feide/{orgNumber}/',
-        ...options
-    });
-};
+export const fetchMembershipsForSchool = <ThrowOnError extends boolean = false>(options: Options<FetchMembershipsForSchoolData, ThrowOnError>) => (options.client ?? client).post<FetchMembershipsForSchoolResponses, unknown, ThrowOnError>({ url: '/api/fetch/memberships/feide/{orgNumber}/', ...options });
 
 /**
  * Get school import status
  *
  * Return status for one school: Groups, Users, Memberships (last fetch count + time, DB count, diff) and last import timestamp.
  */
-export const fetchSchoolImportStatus = <ThrowOnError extends boolean = false>(options: Options<FetchSchoolImportStatusData, ThrowOnError>) => {
-    return (options.client ?? client).get<FetchSchoolImportStatusResponses, unknown, ThrowOnError>({
-        url: '/api/fetch/school_import_status/{orgNumber}/',
-        ...options
-    });
-};
+export const fetchSchoolImportStatus = <ThrowOnError extends boolean = false>(options: Options<FetchSchoolImportStatusData, ThrowOnError>) => (options.client ?? client).get<FetchSchoolImportStatusResponses, unknown, ThrowOnError>({ url: '/api/fetch/school_import_status/{orgNumber}/', ...options });
 
-export const goalsList = <ThrowOnError extends boolean = false>(options: Options<GoalsListData, ThrowOnError>) => {
-    return (options.client ?? client).get<GoalsListResponses, unknown, ThrowOnError>({
-        url: '/api/goals/',
-        ...options
-    });
-};
+export const goalsList = <ThrowOnError extends boolean = false>(options: Options<GoalsListData, ThrowOnError>) => (options.client ?? client).get<GoalsListResponses, unknown, ThrowOnError>({ url: '/api/goals/', ...options });
 
-export const goalsCreate = <ThrowOnError extends boolean = false>(options: Options<GoalsCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<GoalsCreateResponses, unknown, ThrowOnError>({
-        url: '/api/goals/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const goalsCreate = <ThrowOnError extends boolean = false>(options: Options<GoalsCreateData, ThrowOnError>) => (options.client ?? client).post<GoalsCreateResponses, unknown, ThrowOnError>({
+    url: '/api/goals/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const goalsDestroy = <ThrowOnError extends boolean = false>(options: Options<GoalsDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<GoalsDestroyResponses, unknown, ThrowOnError>({
-        url: '/api/goals/{id}/',
-        ...options
-    });
-};
+export const goalsDestroy = <ThrowOnError extends boolean = false>(options: Options<GoalsDestroyData, ThrowOnError>) => (options.client ?? client).delete<GoalsDestroyResponses, unknown, ThrowOnError>({ url: '/api/goals/{id}/', ...options });
 
-export const goalsRetrieve = <ThrowOnError extends boolean = false>(options: Options<GoalsRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<GoalsRetrieveResponses, unknown, ThrowOnError>({
-        url: '/api/goals/{id}/',
-        ...options
-    });
-};
+export const goalsRetrieve = <ThrowOnError extends boolean = false>(options: Options<GoalsRetrieveData, ThrowOnError>) => (options.client ?? client).get<GoalsRetrieveResponses, unknown, ThrowOnError>({ url: '/api/goals/{id}/', ...options });
 
-export const goalsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<GoalsPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<GoalsPartialUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/goals/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const goalsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<GoalsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<GoalsPartialUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/goals/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const goalsUpdate = <ThrowOnError extends boolean = false>(options: Options<GoalsUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<GoalsUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/goals/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const goalsUpdate = <ThrowOnError extends boolean = false>(options: Options<GoalsUpdateData, ThrowOnError>) => (options.client ?? client).put<GoalsUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/goals/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const groupsList = <ThrowOnError extends boolean = false>(options: Options<GroupsListData, ThrowOnError>) => {
-    return (options.client ?? client).get<GroupsListResponses, unknown, ThrowOnError>({
-        url: '/api/groups/',
-        ...options
-    });
-};
+export const groupsList = <ThrowOnError extends boolean = false>(options: Options<GroupsListData, ThrowOnError>) => (options.client ?? client).get<GroupsListResponses, unknown, ThrowOnError>({ url: '/api/groups/', ...options });
 
-export const groupsCreate = <ThrowOnError extends boolean = false>(options: Options<GroupsCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<GroupsCreateResponses, unknown, ThrowOnError>({
-        url: '/api/groups/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const groupsCreate = <ThrowOnError extends boolean = false>(options: Options<GroupsCreateData, ThrowOnError>) => (options.client ?? client).post<GroupsCreateResponses, unknown, ThrowOnError>({
+    url: '/api/groups/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const groupsDestroy = <ThrowOnError extends boolean = false>(options: Options<GroupsDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<GroupsDestroyResponses, unknown, ThrowOnError>({
-        url: '/api/groups/{id}/',
-        ...options
-    });
-};
+export const groupsDestroy = <ThrowOnError extends boolean = false>(options: Options<GroupsDestroyData, ThrowOnError>) => (options.client ?? client).delete<GroupsDestroyResponses, unknown, ThrowOnError>({ url: '/api/groups/{id}/', ...options });
 
-export const groupsRetrieve = <ThrowOnError extends boolean = false>(options: Options<GroupsRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<GroupsRetrieveResponses, unknown, ThrowOnError>({
-        url: '/api/groups/{id}/',
-        ...options
-    });
-};
+export const groupsRetrieve = <ThrowOnError extends boolean = false>(options: Options<GroupsRetrieveData, ThrowOnError>) => (options.client ?? client).get<GroupsRetrieveResponses, unknown, ThrowOnError>({ url: '/api/groups/{id}/', ...options });
 
-export const groupsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<GroupsPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<GroupsPartialUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/groups/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const groupsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<GroupsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<GroupsPartialUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/groups/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const groupsUpdate = <ThrowOnError extends boolean = false>(options: Options<GroupsUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<GroupsUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/groups/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const groupsUpdate = <ThrowOnError extends boolean = false>(options: Options<GroupsUpdateData, ThrowOnError>) => (options.client ?? client).put<GroupsUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/groups/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Import school from Feide
  *
  * Import a single school by org number from Feide and create/update in our database.
  */
-export const feideImportSchool = <ThrowOnError extends boolean = false>(options: Options<FeideImportSchoolData, ThrowOnError>) => {
-    return (options.client ?? client).post<FeideImportSchoolResponses, unknown, ThrowOnError>({
-        url: '/api/import/school/feide/{orgNumber}/',
-        ...options
-    });
-};
+export const feideImportSchool = <ThrowOnError extends boolean = false>(options: Options<FeideImportSchoolData, ThrowOnError>) => (options.client ?? client).post<FeideImportSchoolResponses, unknown, ThrowOnError>({ url: '/api/import/school/feide/{orgNumber}/', ...options });
 
 /**
  * Import groups and users
  *
  * Import groups and users for a specific school from previously fetched files.
  */
-export const importGroupsAndUsers = <ThrowOnError extends boolean = false>(options: Options<ImportGroupsAndUsersData, ThrowOnError>) => {
-    return (options.client ?? client).post<ImportGroupsAndUsersResponses, unknown, ThrowOnError>({
-        url: '/api/import/school_groups_and_users/{orgNumber}/',
-        ...options
-    });
-};
+export const importGroupsAndUsers = <ThrowOnError extends boolean = false>(options: Options<ImportGroupsAndUsersData, ThrowOnError>) => (options.client ?? client).post<ImportGroupsAndUsersResponses, unknown, ThrowOnError>({ url: '/api/import/school_groups_and_users/{orgNumber}/', ...options });
 
 /**
  * Ensure data integrity is as expected
  *
  * Soft-delete data which has not been maintained during imports, and hard-delete data which has been soft-deleted for a sufficient time.
  */
-export const updateDataIntegrity = <ThrowOnError extends boolean = false>(options: Options<UpdateDataIntegrityData, ThrowOnError>) => {
-    return (options.client ?? client).post<UpdateDataIntegrityResponses, unknown, ThrowOnError>({
-        url: '/api/import/update_data_integrity/{orgNumber}/',
-        ...options
-    });
-};
+export const updateDataIntegrity = <ThrowOnError extends boolean = false>(options: Options<UpdateDataIntegrityData, ThrowOnError>) => (options.client ?? client).post<UpdateDataIntegrityResponses, unknown, ThrowOnError>({ url: '/api/import/update_data_integrity/{orgNumber}/', ...options });
 
-export const masterySchemasList = <ThrowOnError extends boolean = false>(options?: Options<MasterySchemasListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<MasterySchemasListResponses, unknown, ThrowOnError>({
-        url: '/api/mastery-schemas/',
-        ...options
-    });
-};
+export const masterySchemasList = <ThrowOnError extends boolean = false>(options?: Options<MasterySchemasListData, ThrowOnError>) => (options?.client ?? client).get<MasterySchemasListResponses, unknown, ThrowOnError>({ url: '/api/mastery-schemas/', ...options });
 
-export const masterySchemasCreate = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<MasterySchemasCreateResponses, unknown, ThrowOnError>({
-        url: '/api/mastery-schemas/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const masterySchemasCreate = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasCreateData, ThrowOnError>) => (options.client ?? client).post<MasterySchemasCreateResponses, unknown, ThrowOnError>({
+    url: '/api/mastery-schemas/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const masterySchemasDestroy = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<MasterySchemasDestroyResponses, unknown, ThrowOnError>({
-        url: '/api/mastery-schemas/{id}/',
-        ...options
-    });
-};
+export const masterySchemasDestroy = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasDestroyData, ThrowOnError>) => (options.client ?? client).delete<MasterySchemasDestroyResponses, unknown, ThrowOnError>({ url: '/api/mastery-schemas/{id}/', ...options });
 
-export const masterySchemasRetrieve = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<MasterySchemasRetrieveResponses, unknown, ThrowOnError>({
-        url: '/api/mastery-schemas/{id}/',
-        ...options
-    });
-};
+export const masterySchemasRetrieve = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasRetrieveData, ThrowOnError>) => (options.client ?? client).get<MasterySchemasRetrieveResponses, unknown, ThrowOnError>({ url: '/api/mastery-schemas/{id}/', ...options });
 
-export const masterySchemasPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<MasterySchemasPartialUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/mastery-schemas/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const masterySchemasPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<MasterySchemasPartialUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/mastery-schemas/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const masterySchemasUpdate = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<MasterySchemasUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/mastery-schemas/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const masterySchemasUpdate = <ThrowOnError extends boolean = false>(options: Options<MasterySchemasUpdateData, ThrowOnError>) => (options.client ?? client).put<MasterySchemasUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/mastery-schemas/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Get service metadata
  *
  * Display various metrics related to roles and data longevity
  */
-export const fetchMetadata = <ThrowOnError extends boolean = false>(options?: Options<FetchMetadataData, ThrowOnError>) => {
-    return (options?.client ?? client).get<FetchMetadataResponses, unknown, ThrowOnError>({
-        url: '/api/metadata/',
-        ...options
-    });
-};
+export const fetchMetadata = <ThrowOnError extends boolean = false>(options?: Options<FetchMetadataData, ThrowOnError>) => (options?.client ?? client).get<FetchMetadataResponses, unknown, ThrowOnError>({ url: '/api/metadata/', ...options });
 
-export const observationsList = <ThrowOnError extends boolean = false>(options?: Options<ObservationsListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ObservationsListResponses, unknown, ThrowOnError>({
-        url: '/api/observations/',
-        ...options
-    });
-};
+export const observationsList = <ThrowOnError extends boolean = false>(options?: Options<ObservationsListData, ThrowOnError>) => (options?.client ?? client).get<ObservationsListResponses, unknown, ThrowOnError>({ url: '/api/observations/', ...options });
 
-export const observationsCreate = <ThrowOnError extends boolean = false>(options: Options<ObservationsCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<ObservationsCreateResponses, unknown, ThrowOnError>({
-        url: '/api/observations/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const observationsCreate = <ThrowOnError extends boolean = false>(options: Options<ObservationsCreateData, ThrowOnError>) => (options.client ?? client).post<ObservationsCreateResponses, unknown, ThrowOnError>({
+    url: '/api/observations/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const observationsDestroy = <ThrowOnError extends boolean = false>(options: Options<ObservationsDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<ObservationsDestroyResponses, unknown, ThrowOnError>({
-        url: '/api/observations/{id}/',
-        ...options
-    });
-};
+export const observationsDestroy = <ThrowOnError extends boolean = false>(options: Options<ObservationsDestroyData, ThrowOnError>) => (options.client ?? client).delete<ObservationsDestroyResponses, unknown, ThrowOnError>({ url: '/api/observations/{id}/', ...options });
 
-export const observationsRetrieve = <ThrowOnError extends boolean = false>(options: Options<ObservationsRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<ObservationsRetrieveResponses, unknown, ThrowOnError>({
-        url: '/api/observations/{id}/',
-        ...options
-    });
-};
+export const observationsRetrieve = <ThrowOnError extends boolean = false>(options: Options<ObservationsRetrieveData, ThrowOnError>) => (options.client ?? client).get<ObservationsRetrieveResponses, unknown, ThrowOnError>({ url: '/api/observations/{id}/', ...options });
 
-export const observationsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ObservationsPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<ObservationsPartialUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/observations/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const observationsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ObservationsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<ObservationsPartialUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/observations/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const observationsUpdate = <ThrowOnError extends boolean = false>(options: Options<ObservationsUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<ObservationsUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/observations/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const observationsUpdate = <ThrowOnError extends boolean = false>(options: Options<ObservationsUpdateData, ThrowOnError>) => (options.client ?? client).put<ObservationsUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/observations/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const pingRetrieve = <ThrowOnError extends boolean = false>(options?: Options<PingRetrieveData, ThrowOnError>) => {
-    return (options?.client ?? client).get<PingRetrieveResponses, unknown, ThrowOnError>({
-        url: '/api/ping/',
-        ...options
-    });
-};
+export const pingRetrieve = <ThrowOnError extends boolean = false>(options?: Options<PingRetrieveData, ThrowOnError>) => (options?.client ?? client).get<PingRetrieveResponses, unknown, ThrowOnError>({ url: '/api/ping/', ...options });
 
-export const rolesList = <ThrowOnError extends boolean = false>(options?: Options<RolesListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<RolesListResponses, unknown, ThrowOnError>({
-        url: '/api/roles/',
-        ...options
-    });
-};
+export const rolesList = <ThrowOnError extends boolean = false>(options?: Options<RolesListData, ThrowOnError>) => (options?.client ?? client).get<RolesListResponses, unknown, ThrowOnError>({ url: '/api/roles/', ...options });
 
-export const rolesCreate = <ThrowOnError extends boolean = false>(options: Options<RolesCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<RolesCreateResponses, unknown, ThrowOnError>({
-        url: '/api/roles/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const rolesCreate = <ThrowOnError extends boolean = false>(options: Options<RolesCreateData, ThrowOnError>) => (options.client ?? client).post<RolesCreateResponses, unknown, ThrowOnError>({
+    url: '/api/roles/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const rolesDestroy = <ThrowOnError extends boolean = false>(options: Options<RolesDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<RolesDestroyResponses, unknown, ThrowOnError>({
-        url: '/api/roles/{id}/',
-        ...options
-    });
-};
+export const rolesDestroy = <ThrowOnError extends boolean = false>(options: Options<RolesDestroyData, ThrowOnError>) => (options.client ?? client).delete<RolesDestroyResponses, unknown, ThrowOnError>({ url: '/api/roles/{id}/', ...options });
 
-export const rolesRetrieve = <ThrowOnError extends boolean = false>(options: Options<RolesRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<RolesRetrieveResponses, unknown, ThrowOnError>({
-        url: '/api/roles/{id}/',
-        ...options
-    });
-};
+export const rolesRetrieve = <ThrowOnError extends boolean = false>(options: Options<RolesRetrieveData, ThrowOnError>) => (options.client ?? client).get<RolesRetrieveResponses, unknown, ThrowOnError>({ url: '/api/roles/{id}/', ...options });
 
-export const rolesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<RolesPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<RolesPartialUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/roles/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const rolesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<RolesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<RolesPartialUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/roles/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const rolesUpdate = <ThrowOnError extends boolean = false>(options: Options<RolesUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<RolesUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/roles/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const rolesUpdate = <ThrowOnError extends boolean = false>(options: Options<RolesUpdateData, ThrowOnError>) => (options.client ?? client).put<RolesUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/roles/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const schoolsList = <ThrowOnError extends boolean = false>(options?: Options<SchoolsListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<SchoolsListResponses, unknown, ThrowOnError>({
-        url: '/api/schools/',
-        ...options
-    });
-};
+export const schoolsList = <ThrowOnError extends boolean = false>(options?: Options<SchoolsListData, ThrowOnError>) => (options?.client ?? client).get<SchoolsListResponses, unknown, ThrowOnError>({ url: '/api/schools/', ...options });
 
-export const schoolsCreate = <ThrowOnError extends boolean = false>(options: Options<SchoolsCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<SchoolsCreateResponses, unknown, ThrowOnError>({
-        url: '/api/schools/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const schoolsCreate = <ThrowOnError extends boolean = false>(options: Options<SchoolsCreateData, ThrowOnError>) => (options.client ?? client).post<SchoolsCreateResponses, unknown, ThrowOnError>({
+    url: '/api/schools/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const schoolsDestroy = <ThrowOnError extends boolean = false>(options: Options<SchoolsDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<SchoolsDestroyResponses, unknown, ThrowOnError>({
-        url: '/api/schools/{id}/',
-        ...options
-    });
-};
+export const schoolsDestroy = <ThrowOnError extends boolean = false>(options: Options<SchoolsDestroyData, ThrowOnError>) => (options.client ?? client).delete<SchoolsDestroyResponses, unknown, ThrowOnError>({ url: '/api/schools/{id}/', ...options });
 
-export const schoolsRetrieve = <ThrowOnError extends boolean = false>(options: Options<SchoolsRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<SchoolsRetrieveResponses, unknown, ThrowOnError>({
-        url: '/api/schools/{id}/',
-        ...options
-    });
-};
+export const schoolsRetrieve = <ThrowOnError extends boolean = false>(options: Options<SchoolsRetrieveData, ThrowOnError>) => (options.client ?? client).get<SchoolsRetrieveResponses, unknown, ThrowOnError>({ url: '/api/schools/{id}/', ...options });
 
-export const schoolsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<SchoolsPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<SchoolsPartialUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/schools/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const schoolsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<SchoolsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<SchoolsPartialUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/schools/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const schoolsUpdate = <ThrowOnError extends boolean = false>(options: Options<SchoolsUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<SchoolsUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/schools/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const schoolsUpdate = <ThrowOnError extends boolean = false>(options: Options<SchoolsUpdateData, ThrowOnError>) => (options.client ?? client).put<SchoolsUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/schools/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const situationsList = <ThrowOnError extends boolean = false>(options?: Options<SituationsListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<SituationsListResponses, unknown, ThrowOnError>({
-        url: '/api/situations/',
-        ...options
-    });
-};
+export const statusList = <ThrowOnError extends boolean = false>(options?: Options<StatusListData, ThrowOnError>) => (options?.client ?? client).get<StatusListResponses, unknown, ThrowOnError>({ url: '/api/status/', ...options });
 
-export const situationsCreate = <ThrowOnError extends boolean = false>(options: Options<SituationsCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<SituationsCreateResponses, unknown, ThrowOnError>({
-        url: '/api/situations/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const statusCreate = <ThrowOnError extends boolean = false>(options: Options<StatusCreateData, ThrowOnError>) => (options.client ?? client).post<StatusCreateResponses, unknown, ThrowOnError>({
+    url: '/api/status/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const situationsDestroy = <ThrowOnError extends boolean = false>(options: Options<SituationsDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<SituationsDestroyResponses, unknown, ThrowOnError>({
-        url: '/api/situations/{id}/',
-        ...options
-    });
-};
+export const statusDestroy = <ThrowOnError extends boolean = false>(options: Options<StatusDestroyData, ThrowOnError>) => (options.client ?? client).delete<StatusDestroyResponses, unknown, ThrowOnError>({ url: '/api/status/{id}/', ...options });
 
-export const situationsRetrieve = <ThrowOnError extends boolean = false>(options: Options<SituationsRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<SituationsRetrieveResponses, unknown, ThrowOnError>({
-        url: '/api/situations/{id}/',
-        ...options
-    });
-};
+export const statusRetrieve = <ThrowOnError extends boolean = false>(options: Options<StatusRetrieveData, ThrowOnError>) => (options.client ?? client).get<StatusRetrieveResponses, unknown, ThrowOnError>({ url: '/api/status/{id}/', ...options });
 
-export const situationsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<SituationsPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<SituationsPartialUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/situations/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const statusPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<StatusPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<StatusPartialUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/status/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const situationsUpdate = <ThrowOnError extends boolean = false>(options: Options<SituationsUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<SituationsUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/situations/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const statusUpdate = <ThrowOnError extends boolean = false>(options: Options<StatusUpdateData, ThrowOnError>) => (options.client ?? client).put<StatusUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/status/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const statusList = <ThrowOnError extends boolean = false>(options?: Options<StatusListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<StatusListResponses, unknown, ThrowOnError>({
-        url: '/api/status/',
-        ...options
-    });
-};
+export const subjectsList = <ThrowOnError extends boolean = false>(options: Options<SubjectsListData, ThrowOnError>) => (options.client ?? client).get<SubjectsListResponses, unknown, ThrowOnError>({ url: '/api/subjects/', ...options });
 
-export const statusCreate = <ThrowOnError extends boolean = false>(options: Options<StatusCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<StatusCreateResponses, unknown, ThrowOnError>({
-        url: '/api/status/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const subjectsCreate = <ThrowOnError extends boolean = false>(options: Options<SubjectsCreateData, ThrowOnError>) => (options.client ?? client).post<SubjectsCreateResponses, unknown, ThrowOnError>({
+    url: '/api/subjects/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const statusDestroy = <ThrowOnError extends boolean = false>(options: Options<StatusDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<StatusDestroyResponses, unknown, ThrowOnError>({
-        url: '/api/status/{id}/',
-        ...options
-    });
-};
+export const subjectsDestroy = <ThrowOnError extends boolean = false>(options: Options<SubjectsDestroyData, ThrowOnError>) => (options.client ?? client).delete<SubjectsDestroyResponses, unknown, ThrowOnError>({ url: '/api/subjects/{id}/', ...options });
 
-export const statusRetrieve = <ThrowOnError extends boolean = false>(options: Options<StatusRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<StatusRetrieveResponses, unknown, ThrowOnError>({
-        url: '/api/status/{id}/',
-        ...options
-    });
-};
+export const subjectsRetrieve = <ThrowOnError extends boolean = false>(options: Options<SubjectsRetrieveData, ThrowOnError>) => (options.client ?? client).get<SubjectsRetrieveResponses, unknown, ThrowOnError>({ url: '/api/subjects/{id}/', ...options });
 
-export const statusPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<StatusPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<StatusPartialUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/status/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const subjectsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<SubjectsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<SubjectsPartialUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/subjects/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const statusUpdate = <ThrowOnError extends boolean = false>(options: Options<StatusUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<StatusUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/status/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const subjectsUpdate = <ThrowOnError extends boolean = false>(options: Options<SubjectsUpdateData, ThrowOnError>) => (options.client ?? client).put<SubjectsUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/subjects/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const subjectsList = <ThrowOnError extends boolean = false>(options?: Options<SubjectsListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<SubjectsListResponses, unknown, ThrowOnError>({
-        url: '/api/subjects/',
-        ...options
-    });
-};
+export const userGroupsList = <ThrowOnError extends boolean = false>(options: Options<UserGroupsListData, ThrowOnError>) => (options.client ?? client).get<UserGroupsListResponses, unknown, ThrowOnError>({ url: '/api/user-groups/', ...options });
 
-export const subjectsCreate = <ThrowOnError extends boolean = false>(options: Options<SubjectsCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<SubjectsCreateResponses, unknown, ThrowOnError>({
-        url: '/api/subjects/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const userGroupsCreate = <ThrowOnError extends boolean = false>(options?: Options<UserGroupsCreateData, ThrowOnError>) => (options?.client ?? client).post<UserGroupsCreateResponses, unknown, ThrowOnError>({
+    url: '/api/user-groups/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
 
-export const subjectsDestroy = <ThrowOnError extends boolean = false>(options: Options<SubjectsDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<SubjectsDestroyResponses, unknown, ThrowOnError>({
-        url: '/api/subjects/{id}/',
-        ...options
-    });
-};
+export const userGroupsDestroy = <ThrowOnError extends boolean = false>(options: Options<UserGroupsDestroyData, ThrowOnError>) => (options.client ?? client).delete<UserGroupsDestroyResponses, unknown, ThrowOnError>({ url: '/api/user-groups/{id}/', ...options });
 
-export const subjectsRetrieve = <ThrowOnError extends boolean = false>(options: Options<SubjectsRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<SubjectsRetrieveResponses, unknown, ThrowOnError>({
-        url: '/api/subjects/{id}/',
-        ...options
-    });
-};
+export const userGroupsRetrieve = <ThrowOnError extends boolean = false>(options: Options<UserGroupsRetrieveData, ThrowOnError>) => (options.client ?? client).get<UserGroupsRetrieveResponses, unknown, ThrowOnError>({ url: '/api/user-groups/{id}/', ...options });
 
-export const subjectsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<SubjectsPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<SubjectsPartialUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/subjects/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const userGroupsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<UserGroupsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<UserGroupsPartialUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/user-groups/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const subjectsUpdate = <ThrowOnError extends boolean = false>(options: Options<SubjectsUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<SubjectsUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/subjects/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const userGroupsUpdate = <ThrowOnError extends boolean = false>(options: Options<UserGroupsUpdateData, ThrowOnError>) => (options.client ?? client).put<UserGroupsUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/user-groups/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const userGroupsList = <ThrowOnError extends boolean = false>(options: Options<UserGroupsListData, ThrowOnError>) => {
-    return (options.client ?? client).get<UserGroupsListResponses, unknown, ThrowOnError>({
-        url: '/api/user-groups/',
-        ...options
-    });
-};
+export const userSchoolsList = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsListData, ThrowOnError>) => (options.client ?? client).get<UserSchoolsListResponses, unknown, ThrowOnError>({ url: '/api/user-schools/', ...options });
 
-export const userGroupsCreate = <ThrowOnError extends boolean = false>(options?: Options<UserGroupsCreateData, ThrowOnError>) => {
-    return (options?.client ?? client).post<UserGroupsCreateResponses, unknown, ThrowOnError>({
-        url: '/api/user-groups/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options?.headers
-        }
-    });
-};
+export const userSchoolsCreate = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsCreateData, ThrowOnError>) => (options.client ?? client).post<UserSchoolsCreateResponses, unknown, ThrowOnError>({
+    url: '/api/user-schools/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const userGroupsDestroy = <ThrowOnError extends boolean = false>(options: Options<UserGroupsDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<UserGroupsDestroyResponses, unknown, ThrowOnError>({
-        url: '/api/user-groups/{id}/',
-        ...options
-    });
-};
+export const userSchoolsDestroy = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsDestroyData, ThrowOnError>) => (options.client ?? client).delete<UserSchoolsDestroyResponses, unknown, ThrowOnError>({ url: '/api/user-schools/{id}/', ...options });
 
-export const userGroupsRetrieve = <ThrowOnError extends boolean = false>(options: Options<UserGroupsRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<UserGroupsRetrieveResponses, unknown, ThrowOnError>({
-        url: '/api/user-groups/{id}/',
-        ...options
-    });
-};
+export const userSchoolsRetrieve = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsRetrieveData, ThrowOnError>) => (options.client ?? client).get<UserSchoolsRetrieveResponses, unknown, ThrowOnError>({ url: '/api/user-schools/{id}/', ...options });
 
-export const userGroupsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<UserGroupsPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<UserGroupsPartialUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/user-groups/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const userSchoolsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<UserSchoolsPartialUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/user-schools/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const userGroupsUpdate = <ThrowOnError extends boolean = false>(options: Options<UserGroupsUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<UserGroupsUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/user-groups/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const userSchoolsUpdate = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsUpdateData, ThrowOnError>) => (options.client ?? client).put<UserSchoolsUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/user-schools/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const userSchoolsList = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsListData, ThrowOnError>) => {
-    return (options.client ?? client).get<UserSchoolsListResponses, unknown, ThrowOnError>({
-        url: '/api/user-schools/',
-        ...options
-    });
-};
+export const usersList = <ThrowOnError extends boolean = false>(options: Options<UsersListData, ThrowOnError>) => (options.client ?? client).get<UsersListResponses, unknown, ThrowOnError>({ url: '/api/users/', ...options });
 
-export const userSchoolsCreate = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<UserSchoolsCreateResponses, unknown, ThrowOnError>({
-        url: '/api/user-schools/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const usersCreate = <ThrowOnError extends boolean = false>(options: Options<UsersCreateData, ThrowOnError>) => (options.client ?? client).post<UsersCreateResponses, unknown, ThrowOnError>({
+    url: '/api/users/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const userSchoolsDestroy = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<UserSchoolsDestroyResponses, unknown, ThrowOnError>({
-        url: '/api/user-schools/{id}/',
-        ...options
-    });
-};
+export const usersDestroy = <ThrowOnError extends boolean = false>(options: Options<UsersDestroyData, ThrowOnError>) => (options.client ?? client).delete<UsersDestroyResponses, unknown, ThrowOnError>({ url: '/api/users/{id}/', ...options });
 
-export const userSchoolsRetrieve = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<UserSchoolsRetrieveResponses, unknown, ThrowOnError>({
-        url: '/api/user-schools/{id}/',
-        ...options
-    });
-};
+export const usersRetrieve = <ThrowOnError extends boolean = false>(options: Options<UsersRetrieveData, ThrowOnError>) => (options.client ?? client).get<UsersRetrieveResponses, unknown, ThrowOnError>({ url: '/api/users/{id}/', ...options });
 
-export const userSchoolsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<UserSchoolsPartialUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/user-schools/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const usersPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<UsersPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<UsersPartialUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/users/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const userSchoolsUpdate = <ThrowOnError extends boolean = false>(options: Options<UserSchoolsUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<UserSchoolsUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/user-schools/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const usersUpdate = <ThrowOnError extends boolean = false>(options: Options<UsersUpdateData, ThrowOnError>) => (options.client ?? client).put<UsersUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/users/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const usersList = <ThrowOnError extends boolean = false>(options: Options<UsersListData, ThrowOnError>) => {
-    return (options.client ?? client).get<UsersListResponses, unknown, ThrowOnError>({
-        url: '/api/users/',
-        ...options
-    });
-};
-
-export const usersCreate = <ThrowOnError extends boolean = false>(options: Options<UsersCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<UsersCreateResponses, unknown, ThrowOnError>({
-        url: '/api/users/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-export const usersDestroy = <ThrowOnError extends boolean = false>(options: Options<UsersDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<UsersDestroyResponses, unknown, ThrowOnError>({
-        url: '/api/users/{id}/',
-        ...options
-    });
-};
-
-export const usersRetrieve = <ThrowOnError extends boolean = false>(options: Options<UsersRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<UsersRetrieveResponses, unknown, ThrowOnError>({
-        url: '/api/users/{id}/',
-        ...options
-    });
-};
-
-export const usersPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<UsersPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<UsersPartialUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/users/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-export const usersUpdate = <ThrowOnError extends boolean = false>(options: Options<UsersUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<UsersUpdateResponses, unknown, ThrowOnError>({
-        url: '/api/users/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-export const authStatusRetrieve = <ThrowOnError extends boolean = false>(options?: Options<AuthStatusRetrieveData, ThrowOnError>) => {
-    return (options?.client ?? client).get<AuthStatusRetrieveResponses, unknown, ThrowOnError>({
-        url: '/auth/status',
-        ...options
-    });
-};
+export const authStatusRetrieve = <ThrowOnError extends boolean = false>(options?: Options<AuthStatusRetrieveData, ThrowOnError>) => (options?.client ?? client).get<AuthStatusRetrieveResponses, unknown, ThrowOnError>({ url: '/auth/status', ...options });

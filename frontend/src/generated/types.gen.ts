@@ -125,7 +125,7 @@ export type ObservationType = {
     goalId: string;
     studentId: string;
     observerId?: string | null;
-    situationId?: string | null;
+    subjectId?: string | null;
 };
 
 export type PatchedDataMaintenanceTaskType = {
@@ -236,7 +236,7 @@ export type PatchedObservationType = {
     goalId?: string;
     studentId?: string;
     observerId?: string | null;
-    situationId?: string | null;
+    subjectId?: string | null;
 };
 
 export type PatchedRoleType = {
@@ -268,19 +268,6 @@ export type PatchedSchoolType = {
     isGoalTitleEnabled?: boolean;
     isStatusEnabled?: boolean;
     subjectsAllowed?: string;
-    readonly createdById?: string;
-    readonly updatedById?: string;
-};
-
-export type PatchedSituationType = {
-    readonly id?: string;
-    readonly createdAt?: string;
-    readonly updatedAt?: string;
-    readonly maintainedAt?: string | null;
-    deletedAt?: string | null;
-    title?: string;
-    description?: string | null;
-    happensAt?: string | null;
     readonly createdById?: string;
     readonly updatedById?: string;
 };
@@ -380,19 +367,6 @@ export type SchoolType = {
     isGoalTitleEnabled?: boolean;
     isStatusEnabled?: boolean;
     subjectsAllowed?: string;
-    readonly createdById: string;
-    readonly updatedById: string;
-};
-
-export type SituationType = {
-    readonly id: string;
-    readonly createdAt: string;
-    readonly updatedAt: string;
-    readonly maintainedAt: string | null;
-    deletedAt?: string | null;
-    title: string;
-    description?: string | null;
-    happensAt?: string | null;
     readonly createdById: string;
     readonly updatedById: string;
 };
@@ -543,7 +517,7 @@ export type ObservationCreateType = {
     goalId: string;
     studentId: string;
     observerId?: string | null;
-    situationId?: string | null;
+    subjectId?: string | null;
 };
 
 export type PatchedDataMaintenanceTaskCreateType = {
@@ -614,7 +588,7 @@ export type PatchedObservationCreateType = {
     goalId?: string;
     studentId?: string;
     observerId?: string | null;
-    situationId?: string | null;
+    subjectId?: string | null;
 };
 
 export type PatchedRoleCreateType = {
@@ -636,13 +610,6 @@ export type PatchedSchoolCreateType = {
     isGoalTitleEnabled?: boolean;
     isStatusEnabled?: boolean;
     subjectsAllowed?: string;
-};
-
-export type PatchedSituationCreateType = {
-    deletedAt?: string | null;
-    title?: string;
-    description?: string | null;
-    happensAt?: string | null;
 };
 
 export type PatchedStatusCreateType = {
@@ -704,13 +671,6 @@ export type SchoolCreateType = {
     isGoalTitleEnabled?: boolean;
     isStatusEnabled?: boolean;
     subjectsAllowed?: string;
-};
-
-export type SituationCreateType = {
-    deletedAt?: string | null;
-    title: string;
-    description?: string | null;
-    happensAt?: string | null;
 };
 
 export type StatusCreateType = {
@@ -1171,7 +1131,7 @@ export type GroupsListData = {
          */
         roles?: string;
         /**
-         * Filter users by School ID (users in any group of that school)
+         * Filter groups by School ID (groups at school)
          */
         school: string;
         /**
@@ -1826,107 +1786,6 @@ export type SchoolsUpdateResponses = {
 
 export type SchoolsUpdateResponse = SchoolsUpdateResponses[keyof SchoolsUpdateResponses];
 
-export type SituationsListData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/situations/';
-};
-
-export type SituationsListResponses = {
-    200: Array<SituationType>;
-};
-
-export type SituationsListResponse = SituationsListResponses[keyof SituationsListResponses];
-
-export type SituationsCreateData = {
-    body: SituationCreateType;
-    path?: never;
-    query?: never;
-    url: '/api/situations/';
-};
-
-export type SituationsCreateResponses = {
-    201: SituationType;
-};
-
-export type SituationsCreateResponse = SituationsCreateResponses[keyof SituationsCreateResponses];
-
-export type SituationsDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique value identifying this situation.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/situations/{id}/';
-};
-
-export type SituationsDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type SituationsDestroyResponse = SituationsDestroyResponses[keyof SituationsDestroyResponses];
-
-export type SituationsRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique value identifying this situation.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/situations/{id}/';
-};
-
-export type SituationsRetrieveResponses = {
-    200: SituationType;
-};
-
-export type SituationsRetrieveResponse = SituationsRetrieveResponses[keyof SituationsRetrieveResponses];
-
-export type SituationsPartialUpdateData = {
-    body?: PatchedSituationCreateType;
-    path: {
-        /**
-         * A unique value identifying this situation.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/situations/{id}/';
-};
-
-export type SituationsPartialUpdateResponses = {
-    200: SituationType;
-};
-
-export type SituationsPartialUpdateResponse = SituationsPartialUpdateResponses[keyof SituationsPartialUpdateResponses];
-
-export type SituationsUpdateData = {
-    body: SituationCreateType;
-    path: {
-        /**
-         * A unique value identifying this situation.
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/situations/{id}/';
-};
-
-export type SituationsUpdateResponses = {
-    200: SituationType;
-};
-
-export type SituationsUpdateResponse = SituationsUpdateResponses[keyof SituationsUpdateResponses];
-
 export type StatusListData = {
     body?: never;
     path?: never;
@@ -2052,7 +1911,7 @@ export type StatusUpdateResponse = StatusUpdateResponses[keyof StatusUpdateRespo
 export type SubjectsListData = {
     body?: never;
     path?: never;
-    query?: {
+    query: {
         /**
          * Filter subjects by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
@@ -2064,7 +1923,7 @@ export type SubjectsListData = {
         /**
          * All subjects belonging to school, either directly via owned_by_school or via groups belonging to school
          */
-        school?: string;
+        school: string;
         /**
          * Filter subjects by student participation. Comma-separated list of user IDs
          */
