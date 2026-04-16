@@ -8,6 +8,7 @@
   import GroupTag from '../components/GroupTag.svelte'
   import UserTag from '../components/UserTag.svelte'
   import Link from '../components/Link.svelte'
+  import GroupsCompareSelect from '../components/GroupsCompareSelect.svelte'
 
   let currentSchool = $derived($dataStore.currentSchool)
   let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
@@ -52,13 +53,7 @@
       🫤 Du har visst ikke tilgang til noen grupper på {currentSchool?.displayName}.
     </div>
   {:else}
-    {#if $hasUserAccessToFeature('group', 'compare')}
-      <div class="mt-3">
-        <Link to="/groups-compare/?groups={groups.map(group => group.id).join(',')}">
-          Sammenlign gruppene
-        </Link>
-      </div>
-    {/if}
+    <GroupsCompareSelect />
     {#each groups as group}
       <div class="card shadow-sm p-3">
         <h3 class="mt-1 mb-3" title={group.feideId}>
