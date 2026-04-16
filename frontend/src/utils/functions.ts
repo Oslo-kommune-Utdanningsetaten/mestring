@@ -169,12 +169,12 @@ const calculateTrend = (values: number[]): number => {
   return lastValue - firstValue
 }
 
-export const inferMastery = (observationsForGoal: ObservationType[]): Mastery | null => {
-  if (observationsForGoal.length === 0) {
+export const inferMastery = (observations: ObservationType[]): Mastery | null => {
+  if (observations.length === 0) {
     return null
   }
-  const lastValue = observationsForGoal[observationsForGoal.length - 1]?.masteryValue
-  const masteryValues = observationsForGoal.map(o => o.masteryValue).filter(isNumber) as number[]
+  const lastValue = observations[observations.length - 1]?.masteryValue
+  const masteryValues = observations.map(obs => obs.masteryValue).filter(isNumber) as number[]
   const trend = calculateLinearRegressionTrend(masteryValues)
   return {
     mastery: lastValue || 0,
