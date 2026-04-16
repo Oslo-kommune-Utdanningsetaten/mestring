@@ -1,7 +1,7 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
-  import { groupsList, observationsList } from '../generated/sdk.gen'
-  import type { GroupType, ObservationType } from '../generated/types.gen'
+  import { observationsList } from '../generated/sdk.gen'
+  import type { GroupType, ObservationType, SubjectType } from '../generated/types.gen'
   import GroupRow from './GroupRow.svelte'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
 
@@ -10,7 +10,6 @@
   }>()
   let isLoading = $state<boolean>(true)
   let currentSchool = $derived($dataStore.currentSchool)
-  let subjects = $derived($dataStore.subjects)
   let groups = $derived<GroupType[]>(
     $dataStore.currentUser.allGroups.filter((group: GroupType) => groupIds.includes(group.id))
   )
@@ -19,6 +18,10 @@
   )
   let groupType = $derived(areAllGroupsOfSameType ? groups[0].type : null)
   let observationsByGroupId = $derived<Record<string, ObservationType[]>>({})
+  let uniqueSubjectIds = $derived<Set<string>>(new Set())
+  let uniqueSubjects = $derived(
+    $dataStore.subjects.filter(subject => uniqueSubjectIds.has(subject.id))
+  )
 
   const fetchGroups = async () => {
     try {
@@ -28,20 +31,24 @@
           const observationsResult = await observationsList({
             query: { group: group.id, school: currentSchool.id },
           })
+          // All observations for this group, accross subjects
+          const observations = observationsResult.data || []
+          // Observations by subect id
           observationsByGroupId = {
             ...observationsByGroupId,
-            [group.id]: observationsResult.data || [],
+            [group.id]: observations,
           }
+          // Subject ids
+          const groupSubjectIds = new Set(
+            observations.map(obs => obs.subjectId).filter(Boolean) as string[]
+          )
+          // Unique subject ids across all groups
+          uniqueSubjectIds = new Set([...uniqueSubjectIds, ...groupSubjectIds])
         })
-      )
-
-      const subjectsFromGroupGoals = subjects.filter(subject =>
-        groups.some(group => group.subjectId === subject.id)
       )
     } catch (error) {
       console.error('Error fetching groups', { groupIds, error })
       groups = []
-      subjects = []
     } finally {
       isLoading = false
     }
@@ -57,7 +64,7 @@
     <div class="mt-3">Laster...</div>
   {:else}
     <h2>Sammenligner {groupType === GROUP_TYPE_BASIS ? 'basis' : 'undervisnings'}grupper</h2>
-    <p class="text-muted">[{groupIds.join(', ')}]</p>
+    <p class="text-muted">{groups.map(group => group.displayName).join(', ')}</p>
     {#if groups.length === 0}
       <div class="mt-3">Ingen grupper å sammenligne 🫤</div>
     {:else if !areAllGroupsOfSameType}
@@ -67,11 +74,13 @@
     {:else if groupType === GROUP_TYPE_TEACHING}
       <p class="mt-3">Sammenligning av undervisningsgrupper er ikke støttet ennå.</p>
     {:else if groupType === GROUP_TYPE_BASIS}
-      <pre>{JSON.stringify({ areAllGroupsOfSameType, observationsByGroupId }, null, 2)}</pre>
-
-      <div class="groups-grid" aria-label="Gruppeliste" style="--columns-count: {subjects.length}">
+      <div
+        class="groups-grid"
+        aria-label="Gruppeliste"
+        style="--columns-count: {uniqueSubjects.length}"
+      >
         <span class="item header header-row">Group</span>
-        {#each subjects as subject (subject.id)}
+        {#each uniqueSubjects as subject (subject.id)}
           <span class="item header header-row">
             <span class="column-header">
               {#if subject.ownedBySchoolId}
@@ -83,7 +92,16 @@
           </span>
         {/each}
         {#each groups as group (group.id)}
-          <GroupRow {group} {subjects} />
+          <GroupRow
+            {group}
+            subjects={uniqueSubjects.map(subject => {
+              const hasObservationsForSubject = observationsByGroupId[group.id].some(
+                obs => obs.subjectId === subject.id
+              )
+              return hasObservationsForSubject ? subject : null
+            })}
+            observations={observationsByGroupId[group.id]}
+          />
         {/each}
       </div>
     {:else}
@@ -94,6 +112,7 @@
 
 <style>
   .groups-grid {
+    margin-top: 2rem;
     display: grid;
     grid-template-columns: auto repeat(var(--columns-count, 8), 1fr);
     align-items: start;

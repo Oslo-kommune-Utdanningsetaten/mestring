@@ -8,16 +8,18 @@
     masterySchema,
     isBadgeEmpty = false,
     isBadgeVoid = false,
+    isLastValueVisible = true,
   } = $props<{
     masteryData?: Mastery
     masterySchema?: MasterySchemaWithConfig | null
     isBadgeEmpty?: boolean
     isBadgeVoid?: boolean
+    isLastValueVisible?: boolean
   }>()
 
   const mastery = $derived(masteryData?.mastery ?? 0)
   const trend = $derived(masteryData?.trend ?? 0)
-  const title = $derived(masteryData?.title ?? '')
+  const title = $derived([masterySchema?.title, masteryData?.title].filter(Boolean).join('\n'))
   const calculations = $derived(useMasteryCalculations(masterySchema))
 
   // Trend
@@ -52,12 +54,14 @@
       style="background-color: {trendColor}; width: {trendBoxSizeX}px; height: {trendBoxSizeY}px;"
       title={`${title}`}
     >
-      <span
-        class="mastery-indicator"
-        style="bottom: {indicatorPosition(
-          mastery
-        )}px; border-color: {trendColor}; height: {masteryIndicatorHeight}px; width: {masteryIndicatorWidth}px; left: {-masteryIndicatorOutcrop}px;"
-      ></span>
+      {#if isLastValueVisible}
+        <span
+          class="mastery-indicator"
+          style="bottom: {indicatorPosition(
+            mastery
+          )}px; border-color: {trendColor}; height: {masteryIndicatorHeight}px; width: {masteryIndicatorWidth}px; left: {-masteryIndicatorOutcrop}px;"
+        ></span>
+      {/if}
     </span>
   {:else if isBadgeEmpty}
     <span
