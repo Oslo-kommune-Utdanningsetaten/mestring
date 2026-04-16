@@ -4,6 +4,7 @@ import About from '../views/About.svelte'
 import Student from '../views/Student.svelte'
 import Group from '../views/Group.svelte'
 import Groups from '../views/Groups.svelte'
+import GroupsCompare from '../views/GroupsCompare.svelte'
 import Students from '../views/Students.svelte'
 import Status from '../views/Status.svelte'
 import Profile from '../views/Profile.svelte'
@@ -60,6 +61,17 @@ export const ROUTES = [
     component: Group,
     isPublic: false,
     accessibleBy: allRoles,
+  },
+  {
+    path: '/groups-compare/',
+    component: GroupsCompare,
+    isPublic: false,
+    accessibleBy: [
+      USER_ROLES.TEACHER,
+      USER_ROLES.INSPECTOR,
+      USER_ROLES.ADMIN,
+      USER_ROLES.SUPERADMIN,
+    ],
   },
   {
     path: '/profile',

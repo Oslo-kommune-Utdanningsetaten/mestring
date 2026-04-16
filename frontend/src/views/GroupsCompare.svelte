@@ -1,13 +1,14 @@
 <script lang="ts">
+  import { useTinyRouter } from 'svelte-tiny-router'
   import { dataStore } from '../stores/data'
   import { observationsList } from '../generated/sdk.gen'
   import type { GroupType, ObservationType, SubjectType } from '../generated/types.gen'
-  import GroupRow from './GroupRow.svelte'
+  import GroupRow from '../components/GroupRow.svelte'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
 
-  const { groupIds } = $props<{
-    groupIds: string[]
-  }>()
+  const router = useTinyRouter()
+  const groupIds = $derived(router.getQueryParam('groups')?.split(',') || [])
+
   let isLoading = $state<boolean>(true)
   let currentSchool = $derived($dataStore.currentSchool)
   let groups = $derived<GroupType[]>(

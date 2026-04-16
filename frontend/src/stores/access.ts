@@ -127,6 +127,10 @@ const checkUserAccessToFeature = (
         }
       })
     }
+  } else if (resource === 'group') {
+    if (['compare'].includes(action)) {
+      return currentUser.isSchoolAdmin || currentUser.isSchoolInspector
+    }
   }
   return false
 }
