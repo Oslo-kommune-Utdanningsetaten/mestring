@@ -5,6 +5,7 @@
   import type { GroupType, ObservationType, SubjectType } from '../generated/types.gen'
   import GroupRow from '../components/GroupRow.svelte'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
+  import GroupsCompareSelect from '../components/GroupsCompareSelect.svelte'
 
   const router = useTinyRouter()
   const groupIds = $derived(router.getQueryParam('groups')?.split(',') || [])
@@ -56,58 +57,57 @@
   }
 
   $effect(() => {
-    fetchGroups()
+    if (groupIds) {
+      fetchGroups()
+    }
   })
 </script>
 
 <section class="py-3">
+  <h2>Sammenligner grupper</h2>
+  <GroupsCompareSelect />
+  <p class="text-muted">Valgt: {groups.map(g => g.displayName).join(', ')}</p>
   {#if isLoading}
     <div class="mt-3">Laster...</div>
-  {:else}
-    <h2>Sammenligner {groupType === GROUP_TYPE_BASIS ? 'basis' : 'undervisnings'}grupper</h2>
-    <p class="text-muted">{groups.map(group => group.displayName).join(', ')}</p>
-    {#if groups.length === 0}
-      <div class="mt-3">Ingen grupper å sammenligne 🫤</div>
-    {:else if !areAllGroupsOfSameType}
-      <p class="mt-3">
-        Du kan bare sammenligne grupper av samme type: Enten basis eller undervisning.
-      </p>
-    {:else if groupType === GROUP_TYPE_TEACHING}
-      <p class="mt-3">Sammenligning av undervisningsgrupper er ikke støttet ennå.</p>
-    {:else if groupType === GROUP_TYPE_BASIS}
-      <div
-        class="groups-grid"
-        aria-label="Gruppeliste"
-        style="--columns-count: {uniqueSubjects.length}"
-      >
-        <span class="item header header-row">Group</span>
-        {#each uniqueSubjects as subject (subject.id)}
-          <span class="item header header-row">
-            <span class="column-header">
-              {#if subject.ownedBySchoolId}
-                {subject.shortName}
-              {:else}
-                {subject.grepCode}
-              {/if}
-            </span>
+  {:else if groups.length === 0}
+    <div class="mt-3">Ingen grupper å sammenligne 🫤</div>
+  {:else if !areAllGroupsOfSameType}
+    <p class="text-danger mb-2">Valgte grupper må være av samme type (basis/undervisning)</p>
+  {:else if groupType === GROUP_TYPE_TEACHING}
+    <p class="mt-3">Sammenligning av undervisningsgrupper er ikke støttet ennå.</p>
+  {:else if groupType === GROUP_TYPE_BASIS}
+    <div
+      class="groups-grid"
+      aria-label="Gruppeliste"
+      style="--columns-count: {uniqueSubjects.length}"
+    >
+      <span class="item header header-row">Group</span>
+      {#each uniqueSubjects as subject (subject.id)}
+        <span class="item header header-row">
+          <span class="column-header">
+            {#if subject.ownedBySchoolId}
+              {subject.shortName}
+            {:else}
+              {subject.grepCode}
+            {/if}
           </span>
-        {/each}
-        {#each groups as group (group.id)}
-          <GroupRow
-            {group}
-            subjects={uniqueSubjects.map(subject => {
-              const hasObservationsForSubject = observationsByGroupId[group.id].some(
-                obs => obs.subjectId === subject.id
-              )
-              return hasObservationsForSubject ? subject : null
-            })}
-            observations={observationsByGroupId[group.id]}
-          />
-        {/each}
-      </div>
-    {:else}
-      <p class="mt-3">Ukjent gruppetype: {groupType}</p>
-    {/if}
+        </span>
+      {/each}
+      {#each groups as group (group.id)}
+        <GroupRow
+          {group}
+          subjects={uniqueSubjects.map(subject => {
+            const hasObservationsForSubject = observationsByGroupId[group.id]?.some(
+              obs => obs.subjectId === subject.id
+            )
+            return hasObservationsForSubject ? subject : null
+          })}
+          observations={observationsByGroupId[group.id]}
+        />
+      {/each}
+    </div>
+  {:else}
+    <p class="mt-3">Ukjent gruppetype: {groupType}</p>
   {/if}
 </section>
 

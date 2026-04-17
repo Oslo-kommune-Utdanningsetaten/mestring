@@ -1,14 +1,13 @@
 <script lang="ts">
-  import { currentUser, dataStore } from '../stores/data'
+  import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
-  import { hasUserAccessToFeature, hasUserAccessToPath } from '../stores/access'
+  import { hasUserAccessToPath } from '../stores/access'
   import { USER_ROLES } from '../utils/constants'
   import { usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType } from '../generated/types.gen'
   import GroupTag from '../components/GroupTag.svelte'
   import UserTag from '../components/UserTag.svelte'
   import Link from '../components/Link.svelte'
-  import GroupsCompareSelect from '../components/GroupsCompareSelect.svelte'
 
   let currentSchool = $derived($dataStore.currentSchool)
   let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
@@ -53,7 +52,6 @@
       🫤 Du har visst ikke tilgang til noen grupper på {currentSchool?.displayName}.
     </div>
   {:else}
-    <GroupsCompareSelect />
     {#each groups as group}
       <div class="card shadow-sm p-3">
         <h3 class="mt-1 mb-3" title={group.feideId}>

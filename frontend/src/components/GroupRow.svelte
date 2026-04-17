@@ -72,39 +72,41 @@
   }
 
   $effect(() => {
-    if (observations.length > 0) {
+    if (observations?.length > 0) {
       inferMasterySchema()
     }
   })
 </script>
 
-<span class="item group-name">
-  <Link to={`/groups/${group.id}`}>{group.displayName}</Link>
-</span>
-{#each subjects as subject}
-  <span class="item">
-    {#if subject && observationsBySubjectId[subject.id]?.length}
-      <span class="me-1" title={subject.displayName}>
-        <MasteryLevelBadge
-          masteryData={inferMastery(observationsBySubjectId[subject.id]) ?? undefined}
-          masterySchema={assumedMasterySchema}
-          isLastValueVisible={false}
-        />
-      </span>
-
-      {#if $isMasteryBarChartVisible}
-        <MasteryBarChart
-          data={observationsBySubjectId[subject.id].map(
-            (obs: ObservationType) => obs.masteryValue ?? 0
-          )}
-          masterySchema={assumedMasterySchema}
-        />
-      {/if}
-    {:else}
-      <span class="text-muted">---</span>
-    {/if}
+{#if group}
+  <span class="item group-name">
+    <Link to={`/groups/${group.id}`}>{group.displayName}</Link>
   </span>
-{/each}
+  {#each subjects as subject}
+    <span class="item">
+      {#if subject && observationsBySubjectId[subject.id]?.length}
+        <span class="me-1" title={subject.displayName}>
+          <MasteryLevelBadge
+            masteryData={inferMastery(observationsBySubjectId[subject.id]) ?? undefined}
+            masterySchema={assumedMasterySchema}
+            isLastValueVisible={false}
+          />
+        </span>
+
+        {#if $isMasteryBarChartVisible}
+          <MasteryBarChart
+            data={observationsBySubjectId[subject.id].map(
+              (obs: ObservationType) => obs.masteryValue ?? 0
+            )}
+            masterySchema={assumedMasterySchema}
+          />
+        {/if}
+      {:else}
+        <span class="text-muted">---</span>
+      {/if}
+    </span>
+  {/each}
+{/if}
 
 <style>
 </style>

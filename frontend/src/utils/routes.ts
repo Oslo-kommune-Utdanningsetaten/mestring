@@ -63,7 +63,7 @@ export const ROUTES = [
     accessibleBy: allRoles,
   },
   {
-    path: '/groups-compare/',
+    path: '/groups-compare',
     component: GroupsCompare,
     isPublic: false,
     accessibleBy: [

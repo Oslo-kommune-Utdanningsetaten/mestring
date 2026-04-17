@@ -10,6 +10,7 @@
   let currentSchool = $derived($dataStore.currentSchool)
   let isHomeActive = $derived($currentPath === '/')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
+  let isGroupsActive = $derived($currentPath.startsWith('/groups'))
   let isAdminActive = $derived($currentPath.startsWith('/admin'))
   let isProfileActive = $derived($currentPath.startsWith('/profile'))
   let environmentWarning = $derived(
@@ -104,9 +105,14 @@
                     <Link to="/students" className="dropdown-item">Elever</Link>
                   </li>
                 {/if}
-                {#if $hasUserAccessToPath('/admin/goals')}
+                {#if $hasUserAccessToPath('/groups-compare')}
                   <li class="nav-item">
-                    <Link to="/admin/goals" className="dropdown-item">Mål</Link>
+                    <Link to="/groups-compare" className="dropdown-item">Grupper</Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/admin/groups')}
+                  <li>
+                    <Link to="/admin/groups" className="dropdown-item">Grupper adm</Link>
                   </li>
                 {/if}
                 {#if $hasUserAccessToPath('/admin/users')}
@@ -114,14 +120,14 @@
                     <Link to="/admin/users" className="dropdown-item">Brukere</Link>
                   </li>
                 {/if}
-                {#if $hasUserAccessToPath('/admin/groups')}
-                  <li>
-                    <Link to="/admin/groups" className="dropdown-item">Grupper</Link>
-                  </li>
-                {/if}
                 {#if $hasUserAccessToPath('/admin/subjects')}
                   <li>
                     <Link to="/admin/subjects" className="dropdown-item">Fag</Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/admin/goals')}
+                  <li class="nav-item">
+                    <Link to="/admin/goals" className="dropdown-item">Mål</Link>
                   </li>
                 {/if}
                 {#if $hasUserAccessToPath('/admin/stats')}
