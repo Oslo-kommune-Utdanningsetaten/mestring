@@ -64,7 +64,7 @@
 </script>
 
 <section class="py-3">
-  <h2>Sammenligner grupper</h2>
+  <h2>Sammenlign grupper</h2>
   <GroupsCompareSelect />
   <p class="text-muted">Valgt: {groups.map(g => g.displayName).join(', ')}</p>
   {#if isLoading}
