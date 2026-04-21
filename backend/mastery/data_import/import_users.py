@@ -145,6 +145,8 @@ def ensure_user_exists(user_data):
             # Cascade un-delete related objects
             models.Observation.objects.filter(student=user).update(
                 deleted_at=None, maintained_at=now)
+            models.Status.objects.filter(student=user).update(
+                deleted_at=None, maintained_at=now)
             models.Goal.objects.filter(student=user).update(deleted_at=None, maintained_at=now)
         logger.debug("User maintained: %s", user.email)
         user.save()

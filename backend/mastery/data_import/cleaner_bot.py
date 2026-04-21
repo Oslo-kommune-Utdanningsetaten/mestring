@@ -4,6 +4,7 @@ from django.db.models import Q, Count
 from mastery.constants import (
     DAYS_BEFORE_HARD_DELETE_OF_GROUP,
     DAYS_BEFORE_HARD_DELETE_OF_OBSERVATION,
+    DAYS_BEFORE_HARD_DELETE_OF_STATUS,
     DAYS_BEFORE_HARD_DELETE_OF_GOAL,
     DAYS_BEFORE_HARD_DELETE_OF_USER,
     HOURS_BEFORE_HARD_DELETE_OF_USER_GROUP,
@@ -48,6 +49,7 @@ def update_data_integrity(org_number, options):
         changes["group"]["soft-deleted"] = soft_delete_groups(school, now, groups_earlier_than, dry_run)
         changes["user"]["soft-deleted"] = soft_delete_users(school, now, memberships_earlier_than, dry_run)
         changes["observation"]["soft-deleted"] = soft_delete_observations(school, now, dry_run)
+        changes["status"]["soft-deleted"] = soft_delete_statuses(school, now, dry_run)
         changes["goal"]["soft-deleted"] = soft_delete_goals(school, now, dry_run)
         changes["user_group"]["soft-deleted"] = soft_delete_user_groups(
             school, now, memberships_earlier_than, dry_run)
@@ -63,6 +65,7 @@ def update_data_integrity(org_number, options):
         changes["group"]["hard-deleted"] = hard_delete_groups(school, now, dry_run)
         changes["user"]["hard-deleted"] = hard_delete_users(now, dry_run)
         changes["observation"]["hard-deleted"] = hard_delete_observations(school, now, dry_run)
+        changes["status"]["hard-deleted"] = hard_delete_statuses(school, now, dry_run)
         changes["goal"]["hard-deleted"] = hard_delete_goals(school, now, dry_run)
         changes["user_group"]["hard-deleted"] = hard_delete_user_groups(school, now, dry_run)
     except Exception as e:
@@ -133,6 +136,20 @@ def soft_delete_observations(school, now, dry_run=False):
         return list(observations.values("id", "student__name", "student__feide_id", "goal__title"))
     count = observations.count()
     observations.update(deleted_at=now)
+    return count
+
+
+def soft_delete_statuses(school, now, dry_run=False):
+    # If student is soft-deleted -> mark as deleted
+    statuses = models.Status.objects.filter(
+        deleted_at__isnull=True,
+        student__deleted_at__isnull=False,
+        mastery_schema__school=school
+    )
+    if dry_run:
+        return list(statuses.values("id", "title", "student__name", "student__feide_id", "subject__display_name"))
+    count = statuses.count()
+    statuses.update(deleted_at=now)
     return count
 
 
@@ -218,6 +235,21 @@ def hard_delete_observations(school, now, dry_run=False):
         return list(observations.values("id", "student__name", "student__feide_id", "goal__title", "deleted_at"))
     count = observations.count()
     observations.delete()
+    return count
+
+
+def hard_delete_statuses(school, now, dry_run=False):
+    # If deleted_at older than DAYS_BEFORE_HARD_DELETE_OF_STATUS days, hard delete
+    statuses = models.Status.objects.filter(
+        deleted_at__lt=now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_STATUS),
+        mastery_schema__school=school
+    )
+    if dry_run:
+        return list(
+            statuses.values(
+                "id", "title", "student__name", "student__feide_id", "subject__display_name", "deleted_at"))
+    count = statuses.count()
+    statuses.delete()
     return count
 
 

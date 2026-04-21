@@ -2,7 +2,7 @@ This issue sketches up a plan for the lifecycle of our various pieces of data.
 
 # Model infrastructure
 
-![Mestring data model](./data_model.jpeg)
+![Mestring data model](./mestring-diagram-2026-04-15.drawio.png)
 
 All models have, via `Basemodel`, have these fields:
 
@@ -37,7 +37,7 @@ The daily Feide import job operates on school level. It happens in five stages, 
 There are four cases where data "disappears" automatically:
 
 1. **Group memberships change**. E.g. school cancels a teaching group, a teacher is reassigned to a group, a student moves to another group etc. This should "just work", given the above logic. Users are given new memberships, and old memberships become invisible (due to `deleted_at`). Likewise, memberships where the group is is either invalid (date wise) or marked for deletion, should not be visible.
-2. **Student or teacher quits the school**. This should also "just work", given the above logic. Users loose memberships, due to `deleted_at` on `UserGroup` rows. **Note**: The creator of an observation or goal (observation.created_by or goal.created_by) or the target of an observation (observation.student) will keep access to that thing - is this correct❓There might not be a UI where these things can be viewed...
+2. **Student or teacher quits the school**. This should also "just work", given the above logic. Users loose memberships, due to `deleted_at` on `UserGroup` rows. **Note**: The creator of an observation or goal (observation.created_by or goal.created_by) or the target of an observation (observation.student) will keep access to that thing - though there is not currently a UI where outdated rows can be viewed.
 3. **End of school year**: Due to the `valid_from` <--> `valid_to` scope, groups and memberships should automatically become invisible, and new groups + memberships automatically created on import.
 4. **Deletion**: When the `deleted_at` timestamp is more than 90 days (or some other pre-configured number) older than the current time, a delete task irrevocably removes the row from the database ("hard delete").
 
@@ -46,7 +46,6 @@ There are four cases where data "disappears" automatically:
 - School admins and inspectors are promoted manually (in the `UserSchool` table). For security purposes, we should probably delete admins and inspectors come every new school year, and manually set new ones.
 - We'll need a UI where superadmin can inspect and maybe update rows with `deleted_at`.
 - The Role-API (https://api.osloskolen.no/) might help us automate the promotion/demotion of users to school- admins and inspectors.
-- Anything else❓
 
 ## Lifecycle stage responsibility
 
@@ -55,6 +54,7 @@ There are four cases where data "disappears" automatically:
 | Group       | Importer            | Importer | **Cleaner**, if not maintained AND within validity period: `deleted_at`<br>**Automatic** (via queryset), if outside `valid_to` <--> `valid_from` | Importer, ensure_group (cascade unsets Goals)               | Cleaner, if `deleted_at` > 90 days |
 | User        | Importer            | Importer | **Cleaner**, if not maintained AND no active (non-deleted) UserGroups AND not superadmin: `deleted_at`                                           | Importer, ensure_user (cascade unsets Goals & Observations) | Cleaner, if `deleted_at` > 90 days |
 | Observation | Manual, by User     |          | **Cleaner**, if student is soft-deleted: `deleted_at`                                                                                            | Importer, ensure_user (via cascade)                         | Cleaner, if `deleted_at` > 90 days |
+| Status      | Manual, by User     |          | **Cleaner**, if student is soft-deleted: `deleted_at`                                                                                            | Importer, ensure_user (via cascade)                         | Cleaner, if `deleted_at` > 90 days |
 | Goal        | Manual, by User     |          | **Cleaner**, if individual goal AND student is soft-deleted: `deleted_at`<br>**Cleaner**, if group goal AND group is soft-deleted: `deleted_at`  | Importer, ensure_user/ensure_group (via cascade)            | Cleaner, if `deleted_at` > 90 days |
 | UserGroup   | Importer            | Importer | **Cleaner**, if group is soft-deleted: `deleted_at`<br>**Cleaner**, if not maintained AND group is within validity period: `deleted_at`          | Importer, ensure_membership                                 | Cleaner, if `deleted_at` > 1 hour  |
 | UserSchool  | Automatic, on login |          |                                                                                                                                                  |                                                             | Manual                             |
