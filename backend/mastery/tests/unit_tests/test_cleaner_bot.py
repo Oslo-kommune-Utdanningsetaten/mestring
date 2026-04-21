@@ -5,6 +5,7 @@ from django.utils import timezone
 from mastery.constants import (
     DAYS_BEFORE_HARD_DELETE_OF_GROUP,
     DAYS_BEFORE_HARD_DELETE_OF_OBSERVATION,
+    DAYS_BEFORE_HARD_DELETE_OF_STATUS,
     DAYS_BEFORE_HARD_DELETE_OF_GOAL,
     DAYS_BEFORE_HARD_DELETE_OF_USER,
     HOURS_BEFORE_HARD_DELETE_OF_USER_GROUP,
@@ -558,3 +559,103 @@ def test_hard_delete_user_group(school, student, student_role, valid_group):
     assert final_chunk["is_done"] is True
     assert changes["user_group"]["hard-deleted"] == 1
     assert not models.UserGroup.objects.filter(id=user_group_id).exists()
+
+
+@pytest.fixture
+def status(student, subject_owned_by_school, school, mastery_schema):
+    return models.Status.objects.create(
+        student=student,
+        subject=subject_owned_by_school,
+        school=school,
+        mastery_schema=mastery_schema,
+        begin_at=timezone.now() - timezone.timedelta(days=60),
+        end_at=timezone.now() - timezone.timedelta(days=2),
+    )
+
+
+@pytest.fixture
+def other_status(other_student, subject_owned_by_school, school, mastery_schema):
+    return models.Status.objects.create(
+        student=other_student,
+        subject=subject_owned_by_school,
+        school=school,
+        mastery_schema=mastery_schema,
+        begin_at=timezone.now() - timezone.timedelta(days=60),
+        end_at=timezone.now() - timezone.timedelta(days=2),
+    )
+
+
+@pytest.mark.django_db
+def test_soft_delete_status(school, student, status, other_status):
+    now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
+    # Soft-delete status for soft-deleted student
+    student.deleted_at = now
+    student.save()
+    result = update_data_integrity(school.org_number, options)
+    final_chunk = list(result)[-1]
+    changes = final_chunk["result"]["changes"]
+    status.refresh_from_db()
+    assert final_chunk["is_done"] is True
+    assert changes["status"]["soft-deleted"] == 1
+    assert status.deleted_at is not None
+    # Don't soft-delete status for non-deleted student
+    other_status.refresh_from_db()
+    assert other_status.deleted_at is None
+
+
+@pytest.mark.django_db
+def test_do_not_soft_delete_status_for_active_student(school, student, status):
+    now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
+    # Student is not soft-deleted, so status should remain
+    result = update_data_integrity(school.org_number, options)
+    final_chunk = list(result)[-1]
+    changes = final_chunk["result"]["changes"]
+    status.refresh_from_db()
+    assert final_chunk["is_done"] is True
+    assert changes["status"]["soft-deleted"] == 0
+    assert status.deleted_at is None
+
+
+@pytest.mark.django_db
+def test_hard_delete_status(school, status):
+    now = timezone.now()
+    options = {
+        "groups_earlier_than": now,
+        "memberships_earlier_than": now,
+    }
+    status_id = status.id
+    # Initial cleanup -> no deletes
+    result = update_data_integrity(school.org_number, options)
+    final_chunk = list(result)[-1]
+    changes = final_chunk["result"]["changes"]
+    assert final_chunk["is_done"] is True
+    assert changes["status"]["hard-deleted"] == 0
+    assert models.Status.objects.filter(id=status_id).exists()
+
+    # Almost, but not quite ready for delete
+    status.deleted_at = now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_STATUS - 1)
+    status.save()
+    result = update_data_integrity(school.org_number, options)
+    final_chunk = list(result)[-1]
+    changes = final_chunk["result"]["changes"]
+    assert final_chunk["is_done"] is True
+    assert changes["status"]["hard-deleted"] == 0
+    assert models.Status.objects.filter(id=status_id).exists()
+
+    # Hard-delete status which has been soft-deleted a sufficient time
+    status.deleted_at = now - timezone.timedelta(days=DAYS_BEFORE_HARD_DELETE_OF_STATUS)
+    status.save()
+    result = update_data_integrity(school.org_number, options)
+    final_chunk = list(result)[-1]
+    changes = final_chunk["result"]["changes"]
+    assert final_chunk["is_done"] is True
+    assert changes["status"]["hard-deleted"] == 1
+    assert not models.Status.objects.filter(id=status_id).exists()

@@ -37,6 +37,7 @@ def update_data_integrity(org_number, options):
         "group": {},
         "user": {},
         "observation": {},
+        "status": {},
         "goal": {},
         "user_group": {},
     }
