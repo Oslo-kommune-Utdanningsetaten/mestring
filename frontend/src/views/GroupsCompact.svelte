@@ -1,0 +1,119 @@
+<script lang="ts">
+  import { dataStore } from '../stores/data'
+  import { urlStringFrom } from '../utils/functions'
+  import { hasUserAccessToPath } from '../stores/access'
+  import { USER_ROLES } from '../utils/constants'
+  import { usersList } from '../generated/sdk.gen'
+  import type { GroupType, UserType } from '../generated/types.gen'
+  import GroupTag from '../components/GroupTag.svelte'
+  import UserTag from '../components/UserTag.svelte'
+  import Link from '../components/Link.svelte'
+
+  let currentSchool = $derived($dataStore.currentSchool)
+  let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
+  let membersByGroupId = $state<Record<string, { teachers: UserType[]; students: UserType[] }>>({})
+
+  const fetchAllmembersByGroupId = async () => {
+    groups.forEach(async group => {
+      try {
+        const teachersResult = await usersList({
+          query: { groups: group.id, school: currentSchool.id, roles: USER_ROLES.TEACHER },
+        })
+        const studentsResult = await usersList({
+          query: { groups: group.id, school: currentSchool.id, roles: USER_ROLES.STUDENT },
+        })
+        const teachers = teachersResult.data || []
+        const students = studentsResult.data || []
+        membersByGroupId = { ...membersByGroupId, [group.id]: { teachers, students } }
+      } catch (error) {
+        console.error(`Error fetching members for group ${group.id}:`, error)
+        membersByGroupId = { ...membersByGroupId, [group.id]: { teachers: [], students: [] } }
+      }
+    })
+  }
+
+  const getSubjectName = (subjectId: string) => {
+    const subject = $dataStore.subjects.find(subj => subj.id === subjectId)
+    return subject ? subject.displayName : 'Ukjent fag'
+  }
+
+  $effect(() => {
+    if (currentSchool) {
+      fetchAllmembersByGroupId()
+    }
+  })
+</script>
+
+<section class="py-3">
+  <h2>Mine grupper</h2>
+
+  {#if groups.length === 0}
+    <div class="mt-3">
+      🫤 Du har visst ikke tilgang til noen grupper på {currentSchool?.displayName}.
+    </div>
+  {:else}
+    <div class="card shadow-sm">
+      {#each groups as group, i}
+        <div class="group-row px-3 py-2" class:border-top={i > 0}>
+          <div class="group-name">
+            <Link to="/groups/{group.id}" title={group.feideId}>
+              {group.displayName}
+            </Link>
+            {#if group.subjectId}
+              <small class="text-muted">{getSubjectName(group.subjectId)}</small>
+            {/if}
+          </div>
+
+          <div>
+            <GroupTag {group} isGroupTypeNameEnabled={true} />
+          </div>
+
+          {#if membersByGroupId && Object.hasOwn(membersByGroupId, group.id)}
+            <div class="d-flex flex-wrap gap-2">
+              {#each membersByGroupId[group.id].teachers as teacher}
+                <UserTag
+                  user={teacher}
+                  role={USER_ROLES.TEACHER}
+                  allUsers={membersByGroupId[group.id].teachers}
+                />
+              {/each}
+            </div>
+
+            <div class="text-end text-nowrap">
+              {#if currentSchool.isStudentListEnabled || $hasUserAccessToPath('/students')}
+                <Link
+                  to={urlStringFrom({ groupId: group.id }, { path: '/students', mode: 'replace' })}
+                >
+                  {membersByGroupId[group.id].students.length}
+                  {membersByGroupId[group.id].students.length === 1 ? 'elev' : 'elever'}
+                </Link>
+              {:else}
+                {membersByGroupId[group.id].students.length}
+                {membersByGroupId[group.id].students.length === 1 ? 'elev' : 'elever'}
+              {/if}
+            </div>
+          {:else}
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">Henter data...</span>
+            </div>
+          {/if}
+        </div>
+      {/each}
+    </div>
+  {/if}
+</section>
+
+<style>
+  .group-row {
+    display: grid;
+    grid-template-columns: 25rem 12rem auto auto;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .group-name {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+</style>

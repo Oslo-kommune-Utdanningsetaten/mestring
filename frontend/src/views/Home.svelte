@@ -2,7 +2,8 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import { currentUser } from '../stores/data'
   import { login } from '../stores/auth'
-  import Groups from './Groups.svelte'
+  import GroupsCompact from './GroupsCompact.svelte'
+  import Observations from '../components/Observations.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
 
   const router = useTinyRouter()
@@ -10,7 +11,8 @@
 </script>
 
 {#if $currentUser}
-  <Groups />
+  <GroupsCompact />
+  <Observations />
 {:else}
   <h2 class="mb-4">Hei på deg!</h2>
   {#if errorFromUrl === 'login_failed'}
