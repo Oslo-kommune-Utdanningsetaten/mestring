@@ -52,9 +52,9 @@
       🫤 Du har visst ikke tilgang til noen grupper på {currentSchool?.displayName}.
     </div>
   {:else}
-    <div class="card shadow-sm">
+    <div class="card shadow-sm mt-4 groups-grid">
       {#each groups as group, i}
-        <div class="group-row px-3 py-2" class:border-top={i > 0}>
+        <div class="group-row" class:border-top={i > 0}>
           <div class="group-name">
             <Link to="/groups/{group.id}" title={group.feideId}>
               {group.displayName}
@@ -69,7 +69,7 @@
           </div>
 
           {#if membersByGroupId && Object.hasOwn(membersByGroupId, group.id)}
-            <div class="d-flex flex-wrap gap-2">
+            <div class="group-teachers d-flex flex-wrap gap-2">
               {#each membersByGroupId[group.id].teachers as teacher}
                 <UserTag
                   user={teacher}
@@ -104,11 +104,23 @@
 </section>
 
 <style>
-  .group-row {
+  .groups-grid {
     display: grid;
-    grid-template-columns: 25rem 12rem auto auto;
+    grid-template-columns: minmax(12rem, 20rem) 1fr auto 1fr;
+    column-gap: 20px;
+    padding: 0 0.75rem;
+  }
+
+  .group-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
     align-items: center;
-    gap: 20px;
+    padding: 0.5rem 0;
+  }
+
+  .group-teachers {
+    justify-self: start;
   }
 
   .group-name {
