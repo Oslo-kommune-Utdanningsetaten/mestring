@@ -12,9 +12,17 @@
   let creatorsById = $state<Record<string, string>>({})
 
   // Sort state
-  type SortKey = 'type' | 'title' | 'createdBy' | 'createdAt' | 'belongsTo'
+  type SortKey = 'type' | 'title' | 'createdBy' | 'createdAt' | 'belongsTo' | 'masterySchema'
   let sortBy = $state<SortKey>('createdAt')
   let sortDirection = $state<'asc' | 'desc'>('desc')
+
+  const masterySchemasById = $derived.by(() => {
+    const map: Record<string, any> = {}
+    $dataStore.masterySchemas.forEach((ms: any) => {
+      map[ms.id] = ms
+    })
+    return map
+  })
 
   const fetchGoals = async () => {
     try {
@@ -78,6 +86,10 @@
         const timeA = a.createdAt || '0'
         const timeB = b.createdAt || '0'
         comparison = new Date(timeA).getTime() - new Date(timeB).getTime()
+      } else if (sortBy === 'masterySchema') {
+        const msA = masterySchemasById[a.masterySchemaId || '']?.title || ''
+        const msB = masterySchemasById[b.masterySchemaId || '']?.title || ''
+        comparison = msA.localeCompare(msB, 'no')
       } else {
         comparison = 0
       }
@@ -149,6 +161,17 @@
           Tilhører{getSortIndicator('belongsTo')}
         </button>
       </span>
+
+      <span class="header">
+        <button
+          class="sort-button"
+          onclick={() => handleHeaderClick('masterySchema')}
+          title="Sorter etter mestringsskjema"
+        >
+          Mestringsskjema{getSortIndicator('masterySchema')}
+        </button>
+      </span>
+
       <span class="header">
         <button
           class="sort-button"
@@ -186,6 +209,9 @@
           </Link>
         </div>
         <div>
+          {masterySchemasById[goal.masterySchemaId || '']?.title || '–'}
+        </div>
+        <div>
           <Link to="/admin/users/{goal.createdById}">
             {creatorsById[goal.createdById] || goal.createdById}
           </Link>
@@ -201,7 +227,7 @@
 <style>
   .goals-grid {
     display: grid;
-    grid-template-columns: 1fr auto 2fr 4fr 4fr;
+    grid-template-columns: 1fr auto 2fr 3fr 4fr 4fr;
   }
 
   .header {
@@ -225,11 +251,12 @@
   }
 
   /* Target all cells in odd data rows (row 1, 3, 5...) */
-  .goals-grid > div:nth-child(10n + 1),
-  .goals-grid > div:nth-child(10n + 2),
-  .goals-grid > div:nth-child(10n + 3),
-  .goals-grid > div:nth-child(10n + 4),
-  .goals-grid > div:nth-child(10n + 5) {
+  .goals-grid > div:nth-child(12n + 1),
+  .goals-grid > div:nth-child(12n + 2),
+  .goals-grid > div:nth-child(12n + 3),
+  .goals-grid > div:nth-child(12n + 4),
+  .goals-grid > div:nth-child(12n + 5),
+  .goals-grid > div:nth-child(12n + 6) {
     background-color: var(--pkt-sand-10, #fafaf8);
     padding: 0.5rem;
   }
