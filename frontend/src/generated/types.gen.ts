@@ -1459,6 +1459,10 @@ export type ObservationsListData = {
          */
         student?: string;
         /**
+         * Filter observations by subject.
+         */
+        subject?: string;
+        /**
          * Filter observations by when they were created, using ISO format date string. E.g. 2025-12-24 will return observations created on or before December 24st, 2025.
          */
         to?: string;

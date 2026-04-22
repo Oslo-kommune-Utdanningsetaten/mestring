@@ -767,6 +767,13 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
+                name='subject',
+                description='Filter observations by subject.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='from',
                 description='Filter observations by when they were created, using ISO format date string. E.g. 2025-12-24 will return observations created on or after December 24st, 2025.',
                 required=False,
@@ -810,6 +817,7 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
             student_param, _ = get_request_param(self.request.query_params, 'student')
             observer_param, _ = get_request_param(self.request.query_params, 'observer')
             goal_param, _ = get_request_param(self.request.query_params, 'goal')
+            subject_param, _ = get_request_param(self.request.query_params, 'subject')
             group_param, _ = get_request_param(self.request.query_params, 'group')
             school_param, _ = get_request_param(self.request.query_params, 'school')
             from_param, _ = get_request_param(self.request.query_params, 'from')
@@ -828,6 +836,8 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
                 qs = qs.filter(observer_id=observer_param)
             if goal_param:
                 qs = qs.filter(goal_id=goal_param)
+            if subject_param:
+                qs = qs.filter(subject_id=subject_param)
             if school_param:
                 qs = qs.filter(goal__school_id=school_param)
             if group_param:
