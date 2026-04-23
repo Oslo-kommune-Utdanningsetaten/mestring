@@ -2,7 +2,7 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import { currentUser } from '../stores/data'
   import { login } from '../stores/auth'
-  import GroupsCompact from './GroupsCompact.svelte'
+  import GroupsCompact from '../components/GroupsCompact.svelte'
   import ObservationsTeacherView from '../components/ObservationsTeacherView.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
 

@@ -164,19 +164,8 @@
     line-height: 1.3;
   }
 
-  .observation-subject {
-    align-self: flex-start;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #666;
-    background: #ebebeb;
-    padding: 0.1rem 0.4rem;
-  }
-
   .observation-author {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: #999;
   }
 
@@ -264,7 +253,7 @@
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    opacity: 0.7;
+    opacity: 0.85;
     font-weight: 600;
   }
 

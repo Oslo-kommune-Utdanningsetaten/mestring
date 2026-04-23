@@ -5,10 +5,10 @@
   import { USER_ROLES } from '../utils/constants'
   import { usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType } from '../generated/types.gen'
-  import GroupTag from '../components/GroupTag.svelte'
-  import UserTag from '../components/UserTag.svelte'
-  import SubjectTag from '../components/SubjectTag.svelte'
-  import Link from '../components/Link.svelte'
+  import GroupTag from './GroupTag.svelte'
+  import UserTag from './UserTag.svelte'
+  import SubjectTag from './SubjectTag.svelte'
+  import Link from './Link.svelte'
 
   let currentSchool = $derived($dataStore.currentSchool)
   let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
