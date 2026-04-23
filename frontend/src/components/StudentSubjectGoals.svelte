@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { useTinyRouter } from 'svelte-tiny-router'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { dataStore } from '../stores/data'
   import type {
@@ -25,7 +26,7 @@
 
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { localStorage } from '../stores/localStorage'
-  import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
+  import { fetchGoalsForSubjectAndStudent, urlStringFrom } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
@@ -36,13 +37,15 @@
     onRefreshRequired?: Function
   }>()
 
+  const router = useTinyRouter()
+  let expandedGoalIds = $derived(router.getQueryParam('expanded')?.split(',') || [])
+
   let goalsForSubject = $state<GoalDecorated[]>([])
   let sortableInstance: Sortable | null = null
   let goalWip = $state<GoalDecorated | null>(null)
   let statusWip = $state<Partial<StatusType> | null>(null)
   let goalForObservation = $state<GoalDecorated | null>(null)
   let observationWip = $state<ObservationType | {} | null>(null)
-  let expandedGoals = $state<Record<string, boolean>>({})
   let goalsListElement = $state<HTMLElement | null>(null)
   let isGoalEditorOpen = $state<boolean>(false)
   let isObservationEditorOpen = $state<boolean>(false)
@@ -213,11 +216,21 @@
     }
   }
 
-  const toggleGoalExpansion = (goalId: string) => {
-    expandedGoals = {
-      ...expandedGoals,
-      [goalId]: !expandedGoals[goalId],
+  const handleToggleGoal = (goalId: string) => {
+    const nextExpandedGoals = new Set(expandedGoalIds)
+    if (nextExpandedGoals.has(goalId)) {
+      nextExpandedGoals.delete(goalId)
+    } else {
+      nextExpandedGoals.add(goalId)
     }
+    expandedGoalIds = Array.from(nextExpandedGoals)
+    const newUrl = expandedGoalIds.length
+      ? urlStringFrom(
+          { expanded: expandedGoalIds.join(',') },
+          { path: `/students/${student.id}`, mode: 'merge' }
+        )
+      : urlStringFrom({}, { path: `/students/${student.id}` })
+    router.navigate(newUrl)
   }
 
   const handleGoalOrderChange = async (event: SortableEvent) => {
@@ -306,11 +319,11 @@
 </div>
 
 {#snippet goalInList(goal: GoalDecorated, index: number)}
-  {@const isExpanded = expandedGoals[goal.id] || false}
+  {@const isExpanded = expandedGoalIds.includes(goal.id)}
   <div
-    class="list-group-item goal-item {isExpanded ? 'shadow border-2 z-1' : ''}  {goal.isRelevant
-      ? ''
-      : 'hatched-background'}"
+    class="list-group-item goal-item {isExpanded
+      ? 'shadow border-2 z-1 expanded'
+      : ''}  {goal.isRelevant ? '' : 'hatched-background'}"
     title={goal.isRelevant ? '' : 'Målet er ikke lenger relevant for eleven'}
   >
     <div class="goal-primary-row">
@@ -387,7 +400,7 @@
             iconName: `chevron-thin-${isExpanded ? 'up' : 'down'}`,
             disabled: !goal.isRelevant,
             title: `${isExpanded ? 'Skjul' : 'Vis'} observasjoner`,
-            onClick: () => toggleGoalExpansion(goal.id),
+            onClick: () => handleToggleGoal(goal.id),
           }}
         />
       </span>
@@ -496,12 +509,12 @@
 
 {#if goalsForSubject?.length}
   <div bind:this={goalsListElement} class="list-group mt-2">
-    {#each goalsForSubject.filter(goal => goal.isIndividual) as goal, index (`${goal.id}-${expandedGoals[goal.id]}`)}
+    {#each goalsForSubject.filter(goal => goal.isIndividual) as goal, index (`${goal.id}-${expandedGoalIds.includes(goal.id)}`)}
       {@render goalInList(goal, index)}
     {/each}
   </div>
   <div class="list-group mt-2">
-    {#each goalsForSubject.filter(goal => !goal.isIndividual) as goal, index (`${goal.id}-${expandedGoals[goal.id]}`)}
+    {#each goalsForSubject.filter(goal => !goal.isIndividual) as goal, index (`${goal.id}-${expandedGoalIds.includes(goal.id)}`)}
       {@render goalInList(goal, index)}
     {/each}
   </div>
@@ -594,6 +607,10 @@
 
   .goal-item {
     background-color: var(--bs-light);
+  }
+
+  .goal-item.expanded {
+    margin-inline: -0.5rem;
   }
 
   .goal-primary-row {

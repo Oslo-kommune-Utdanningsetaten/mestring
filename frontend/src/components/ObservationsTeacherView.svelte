@@ -6,6 +6,7 @@
   import AuthorInfo from './AuthorInfo.svelte'
   import UserTag from './UserTag.svelte'
   import SubjectTag from './SubjectTag.svelte'
+  import Link from './Link.svelte'
   import { USER_ROLES } from '../utils/constants'
   import { isNumber } from '../utils/functions'
 
@@ -13,8 +14,6 @@
   const limit = 10
   let observations = $state<ObservationType[]>([])
   let cachedGoals = $state<Record<string, GoalType>>({})
-
-  // TODO: Fetch both observered by me and where I'm as student (possibly merge, if same). Then render in two different lists ''
 
   const fetchObservations = async () => {
     try {
@@ -76,15 +75,18 @@
     <div class="card shadow-sm mt-4">
       {#each observations as observation, i}
         <div class="observation-row" class:border-top={i > 0}>
-          <div class="observation-goal">
+          <div class="observation-meta-panel">
             <UserTag
               userId={observation.studentId}
               role={USER_ROLES.STUDENT}
               href="/students/{observation.studentId}"
             />
             {#if cachedGoals[observation.goalId]}
-              <span class="observation-goal-title">
-                {cachedGoals[observation.goalId].title || cachedGoals[observation.goalId].sortOrder}
+              <span class="observation-goal">
+                <Link to={`/students/${observation.studentId}?expanded=${observation.goalId}`}>
+                  {cachedGoals[observation.goalId].title ||
+                    cachedGoals[observation.goalId].sortOrder}
+                </Link>
               </span>
             {:else}
               {void lookUpGoal(observation.goalId)}
@@ -150,7 +152,7 @@
     gap: 1.25rem;
   }
 
-  .observation-goal {
+  .observation-meta-panel {
     flex: 1;
     min-width: 0;
     display: flex;
@@ -158,7 +160,7 @@
     gap: 0.15rem;
   }
 
-  .observation-goal-title {
+  .observation-goal {
     font-weight: 600;
     font-size: 1rem;
     line-height: 1.3;
