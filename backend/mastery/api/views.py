@@ -36,6 +36,17 @@ def apply_valid_group_filter(query_params, qs):
         return qs.within_validity_period()
 
 
+def apply_limit_filter(query_params, qs):
+    limit_param, _ = get_request_param(query_params, 'limit')
+
+    if limit_param and limit_param.isdigit():
+        # Apply limit filter
+        return qs[:int(limit_param)]
+    else:
+        # By default, no limit
+        return qs
+
+
 class FingerprintViewSetMixin:
 
     def perform_create(self, serializer):
@@ -801,6 +812,13 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
                 type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
+            OpenApiParameter(
+                name='limit',
+                description='The maximum number of observations to return. Default is no limit.',
+                required=False,
+                type={'type': 'number'},
+                location=OpenApiParameter.QUERY
+            ),
         ]
     )
 )
@@ -810,7 +828,7 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
     access_policy = ObservationAccessPolicy
 
     def get_queryset(self):
-        qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('observed_at')
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('-observed_at')
         qs = apply_deleted_filter(self.request.query_params, qs)
 
         if self.action == 'list':
@@ -877,7 +895,9 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
                         {'error': 'invalid-parameter',
                          'message': 'Invalid date format for "to" parameter. Use ISO format (YYYY-MM-DD).'})
                 qs = qs.filter(observed_at__date__lte=to_date)
-        # non-list actions (retrieve, create, update, destroy) do not require parameters
+
+        # Apply limit filter after all others
+        qs = apply_limit_filter(self.request.query_params, qs)
         return qs
 
 

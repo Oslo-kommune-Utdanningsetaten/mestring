@@ -5,35 +5,26 @@
   import { getMasteryLevelColorByValue, getMasteryTitleByValue } from '../utils/masteryHelpers'
   import AuthorInfo from './AuthorInfo.svelte'
   import UserTag from './UserTag.svelte'
+  import SubjectTag from './SubjectTag.svelte'
   import { USER_ROLES } from '../utils/constants'
   import { isNumber } from '../utils/functions'
 
   let { currentSchool, currentUser, subjects } = $derived($dataStore)
-
-  let observationsByMe = $state<ObservationType[]>([])
-  let observationsOfMe = $state<ObservationType[]>([])
-  let observations = $derived(
-    [...observationsByMe, ...observationsOfMe].sort(
-      (a: ObservationType, b: ObservationType) =>
-        new Date(b?.observedAt ?? 0).getTime() - new Date(a?.observedAt ?? 0).getTime()
-    )
-  )
+  const limit = 10
+  let observations = $state<ObservationType[]>([])
   let cachedGoals = $state<Record<string, GoalType>>({})
 
   // TODO: Fetch both observered by me and where I'm as student (possibly merge, if same). Then render in two different lists ''
 
   const fetchObservations = async () => {
     try {
-      const [obmResult, oomResult] = await Promise.all([
-        observationsList({
-          query: { observer: currentUser?.id, school: currentSchool?.id },
-        }),
-        observationsList({
-          query: { student: currentUser?.id, school: currentSchool?.id },
-        }),
-      ])
-      observationsByMe = obmResult.data || []
-      observationsOfMe = oomResult.data || []
+      const result = await observationsList({
+        query: { observer: currentUser?.id, school: currentSchool?.id, limit },
+      })
+      observations = (result.data || []).sort(
+        (a: ObservationType, b: ObservationType) =>
+          new Date(b?.observedAt ?? 0).getTime() - new Date(a?.observedAt ?? 0).getTime()
+      )
     } catch (error) {
       console.error('Error fetching observations:', error)
     }
@@ -57,20 +48,18 @@
 
   const getMasteryLevelColor = (observation: ObservationType): string | null => {
     const goal = cachedGoals[observation.goalId]
-    if (!goal || observation.masteryValue == null) return null
-    const schema = $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
+    const schema = $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
     const levels = schema?.config?.levels
     if (!levels?.length) return null
-    return getMasteryLevelColorByValue(observation.masteryValue, levels)
+    return getMasteryLevelColorByValue(observation.masteryValue as number, levels)
   }
 
   const getMasteryLevelTitle = (observation: ObservationType): string | null => {
     const goal = cachedGoals[observation.goalId]
-    if (!goal || observation.masteryValue == null) return null
-    const schema = $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
+    const schema = $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
     const levels = schema?.config?.levels
     if (!levels?.length) return null
-    return getMasteryTitleByValue(observation.masteryValue, levels)
+    return getMasteryTitleByValue(observation.masteryValue as number, levels)
   }
 
   $effect(() => {
@@ -79,7 +68,7 @@
 </script>
 
 <section class="py-4">
-  <h2>Observasjoner</h2>
+  <h2>Siste {limit > observations.length ? '' : limit} observasjoner</h2>
 
   {#if observations.length < 1}
     <div class="mt-3">🫤 Her var det lite, gitt.</div>
@@ -87,27 +76,27 @@
     <div class="card shadow-sm mt-4">
       {#each observations as observation, i}
         <div class="observation-row" class:border-top={i > 0}>
-          <div class="observation-header">
-            <UserTag userId={observation.studentId} role={USER_ROLES.STUDENT} />
-            <div class="observation-goal">
-              <div class="observation-goal-line">
-                {#if cachedGoals[observation.goalId]}
-                  <span class="observation-goal-title">
-                    {cachedGoals[observation.goalId].title}
-                  </span>
-                {:else}
-                  {void lookUpGoal(observation.goalId)}
-                  <span
-                    class="spinner-border spinner-border-sm"
-                    role="status"
-                    aria-hidden="true"
-                  ></span>
-                {/if}
-                <span class="observation-subject">{getSubjectName(observation?.subjectId)}</span>
-              </div>
-              <div class="observation-author">
-                <AuthorInfo item={observation} />
-              </div>
+          <div class="observation-goal">
+            <UserTag
+              userId={observation.studentId}
+              role={USER_ROLES.STUDENT}
+              href="/students/{observation.studentId}"
+            />
+            {#if cachedGoals[observation.goalId]}
+              <span class="observation-goal-title">
+                {cachedGoals[observation.goalId].title || cachedGoals[observation.goalId].sortOrder}
+              </span>
+            {:else}
+              {void lookUpGoal(observation.goalId)}
+              <span
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+            {/if}
+            <SubjectTag subjectId={observation.subjectId} />
+            <div class="observation-author">
+              <AuthorInfo item={observation} />
             </div>
           </div>
           <div
@@ -156,43 +145,28 @@
 
 <style>
   .observation-row {
+    padding: 1rem;
     display: flex;
-    padding: 0.65rem 1.25rem;
-    align-items: center;
     gap: 1.25rem;
   }
 
-  .observation-header {
-    display: flex;
+  .observation-goal {
     flex: 1;
     min-width: 0;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .observation-goal {
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
-    min-width: 0;
-  }
-
-  .observation-goal-line {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    flex-wrap: wrap;
   }
 
   .observation-goal-title {
     font-weight: 600;
-    font-size: 0.975rem;
+    font-size: 1rem;
     line-height: 1.3;
   }
 
   .observation-subject {
-    display: inline-block;
-    font-size: 0.65rem;
+    align-self: flex-start;
+    font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -202,25 +176,22 @@
   }
 
   .observation-author {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     color: #999;
   }
 
   .mastery-panel {
+    position: relative;
     flex-shrink: 0;
     width: 40%;
     border-radius: 4px;
     padding: 1.5rem 0.75rem;
-    position: relative;
-    font-size: 0.825rem;
     line-height: 1.45;
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 0.5rem;
-    align-self: stretch;
     min-height: 3.5rem;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     /* Colors are set by --mastery-color custom property */
     --mastery-color: #888;
     background: color-mix(in srgb, var(--mastery-color) 12%, white);
@@ -247,7 +218,7 @@
   }
 
   .mastery-value-corner:hover {
-    transition: opacity 0.4s ease;
+    transition: opacity 0.3s ease;
     opacity: 0.9;
   }
 
@@ -257,6 +228,8 @@
     gap: 0.5rem;
     font-style: italic;
     opacity: 0.85;
+    text-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   .mastery-divider {

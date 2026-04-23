@@ -11,11 +11,13 @@
     userId,
     allUsers = [],
     role,
+    href,
   } = $props<{
     user?: UserType | null | undefined
     userId?: string | undefined
     allUsers?: UserType[]
     role?: UserRoleType
+    href?: string
   }>()
 
   const iconName = $derived<string>(
@@ -43,9 +45,15 @@
 
 {#if userToDisplay}
   <pkt-tag {iconName} skin="yellow">
-    <span title={userToDisplay.feideId}>
-      {abbreviateName(userToDisplay.name, otherNames)}
-    </span>
+    {#if href}
+      <Link to={href}>
+        {abbreviateName(userToDisplay.name, otherNames)}
+      </Link>
+    {:else}
+      <span title={userToDisplay.feideId}>
+        {abbreviateName(userToDisplay.name, otherNames)}
+      </span>
+    {/if}
   </pkt-tag>
 {/if}
 

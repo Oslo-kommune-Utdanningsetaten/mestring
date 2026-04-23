@@ -7,6 +7,7 @@
   import type { GroupType, UserType } from '../generated/types.gen'
   import GroupTag from '../components/GroupTag.svelte'
   import UserTag from '../components/UserTag.svelte'
+  import SubjectTag from '../components/SubjectTag.svelte'
   import Link from '../components/Link.svelte'
 
   let currentSchool = $derived($dataStore.currentSchool)
@@ -32,11 +33,6 @@
     })
   }
 
-  const getSubjectName = (subjectId: string) => {
-    const subject = $dataStore.subjects.find(subj => subj.id === subjectId)
-    return subject ? subject.displayName : 'Ukjent fag'
-  }
-
   $effect(() => {
     if (currentSchool) {
       fetchAllmembersByGroupId()
@@ -60,7 +56,7 @@
               {group.displayName}
             </Link>
             {#if group.subjectId}
-              <small class="text-muted">{getSubjectName(group.subjectId)}</small>
+              <SubjectTag subjectId={group.subjectId} />
             {/if}
           </div>
 

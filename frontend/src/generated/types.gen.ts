@@ -1447,6 +1447,10 @@ export type ObservationsListData = {
          */
         group?: string;
         /**
+         * The maximum number of observations to return. Default is no limit.
+         */
+        limit?: number;
+        /**
          * Filter observations by who has done the observing.
          */
         observer?: string;
