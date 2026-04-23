@@ -133,7 +133,11 @@
                 </div>
               {/if}
               {#if isNumber(observation.masteryValue)}
-                <span class="mastery-value-corner">{observation.masteryValue}</span>
+                <span class="mastery-value-corner">
+                  <span class="mastery-level-title">
+                    {getMasteryLevelTitle(observation)} ({observation.masteryValue})
+                  </span>
+                </span>
               {/if}
             {:else if isNumber(observation.masteryValue)}
               <div class="mastery-value-only">
@@ -152,16 +156,16 @@
 
 <style>
   .observation-row {
-    padding: 0.65rem 1.25rem;
     display: flex;
+    padding: 0.65rem 1.25rem;
     align-items: center;
     gap: 1.25rem;
   }
 
   .observation-header {
+    display: flex;
     flex: 1;
     min-width: 0;
-    display: flex;
     align-items: center;
     gap: 0.75rem;
   }
@@ -205,13 +209,14 @@
   .mastery-panel {
     flex-shrink: 0;
     width: 40%;
-    border-radius: 12px;
-    padding: 0.75rem;
+    border-radius: 4px;
+    padding: 1.5rem 0.75rem;
     position: relative;
     font-size: 0.825rem;
     line-height: 1.45;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 0.5rem;
     align-self: stretch;
     min-height: 3.5rem;
@@ -226,10 +231,10 @@
     position: absolute;
     top: -0.6rem;
     right: -0.6rem;
-    width: 2rem;
     height: 2rem;
-    border-radius: 50%;
     display: flex;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
     align-items: center;
     justify-content: center;
     font-weight: 800;
@@ -237,6 +242,13 @@
     color: #fff;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     background: var(--mastery-color);
+    opacity: 0.25;
+    transition: opacity 0.8s ease;
+  }
+
+  .mastery-value-corner:hover {
+    transition: opacity 0.4s ease;
+    opacity: 0.9;
   }
 
   .mastery-text {
