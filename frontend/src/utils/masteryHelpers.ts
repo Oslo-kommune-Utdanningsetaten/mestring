@@ -1,9 +1,14 @@
 import type { MasterySchemaWithConfig, MasteryConfigLevel } from '../types/models'
 import { isNumber } from './functions'
 
-export const getMasteryColorByValue = (value: number, masteryLevels: any[]): string => {
+export const getMasteryLevelColorByValue = (value: number, masteryLevels: any[]): string => {
   const masteryLevel = masteryLevels.find(ml => ml.minValue <= value && ml.maxValue >= value)
   return masteryLevel ? masteryLevel.color : 'black'
+}
+
+export const getMasteryTitleByValue = (value: number, masteryLevels: any[]): string => {
+  const masteryLevel = masteryLevels.find(ml => ml.minValue <= value && ml.maxValue >= value)
+  return masteryLevel ? masteryLevel.title : 'tittel manlger'
 }
 
 export function useMasteryCalculations(masterySchema: MasterySchemaWithConfig | null) {

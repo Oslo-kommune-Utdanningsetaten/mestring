@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { MasteryConfigLevel, MasterySchemaWithConfig } from '../types/models'
-  import { useMasteryCalculations, getMasteryColorByValue } from '../utils/masteryHelpers'
+  import { useMasteryCalculations, getMasteryLevelColorByValue } from '../utils/masteryHelpers'
   import BarChart from './BarChart.svelte'
 
   interface Props {
@@ -31,7 +31,7 @@
 
   const colorLookup = (value: number) =>
     Number.isFinite(value) && masteryLevels.length > 0
-      ? getMasteryColorByValue(value, masteryLevels)
+      ? getMasteryLevelColorByValue(value, masteryLevels)
       : lineColor
 </script>
 

@@ -2,10 +2,11 @@
   import type { ObservationType, GoalType, UserType } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
   import { goalsRetrieve, observationsList } from '../generated/sdk.gen'
-  import { getMasteryColorByValue } from '../utils/masteryHelpers'
+  import { getMasteryLevelColorByValue, getMasteryTitleByValue } from '../utils/masteryHelpers'
   import AuthorInfo from './AuthorInfo.svelte'
   import UserTag from './UserTag.svelte'
   import { USER_ROLES } from '../utils/constants'
+  import { isNumber } from '../utils/functions'
 
   let { currentSchool, currentUser, subjects } = $derived($dataStore)
 
@@ -54,13 +55,22 @@
     return subjects.find(s => s.id === subjectId)?.displayName || 'Ukjent fag'
   }
 
-  const getMasteryColor = (observation: ObservationType): string | null => {
+  const getMasteryLevelColor = (observation: ObservationType): string | null => {
     const goal = cachedGoals[observation.goalId]
     if (!goal || observation.masteryValue == null) return null
     const schema = $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
     const levels = schema?.config?.levels
     if (!levels?.length) return null
-    return getMasteryColorByValue(observation.masteryValue, levels)
+    return getMasteryLevelColorByValue(observation.masteryValue, levels)
+  }
+
+  const getMasteryLevelTitle = (observation: ObservationType): string | null => {
+    const goal = cachedGoals[observation.goalId]
+    if (!goal || observation.masteryValue == null) return null
+    const schema = $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
+    const levels = schema?.config?.levels
+    if (!levels?.length) return null
+    return getMasteryTitleByValue(observation.masteryValue, levels)
   }
 
   $effect(() => {
@@ -77,12 +87,14 @@
     <div class="card shadow-sm mt-4">
       {#each observations as observation, i}
         <div class="observation-row" class:border-top={i > 0}>
-          <div class="obs-header">
+          <div class="observation-header">
             <UserTag userId={observation.studentId} role={USER_ROLES.STUDENT} />
-            <div class="obs-goal">
-              <div class="obs-goal-line">
+            <div class="observation-goal">
+              <div class="observation-goal-line">
                 {#if cachedGoals[observation.goalId]}
-                  <span class="obs-goal-title">{cachedGoals[observation.goalId].title}</span>
+                  <span class="observation-goal-title">
+                    {cachedGoals[observation.goalId].title}
+                  </span>
                 {:else}
                   {void lookUpGoal(observation.goalId)}
                   <span
@@ -91,36 +103,42 @@
                     aria-hidden="true"
                   ></span>
                 {/if}
-                <span class="obs-subject">{getSubjectName(observation?.subjectId)}</span>
+                <span class="observation-subject">{getSubjectName(observation?.subjectId)}</span>
               </div>
-              <div class="obs-meta">
+              <div class="observation-author">
                 <AuthorInfo item={observation} />
               </div>
             </div>
           </div>
           <div
             class="mastery-panel"
-            style={getMasteryColor(observation)
-              ? `--mastery-color: ${getMasteryColor(observation)}`
+            style={getMasteryLevelColor(observation)
+              ? `--mastery-color: ${getMasteryLevelColor(observation)}`
               : undefined}
           >
             {#if observation.masteryDescription || observation.feedforward}
-              {#if observation.masteryValue != null}
-                <div class="mastery-badge">{observation.masteryValue}</div>
-              {/if}
               {#if observation.masteryDescription}
-                <p class="mastery-desc">{observation.masteryDescription}</p>
+                <span class="mastery-text">
+                  <span class="mastery-icon">←</span>
+                  {observation.masteryDescription}
+                </span>
+              {/if}
+              {#if observation.masteryDescription && observation.feedforward}
+                <hr class="mastery-divider" />
               {/if}
               {#if observation.feedforward}
-                <div class="mastery-ff">
-                  <span class="ff-icon">↗</span>
+                <div class="mastery-text">
+                  <span class="mastery-icon">→</span>
                   {observation.feedforward}
                 </div>
               {/if}
-            {:else if observation.masteryValue != null}
-              <div class="mastery-solo">
-                <span class="mastery-solo-value">{observation.masteryValue}</span>
-                <span class="mastery-solo-label">mestring</span>
+              {#if isNumber(observation.masteryValue)}
+                <span class="mastery-value-corner">{observation.masteryValue}</span>
+              {/if}
+            {:else if isNumber(observation.masteryValue)}
+              <div class="mastery-value-only">
+                <span class="mastery-value-only">{observation.masteryValue}</span>
+                <span class="mastery-level-title">{getMasteryLevelTitle(observation)}</span>
               </div>
             {:else}
               <span class="mastery-empty">–</span>
@@ -140,8 +158,7 @@
     gap: 1.25rem;
   }
 
-  /* ── Left side: header ── */
-  .obs-header {
+  .observation-header {
     flex: 1;
     min-width: 0;
     display: flex;
@@ -149,27 +166,27 @@
     gap: 0.75rem;
   }
 
-  .obs-goal {
+  .observation-goal {
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
     min-width: 0;
   }
 
-  .obs-goal-line {
+  .observation-goal-line {
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
     flex-wrap: wrap;
   }
 
-  .obs-goal-title {
+  .observation-goal-title {
     font-weight: 600;
     font-size: 0.975rem;
     line-height: 1.3;
   }
 
-  .obs-subject {
+  .observation-subject {
     display: inline-block;
     font-size: 0.65rem;
     font-weight: 600;
@@ -177,19 +194,14 @@
     letter-spacing: 0.05em;
     color: #666;
     background: #ebebeb;
-    border-radius: 4px;
     padding: 0.1rem 0.4rem;
-    white-space: nowrap;
-    flex-shrink: 0;
   }
 
-  /* ── Meta row ── */
-  .obs-meta {
+  .observation-author {
     font-size: 0.72rem;
     color: #999;
   }
 
-  /* ── Mastery panel ───────────────────────────────── */
   .mastery-panel {
     flex-shrink: 0;
     width: 40%;
@@ -204,17 +216,13 @@
     align-self: stretch;
     min-height: 3.5rem;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  }
-
-  /* Color themes — driven by --mastery-color custom property */
-  .mastery-panel {
+    /* Colors are set by --mastery-color custom property */
     --mastery-color: #888;
     background: color-mix(in srgb, var(--mastery-color) 12%, white);
     color: color-mix(in srgb, var(--mastery-color) 80%, black);
   }
 
-  /* ── Value badge (corner) ── */
-  .mastery-badge {
+  .mastery-value-corner {
     position: absolute;
     top: -0.6rem;
     right: -0.6rem;
@@ -231,30 +239,27 @@
     background: var(--mastery-color);
   }
 
-  /* ── Rich text content ── */
-  .mastery-desc {
-    margin: 0;
-    font-weight: 500;
-  }
-
-  .mastery-ff {
+  .mastery-text {
     display: flex;
-    gap: 0.3rem;
+    font-weight: 500;
+    gap: 0.5rem;
     font-style: italic;
     opacity: 0.85;
-    border-top: 1px solid currentColor;
-    padding-top: 0.4rem;
-    margin-top: auto;
   }
 
-  .ff-icon {
+  .mastery-divider {
+    opacity: 0.5;
+    border-top: 1px solid currentColor;
+    margin: 0.5rem;
+  }
+
+  .mastery-icon {
     flex-shrink: 0;
     font-style: normal;
     font-weight: 700;
   }
 
-  /* ── Solo value display ── */
-  .mastery-solo {
+  .mastery-value-only {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -263,18 +268,18 @@
     gap: 0.15rem;
   }
 
-  .mastery-solo-value {
+  .mastery-value-only {
     font-size: 2.75rem;
     font-weight: 900;
     line-height: 1;
     letter-spacing: -0.02em;
   }
 
-  .mastery-solo-label {
-    font-size: 0.6rem;
+  .mastery-level-title {
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    opacity: 0.65;
+    opacity: 0.7;
     font-weight: 600;
   }
 
