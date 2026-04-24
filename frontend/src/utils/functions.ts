@@ -362,10 +362,3 @@ export const formatDateTimeWithToday = (
       : format(date, 'd. LLLL yyyy', { locale: noLocale })
   }
 }
-
-export const randomRgbaColor = (opacity: number = 0.5): string => {
-  const r = Math.floor(Math.random() * 256)
-  const g = Math.floor(Math.random() * 256)
-  const b = Math.floor(Math.random() * 256)
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`
-}

@@ -2,7 +2,7 @@
   import { dataStore } from '../stores/data'
   import type { UserType, SubjectType, ObservationType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
-  import { fetchGoalsForSubjectAndStudent, randomRgbaColor, isNumber } from '../utils/functions'
+  import { fetchGoalsForSubjectAndStudent, isNumber } from '../utils/functions'
   import { useMasteryCalculations, getMasteryLevelColorByValue } from '../utils/masteryHelpers'
   import { PolarArea } from 'svelte-chartjs'
   import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, RadialLinearScale } from 'chart.js'
@@ -62,10 +62,6 @@
       currentSchool?.id!,
       currentUser.allGroups
     )
-    goalsForSubjectDecorated = goalsForSubjectDecorated.map(goal => ({
-      ...goal,
-      displayColor: randomRgbaColor(0.5),
-    }))
     assembleChartData()
   }
 
