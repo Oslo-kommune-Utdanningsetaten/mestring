@@ -31,6 +31,7 @@ export type HasUserAccessToFeatureOptions = {
 export type GoalDecorated = GoalType & {
   masteryData?: Mastery | null
   observations?: ObservationType[]
+  displayColor?: string
 }
 
 export type UserDecorated = UserType & {

@@ -1,9 +1,33 @@
 import type { MasterySchemaWithConfig, MasteryConfigLevel } from '../types/models'
 import { isNumber } from './functions'
 
-export const getMasteryLevelColorByValue = (value: number, masteryLevels: any[]): string => {
+export const getMasteryLevelColorByValue = (
+  value: number,
+  masteryLevels: any[],
+  opacity?: number
+): string => {
   const masteryLevel = masteryLevels.find(ml => ml.minValue <= value && ml.maxValue >= value)
-  return masteryLevel ? masteryLevel.color : 'black'
+  let color = masteryLevel ? masteryLevel.color : `rgba(100, 100, 100)`
+  if (!opacity) {
+    return color
+  }
+  const opacityValue = opacity || 1
+  // Extract the RGB values and construct a new RGBA string with the provided opacity
+  const rgbaMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/)
+  const hexMatch = color.match(/#([0-9a-fA-F]{6})/)
+  if (rgbaMatch) {
+    const r = rgbaMatch[1]
+    const g = rgbaMatch[2]
+    const b = rgbaMatch[3]
+    color = `rgba(${r}, ${g}, ${b}, ${opacityValue})`
+  } else if (hexMatch) {
+    const hex = hexMatch[1]
+    const r = parseInt(hex.substring(0, 2), 16)
+    const g = parseInt(hex.substring(2, 4), 16)
+    const b = parseInt(hex.substring(4, 6), 16)
+    color = `rgba(${r}, ${g}, ${b}, ${opacityValue})`
+  }
+  return color
 }
 
 export const getMasteryTitleByValue = (value: number, masteryLevels: any[]): string => {

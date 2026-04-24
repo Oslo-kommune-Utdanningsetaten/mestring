@@ -12,8 +12,8 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@tsconfig/svelte": "^5.0.8",
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "@tsconfig/svelte": "^5.0.8",
     "@types/sortablejs": "^1.15.8",
     "prettier": "^3.6.2",
     "sass": "^1.99.0",
@@ -29,8 +29,10 @@
     "@oslokommune/punkt-css": "^16.7.2",
     "@oslokommune/punkt-elements": "^16.7.1",
     "bootstrap": "^5.3.3",
+    "chart.js": "^4.5.1",
     "date-fns": "^4.1.0",
     "sortablejs": "^1.15.6",
+    "svelte-chartjs": "^4.0.1",
     "svelte-jsoneditor": "^3.11.0",
     "svelte-tiny-router": "^1.0.8"
   }
