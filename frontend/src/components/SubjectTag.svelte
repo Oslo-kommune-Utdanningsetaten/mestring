@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { SubjectType } from '../generated/types.gen'
-  import Link from './Link.svelte'
   import { dataStore } from '../stores/data'
 
   const { subjectId } = $props<{
@@ -10,13 +9,13 @@
   const subject = $derived($dataStore.subjects.find((sub: SubjectType) => sub.id === subjectId))
 </script>
 
-{#if subject}
-  <span title={subject.id} class="subject">
-    {subject.shortName || subject.displayName || subject.grepCode || 'Ukjent fag'}
-  </span>
-{:else}
-  ukjent fag :/
-{/if}
+<span class="subject">
+  {#if subject}
+    {subject.shortName || subject.displayName || subject.grepCode || `Fag med id ${subject.id}`}
+  {:else}
+    ukjent fag :/
+  {/if}
+</span>
 
 <style>
   .subject {
