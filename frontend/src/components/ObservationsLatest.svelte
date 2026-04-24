@@ -72,7 +72,7 @@
 </script>
 
 <section class="py-4">
-  <h2>Siste {limit > observations.length ? '' : limit} observasjoner [{viewMode}]</h2>
+  <h2 title="{viewMode} mode">Siste {limit > observations.length ? '' : limit} observasjoner</h2>
 
   {#if observations.length < 1}
     <div class="mt-3">🫤 Her var det lite, gitt.</div>
@@ -165,7 +165,7 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: 0.5em;
   }
 
   .observation-goal-row {
@@ -208,9 +208,9 @@
     position: absolute;
     top: -0.6rem;
     right: -0.6rem;
-    height: 1.8rem;
+    height: 1.6rem;
     display: flex;
-    padding: 0.25rem 0.5rem;
+    padding: 0.3rem 0.5rem;
     border-radius: 4px;
     align-items: center;
     justify-content: center;
