@@ -88,22 +88,24 @@
                 href="/students/{observation.studentId}"
               />
             {/if}
-            {#if cachedGoals[observation.goalId]}
-              <span class="observation-goal">
-                <Link to={`/students/${observation.studentId}?expanded=${observation.goalId}`}>
-                  {cachedGoals[observation.goalId].title ||
-                    cachedGoals[observation.goalId].sortOrder}
-                </Link>
-              </span>
-            {:else}
-              {void lookUpGoal(observation.goalId)}
-              <span
-                class="spinner-border spinner-border-sm"
-                role="status"
-                aria-hidden="true"
-              ></span>
-            {/if}
-            <SubjectTag subjectId={observation.subjectId} />
+            <div class="observation-goal-row">
+              {#if cachedGoals[observation.goalId]}
+                <span class="observation-goal">
+                  <Link to={`/students/${observation.studentId}?expanded=${observation.goalId}`}>
+                    {cachedGoals[observation.goalId].title ||
+                      cachedGoals[observation.goalId].sortOrder}
+                  </Link>
+                </span>
+              {:else}
+                {void lookUpGoal(observation.goalId)}
+                <span
+                  class="spinner-border spinner-border-sm"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+              {/if}
+              <SubjectTag subjectId={observation.subjectId} />
+            </div>
             <div class="observation-author">
               <AuthorInfo item={observation} />
             </div>
@@ -132,15 +134,15 @@
               {/if}
               {#if isNumber(observation.masteryValue)}
                 <span class="mastery-value-corner">
-                  <span class="mastery-level-title">
+                  <span class="mastery-level-title-corner">
                     {getMasteryLevelTitle(observation)} ({observation.masteryValue})
                   </span>
                 </span>
               {/if}
             {:else if isNumber(observation.masteryValue)}
-              <div class="mastery-value-only">
+              <div class="mastery-only">
+                <span class="mastery-level-title-only">{getMasteryLevelTitle(observation)}</span>
                 <span class="mastery-value-only">{observation.masteryValue}</span>
-                <span class="mastery-level-title">{getMasteryLevelTitle(observation)}</span>
               </div>
             {:else}
               <span class="mastery-empty">–</span>
@@ -166,6 +168,13 @@
     gap: 0.15rem;
   }
 
+  .observation-goal-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+
   .observation-goal {
     font-weight: 600;
     font-size: 1rem;
@@ -182,7 +191,7 @@
     flex-shrink: 0;
     width: 40%;
     border-radius: 4px;
-    padding: 1.5rem 0.75rem;
+    padding: 1rem 0.75rem;
     line-height: 1.45;
     display: flex;
     flex-direction: column;
@@ -199,7 +208,7 @@
     position: absolute;
     top: -0.6rem;
     right: -0.6rem;
-    height: 2rem;
+    height: 1.8rem;
     display: flex;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
@@ -241,28 +250,36 @@
     font-weight: 700;
   }
 
-  .mastery-value-only {
+  .mastery-level-title-corner {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08rem;
+    opacity: 0.85;
+    font-weight: 600;
+  }
+
+  .mastery-only {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.15rem;
+    gap: 0.3rem;
+  }
+
+  .mastery-level-title-only {
+    font-size: 2rem;
+    text-transform: uppercase;
+    font-weight: 900;
+    line-height: 1;
   }
 
   .mastery-value-only {
-    font-size: 2.75rem;
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: -0.02em;
-  }
-
-  .mastery-level-title {
-    font-size: 0.7rem;
-    text-transform: uppercase;
     letter-spacing: 0.1em;
     opacity: 0.85;
     font-weight: 600;
+    opacity: 0.5;
+    line-height: 1;
   }
 
   .mastery-empty {
