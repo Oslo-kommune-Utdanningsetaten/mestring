@@ -104,7 +104,6 @@
     display: grid;
     grid-template-columns: minmax(12rem, 20rem) 1fr auto 1fr;
     column-gap: 20px;
-    padding: 0 0.75rem;
   }
 
   .group-row {
@@ -112,7 +111,7 @@
     display: grid;
     grid-template-columns: subgrid;
     align-items: center;
-    padding: 0.5rem 0;
+    padding: 1rem;
   }
 
   .group-teachers {

@@ -10,10 +10,19 @@
   import { USER_ROLES } from '../utils/constants'
   import { isNumber } from '../utils/functions'
 
-  let { currentSchool, currentUser, subjects } = $derived($dataStore)
   const limit = 10
+  let { masterySchemas, currentSchool, currentUser } = $derived($dataStore)
   let observations = $state<ObservationType[]>([])
   let cachedGoals = $state<Record<string, GoalType>>({})
+  let viewMode = $derived(
+    currentUser.isSuperadmin || currentUser.isSchoolAdmin || currentUser.isSchoolInspector
+      ? 'school'
+      : currentUser.isTeacher
+        ? 'teacher'
+        : currentUser.isStudent
+          ? 'student'
+          : null
+  )
 
   const fetchObservations = async () => {
     try {
@@ -41,13 +50,9 @@
     }
   }
 
-  const getSubjectName = (subjectId: any) => {
-    return subjects.find(s => s.id === subjectId)?.displayName || 'Ukjent fag'
-  }
-
   const getMasteryLevelColor = (observation: ObservationType): string | null => {
     const goal = cachedGoals[observation.goalId]
-    const schema = $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
+    const schema = masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
     const levels = schema?.config?.levels
     if (!levels?.length) return null
     return getMasteryLevelColorByValue(observation.masteryValue as number, levels)
@@ -55,7 +60,7 @@
 
   const getMasteryLevelTitle = (observation: ObservationType): string | null => {
     const goal = cachedGoals[observation.goalId]
-    const schema = $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
+    const schema = masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
     const levels = schema?.config?.levels
     if (!levels?.length) return null
     return getMasteryTitleByValue(observation.masteryValue as number, levels)
@@ -67,7 +72,7 @@
 </script>
 
 <section class="py-4">
-  <h2>Siste {limit > observations.length ? '' : limit} observasjoner</h2>
+  <h2>Siste {limit > observations.length ? '' : limit} observasjoner [{viewMode}]</h2>
 
   {#if observations.length < 1}
     <div class="mt-3">🫤 Her var det lite, gitt.</div>
@@ -76,11 +81,13 @@
       {#each observations as observation, i}
         <div class="observation-row" class:border-top={i > 0}>
           <div class="observation-meta-panel">
-            <UserTag
-              userId={observation.studentId}
-              role={USER_ROLES.STUDENT}
-              href="/students/{observation.studentId}"
-            />
+            {#if viewMode !== 'student'}
+              <UserTag
+                userId={observation.studentId}
+                role={USER_ROLES.STUDENT}
+                href="/students/{observation.studentId}"
+              />
+            {/if}
             {#if cachedGoals[observation.goalId]}
               <span class="observation-goal">
                 <Link to={`/students/${observation.studentId}?expanded=${observation.goalId}`}>
@@ -149,7 +156,6 @@
   .observation-row {
     padding: 1rem;
     display: flex;
-    gap: 1.25rem;
   }
 
   .observation-meta-panel {
@@ -167,7 +173,7 @@
   }
 
   .observation-author {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #999;
   }
 
