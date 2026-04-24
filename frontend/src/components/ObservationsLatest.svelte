@@ -26,9 +26,13 @@
 
   const fetchObservations = async () => {
     try {
-      const result = await observationsList({
-        query: { observer: currentUser?.id, school: currentSchool?.id, limit },
-      })
+      const query: Record<string, any> = { limit, school: currentSchool?.id }
+      if (viewMode === 'teacher') {
+        query.observer = currentUser?.id
+      } else if (viewMode === 'student') {
+        query.student = currentUser?.id
+      }
+      const result = await observationsList({ query })
       observations = (result.data || []).sort(
         (a: ObservationType, b: ObservationType) =>
           new Date(b?.observedAt ?? 0).getTime() - new Date(a?.observedAt ?? 0).getTime()
