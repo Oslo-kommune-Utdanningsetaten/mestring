@@ -23,6 +23,7 @@
   import Offcanvas from './Offcanvas.svelte'
   import Statuses from '../components/Statuses.svelte'
   import AuthorInfo from './AuthorInfo.svelte'
+  import StudentSubjectChart from './StudentSubjectChart.svelte'
 
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { localStorage } from '../stores/localStorage'
@@ -317,6 +318,8 @@
     <Statuses {student} {subject} />
   {/key}
 </div>
+
+<StudentSubjectChart {student} {subject} />
 
 {#snippet goalInList(goal: GoalDecorated, index: number)}
   {@const isExpanded = expandedGoalIds.includes(goal.id)}

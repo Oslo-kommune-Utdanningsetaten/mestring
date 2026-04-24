@@ -4,6 +4,7 @@
   import { login } from '../stores/auth'
   import GroupsCompact from '../components/GroupsCompact.svelte'
   import ObservationsLatest from '../components/ObservationsLatest.svelte'
+  import StudentSubjectChart from '../components/StudentSubjectChart.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
 
   const router = useTinyRouter()
