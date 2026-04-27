@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ObservationType, GoalType, UserType } from '../generated/types.gen'
+  import type { ObservationType, GoalType } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
   import { goalsRetrieve, observationsList } from '../generated/sdk.gen'
   import { getMasteryLevelColorByValue, getMasteryTitleByValue } from '../utils/masteryHelpers'
@@ -61,16 +61,32 @@
 
   const getMasteryLevelColor = (observation: ObservationType): string | null => {
     const masterySchema = getMasterySchemaForObservation(observation)
+    if (!masterySchema || !isNumber(observation.masteryValue)) {
+      return null
+    }
     return getMasteryLevelColorByValue(observation.masteryValue as number, masterySchema)
   }
 
   const getMasteryLevelTitle = (observation: ObservationType): string | null => {
     const masterySchema = getMasterySchemaForObservation(observation)
+    if (!masterySchema || !isNumber(observation.masteryValue)) {
+      return null
+    }
     return getMasteryTitleByValue(observation.masteryValue as number, masterySchema)
   }
 
+  const isMasteryValueAvailable = (observation: ObservationType): boolean => {
+    const masterySchema = getMasterySchemaForObservation(observation)
+    if (!masterySchema || !isNumber(observation.masteryValue)) {
+      return false
+    }
+    return masterySchema?.config?.isMasteryValueInputEnabled
+  }
+
   $effect(() => {
-    fetchObservations()
+    if (currentSchool) {
+      fetchObservations()
+    }
   })
 </script>
 
@@ -138,14 +154,19 @@
               {#if isNumber(observation.masteryValue)}
                 <span class="mastery-value-corner">
                   <span class="mastery-level-title-corner">
-                    {getMasteryLevelTitle(observation)} ({observation.masteryValue})
+                    {getMasteryLevelTitle(observation)}
+                    {#if isMasteryValueAvailable(observation)}
+                      ({observation.masteryValue})
+                    {/if}
                   </span>
                 </span>
               {/if}
             {:else if isNumber(observation.masteryValue)}
               <div class="mastery-only">
                 <span class="mastery-level-title-only">{getMasteryLevelTitle(observation)}</span>
-                <span class="mastery-value-only">{observation.masteryValue}</span>
+                {#if isMasteryValueAvailable(observation)}
+                  <span class="mastery-value-only">{observation.masteryValue}</span>
+                {/if}
               </div>
             {:else}
               <span class="mastery-empty">–</span>
@@ -190,6 +211,7 @@
   }
 
   .mastery-panel {
+    container-type: inline-size;
     position: relative;
     flex-shrink: 0;
     width: 40%;
@@ -271,7 +293,7 @@
   }
 
   .mastery-level-title-only {
-    font-size: 2rem;
+    font-size: clamp(0.8rem, 8cqi, 2rem);
     text-transform: uppercase;
     font-weight: 900;
     line-height: 1;
