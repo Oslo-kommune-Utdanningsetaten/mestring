@@ -13,14 +13,14 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name='status',
-            name='subject',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='statuses', to='mastery.subject'),
-        ),
+            model_name='status', name='subject', field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.CASCADE, related_name='statuses',
+                to='mastery.subject'),),
         migrations.CreateModel(
             name='StatusCategory',
-            fields=[
-                ('id', models.CharField(default=mastery.models.generate_nanoid, editable=False, max_length=50, primary_key=True, serialize=False)),
+            fields=[('id', models.CharField(
+                default=mastery.models.generate_nanoid, editable=False, max_length=50,
+                primary_key=True, serialize=False)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('maintained_at', models.DateTimeField(null=True)),
@@ -29,23 +29,27 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=200)),
                 ('begin_at', models.DateTimeField()),
                 ('end_at', models.DateTimeField()),
-                ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='created_%(class)s_set', to='mastery.user')),
-                ('mastery_schema', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='status_categories', to='mastery.masteryschema')),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='status_categories', to='mastery.school')),
-                ('updated_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='updated_%(class)s_set', to='mastery.user')),
-            ],
-        ),
+                ('created_by', models.ForeignKey(
+                    null=True, on_delete=django.db.models.deletion.SET_NULL,
+                    related_name='created_%(class)s_set', to='mastery.user')),
+                ('mastery_schema', models.ForeignKey(
+                    null=False, on_delete=django.db.models.deletion.SET_NULL,
+                    related_name='status_categories', to='mastery.masteryschema')),
+                ('school', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, related_name='status_categories',
+                    to='mastery.school')),
+                ('updated_by', models.ForeignKey(
+                    null=True, on_delete=django.db.models.deletion.SET_NULL,
+                    related_name='updated_%(class)s_set', to='mastery.user')),],),
         migrations.AddField(
-            model_name='status',
-            name='category',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='statuses', to='mastery.statuscategory'),
-        ),
+            model_name='status', name='category', field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='statuses',
+                to='mastery.statuscategory'),),
         migrations.AddConstraint(
-            model_name='status',
-            constraint=models.CheckConstraint(condition=models.Q(('subject__isnull', False), ('category__isnull', False), _connector='OR'), name='status_subject_or_category'),
-        ),
-        migrations.AlterUniqueTogether(
-            name='statuscategory',
-            unique_together={('name', 'school')},
-        ),
-    ]
+            model_name='status', constraint=models.CheckConstraint(
+                condition=models.Q(
+                    ('subject__isnull', False),
+                    ('category__isnull', False),
+                    _connector='OR'),
+                name='status_subject_or_category'),),
+        migrations.AlterUniqueTogether(name='statuscategory', unique_together={('name', 'school')},),]

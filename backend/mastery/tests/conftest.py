@@ -492,22 +492,24 @@ def status_at_other_school(db, other_school, other_school_student, subject_owned
 
 
 @pytest.fixture
-def status_category_at_school(db, school):
+def status_category_at_school(db, school, mastery_schema):
     return StatusCategory.objects.create(
         title="Halvtårsvurdering",
         name="halvtår",
         school=school,
+        mastery_schema=mastery_schema,
         begin_at=timezone.now() - timedelta(days=30),
         end_at=timezone.now() - timedelta(days=2),
     )
 
 
 @pytest.fixture
-def status_category_at_other_school(db, other_school):
+def status_category_at_other_school(db, other_school, mastery_schema_other_school):
     return StatusCategory.objects.create(
         title="Halvtårsvurdering",
         name="halvtår",
         school=other_school,
+        mastery_schema=mastery_schema_other_school,
         begin_at=timezone.now() - timedelta(days=30),
         end_at=timezone.now() - timedelta(days=2),
     )

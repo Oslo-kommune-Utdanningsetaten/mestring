@@ -20,7 +20,7 @@ def test_non_user_status_category_access(status_category_at_school):
 
 @pytest.mark.django_db
 def test_superadmin_status_category_access(
-        superadmin, school, other_school,
+        superadmin, school, other_school, mastery_schema,
         status_category_at_school, status_category_at_other_school):
     """Superadmin has full access to all status categories."""
     client = APIClient()
@@ -54,6 +54,7 @@ def test_superadmin_status_category_access(
         "title": "Standpunkt",
         "name": "standpunkt",
         "school_id": school.id,
+        "mastery_schema_id": mastery_schema.id,
         "begin_at": thirty_days_ago,
         "end_at": two_days_ago,
     }, format='json')
@@ -137,6 +138,7 @@ def test_authenticated_status_category_access(
 def test_school_admin_status_category_access(
         school, other_school,
         school_admin,
+        mastery_schema,
         status_category_at_school, status_category_at_other_school):
     """
     School admins have full CRUD on status categories belonging to their school.
@@ -174,6 +176,7 @@ def test_school_admin_status_category_access(
         "title": "Standpunkt",
         "name": "standpunkt",
         "school_id": school.id,
+        "mastery_schema_id": mastery_schema.id,
         "begin_at": thirty_days_ago,
         "end_at": two_days_ago,
     }, format='json')
