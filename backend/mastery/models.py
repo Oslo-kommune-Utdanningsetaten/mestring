@@ -384,7 +384,7 @@ class StatusCategory(BaseModel):
     name = models.CharField(max_length=200, null=False)  # e.g. 'halvtår', 'standpunt', 'iv'
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='status_categories')
     mastery_schema = models.ForeignKey(
-        MasterySchema, on_delete=models.SET_NULL, null=False, related_name='status_categories')
+        MasterySchema, on_delete=models.CASCADE, null=False, related_name='status_categories')
     begin_at = models.DateTimeField(null=False)  # begin and end define the period this status covers
     end_at = models.DateTimeField(null=False)
 

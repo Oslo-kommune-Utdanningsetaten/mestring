@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                     null=True, on_delete=django.db.models.deletion.SET_NULL,
                     related_name='created_%(class)s_set', to='mastery.user')),
                 ('mastery_schema', models.ForeignKey(
-                    null=False, on_delete=django.db.models.deletion.SET_NULL,
+                    null=False, on_delete=django.db.models.deletion.CASCADE,
                     related_name='status_categories', to='mastery.masteryschema')),
                 ('school', models.ForeignKey(
                     on_delete=django.db.models.deletion.CASCADE, related_name='status_categories',
