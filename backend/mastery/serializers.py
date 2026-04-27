@@ -217,6 +217,12 @@ class StatusSerializer(BaseModelSerializer):
         return attrs
 
 
+class StatusCategorySerializer(BaseModelSerializer):
+    class Meta:
+        model = models.School
+        fields = '__all__'
+
+
 class SchoolSerializer(BaseModelSerializer):
     class Meta:
         model = models.School

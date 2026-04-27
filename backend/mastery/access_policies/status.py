@@ -169,5 +169,5 @@ class StatusAccessPolicy(BaseAccessPolicy):
             return school_id in school_admin_ids
 
         except Exception:
-            logger.exception("StatusAccessPolicy.belongs_to_school")
+            logger.exception("StatusAccessPolicy.is_admin_at_school")
             return False

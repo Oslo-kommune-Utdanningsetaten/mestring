@@ -6,7 +6,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_access_policy import AccessViewSetMixin
-from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy, StatusAccessPolicy
+from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy, StatusAccessPolicy, StatusCategoryAccessPolicy
 from .api_functions import get_request_param
 import logging
 
@@ -1012,6 +1012,52 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
 
             if editor_param:
                 qs = qs.filter(Q(created_by_id=editor_param) | Q(updated_by_id=editor_param))
+
+        # non-list actions (retrieve, create, update, destroy) do not require parameters
+        return qs
+
+
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='school',
+                description='Filter statuses by school.',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='name',
+                description='Filter statuses by name.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+        ]
+    )
+)
+class StatusCategoryViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
+    queryset = models.StatusCategory.objects.all()
+    serializer_class = serializers.StatusCategorySerializer
+    access_policy = StatusCategoryAccessPolicy
+
+    def get_queryset(self):
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = apply_deleted_filter(self.request.query_params, qs)
+
+        if self.action == 'list':
+            school_param, _ = get_request_param(self.request.query_params, 'school')
+            name_param, _ = get_request_param(self.request.query_params, 'name')
+
+            if not school_param:
+                raise ValidationError({'error': 'missing-parameter',
+                                      'message': 'The "school" parameter is required.'})
+
+            qs = qs.filter(school_id=school_param)
+
+            if name_param:
+                qs = qs.filter(name=name_param)
 
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs

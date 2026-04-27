@@ -287,9 +287,32 @@ export type PatchedStatusType = {
     readonly createdById?: string;
     readonly updatedById?: string;
     studentId?: string;
-    subjectId?: string;
+    subjectId?: string | null;
     schoolId?: string;
     masterySchemaId?: string | null;
+    categoryId?: string | null;
+};
+
+export type PatchedStatusCategoryType = {
+    readonly id?: string;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    readonly maintainedAt?: string | null;
+    deletedAt?: string | null;
+    feideId?: string;
+    displayName?: string;
+    shortName?: string | null;
+    orgNumber?: string;
+    owner?: string | null;
+    isServiceEnabled?: boolean;
+    isServiceEnabledForStudents?: boolean;
+    isGroupGoalEnabled?: boolean;
+    isStudentListEnabled?: boolean;
+    isGoalTitleEnabled?: boolean;
+    isStatusEnabled?: boolean;
+    subjectsAllowed?: string;
+    readonly createdById?: string;
+    readonly updatedById?: string;
 };
 
 export type PatchedSubjectType = {
@@ -386,9 +409,32 @@ export type StatusType = {
     readonly createdById: string;
     readonly updatedById: string;
     studentId: string;
-    subjectId: string;
+    subjectId?: string | null;
     schoolId: string;
     masterySchemaId?: string | null;
+    categoryId?: string | null;
+};
+
+export type StatusCategoryType = {
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    readonly maintainedAt: string | null;
+    deletedAt?: string | null;
+    feideId: string;
+    displayName: string;
+    shortName?: string | null;
+    orgNumber: string;
+    owner?: string | null;
+    isServiceEnabled?: boolean;
+    isServiceEnabledForStudents?: boolean;
+    isGroupGoalEnabled?: boolean;
+    isStudentListEnabled?: boolean;
+    isGoalTitleEnabled?: boolean;
+    isStatusEnabled?: boolean;
+    subjectsAllowed?: string;
+    readonly createdById: string;
+    readonly updatedById: string;
 };
 
 /**
@@ -621,9 +667,26 @@ export type PatchedStatusCreateType = {
     masteryDescription?: string | null;
     feedforward?: string | null;
     studentId?: string;
-    subjectId?: string;
+    subjectId?: string | null;
     schoolId?: string;
     masterySchemaId?: string | null;
+    categoryId?: string | null;
+};
+
+export type PatchedStatusCategoryCreateType = {
+    deletedAt?: string | null;
+    feideId?: string;
+    displayName?: string;
+    shortName?: string | null;
+    orgNumber?: string;
+    owner?: string | null;
+    isServiceEnabled?: boolean;
+    isServiceEnabledForStudents?: boolean;
+    isGroupGoalEnabled?: boolean;
+    isStudentListEnabled?: boolean;
+    isGoalTitleEnabled?: boolean;
+    isStatusEnabled?: boolean;
+    subjectsAllowed?: string;
 };
 
 export type PatchedSubjectCreateType = {
@@ -682,9 +745,26 @@ export type StatusCreateType = {
     masteryDescription?: string | null;
     feedforward?: string | null;
     studentId: string;
-    subjectId: string;
+    subjectId?: string | null;
     schoolId: string;
     masterySchemaId?: string | null;
+    categoryId?: string | null;
+};
+
+export type StatusCategoryCreateType = {
+    deletedAt?: string | null;
+    feideId: string;
+    displayName: string;
+    shortName?: string | null;
+    orgNumber: string;
+    owner?: string | null;
+    isServiceEnabled?: boolean;
+    isServiceEnabledForStudents?: boolean;
+    isGroupGoalEnabled?: boolean;
+    isStudentListEnabled?: boolean;
+    isGoalTitleEnabled?: boolean;
+    isStatusEnabled?: boolean;
+    subjectsAllowed?: string;
 };
 
 export type SubjectCreateType = {
@@ -1840,6 +1920,116 @@ export type StatusCreateResponses = {
 };
 
 export type StatusCreateResponse = StatusCreateResponses[keyof StatusCreateResponses];
+
+export type StatusCategoriesListData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Filter statuses by name.
+         */
+        name?: string;
+        /**
+         * Filter statuses by school.
+         */
+        school: string;
+    };
+    url: '/api/status-categories/';
+};
+
+export type StatusCategoriesListResponses = {
+    200: Array<StatusCategoryType>;
+};
+
+export type StatusCategoriesListResponse = StatusCategoriesListResponses[keyof StatusCategoriesListResponses];
+
+export type StatusCategoriesCreateData = {
+    body: StatusCategoryCreateType;
+    path?: never;
+    query?: never;
+    url: '/api/status-categories/';
+};
+
+export type StatusCategoriesCreateResponses = {
+    201: StatusCategoryType;
+};
+
+export type StatusCategoriesCreateResponse = StatusCategoriesCreateResponses[keyof StatusCategoriesCreateResponses];
+
+export type StatusCategoriesDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this status category.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/status-categories/{id}/';
+};
+
+export type StatusCategoriesDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type StatusCategoriesDestroyResponse = StatusCategoriesDestroyResponses[keyof StatusCategoriesDestroyResponses];
+
+export type StatusCategoriesRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this status category.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/status-categories/{id}/';
+};
+
+export type StatusCategoriesRetrieveResponses = {
+    200: StatusCategoryType;
+};
+
+export type StatusCategoriesRetrieveResponse = StatusCategoriesRetrieveResponses[keyof StatusCategoriesRetrieveResponses];
+
+export type StatusCategoriesPartialUpdateData = {
+    body?: PatchedStatusCategoryCreateType;
+    path: {
+        /**
+         * A unique value identifying this status category.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/status-categories/{id}/';
+};
+
+export type StatusCategoriesPartialUpdateResponses = {
+    200: StatusCategoryType;
+};
+
+export type StatusCategoriesPartialUpdateResponse = StatusCategoriesPartialUpdateResponses[keyof StatusCategoriesPartialUpdateResponses];
+
+export type StatusCategoriesUpdateData = {
+    body: StatusCategoryCreateType;
+    path: {
+        /**
+         * A unique value identifying this status category.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/status-categories/{id}/';
+};
+
+export type StatusCategoriesUpdateResponses = {
+    200: StatusCategoryType;
+};
+
+export type StatusCategoriesUpdateResponse = StatusCategoriesUpdateResponses[keyof StatusCategoriesUpdateResponses];
 
 export type StatusDestroyData = {
     body?: never;

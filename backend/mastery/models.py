@@ -376,22 +376,46 @@ class Observation(BaseModel):
         ordering = ["observed_at"]
 
 
+class StatusCategory(BaseModel):
+    """
+    A StatusCategory represents a category for a Status, e.g. 'halvtår', 'standpunt' etc. Let schools configure how they want to use Status.
+    """
+    title = models.CharField(max_length=200, null=False)
+    name = models.CharField(max_length=200, null=False)  # e.g. 'halvtår', 'standpunt', 'iv'
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='status_categories')
+    mastery_schema = models.ForeignKey(
+        MasterySchema, on_delete=models.SET_NULL, null=True, related_name='status_categories')
+    begin_at = models.DateTimeField(null=False)  # begin and end define the period this status covers
+    end_at = models.DateTimeField(null=False)
+
+    class Meta:
+        unique_together = ('name', 'school')
+
+
 class Status(BaseModel):
     """
     A status represents an overall assessment of a students mastery in a subject, over a period of time. E.g. how has Lois been doing in math since October, considering all math Goals (individual and group).
     """
     title = models.CharField(max_length=200, null=True)
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False, related_name='statuses')
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=False, related_name='statuses')
-    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False,
-                               related_name='statuses')  # for easier querying
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, null=True, related_name='statuses')
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='statuses')
     mastery_schema = models.ForeignKey(
         MasterySchema, on_delete=models.SET_NULL, null=True, related_name='statuses')
+    # if set, the status inherits the category's title, mastery_schema and period, and is linked to the category for easier querying. If not set, these fields are set on the status itself and can be used freely.
+    category = models.ForeignKey(StatusCategory, on_delete=models.SET_NULL,
+                                 null=True, related_name='statuses')
     begin_at = models.DateTimeField(null=False)  # begin and end define the period this status covers
     end_at = models.DateTimeField(null=False)
     mastery_value = models.IntegerField(null=True)
     mastery_description = models.TextField(null=True)
     feedforward = models.TextField(null=True)
+
+    class Meta:
+        constraints = [models.CheckConstraint(
+            condition=Q(subject__isnull=False) | Q(category__isnull=False),
+            name='status_subject_or_category')
+        ]
 
 
 class DataMaintenanceTask(BaseModel):

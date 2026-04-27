@@ -7,6 +7,7 @@ from .role import RoleAccessPolicy
 from .mastery_schema import MasterySchemaAccessPolicy
 from .observation import ObservationAccessPolicy
 from .status import StatusAccessPolicy
+from .status_category import StatusCategoryAccessPolicy
 from .user_school import UserSchoolAccessPolicy
 from .user_group import UserGroupAccessPolicy
 from .data_maintenance_task import DataMaintenanceTaskAccessPolicy
@@ -24,6 +25,7 @@ __all__ = [
     "UserSchoolAccessPolicy",
     "UserGroupAccessPolicy",
     "StatusAccessPolicy",
+    "StatusCategoryAccessPolicy",
     "DataMaintenanceTaskAccessPolicy",
     "ImportAccessPolicy",
 ]
