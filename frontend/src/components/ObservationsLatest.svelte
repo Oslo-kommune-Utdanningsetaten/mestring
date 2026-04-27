@@ -54,19 +54,18 @@
     }
   }
 
-  const getMasteryLevelColor = (observation: ObservationType): string | null => {
+  const getMasterySchemaForObservation = (observation: ObservationType) => {
     const goal = cachedGoals[observation.goalId]
-    const masterySchema = masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
-    const levels = schema?.config?.levels
-    if (!levels?.length) return null
+    return masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
+  }
+
+  const getMasteryLevelColor = (observation: ObservationType): string | null => {
+    const masterySchema = getMasterySchemaForObservation(observation)
     return getMasteryLevelColorByValue(observation.masteryValue as number, masterySchema)
   }
 
   const getMasteryLevelTitle = (observation: ObservationType): string | null => {
-    const goal = cachedGoals[observation.goalId]
-    const masterySchema = masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
-    const levels = schema?.config?.levels
-    if (!levels?.length) return null
+    const masterySchema = getMasterySchemaForObservation(observation)
     return getMasteryTitleByValue(observation.masteryValue as number, masterySchema)
   }
 
