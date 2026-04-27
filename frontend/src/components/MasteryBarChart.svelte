@@ -29,7 +29,7 @@
   const title = $derived(providedTitle ?? (hasSufficientData ? data.join(', ') : 'Mangler data'))
 
   const colorLookup = (value: number) =>
-    Number.isFinite(value) && masteryLevels.length > 0
+    Number.isFinite(value)
       ? getMasteryLevelColorByValue(value, masterySchema)
       : lineColor
 </script>
