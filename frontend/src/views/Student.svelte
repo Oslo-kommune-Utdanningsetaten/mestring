@@ -168,10 +168,15 @@
         </div>
       </div>
     </div>
-    <div class="my-4">
+    <div class="my-3">
       {#each groups as group}
         <span class="me-2">
-          <GroupTag {group} isGroupNameEnabled={true} href={`/groups/${group.id}/`} />
+          <GroupTag
+            {group}
+            isGroupNameEnabled={true}
+            href={`/groups/${group.id}/`}
+            classes="mb-2"
+          />
         </span>
       {/each}
     </div>
