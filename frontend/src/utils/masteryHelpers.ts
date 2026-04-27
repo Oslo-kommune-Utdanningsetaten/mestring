@@ -7,7 +7,9 @@ export const getMasteryLevelColorByValue = (
   opacity?: number
 ): string => {
   const masteryLevels = masterySchema.config?.levels || []
-  const masteryLevel = masteryLevels.find(ml => ml.minValue <= value && ml.maxValue >= value)
+  const masteryLevel = masteryLevels.find(
+    (ml: MasteryConfigLevel) => ml.minValue <= value && ml.maxValue >= value
+  )
   let color = masteryLevel ? masteryLevel.color : `rgba(100, 100, 100)`
   if (!opacity) {
     return color
@@ -31,9 +33,14 @@ export const getMasteryLevelColorByValue = (
   return color
 }
 
-export const getMasteryTitleByValue = (value: number, masterySchema: MasterySchemaWithConfig): string => {
+export const getMasteryTitleByValue = (
+  value: number,
+  masterySchema: MasterySchemaWithConfig
+): string => {
   const masteryLevels = masterySchema.config?.levels || []
-  const masteryLevel = masteryLevels.find(ml => ml.minValue <= value && ml.maxValue >= value)
+  const masteryLevel = masteryLevels.find(
+    (ml: MasteryConfigLevel) => ml.minValue <= value && ml.maxValue >= value
+  )
   return masteryLevel ? masteryLevel.title : 'tittel manlger'
 }
 
