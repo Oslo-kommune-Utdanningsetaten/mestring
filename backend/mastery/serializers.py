@@ -219,7 +219,7 @@ class StatusSerializer(BaseModelSerializer):
 
 class StatusCategorySerializer(BaseModelSerializer):
     class Meta:
-        model = models.School
+        model = models.StatusCategory
         fields = '__all__'
 
 

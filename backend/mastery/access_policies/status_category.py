@@ -41,22 +41,14 @@ class StatusCategoryAccessPolicy(BaseAccessPolicy):
         if requester.is_superadmin:
             return qs
         try:
-            school_member_ids = UserGroup.objects.filter(
+            school_ids_via_user_school = UserSchool.objects.filter(
                 user_id=requester.id).values_list(
-                "school_id", flat=True).distinct()
-            school_employee_ids = UserSchool.objects.filter(
-                user_id=requester.id, role__name__in=["admin", "inspector"]).values_list(
-                "school_id", flat=True).distinct()
-
-            # Anyone with a group membership at the school can see status categories at that school
-            if school_member_ids:
-                filters |= Q(school_id__in=school_member_ids)
-
-            # School employees: All statuses categories at their schools
-            if school_employee_ids:
-                filters |= Q(school_id__in=school_employee_ids)
-
-            return qs.filter(filters).distinct()
+                "school_id", flat=True)
+            school_ids_via_user_group = UserGroup.objects.filter(
+                user_id=requester.id).values_list(
+                "group__school_id", flat=True)
+            school_ids = list(set(school_ids_via_user_school).union(set(school_ids_via_user_group)))
+            return qs.filter(school_id__in=school_ids).distinct()
         except Exception:
             logger.exception("StatusCategoryAccessPolicy.scope_queryset")
             return qs.none()

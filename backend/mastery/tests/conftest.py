@@ -2,7 +2,7 @@ import pytest
 from datetime import timedelta
 from django.test import Client
 from django.utils import timezone
-from mastery.models import School, User, Group, Role, Subject, Goal, MasterySchema, Observation, Status
+from mastery.models import School, User, Group, Role, Subject, Goal, MasterySchema, Observation, Status, StatusCategory
 
 
 @pytest.fixture
@@ -487,5 +487,27 @@ def status_at_other_school(db, other_school, other_school_student, subject_owned
         subject=subject_owned_by_other_school,
         school=other_school,
         begin_at=timezone.now() - timedelta(days=60),
+        end_at=timezone.now() - timedelta(days=2),
+    )
+
+
+@pytest.fixture
+def status_category_at_school(db, school):
+    return StatusCategory.objects.create(
+        title="Halvtårsvurdering",
+        name="halvtår",
+        school=school,
+        begin_at=timezone.now() - timedelta(days=30),
+        end_at=timezone.now() - timedelta(days=2),
+    )
+
+
+@pytest.fixture
+def status_category_at_other_school(db, other_school):
+    return StatusCategory.objects.create(
+        title="Halvtårsvurdering",
+        name="halvtår",
+        school=other_school,
+        begin_at=timezone.now() - timedelta(days=30),
         end_at=timezone.now() - timedelta(days=2),
     )
