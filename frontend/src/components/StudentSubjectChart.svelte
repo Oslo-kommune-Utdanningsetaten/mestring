@@ -82,7 +82,7 @@
     // colors
     //data.datasets[0].backgroundColor = goalsForSubjectDecorated.map(goal => goal.displayColor)
     tempData.forEach(value => {
-      const color = getMasteryLevelColorByValue(value, masterySchema.config?.levels, 0.5)
+      const color = getMasteryLevelColorByValue(value, masterySchema, 0.5)
       data.datasets[0].backgroundColor.push(color)
     })
 

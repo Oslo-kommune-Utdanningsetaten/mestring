@@ -22,7 +22,6 @@
     title: providedTitle,
   }: Props = $props()
 
-  const masteryLevels = $derived<MasteryConfigLevel[]>(masterySchema?.config?.levels ?? [])
   const hasSufficientData = $derived(
     Array.isArray(data) && data.length > 0 && data.every(n => Number.isFinite(n))
   )
@@ -31,7 +30,7 @@
 
   const colorLookup = (value: number) =>
     Number.isFinite(value) && masteryLevels.length > 0
-      ? getMasteryLevelColorByValue(value, masteryLevels)
+      ? getMasteryLevelColorByValue(value, masterySchema)
       : lineColor
 </script>
 

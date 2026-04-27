@@ -56,18 +56,18 @@
 
   const getMasteryLevelColor = (observation: ObservationType): string | null => {
     const goal = cachedGoals[observation.goalId]
-    const schema = masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
+    const masterySchema = masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
     const levels = schema?.config?.levels
     if (!levels?.length) return null
-    return getMasteryLevelColorByValue(observation.masteryValue as number, levels)
+    return getMasteryLevelColorByValue(observation.masteryValue as number, masterySchema)
   }
 
   const getMasteryLevelTitle = (observation: ObservationType): string | null => {
     const goal = cachedGoals[observation.goalId]
-    const schema = masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
+    const masterySchema = masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
     const levels = schema?.config?.levels
     if (!levels?.length) return null
-    return getMasteryTitleByValue(observation.masteryValue as number, levels)
+    return getMasteryTitleByValue(observation.masteryValue as number, masterySchema)
   }
 
   $effect(() => {
@@ -76,7 +76,7 @@
 </script>
 
 <section class="py-4">
-  <h2 title="{viewMode} mode">Siste {limit > observations.length ? '' : limit} observasjoner</h2>
+  <h2 title="{viewMode} mode">Siste observasjoner</h2>
 
   {#if observations.length < 1}
     <div class="mt-3">🫤 Her var det lite, gitt.</div>

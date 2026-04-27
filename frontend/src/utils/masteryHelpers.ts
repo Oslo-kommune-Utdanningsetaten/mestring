@@ -3,9 +3,10 @@ import { isNumber } from './functions'
 
 export const getMasteryLevelColorByValue = (
   value: number,
-  masteryLevels: any[],
+  masterySchema: MasterySchemaWithConfig,
   opacity?: number
 ): string => {
+  const masteryLevels = masterySchema.config?.levels || []
   const masteryLevel = masteryLevels.find(ml => ml.minValue <= value && ml.maxValue >= value)
   let color = masteryLevel ? masteryLevel.color : `rgba(100, 100, 100)`
   if (!opacity) {
@@ -30,7 +31,8 @@ export const getMasteryLevelColorByValue = (
   return color
 }
 
-export const getMasteryTitleByValue = (value: number, masteryLevels: any[]): string => {
+export const getMasteryTitleByValue = (value: number, masterySchema: MasterySchemaWithConfig): string => {
+  const masteryLevels = masterySchema.config?.levels || []
   const masteryLevel = masteryLevels.find(ml => ml.minValue <= value && ml.maxValue >= value)
   return masteryLevel ? masteryLevel.title : 'tittel manlger'
 }
