@@ -81,6 +81,21 @@
     }
   }
 
+  const handleCategoryChange = () => {
+    // If the selected category has a default mastery value, set it on the status
+    const selectedCategory = statusCategories.find(c => c.id === localStatus.categoryId)
+    console.log('Selected category:', selectedCategory)
+    if (selectedCategory?.defaultMasteryValue !== undefined) {
+      localStatus.masteryValue = selectedCategory.defaultMasteryValue
+    }
+    // TODO
+    // category should auto-set
+    // title
+    // period (beginAt and endAt)
+    // mastery_schema
+    // unset subject
+  }
+
   const toggleGoalsExpansion = () => {
     isGoalSectionExpanded = !isGoalSectionExpanded
   }
@@ -226,7 +241,12 @@
       <h3 class="col-4 mb-0">Kategori</h3>
       <div class="col-8">
         <label for="categorySelect" class="mb-1 visually-hidden">Fra</label>
-        <select class="pkt-input" id="categorySelect" bind:value={localStatus.categoryId}>
+        <select
+          class="pkt-input"
+          id="categorySelect"
+          bind:value={localStatus.categoryId}
+          onchange={() => handleCategoryChange()}
+        >
           <option value={null} selected={!localStatus.categoryId}>Ingen</option>
           {#each statusCategories as statusCategory}
             <option
@@ -398,7 +418,7 @@
     padding-right: 2.5rem;
   }
 
-  .input-with-icon :global(button) {
+  .input-with-icon :global(.button-icon-wrapper) {
     position: absolute;
     right: 0.5rem;
     top: 50%;

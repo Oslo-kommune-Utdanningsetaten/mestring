@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { StatusType, SubjectType, UserType, GoalType } from '../generated/types.gen'
+  import type { StatusType, SubjectType, UserType } from '../generated/types.gen'
   import {
     statusRetrieve,
     usersRetrieve,
@@ -53,7 +53,7 @@
       const studentResult = await usersRetrieve({ path: { id: status.studentId } })
       student = studentResult.data!
       // Fetch subject
-      const subjectResult = await subjectsRetrieve({ path: { id: status.subjectId } })
+      const subjectResult = await subjectsRetrieve({ path: { id: status.subjectId as string } })
       subject = subjectResult.data!
     } catch (error) {
       console.error('Error fetching status data:', error)
@@ -157,6 +157,21 @@
           >
             Slett
           </ButtonMini>
+        {/if}
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- Status category -->
+    <div class="row my-4">
+      <h3 class="col-4">Kategori</h3>
+      <div class="col-8">
+        {#if status.categoryId}
+          {$dataStore.statusCategories.find(cat => cat.id === status?.categoryId)?.title ||
+            'ukjent'}
+        {:else}
+          ingen
         {/if}
       </div>
     </div>
