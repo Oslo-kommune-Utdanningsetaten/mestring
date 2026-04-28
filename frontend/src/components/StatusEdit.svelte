@@ -31,8 +31,8 @@
 
   let localStudent = $state<UserType | null>(student || null)
   let localGoals = $state<GoalDecorated[] | null>(goals || null)
-
   let isGoalSectionExpanded = $state<boolean>(false)
+  let statusCategories = $derived($dataStore.statusCategories)
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
 
   const goalSectionToggleOptions = $derived.by(() => {
@@ -222,8 +222,26 @@
       {localStatus.id ? 'Redigerer' : 'Opprett ny'} status
     </h2>
 
+    <div class="d-flex my-5">
+      <h3 class="col-4 mb-0">Kategori</h3>
+      <div class="col-8">
+        <label for="categorySelect" class="mb-1 visually-hidden">Fra</label>
+        <select class="pkt-input" id="categorySelect" bind:value={localStatus.categoryId}>
+          <option value={null} selected={!localStatus.categoryId}>Ingen</option>
+          {#each statusCategories as statusCategory}
+            <option
+              value={statusCategory.id}
+              selected={statusCategory.id === localStatus.categoryId}
+            >
+              {statusCategory.title}
+            </option>
+          {/each}
+        </select>
+      </div>
+    </div>
+
     <!-- Begin and end dates -->
-    <div class="row my-5">
+    <div class="d-flex my-5">
       <h3 class="col-4">Periode</h3>
       <div class="col-auto">
         <label for="beginAt" class="form-label mb-0">Fra</label>
@@ -239,7 +257,7 @@
           <div class="invalid-feedback d-block">{validationErrors.beginAt}</div>
         {/if}
       </div>
-      <div class="col-auto">
+      <div class="col-auto ms-3">
         <label for="endAt" class="form-label mb-0">Til</label>
         <input
           id="endAt"
@@ -256,7 +274,7 @@
     </div>
 
     <!-- Title -->
-    <div class="row my-5">
+    <div class="d-flex my-5">
       <h3 class="col-4">Tittel</h3>
       <div class="col-8">
         <label for="title" class="visually-hidden">Tittel</label>
@@ -281,7 +299,7 @@
 
     <!-- Mastery value input -->
     {#if masterySchema?.config?.isMasteryValueInputEnabled}
-      <div class="row my-5">
+      <div class="d-flex my-5">
         <h3 class="col-4">Mestring</h3>
         <div class="col-8">
           <MasteryValueInput
@@ -295,7 +313,7 @@
 
     <!-- Mastery description input -->
     {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
-      <div class="row my-4">
+      <div class="d-flex my-5">
         <h3 class="col-4">Beskrivelse</h3>
         <div class="col-8">
           <label for="description" class="visually-hidden">
@@ -314,7 +332,7 @@
 
     <!-- Mastery feed forward input -->
     {#if masterySchema?.config?.isFeedforwardInputEnabled}
-      <div class="row my-4">
+      <div class="d-flex my-5">
         <h3 class="col-4">Fremovermelding</h3>
         <div class="col-8">
           <label for="feedforward" class="visually-hidden">Fremovermelding til eleven</label>

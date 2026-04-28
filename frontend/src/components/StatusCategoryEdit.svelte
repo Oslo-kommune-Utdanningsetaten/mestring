@@ -46,6 +46,8 @@
 
 <div class="p-4 status-category-edit">
   <h3 class="pb-2">{localStatusCategory.id ? 'Redigerer statuskategori' : 'Ny statuskategori'}</h3>
+
+  <!-- Title -->
   <div class="form-group mb-3">
     <label for="stausCategoryTitle" class="form-label">Tittel</label>
     <input
@@ -57,6 +59,7 @@
     />
   </div>
 
+  <!-- Name -->
   <div class="form-group mb-3">
     <label for="nameSelect" class="mb-1">Velg kategori-navn</label>
     <select class="pkt-input" id="nameSelect" bind:value={localStatusCategory.name}>
@@ -72,34 +75,21 @@
   <!-- Mastery schema -->
   {#if masterySchemas.length > 1}
     <div class="form-group mb-3">
-      <div>
-        <pkt-select
-          label="Mestringsskjema"
-          name="goalMasterySchema"
-          fullwidth={true}
-          value={localStatusCategory.masterySchemaId || NONE_FIELD_VALUE}
-          hasError={!localStatusCategory.masterySchemaId ||
-            localStatusCategory.masterySchemaId === NONE_FIELD_VALUE}
-          requiredText="Velg et mestringsskjema"
-          disabled={!localStatusCategory.isEnabled}
-          onchange={(e: Event) => {
-            const target = e.target as HTMLSelectElement | null
-            const msid = target?.value || NONE_FIELD_VALUE
-            handleChangeMasterySchema(msid)
-          }}
-        >
-          <option disabled value={NONE_FIELD_VALUE}>Velg mestringsskjema</option>
-          {#each masterySchemas as masterySchema}
-            <option
-              disabled={!masterySchema.isEnabled}
-              value={masterySchema.id}
-              selected={masterySchema.id === selectedMasterySchemaId}
-            >
-              {masterySchema.title}
-            </option>
-          {/each}
-        </pkt-select>
-      </div>
+      <label for="masterySchemaSelect" class="mb-1">Mestringsskjema</label>
+      <select
+        id="masterySchemaSelect"
+        class="pkt-input"
+        disabled={!localStatusCategory.isEnabled}
+        value={selectedMasterySchemaId}
+        onchange={e => handleChangeMasterySchema((e.target as HTMLSelectElement).value)}
+      >
+        <option disabled value={NONE_FIELD_VALUE}>Velg mestringsskjema</option>
+        {#each masterySchemas as masterySchema}
+          <option disabled={!masterySchema.isEnabled} value={masterySchema.id}>
+            {masterySchema.title}
+          </option>
+        {/each}
+      </select>
     </div>
   {/if}
 
