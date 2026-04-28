@@ -1,6 +1,7 @@
 import { get, writable, derived } from 'svelte/store'
 import {
   subjectsList,
+  statusCategoriesList,
   schoolsList,
   masterySchemasList,
   rolesList,
@@ -35,14 +36,16 @@ export const setCurrentSchool = (school: SchoolType) => {
       registerSubjects(school)
       registerUserStatus(school)
       registerMasterySchemas(school)
+      registerStatusCategories(school)
     }
   }
 }
 
 export const dataStore = writable<AppData>({
-  subjects: [],
   currentSchool: null,
   currentUser: null,
+  subjects: [],
+  statusCategories: [],
   masterySchemas: [],
   roles: [],
 })
@@ -141,6 +144,23 @@ const registerMasterySchemas = async (school: SchoolType) => {
   } catch (error) {
     console.error('Error fetching mastery schemas:', error)
     return null
+  }
+}
+
+const registerStatusCategories = async (school: SchoolType) => {
+  try {
+    const result = await statusCategoriesList({
+      query: { school: school.id },
+    })
+    const categories = result.data || []
+    dataStore.update(data => {
+      return { ...data, statusCategories: categories }
+    })
+  } catch (error) {
+    console.error('Error fetching status categories:', error)
+    dataStore.update(data => {
+      return { ...data, statusCategories: [] }
+    })
   }
 }
 

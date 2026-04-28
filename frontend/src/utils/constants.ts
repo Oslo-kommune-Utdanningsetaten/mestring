@@ -42,6 +42,12 @@ export enum USER_ROLES {
   SUPERADMIN = 'superadmin',
 }
 
+export const STATUS_CATEGORY_NAMES: Record<string, string> = {
+  midyear: 'Halvtår',
+  endyear: 'Standpunkt',
+  risk: 'IVF/G',
+}
+
 export const VALUE_INPUT_VARIANTS = [
   'sliderHorizontal',
   'sliderVertical',

@@ -10,7 +10,7 @@
   import { dataStore } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
   import ButtonMini from './ButtonMini.svelte'
-  import { NONE_FIELD_VALUE, SUBJECTS_ALLOWED_CUSTOM, GROUP_TYPE_BASIS } from '../utils/constants'
+  import { NONE_FIELD_VALUE } from '../utils/constants'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
 

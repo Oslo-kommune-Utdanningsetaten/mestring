@@ -20,6 +20,7 @@ import Schools from '../views/admin/Schools.svelte'
 import School from '../views/admin/School.svelte'
 import SchoolStats from '../views/admin/SchoolStats.svelte'
 import UsersByRole from '../views/UsersByRole.svelte'
+import StatusCategory from '../views/admin/StatusCategory.svelte'
 
 import { USER_ROLES } from './constants'
 
@@ -139,6 +140,12 @@ export const ROUTES = [
     component: Subjects,
     isPublic: false,
     accessibleBy: [USER_ROLES.SUPERADMIN],
+  },
+  {
+    path: '/admin/status-categories',
+    component: StatusCategory,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
   {
     path: '/admin/mastery-schemas',

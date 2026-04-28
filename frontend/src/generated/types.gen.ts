@@ -299,20 +299,13 @@ export type PatchedStatusCategoryType = {
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
     deletedAt?: string | null;
-    feideId?: string;
-    displayName?: string;
-    shortName?: string | null;
-    orgNumber?: string;
-    owner?: string | null;
-    isServiceEnabled?: boolean;
-    isServiceEnabledForStudents?: boolean;
-    isGroupGoalEnabled?: boolean;
-    isStudentListEnabled?: boolean;
-    isGoalTitleEnabled?: boolean;
-    isStatusEnabled?: boolean;
-    subjectsAllowed?: string;
+    title?: string;
+    name?: string;
+    isEnabled?: boolean;
     readonly createdById?: string;
     readonly updatedById?: string;
+    schoolId?: string;
+    masterySchemaId?: string;
 };
 
 export type PatchedSubjectType = {
@@ -421,20 +414,13 @@ export type StatusCategoryType = {
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
     deletedAt?: string | null;
-    feideId: string;
-    displayName: string;
-    shortName?: string | null;
-    orgNumber: string;
-    owner?: string | null;
-    isServiceEnabled?: boolean;
-    isServiceEnabledForStudents?: boolean;
-    isGroupGoalEnabled?: boolean;
-    isStudentListEnabled?: boolean;
-    isGoalTitleEnabled?: boolean;
-    isStatusEnabled?: boolean;
-    subjectsAllowed?: string;
+    title: string;
+    name: string;
+    isEnabled?: boolean;
     readonly createdById: string;
     readonly updatedById: string;
+    schoolId: string;
+    masterySchemaId: string;
 };
 
 /**
@@ -675,18 +661,11 @@ export type PatchedStatusCreateType = {
 
 export type PatchedStatusCategoryCreateType = {
     deletedAt?: string | null;
-    feideId?: string;
-    displayName?: string;
-    shortName?: string | null;
-    orgNumber?: string;
-    owner?: string | null;
-    isServiceEnabled?: boolean;
-    isServiceEnabledForStudents?: boolean;
-    isGroupGoalEnabled?: boolean;
-    isStudentListEnabled?: boolean;
-    isGoalTitleEnabled?: boolean;
-    isStatusEnabled?: boolean;
-    subjectsAllowed?: string;
+    title?: string;
+    name?: string;
+    isEnabled?: boolean;
+    schoolId?: string;
+    masterySchemaId?: string;
 };
 
 export type PatchedSubjectCreateType = {
@@ -753,18 +732,11 @@ export type StatusCreateType = {
 
 export type StatusCategoryCreateType = {
     deletedAt?: string | null;
-    feideId: string;
-    displayName: string;
-    shortName?: string | null;
-    orgNumber: string;
-    owner?: string | null;
-    isServiceEnabled?: boolean;
-    isServiceEnabledForStudents?: boolean;
-    isGroupGoalEnabled?: boolean;
-    isStudentListEnabled?: boolean;
-    isGoalTitleEnabled?: boolean;
-    isStatusEnabled?: boolean;
-    subjectsAllowed?: string;
+    title: string;
+    name: string;
+    isEnabled?: boolean;
+    schoolId: string;
+    masterySchemaId: string;
 };
 
 export type SubjectCreateType = {

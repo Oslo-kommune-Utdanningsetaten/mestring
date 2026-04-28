@@ -16,6 +16,7 @@ export type AppData = {
   currentSchool: SchoolType | null
   currentUser: BasicUserType | null
   masterySchemas: MasterySchemaType[]
+  statusCategories: StatusCategoryType[]
   roles: RoleType[]
   defaultMasterySchema?: MasterySchemaType | null
 }

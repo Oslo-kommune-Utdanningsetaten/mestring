@@ -125,6 +125,13 @@
                     <Link to="/admin/subjects" className="dropdown-item">Fag</Link>
                   </li>
                 {/if}
+                {#if $hasUserAccessToPath('/admin/status-categories')}
+                  <li>
+                    <Link to="/admin/status-categories" className="dropdown-item">
+                      Statuskategorier
+                    </Link>
+                  </li>
+                {/if}
                 {#if $hasUserAccessToPath('/admin/goals')}
                   <li class="nav-item">
                     <Link to="/admin/goals" className="dropdown-item">Mål</Link>

@@ -52,11 +52,10 @@ def test_superadmin_status_category_access(
     # Can create status categories at any school
     resp = client.post("/api/status-categories/", {
         "title": "Standpunkt",
-        "name": "standpunkt",
+        "name": "endyear",
         "school_id": school.id,
         "mastery_schema_id": mastery_schema.id,
-        "begin_at": thirty_days_ago,
-        "end_at": two_days_ago,
+        "is_enabled": True,
     }, format='json')
     assert resp.status_code == 201
     created_id = resp.json()["id"]
@@ -114,10 +113,9 @@ def test_authenticated_status_category_access(
         # Cannot create status categories
         resp = client.post("/api/status-categories/", {
             "title": "Halvårsvurdering",
-            "name": "halvtår-ny",
+            "name": "midyear-new",
             "school_id": school.id,
-            "begin_at": thirty_days_ago,
-            "end_at": two_days_ago,
+            "is_enabled": True,
         }, format='json')
         assert resp.status_code == 403
 
@@ -174,11 +172,10 @@ def test_school_admin_status_category_access(
     # Can create a status category at their school
     resp = client.post("/api/status-categories/", {
         "title": "Standpunkt",
-        "name": "standpunkt",
+        "name": "endyear",
         "school_id": school.id,
         "mastery_schema_id": mastery_schema.id,
-        "begin_at": thirty_days_ago,
-        "end_at": two_days_ago,
+        "is_enabled": True,
     }, format='json')
     assert resp.status_code == 201
     created_id = resp.json()["id"]
@@ -200,10 +197,9 @@ def test_school_admin_status_category_access(
     # Cannot create a status category at another school
     resp = client.post("/api/status-categories/", {
         "title": "Halvtårsvurdering",
-        "name": "halvtår-ny",
+        "name": "mideyear-new",
         "school_id": other_school.id,
-        "begin_at": thirty_days_ago,
-        "end_at": two_days_ago,
+        "is_enabled": True,
     }, format='json')
     assert resp.status_code == 403
 
