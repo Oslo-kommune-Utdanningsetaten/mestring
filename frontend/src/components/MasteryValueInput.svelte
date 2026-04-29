@@ -15,7 +15,7 @@
     isInputEnabled = true,
   } = $props<{
     masterySchema: MasterySchemaType
-    value?: number
+    value?: number | undefined | null
     title?: string
     isInputEnabled?: boolean
   }>()

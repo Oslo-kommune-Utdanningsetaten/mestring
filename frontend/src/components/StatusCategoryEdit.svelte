@@ -39,7 +39,7 @@
   const handleChangeMasterySchema = (masterySchemaId: string) => {
     if (masterySchemaId !== NONE_FIELD_VALUE) {
       localStatusCategory = { ...localStatusCategory, masterySchemaId }
-      localStorage<string>('preferredMasterySchemaId').set(masterySchemaId)
+      localStorage('preferredMasterySchemaId').set(masterySchemaId)
     }
   }
 </script>

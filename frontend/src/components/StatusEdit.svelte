@@ -11,7 +11,11 @@
   import type { MasterySchemaWithConfig, GoalDecorated } from '../types/models'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
-  import { fetchGoalsForSubjectAndStudent, formatMonthName } from '../utils/functions'
+  import {
+    fetchGoalsForSubjectAndStudent,
+    formatMonthName,
+    calculateSchoolYearMilestones,
+  } from '../utils/functions'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
   import ButtonMini from './ButtonMini.svelte'
@@ -43,11 +47,12 @@
     }
   })
 
-  const masterySchema: MasterySchemaWithConfig = $derived($dataStore.defaultMasterySchema)
+  let localStatus = $state<Partial<StatusType> & { masteryValue?: number | null }>({})
+  let masterySchema: MasterySchemaWithConfig = $derived(
+    $dataStore.masterySchemas.find(ms => ms.id === localStatus.masterySchemaId) ||
+      $dataStore.defaultMasterySchema
+  )
   const calculations = $derived(useMasteryCalculations(masterySchema))
-
-  let localStatus = $state<Partial<StatusType> & { masteryValue?: number }>({})
-
   let validationErrors = $state<{ beginAt?: string; endAt?: string }>({})
 
   const getMasterySchmemaForGoal = (goal: GoalType) => {
@@ -82,18 +87,46 @@
   }
 
   const handleCategoryChange = () => {
-    // If the selected category has a default mastery value, set it on the status
-    const selectedCategory = statusCategories.find(c => c.id === localStatus.categoryId)
-    console.log('Selected category:', selectedCategory)
-    if (selectedCategory?.defaultMasteryValue !== undefined) {
-      localStatus.masteryValue = selectedCategory.defaultMasteryValue
+    const selectedCategory = statusCategories.find(cat => cat.id === localStatus.categoryId)
+    console.log('Selected category:', { selectedCategory, localStatus }, localStatus)
+
+    if (selectedCategory) {
+      // category has been selected, save preference and update fields accordingly
+      localStorage('preferredStatusCategoryId').set(selectedCategory.id)
+      localStatus.categoryId = selectedCategory.id
+      localStatus.title = selectedCategory.title
+      if (localStatus.masterySchemaId !== selectedCategory.masterySchemaId) {
+        localStatus.masterySchemaId = selectedCategory.masterySchemaId
+        localStatus.masteryValue = null // Reset mastery value when category changes, as the scale might be different
+      }
+      localStatus.masterySchemaId = selectedCategory.masterySchemaId
+      localStatus.subjectId = null // Unset subject when category set, as categories imply status on student level, not subject level
+
+      const { startAt, midyearAt, endAt } = calculateSchoolYearMilestones()
+      if (selectedCategory.name === 'endyear') {
+        // Standpunkt
+        localStatus.beginAt = startAt
+        localStatus.endAt = endAt
+      } else if (selectedCategory.name === 'midyear') {
+        // Halvtårs
+        localStatus.beginAt = startAt
+        localStatus.endAt = midyearAt
+      } else if (selectedCategory.name === 'risk') {
+        // IVF/G
+        localStatus.beginAt = startAt
+        localStatus.endAt = endAt
+      } else {
+        console.error('Unknown category', { selectedCategory })
+      }
+    } else {
+      // category has been unset, remove preference and reset related fields
+      localStorage('preferredStatusCategoryId').remove()
+      localStatus.categoryId = null
+      localStatus.title = null
+      localStatus.masterySchemaId = null
+      localStatus.subjectId = subject?.id // Set subject back to the status if category is unset, as it should be a subject-specific status
     }
-    // TODO
-    // category should auto-set
-    // title
-    // period (beginAt and endAt)
-    // mastery_schema
-    // unset subject
+    localStatus = { ...localStatus }
   }
 
   const toggleGoalsExpansion = () => {
@@ -121,11 +154,12 @@
     }
 
     localStatus.studentId = localStudent?.id
-    localStatus.subjectId = subject?.id
+    localStatus.subjectId = localStatus.categoryId ? null : subject?.id
     localStatus.schoolId = $dataStore.currentSchool?.id
     localStatus.title =
       localStatus.title?.trim() || generateTitle(localStatus.beginAt!, localStatus.endAt!)
     let action = undefined
+
     try {
       if (localStatus.id) {
         await statusUpdate({

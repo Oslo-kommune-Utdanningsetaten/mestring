@@ -362,3 +362,16 @@ export const formatDateTimeWithToday = (
       : format(date, 'd. LLLL yyyy', { locale: noLocale })
   }
 }
+
+export const calculateSchoolYearMilestones = (customDate?: Date) => {
+  const date = customDate || new Date()
+  const year = date.getFullYear()
+  const month = date.getMonth()
+  const schoolStartYear = month < 7 ? year - 1 : year
+
+  return {
+    startAt: `${schoolStartYear}-08-15`,
+    midyearAt: `${schoolStartYear + 1}-01-15`,
+    endAt: `${schoolStartYear + 1}-06-30`,
+  }
+}
