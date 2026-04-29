@@ -27,7 +27,7 @@
 
   let { status, student, subject, goals, onDone } = $props<{
     status: StatusType | {} | null
-    subject: SubjectType | null
+    subject?: SubjectType | null
     student?: UserType | null
     goals?: GoalDecorated[]
     onDone: () => void
@@ -100,7 +100,6 @@
         localStatus.masteryValue = null // Reset mastery value when category changes, as the scale might be different
       }
       localStatus.masterySchemaId = selectedCategory.masterySchemaId
-      localStatus.subjectId = null // Unset subject when category set, as categories imply status on student level, not subject level
 
       const { startAt, midyearAt, endAt } = calculateSchoolYearMilestones()
       if (selectedCategory.name === 'endyear') {
@@ -115,6 +114,7 @@
         // IVF/G
         localStatus.beginAt = startAt
         localStatus.endAt = endAt
+        localStatus.subjectId = null // Unset subject for risk status category
       } else {
         console.error('Unknown category', { selectedCategory })
       }
@@ -154,7 +154,6 @@
     }
 
     localStatus.studentId = localStudent?.id
-    localStatus.subjectId = localStatus.categoryId ? null : subject?.id
     localStatus.schoolId = $dataStore.currentSchool?.id
     localStatus.title =
       localStatus.title?.trim() || generateTitle(localStatus.beginAt!, localStatus.endAt!)
@@ -192,6 +191,7 @@
   onMount(() => {
     localStatus = {
       ...status,
+      subjectId: subject?.id,
       // Convert ISO timestamps to YYYY-MM-DD format for date inputs
       beginAt: status.beginAt ? status.beginAt.split('T')[0] : undefined,
       endAt: status.endAt ? status.endAt.split('T')[0] : undefined,

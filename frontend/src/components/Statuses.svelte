@@ -6,7 +6,7 @@
 
   let { student, subject } = $props<{
     student: UserType
-    subject: SubjectType
+    subject: SubjectType | null
   }>()
 
   let statuses = $state<StatusType[]>([])
@@ -18,7 +18,7 @@
       const result = await statusList({
         query: {
           students: student.id,
-          subject: subject.id,
+          subject: subject ? subject.id : null,
           school: $dataStore.currentSchool?.id,
         },
       })
@@ -33,7 +33,7 @@
   }
 
   $effect(() => {
-    if (student.id && subject.id && $dataStore.currentSchool?.id) {
+    if (student.id && $dataStore.currentSchool?.id) {
       fetchStatuses()
     }
   })
