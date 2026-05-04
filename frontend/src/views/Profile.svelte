@@ -130,7 +130,7 @@
         </div>
         <div class="card-body">
           <div class="mb-2">
-            <strong>Mini stolpediagram pr. elev</strong>
+            <strong>Mini stolpediagram</strong>
             <pkt-checkbox
               label={$isMasteryBarChartVisible ? 'Vises' : 'Skjules'}
               labelPosition="right"
