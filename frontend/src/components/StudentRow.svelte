@@ -33,19 +33,13 @@
   let isStatusEditorOpen = $state<boolean>(false)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
 
-  const handleEditStatus = async (status: Partial<StatusType> | null) => {
-    if (status?.id) {
-      statusWip = {
-        ...status,
-      }
-    } else {
-      statusWip = {
-        subjectId: null,
-        studentId: student.id,
-        schoolId: $dataStore.currentSchool.id,
-        beginAt: sixtyDaysAgo.toISOString().split('T')[0],
-        endAt: today.toISOString().split('T')[0],
-      }
+  const handleCreateStatus = async () => {
+    statusWip = {
+      subjectId: null,
+      studentId: student.id,
+      schoolId: $dataStore.currentSchool.id,
+      beginAt: sixtyDaysAgo.toISOString().split('T')[0],
+      endAt: today.toISOString().split('T')[0],
     }
     isStatusEditorOpen = true
   }
@@ -69,7 +63,7 @@
           iconName: 'achievement',
           classes: 'bordered',
           title: 'Legg til ny status',
-          onClick: () => handleEditStatus(null),
+          onClick: () => handleCreateStatus(),
         }}
       />
     {/if}
@@ -108,13 +102,7 @@
   }}
 >
   {#if statusWip}
-    <StatusEdit
-      status={statusWip}
-      {student}
-      subject={null}
-      goals={null}
-      onDone={handleStatusDone}
-    />
+    <StatusEdit status={statusWip} {student} subject={null} onDone={handleStatusDone} />
   {/if}
 </Offcanvas>
 

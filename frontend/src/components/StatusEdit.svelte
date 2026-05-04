@@ -36,7 +36,11 @@
   let localStudent = $state<UserType | null>(student || null)
   let localGoals = $state<GoalDecorated[] | null>(goals || null)
   let isGoalSectionExpanded = $state<boolean>(false)
-  let statusCategories = $derived($dataStore.statusCategories)
+  let statusCategories = $derived(
+    $dataStore.statusCategories.filter(cat =>
+      subject ? cat.name === '!risk' : cat.name === 'risk'
+    )
+  )
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
 
   const goalSectionToggleOptions = $derived.by(() => {
@@ -88,7 +92,6 @@
 
   const handleCategoryChange = () => {
     const selectedCategory = statusCategories.find(cat => cat.id === localStatus.categoryId)
-    console.log('Selected category:', { selectedCategory, localStatus }, localStatus)
 
     if (selectedCategory) {
       // category has been selected, save preference and update fields accordingly
@@ -206,69 +209,67 @@
 </script>
 
 <div class="status-edit p-4">
-  {#if localStatus && subject && localStudent}
-    <!-- Name and subject -->
-    <h2 class="mt-3 mb-5">
-      <mark>{localStudent.name}</mark>
-      i faget
-      <mark>{subject.shortName || subject.displayName}</mark>
-    </h2>
-
+  {#if localStatus && localStudent}
     <!-- Goals, compacted for reference -->
-    <div class="my-5 goals-section">
-      <h3>
-        Elevens mål i faget <ButtonIcon options={goalSectionToggleOptions} />
-      </h3>
-      {#if !localGoals}
-        <p><em>Ingen mål for denne eleven i dette faget</em></p>
-      {/if}
-      {#if localGoals && isGoalSectionExpanded}
-        <div class="goals-container mt-2">
-          {#each localGoals as goal}
-            <div class="goal-row">
-              <span class="goal-sort-order">{goal.sortOrder}</span>
-              {#if goal.isIndividual}
-                <span class="individual-goal-icon" title="Individuelt mål">
-                  <pkt-icon name="person"></pkt-icon>
-                </span>
-              {:else}
-                <span class="group-goal-icon" title="Gruppemål">
-                  <pkt-icon name="group"></pkt-icon>
-                </span>
-              {/if}
+    {#if subject}
+      <div class="my-5 goals-section">
+        <h3>
+          Elevens mål i <mark>{subject?.shortName || subject?.displayName}</mark>
+          <ButtonIcon options={goalSectionToggleOptions} />
+        </h3>
+        {#if !localGoals}
+          <p><em>Ingen mål for denne eleven i dette faget</em></p>
+        {/if}
 
-              <!-- Goal title -->
-              {#if $dataStore.currentSchool.isGoalTitleEnabled}
-                <span class="goal-title">
-                  {goal.title}
-                </span>
-              {/if}
+        {#if localGoals && isGoalSectionExpanded}
+          <div class="goals-container mt-2">
+            {#each localGoals as goal}
+              <div class="goal-row">
+                <span class="goal-sort-order">{goal.sortOrder}</span>
+                {#if goal.isIndividual}
+                  <span class="individual-goal-icon" title="Individuelt mål">
+                    <pkt-icon name="person"></pkt-icon>
+                  </span>
+                {:else}
+                  <span class="group-goal-icon" title="Gruppemål">
+                    <pkt-icon name="group"></pkt-icon>
+                  </span>
+                {/if}
 
-              <!-- Stats widgets -->
-              <span class="goal-stats">
-                {#if goal.masteryData}
-                  <MasteryLevelBadge
-                    masteryData={goal.masteryData}
-                    masterySchema={getMasterySchmemaForGoal(goal)}
-                  />
-                  {#if $isMasteryBarChartVisible}
-                    <MasteryBarChart
-                      data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
+                <!-- Goal title -->
+                {#if $dataStore.currentSchool.isGoalTitleEnabled}
+                  <span class="goal-title">
+                    {goal.title}
+                  </span>
+                {/if}
+
+                <!-- Stats widgets -->
+                <span class="goal-stats">
+                  {#if goal.masteryData}
+                    <MasteryLevelBadge
+                      masteryData={goal.masteryData}
                       masterySchema={getMasterySchmemaForGoal(goal)}
                     />
+                    {#if $isMasteryBarChartVisible}
+                      <MasteryBarChart
+                        data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
+                        masterySchema={getMasterySchmemaForGoal(goal)}
+                      />
+                    {/if}
+                  {:else}
+                    Ingen observasjoner i dette målet
                   {/if}
-                {:else}
-                  Ingen observasjoner i dette målet
-                {/if}
-              </span>
-            </div>
-          {/each}
-        </div>
-      {/if}
-    </div>
+                </span>
+              </div>
+            {/each}
+          </div>
+        {/if}
+      </div>
+    {/if}
 
     <h2 class="my-4">
-      {localStatus.id ? 'Redigerer' : 'Opprett ny'} status
+      {localStatus.id ? 'Redigerer' : 'Opprett ny'} status for
+      <mark>{localStudent.name}</mark>
     </h2>
 
     <div class="d-flex my-5">
@@ -356,11 +357,7 @@
       <div class="d-flex my-5">
         <h3 class="col-4">Mestring</h3>
         <div class="col-8">
-          <MasteryValueInput
-            {masterySchema}
-            bind:value={localStatus.masteryValue}
-            title="Totalt sett, i denne perioden"
-          />
+          <MasteryValueInput {masterySchema} bind:value={localStatus.masteryValue} />
         </div>
       </div>
     {/if}
