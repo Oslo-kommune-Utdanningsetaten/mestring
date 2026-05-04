@@ -160,7 +160,7 @@
 <style>
   .students-grid {
     display: grid;
-    grid-template-columns: auto repeat(var(--columns-count, 8), 1fr);
+    grid-template-columns: 1.2fr repeat(var(--columns-count, 8), 1fr);
     align-items: start;
     gap: 0;
   }

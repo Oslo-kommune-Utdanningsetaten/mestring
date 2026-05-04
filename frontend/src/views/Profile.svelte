@@ -12,6 +12,7 @@
   const isProfileMode = $derived($currentUser.id && !userId)
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
+  const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
 
   // For admin viewing another user's profile
   let otherUser = $state<UserDecorated | undefined>(undefined)
@@ -79,7 +80,11 @@
     setCurrentSchool(school)
   }
 
-  const handleToggleShowChart = () => isMasteryBarChartVisible.set(!isMasteryBarChartVisible.get())
+  const handleToggleMasteryBarChart = () =>
+    isMasteryBarChartVisible.set(!isMasteryBarChartVisible.get())
+
+  const handleToggleSubjectPolarChart = () =>
+    isSubjectPolarChartVisible.set(!isSubjectPolarChartVisible.get())
 
   $effect(() => {
     // Only load data when viewing another user's profile (admin mode)
@@ -129,7 +134,7 @@
           <h3>Innstillinger</h3>
         </div>
         <div class="card-body">
-          <div class="mb-2">
+          <div class="mb-4">
             <strong>Mini stolpediagram</strong>
             <pkt-checkbox
               label={$isMasteryBarChartVisible ? 'Vises' : 'Skjules'}
@@ -137,7 +142,18 @@
               isSwitch="true"
               aria-checked={$isMasteryBarChartVisible}
               checked={$isMasteryBarChartVisible}
-              onchange={() => handleToggleShowChart()}
+              onchange={() => handleToggleMasteryBarChart()}
+            ></pkt-checkbox>
+          </div>
+          <div class="mb-2">
+            <strong>Radial-diagram pr. elev og fag</strong>
+            <pkt-checkbox
+              label={$isSubjectPolarChartVisible ? 'Vises' : 'Skjules'}
+              labelPosition="right"
+              isSwitch="true"
+              aria-checked={$isSubjectPolarChartVisible}
+              checked={$isSubjectPolarChartVisible}
+              onchange={() => handleToggleSubjectPolarChart()}
             ></pkt-checkbox>
           </div>
         </div>

@@ -56,25 +56,24 @@
   }
 </script>
 
-<span>
-  <span class="item student-name">
-    <Link to={`/students/${student.id}`}>{student.name}</Link>
+<span class="item student-name">
+  <Link to={`/students/${student.id}`}>{student.name}</Link>
+  <span class="student-actions">
+    {#key statusesKey}
+      <Statuses {student} subject={null} />
+    {/key}
+
+    {#if $hasUserAccessToFeature('status', 'create', { studentGroupIds: student.groupIds })}
+      <ButtonIcon
+        options={{
+          iconName: 'achievement',
+          classes: 'bordered',
+          title: 'Legg til ny status',
+          onClick: () => handleEditStatus(null),
+        }}
+      />
+    {/if}
   </span>
-
-  {#if $hasUserAccessToFeature('status', 'create', { studentGroupIds: student.groupIds })}
-    <ButtonIcon
-      options={{
-        iconName: 'achievement',
-        classes: 'bordered ms-1',
-        title: 'Legg til ny status',
-        onClick: () => handleEditStatus(null),
-      }}
-    />
-  {/if}
-
-  {#key statusesKey}
-    <Statuses {student} subject={null} />
-  {/key}
 </span>
 
 {#each subjects as subject}
@@ -120,4 +119,10 @@
 </Offcanvas>
 
 <style>
+  .student-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
 </style>

@@ -944,7 +944,7 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
             ),
             OpenApiParameter(
                 name='subject',
-                description='Filter statuses by subject.',
+                description='Filter statuses by subject. Pass null to filter for statuses without a subject.',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY

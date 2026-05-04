@@ -54,6 +54,7 @@
   let isStatusEditorOpen = $state<boolean>(false)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
+  const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
 
   const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
   const today = new Date()
@@ -319,7 +320,9 @@
   {/key}
 </div>
 
-<StudentSubjectChart {student} {subject} />
+{#if $isSubjectPolarChartVisible}
+  <StudentSubjectChart {student} {subject} />
+{/if}
 
 {#snippet goalInList(goal: GoalDecorated, index: number)}
   {@const isExpanded = expandedGoalIds.includes(goal.id)}
