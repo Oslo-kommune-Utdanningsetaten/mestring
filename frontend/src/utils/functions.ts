@@ -1,9 +1,15 @@
-import type { Mastery, GoalDecorated } from '../types/models'
-import type { GoalType, SubjectType, ObservationType, GroupType } from '../generated/types.gen'
+import type { Mastery, GoalDecorated, UserDecorated } from '../types/models'
+import type {
+  GoalType,
+  SubjectType,
+  ObservationType,
+  GroupType,
+  UserType,
+} from '../generated/types.gen'
 import { goalsList, userGroupsList, userSchoolsList } from '../generated/sdk.gen'
 import { nb as noLocale } from 'date-fns/locale'
 import { format, formatDistance, formatDistanceToNow } from 'date-fns'
-import { USER_ROLES } from './constants'
+import { USER_ROLES, GROUP_TYPE_BASIS } from './constants'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
   [key: string]: string
@@ -43,6 +49,24 @@ export const urlStringFrom = (
     Object.keys(finalParams)
       .map(key => `${key}=${finalParams[key] ?? ''}`)
       .join('&')
+  )
+}
+
+// Subjects the teacher teaches to this student via their common groups
+export const subjectsInCommon = (
+  currentUser: UserDecorated,
+  student: UserType,
+  allSubjects: SubjectType[]
+) => {
+  if (!student) return allSubjects
+  if (currentUser.isSuperadmin || currentUser.isSchoolAdmin) return allSubjects
+  const teacherGroups: GroupType[] = currentUser?.teacherGroups || []
+  const studentGroupIds = student.groupIds || []
+  const commonGroups = teacherGroups.filter((g: GroupType) => studentGroupIds.includes(g.id))
+  const subjectIds = new Set(commonGroups.map(g => g.subjectId).filter(Boolean))
+  const hasSharedBasisGroup = commonGroups.some(g => g.type === GROUP_TYPE_BASIS)
+  return allSubjects.filter(
+    s => subjectIds.has(s.id) || (hasSharedBasisGroup && !!s.ownedBySchoolId)
   )
 }
 

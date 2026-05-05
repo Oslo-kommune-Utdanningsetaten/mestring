@@ -15,6 +15,7 @@
     fetchGoalsForSubjectAndStudent,
     formatMonthName,
     calculateSchoolYearMilestones,
+    subjectsInCommon,
   } from '../utils/functions'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
@@ -25,23 +26,37 @@
   import MasteryBarChart from './MasteryBarChart.svelte'
   import { localStorage } from '../stores/localStorage'
 
-  let { status, student, subject, goals, onDone } = $props<{
+  let { status, student, onDone } = $props<{
     status: StatusType | {} | null
-    subject?: SubjectType | null
     student?: UserType | null
-    goals?: GoalDecorated[]
     onDone: () => void
   }>()
 
-  let localStudent = $state<UserType | null>(student || null)
-  let localGoals = $state<GoalDecorated[] | null>(goals || null)
+  const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
+  let localStudent = $state<UserType | null>(null)
+  let subjects = $derived(
+    subjectsInCommon($dataStore.currentUser, localStudent!, $dataStore.subjects)
+  )
+  let subject = $derived(
+    status.subjectId && subjects?.find((s: SubjectType) => s.id === status.subjectId)
+  )
+  let localStatus = $derived<Partial<StatusType> & { masteryValue?: number | null }>(
+    status
+      ? {
+          ...status,
+          // Convert ISO timestamps to YYYY-MM-DD format for date inputs
+          beginAt: status.beginAt ? status.beginAt.split('T')[0] : undefined,
+          endAt: status.endAt ? status.endAt.split('T')[0] : undefined,
+        }
+      : null
+  )
+  let localGoals = $state<GoalDecorated[] | null>([])
   let isGoalSectionExpanded = $state<boolean>(false)
   let statusCategories = $derived(
     $dataStore.statusCategories.filter(cat =>
-      subject ? cat.name === '!risk' : cat.name === 'risk'
+      localStatus.subjectId ? cat.name !== 'risk' : cat.name === 'risk'
     )
   )
-  const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
 
   const goalSectionToggleOptions = $derived.by(() => {
     return {
@@ -51,7 +66,6 @@
     }
   })
 
-  let localStatus = $state<Partial<StatusType> & { masteryValue?: number | null }>({})
   let masterySchema: MasterySchemaWithConfig = $derived(
     $dataStore.masterySchemas.find(ms => ms.id === localStatus.masterySchemaId) ||
       $dataStore.defaultMasterySchema
@@ -89,6 +103,8 @@
       masteryValue: localStatus?.masteryValue ?? calculations.defaultValue,
     }
   }
+
+  const handleSubjectChange = () => {}
 
   const handleCategoryChange = () => {
     const selectedCategory = statusCategories.find(cat => cat.id === localStatus.categoryId)
@@ -208,7 +224,12 @@
   })
 </script>
 
-<div class="status-edit p-4">
+<div class="status-edit px-4 py-2">
+  <h2 class="my-4">
+    {localStatus.id ? 'Redigerer' : 'Opprett ny'} status for
+    <mark>{localStudent?.name}</mark>
+  </h2>
+
   {#if localStatus && localStudent}
     <!-- Goals, compacted for reference -->
     {#if subject}
@@ -267,15 +288,11 @@
       </div>
     {/if}
 
-    <h2 class="my-4">
-      {localStatus.id ? 'Redigerer' : 'Opprett ny'} status for
-      <mark>{localStudent.name}</mark>
-    </h2>
-
+    <!-- Kategori -->
     <div class="d-flex my-5">
       <h3 class="col-4 mb-0">Kategori</h3>
       <div class="col-8">
-        <label for="categorySelect" class="mb-1 visually-hidden">Fra</label>
+        <label for="categorySelect" class="mb-1 visually-hidden">Kategori</label>
         <select
           class="pkt-input"
           id="categorySelect"
@@ -289,6 +306,28 @@
               selected={statusCategory.id === localStatus.categoryId}
             >
               {statusCategory.title}
+            </option>
+          {/each}
+        </select>
+      </div>
+    </div>
+
+    <!-- Fag -->
+    <div class="d-flex my-5">
+      <h3 class="col-4 mb-0">Fag</h3>
+      <div class="col-8">
+        <label for="subjectSelect" class="mb-1 visually-hidden">Fag</label>
+        <select
+          class="pkt-input"
+          id="categorySelect"
+          bind:value={localStatus.subjectId}
+          onchange={() => handleSubjectChange()}
+          disabled={!!localStatus.categoryId}
+        >
+          <option value={null} selected={!localStatus.categoryId}>Ingen</option>
+          {#each subjects as sub}
+            <option value={sub.id} selected={sub.id === localStatus.subjectId}>
+              {sub.shortName || sub.displayName || sub.grepCode}
             </option>
           {/each}
         </select>

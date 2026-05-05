@@ -8,8 +8,12 @@
     groupsList,
     subjectsList,
   } from '../generated/sdk.gen'
+  import { subjectsInCommon } from '../utils/functions'
   import { SUBJECTS_ALLOWED_CUSTOM, GROUP_TYPE_BASIS } from '../utils/constants'
   import { hasUserAccessToFeature } from '../stores/access'
+  import { dataStore } from '../stores/data'
+  import { trackEvent } from '../stores/analytics'
+  import { localStorage } from '../stores/localStorage'
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
   import GoalEdit from '../components/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
@@ -17,9 +21,6 @@
   import ButtonIcon from '../components/ButtonIcon.svelte'
   import StudentSVG from '../assets/education.svg.svelte'
   import GroupTag from '../components/GroupTag.svelte'
-  import { dataStore } from '../stores/data'
-  import { trackEvent } from '../stores/analytics'
-  import { localStorage } from '../stores/localStorage'
 
   const { studentId } = $props<{ studentId: string }>()
   const individualGoalcount = 3
@@ -34,18 +35,7 @@
   let isGoalEditorOpen = $state<boolean>(false)
 
   // Subjects the teacher teaches to this student via their common groups
-  const subjectsForGoalEdit = $derived.by(() => {
-    if (!student) return $dataStore.subjects
-    if (currentUser.isSuperadmin || currentUser.isSchoolAdmin) return $dataStore.subjects
-    const teacherGroups: GroupType[] = currentUser?.teacherGroups || []
-    const studentGroupIds = student.groupIds || []
-    const commonGroups = teacherGroups.filter((g: GroupType) => studentGroupIds.includes(g.id))
-    const subjectIds = new Set(commonGroups.map(g => g.subjectId).filter(Boolean))
-    const hasSharedBasisGroup = commonGroups.some(g => g.type === GROUP_TYPE_BASIS)
-    return $dataStore.subjects.filter(
-      s => subjectIds.has(s.id) || (hasSharedBasisGroup && !!s.ownedBySchoolId)
-    )
-  })
+  const subjectsForGoalEdit = $derived(subjectsInCommon(currentUser, student!, $dataStore.subjects))
 
   const fetchStudentData = async (userId: string) => {
     try {

@@ -3,6 +3,8 @@
   import type { UserType, SubjectType, StatusType } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
   import { hasUserAccessToFeature } from '../stores/access'
+  import { MISSING_REASON_NO_OBSERVATIONS, MISSING_REASON_NO_GOALS } from '../utils/constants'
+  import { subjectsInCommon } from '../utils/functions'
 
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import Link from './Link.svelte'
@@ -10,7 +12,6 @@
   import Offcanvas from './Offcanvas.svelte'
   import Statuses from './Statuses.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
-  import { MISSING_REASON_NO_OBSERVATIONS, MISSING_REASON_NO_GOALS } from '../utils/constants'
 
   type MasteryState = {
     mastery?: Mastery
@@ -102,7 +103,7 @@
   }}
 >
   {#if statusWip}
-    <StatusEdit status={statusWip} {student} subject={null} onDone={handleStatusDone} />
+    <StatusEdit status={statusWip} onDone={handleStatusDone} />
   {/if}
 </Offcanvas>
 
