@@ -6,6 +6,7 @@
     UserType,
     ObservationType,
     GoalType,
+    StatusCategoryType,
   } from '../generated/types.gen'
   import { statusCreate, statusUpdate, usersRetrieve } from '../generated/sdk.gen'
   import type { MasterySchemaWithConfig, GoalDecorated } from '../types/models'
@@ -27,7 +28,7 @@
   import { localStorage } from '../stores/localStorage'
 
   let { status, student, onDone } = $props<{
-    status: StatusType | {} | null
+    status: Partial<StatusType>
     student?: UserType | null
     onDone: () => void
   }>()
@@ -53,8 +54,9 @@
   let localGoals = $state<GoalDecorated[] | null>([])
   let isGoalSectionExpanded = $state<boolean>(false)
   let statusCategories = $derived(
-    $dataStore.statusCategories.filter(cat =>
-      localStatus.subjectId ? cat.name !== 'risk' : cat.name === 'risk'
+    $dataStore.statusCategories.filter(
+      // If status has a subjectId, only show subject-specific categories. If it doesn't, only show non-subject-specific categories.
+      (cat: StatusCategoryType) => !!localStatus.subjectId === cat.isSubjectSpecific
     )
   )
 
@@ -103,8 +105,6 @@
       masteryValue: localStatus?.masteryValue ?? calculations.defaultValue,
     }
   }
-
-  const handleSubjectChange = () => {}
 
   const handleCategoryChange = () => {
     const selectedCategory = statusCategories.find(cat => cat.id === localStatus.categoryId)
@@ -211,6 +211,7 @@
     localStatus = {
       ...status,
       subjectId: subject?.id,
+      categoryId: status.categoryId || localStorage('preferredStatusCategoryId').get(),
       // Convert ISO timestamps to YYYY-MM-DD format for date inputs
       beginAt: status.beginAt ? status.beginAt.split('T')[0] : undefined,
       endAt: status.endAt ? status.endAt.split('T')[0] : undefined,
@@ -239,7 +240,7 @@
           <ButtonIcon options={goalSectionToggleOptions} />
         </h3>
         {#if !localGoals}
-          <p><em>Ingen mål for denne eleven i dette faget</em></p>
+          <p><em>Eleven har ingen mål i dette faget</em></p>
         {/if}
 
         {#if localGoals && isGoalSectionExpanded}
@@ -288,6 +289,16 @@
       </div>
     {/if}
 
+    <!-- Subject -->
+    {#if subject}
+      <div class="d-flex my-5">
+        <h3 class="col-4 mb-0">Fag</h3>
+        <div class="col-8">
+          {subject.shortName || subject.displayName || subject.grepCode}
+        </div>
+      </div>
+    {/if}
+
     <!-- Kategori -->
     <div class="d-flex my-5">
       <h3 class="col-4 mb-0">Kategori</h3>
@@ -306,28 +317,6 @@
               selected={statusCategory.id === localStatus.categoryId}
             >
               {statusCategory.title}
-            </option>
-          {/each}
-        </select>
-      </div>
-    </div>
-
-    <!-- Fag -->
-    <div class="d-flex my-5">
-      <h3 class="col-4 mb-0">Fag</h3>
-      <div class="col-8">
-        <label for="subjectSelect" class="mb-1 visually-hidden">Fag</label>
-        <select
-          class="pkt-input"
-          id="categorySelect"
-          bind:value={localStatus.subjectId}
-          onchange={() => handleSubjectChange()}
-          disabled={!!localStatus.categoryId}
-        >
-          <option value={null} selected={!localStatus.categoryId}>Ingen</option>
-          {#each subjects as sub}
-            <option value={sub.id} selected={sub.id === localStatus.subjectId}>
-              {sub.shortName || sub.displayName || sub.grepCode}
             </option>
           {/each}
         </select>

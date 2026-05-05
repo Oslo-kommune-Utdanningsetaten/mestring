@@ -301,6 +301,7 @@ export type PatchedStatusCategoryType = {
     deletedAt?: string | null;
     title?: string;
     name?: string;
+    isSubjectSpecific?: boolean;
     isEnabled?: boolean;
     readonly createdById?: string;
     readonly updatedById?: string;
@@ -416,6 +417,7 @@ export type StatusCategoryType = {
     deletedAt?: string | null;
     title: string;
     name: string;
+    isSubjectSpecific?: boolean;
     isEnabled?: boolean;
     readonly createdById: string;
     readonly updatedById: string;
@@ -663,6 +665,7 @@ export type PatchedStatusCategoryCreateType = {
     deletedAt?: string | null;
     title?: string;
     name?: string;
+    isSubjectSpecific?: boolean;
     isEnabled?: boolean;
     schoolId?: string;
     masterySchemaId?: string;
@@ -734,6 +737,7 @@ export type StatusCategoryCreateType = {
     deletedAt?: string | null;
     title: string;
     name: string;
+    isSubjectSpecific?: boolean;
     isEnabled?: boolean;
     schoolId: string;
     masterySchemaId: string;
@@ -1867,7 +1871,7 @@ export type StatusListData = {
          */
         students?: string;
         /**
-         * Filter statuses by subject.
+         * Filter statuses by subject. Pass null to filter for statuses without a subject.
          */
         subject?: string;
     };

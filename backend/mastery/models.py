@@ -385,6 +385,7 @@ class StatusCategory(BaseModel):
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='status_categories')
     mastery_schema = models.ForeignKey(
         MasterySchema, on_delete=models.CASCADE, null=False, related_name='status_categories')
+    is_subject_specific = models.BooleanField(default=True, null=False)  # status must be linked to a subject
     is_enabled = models.BooleanField(default=False, null=False)
 
     class Meta:

@@ -97,6 +97,20 @@
     }
   }
 
+  const toggleIsSubjectSpecific = async (statusCategory: StatusCategoryType) => {
+    try {
+      const current = statusCategory.isSubjectSpecific ?? false
+      await statusCategoriesPartialUpdate({
+        path: { id: statusCategory.id },
+        body: { isSubjectSpecific: !current },
+      })
+    } catch (error) {
+      console.error('Error updating isSubjectSpecific:', error)
+    } finally {
+      await fetchStatusCategories()
+    }
+  }
+
   const toggleIsEnabled = async (statusCategory: StatusCategoryType) => {
     try {
       const current = statusCategory.isEnabled ?? false
@@ -186,6 +200,19 @@
               <p>
                 Name: {STATUS_CATEGORY_NAMES[statusCategory.name]} ({statusCategory.name})
               </p>
+
+              <div class="mb-4">
+                <pkt-checkbox
+                  label={statusCategory.isSubjectSpecific
+                    ? 'Specific for subject'
+                    : 'Accross all subjects'}
+                  labelPosition="right"
+                  isSwitch="true"
+                  aria-checked={statusCategory.isSubjectSpecific}
+                  checked={statusCategory.isSubjectSpecific}
+                  onchange={() => toggleIsSubjectSpecific(statusCategory)}
+                ></pkt-checkbox>
+              </div>
 
               <div class="mb-4">
                 <pkt-checkbox
