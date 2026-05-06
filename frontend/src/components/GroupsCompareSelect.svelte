@@ -16,7 +16,9 @@
   let selectedGroups = $derived<GroupType[]>(
     groups.filter((group: GroupType) => groupIds.includes(group.id))
   )
-  let compareUrl = $derived(`/groups-compare/?groups=${selectedGroups.map(g => g.id).join(',')}`)
+  let compareUrl = $derived(
+    `/school/groups-compare/?groups=${selectedGroups.map(g => g.id).join(',')}`
+  )
 
   const handleToggleGroup = (id: string) => {
     const nextSelectionIds = new Set(selectedGroups.map(g => g.id))

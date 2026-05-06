@@ -82,7 +82,7 @@
           {/if}
 
           <!-- School inspector/admin menu -->
-          {#if $hasUserAccessToPath('/admin')}
+          {#if $hasUserAccessToPath('/school')}
             <li class="nav-item dropdown">
               <!-- svelte-ignore a11y_invalid_attribute -->
               <a
@@ -95,24 +95,24 @@
                 Skolen
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                {#if $hasUserAccessToPath('/students')}
+                {#if $hasUserAccessToPath('/school/students')}
                   <li class="nav-item">
-                    <Link to="/students" className="dropdown-item">Elever</Link>
+                    <Link to="/school/students" className="dropdown-item">Elever</Link>
                   </li>
                 {/if}
-                {#if $hasUserAccessToPath('/groups-compare')}
+                {#if $hasUserAccessToPath('/school/groups-compare')}
                   <li class="nav-item">
-                    <Link to="/groups-compare" className="dropdown-item">Grupper</Link>
+                    <Link to="/school/groups-compare" className="dropdown-item">Grupper</Link>
                   </li>
                 {/if}
-                {#if $hasUserAccessToPath('/goals')}
+                {#if $hasUserAccessToPath('/school/goals')}
                   <li class="nav-item">
-                    <Link to="/goals" className="dropdown-item">Mål</Link>
+                    <Link to="/school/goals" className="dropdown-item">Mål</Link>
                   </li>
                 {/if}
-                {#if $hasUserAccessToPath('/stats')}
+                {#if $hasUserAccessToPath('/school/stats')}
                   <li>
-                    <Link to="/stats" className="dropdown-item">Statistikk</Link>
+                    <Link to="/school/stats" className="dropdown-item">Statistikk</Link>
                   </li>
                 {/if}
               </ul>

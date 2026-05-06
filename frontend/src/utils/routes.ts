@@ -64,29 +64,12 @@ export const ROUTES = [
     accessibleBy: allRoles,
   },
   {
-    path: '/groups-compare',
-    component: GroupsCompare,
-    isPublic: false,
-    accessibleBy: [
-      USER_ROLES.TEACHER,
-      USER_ROLES.INSPECTOR,
-      USER_ROLES.ADMIN,
-      USER_ROLES.SUPERADMIN,
-    ],
-  },
-  {
     path: '/profile',
     component: Profile,
     isPublic: false,
     accessibleBy: allRoles,
   },
   { path: '/statuses/:statusId', component: Status, isPublic: false, accessibleBy: allRoles },
-  {
-    path: '/students',
-    component: Students,
-    isPublic: false,
-    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
-  },
   {
     path: '/students/:studentId',
     component: Student,
@@ -100,22 +83,45 @@ export const ROUTES = [
     ],
   },
   {
-    path: '/admin',
-    component: undefined, // placeholder, as we just check for access to the admin menu
+    path: '/school',
+    component: undefined, // placeholder, as we just check for access to the school menu
     isPublic: false,
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
   {
-    path: '/stats',
+    path: '/school/students',
+    component: Students,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+  },
+  {
+    path: '/school/groups-compare',
+    component: GroupsCompare,
+    isPublic: false,
+    accessibleBy: [
+      USER_ROLES.TEACHER,
+      USER_ROLES.INSPECTOR,
+      USER_ROLES.ADMIN,
+      USER_ROLES.SUPERADMIN,
+    ],
+  },
+  {
+    path: '/school/stats',
     component: SchoolStats,
     isPublic: false,
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
   {
-    path: '/goals',
+    path: '/school/goals',
     component: Goals,
     isPublic: false,
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+  },
+  {
+    path: '/admin',
+    component: undefined, // placeholder, as we just check for access to the admin menu
+    isPublic: false,
+    accessibleBy: [USER_ROLES.SUPERADMIN],
   },
   {
     path: '/admin/users/:userId',
