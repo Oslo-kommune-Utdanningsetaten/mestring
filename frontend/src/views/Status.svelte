@@ -298,6 +298,6 @@
 
   .mastery-level.inactive {
     filter: grayscale(30%);
-    opacity: 0.4;
+    opacity: 0.2;
   }
 </style>

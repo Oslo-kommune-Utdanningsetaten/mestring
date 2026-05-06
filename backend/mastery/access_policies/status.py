@@ -115,7 +115,7 @@ class StatusAccessPolicy(BaseAccessPolicy):
             if not student_id or not subject_id:
                 return False
 
-            # Teaches that subject to that student
+            # Teachers that teach the subject to that student
             teaches_subject_at_school = requester.teacher_groups.filter(
                 subject_id=subject_id,
                 members__id=student_id,
@@ -130,7 +130,7 @@ class StatusAccessPolicy(BaseAccessPolicy):
 
     def can_teacher_modify_status(self, request, view, action):
         """
-        Teachers can status if they teach that student in that subject
+        Teachers can modify status if they teach the subject to that student
         """
         try:
             target_status = view.get_object()
