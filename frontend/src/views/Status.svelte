@@ -39,22 +39,22 @@
 
   const fetchData = async () => {
     isLoading = true
+    console.log('Fetching status data for statusId:', statusId)
     try {
       // Fetch status
       const statusResult = await statusRetrieve({ path: { id: statusId } })
       status = statusResult.data!
 
-      if (!status) {
-        isLoading = false
-        return
+      if (status) {
+        // Fetch student
+        const studentResult = await usersRetrieve({ path: { id: status.studentId } })
+        student = studentResult.data!
+        if (status.subjectId) {
+          // Fetch subject
+          const subjectResult = await subjectsRetrieve({ path: { id: status.subjectId } })
+          subject = subjectResult.data!
+        }
       }
-
-      // Fetch student
-      const studentResult = await usersRetrieve({ path: { id: status.studentId } })
-      student = studentResult.data!
-      // Fetch subject
-      const subjectResult = await subjectsRetrieve({ path: { id: status.subjectId as string } })
-      subject = subjectResult.data!
     } catch (error) {
       console.error('Error fetching status data:', error)
     } finally {
@@ -109,14 +109,16 @@
         <span class="visually-hidden">Laster...</span>
       </div>
     </div>
-  {:else if status && subject && student}
+  {:else if status && student}
     <!-- Name and subject -->
     <h2 class="my-3">
       Status for
       <mark><Link to="/students/{student.id}">{student.name}</Link></mark>
-      i faget
-      <mark>{subject.shortName || subject.displayName}</mark>
-      , {status.title}
+      {#if subject}
+        i faget
+        <mark>{subject.shortName || subject.displayName}</mark>
+        , {status.title}
+      {/if}
     </h2>
 
     <hr />
@@ -129,7 +131,7 @@
         </p>
       </div>
       <div class="d-flex gap-2">
-        {#if $hasUserAccessToFeature( 'status', 'edit', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
+        {#if $hasUserAccessToFeature( 'status', 'edit', { subjectId: subject?.id, studentGroupIds: student.groupIds } )}
           <ButtonMini
             options={{
               title: 'Rediger status',
@@ -143,7 +145,7 @@
             Rediger
           </ButtonMini>
         {/if}
-        {#if $hasUserAccessToFeature( 'status', 'delete', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
+        {#if $hasUserAccessToFeature( 'status', 'delete', { subjectId: subject?.id, studentGroupIds: student.groupIds } )}
           <ButtonMini
             options={{
               title: 'Slett status',
@@ -216,9 +218,11 @@
               </div>
             {/each}
           </div>
-          <p class="mt-2">
-            {status.masteryValue}
-          </p>
+          {#if masterySchema?.config?.isValueIndicatorEnabled}
+            <p class="mt-2">
+              {status.masteryValue}
+            </p>
+          {/if}
         </div>
       </div>
     {/if}

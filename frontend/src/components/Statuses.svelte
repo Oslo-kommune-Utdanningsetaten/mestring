@@ -20,7 +20,6 @@
         subject: subject ? subject.id : '',
         school: $dataStore.currentSchool?.id,
       }
-      console.log('Fetching statuses with query:', query)
       const result = await statusList({ query })
       statuses = (result.data || []).sort(
         (a, b) => new Date(a.beginAt).getTime() - new Date(b.beginAt).getTime()
