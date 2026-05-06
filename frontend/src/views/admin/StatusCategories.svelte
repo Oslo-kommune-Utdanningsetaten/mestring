@@ -6,6 +6,7 @@
     statusCategoriesList,
     statusCategoriesPartialUpdate,
     schoolsList,
+    masterySchemasList,
   } from '../../generated/sdk.gen'
   import type { StatusCategoryType, SchoolType } from '../../generated/types.gen'
   import { urlStringFrom } from '../../utils/functions'
@@ -25,7 +26,7 @@
     const schoolIdFromUrl = router.getQueryParam('school')
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
   })
-  let masterySchemas = $derived($dataStore.masterySchemas)
+  let masterySchemas = $state($dataStore.masterySchemas)
 
   const fetchSchools = async () => {
     try {
@@ -37,11 +38,13 @@
     }
   }
 
-  const fetchStatusCategories = async () => {
+  const fetchData = async () => {
     const query = { school: selectedSchool.id }
     try {
-      const result = await statusCategoriesList({ query })
-      statusCategories = result.data || []
+      const statusResult = await statusCategoriesList({ query })
+      statusCategories = statusResult.data || []
+      const masterySchemasResult = await masterySchemasList({ query })
+      masterySchemas = masterySchemasResult.data || []
     } catch (error) {
       console.error('Error fetching status categories:', error)
       statusCategories = []
@@ -60,7 +63,7 @@
 
   const handleDone = () => {
     isEditorOpen = false
-    fetchStatusCategories()
+    fetchData()
   }
 
   const handleNewStatusCategory = () => {
@@ -93,7 +96,7 @@
     } catch (error) {
       console.error('Error deleting status category:', error)
     } finally {
-      await fetchStatusCategories()
+      await fetchData()
     }
   }
 
@@ -107,7 +110,7 @@
     } catch (error) {
       console.error('Error updating isSubjectSpecific:', error)
     } finally {
-      await fetchStatusCategories()
+      await fetchData()
     }
   }
 
@@ -121,7 +124,7 @@
     } catch (error) {
       console.error('Error updating isEnabled:', error)
     } finally {
-      await fetchStatusCategories()
+      await fetchData()
     }
   }
 
@@ -131,7 +134,7 @@
 
   $effect(() => {
     if (selectedSchool && selectedSchool.id) {
-      fetchStatusCategories()
+      fetchData()
     }
   })
 </script>
@@ -194,8 +197,9 @@
                 {statusCategory.title}
               </h3>
               <p>
-                Mastery schema: {masterySchemas.find(ms => ms.id === statusCategory.masterySchemaId)
-                  .title || '?'}
+                Mastery schema: {masterySchemas?.find(
+                  ms => ms.id === statusCategory.masterySchemaId
+                )?.title || '?'}
               </p>
               <p>
                 Name: {STATUS_CATEGORY_NAMES[statusCategory.name]} ({statusCategory.name})
@@ -282,7 +286,7 @@
   ariaLabel="Rediger statuskategori"
   onClosed={() => {
     statusCategoryWip = null
-    fetchStatusCategories()
+    fetchData()
   }}
 >
   {#if statusCategoryWip}
