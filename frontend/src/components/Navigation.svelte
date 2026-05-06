@@ -81,7 +81,45 @@
             </li>
           {/if}
 
-          <!-- Admin menu -->
+          <!-- School inspector/admin menu -->
+          {#if $hasUserAccessToPath('/admin')}
+            <li class="nav-item dropdown">
+              <!-- svelte-ignore a11y_invalid_attribute -->
+              <a
+                class={`nav-link dropdown-toggle ${isAdminActive ? 'active' : ''}`}
+                id="navbarDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                href="#"
+              >
+                Skolen
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                {#if $hasUserAccessToPath('/students')}
+                  <li class="nav-item">
+                    <Link to="/students" className="dropdown-item">Elever</Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/groups-compare')}
+                  <li class="nav-item">
+                    <Link to="/groups-compare" className="dropdown-item">Grupper</Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/goals')}
+                  <li class="nav-item">
+                    <Link to="/goals" className="dropdown-item">Mål</Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/stats')}
+                  <li>
+                    <Link to="/stats" className="dropdown-item">Statistikk</Link>
+                  </li>
+                {/if}
+              </ul>
+            </li>
+          {/if}
+
+          <!-- Superadmin menu -->
           {#if $hasUserAccessToPath('/admin')}
             <li class="nav-item dropdown">
               <!-- svelte-ignore a11y_invalid_attribute -->
@@ -98,16 +136,6 @@
                 {#if $hasUserAccessToPath('/admin/schools')}
                   <li>
                     <Link to="/admin/schools" className="dropdown-item">Alle skoler</Link>
-                  </li>
-                {/if}
-                {#if $hasUserAccessToPath('/students')}
-                  <li class="nav-item">
-                    <Link to="/students" className="dropdown-item">Elever</Link>
-                  </li>
-                {/if}
-                {#if $hasUserAccessToPath('/groups-compare')}
-                  <li class="nav-item">
-                    <Link to="/groups-compare" className="dropdown-item">Grupper</Link>
                   </li>
                 {/if}
                 {#if $hasUserAccessToPath('/admin/groups')}
@@ -130,16 +158,6 @@
                     <Link to="/admin/status-categories" className="dropdown-item">
                       Statuskategorier
                     </Link>
-                  </li>
-                {/if}
-                {#if $hasUserAccessToPath('/admin/goals')}
-                  <li class="nav-item">
-                    <Link to="/admin/goals" className="dropdown-item">Mål</Link>
-                  </li>
-                {/if}
-                {#if $hasUserAccessToPath('/admin/stats')}
-                  <li>
-                    <Link to="/admin/stats" className="dropdown-item">Statistikk</Link>
                   </li>
                 {/if}
                 {#if $hasUserAccessToPath('/admin/analytics')}
