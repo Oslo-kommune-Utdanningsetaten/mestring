@@ -10,8 +10,9 @@
   let currentSchool = $derived($dataStore.currentSchool)
   let isHomeActive = $derived($currentPath === '/')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
-  let isSchoolActive = $derived($currentPath.startsWith('/school'))
-  let isGroupsActive = $derived($currentPath.startsWith('/groups'))
+  let isSchoolActive = $derived(
+    ['students', 'goals', 'groups-compare', 'stats'].includes($currentPath.split('/')[1])
+  )
   let isAdminActive = $derived($currentPath.startsWith('/admin'))
   let isProfileActive = $derived($currentPath.startsWith('/profile'))
   let environmentWarning = $derived(
@@ -73,7 +74,7 @@
             <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
           </li>
 
-          {#if currentSchool?.isStudentListEnabled}
+          {#if currentSchool?.isStudentListEnabled && $hasUserAccessToPath('/students')}
             <li class="nav-item">
               <Link to="/students" className={`nav-link ${isStudentsActive ? 'active' : ''}`}>
                 Elever

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { Mastery } from '../types/models'
   import type {
     GroupType,
     SubjectType,
