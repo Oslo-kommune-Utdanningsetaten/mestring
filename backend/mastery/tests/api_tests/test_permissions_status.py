@@ -408,6 +408,60 @@ def test_basis_group_teacher_status_access(
 
 
 @pytest.mark.django_db
+def test_basis_group_teacher_can_create_status_without_subject(
+        school, teacher, student, other_student, student_role, teacher_role,
+        basis_group, status_category_at_school):
+    """
+    Basis group teachers can create statuses without a subject for students
+    in their basis group, as long as a category is provided.
+    They cannot do this for students outside their basis group.
+    """
+    client = APIClient()
+    client.force_authenticate(user=teacher)
+
+    # Add student and teacher to basis group
+    basis_group.add_member(student, student_role)
+    basis_group.add_member(teacher, teacher_role)
+
+    # Basis teacher can create status without subject (with category) for their student
+    resp = client.post("/api/status/", {
+        "student_id": student.id,
+        "category_id": status_category_at_school.id,
+        "school_id": school.id,
+        "begin_at": thirty_days_ago,
+        "end_at": two_days_ago,
+    }, format='json')
+    assert resp.status_code == 201
+    status_id = resp.json()["id"]
+
+    # Basis teacher can update the status they created
+    resp = client.put(f"/api/status/{status_id}/", {
+        "student_id": student.id,
+        "category_id": status_category_at_school.id,
+        "school_id": school.id,
+        "begin_at": thirty_days_ago,
+        "end_at": two_days_ago,
+        "feedforward": "Bra jobba!",
+    }, format='json')
+    assert resp.status_code == 200
+    assert resp.json()["feedforward"] == "Bra jobba!"
+
+    # Basis teacher can delete the status they created
+    resp = client.delete(f"/api/status/{status_id}/")
+    assert resp.status_code == 204
+
+    # Basis teacher cannot create status without subject for student NOT in their basis group
+    resp = client.post("/api/status/", {
+        "student_id": other_student.id,
+        "category_id": status_category_at_school.id,
+        "school_id": school.id,
+        "begin_at": thirty_days_ago,
+        "end_at": two_days_ago,
+    }, format='json')
+    assert resp.status_code == 403
+
+
+@pytest.mark.django_db
 def test_student_status_access(school, student, other_student, subject_with_group):
     """
     Students can only see statuses about themselves after the end_at date (publish date).

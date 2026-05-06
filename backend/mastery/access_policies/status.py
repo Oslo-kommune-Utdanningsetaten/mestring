@@ -104,7 +104,9 @@ class StatusAccessPolicy(BaseAccessPolicy):
 
     def can_teacher_create_status(self, request, view, action):
         """
-        Teachers can create statuses for students they teach, in that subject
+        Teachers can create statuses for students they teach, in that subject.
+        Basis group teachers can create statuses without a subject (with a category)
+        for students in their basis group.
         """
         try:
             student_id = request.data.get("student_id")
@@ -112,17 +114,23 @@ class StatusAccessPolicy(BaseAccessPolicy):
             school_id = request.data.get("school_id")
             requester = request.user
 
-            if not student_id or not subject_id:
+            if not student_id:
                 return False
 
-            # Teachers that teach the subject to that student
-            teaches_subject_at_school = requester.teacher_groups.filter(
-                subject_id=subject_id,
+            if subject_id:
+                # Teachers that teach the subject to that student
+                return requester.teacher_groups.filter(
+                    subject_id=subject_id,
+                    members__id=student_id,
+                    school_id=school_id
+                ).exists()
+
+            # No subject: allow if teacher is in a basis group with the student at this school
+            return requester.teacher_groups.filter(
+                type='basis',
                 members__id=student_id,
                 school_id=school_id
             ).exists()
-
-            return teaches_subject_at_school
 
         except Exception:
             logger.exception("StatusAccessPolicy.can_teacher_create_status")
@@ -130,20 +138,28 @@ class StatusAccessPolicy(BaseAccessPolicy):
 
     def can_teacher_modify_status(self, request, view, action):
         """
-        Teachers can modify status if they teach the subject to that student
+        Teachers can modify status if they teach the subject to that student.
+        Basis group teachers can modify statuses without a subject for students
+        in their basis group.
         """
         try:
             target_status = view.get_object()
             requester = request.user
             school_id = target_status.school_id
 
-            teaches_subject = requester.teacher_groups.filter(
-                subject_id=target_status.subject_id,
+            if target_status.subject_id:
+                return requester.teacher_groups.filter(
+                    subject_id=target_status.subject_id,
+                    members__id=target_status.student_id,
+                    school_id=school_id
+                ).exists()
+
+            # No subject: allow if teacher is in a basis group with the student
+            return requester.teacher_groups.filter(
+                type='basis',
                 members__id=target_status.student_id,
                 school_id=school_id
             ).exists()
-
-            return teaches_subject
 
         except Exception:
             logger.exception("StatusAccessPolicy.can_teacher_modify_status")
