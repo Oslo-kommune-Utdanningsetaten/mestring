@@ -10,6 +10,7 @@
   let currentSchool = $derived($dataStore.currentSchool)
   let isHomeActive = $derived($currentPath === '/')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
+  let isSchoolActive = $derived($currentPath.startsWith('/school'))
   let isGroupsActive = $derived($currentPath.startsWith('/groups'))
   let isAdminActive = $derived($currentPath.startsWith('/admin'))
   let isProfileActive = $derived($currentPath.startsWith('/profile'))
@@ -86,7 +87,7 @@
             <li class="nav-item dropdown">
               <!-- svelte-ignore a11y_invalid_attribute -->
               <a
-                class={`nav-link dropdown-toggle ${isAdminActive ? 'active' : ''}`}
+                class={`nav-link dropdown-toggle ${isSchoolActive ? 'active' : ''}`}
                 id="navbarDropdown"
                 role="button"
                 data-bs-toggle="dropdown"
