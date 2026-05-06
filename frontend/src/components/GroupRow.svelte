@@ -78,7 +78,7 @@
   })
 </script>
 
-{#if group}
+{#if group && assumedMasterySchema}
   <span class="item group-name">
     <Link to={`/groups/${group.id}`}>{group.displayName}</Link>
   </span>
