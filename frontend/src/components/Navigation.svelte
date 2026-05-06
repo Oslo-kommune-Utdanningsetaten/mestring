@@ -73,7 +73,6 @@
             <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
           </li>
 
-          <!-- Students -->
           {#if currentSchool?.isStudentListEnabled}
             <li class="nav-item">
               <Link to="/students" className={`nav-link ${isStudentsActive ? 'active' : ''}`}>
@@ -96,24 +95,25 @@
                 Skolen
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                {#if $hasUserAccessToPath('/school/students')}
+                <!-- Students -->
+                {#if $hasUserAccessToPath('/students')}
                   <li class="nav-item">
-                    <Link to="/school/students" className="dropdown-item">Elever</Link>
+                    <Link to="/students" className="dropdown-item">Elever</Link>
                   </li>
                 {/if}
-                {#if $hasUserAccessToPath('/school/groups-compare')}
+                {#if $hasUserAccessToPath('/groups-compare')}
                   <li class="nav-item">
-                    <Link to="/school/groups-compare" className="dropdown-item">Grupper</Link>
+                    <Link to="/groups-compare" className="dropdown-item">Grupper</Link>
                   </li>
                 {/if}
-                {#if $hasUserAccessToPath('/school/goals')}
+                {#if $hasUserAccessToPath('/goals')}
                   <li class="nav-item">
-                    <Link to="/school/goals" className="dropdown-item">Mål</Link>
+                    <Link to="/goals" className="dropdown-item">Mål</Link>
                   </li>
                 {/if}
-                {#if $hasUserAccessToPath('/school/stats')}
+                {#if $hasUserAccessToPath('/stats')}
                   <li>
-                    <Link to="/school/stats" className="dropdown-item">Statistikk</Link>
+                    <Link to="/stats" className="dropdown-item">Statistikk</Link>
                   </li>
                 {/if}
               </ul>
