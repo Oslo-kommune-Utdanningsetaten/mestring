@@ -29,7 +29,6 @@
 
   let { status, student, onDone } = $props<{
     status: Partial<StatusType>
-    student?: UserType | null
     onDone: () => void
   }>()
 
@@ -93,7 +92,7 @@
     const userResult = await usersRetrieve({ path: { id: status.studentId } })
     const currentSchoolId = $dataStore.currentSchool?.id
     localStudent = userResult.data!
-    if (!localStudent) return
+    if (!localStudent || !subject) return
     localGoals = await fetchGoalsForSubjectAndStudent(
       subject.id,
       localStudent.id,

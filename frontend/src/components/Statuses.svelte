@@ -13,15 +13,15 @@
   let isLoading = $state(true)
 
   const fetchStatuses = async () => {
+    isLoading = true
     try {
-      isLoading = true
-      const result = await statusList({
-        query: {
-          students: student.id,
-          subject: subject ? subject.id : null,
-          school: $dataStore.currentSchool?.id,
-        },
-      })
+      const query = {
+        students: student.id,
+        subject: subject ? subject.id : '',
+        school: $dataStore.currentSchool?.id,
+      }
+      console.log('Fetching statuses with query:', query)
+      const result = await statusList({ query })
       statuses = (result.data || []).sort(
         (a, b) => new Date(a.beginAt).getTime() - new Date(b.beginAt).getTime()
       )
