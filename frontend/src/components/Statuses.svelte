@@ -18,7 +18,7 @@
       const result = await statusList({
         query: {
           students: student.id,
-          subject: subject ? subject.id : 'null', // pass 'null' as a string to filter for statuses without a subject
+          subject: subject ? subject.id : null,
           school: $dataStore.currentSchool?.id,
         },
       })

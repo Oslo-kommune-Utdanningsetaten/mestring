@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { goalsCreate, goalsUpdate, subjectsList } from '../generated/sdk.gen'
+  import { goalsCreate, goalsUpdate } from '../generated/sdk.gen'
   import type {
     GoalType,
     GroupType,

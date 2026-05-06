@@ -35,16 +35,17 @@
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   let localStudent = $state<UserType | null>(null)
-  let subjects = $derived(
+  let selectableSubjects = $derived(
     subjectsInCommon($dataStore.currentUser, localStudent!, $dataStore.subjects)
   )
   let subject = $derived(
-    status.subjectId && subjects?.find((s: SubjectType) => s.id === status.subjectId)
+    status.subjectId && selectableSubjects?.find((s: SubjectType) => s.id === status.subjectId)
   )
-  let localStatus = $derived<Partial<StatusType> & { masteryValue?: number | null }>(
+  let localStatus = $state<Partial<StatusType> & { masteryValue?: number | null }>(
     status
       ? {
           ...status,
+          categoryId: status.categoryId || localStorage('preferredStatusCategoryId').get(),
           // Convert ISO timestamps to YYYY-MM-DD format for date inputs
           beginAt: status.beginAt ? status.beginAt.split('T')[0] : undefined,
           endAt: status.endAt ? status.endAt.split('T')[0] : undefined,
@@ -53,9 +54,11 @@
   )
   let localGoals = $state<GoalDecorated[] | null>([])
   let isGoalSectionExpanded = $state<boolean>(false)
-  let statusCategories = $derived(
+
+  let selectableStatusCategories = $derived(
     $dataStore.statusCategories.filter(
-      // If status has a subjectId, only show subject-specific categories. If it doesn't, only show non-subject-specific categories.
+      // If status has a subjectId, only show subject-specific categories
+      // If it doesn't, only show non-subject-specific categories
       (cat: StatusCategoryType) => !!localStatus.subjectId === cat.isSubjectSpecific
     )
   )
@@ -68,11 +71,18 @@
     }
   })
 
-  let masterySchema: MasterySchemaWithConfig = $derived(
-    $dataStore.masterySchemas.find(ms => ms.id === localStatus.masterySchemaId) ||
-      $dataStore.defaultMasterySchema
+  let currentStatusCategory = $derived(
+    selectableStatusCategories.find(cat => cat.id === localStatus.categoryId)
   )
-  const calculations = $derived(useMasteryCalculations(masterySchema))
+
+  let currentMasterySchema: MasterySchemaWithConfig = $derived.by(() => {
+    const schemaId = localStatus.masterySchemaId || currentStatusCategory?.masterySchemaId
+    return (
+      $dataStore.masterySchemas.find(ms => ms.id === schemaId) || $dataStore.defaultMasterySchema
+    )
+  })
+
+  const calculations = $derived(useMasteryCalculations(currentMasterySchema))
   let validationErrors = $state<{ beginAt?: string; endAt?: string }>({})
 
   const getMasterySchmemaForGoal = (goal: GoalType) => {
@@ -93,6 +103,9 @@
   }
 
   const generateTitle = (beginAt: string, endAt: string): string => {
+    if (currentStatusCategory) {
+      return currentStatusCategory.title
+    }
     const beginMonth = formatMonthName(beginAt)
     const endMonth = formatMonthName(endAt)
     return `${beginMonth} - ${endMonth}`
@@ -107,45 +120,38 @@
   }
 
   const handleCategoryChange = () => {
-    const selectedCategory = statusCategories.find(cat => cat.id === localStatus.categoryId)
-
-    if (selectedCategory) {
+    if (currentStatusCategory) {
       // category has been selected, save preference and update fields accordingly
-      localStorage('preferredStatusCategoryId').set(selectedCategory.id)
-      localStatus.categoryId = selectedCategory.id
-      localStatus.title = selectedCategory.title
-      if (localStatus.masterySchemaId !== selectedCategory.masterySchemaId) {
-        localStatus.masterySchemaId = selectedCategory.masterySchemaId
+      localStorage('preferredStatusCategoryId').set(currentStatusCategory.id)
+      localStatus.title = currentStatusCategory.title
+      if (localStatus.masterySchemaId !== currentStatusCategory.masterySchemaId) {
+        localStatus.masterySchemaId = currentStatusCategory.masterySchemaId
         localStatus.masteryValue = null // Reset mastery value when category changes, as the scale might be different
       }
-      localStatus.masterySchemaId = selectedCategory.masterySchemaId
-
       const { startAt, midyearAt, endAt } = calculateSchoolYearMilestones()
-      if (selectedCategory.name === 'endyear') {
+      if (currentStatusCategory.name === 'endyear') {
         // Standpunkt
         localStatus.beginAt = startAt
         localStatus.endAt = endAt
-      } else if (selectedCategory.name === 'midyear') {
+      } else if (currentStatusCategory.name === 'midyear') {
         // Halvtårs
         localStatus.beginAt = startAt
         localStatus.endAt = midyearAt
-      } else if (selectedCategory.name === 'risk') {
+      } else if (currentStatusCategory.name === 'risk') {
         // IVF/G
         localStatus.beginAt = startAt
         localStatus.endAt = endAt
         localStatus.subjectId = null // Unset subject for risk status category
       } else {
-        console.error('Unknown category', { selectedCategory })
+        console.error('Unknown category', { currentStatusCategory })
       }
     } else {
       // category has been unset, remove preference and reset related fields
       localStorage('preferredStatusCategoryId').remove()
-      localStatus.categoryId = null
       localStatus.title = null
       localStatus.masterySchemaId = null
-      localStatus.subjectId = subject?.id // Set subject back to the status if category is unset, as it should be a subject-specific status
+      localStatus.subjectId = subject?.id // Restore subject when category is unset
     }
-    localStatus = { ...localStatus }
   }
 
   const toggleGoalsExpansion = () => {
@@ -206,17 +212,6 @@
       })
     }
   }
-
-  onMount(() => {
-    localStatus = {
-      ...status,
-      subjectId: subject?.id,
-      categoryId: status.categoryId || localStorage('preferredStatusCategoryId').get(),
-      // Convert ISO timestamps to YYYY-MM-DD format for date inputs
-      beginAt: status.beginAt ? status.beginAt.split('T')[0] : undefined,
-      endAt: status.endAt ? status.endAt.split('T')[0] : undefined,
-    }
-  })
 
   $effect(() => {
     if (!student) {
@@ -308,10 +303,10 @@
           class="pkt-input"
           id="categorySelect"
           bind:value={localStatus.categoryId}
-          onchange={() => handleCategoryChange()}
+          onchange={handleCategoryChange}
         >
           <option value={null} selected={!localStatus.categoryId}>Ingen</option>
-          {#each statusCategories as statusCategory}
+          {#each selectableStatusCategories as statusCategory}
             <option
               value={statusCategory.id}
               selected={statusCategory.id === localStatus.categoryId}
@@ -381,17 +376,20 @@
     </div>
 
     <!-- Mastery value input -->
-    {#if masterySchema?.config?.isMasteryValueInputEnabled}
+    {#if currentMasterySchema?.config?.isMasteryValueInputEnabled}
       <div class="d-flex my-5">
         <h3 class="col-4">Mestring</h3>
         <div class="col-8">
-          <MasteryValueInput {masterySchema} bind:value={localStatus.masteryValue} />
+          <MasteryValueInput
+            masterySchema={currentMasterySchema}
+            bind:value={localStatus.masteryValue}
+          />
         </div>
       </div>
     {/if}
 
     <!-- Mastery description input -->
-    {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
+    {#if currentMasterySchema?.config?.isMasteryDescriptionInputEnabled}
       <div class="d-flex my-5">
         <h3 class="col-4">Beskrivelse</h3>
         <div class="col-8">
@@ -410,7 +408,7 @@
     {/if}
 
     <!-- Mastery feed forward input -->
-    {#if masterySchema?.config?.isFeedforwardInputEnabled}
+    {#if currentMasterySchema?.config?.isFeedforwardInputEnabled}
       <div class="d-flex my-5">
         <h3 class="col-4">Fremovermelding</h3>
         <div class="col-8">

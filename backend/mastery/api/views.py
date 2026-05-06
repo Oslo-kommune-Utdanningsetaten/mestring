@@ -944,7 +944,7 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
             ),
             OpenApiParameter(
                 name='subject',
-                description='Filter statuses by subject. Pass null to filter for statuses without a subject.',
+                description='Filter statuses by subject.',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
@@ -985,7 +985,7 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
         if self.action == 'list':
             students_param, _ = get_request_param(self.request.query_params, 'students')
             school_param, _ = get_request_param(self.request.query_params, 'school')
-            subject_param, _ = get_request_param(self.request.query_params, 'subject')
+            subject_param, is_subject_set = get_request_param(self.request.query_params, 'subject')
             group_param, _ = get_request_param(self.request.query_params, 'group')
             editor_param, _ = get_request_param(self.request.query_params, 'editor')
 
@@ -1007,8 +1007,11 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
                 if student_ids:
                     qs = qs.filter(student_id__in=student_ids)
 
-            if subject_param:
-                qs = qs.filter(subject_id=subject_param)
+            if is_subject_set:
+                if subject_param:
+                    qs = qs.filter(subject_id=subject_param)
+                else:
+                    qs = qs.filter(subject_id__isnull=True)
 
             if editor_param:
                 qs = qs.filter(Q(created_by_id=editor_param) | Q(updated_by_id=editor_param))

@@ -459,7 +459,7 @@
   }}
 >
   {#if statusWip}
-    <StatusEdit status={statusWip} {subject} onDone={handleStatusDone} />
+    <StatusEdit status={statusWip} onDone={handleStatusDone} />
   {/if}
 </Offcanvas>
 
