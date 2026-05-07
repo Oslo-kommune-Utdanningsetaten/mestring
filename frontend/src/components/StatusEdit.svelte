@@ -156,8 +156,8 @@
       // category has been unset, remove preference and reset related fields
       localStorage('preferredStatusCategoryId').remove()
       localStatus.title = null
-      localStatus.masterySchemaId = null
-      localStatus.subjectId = subject?.id // Restore subject when category is unset
+      localStatus.masterySchemaId = $dataStore.defaultMasterySchema.id
+      localStatus.subjectId = subject?.id
     }
   }
 
