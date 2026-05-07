@@ -9,7 +9,7 @@
   } from '../generated/types.gen'
   import { statusCreate, statusUpdate, usersRetrieve } from '../generated/sdk.gen'
   import type { MasterySchemaWithConfig, GoalDecorated } from '../types/models'
-  import { useMasteryCalculations, areSchemaValuesConsistent } from '../utils/masteryHelpers'
+  import { areSchemaValuesConsistent } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
   import {
     fetchGoalsForSubjectAndStudent,
@@ -26,10 +26,55 @@
   import MasteryBarChart from './MasteryBarChart.svelte'
   import { localStorage } from '../stores/localStorage'
 
-  let { status, student, onDone } = $props<{
+  let { status, onDone } = $props<{
     status: Partial<StatusType>
     onDone: () => void
   }>()
+
+  const getUpdatedStatus = (aStatus: Partial<StatusType>): Partial<StatusType> => {
+    const updatedStatus = { ...aStatus }
+    const statusCategory = $dataStore.statusCategories.find(cat => cat.id === aStatus.categoryId)
+    if (statusCategory) {
+      const currentMasterySchema = $dataStore.masterySchemas.find(
+        ms => ms.id === aStatus.masterySchemaId
+      )
+      const nextMasterySchema = $dataStore.masterySchemas.find(
+        ms => ms.id === statusCategory.masterySchemaId
+      )
+      if (!areSchemaValuesConsistent([currentMasterySchema, nextMasterySchema])) {
+        updatedStatus.masteryValue = null // Reset mastery value if schemas are inconsistent
+      }
+      updatedStatus.title = statusCategory.title
+      updatedStatus.masterySchemaId = statusCategory.masterySchemaId
+
+      if (!statusCategory.isSubjectSpecific) {
+        updatedStatus.subjectId = null // Unset subject for non-subject-specific category
+      }
+      const { startAt, midyearAt, endAt } = calculateSchoolYearMilestones()
+      if (statusCategory.name === 'midyear') {
+        // Halvtårs
+        updatedStatus.beginAt = startAt
+        updatedStatus.endAt = midyearAt
+      } else if (statusCategory.name === 'endyear') {
+        // Standpunkt
+        updatedStatus.beginAt = startAt
+        updatedStatus.endAt = endAt
+      } else if (statusCategory.name === 'risk') {
+        // IVF/G
+        updatedStatus.beginAt = startAt
+        updatedStatus.endAt = endAt
+      } else {
+        console.error('Unknown category', { statusCategory })
+      }
+    } else {
+      updatedStatus.title = null
+      updatedStatus.masterySchemaId = $dataStore.defaultMasterySchema.id
+      updatedStatus.subjectId = subject?.id
+      updatedStatus.beginAt = status.beginAt?.split('T')[0]
+      updatedStatus.endAt = status.endAt?.split('T')[0]
+    }
+    return updatedStatus
+  }
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   let localStudent = $state<UserType | null>(null)
@@ -40,15 +85,7 @@
     status.subjectId && selectableSubjects?.find((s: SubjectType) => s.id === status.subjectId)
   )
   let localStatus = $state<Partial<StatusType> & { masteryValue?: number | null }>(
-    status
-      ? {
-          ...status,
-          categoryId: status.categoryId || localStorage('preferredStatusCategoryId').get(),
-          // Convert ISO timestamps to YYYY-MM-DD format for date inputs
-          beginAt: status.beginAt ? status.beginAt.split('T')[0] : undefined,
-          endAt: status.endAt ? status.endAt.split('T')[0] : undefined,
-        }
-      : null
+    getUpdatedStatus(status)
   )
   let localGoals = $state<GoalDecorated[] | null>([])
   let isGoalSectionExpanded = $state<boolean>(false)
@@ -80,10 +117,9 @@
     )
   })
 
-  const calculations = $derived(useMasteryCalculations(currentMasterySchema))
   let validationErrors = $state<{ beginAt?: string; endAt?: string }>({})
 
-  const getMasterySchmemaForGoal = (goal: GoalType) => {
+  const getMasterySchemaForGoal = (goal: GoalType) => {
     return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
   }
 
@@ -100,65 +136,33 @@
     )
   }
 
-  const generateTitle = (beginAt: string, endAt: string): string => {
-    if (currentStatusCategory) {
-      return currentStatusCategory.title
+  const generateTitle = (aStatus: Partial<StatusType>): string => {
+    const statusCategory = selectableStatusCategories.find(cat => cat.id === aStatus.categoryId)
+    if (statusCategory) {
+      return statusCategory.title
     }
-    const beginMonth = formatMonthName(beginAt)
-    const endMonth = formatMonthName(endAt)
+    const beginMonth = formatMonthName(aStatus.beginAt)
+    const endMonth = formatMonthName(aStatus.endAt)
     return `${beginMonth} - ${endMonth}`
   }
 
   const handleGenerateTitle = () => {
     localStatus = {
       ...localStatus,
-      title: generateTitle(localStatus.beginAt!, localStatus.endAt!),
-      masteryValue: localStatus?.masteryValue ?? calculations.defaultValue,
+      title: generateTitle(localStatus),
     }
   }
 
   const handleCategoryChange = () => {
-    if (currentStatusCategory) {
-      // category has been selected, save preference and update fields accordingly
-      localStorage('preferredStatusCategoryId').set(currentStatusCategory.id)
-      const currentMasterySchema = $dataStore.masterySchemas.find(
-        ms => ms.id === localStatus.masterySchemaId
-      )
-      const nextMasterySchema = $dataStore.masterySchemas.find(
-        ms => ms.id === currentStatusCategory.masterySchemaId
-      )
-      if (!areSchemaValuesConsistent([currentMasterySchema, nextMasterySchema])) {
-        localStatus.masteryValue = null // Reset mastery value if schemas are not consistent
-      }
-      localStatus.title = currentStatusCategory.title
-      localStatus.masterySchemaId = currentStatusCategory.masterySchemaId
-
-      if (!currentStatusCategory.isSubjectSpecific) {
-        localStatus.subjectId = null // Unset subject for non-subject-specific category
-      }
-      const { startAt, midyearAt, endAt } = calculateSchoolYearMilestones()
-      if (currentStatusCategory.name === 'endyear') {
-        // Standpunkt
-        localStatus.beginAt = startAt
-        localStatus.endAt = endAt
-      } else if (currentStatusCategory.name === 'midyear') {
-        // Halvtårs
-        localStatus.beginAt = startAt
-        localStatus.endAt = midyearAt
-      } else if (currentStatusCategory.name === 'risk') {
-        // IVF/G
-        localStatus.beginAt = startAt
-        localStatus.endAt = endAt
-      } else {
-        console.error('Unknown category', { currentStatusCategory })
-      }
+    if (localStatus.categoryId) {
+      // category has been selected, save preference
+      localStorage('preferredStatusCategoryId').set(localStatus.categoryId)
     } else {
-      // category has been unset, remove preference and reset related fields
+      // category has been unset, remove preference
       localStorage('preferredStatusCategoryId').remove()
-      localStatus.title = null
-      localStatus.masterySchemaId = $dataStore.defaultMasterySchema.id
-      localStatus.subjectId = subject?.id
     }
+    // update fields according to new category
+    localStatus = getUpdatedStatus(localStatus)
   }
 
   const toggleGoalsExpansion = () => {
@@ -187,8 +191,7 @@
 
     localStatus.studentId = localStudent?.id
     localStatus.schoolId = $dataStore.currentSchool?.id
-    localStatus.title =
-      localStatus.title?.trim() || generateTitle(localStatus.beginAt!, localStatus.endAt!)
+    localStatus.title = localStatus.title?.trim() || generateTitle(localStatus)
     let action = undefined
 
     try {
@@ -221,7 +224,7 @@
   }
 
   $effect(() => {
-    if (!student) {
+    if (status.studentId && !localStudent) {
       fetchStudentData()
     }
   })
@@ -229,7 +232,7 @@
 
 <div class="status-edit px-4 py-2">
   <h2 class="my-4">
-    {localStatus.id ? 'Redigerer' : 'Opprett ny'} status for
+    {localStatus.id ? 'Redigerer' : 'Oppretter ny'} status for
     <mark>{localStudent?.name}</mark>
   </h2>
 
@@ -238,7 +241,7 @@
     {#if subject}
       <div class="my-3 goals-section">
         <h3>
-          Elevens mål i <mark>{subject?.shortName || subject?.displayName}</mark>
+          Mål i <mark>{subject?.shortName || subject?.displayName}</mark>
           <ButtonIcon options={goalSectionToggleOptions} />
         </h3>
         {#if !localGoals}
@@ -272,12 +275,12 @@
                   {#if goal.masteryData}
                     <MasteryLevelBadge
                       masteryData={goal.masteryData}
-                      masterySchema={getMasterySchmemaForGoal(goal)}
+                      masterySchema={getMasterySchemaForGoal(goal)}
                     />
                     {#if $isMasteryBarChartVisible}
                       <MasteryBarChart
                         data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
-                        masterySchema={getMasterySchmemaForGoal(goal)}
+                        masterySchema={getMasterySchemaForGoal(goal)}
                       />
                     {/if}
                   {:else}

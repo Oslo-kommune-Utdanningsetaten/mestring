@@ -218,11 +218,6 @@
               </div>
             {/each}
           </div>
-          {#if masterySchema?.config?.isValueIndicatorEnabled}
-            <p class="mt-2">
-              {status.masteryValue}
-            </p>
-          {/if}
         </div>
       </div>
     {/if}

@@ -19,6 +19,12 @@
   import type { GoalDecorated } from '../types/models'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
   import Sortable, { type SortableEvent } from 'sortablejs'
+  import { dataStore } from '../stores/data'
+  import { localStorage } from '../stores/localStorage'
+  import { goalsWithCalculatedMastery } from '../utils/functions'
+  import { hasUserAccessToFeature } from '../stores/access'
+  import { addAlert } from '../stores/alerts'
+  import { trackEvent } from '../stores/analytics'
   import GroupSVG from '../assets/group.svg.svelte'
   import ButtonIcon from '../components/ButtonIcon.svelte'
   import ObservationEdit from '../components/ObservationEdit.svelte'
@@ -28,11 +34,6 @@
   import GroupTag from '../components/GroupTag.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
-  import { dataStore } from '../stores/data'
-  import { goalsWithCalculatedMastery } from '../utils/functions'
-  import { hasUserAccessToFeature } from '../stores/access'
-  import { addAlert } from '../stores/alerts'
-  import { trackEvent } from '../stores/analytics'
   import UserTag from '../components/UserTag.svelte'
 
   const { groupId } = $props<{ groupId: string }>()
@@ -197,6 +198,7 @@
         subjectId: subject?.id,
         studentId: student.id,
         schoolId: $dataStore.currentSchool.id,
+        categoryId: localStorage('preferredStatusCategoryId').get() as string | null,
         beginAt: sixtyDaysAgo.toISOString().split('T')[0],
         endAt: today.toISOString().split('T')[0],
       }

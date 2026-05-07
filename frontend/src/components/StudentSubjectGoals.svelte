@@ -82,6 +82,7 @@
         subjectId: subject.id,
         studentId: student.id,
         schoolId: $dataStore.currentSchool.id,
+        categoryId: localStorage('preferredStatusCategoryId').get() as string | null,
         beginAt: sixtyDaysAgo.toISOString().split('T')[0],
         endAt: today.toISOString().split('T')[0],
       }
