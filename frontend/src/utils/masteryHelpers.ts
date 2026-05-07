@@ -1,3 +1,4 @@
+import type { MasterySchemaType } from '../generated'
 import type { MasterySchemaWithConfig, MasteryConfigLevel } from '../types/models'
 import { isNumber } from './functions'
 
@@ -42,6 +43,25 @@ export const getMasteryTitleByValue = (
     (ml: MasteryConfigLevel) => ml.minValue <= value && ml.maxValue >= value
   )
   return masteryLevel ? masteryLevel.title : 'tittel manlger'
+}
+
+export const areSchemaValuesConsistent = (masterySchemas: MasterySchemaType[]) => {
+  let min: number | null = null
+  let max: number | null = null
+  let result = true
+  masterySchemas.forEach((schema, index) => {
+    const { minValue, maxValue } = useMasteryCalculations(schema)
+    if (index === 0) {
+      // first pass
+      min = minValue
+      max = maxValue
+    } else {
+      if (minValue !== min || maxValue !== max) {
+        result = false
+      }
+    }
+  })
+  return result
 }
 
 export function useMasteryCalculations(masterySchema: MasterySchemaWithConfig | null) {

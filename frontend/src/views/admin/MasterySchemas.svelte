@@ -7,12 +7,12 @@
     masterySchemasPartialUpdate,
   } from '../../generated/sdk.gen'
   import type { MasterySchemaType, SchoolType } from '../../generated/types.gen'
-  import type { MasterySchemaWithConfig, MasteryConfigLevel } from '../../types/models'
+  import type { MasterySchemaWithConfig } from '../../types/models'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { urlStringFrom, getContrastFriendlyTextColor } from '../../utils/functions'
   import { VALUE_INPUT_VARIANTS } from '../../utils/constants'
   import { dataStore } from '../../stores/data'
-  import { useMasteryCalculations } from '../../utils/masteryHelpers'
+  import { useMasteryCalculations, areSchemaValuesConsistent } from '../../utils/masteryHelpers'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
   import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
@@ -24,30 +24,13 @@
   let isEditorOpen = $state<boolean>(false)
   let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
-  let masterySchemas = $derived<MasterySchemaWithConfig[]>([])
+  let masterySchemas = $state<MasterySchemaWithConfig[]>([])
   let selectedSchool = $derived.by(() => {
     const schoolIdFromUrl = router.getQueryParam('school')
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
   })
 
-  const areSchemaValuesConsistent = $derived.by(() => {
-    let min: number | null = null
-    let max: number | null = null
-    let result = true
-    masterySchemas.forEach((schema, index) => {
-      const { minValue, maxValue } = useMasteryCalculations(schema)
-      if (index === 0) {
-        // first pass
-        min = minValue
-        max = maxValue
-      } else {
-        if (minValue !== min || maxValue !== max) {
-          result = false
-        }
-      }
-    })
-    return result
-  })
+  const areSchemasConsistent = $derived(areSchemaValuesConsistent(masterySchemas))
 
   const fetchSchools = async () => {
     try {
@@ -211,7 +194,7 @@
       Nytt mestringsskjema
     </ButtonMini>
 
-    {#if masterySchemas.length > 0 && !areSchemaValuesConsistent}
+    {#if masterySchemas.length > 0 && !areSchemasConsistent}
       <div class="alert alert-warning mt-4">
         Mestringsskjemaene for denne skolen har ulik range. Dette kan føre til inkonsistente
         visninger og problemer med datakvalitet. Vurder å justere range i skjemaene slik at de er

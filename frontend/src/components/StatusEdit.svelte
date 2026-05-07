@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
   import type {
     StatusType,
     SubjectType,
@@ -10,7 +9,7 @@
   } from '../generated/types.gen'
   import { statusCreate, statusUpdate, usersRetrieve } from '../generated/sdk.gen'
   import type { MasterySchemaWithConfig, GoalDecorated } from '../types/models'
-  import { useMasteryCalculations } from '../utils/masteryHelpers'
+  import { useMasteryCalculations, areSchemaValuesConsistent } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
   import {
     fetchGoalsForSubjectAndStudent,
@@ -122,10 +121,20 @@
     if (currentStatusCategory) {
       // category has been selected, save preference and update fields accordingly
       localStorage('preferredStatusCategoryId').set(currentStatusCategory.id)
+      const currentMasterySchema = $dataStore.masterySchemas.find(
+        ms => ms.id === localStatus.masterySchemaId
+      )
+      const nextMasterySchema = $dataStore.masterySchemas.find(
+        ms => ms.id === currentStatusCategory.masterySchemaId
+      )
+      if (!areSchemaValuesConsistent([currentMasterySchema, nextMasterySchema])) {
+        localStatus.masteryValue = null // Reset mastery value if schemas are not consistent
+      }
       localStatus.title = currentStatusCategory.title
-      if (localStatus.masterySchemaId !== currentStatusCategory.masterySchemaId) {
-        localStatus.masterySchemaId = currentStatusCategory.masterySchemaId
-        localStatus.masteryValue = null // Reset mastery value when category changes, as the scale might be different
+      localStatus.masterySchemaId = currentStatusCategory.masterySchemaId
+
+      if (!currentStatusCategory.isSubjectSpecific) {
+        localStatus.subjectId = null // Unset subject for non-subject-specific category
       }
       const { startAt, midyearAt, endAt } = calculateSchoolYearMilestones()
       if (currentStatusCategory.name === 'endyear') {
@@ -140,7 +149,6 @@
         // IVF/G
         localStatus.beginAt = startAt
         localStatus.endAt = endAt
-        localStatus.subjectId = null // Unset subject for risk status category
       } else {
         console.error('Unknown category', { currentStatusCategory })
       }
@@ -283,16 +291,6 @@
       </div>
     {/if}
 
-    <!-- Subject -->
-    {#if subject}
-      <div class="d-flex my-5">
-        <h3 class="col-4 mb-0">Fag</h3>
-        <div class="col-8">
-          {subject.shortName || subject.displayName || subject.grepCode}
-        </div>
-      </div>
-    {/if}
-
     <!-- Kategori -->
     <div class="d-flex my-5">
       <h3 class="col-4 mb-0">Kategori</h3>
@@ -328,6 +326,7 @@
           class="form-control date-input"
           class:is-invalid={validationErrors.beginAt}
           bind:value={localStatus.beginAt}
+          disabled={!!currentStatusCategory}
           required
         />
         {#if validationErrors.beginAt}
@@ -342,6 +341,7 @@
           class="form-control date-input"
           class:is-invalid={validationErrors.endAt}
           bind:value={localStatus.endAt}
+          disabled={!!currentStatusCategory}
           required
         />
         {#if validationErrors.endAt}
@@ -362,6 +362,7 @@
             class="form-control rounded-0 border-2 border-primary p-2"
             bind:value={localStatus.title}
             placeholder="Angi en tittel"
+            disabled={!!currentStatusCategory}
           />
           <ButtonIcon
             options={{

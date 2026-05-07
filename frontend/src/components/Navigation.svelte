@@ -162,16 +162,7 @@
                     </Link>
                   </li>
                 {/if}
-                {#if $hasUserAccessToPath('/admin/analytics')}
-                  <li>
-                    <Link
-                      to="https://mestring.osloskolen.no/analytics/index.php"
-                      className="dropdown-item"
-                    >
-                      Analytics
-                    </Link>
-                  </li>
-                {/if}
+
                 {#if $hasUserAccessToPath('/admin/mastery-schemas')}
                   <li>
                     <Link to="/admin/mastery-schemas" className="dropdown-item">
@@ -183,6 +174,17 @@
                   <li>
                     <Link to="/admin/data-maintenance-tasks" className="dropdown-item">
                       Bakgrunnsjobber
+                    </Link>
+                  </li>
+                {/if}
+
+                {#if $hasUserAccessToPath('/admin/analytics')}
+                  <li>
+                    <Link
+                      to="https://mestring.osloskolen.no/analytics/index.php"
+                      className="dropdown-item"
+                    >
+                      Analytics
                     </Link>
                   </li>
                 {/if}
