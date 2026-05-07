@@ -228,7 +228,7 @@
   {#if localStatus && localStudent}
     <!-- Goals, compacted for reference -->
     {#if subject}
-      <div class="my-5 goals-section">
+      <div class="my-3 goals-section">
         <h3>
           Elevens mål i <mark>{subject?.shortName || subject?.displayName}</mark>
           <ButtonIcon options={goalSectionToggleOptions} />

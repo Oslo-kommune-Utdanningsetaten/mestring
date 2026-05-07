@@ -1,17 +1,12 @@
 <script lang="ts">
   import type { Mastery } from '../types/models'
-  import type { UserType, SubjectType, StatusType } from '../generated/types.gen'
+  import type { UserType, SubjectType } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
-  import { hasUserAccessToFeature } from '../stores/access'
   import { MISSING_REASON_NO_OBSERVATIONS, MISSING_REASON_NO_GOALS } from '../utils/constants'
-  import { subjectsInCommon } from '../utils/functions'
 
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import Link from './Link.svelte'
-  import StatusEdit from './StatusEdit.svelte'
-  import Offcanvas from './Offcanvas.svelte'
   import Statuses from './Statuses.svelte'
-  import ButtonIcon from './ButtonIcon.svelte'
 
   type MasteryState = {
     mastery?: Mastery
@@ -28,27 +23,7 @@
     masteryBySubjectId?: Record<string, MasteryState>
   } = $props()
 
-  const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
-  const today = new Date()
-  let statusWip = $state<Partial<StatusType> | null>(null)
-  let isStatusEditorOpen = $state<boolean>(false)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
-
-  const handleCreateStatus = async () => {
-    statusWip = {
-      subjectId: null,
-      studentId: student.id,
-      schoolId: $dataStore.currentSchool.id,
-      beginAt: sixtyDaysAgo.toISOString().split('T')[0],
-      endAt: today.toISOString().split('T')[0],
-    }
-    isStatusEditorOpen = true
-  }
-
-  const handleStatusDone = async () => {
-    isStatusEditorOpen = false
-    statusesKey++
-  }
 </script>
 
 <span class="item student-name">
@@ -57,17 +32,6 @@
     {#key statusesKey}
       <Statuses {student} subject={null} />
     {/key}
-
-    {#if $hasUserAccessToFeature('status', 'create', { studentGroupIds: student.groupIds })}
-      <ButtonIcon
-        options={{
-          iconName: 'achievement',
-          classes: 'bordered',
-          title: 'Legg til ny status',
-          onClick: () => handleCreateStatus(),
-        }}
-      />
-    {/if}
   </span>
 </span>
 
@@ -93,19 +57,6 @@
     {/if}
   </span>
 {/each}
-
-<!-- offcanvas for creating/editing status -->
-<Offcanvas
-  bind:isOpen={isStatusEditorOpen}
-  ariaLabel="Rediger status"
-  onClosed={() => {
-    statusWip = null
-  }}
->
-  {#if statusWip}
-    <StatusEdit status={statusWip} onDone={handleStatusDone} />
-  {/if}
-</Offcanvas>
 
 <style>
   .student-actions {

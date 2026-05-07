@@ -207,6 +207,17 @@
 
               <div class="mb-4">
                 <pkt-checkbox
+                  label={statusCategory.isEnabled ? 'Currently enabled' : 'Currently disabled'}
+                  labelPosition="right"
+                  isSwitch="true"
+                  aria-checked={statusCategory.isEnabled}
+                  checked={statusCategory.isEnabled}
+                  onchange={() => toggleIsEnabled(statusCategory)}
+                ></pkt-checkbox>
+              </div>
+
+              <div class="mb-4">
+                <pkt-checkbox
                   label={statusCategory.isSubjectSpecific
                     ? 'Specific for subject'
                     : 'Accross all subjects'}
@@ -215,17 +226,8 @@
                   aria-checked={statusCategory.isSubjectSpecific}
                   checked={statusCategory.isSubjectSpecific}
                   onchange={() => toggleIsSubjectSpecific(statusCategory)}
-                ></pkt-checkbox>
-              </div>
-
-              <div class="mb-4">
-                <pkt-checkbox
-                  label={statusCategory.isEnabled ? 'Currently enabled' : 'Currently disabled'}
-                  labelPosition="right"
-                  isSwitch="true"
-                  aria-checked={statusCategory.isEnabled}
-                  checked={statusCategory.isEnabled}
-                  onchange={() => toggleIsEnabled(statusCategory)}
+                  disabled={true}
+                  title="Not editable yet, needs a use case :)"
                 ></pkt-checkbox>
               </div>
 
