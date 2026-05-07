@@ -18,13 +18,16 @@
   let isLoadingStudents = $state<boolean>(false)
   let nameFilter = $state<string>('')
   let subjects = $state<SubjectType[]>([])
-  let selectedFocus = $state<string>('mastery')
 
   // Options for switching focus
   const focusOptions = [
     { value: 'mastery', label: 'Mestring i fag' },
     { value: 'status-risk', label: 'Vurderingsgrunnlag' },
   ] as const
+  let selectedFocus = $state<string>(focusOptions[0].value)
+
+  // Slightly hard-coded check if we should display the focus selector
+  const isFocusEnabled = $derived($dataStore.statusCategories.some(cat => cat.name === 'risk'))
 
   let filteredStudents = $derived(
     nameFilter
@@ -123,24 +126,26 @@
     </div>
   </div>
 
-  <div class="d-flex flex-wrap gap-3 mt-3">
-    <!-- Radio buttons for focus -->
-    <fieldset class="border p-3 rounded">
-      <legend class="w-auto fs-6">Fokus</legend>
-      {#each focusOptions as option (option.value)}
-        <label class="my-2 ms-1 d-block">
-          <input
-            type="radio"
-            name="focusOptions"
-            value={option.value}
-            onclick={() => handleFocusSelect(option.value)}
-            checked={selectedFocus === option.value}
-          />
-          <span class="ms-2">{option.label}</span>
-        </label>
-      {/each}
-    </fieldset>
-  </div>
+  {#if isFocusEnabled}
+    <div class="d-flex flex-wrap gap-3 mt-3">
+      <!-- Radio buttons for focus -->
+      <fieldset class="border p-3 rounded">
+        <legend class="w-auto fs-6">Fokus</legend>
+        {#each focusOptions as option (option.value)}
+          <label class="my-2 ms-1 d-block">
+            <input
+              type="radio"
+              name="focusOptions"
+              value={option.value}
+              onclick={() => handleFocusSelect(option.value)}
+              checked={selectedFocus === option.value}
+            />
+            <span class="ms-2">{option.label}</span>
+          </label>
+        {/each}
+      </fieldset>
+    </div>
+  {/if}
 </section>
 
 <section class="my-4">
@@ -155,9 +160,9 @@
     </div>
   {:else if students.length === 0}
     <div class="mt-3">Her var det tomt</div>
-  {:else if selectedFocus === 'mastery'}
+  {:else if selectedFocus === focusOptions[0].value}
     <StudentsWithSubjects students={filteredStudents} {subjects} />
-  {:else if selectedFocus === 'status-risk'}
+  {:else if selectedFocus === focusOptions[1].value}
     <StudentsWithStatuses students={filteredStudents} {subjects} />
   {:else}
     <div class="mt-3">Ukjent fokusvalg</div>
