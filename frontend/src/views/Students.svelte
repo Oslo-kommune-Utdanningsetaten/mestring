@@ -5,6 +5,7 @@
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
+  import StudentsWithStatuses from '../components/StudentsWithStatuses.svelte'
   import { USER_ROLES } from '../utils/constants'
   import { subjectsList, usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
@@ -17,6 +18,13 @@
   let isLoadingStudents = $state<boolean>(false)
   let nameFilter = $state<string>('')
   let subjects = $state<SubjectType[]>([])
+  let selectedFocus = $state<string>('mastery')
+
+  // Options for switching focus
+  const focusOptions = [
+    { value: 'mastery', label: 'Mestring i fag' },
+    { value: 'status-risk', label: 'Vurderingsgrunnlag' },
+  ] as const
 
   let filteredStudents = $derived(
     nameFilter
@@ -40,11 +48,11 @@
     if (!currentSchool) return
     try {
       isLoadingStudents = true
-      const queryOptions = selectedGroupId
+      const studentQueryOptions = selectedGroupId
         ? { groups: selectedGroupId, school: currentSchool.id, roles: USER_ROLES.STUDENT }
         : { school: currentSchool.id, roles: USER_ROLES.STUDENT }
       const studentsResult = await usersList({
-        query: queryOptions,
+        query: studentQueryOptions,
       })
       students = studentsResult.data || []
       const subjectsResult = await subjectsList({
@@ -56,6 +64,7 @@
     } catch (error) {
       console.error('Error fetching members', { selectedGroupId, error })
       students = []
+      subjects = []
     } finally {
       isLoadingStudents = false
     }
@@ -67,6 +76,10 @@
     } else {
       router.navigate(urlStringFrom({}, { path: '/students', mode: 'replace' }))
     }
+  }
+
+  const handleFocusSelect = (focusValue: string): void => {
+    selectedFocus = focusValue
   }
 
   $effect(() => {
@@ -81,6 +94,7 @@
   <!-- Filter groups -->
   <div class="filters-container">
     <div class="filter-item">
+      <!-- Filter by group membership -->
       <label for="groupSelect" class="mb-1 visually-hidden">Filtrer på gruppe:</label>
       <select
         class="pkt-input"
@@ -95,7 +109,9 @@
         {/each}
       </select>
     </div>
+
     <div class="filter-item">
+      <!-- Filter by student name -->
       <label for="filterStudentsByName" class="mb-1 visually-hidden">Filtrer på navn:</label>
       <input
         type="text"
@@ -105,6 +121,25 @@
         bind:value={nameFilter}
       />
     </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-3 mt-3">
+    <!-- Radio buttons for focus -->
+    <fieldset class="border p-3 rounded">
+      <legend class="w-auto fs-6">Fokus</legend>
+      {#each focusOptions as option (option.value)}
+        <label class="my-2 ms-1 d-block">
+          <input
+            type="radio"
+            name="focusOptions"
+            value={option.value}
+            onclick={() => handleFocusSelect(option.value)}
+            checked={selectedFocus === option.value}
+          />
+          <span class="ms-2">{option.label}</span>
+        </label>
+      {/each}
+    </fieldset>
   </div>
 </section>
 
@@ -120,8 +155,12 @@
     </div>
   {:else if students.length === 0}
     <div class="mt-3">Her var det tomt</div>
-  {:else}
+  {:else if selectedFocus === 'mastery'}
     <StudentsWithSubjects students={filteredStudents} {subjects} />
+  {:else if selectedFocus === 'status-risk'}
+    <StudentsWithStatuses students={filteredStudents} {subjects} />
+  {:else}
+    <div class="mt-3">Ukjent fokusvalg</div>
   {/if}
 </section>
 

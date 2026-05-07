@@ -970,6 +970,13 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
+            OpenApiParameter(
+                name='name',
+                description='Filter statuses by status name.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
         ]
     )
 )
@@ -988,6 +995,7 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
             subject_param, is_subject_set = get_request_param(self.request.query_params, 'subject')
             group_param, _ = get_request_param(self.request.query_params, 'group')
             editor_param, _ = get_request_param(self.request.query_params, 'editor')
+            category_name_param, _ = get_request_param(self.request.query_params, 'category_name')
 
             if not school_param:
                 raise ValidationError({'error': 'missing-parameter',
@@ -1015,6 +1023,9 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
 
             if editor_param:
                 qs = qs.filter(Q(created_by_id=editor_param) | Q(updated_by_id=editor_param))
+
+            if category_name_param:
+                qs = qs.filter(category__name=category_name_param)
 
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs

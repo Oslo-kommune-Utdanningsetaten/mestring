@@ -1863,6 +1863,10 @@ export type StatusListData = {
          */
         group?: 'exclude' | 'include' | 'only';
         /**
+         * Filter statuses by status name.
+         */
+        name?: string;
+        /**
          * Filter statuses by school.
          */
         school?: string;
@@ -1871,7 +1875,7 @@ export type StatusListData = {
          */
         students?: string;
         /**
-         * Filter statuses by subject. Pass null to filter for statuses without a subject.
+         * Filter statuses by subject.
          */
         subject?: string;
     };

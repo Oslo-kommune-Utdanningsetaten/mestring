@@ -247,8 +247,8 @@
         />
       </div>
     </div>
-    <!-- Radio buttons for role status -->
     <div class="d-flex flex-wrap gap-3 mt-3">
+      <!-- Radio buttons for role status -->
       <fieldset class="border p-3 rounded">
         <legend class="w-auto fs-6">Brukere med rolle</legend>
         {#each roleOptions as option (option.value)}
