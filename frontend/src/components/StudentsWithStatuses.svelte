@@ -3,7 +3,7 @@
   import { dataStore } from '../stores/data'
   import { statusList } from '../generated/sdk.gen'
   import Link from './Link.svelte'
-  import StatusTag from './StatusTag.svelte'
+  import MasteryBadge from './MasteryBadge.svelte'
 
   let {
     students,
@@ -123,13 +123,17 @@
     </span>
 
     {#each subjects as subject}
-      <span class="item">
-        {#if dataByStudentId[student.id]?.statusBySubjectId[subject.id]}
-          <StatusTag status={dataByStudentId[student.id].statusBySubjectId[subject.id]!} />
-        {:else}
-          <span>-</span>
-        {/if}
-      </span>
+      {@const status = dataByStudentId[student.id]?.statusBySubjectId[subject.id]}
+      {#if status}
+        <span class="item">
+          <MasteryBadge
+            masteryValue={status.masteryValue}
+            masterySchemaId={status.masterySchemaId}
+          />
+        </span>
+      {:else}
+        <span class="item">-</span>
+      {/if}
     {/each}
   {/each}
 </div>

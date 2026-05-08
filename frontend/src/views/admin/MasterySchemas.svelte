@@ -9,11 +9,12 @@
   import type { MasterySchemaType, SchoolType } from '../../generated/types.gen'
   import type { MasterySchemaWithConfig } from '../../types/models'
   import { useTinyRouter } from 'svelte-tiny-router'
-  import { urlStringFrom, getContrastFriendlyTextColor } from '../../utils/functions'
+  import { urlStringFrom } from '../../utils/functions'
   import { VALUE_INPUT_VARIANTS } from '../../utils/constants'
   import { dataStore } from '../../stores/data'
   import { useMasteryCalculations, areSchemaValuesConsistent } from '../../utils/masteryHelpers'
   import ButtonMini from '../../components/ButtonMini.svelte'
+  import MasteryBadge from '../../components/MasteryBadge.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
   import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
 
@@ -271,13 +272,10 @@
               <div class="mb-4 d-flex gap-2">
                 {#each masterySchema?.config?.levels || [] as level}
                   <div class="d-flex flex-column align-items-center">
-                    <span
-                      class="p-2 w-100 text-center"
-                      style="background-color: {level.color ||
-                        'white'}; color: {getContrastFriendlyTextColor(level.color)};"
-                    >
-                      {level.title}
-                    </span>
+                    <MasteryBadge
+                      masteryValue={level.minValue}
+                      masterySchemaId={masterySchema.id}
+                    />
                     <span class="small text-muted py-1 bg-light w-100 text-center">
                       {level.minValue}&nbsp;➡&nbsp;{level.maxValue}
                     </span>
