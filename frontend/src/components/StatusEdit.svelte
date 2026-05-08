@@ -98,6 +98,7 @@
       (cat: StatusCategoryType) => !!localStatus.subjectId === cat.isSubjectSpecific
     )
   )
+  const studentFirstName = $derived(localStudent?.name.split(' ')[0] || 'eleven')
 
   const goalSectionToggleOptions = $derived.by(() => {
     return {
@@ -406,7 +407,7 @@
               id="description"
               class="form-control rounded-0 border-2 border-primary"
               bind:value={localStatus.masteryDescription}
-              placeholder="Kort beskrivelse av elevens mestringsnivå"
+              placeholder="Kort beskrivelse av hva {studentFirstName} får til"
               rows="4"
             ></textarea>
           </div>
@@ -420,7 +421,7 @@
               id="feedforward"
               class="form-control rounded-0 border-2 border-primary"
               bind:value={localStatus.feedforward}
-              placeholder="Konkret, hva kan eleven gjøre for å forbedre seg?"
+              placeholder="Konkret, hva kan {studentFirstName} gjøre for å forbedre seg?"
               rows="4"
             ></textarea>
           </div>
