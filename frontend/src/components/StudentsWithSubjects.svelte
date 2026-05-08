@@ -168,7 +168,7 @@
   .students-grid :global(.item) {
     padding: 0.5rem;
     border-bottom: 1px solid var(--bs-border-color);
-    min-height: 4rem;
+    min-height: 3rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -177,8 +177,7 @@
   .students-grid .item.header-row {
     background-color: var(--bs-light);
     font-weight: 800;
-    max-height: 4rem;
-    margin-bottom: 0.5rem;
+    max-height: 3rem;
   }
 
   .students-grid :global(.item.header:first-child),

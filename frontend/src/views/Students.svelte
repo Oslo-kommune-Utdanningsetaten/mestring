@@ -11,22 +11,21 @@
   import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
 
   const router = useTinyRouter()
-  let currentSchool = $derived($dataStore.currentSchool)
+  // Options for switching focus
+  const focusOptions = [
+    { value: 'mastery', label: 'Mestring i fag' },
+    { value: 'status-risk', label: 'Vurderingsgrunnlag' },
+  ] as const
   let selectedGroupId = $derived(router.getQueryParam('groupId'))
+  let selectedFocus = $derived(router.getQueryParam('focus') || focusOptions[0].value)
+  let currentSchool = $derived($dataStore.currentSchool)
   let allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
   let students = $state<UserType[]>([])
   let isLoadingStudents = $state<boolean>(false)
   let nameFilter = $state<string>('')
   let subjects = $state<SubjectType[]>([])
 
-  // Options for switching focus
-  const focusOptions = [
-    { value: 'mastery', label: 'Mestring i fag' },
-    { value: 'status-risk', label: 'Vurderingsgrunnlag' },
-  ] as const
-  let selectedFocus = $state<string>(focusOptions[0].value)
-
-  // Slightly hard-coded check if we should display the focus selector
+  // Enable the focus selector if there is a category named risk
   const isFocusEnabled = $derived($dataStore.statusCategories.some(cat => cat.name === 'risk'))
 
   let filteredStudents = $derived(
@@ -82,7 +81,7 @@
   }
 
   const handleFocusSelect = (focusValue: string): void => {
-    selectedFocus = focusValue
+    router.navigate(urlStringFrom({ focus: focusValue }, { path: '/students', mode: 'merge' }))
   }
 
   $effect(() => {
@@ -130,7 +129,7 @@
     <div class="d-flex flex-wrap gap-3 mt-3">
       <!-- Radio buttons for focus -->
       <fieldset class="border p-3 rounded">
-        <legend class="w-auto fs-6">Fokus</legend>
+        <legend class="fs-6 fw-bold">Fokus</legend>
         {#each focusOptions as option (option.value)}
           <label class="my-2 ms-1 d-block">
             <input
@@ -163,7 +162,11 @@
   {:else if selectedFocus === focusOptions[0].value}
     <StudentsWithSubjects students={filteredStudents} {subjects} />
   {:else if selectedFocus === focusOptions[1].value}
-    <StudentsWithStatuses students={filteredStudents} {subjects} />
+    <StudentsWithStatuses
+      students={filteredStudents}
+      {subjects}
+      category={selectedFocus.split('-')[1]}
+    />
   {:else}
     <div class="mt-3">Ukjent fokusvalg</div>
   {/if}
