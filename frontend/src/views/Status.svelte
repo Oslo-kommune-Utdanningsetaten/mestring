@@ -111,92 +111,87 @@
       </div>
     </div>
   {:else if status && student}
-    <!-- Name and subject -->
-    <h2 class="my-3">
-      {status.title} for
-      <mark><Link to="/students/{student.id}">{student.name}</Link></mark>
-      {#if subject}
-        i faget
-        <mark>{subject.shortName || subject.displayName}</mark>
-      {/if}
-    </h2>
-
-    <hr />
-
-    <!-- Updated by info and action buttons -->
-    <div class="d-flex justify-content-between align-items-center my-3">
-      <div>
-        <p class="text-muted mb-0">
-          <AuthorInfo item={status} />
-        </p>
-      </div>
-      <div class="d-flex gap-2">
-        {#if $hasUserAccessToFeature( 'status', 'edit', { subjectId: subject?.id, studentGroupIds: student.groupIds } )}
-          <ButtonMini
-            options={{
-              title: 'Rediger status',
-              skin: 'secondary',
-              iconName: 'edit',
-              variant: 'icon-left',
-              classes: 'me-2',
-              onClick: handleEditStatus,
-            }}
-          >
-            Rediger
-          </ButtonMini>
+    <!-- Header -->
+    <div class="p-4 pb-3 border-bottom border-3 border-primary">
+      <h2 class="fs-5 fw-semibold mb-0">
+        {status.title} for
+        <mark><Link to="/students/{student.id}">{student.name}</Link></mark>
+        {#if subject}
+          i faget
+          <mark>{subject.shortName || subject.displayName}</mark>
         {/if}
-        {#if $hasUserAccessToFeature( 'status', 'delete', { subjectId: subject?.id, studentGroupIds: student.groupIds } )}
-          <ButtonMini
-            options={{
-              title: 'Slett status',
-              skin: 'secondary',
-              iconName: 'trash-can',
-              variant: 'icon-left',
-              classes: 'me-2',
-              onClick: handleDelete,
-              delayActionFor: 3,
-            }}
-          >
-            Slett
-          </ButtonMini>
-        {/if}
-      </div>
+      </h2>
+      <p class="small text-muted mt-1 mb-0">
+        {formatDateHumanly(status.beginAt) || '?'} – {formatDateHumanly(status.endAt) || '?'}
+      </p>
     </div>
 
-    <hr />
-
-    <!-- Status category -->
-    <div class="row my-4">
-      <h3 class="col-4">Kategori</h3>
-      <div class="col-8">
-        {#if status.categoryId}
-          {$dataStore.statusCategories.find(cat => cat.id === status?.categoryId)?.title ||
-            'ukjent'}
-        {:else}
-          ingen
-        {/if}
+    <div class="p-4">
+      <!-- Updated by info and action buttons -->
+      <div class="field-group d-flex justify-content-between align-items-center">
+        <div>
+          <p class="text-muted mb-0">
+            <AuthorInfo item={status} />
+          </p>
+        </div>
+        <div class="d-flex gap-2">
+          {#if $hasUserAccessToFeature( 'status', 'edit', { subjectId: subject?.id, studentGroupIds: student.groupIds } )}
+            <ButtonMini
+              options={{
+                title: 'Rediger status',
+                skin: 'secondary',
+                iconName: 'edit',
+                variant: 'icon-left',
+                classes: 'me-2',
+                onClick: handleEditStatus,
+              }}
+            >
+              Rediger
+            </ButtonMini>
+          {/if}
+          {#if $hasUserAccessToFeature( 'status', 'delete', { subjectId: subject?.id, studentGroupIds: student.groupIds } )}
+            <ButtonMini
+              options={{
+                title: 'Slett status',
+                skin: 'secondary',
+                iconName: 'trash-can',
+                variant: 'icon-left',
+                classes: 'me-2',
+                onClick: handleDelete,
+                delayActionFor: 3,
+              }}
+            >
+              Slett
+            </ButtonMini>
+          {/if}
+        </div>
       </div>
-    </div>
 
-    <hr />
+      <!-- Kategori -->
+      <div class="field-group">
+        <span class="field-label">Kategori</span>
+        <div>
+          {#if status.categoryId}
+            {$dataStore.statusCategories.find(cat => cat.id === status?.categoryId)?.title ||
+              'ukjent'}
+          {:else}
+            ingen
+          {/if}
+        </div>
+      </div>
 
-    <!-- Begin and end dates -->
-    <div class="row my-4">
-      <h3 class="col-4">Periode</h3>
-      <div class="col-8">
+      <!-- Periode -->
+      <div class="field-group">
+        <span class="field-label">Periode</span>
         <p class="mb-0">
           {formatDateHumanly(status.beginAt)} – {formatDateHumanly(status.endAt)}
         </p>
       </div>
-    </div>
 
-    <hr />
-
-    <!-- Mastery value display -->
-    {#if masterySchema?.config?.isMasteryValueInputEnabled && status.masteryValue !== null && status.masteryValue !== undefined}
-      <div class="row my-4">
-        <h3 class="col-4">Mestring</h3>
-        <div class="col-8">
+      <!-- Mestring -->
+      {#if masterySchema?.config?.isMasteryValueInputEnabled && status.masteryValue !== null && status.masteryValue !== undefined}
+        <div class="field-group">
+          <span class="field-label">Mestring</span>
           <div
             class="mastery-scale"
             class:mastery-scale-horizontal={masterySchema?.config?.valueInput ===
@@ -219,28 +214,28 @@
             {/each}
           </div>
         </div>
-      </div>
-    {/if}
+      {/if}
 
-    <!-- Mastery description display -->
-    {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
-      <div class="row my-4">
-        <h3 class="col-4">Beskrivelse</h3>
-        <div class="col-8">
-          {status.masteryDescription || 'ingen beskrivelse'}
+      <!-- Beskrivelse -->
+      {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
+        <div class="field-group">
+          <span class="field-label">Beskrivelse</span>
+          <div>
+            {status.masteryDescription || 'ingen beskrivelse'}
+          </div>
         </div>
-      </div>
-    {/if}
+      {/if}
 
-    <!-- Mastery feed forward display -->
-    {#if masterySchema?.config?.isFeedforwardInputEnabled}
-      <div class="row my-4">
-        <h3 class="col-4">Fremovermelding</h3>
-        <div class="col-8">
-          {status.feedforward || 'ingen fremovermelding'}
+      <!-- Fremovermelding -->
+      {#if masterySchema?.config?.isFeedforwardInputEnabled}
+        <div class="field-group">
+          <span class="field-label">Fremovermelding</span>
+          <div>
+            {status.feedforward || 'ingen fremovermelding'}
+          </div>
         </div>
-      </div>
-    {/if}
+      {/if}
+    </div>
   {:else}
     <p>Status ikke funnet</p>
   {/if}
@@ -260,6 +255,28 @@
 </Offcanvas>
 
 <style>
+  .field-group {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--pkt-color-grays-gray-100, #e6e6e6);
+  }
+
+  .field-group:last-child {
+    border-bottom: none;
+  }
+
+  .field-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+  }
+
+  .field-group :not(.field-label) {
+    font-size: 1.1rem;
+  }
+
   .mastery-scale {
     display: flex;
     gap: 0.5rem;
