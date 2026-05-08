@@ -9,7 +9,7 @@
   import type { MasterySchemaWithConfig } from '../types/models'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
-  import { formatDateHumanly, getContrastFriendlyTextColor } from '../utils/functions'
+  import { formatDateHumanly } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
@@ -18,6 +18,7 @@
   import Offcanvas from '../components/Offcanvas.svelte'
   import AuthorInfo from '../components/AuthorInfo.svelte'
   import Link from '../components/Link.svelte'
+  import MasteryBadge from '../components/MasteryBadge.svelte'
 
   let { statusId } = $props<{
     statusId: string
@@ -204,18 +205,18 @@
             class:mastery-scale-vertical={masterySchema?.config?.valueInput === 'sliderVertical'}
           >
             {#each calculations.masteryLevels as level}
-              <div
-                class="mastery-level"
+              <span
+                class="mastery-level-wrapper"
                 class:active={status.masteryValue >= level.minValue &&
                   status.masteryValue <= level.maxValue}
                 class:inactive={status.masteryValue < level.minValue ||
                   status.masteryValue > level.maxValue}
-                style="--level-color: {level.color}; background-color: var(--level-color); color: {getContrastFriendlyTextColor(
-                  level.color
-                )};"
               >
-                <strong>{level.title}</strong>
-              </div>
+                <MasteryBadge
+                  masteryValue={level.minValue}
+                  masterySchemaId={status.masterySchemaId}
+                />
+              </span>
             {/each}
           </div>
         </div>
@@ -274,25 +275,16 @@
     flex-direction: row;
   }
 
-  .mastery-level {
-    padding: 0.5rem;
-    border: 1px solid #dee2e6;
+  .mastery-level-wrapper {
+    transition: opacity 0.2s;
   }
 
-  .mastery-scale-horizontal .mastery-level {
-    flex: 1;
-    text-align: center;
+  .mastery-level-wrapper.active {
+    opacity: 1;
   }
 
-  .mastery-level.active {
-    border-color: color-mix(in srgb, var(--level-color) 70%, rgba(0, 0, 0, 0.7));
-    border-width: 5px;
-    border-style: outset;
-    font-weight: 600;
-  }
-
-  .mastery-level.inactive {
-    filter: grayscale(30%);
+  .mastery-level-wrapper.inactive {
     opacity: 0.2;
+    filter: grayscale(30%);
   }
 </style>
