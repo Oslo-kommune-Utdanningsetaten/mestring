@@ -14,6 +14,7 @@
   import {
     fetchGoalsForSubjectAndStudent,
     formatMonthName,
+    formatDateHumanly,
     calculateSchoolYearMilestones,
     subjectsInCommon,
   } from '../utils/functions'
@@ -143,7 +144,7 @@
     }
     const beginMonth = formatMonthName(aStatus.beginAt)
     const endMonth = formatMonthName(aStatus.endAt)
-    return `${beginMonth} - ${endMonth}`
+    return `Status ${beginMonth} - ${endMonth}`
   }
 
   const handleGenerateTitle = () => {
@@ -230,226 +231,228 @@
   })
 </script>
 
-<div class="status-edit px-4 py-2">
-  <h2 class="my-4">
-    {localStatus.id ? 'Redigerer' : 'Oppretter ny'} status for
-    <mark>{localStudent?.name}</mark>
-  </h2>
+<div class="status-edit">
+  <!-- Header -->
+  <div class="p-4 pb-3 border-bottom border-3 border-primary">
+    <h2 class="fs-5 fw-semibold mb-0">
+      {localStatus.id ? 'Redigerer' : 'Ny'} status for
+      <mark>{localStudent?.name}</mark>
+    </h2>
+    {#if localStatus.beginAt || localStatus.endAt}
+      <p class="small text-muted mt-1 mb-0">
+        {localStatus.title} [{formatDateHumanly(localStatus.beginAt) || '?'} – {formatDateHumanly(
+          localStatus.endAt
+        ) || '?'}]
+      </p>
+    {/if}
+  </div>
 
   {#if localStatus && localStudent}
-    <!-- Goals, compacted for reference -->
-    {#if subject}
-      <div class="my-3 goals-section">
-        <h3>
-          Mål i <mark>{subject?.shortName || subject?.displayName}</mark>
-          <ButtonIcon options={goalSectionToggleOptions} />
-        </h3>
-        {#if !localGoals}
-          <p><em>Eleven har ingen mål i dette faget</em></p>
-        {/if}
+    <div class="p-4">
+      <!-- Goals, compacted for reference -->
+      {#if subject}
+        <div class="goals-section bg-light p-3">
+          <h3>
+            Mål i <mark>{subject?.shortName || subject?.displayName}</mark>
+            <ButtonIcon options={goalSectionToggleOptions} />
+          </h3>
+          {#if !localGoals}
+            <p><em>Eleven har ingen mål i dette faget</em></p>
+          {/if}
 
-        {#if localGoals && isGoalSectionExpanded}
-          <div class="goals-container mt-2">
-            {#each localGoals as goal}
-              <div class="goal-row">
-                <span class="goal-sort-order">{goal.sortOrder}</span>
-                {#if goal.isIndividual}
-                  <span class="individual-goal-icon" title="Individuelt mål">
-                    <pkt-icon name="person"></pkt-icon>
-                  </span>
-                {:else}
-                  <span class="group-goal-icon" title="Gruppemål">
-                    <pkt-icon name="group"></pkt-icon>
-                  </span>
-                {/if}
+          {#if localGoals && isGoalSectionExpanded}
+            <div class="d-flex flex-column gap-2 mt-2">
+              {#each localGoals as goal}
+                <div class="goal-row">
+                  <span>{goal.sortOrder}</span>
+                  {#if goal.isIndividual}
+                    <span title="Individuelt mål">
+                      <pkt-icon name="person"></pkt-icon>
+                    </span>
+                  {:else}
+                    <span title="Gruppemål">
+                      <pkt-icon name="group"></pkt-icon>
+                    </span>
+                  {/if}
 
-                <!-- Goal title -->
-                {#if $dataStore.currentSchool.isGoalTitleEnabled}
-                  <span class="goal-title">
-                    {goal.title}
-                  </span>
-                {/if}
+                  {#if $dataStore.currentSchool.isGoalTitleEnabled}
+                    <span class="goal-title">
+                      {goal.title}
+                    </span>
+                  {/if}
 
-                <!-- Stats widgets -->
-                <span class="goal-stats">
-                  {#if goal.masteryData}
-                    <MasteryLevelBadge
-                      masteryData={goal.masteryData}
-                      masterySchema={getMasterySchemaForGoal(goal)}
-                    />
-                    {#if $isMasteryBarChartVisible}
-                      <MasteryBarChart
-                        data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
+                  <span class="goal-stats">
+                    {#if goal.masteryData}
+                      <MasteryLevelBadge
+                        masteryData={goal.masteryData}
                         masterySchema={getMasterySchemaForGoal(goal)}
                       />
+                      {#if $isMasteryBarChartVisible}
+                        <MasteryBarChart
+                          data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
+                          masterySchema={getMasterySchemaForGoal(goal)}
+                        />
+                      {/if}
+                    {:else}
+                      Ingen observasjoner i dette målet
                     {/if}
-                  {:else}
-                    Ingen observasjoner i dette målet
-                  {/if}
-                </span>
-              </div>
+                  </span>
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </div>
+      {/if}
+
+      <!-- Form fields -->
+      <div class="mt-3">
+        <!-- Kategori -->
+        <div class="field-group">
+          <label for="categorySelect" class="field-label">Kategori</label>
+          <select
+            class="form-control rounded-0 border-2 border-primary"
+            id="categorySelect"
+            bind:value={localStatus.categoryId}
+            onchange={handleCategoryChange}
+          >
+            <option value={null} selected={!localStatus.categoryId}>Ingen</option>
+            {#each selectableStatusCategories as statusCategory}
+              <option
+                value={statusCategory.id}
+                selected={statusCategory.id === localStatus.categoryId}
+              >
+                {statusCategory.title}
+              </option>
             {/each}
+          </select>
+        </div>
+
+        <!-- Periode -->
+        <div class="field-group">
+          <span class="field-label">Periode</span>
+          <div class="d-flex align-items-end gap-2 flex-wrap">
+            <div class="flex-fill" style="min-width: 140px">
+              <label for="beginAt" class="form-label small text-muted mb-1">Fra</label>
+              <input
+                id="beginAt"
+                type="date"
+                class="form-control rounded-0 border-2 border-primary"
+                class:is-invalid={validationErrors.beginAt}
+                bind:value={localStatus.beginAt}
+                disabled={!!currentStatusCategory}
+                required
+              />
+              {#if validationErrors.beginAt}
+                <div class="text-danger small mt-1">{validationErrors.beginAt}</div>
+              {/if}
+            </div>
+            <span class="text-muted pb-2">–</span>
+            <div class="flex-fill" style="min-width: 140px">
+              <label for="endAt" class="form-label small text-muted mb-1">Til</label>
+              <input
+                id="endAt"
+                type="date"
+                class="form-control rounded-0 border-2 border-primary"
+                class:is-invalid={validationErrors.endAt}
+                bind:value={localStatus.endAt}
+                disabled={!!currentStatusCategory}
+                required
+              />
+              {#if validationErrors.endAt}
+                <div class="text-danger small mt-1">{validationErrors.endAt}</div>
+              {/if}
+            </div>
+          </div>
+        </div>
+
+        <!-- Tittel -->
+        <div class="field-group">
+          <label for="title" class="field-label">Tittel</label>
+          <div class="input-with-icon position-relative">
+            <input
+              id="title"
+              type="text"
+              class="form-control rounded-0 border-2 border-primary"
+              bind:value={localStatus.title}
+              placeholder="Angi en tittel"
+              disabled={!!currentStatusCategory}
+            />
+            <ButtonIcon
+              options={{
+                iconName: 'arrow-circle',
+                title: 'Foreslå tittel basert på datoer',
+                onClick: () => handleGenerateTitle(),
+              }}
+            />
+          </div>
+        </div>
+
+        <!-- Mestring -->
+        {#if currentMasterySchema?.config?.isMasteryValueInputEnabled}
+          <div class="field-group">
+            <span class="field-label">Mestring</span>
+            <MasteryValueInput
+              masterySchema={currentMasterySchema}
+              bind:value={localStatus.masteryValue}
+            />
+          </div>
+        {/if}
+
+        <!-- Beskrivelse -->
+        {#if currentMasterySchema?.config?.isMasteryDescriptionInputEnabled}
+          <div class="field-group">
+            <label for="description" class="field-label">Beskrivelse</label>
+            <textarea
+              id="description"
+              class="form-control rounded-0 border-2 border-primary"
+              bind:value={localStatus.masteryDescription}
+              placeholder="Kort beskrivelse av elevens mestringsnivå"
+              rows="4"
+            ></textarea>
+          </div>
+        {/if}
+
+        <!-- Fremovermelding -->
+        {#if currentMasterySchema?.config?.isFeedforwardInputEnabled}
+          <div class="field-group">
+            <label for="feedforward" class="field-label">Fremovermelding</label>
+            <textarea
+              id="feedforward"
+              class="form-control rounded-0 border-2 border-primary"
+              bind:value={localStatus.feedforward}
+              placeholder="Konkret, hva kan eleven gjøre for å forbedre seg?"
+              rows="4"
+            ></textarea>
           </div>
         {/if}
       </div>
-    {/if}
 
-    <!-- Kategori -->
-    <div class="d-flex my-5">
-      <h3 class="col-4 mb-0">Kategori</h3>
-      <div class="col-8">
-        <label for="categorySelect" class="mb-1 visually-hidden">Kategori</label>
-        <select
-          class="pkt-input"
-          id="categorySelect"
-          bind:value={localStatus.categoryId}
-          onchange={handleCategoryChange}
+      <!-- Actions -->
+      <div class="d-flex gap-2 pt-4">
+        <ButtonMini
+          options={{
+            title: 'Lagre',
+            skin: 'primary',
+            variant: 'label-only',
+            size: 'medium',
+            onClick: () => handleSave(),
+          }}
         >
-          <option value={null} selected={!localStatus.categoryId}>Ingen</option>
-          {#each selectableStatusCategories as statusCategory}
-            <option
-              value={statusCategory.id}
-              selected={statusCategory.id === localStatus.categoryId}
-            >
-              {statusCategory.title}
-            </option>
-          {/each}
-        </select>
-      </div>
-    </div>
+          Lagre
+        </ButtonMini>
 
-    <!-- Begin and end dates -->
-    <div class="d-flex my-5">
-      <h3 class="col-4">Periode</h3>
-      <div class="col-auto">
-        <label for="beginAt" class="form-label mb-0">Fra</label>
-        <input
-          id="beginAt"
-          type="date"
-          class="form-control date-input"
-          class:is-invalid={validationErrors.beginAt}
-          bind:value={localStatus.beginAt}
-          disabled={!!currentStatusCategory}
-          required
-        />
-        {#if validationErrors.beginAt}
-          <div class="invalid-feedback d-block">{validationErrors.beginAt}</div>
-        {/if}
+        <ButtonMini
+          options={{
+            title: 'Avbryt',
+            skin: 'tertiary',
+            variant: 'label-only',
+            size: 'medium',
+            onClick: () => onDone(),
+          }}
+        >
+          Avbryt
+        </ButtonMini>
       </div>
-      <div class="col-auto ms-3">
-        <label for="endAt" class="form-label mb-0">Til</label>
-        <input
-          id="endAt"
-          type="date"
-          class="form-control date-input"
-          class:is-invalid={validationErrors.endAt}
-          bind:value={localStatus.endAt}
-          disabled={!!currentStatusCategory}
-          required
-        />
-        {#if validationErrors.endAt}
-          <div class="invalid-feedback d-block">{validationErrors.endAt}</div>
-        {/if}
-      </div>
-    </div>
-
-    <!-- Title -->
-    <div class="d-flex my-5">
-      <h3 class="col-4">Tittel</h3>
-      <div class="col-8">
-        <label for="title" class="visually-hidden">Tittel</label>
-        <div class="input-with-icon">
-          <input
-            id="title"
-            type="text"
-            class="form-control rounded-0 border-2 border-primary p-2"
-            bind:value={localStatus.title}
-            placeholder="Angi en tittel"
-            disabled={!!currentStatusCategory}
-          />
-          <ButtonIcon
-            options={{
-              iconName: 'arrow-circle',
-              title: 'Foreslå tittel basert på datoer',
-              onClick: () => handleGenerateTitle(),
-            }}
-          />
-        </div>
-      </div>
-    </div>
-
-    <!-- Mastery value input -->
-    {#if currentMasterySchema?.config?.isMasteryValueInputEnabled}
-      <div class="d-flex my-5">
-        <h3 class="col-4">Mestring</h3>
-        <div class="col-8">
-          <MasteryValueInput
-            masterySchema={currentMasterySchema}
-            bind:value={localStatus.masteryValue}
-          />
-        </div>
-      </div>
-    {/if}
-
-    <!-- Mastery description input -->
-    {#if currentMasterySchema?.config?.isMasteryDescriptionInputEnabled}
-      <div class="d-flex my-5">
-        <h3 class="col-4">Beskrivelse</h3>
-        <div class="col-8">
-          <label for="description" class="visually-hidden">
-            Beskrivelse av elevens mestringsnivå
-          </label>
-          <textarea
-            id="description"
-            class="form-control rounded-0 border-2 border-primary p-2"
-            bind:value={localStatus.masteryDescription}
-            placeholder="Kort beskrivelse av elevens mestringsnivå"
-            rows="4"
-          ></textarea>
-        </div>
-      </div>
-    {/if}
-
-    <!-- Mastery feed forward input -->
-    {#if currentMasterySchema?.config?.isFeedforwardInputEnabled}
-      <div class="d-flex my-5">
-        <h3 class="col-4">Fremovermelding</h3>
-        <div class="col-8">
-          <label for="feedforward" class="visually-hidden">Fremovermelding til eleven</label>
-          <textarea
-            id="feedforward"
-            class="form-control rounded-0 border-2 border-primary p-2"
-            bind:value={localStatus.feedforward}
-            placeholder="Konkret, hva kan eleven gjøre for å forbedre seg?"
-            rows="4"
-          ></textarea>
-        </div>
-      </div>
-    {/if}
-
-    <div class="d-flex gap-2 justify-content-start mt-2">
-      <ButtonMini
-        options={{
-          title: 'Lagre',
-          skin: 'primary',
-          variant: 'label-only',
-          classes: 'me-2',
-          onClick: () => handleSave(),
-        }}
-      >
-        Lagre
-      </ButtonMini>
-
-      <ButtonMini
-        options={{
-          title: 'Avbryt',
-          skin: 'secondary',
-          variant: 'label-only',
-          onClick: () => onDone(),
-        }}
-      >
-        Avbryt
-      </ButtonMini>
     </div>
   {:else}
     No status...
@@ -457,21 +460,56 @@
 </div>
 
 <style>
-  .status-edit {
-    width: 100%;
-    max-width: 100%;
+  .goals-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    font-weight: 600;
   }
 
-  .date-input {
-    border-width: 2px;
-    border-color: var(--pkt-color-primary);
-    border-radius: 0px;
-    padding-left: 8px;
-    max-width: 12rem;
+  .goal-row {
+    display: grid;
+    grid-template-columns: auto auto minmax(max-content, 30ch) 1fr;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background-color: #fff;
+    min-height: 2rem;
   }
 
-  .input-with-icon {
-    position: relative;
+  .goal-row > * {
+    display: flex;
+    align-items: center;
+  }
+
+  .goal-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .goal-stats {
+    gap: 0.5rem;
+  }
+
+  .field-group {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--pkt-color-grays-gray-100, #e6e6e6);
+  }
+
+  .field-group:last-child {
+    border-bottom: none;
+  }
+
+  .field-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
   }
 
   .input-with-icon input {
@@ -485,55 +523,17 @@
     transform: translateY(-50%);
   }
 
-  .goals-section {
-    background-color: var(--pkt-color-brand-neutrals-200);
-    padding: 0.5rem;
+  textarea {
+    font-size: 1.2rem;
+  }
 
-    h3 {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      text-transform: uppercase;
-      font-size: 0.8rem;
+  @media (max-width: 480px) {
+    .goal-row {
+      grid-template-columns: auto auto 1fr;
     }
-  }
 
-  .goals-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .goal-row {
-    display: grid;
-    grid-template-columns: auto auto minmax(max-content, 30ch) 1fr;
-    gap: 1rem;
-    align-items: stretch;
-    padding: 0.5rem 1rem;
-    background-color: white;
-    border-radius: 0px;
-    min-height: 2rem;
-  }
-
-  .goal-row > * {
-    display: flex;
-    align-items: center;
-  }
-
-  .goal-sort-order,
-  .individual-goal-icon,
-  .group-goal-icon {
-    justify-content: center;
-  }
-
-  .goal-title {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .goal-stats {
-    gap: 0.5rem;
-    justify-content: flex-start;
+    .goal-title {
+      grid-column: 1 / -1;
+    }
   }
 </style>

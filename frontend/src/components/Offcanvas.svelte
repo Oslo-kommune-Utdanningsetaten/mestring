@@ -12,7 +12,7 @@
 
   let {
     isOpen = $bindable(false),
-    width = '60vw',
+    width = '70vw',
     side = 'right',
     ariaLabel = 'Panel',
     onClosed,
@@ -21,19 +21,6 @@
 
   type PanelState = 'closed' | 'opening' | 'open' | 'closing'
   let panelState = $state<PanelState>('closed')
-  let responsiveWidth = $state<string>(width)
-
-  // Update width based on form factor using matchMedia
-  $effect(() => {
-    const updateWidth = (e: MediaQueryList | MediaQueryListEvent) => {
-      responsiveWidth = e.matches ? '85vw' : width
-    }
-
-    const mediaQuery = window.matchMedia('(max-width: 768px)')
-    updateWidth(mediaQuery)
-    mediaQuery.addEventListener('change', updateWidth)
-    return () => mediaQuery.removeEventListener('change', updateWidth)
-  })
 
   // State machine (panelState) depends on external `isOpen` prop
   $effect(() => {
@@ -79,7 +66,7 @@
 {#if panelState !== 'closed'}
   <div
     class="offcanvas-panel {side} {panelState === 'open' ? 'is-active' : ''}"
-    style:width={responsiveWidth}
+    style="--panel-width: {width}"
     role="dialog"
     aria-modal="true"
     aria-label={ariaLabel}
@@ -95,6 +82,7 @@
     position: fixed;
     top: 0;
     bottom: 0;
+    width: var(--panel-width);
     background-color: #fff;
     z-index: 1050;
     overflow-y: auto;
@@ -116,9 +104,10 @@
     transform: translateX(0);
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 768px) {
     .offcanvas-panel {
-      max-width: min(100vw, 600px);
+      width: 90%;
+      left: auto;
     }
   }
 </style>

@@ -113,12 +113,11 @@
   {:else if status && student}
     <!-- Name and subject -->
     <h2 class="my-3">
-      Status for
+      {status.title} for
       <mark><Link to="/students/{student.id}">{student.name}</Link></mark>
       {#if subject}
         i faget
         <mark>{subject.shortName || subject.displayName}</mark>
-        , {status.title}
       {/if}
     </h2>
 
@@ -250,7 +249,6 @@
 <!-- offcanvas for creating/editing status -->
 <Offcanvas
   bind:isOpen={isStatusEditorOpen}
-  width="80vw"
   ariaLabel="Rediger status"
   onClosed={() => {
     statusWip = null
