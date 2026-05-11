@@ -9,7 +9,7 @@
     subjectsList,
   } from '../generated/sdk.gen'
   import { subjectsInCommon } from '../utils/functions'
-  import { SUBJECTS_ALLOWED_CUSTOM, GROUP_TYPE_BASIS } from '../utils/constants'
+  import { SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
   import { hasUserAccessToFeature } from '../stores/access'
   import { dataStore } from '../stores/data'
   import { trackEvent } from '../stores/analytics'

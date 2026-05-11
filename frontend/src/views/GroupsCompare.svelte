@@ -2,7 +2,7 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import { dataStore } from '../stores/data'
   import { observationsList } from '../generated/sdk.gen'
-  import type { GroupType, ObservationType, SubjectType } from '../generated/types.gen'
+  import type { GroupType, ObservationType } from '../generated/types.gen'
   import GroupRow from '../components/GroupRow.svelte'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
   import GroupsCompareSelect from '../components/GroupsCompareSelect.svelte'
