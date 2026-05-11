@@ -65,15 +65,14 @@
     <select class="pkt-input" id="nameSelect" bind:value={localStatusCategory.name}>
       {#each Object.keys(STATUS_CATEGORY_NAMES) as key}
         <option value={key} selected={key === localStatusCategory.name}>
-          {key}
-          ({STATUS_CATEGORY_NAMES[key]})
+          {STATUS_CATEGORY_NAMES[key]} [{key}]
         </option>
       {/each}
     </select>
   </div>
 
   <!-- Mastery schema -->
-  {#if masterySchemas.length > 1}
+  {#if masterySchemas.length}
     <div class="form-group mb-3">
       <label for="masterySchemaSelect" class="mb-1">Mestringsskjema</label>
       <select
@@ -90,6 +89,11 @@
           </option>
         {/each}
       </select>
+    </div>
+  {:else}
+    <div class="alert alert-warning">
+      Det finnes ingen mestringsskjemaer. Opprett et mestringsskjema før du oppretter en
+      statuskategori.
     </div>
   {/if}
 

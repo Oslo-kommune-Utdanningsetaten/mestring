@@ -179,12 +179,12 @@
         onClick: () => handleNewStatusCategory(),
       }}
     >
-      Nytt mestringsskjema
+      Ny statuskategori
     </ButtonMini>
 
     {#if statusCategories.length > 0 && !statusCategories.some(schema => schema.isEnabled)}
       <div class="alert alert-warning mt-4">
-        Ingen av mestringsskjemaene for denne skolen er satt til enabled.
+        Ingen av statuskategoriene for denne skolen er satt til enabled.
       </div>
     {/if}
 
