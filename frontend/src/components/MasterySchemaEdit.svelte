@@ -12,7 +12,7 @@
     levels: [
       {
         title: 'Gjengi',
-        minValue: 0,
+        minValue: 1,
         maxValue: 33,
         color: '#ff8274',
       },
@@ -31,7 +31,7 @@
     ],
     valueInput: 'sliderHorizontal',
     inputIncrement: 1,
-    flatTrendThreshold: 5,
+    flatTrendThreshold: 6,
     isValueIndicatorEnabled: true,
     isFeedforwardInputEnabled: true,
     isIncrementIndicatorEnabled: true,
@@ -43,10 +43,8 @@
     masterySchema: Partial<MasterySchemaType> | null
     onDone: () => void
   }>()
-  let localMasterySchema = $derived<Partial<MasterySchemaType>>({ ...masterySchema })
-  let localJson = $derived<Partial<MasterySchemaConfig>>(
-    localMasterySchema?.config || defaultConfig
-  )
+  let localMasterySchema = $state<Partial<MasterySchemaType>>({ ...masterySchema })
+  let localJson = $state<Partial<MasterySchemaConfig>>(localMasterySchema?.config || defaultConfig)
   let calculations = $derived(useMasteryCalculations(masterySchema))
   let placeholderMasteryValue = $derived(calculations.defaultValue)
 
