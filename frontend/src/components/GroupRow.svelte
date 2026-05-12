@@ -5,12 +5,16 @@
     ObservationType,
     MasterySchemaType,
   } from '../generated/types.gen'
+  import type { Mastery } from '../types/models'
+
   import { inferMastery } from '../utils/functions'
   import { dataStore } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
   import { goalsRetrieve } from '../generated/sdk.gen'
-  import MasteryLevelBadge from './MasteryLevelBadge.svelte'
+  import { useMasteryCalculations } from '../utils/masteryHelpers'
+
   import MasteryBarChart from './MasteryBarChart.svelte'
+  import SubjectTrendBarChart from './SubjectTrendBarChart.svelte'
   import Link from './Link.svelte'
 
   let {
@@ -26,6 +30,7 @@
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
 
   let assumedMasterySchema = $state<MasterySchemaType>()
+  let calculations = $derived(useMasteryCalculations(assumedMasterySchema))
 
   const observationsBySubjectId = $derived.by(() => {
     const result: Record<string, ObservationType[]> = {}
@@ -41,6 +46,50 @@
           new Date(a.observedAt ?? 0).getTime() - new Date(b.observedAt ?? 0).getTime()
       )
     })
+    return result
+  })
+
+  // First pass: Nested by subjectId, then studentId, then goalId, wherein we have arrays of observations
+  const observationsBySubjectIdAndStudentIdAndGoalId: Record<
+    string,
+    Record<string, Record<string, ObservationType[]>>
+  > = $derived.by(() => {
+    const result: Record<string, Record<string, Record<string, ObservationType[]>>> = {}
+    observations.forEach((observation: ObservationType) => {
+      const { subjectId, studentId, goalId } = observation
+      if (!subjectId || !studentId || !goalId) return
+      if (!result[subjectId]) {
+        result[subjectId] = {}
+      }
+      if (!result[subjectId][studentId]) {
+        result[subjectId][studentId] = {}
+      }
+      if (!result[subjectId][studentId][goalId]) {
+        result[subjectId][studentId][goalId] = []
+      }
+      result[subjectId][studentId][goalId].push(observation)
+    })
+    return result
+  })
+
+  // Next pass: Infer mastery for observations within each subject, student and goal
+  // Then aggregate masteries by subject, so we have arrays of mastery objects for each subject, which we can use to render the trend bars
+  const masteriesBySubjectId: Record<string, Mastery[]> = $derived.by(() => {
+    const result: Record<string, Mastery[]> = {}
+    Object.entries(observationsBySubjectIdAndStudentIdAndGoalId).forEach(
+      ([subjectId, observationsByStudentIdAndGoalId]) => {
+        const masteriesForSubject: Mastery[] = []
+        Object.values(observationsByStudentIdAndGoalId).forEach(observationsByGoalId => {
+          Object.values(observationsByGoalId).forEach(observationsForGoal => {
+            const mastery = inferMastery(observationsForGoal)
+            if (mastery) {
+              masteriesForSubject.push(mastery)
+            }
+          })
+        })
+        result[subjectId] = masteriesForSubject
+      }
+    )
     return result
   })
 
@@ -70,6 +119,26 @@
     )
   }
 
+  // Takes a list of mastery objects and returns an array containing the count of decreasing, flat and inreasing values
+  const calculateTrendRepresentation = (masteries: Mastery[]): [number, number, number] => {
+    let decreasing = 0
+    let flat = 0
+    let inreasing = 0
+    masteries.forEach(mastery => {
+      const trend = mastery.trend
+      const isFlat = Math.abs(trend) < calculations.flatTrendThreshold
+      const isDecreasing = trend < 0 && !isFlat
+      if (isDecreasing) {
+        decreasing++
+      } else if (isFlat) {
+        flat++
+      } else {
+        inreasing++
+      }
+    })
+    return [decreasing, flat, inreasing]
+  }
+
   $effect(() => {
     if (observations?.length > 0) {
       inferMasterySchema()
@@ -77,22 +146,24 @@
   })
 </script>
 
-{#if group && assumedMasterySchema}
+{#if group}
   <span class="item group-name">
     <Link to={`/groups/${group.id}`}>{group.displayName}</Link>
+    {#if !assumedMasterySchema}
+      <span class="ms-2 text-muted fs-6">[mangler data 🫤]</span>
+    {/if}
   </span>
   {#each subjects as subject}
-    <span class="item">
+    <span class="item gap-2">
       {#if subject && observationsBySubjectId[subject.id]?.length}
-        <span class="me-1" title={subject.displayName}>
-          <MasteryLevelBadge
-            masteryData={inferMastery(observationsBySubjectId[subject.id]) ?? undefined}
-            masterySchema={assumedMasterySchema}
-            isLastValueVisible={false}
-          />
-        </span>
+        <SubjectTrendBarChart
+          data={calculateTrendRepresentation(masteriesBySubjectId[subject.id])}
+          width={50}
+          height={30}
+          yResolution={calculations.sliderValueIncrement}
+        />
 
-        {#if $isMasteryBarChartVisible}
+        {#if $isMasteryBarChartVisible && assumedMasterySchema}
           <MasteryBarChart
             data={observationsBySubjectId[subject.id].map(
               (obs: ObservationType) => obs.masteryValue ?? 0
@@ -101,7 +172,7 @@
           />
         {/if}
       {:else}
-        <span class="text-muted">---</span>
+        <span class="text-muted fs-6"></span>
       {/if}
     </span>
   {/each}

@@ -98,7 +98,7 @@
     {yLabelsAt}
     xAxis={0.5}
     yAxis={1}
-    colorLookup={() => 'var(--pkt-color-brand-dark-green-1000)'}
+    colorLookup={(value, index) => 'var(--pkt-color-brand-dark-green-1000)'}
     options={{ isValueOnHoverEnabled: true, isGlowOnHoverEnabled: true }}
   ></BarChart>
 {/if}

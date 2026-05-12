@@ -28,10 +28,8 @@
   const calculations = $derived(useMasteryCalculations(masterySchema))
   const title = $derived(providedTitle ?? (hasSufficientData ? data.join(', ') : 'Mangler data'))
 
-  const colorLookup = (value: number) =>
-    Number.isFinite(value)
-      ? getMasteryLevelColorByValue(value, masterySchema)
-      : lineColor
+  const colorLookup = (value: number, index: number) =>
+    Number.isFinite(value) ? getMasteryLevelColorByValue(value, masterySchema) : lineColor
 </script>
 
 <BarChart

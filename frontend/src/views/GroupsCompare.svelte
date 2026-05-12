@@ -19,7 +19,7 @@
     groups.length > 0 ? groups.every(group => group.type === groups[0].type) : true
   )
   let groupType = $derived(areAllGroupsOfSameType ? groups[0].type : null)
-  let observationsByGroupId = $derived<Record<string, ObservationType[]>>({})
+  let observationsByGroupId = $state<Record<string, ObservationType[]>>({})
   let uniqueSubjectIds = $derived<Set<string>>(new Set())
   let uniqueSubjects = $derived(
     $dataStore.subjects.filter(subject => uniqueSubjectIds.has(subject.id))
@@ -63,10 +63,14 @@
   })
 </script>
 
-<section class="py-3">
+<section>
   <h2>Sammenlign grupper</h2>
   <GroupsCompareSelect />
   <p class="text-muted">Valgt: {groups.map(g => g.displayName).join(', ')}</p>
+  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+  <p>
+    {@html 'Diagrammet viser tre kategorier: Antall mål der elever beveger seg <span class="fw-bold">ned</span>, <span class="fw-bold">er uforandret</span>, eller <span class="fw-bold">opp</span> i mestringstrappa.'}
+  </p>
   {#if isLoading}
     <div class="mt-3">Laster...</div>
   {:else if groups.length === 0}
@@ -123,7 +127,7 @@
   .groups-grid :global(.item) {
     padding: 0.5rem;
     border-bottom: 1px solid var(--bs-border-color);
-    min-height: 4rem;
+    min-height: 4.5rem;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { ca } from 'date-fns/locale'
   import type { Mastery, MasterySchemaWithConfig } from '../types/models'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
 
