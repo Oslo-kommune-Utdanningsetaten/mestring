@@ -20,7 +20,7 @@
     yLabelsAt?: number
     xAxis?: number
     yAxis?: number
-    colorLookup?: (value: number) => string
+    colorLookup?: (value: number, index: number) => string
     options?: {
       isValueOnHoverEnabled?: boolean
       isGlowOnHoverEnabled?: boolean
@@ -39,7 +39,7 @@
     yLabelsAt,
     xAxis = 0,
     yAxis = 0,
-    colorLookup = yValue => 'rgb(100, 100, 100)',
+    colorLookup = (yValue, index) => 'rgb(100, 100, 100)',
     options = { isValueOnHoverEnabled: false, isGlowOnHoverEnabled: false },
   }: Props = $props()
 
@@ -66,7 +66,7 @@
         const barHeight = yChunkHeight * value
         const x = index * baseWidth + gap / 2 + leftPadding
         const y = height - barHeight + topPadding
-        const color = colorLookup(value)
+        const color = colorLookup(value, index)
 
         return {
           x,

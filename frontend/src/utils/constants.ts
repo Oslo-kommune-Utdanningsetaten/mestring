@@ -17,6 +17,11 @@ export const TASK_STATES: Record<string, string> = {
   failed: 'danger',
 }
 
+// Trend colors
+export const increasingColor = 'var(--bs-success)'
+export const flatColor = 'var(--bs-warning)'
+export const decreasingColor = 'var(--bs-danger)'
+
 export const PUBLIC_PATHS = ['', 'about']
 export const STUDENT_PATHS = PUBLIC_PATHS.concat(['groups', 'profile', 'statuses'])
 export const TEACHER_PATHS = PUBLIC_PATHS.concat(['groups', 'profile', 'statuses'])

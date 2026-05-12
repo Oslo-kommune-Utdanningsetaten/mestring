@@ -185,6 +185,7 @@ const calculateLinearRegressionTrend = (values: number[]): number => {
 }
 
 // The simplest possible trend calculation, just comparing first and last value
+// Not currently used
 const calculateTrend = (values: number[]): number => {
   const n = values.length
   if (n < 2) return 0
@@ -197,6 +198,8 @@ export const inferMastery = (observations: ObservationType[]): Mastery | null =>
   if (observations.length === 0) {
     return null
   }
+  // ensure observations are sorted by createdAt ascending
+  observations.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
   const lastValue = observations[observations.length - 1]?.masteryValue
   const masteryValues = observations.map(obs => obs.masteryValue).filter(isNumber) as number[]
   const trend = calculateLinearRegressionTrend(masteryValues)

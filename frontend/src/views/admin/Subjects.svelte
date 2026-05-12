@@ -8,7 +8,6 @@
   import ButtonIcon from '../../components/ButtonIcon.svelte'
   import SubjectEdit from '../../components/SubjectEdit.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
-  import Link from '../../components/Link.svelte'
   import GroupTag from '../../components/GroupTag.svelte'
   import { dataStore } from '../../stores/data'
 
@@ -17,8 +16,6 @@
   let subjectWip = $state<SubjectType | null>(null)
   let isSubjectEditorOpen = $state(false)
   let schools = $state<SchoolType[]>([])
-  let isLoadingSubjects = $state<boolean>(false)
-  let isLoadingSchools = $state<boolean>(false)
   let subjectFetchSelection = $state<string>('only-school-owned')
   let groupsBySubjectId = $state<Record<string, GroupType[]>>({})
   let nameFilter = $state<string>('')
@@ -57,15 +54,12 @@
   })
 
   const fetchSchools = async () => {
-    isLoadingSchools = true
     try {
       const result = await schoolsList({})
       schools = result.data || []
     } catch (error) {
       console.error('Error fetching schools:', error)
       schools = []
-    } finally {
-      isLoadingSchools = false
     }
   }
 
@@ -87,7 +81,6 @@
   const fetchSubjects = async () => {
     if (!selectedSchool) return
     try {
-      isLoadingSubjects = true
       const queryOption = { ...subjectFetchOption, school: selectedSchool.id }
       const result = await subjectsList({ query: queryOption })
       subjects = (result.data || []).sort((a, b) =>
@@ -98,8 +91,6 @@
     } catch (error) {
       console.error('Error fetching groups:', error)
       subjects = []
-    } finally {
-      isLoadingSubjects = false
     }
   }
 

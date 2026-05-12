@@ -1,4 +1,4 @@
-import { writable, get } from 'svelte/store'
+import { writable } from 'svelte/store'
 
 type alertTypeType = 'success' | 'info' | 'warning' | 'danger' // not 100% happy with alertTypeTypeType, but hey :/
 
