@@ -154,10 +154,4 @@
   input {
     height: 47px;
   }
-
-  .mastery-schema-edit :global(.cm-editor),
-  .mastery-schema-edit :global(.cm-editor .cm-content),
-  .mastery-schema-edit :global(.cm-editor .cm-gutters) {
-    font-family: monospace;
-  }
 </style>
