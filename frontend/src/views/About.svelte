@@ -6,8 +6,7 @@
   import { hasUserAccessToPath } from '../stores/access'
 
   let metadata = $state<Record<string, any>>({})
-  const currentSchool = $derived($dataStore.currentSchool)
-  const currentUser = $derived($dataStore.currentUser)
+  const { currentSchool, currentUser } = $derived($dataStore)
 
   const fetchServiceMetadata = async () => {
     try {
@@ -34,12 +33,14 @@
 {#snippet rolesCount(role: string, teacherType?: string)}
   {@const linkTo = `/users?role=${role}${teacherType ? `&teacherType=${teacherType}` : ''}`}
   {@const count = getRoleCount(role, teacherType)}
+  {@const schoolName =
+    currentSchool && role !== USER_ROLES.SUPERADMIN ? ` ved ${currentSchool.displayName}` : ''}
   {#if currentUser && $hasUserAccessToPath('/users')}
     <Link to={linkTo}>
-      {count + ` ${count == 1 ? 'person' : 'personer'} har denne rollen`}.
+      {count + ` ${count == 1 ? 'person' : 'personer'} har denne rollen${schoolName}`}.
     </Link>
   {:else if currentUser}
-    {count + ` ${count == 1 ? 'person' : 'personer'} har denne rollen`}.
+    {count + ` ${count == 1 ? 'person' : 'personer'} har denne rollen${schoolName}`}.
   {/if}
 {/snippet}
 
@@ -96,12 +97,16 @@
     </li>
     <li>
       <span class="fw-bold">Skoleinspektør</span>
-      kan se mål og observasjoner for alle elever ved sin skole.
+      kan se mål og observasjoner for alle elever ved {currentSchool
+        ? currentSchool.displayName
+        : 'sin skole'}.
       {@render rolesCount(USER_ROLES.INSPECTOR)}
     </li>
     <li>
       <span class="fw-bold">Skoleadmin</span>
-      kan se og redigere mål og observasjoner for alle elever ved sin skole.
+      kan se og redigere mål og observasjoner for alle elever ved {currentSchool
+        ? currentSchool.displayName
+        : 'sin skole'}.
       {@render rolesCount(USER_ROLES.ADMIN)}
     </li>
     <li>
