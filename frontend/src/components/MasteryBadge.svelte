@@ -4,22 +4,23 @@
   import { getMasteryLevelColorByValue, getMasteryTitleByValue } from '../utils/masteryHelpers'
   import { getContrastFriendlyTextColor } from '../utils/functions'
 
-  const { masteryValue, masterySchemaId = null } = $props<{
+  // Supports both passing the whole schema or just the schema ID, because we might want to render a badge based on a schema which is not associated with currentSchool
+  const {
+    masteryValue,
+    masterySchemaId = null,
+    masterySchema = null,
+  } = $props<{
     masteryValue: number | null | undefined
     masterySchemaId?: string | null | undefined
+    masterySchema?: MasterySchemaWithConfig | null
   }>()
 
   const resolvedSchema = $derived(
-    $dataStore.masterySchemas.find(s => s.id === masterySchemaId) as
-      | MasterySchemaWithConfig
-      | undefined
+    masterySchema ||
+      ($dataStore.masterySchemas.find(s => s.id === masterySchemaId) as
+        | MasterySchemaWithConfig
+        | undefined)
   )
-
-  $effect(() => {
-    if (!masterySchemaId) {
-      console.warn('MasteryBadge: masterySchemaId is null or undefined')
-    }
-  })
 
   const title = $derived(
     resolvedSchema && masteryValue != null
@@ -28,7 +29,7 @@
   )
 
   const boxColor = $derived(
-    resolvedSchema && masteryValue != null
+    resolvedSchema && masteryValue !== null
       ? getMasteryLevelColorByValue(masteryValue, resolvedSchema)
       : 'rgba(100, 100, 100)'
   )
@@ -44,9 +45,15 @@
       ''
     )
   })
+
+  $effect(() => {
+    if (!resolvedSchema) {
+      console.warn('MasteryBadge: masterySchemaId is null or undefined')
+    }
+  })
 </script>
 
-{#if masterySchemaId}
+{#if resolvedSchema}
   <span class="mastery-badge" style="background-color: {boxColor}; color: {textColor}">
     <span class="sizer">{longestTitle}</span>
     <span class="label">{title}</span>

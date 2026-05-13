@@ -154,6 +154,7 @@
 
 <section class="pt-3">
   <h2 class="mb-4">Mastery Schemas</h2>
+
   <!-- Filter groups -->
   {#if isLoadingSchools}
     <div class="m-4">
@@ -196,23 +197,23 @@
     </ButtonMini>
 
     {#if masterySchemas.length > 0 && !areSchemasConsistent}
-      <div class="alert alert-warning mt-4">
+      <div class="alert alert-warning mt-3">
         Mestringsskjemaene for denne skolen har ulik range. Dette kan føre til inkonsistente
         visninger og problemer med datakvalitet. Vurder å justere range i skjemaene slik at de er
         like.
       </div>
     {/if}
     {#if masterySchemas.length > 0 && !masterySchemas.some(schema => schema.isEnabled)}
-      <div class="alert alert-warning mt-4">
+      <div class="alert alert-warning mt-3">
         Ingen av mestringsskjemaene for denne skolen er satt til enabled.
       </div>
     {/if}
     {#if masterySchemas.length > 0 && !masterySchemas.some(schema => schema.isDefault)}
-      <div class="alert alert-warning mt-4">
+      <div class="alert alert-warning mt-3">
         Ingen av mestringsskjemaene for denne skolen er satt til default.
       </div>
     {/if}
-    <p>Input variants: {VALUE_INPUT_VARIANTS.join(', ')}</p>
+    <p class="my-3">Input variants: {VALUE_INPUT_VARIANTS.join(', ')}</p>
 
     <div class="pkt-input-check mt-3">
       <div class="pkt-input-check__input">
@@ -272,10 +273,7 @@
               <div class="mb-4 d-flex gap-2">
                 {#each masterySchema?.config?.levels || [] as level}
                   <div class="d-flex flex-column align-items-center">
-                    <MasteryBadge
-                      masteryValue={level.minValue}
-                      masterySchemaId={masterySchema.id}
-                    />
+                    <MasteryBadge masteryValue={level.minValue} {masterySchema} />
                     <span class="small text-muted py-1 bg-light w-100 text-center">
                       {level.minValue}&nbsp;➡&nbsp;{level.maxValue}
                     </span>
