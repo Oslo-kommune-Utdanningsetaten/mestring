@@ -69,8 +69,10 @@
     'user_group',
     'user_school',
     'group',
-  ]
-  let selectedDeleteTypes = $state<Set<string>>(new Set())
+  ] as const
+
+  type DeletableDataType = (typeof deletableDataTypes)[number]
+  let selectedDeleteTypes = $state<Set<DeletableDataType>>(new Set())
   let isDeletingData = $state(false)
   let importStatus = $state<SchoolImportStatus | undefined>(undefined)
 
