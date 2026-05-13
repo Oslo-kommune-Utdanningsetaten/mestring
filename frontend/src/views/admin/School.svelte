@@ -776,7 +776,7 @@
       <section class="border border-3 border-danger p-3 my-4">
         <h3 class="mb-3">Data deletion ☢️</h3>
         <p class="text-muted mb-3">
-          Velg hvilke datatyper som skal slettes permanent for denne skolen.
+          Velg hvilke datatyper som skal slettes permanent for {school.displayName}.
         </p>
         <div class="d-flex flex-wrap gap-3 mb-3">
           {#each deletableDataTypes as dataType}

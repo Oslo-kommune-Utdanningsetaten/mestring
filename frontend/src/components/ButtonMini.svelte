@@ -101,7 +101,14 @@
 {/if}
 
 {#if delayActionFor && hasBeenClicked}
-  <DelayedAction onAction={onClick} onAbort={handleAbort} delay={delayActionFor} />
+  <DelayedAction
+    onAction={() => {
+      hasBeenClicked = false
+      onClick()
+    }}
+    onAbort={handleAbort}
+    delay={delayActionFor}
+  />
 {/if}
 
 <style>
