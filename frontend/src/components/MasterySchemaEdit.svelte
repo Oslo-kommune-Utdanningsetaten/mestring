@@ -2,10 +2,10 @@
   import ButtonMini from './ButtonMini.svelte'
   import MasteryValueInput from './MasteryValueInput.svelte'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
-  import { JSONEditor } from 'svelte-jsoneditor'
+  import { JSONEditor, type Content } from 'svelte-jsoneditor'
   import { masterySchemasUpdate, masterySchemasCreate } from '../generated/sdk.gen'
   import type { MasterySchemaType, MasterySchemaCreateType } from '../generated/types.gen'
-  import type { MasterySchemaConfig } from '../types/models'
+  import type { MasterySchemaConfig, MasterySchemaWithConfig } from '../types/models'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
 
   const defaultConfig = {
@@ -43,23 +43,22 @@
     masterySchema: Partial<MasterySchemaType> | null
     onDone: () => void
   }>()
-  let localMasterySchema = $state<Partial<MasterySchemaType>>({ ...masterySchema })
-  let localJson = $state<Partial<MasterySchemaConfig>>(localMasterySchema?.config || defaultConfig)
-  let calculations = $derived(useMasteryCalculations(masterySchema))
-  let placeholderMasteryValue = $derived(calculations.defaultValue)
-
-  const handleJsonChange = (updatedContent: any) => {
-    if (updatedContent.json) {
-      localJson = updatedContent.json
-      localMasterySchema.config = localJson
-    } else if (updatedContent.text) {
-      localJson = JSON.parse(updatedContent.text)
-      localMasterySchema.config = localJson
-    }
-  }
+  let localMasterySchema = $state<Partial<MasterySchemaWithConfig>>({ ...masterySchema })
+  let editorContent = $state<Content>({ json: localMasterySchema?.config || defaultConfig })
+  let calculations = $derived(useMasteryCalculations(localMasterySchema))
+  let placeholderMasteryValue = $state(calculations.defaultValue)
 
   const handleSave = async () => {
-    localMasterySchema.config = localJson
+    try {
+      if ('json' in editorContent) {
+        localMasterySchema.config = editorContent.json as MasterySchemaConfig
+      } else if ('text' in editorContent) {
+        localMasterySchema.config = JSON.parse(editorContent.text) as MasterySchemaConfig
+      }
+    } catch (error) {
+      console.error('Invalid JSON in editor:', error)
+      return
+    }
     if (localMasterySchema.description === '') {
       localMasterySchema.description = null
     }
@@ -76,14 +75,9 @@
       }
       onDone()
     } catch (error) {
-      // TODO: Show an error message to the user
       console.error('Error saving MasterySchema:', error)
     }
   }
-
-  $effect(() => {
-    localMasterySchema = { ...masterySchema }
-  })
 </script>
 
 <div class="p-4 mastery-schema-edit">
@@ -119,7 +113,7 @@
   </div>
 
   <div style="height: 40vh;">
-    <JSONEditor content={{ json: localJson }} onChange={handleJsonChange} />
+    <JSONEditor bind:content={editorContent} />
   </div>
 
   <div class="d-flex gap-2 justify-content-start">
