@@ -265,6 +265,7 @@
                   variant: 'icon-left',
                   classes: 'my-2',
                   onClick: () => handleDeleteStatusCategory(statusCategory.id),
+                  delayActionFor: 4,
                 }}
               >
                 Slett

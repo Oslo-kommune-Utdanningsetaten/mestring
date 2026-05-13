@@ -321,6 +321,7 @@
                   variant: 'icon-left',
                   classes: 'my-2',
                   onClick: () => handleDeleteMasterySchema(masterySchema.id),
+                  delayActionFor: 4,
                 }}
               >
                 Slett

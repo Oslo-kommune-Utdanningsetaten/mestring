@@ -739,3 +739,152 @@ def estimate_cleanup_for_school(request, org_number):
             {"status": "error", "message": str(e)},
             status=400,
         )
+
+
+VALID_DELETE_TYPES = [
+    'observation', 'status', 'goal', 'status_category', 'mastery_schema',
+    'subject', 'user_group', 'user_school', 'group',
+]
+
+
+@extend_schema(
+    operation_id="delete_school_data",
+    summary="Delete school data by type",
+    description="Delete data associated with a school. Accepts a list of data types to delete. "
+                "Deletion is performed in the correct order to avoid DB constraint errors.",
+    request={
+        'application/json': {
+            'type': 'object',
+            'properties': {
+                'types': {
+                    'type': 'array',
+                    'items': {'type': 'string', 'enum': VALID_DELETE_TYPES},
+                    'description': 'List of data types to delete',
+                },
+            },
+            'required': ['types'],
+        }
+    },
+)
+@api_view(["POST"])
+@permission_classes([ImportAccessPolicy])
+def delete_school_data(request, school_id):
+    """
+    Delete data associated with a school, by type.
+    Deletion order is enforced to avoid FK constraint violations.
+    """
+    school = models.School.objects.filter(id=school_id).first()
+    if not school:
+        return Response({"error": "school-not-found", "message": "School not found"}, status=404)
+
+    requested_types = request.data.get('types', [])
+    if not requested_types or not isinstance(requested_types, list):
+        return Response(
+            {"error": "invalid-params", "message": "'types' must be a non-empty list"},
+            status=400)
+
+    invalid_types = [t for t in requested_types if t not in VALID_DELETE_TYPES]
+    if invalid_types:
+        return Response(
+            {"error": "invalid-types", "message": f"Invalid types: {invalid_types}"},
+            status=400)
+
+    # Deletion order: most dependent first
+    deletion_order = [
+        'observation', 'status', 'goal', 'status_category', 'mastery_schema',
+        'subject', 'user_group', 'user_school', 'group',
+    ]
+
+    result = {}
+    orphaned_users_deleted = 0
+    types_to_delete = [t for t in deletion_order if t in requested_types]
+
+    for data_type in types_to_delete:
+        count, orphaned = _delete_school_data_type(school, data_type)
+        result[data_type] = count
+        orphaned_users_deleted += orphaned
+
+    if orphaned_users_deleted:
+        result['user'] = orphaned_users_deleted
+
+    return Response({"status": "success", "deleted": result}, status=200)
+
+
+def _delete_school_data_type(school, data_type):
+    """Delete all records of the given type associated with the school.
+    Returns (deleted_count, orphaned_users_deleted).
+    """
+    if data_type == 'observation':
+        qs = models.Observation.objects.filter(goal__school=school)
+        count = qs.count()
+        qs.delete()
+        return count, 0
+
+    elif data_type == 'status':
+        qs = models.Status.objects.filter(school=school)
+        count = qs.count()
+        qs.delete()
+        return count, 0
+
+    elif data_type == 'goal':
+        qs = models.Goal.objects.filter(school=school)
+        count = qs.count()
+        qs.delete()
+        return count, 0
+
+    elif data_type == 'status_category':
+        qs = models.StatusCategory.objects.filter(school=school)
+        count = qs.count()
+        qs.delete()
+        return count, 0
+
+    elif data_type == 'mastery_schema':
+        qs = models.MasterySchema.objects.filter(school=school)
+        count = qs.count()
+        qs.delete()
+        return count, 0
+
+    elif data_type == 'subject':
+        qs = models.Subject.objects.filter(owned_by_school=school)
+        count = qs.count()
+        qs.delete()
+        return count, 0
+
+    elif data_type == 'user_group':
+        qs = models.UserGroup.objects.filter(group__school=school)
+        user_ids = list(qs.values_list('user_id', flat=True).distinct())
+        count = qs.count()
+        qs.delete()
+        orphaned = _delete_orphaned_users(user_ids)
+        return count, orphaned
+
+    elif data_type == 'user_school':
+        qs = models.UserSchool.objects.filter(school=school)
+        user_ids = list(qs.values_list('user_id', flat=True).distinct())
+        count = qs.count()
+        qs.delete()
+        orphaned = _delete_orphaned_users(user_ids)
+        return count, orphaned
+
+    elif data_type == 'group':
+        qs = models.Group.objects.filter(school=school)
+        count = qs.count()
+        qs.delete()
+        return count, 0
+
+    return 0, 0
+
+
+def _delete_orphaned_users(user_ids):
+    """Delete users who have no remaining user_group or user_school references.
+    Returns the number of users deleted.
+    """
+    deleted = 0
+    for user_id in user_ids:
+        has_user_groups = models.UserGroup.objects.filter(user_id=user_id).exists()
+        has_user_schools = models.UserSchool.objects.filter(user_id=user_id).exists()
+        is_superadmin = models.User.objects.filter(id=user_id, is_superadmin=True).exists()
+        if not has_user_groups and not has_user_schools and not is_superadmin:
+            models.User.objects.filter(id=user_id).delete()
+            deleted += 1
+    return deleted

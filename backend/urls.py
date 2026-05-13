@@ -68,6 +68,11 @@ urlpatterns = [
         custom.estimate_cleanup_for_school,
         name='estimate_cleanup_for_school'
     ),
+    path(
+        'api/delete/school_data/<str:school_id>/',
+        custom.delete_school_data,
+        name='delete_school_data'
+    ),
 ]
 
 if SERVER_DEPLOYMENT in ['localhost']:

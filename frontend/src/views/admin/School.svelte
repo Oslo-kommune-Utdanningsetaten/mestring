@@ -12,6 +12,7 @@
     estimateUsersImport,
     estimateMembershipsImport,
     estimateCleanup,
+    deleteSchoolData,
     schoolsRetrieve,
   } from '../../generated/sdk.gen'
   import type { SchoolImportStatus } from '../../types/models'
@@ -58,6 +59,19 @@
     { value: SUBJECTS_ALLOWED_CUSTOM, label: 'Kun egendefinerte fag' },
   ] as const
 
+  const deletableDataTypes = [
+    'observation',
+    'status',
+    'goal',
+    'status_category',
+    'mastery_schema',
+    'subject',
+    'user_group',
+    'user_school',
+    'group',
+  ]
+  let selectedDeleteTypes = $state<Set<string>>(new Set())
+  let isDeletingData = $state(false)
   let importStatus = $state<SchoolImportStatus | undefined>(undefined)
 
   const loadImportStatusForSchool = async () => {
@@ -374,6 +388,37 @@
     }
   }
 
+  const handleDeleteSchoolData = async () => {
+    if (!school || selectedDeleteTypes.size === 0) return
+    const types = [...selectedDeleteTypes]
+    const confirmed = confirm(
+      `Er du helt sikker på at du vil slette følgende data for ${school.displayName}?\n\n${types.join(', ')}\n\nDette kan ikke angres.`
+    )
+    if (!confirmed) return
+
+    isDeletingData = true
+    try {
+      const result = await deleteSchoolData({
+        path: { schoolId: school.id },
+        body: { types },
+      })
+      if (result.response.status === 200 && result.data) {
+        const deleted = (result.data as any).deleted
+        const summary = Object.entries(deleted)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(', ')
+        addAlert({ type: 'success', message: `Slettet: ${summary}` })
+        selectedDeleteTypes = new Set()
+      } else {
+        addAlert({ type: 'danger', message: 'Feil ved sletting av data' })
+      }
+    } catch (error: any) {
+      addAlert({ type: 'danger', message: `Nettverksfeil: ${error?.message || error}` })
+    } finally {
+      isDeletingData = false
+    }
+  }
+
   $effect(() => {
     fetchSchool()
   })
@@ -404,7 +449,7 @@
       </div>
 
       <!-- Subjects -->
-      <section class="border border-3 p-3 my-3">
+      <section class="border border-3 p-3 my-4">
         <h3 class="mb-3">Fag</h3>
         <p class="mb-3">Hvilke fag er tilgjengelige på skolen?</p>
         <fieldset class="d-flex flex-wrap gap-4">
@@ -422,7 +467,7 @@
       </section>
 
       <!-- Groups -->
-      <section class="border border-3 p-3 my-3">
+      <section class="border border-3 p-3 my-4">
         <h3 class="mb-3">Grupper</h3>
         <pkt-checkbox
           id={'group-goal-' + school.id}
@@ -447,7 +492,7 @@
       </section>
 
       <!-- Status -->
-      <section class="border border-3 p-3 my-3">
+      <section class="border border-3 p-3 my-4">
         <h3 class="mb-3">Status</h3>
         <pkt-checkbox
           id={'status-' + school.id}
@@ -461,7 +506,7 @@
       </section>
 
       <!-- Teacher navigation -->
-      <section class="border border-3 p-3 my-3">
+      <section class="border border-3 p-3 my-4">
         <h3 class="mb-3">Navigasjon for lærere</h3>
         <pkt-checkbox
           id={'student-list-' + school.id}
@@ -476,7 +521,7 @@
 
       <!-- Student access -->
       <section
-        class="border border-3 p-3 my-3"
+        class="border border-3 p-3 my-4"
         title="Skrudd av i påvente av diskusjon rundt elev-tilgang"
       >
         <h3 class="mb-3">Tilgang for elever</h3>
@@ -493,8 +538,8 @@
       </section>
 
       <!-- Data import stuff -->
-      <section class="border border-3 p-3 my-3">
-        <h3 class="mb-3">Data maintenance</h3>
+      <section class="border border-3 border-warning p-3 my-4">
+        <h3 class="mb-3">Data maintenance ⚠️</h3>
 
         <div class="mb-3">
           <!-- Request fetch job, feide to file -->
@@ -725,6 +770,44 @@
             </tbody>
           </table>
         {/if}
+      </section>
+
+      <!-- Data deletion -->
+      <section class="border border-3 border-danger p-3 my-4">
+        <h3 class="mb-3">Data deletion ☢️</h3>
+        <p class="text-muted mb-3">
+          Velg hvilke datatyper som skal slettes permanent for denne skolen.
+        </p>
+        <div class="d-flex flex-wrap gap-3 mb-3">
+          {#each deletableDataTypes as dataType}
+            <pkt-checkbox
+              id={`delete-type-${dataType}-${school.id}`}
+              label={dataType}
+              labelPosition="right"
+              checked={selectedDeleteTypes.has(dataType)}
+              onchange={(e: Event) => {
+                const checked = (e.target as HTMLInputElement).checked
+                const next = new Set(selectedDeleteTypes)
+                if (checked) next.add(dataType)
+                else next.delete(dataType)
+                selectedDeleteTypes = next
+              }}
+            ></pkt-checkbox>
+          {/each}
+        </div>
+        <ButtonMini
+          options={{
+            title: 'Slett valgte datatyper',
+            iconName: 'trash',
+            skin: 'danger',
+            variant: 'icon-left',
+            disabled: selectedDeleteTypes.size === 0 || isDeletingData,
+            onClick: () => handleDeleteSchoolData(),
+            delayActionFor: 4,
+          }}
+        >
+          {isDeletingData ? 'Sletter...' : `Slett (${selectedDeleteTypes.size} valgt)`}
+        </ButtonMini>
       </section>
     </div>
   {:else}

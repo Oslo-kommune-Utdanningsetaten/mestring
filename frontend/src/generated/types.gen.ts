@@ -875,6 +875,27 @@ export type DataMaintenanceTasksUpdateResponses = {
 
 export type DataMaintenanceTasksUpdateResponse = DataMaintenanceTasksUpdateResponses[keyof DataMaintenanceTasksUpdateResponses];
 
+export type DeleteSchoolDataData = {
+    body?: {
+        /**
+         * List of data types to delete
+         */
+        types: Array<'observation' | 'status' | 'goal' | 'status_category' | 'mastery_schema' | 'subject' | 'user_group' | 'user_school' | 'group'>;
+    };
+    path: {
+        schoolId: string;
+    };
+    query?: never;
+    url: '/api/delete/school_data/{schoolId}/';
+};
+
+export type DeleteSchoolDataResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
 export type EstimateCleanupData = {
     body?: never;
     path: {
