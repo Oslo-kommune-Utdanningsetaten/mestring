@@ -330,7 +330,6 @@
       Avbryt
     </ButtonMini>
   </div>
-  <pre>{JSON.stringify({ updatedRoleIdsByGroupId, updatedUserSchoolRoleIds }, null, 2)}</pre>
 </div>
 
 <style>
