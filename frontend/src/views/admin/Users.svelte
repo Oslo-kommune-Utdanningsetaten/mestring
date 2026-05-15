@@ -15,15 +15,18 @@
   let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingUsers = $state<boolean>(false)
-  let selectedRoles = $state<string[]>([
-    USER_ROLES.TEACHER,
-    USER_ROLES.ADMIN,
-    USER_ROLES.INSPECTOR,
-    USER_ROLES.STAFF,
-  ])
-  let deletedSelection = $state<'include' | 'only' | 'exclude'>('include')
-  let nameFilter = $state<string>(router.getQueryParam('name') || '')
+  const rolesFromUrl = router.getQueryParam('roles')
 
+  // Look up state from URL
+  let selectedRoles = $state<string[]>(
+    rolesFromUrl
+      ? rolesFromUrl.split(',').filter(Boolean)
+      : [USER_ROLES.TEACHER, USER_ROLES.ADMIN, USER_ROLES.INSPECTOR, USER_ROLES.STAFF]
+  )
+  let deletedSelection = $state<'include' | 'only' | 'exclude'>(
+    (router.getQueryParam('deleted') as 'include' | 'only' | 'exclude') || 'include'
+  )
+  let nameFilter = $state<string>(router.getQueryParam('name') || '')
   let selectedSchool = $derived.by(() => {
     const schoolIdFromUrl = router.getQueryParam('school')
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
@@ -233,7 +236,14 @@
   })
 
   $effect(() => {
-    const url = urlStringFrom({ name: nameFilter || null }, { path: '/admin/users', mode: 'merge' })
+    const url = urlStringFrom(
+      {
+        name: nameFilter || null,
+        roles: selectedRoles.join(',') || null,
+        deleted: deletedSelection,
+      },
+      { path: '/admin/users', mode: 'merge' }
+    )
     router.navigate(url)
   })
 </script>
