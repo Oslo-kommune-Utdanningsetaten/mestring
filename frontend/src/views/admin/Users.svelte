@@ -7,6 +7,9 @@
   import { dataStore } from '../../stores/data'
   import { USER_ROLES } from '../../utils/constants'
   import User from '../../components/User.svelte'
+  import ButtonMini from '../../components/ButtonMini.svelte'
+  import Offcanvas from '../../components/Offcanvas.svelte'
+  import UserEdit from '../../components/UserEdit.svelte'
 
   const router = useTinyRouter()
   let schools = $state<SchoolType[]>([])
@@ -201,6 +204,24 @@
     selectedRoles = newRoles
   }
 
+  let userWip = $state<Partial<UserType> | null>(null)
+  let isUserEditorOpen = $derived(userWip !== null)
+
+  const handleNewUser = () => {
+    userWip = {}
+  }
+
+  const handleEditUser = (userId: string) => {
+    userWip = { ...decoratedUsersById[userId] }
+  }
+
+  const handleUserEditDone = async () => {
+    const userIdToRefresh = userWip?.id
+    userWip = null
+    await fetchUsers()
+    if (userIdToRefresh) await fetchUserAffiliations(userIdToRefresh)
+  }
+
   $effect(() => {
     fetchSchools()
   })
@@ -213,7 +234,6 @@
 </script>
 
 <section class="pt-3">
-  <h2 class="py-3">{headerText}</h2>
   <!-- Filter groups -->
   {#if isLoadingSchools}
     <div class="m-4">
@@ -246,6 +266,19 @@
           bind:value={nameFilter}
         />
       </div>
+
+      <ButtonMini
+        options={{
+          title: 'Ny bruker',
+          iconName: 'plus-sign',
+          skin: 'primary',
+          variant: 'label-only',
+          classes: '',
+          onClick: () => handleNewUser(),
+        }}
+      >
+        Ny bruker
+      </ButtonMini>
     </div>
     <div class="d-flex flex-wrap gap-3 mt-3">
       <!-- Radio buttons for role status -->
@@ -328,15 +361,16 @@
             Newest mb.ship{getSortIndicator('newestMembership')}
           </button>
           <span>Groups</span>
-          <span>School access</span>
+          <span>School</span>
+          <span>Actions</span>
         </div>
         <!-- Data rows -->
         {#each sortedUsers as user (user.id)}
           <User
             {user}
             decoratedUser={decoratedUsersById[user.id]}
-            school={selectedSchool}
-            onUserUpdate={fetchUserAffiliations}
+            onDeleteUser={() => fetchUsers()}
+            onEditUser={() => handleEditUser(user.id)}
           />
         {/each}
       </div>
@@ -345,6 +379,20 @@
     Velg skole for å se brukere
   {/if}
 </section>
+
+<!-- Offcanvas for creating/editing a user -->
+<Offcanvas
+  bind:isOpen={isUserEditorOpen}
+  width="60vw"
+  ariaLabel={userWip?.id ? 'Rediger bruker' : 'Ny bruker'}
+  onClosed={() => {
+    userWip = null
+  }}
+>
+  {#if userWip !== null && selectedSchool}
+    <UserEdit user={userWip} school={selectedSchool} onDone={handleUserEditDone} />
+  {/if}
+</Offcanvas>
 
 <style>
   .filters-container {
@@ -380,7 +428,6 @@
     font-weight: 800;
     padding: 0.1rem 0.3rem 0.1rem 0.3rem;
     text-align: left;
-    transform: rotate(-60deg);
     font-size: 0.8rem;
     max-width: 6rem;
     overflow-wrap: break-word;

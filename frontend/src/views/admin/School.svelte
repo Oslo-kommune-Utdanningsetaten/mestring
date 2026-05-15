@@ -800,7 +800,7 @@
         <ButtonMini
           options={{
             title: 'Slett valgte datatyper',
-            iconName: 'trash',
+            iconName: 'trash-can',
             skin: 'danger',
             variant: 'icon-left',
             disabled: selectedDeleteTypes.size === 0 || isDeletingData,

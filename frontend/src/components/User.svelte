@@ -1,43 +1,22 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
-  import type {
-    NestedUserGroupType,
-    NestedUserSchoolType,
-    SchoolType,
-    UserType,
-  } from '../generated/types.gen'
+  import type { NestedUserGroupType, NestedUserSchoolType, UserType } from '../generated/types.gen'
   import type { UserDecorated } from '../types/models.d.ts'
-  import { userSchoolsDestroy, userSchoolsCreate } from '../generated/sdk.gen'
-  import { USER_ROLES, NONE_FIELD_VALUE } from '../utils/constants'
-  import { dataStore } from '../stores/data'
+  import { usersDestroy } from '../generated/sdk.gen'
+  import { addAlert } from '../stores/alerts'
   import GroupTag from './GroupTag.svelte'
   import { formatDate } from '../utils/functions'
   import SinceSchoolStart from './SinceSchoolStart.svelte'
   import Link from './Link.svelte'
+  import ButtonMini from './ButtonMini.svelte'
 
-  const { user, decoratedUser, school, onUserUpdate } = $props<{
+  const { user, decoratedUser, onDeleteUser, onEditUser } = $props<{
     user: UserType
     decoratedUser: UserDecorated
-    school: SchoolType
-    onUserUpdate: (userId: string) => Promise<void>
+    onDeleteUser: () => Promise<void>
+    onEditUser?: () => void
   }>()
-
-  let isSchoolInspector = $derived(
-    !!decoratedUser.userSchools.find(
-      (us: NestedUserSchoolType) =>
-        us.role.name === USER_ROLES.INSPECTOR && us.school.id === school.id
-    )
-  )
-  let isSchoolAdmin = $derived(
-    !!decoratedUser.userSchools.find(
-      (us: NestedUserSchoolType) => us.role.name === USER_ROLES.ADMIN && us.school.id === school.id
-    )
-  )
-  const relevantSchoolRoles = [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN]
-  let selectedSchoolRole = $derived(
-    isSchoolAdmin ? USER_ROLES.ADMIN : isSchoolInspector ? USER_ROLES.INSPECTOR : NONE_FIELD_VALUE
-  )
 
   let newestMembership: NestedUserGroupType | null = $derived(
     [...decoratedUser.userGroups].sort(
@@ -45,44 +24,12 @@
     )[0]
   )
 
-  const handleRoleChange = async (roleName: string) => {
-    if (!decoratedUser.id || !school.id || !roleName) {
-      console.error('Missing information', decoratedUser, school, roleName)
-      return
-    }
-
-    const confirmed = confirm(
-      `Er du sikker på at du vil endre ${decoratedUser.name} sin rolle til ${roleName}?`
-    )
-
-    if (!confirmed) return
-
-    try {
-      // Remove all existing roles
-      await Promise.all(
-        decoratedUser.userSchools
-          .filter((userSchool: NestedUserSchoolType) =>
-            relevantSchoolRoles.includes(userSchool.role.name)
-          )
-          .map(async (userSchool: NestedUserSchoolType) => {
-            return await userSchoolsDestroy({
-              path: {
-                id: userSchool.id,
-              },
-            })
-          })
-      )
-      // Add new role
-      const roleToAssign = $dataStore.roles?.find(role => role.name === roleName)
-      if (roleToAssign) {
-        await userSchoolsCreate({
-          body: { userId: decoratedUser.id, schoolId: school.id, roleId: roleToAssign.id },
-        })
-      }
-    } catch (error) {
-      console.error('Error while changing role:', error)
-    } finally {
-      onUserUpdate(decoratedUser.id)
+  const handleDeleteUser = async () => {
+    const confirmed = confirm(`Er du sikker på at du vil slette brukeren "${user.name}"?`)
+    if (confirmed) {
+      await usersDestroy({ path: { id: user.id } })
+      addAlert({ type: 'success', message: `Bruker "${user.name}" ble slettet` })
+      onDeleteUser()
     }
   }
 </script>
@@ -112,6 +59,8 @@
       <div class="text-muted small">{formatDate(newestMembership?.createdAt)}</div>
       <SinceSchoolStart dateAsString={newestMembership?.createdAt} />
     </div>
+
+    <!-- User Groups -->
     <div class="small">
       <div class="group-type-heading">Lærer</div>
       <ul class="group-list">
@@ -132,30 +81,37 @@
       </ul>
     </div>
 
+    <!-- User school roles -->
+    <div class="mb-1">
+      <strong>
+        {decoratedUser.userSchools
+          .map((userSchool: NestedUserSchoolType) => userSchool.role.name)
+          .join(', ') || 'Ingen'}
+      </strong>
+    </div>
+
     <div>
-      <div class="mb-1">
-        <strong>
-          {decoratedUser.userSchools
-            .map((userSchool: NestedUserSchoolType) => userSchool.role.name)
-            .join(', ') || 'Ingen'}
-        </strong>
-      </div>
-      <pkt-select
-        name="userSchoolRole"
-        value={selectedSchoolRole}
-        onchange={(e: Event) => {
-          const target = e.target as HTMLSelectElement | null
-          const roleName = target?.value || NONE_FIELD_VALUE
-          handleRoleChange(roleName)
+      <ButtonMini
+        options={{
+          title: 'Rediger bruker',
+          iconName: 'edit',
+          skin: 'tertiary',
+          variant: 'icon-only',
+          size: 'tiny',
+          onClick: () => onEditUser(),
         }}
-      >
-        <option value={NONE_FIELD_VALUE}>none</option>
-        {#each relevantSchoolRoles as option}
-          <option value={option}>
-            {option}
-          </option>
-        {/each}
-      </pkt-select>
+      />
+
+      <ButtonMini
+        options={{
+          title: 'Slett bruker',
+          iconName: 'trash-can',
+          skin: 'tertiary',
+          variant: 'icon-only',
+          size: 'tiny',
+          onClick: () => handleDeleteUser(),
+        }}
+      />
     </div>
   {:else}
     <div class="spinner-border spinner-border-sm text-primary" role="status">
