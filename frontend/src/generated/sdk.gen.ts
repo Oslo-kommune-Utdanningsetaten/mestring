@@ -450,12 +450,12 @@ export const subjectsUpdate = <ThrowOnError extends boolean = false>(options: Op
 
 export const userGroupsList = <ThrowOnError extends boolean = false>(options: Options<UserGroupsListData, ThrowOnError>) => (options.client ?? client).get<UserGroupsListResponses, unknown, ThrowOnError>({ url: '/api/user-groups/', ...options });
 
-export const userGroupsCreate = <ThrowOnError extends boolean = false>(options?: Options<UserGroupsCreateData, ThrowOnError>) => (options?.client ?? client).post<UserGroupsCreateResponses, unknown, ThrowOnError>({
+export const userGroupsCreate = <ThrowOnError extends boolean = false>(options: Options<UserGroupsCreateData, ThrowOnError>) => (options.client ?? client).post<UserGroupsCreateResponses, unknown, ThrowOnError>({
     url: '/api/user-groups/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
-        ...options?.headers
+        ...options.headers
     }
 });
 

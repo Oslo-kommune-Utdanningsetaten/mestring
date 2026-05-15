@@ -316,6 +316,11 @@ class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
     serializer_class = serializers.NestedUserGroupSerializer
     access_policy = UserGroupAccessPolicy
 
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return serializers.UserGroupSerializer
+        return serializers.NestedUserGroupSerializer
+
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
         qs = apply_deleted_filter(self.request.query_params, qs)

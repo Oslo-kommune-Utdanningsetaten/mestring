@@ -22,7 +22,7 @@
     USER_ROLES.STAFF,
   ])
   let deletedSelection = $state<'include' | 'only' | 'exclude'>('include')
-  let nameFilter = $state<string>('')
+  let nameFilter = $state<string>(router.getQueryParam('name') || '')
 
   let selectedSchool = $derived.by(() => {
     const schoolIdFromUrl = router.getQueryParam('school')
@@ -231,6 +231,11 @@
       fetchUsers()
     }
   })
+
+  $effect(() => {
+    const url = urlStringFrom({ name: nameFilter || null }, { path: '/admin/users', mode: 'merge' })
+    router.navigate(url)
+  })
 </script>
 
 <section class="pt-3">
@@ -266,19 +271,6 @@
           bind:value={nameFilter}
         />
       </div>
-
-      <ButtonMini
-        options={{
-          title: 'Ny bruker',
-          iconName: 'plus-sign',
-          skin: 'primary',
-          variant: 'label-only',
-          classes: '',
-          onClick: () => handleNewUser(),
-        }}
-      >
-        Ny bruker
-      </ButtonMini>
     </div>
     <div class="d-flex flex-wrap gap-3 mt-3">
       <!-- Radio buttons for role status -->
@@ -326,9 +318,23 @@
         <span>Henter brukere...</span>
       </div>
     {:else if filteredUsers.length === 0}
-      <div class="m-4">Ingen brukere funnet</div>
+      <div class="my-4">Ingen brukere funnet</div>
     {:else}
-      <div class="my-4">Viser {sortedUsers.length} bruker{sortedUsers.length == 1 ? '' : 'e'}</div>
+      <ButtonMini
+        options={{
+          title: 'Ny bruker',
+          iconName: 'plus-sign',
+          skin: 'primary',
+          variant: 'label-only',
+          classes: '',
+          onClick: () => handleNewUser(),
+        }}
+      >
+        Ny bruker
+      </ButtonMini> Note: Manually added users might change or disappear at next import/cleanerbot run.
+      <div class="mt-4 mb-2 fw-bold">
+        Viser {sortedUsers.length} bruker{sortedUsers.length == 1 ? '' : 'e'}
+      </div>
       <div class="card shadow-sm">
         <!-- Header row -->
         <div class="user-grid-row header fw-bold">

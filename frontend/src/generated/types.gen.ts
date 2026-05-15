@@ -207,19 +207,6 @@ export type PatchedMasterySchemaType = {
     schoolId?: string;
 };
 
-export type PatchedNestedUserGroupType = {
-    readonly id?: string;
-    user?: UserType;
-    group?: GroupType;
-    role?: RoleType;
-    readonly createdAt?: string;
-    readonly updatedAt?: string;
-    readonly maintainedAt?: string | null;
-    deletedAt?: string | null;
-    readonly createdById?: string;
-    readonly updatedById?: string;
-};
-
 export type PatchedObservationType = {
     readonly id?: string;
     readonly createdAt?: string;
@@ -340,6 +327,19 @@ export type PatchedUserType = {
     readonly updatedById?: string;
     readonly groupIds?: Array<string>;
     readonly schoolIds?: Array<string>;
+};
+
+export type PatchedUserGroupType = {
+    readonly id?: string;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    readonly maintainedAt?: string | null;
+    deletedAt?: string | null;
+    readonly createdById?: string;
+    readonly updatedById?: string;
+    userId?: string;
+    groupId?: string;
+    roleId?: string;
 };
 
 export type PatchedUserSchoolType = {
@@ -464,6 +464,19 @@ export type UserType = {
     readonly updatedById: string;
     readonly groupIds: Array<string>;
     readonly schoolIds: Array<string>;
+};
+
+export type UserGroupType = {
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    readonly maintainedAt: string | null;
+    deletedAt?: string | null;
+    readonly createdById: string;
+    readonly updatedById: string;
+    userId: string;
+    groupId: string;
+    roleId: string;
 };
 
 export type UserSchoolType = {
@@ -608,10 +621,6 @@ export type PatchedMasterySchemaCreateType = {
     schoolId?: string;
 };
 
-export type PatchedNestedUserGroupCreateType = {
-    deletedAt?: string | null;
-};
-
 export type PatchedObservationCreateType = {
     deletedAt?: string | null;
     masteryValue?: number | null;
@@ -690,6 +699,13 @@ export type PatchedUserCreateType = {
     isSuperadmin?: boolean;
 };
 
+export type PatchedUserGroupCreateType = {
+    deletedAt?: string | null;
+    userId?: string;
+    groupId?: string;
+    roleId?: string;
+};
+
 export type PatchedUserSchoolCreateType = {
     deletedAt?: string | null;
     userId?: string;
@@ -760,6 +776,13 @@ export type UserCreateType = {
     lastActivityAt?: string | null;
     disabledAt?: string | null;
     isSuperadmin?: boolean;
+};
+
+export type UserGroupCreateType = {
+    deletedAt?: string | null;
+    userId: string;
+    groupId: string;
+    roleId: string;
 };
 
 export type UserSchoolCreateType = {
@@ -2260,14 +2283,14 @@ export type UserGroupsListResponses = {
 export type UserGroupsListResponse = UserGroupsListResponses[keyof UserGroupsListResponses];
 
 export type UserGroupsCreateData = {
-    body?: NestedUserGroupCreateType;
+    body: UserGroupCreateType;
     path?: never;
     query?: never;
     url: '/api/user-groups/';
 };
 
 export type UserGroupsCreateResponses = {
-    201: NestedUserGroupType;
+    201: UserGroupType;
 };
 
 export type UserGroupsCreateResponse = UserGroupsCreateResponses[keyof UserGroupsCreateResponses];
@@ -2312,7 +2335,7 @@ export type UserGroupsRetrieveResponses = {
 export type UserGroupsRetrieveResponse = UserGroupsRetrieveResponses[keyof UserGroupsRetrieveResponses];
 
 export type UserGroupsPartialUpdateData = {
-    body?: PatchedNestedUserGroupCreateType;
+    body?: PatchedUserGroupCreateType;
     path: {
         /**
          * A unique value identifying this user group.
@@ -2324,13 +2347,13 @@ export type UserGroupsPartialUpdateData = {
 };
 
 export type UserGroupsPartialUpdateResponses = {
-    200: NestedUserGroupType;
+    200: UserGroupType;
 };
 
 export type UserGroupsPartialUpdateResponse = UserGroupsPartialUpdateResponses[keyof UserGroupsPartialUpdateResponses];
 
 export type UserGroupsUpdateData = {
-    body?: NestedUserGroupCreateType;
+    body: UserGroupCreateType;
     path: {
         /**
          * A unique value identifying this user group.
@@ -2342,7 +2365,7 @@ export type UserGroupsUpdateData = {
 };
 
 export type UserGroupsUpdateResponses = {
-    200: NestedUserGroupType;
+    200: UserGroupType;
 };
 
 export type UserGroupsUpdateResponse = UserGroupsUpdateResponses[keyof UserGroupsUpdateResponses];

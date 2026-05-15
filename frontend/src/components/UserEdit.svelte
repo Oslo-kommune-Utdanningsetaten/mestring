@@ -4,15 +4,23 @@
     usersPartialUpdate,
     userSchoolsCreate,
     userSchoolsDestroy,
+    userGroupsCreate,
+    userGroupsDestroy,
+    groupsList,
   } from '../generated/sdk.gen'
-  import type { SchoolType, UserCreateType, NestedUserSchoolType } from '../generated/types.gen'
+  import type {
+    SchoolType,
+    UserCreateType,
+    NestedUserSchoolType,
+    NestedUserGroupType,
+    GroupType,
+  } from '../generated/types.gen'
   import type { UserDecorated } from '../types/models.d.ts'
   import { dataStore } from '../stores/data'
   import { addAlert } from '../stores/alerts'
   import { USER_ROLES } from '../utils/constants'
   import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
   import ButtonMini from './ButtonMini.svelte'
-  import { tr } from 'date-fns/locale'
 
   const { user, school, onDone } = $props<{
     user: Partial<UserDecorated>
@@ -20,25 +28,64 @@
     onDone?: () => void | Promise<void>
   }>()
 
-  const userSchoolRoleNames = [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN]
+  const userSchoolRoleNames = [USER_ROLES.STAFF, USER_ROLES.INSPECTOR, USER_ROLES.ADMIN]
+  const userGroupRoleNames = [USER_ROLES.TEACHER, USER_ROLES.STUDENT]
+
   const userSchoolRoles = $derived(
     $dataStore.roles.filter(role => userSchoolRoleNames.includes(role.name as any))
   )
 
   let localUser = $state<Partial<UserDecorated>>({ ...user })
 
-  let localRoleIds = $state<Set<string>>(
-    new Set<string>(
-      (user.userSchools ?? ([] as NestedUserSchoolType[]))
-        .filter(
-          (us: NestedUserSchoolType) =>
-            us.school.id === school.id && userSchoolRoleNames.includes(us.role.name as any)
-        )
-        .map((us: NestedUserSchoolType) => us.role.id)
-    )
+  let updatedUserSchoolRoleIds = $state<string[]>(
+    (user.userSchools ?? ([] as NestedUserSchoolType[]))
+      .filter(
+        (us: NestedUserSchoolType) =>
+          us.school.id === school.id && userSchoolRoleNames.includes(us.role.name as any)
+      )
+      .map((us: NestedUserSchoolType) => us.role.id)
   )
 
-  let isSaving = $state(false)
+  const userGroupRoles = $derived(
+    $dataStore.roles.filter(role => userGroupRoleNames.includes(role.name as any))
+  )
+
+  // Record of groupId -> roleId[] reflecting local membership state
+  let updatedRoleIdsByGroupId = $state<Record<string, string[]>>({
+    ...(user.userGroups
+      ? Object.fromEntries(
+          user.userGroups.map((ug: NestedUserGroupType) => [ug.group.id, [ug.role.id]])
+        )
+      : {}),
+  })
+
+  // Stable list of group IDs the user already belongs to (for initial sort order)
+  const initialMemberGroupIds = (user.userGroups ?? ([] as NestedUserGroupType[])).map(
+    (ug: NestedUserGroupType) => ug.group.id
+  )
+
+  let schoolGroups = $state<GroupType[]>([])
+  let isLoadingGroups = $state(true)
+
+  const fetchSchoolGroups = async () => {
+    try {
+      const result = await groupsList({ query: { school: school.id, enabled: 'only' } })
+      schoolGroups = result.data || []
+    } catch (e) {
+      console.error('Error fetching groups:', e)
+    } finally {
+      isLoadingGroups = false
+    }
+  }
+
+  const sortedSchoolGroups = $derived(
+    [...schoolGroups].sort((a, b) => {
+      const aHas = initialMemberGroupIds.includes(a.id) ? 0 : 1
+      const bHas = initialMemberGroupIds.includes(b.id) ? 0 : 1
+      if (aHas !== bHas) return aHas - bHas
+      return a.displayName.localeCompare(b.displayName)
+    })
+  )
 
   let isFormValid = $derived(
     !!localUser.name?.trim() && !!localUser.feideId?.trim() && !!localUser.email?.trim()
@@ -53,14 +100,54 @@
     localUser = { ...localUser }
   }
 
-  const toggleRole = (roleId: string) => {
-    const next = new Set(localRoleIds)
-    if (next.has(roleId)) {
-      next.delete(roleId)
+  const toggleUserGroupMembership = (groupId: string, roleId: string) => {
+    const next = { ...updatedRoleIdsByGroupId }
+    const roles = next[groupId] ?? []
+    const updatedRoleIds = roles.includes(roleId)
+      ? roles.filter(id => id !== roleId)
+      : [...roles, roleId]
+    if (updatedRoleIds.length === 0) {
+      delete next[groupId]
     } else {
-      next.add(roleId)
+      next[groupId] = updatedRoleIds
     }
-    localRoleIds = next
+    updatedRoleIdsByGroupId = { ...next }
+  }
+
+  const reconcileUserGroupMemberships = async (userId: string) => {
+    const existingUserGroups = localUser.userGroups || []
+
+    const userGroupIdsToDelete = existingUserGroups
+      .filter(
+        (ug: NestedUserGroupType) => !updatedRoleIdsByGroupId[ug.group.id]?.includes(ug.role.id)
+      )
+      .map((ug: NestedUserGroupType) => ug.id)
+
+    const membershipsToAdd = Object.entries(updatedRoleIdsByGroupId)
+      .flatMap(([groupId, roleIds]) =>
+        roleIds.map(roleId => {
+          const alreadyExists = existingUserGroups.some(
+            (ug: NestedUserGroupType) => ug.group.id === groupId && ug.role.id === roleId
+          )
+          return alreadyExists ? null : { groupId, roleId }
+        })
+      )
+      .filter((x): x is { groupId: string; roleId: string } => x !== null)
+
+    await Promise.all([
+      ...userGroupIdsToDelete.map((id: string) => userGroupsDestroy({ path: { id } })),
+      ...membershipsToAdd.map(({ groupId, roleId }) =>
+        userGroupsCreate({ body: { userId, groupId, roleId } as any })
+      ),
+    ])
+  }
+
+  const toggleUserSchoolRole = (roleId: string) => {
+    if (updatedUserSchoolRoleIds.includes(roleId)) {
+      updatedUserSchoolRoleIds = updatedUserSchoolRoleIds.filter(id => id !== roleId)
+    } else {
+      updatedUserSchoolRoleIds = [...updatedUserSchoolRoleIds, roleId]
+    }
   }
 
   const reconcileUserSchoolRoles = async (userId: string) => {
@@ -69,14 +156,12 @@
         userSchool.school.id === school.id &&
         userSchoolRoleNames.includes(userSchool.role.name as any)
     )
-    const existingRoleIds = new Set(
-      existingUserSchools.map((us: NestedUserSchoolType) => us.role.id)
-    )
+    const existingRoleIds = existingUserSchools.map((us: NestedUserSchoolType) => us.role.id)
 
     const toRemove = existingUserSchools.filter(
-      (us: NestedUserSchoolType) => !localRoleIds.has(us.role.id)
+      (us: NestedUserSchoolType) => !updatedUserSchoolRoleIds.includes(us.role.id)
     )
-    const toAdd = [...localRoleIds].filter(roleId => !existingRoleIds.has(roleId))
+    const toAdd = updatedUserSchoolRoleIds.filter(roleId => !existingRoleIds.includes(roleId))
 
     await Promise.all([
       ...toRemove.map((us: NestedUserSchoolType) => userSchoolsDestroy({ path: { id: us.id } })),
@@ -86,7 +171,10 @@
 
   const handleSave = async () => {
     if (!isFormValid) return
-    isSaving = true
+    let message = localUser.id
+      ? `Bruker "${localUser.name}" oppdatert`
+      : `Bruker "${localUser.name}" opprettet`
+    let userId = localUser.id
     try {
       if (localUser.id) {
         // update user
@@ -98,8 +186,6 @@
             email: localUser.email!.trim(),
           },
         })
-        await reconcileUserSchoolRoles(localUser.id)
-        addAlert({ type: 'success', message: `Bruker "${localUser.name}" ble oppdatert` })
       } else {
         // create user
         const userBody: UserCreateType = {
@@ -110,18 +196,20 @@
         const result = await usersCreate({ body: userBody })
         const newUser = result.data
         if (!newUser) throw new Error('No user returned from API')
-
-        await reconcileUserSchoolRoles(newUser.id)
-        addAlert({ type: 'success', message: `Bruker "${newUser.name}" ble opprettet` })
+        userId = newUser.id
       }
+      await Promise.all([reconcileUserSchoolRoles(userId), reconcileUserGroupMemberships(userId)])
+      addAlert({ type: 'success', message })
       if (onDone) await onDone()
     } catch (error) {
       console.error('Error saving user:', error)
       addAlert({ type: 'danger', message: 'Noe gikk galt ved lagring av bruker' })
-    } finally {
-      isSaving = false
     }
   }
+
+  $effect(() => {
+    fetchSchoolGroups()
+  })
 </script>
 
 <div class="user-edit p-4">
@@ -132,11 +220,11 @@
   <div class="form-group mb-3">
     <label for="name" class="form-label">Navn</label>
     <input
-      id="newUserName"
+      id="name"
       type="text"
       class="form-control rounded-0 border-2 border-primary input-field"
       bind:value={localUser.name}
-      placeholder="Fornavn Etternavn"
+      placeholder="Tina Snips"
       required={true}
     />
   </div>
@@ -150,7 +238,7 @@
       class="form-control rounded-0 border-2 border-primary input-field"
       bind:value={localUser.email}
       onblur={handleEmailBlur}
-      placeholder="brukernavn@osloskolen.no"
+      placeholder="tinsni001@osloskolen.no"
       required={true}
     />
   </div>
@@ -164,7 +252,7 @@
       class="form-control rounded-0 border-2 border-primary input-field"
       bind:value={localUser.feideId}
       disabled={true}
-      placeholder="brukernavn@feide.osloskolen.no"
+      placeholder="tinsni001@feide.osloskolen.no"
     />
   </div>
 
@@ -177,11 +265,44 @@
           label={role.name}
           labelPosition="right"
           isSwitch="true"
-          checked={localRoleIds.has(role.id)}
-          onchange={() => toggleRole(role.id)}
+          checked={updatedUserSchoolRoleIds.includes(role.id)}
+          onchange={() => toggleUserSchoolRole(role.id)}
         ></pkt-checkbox>
       </div>
     {/each}
+  </div>
+
+  <!-- User Group memberships -->
+  <div class="form-group my-3">
+    <p class="form-label fw-bold">Gruppemedlemskap ved {school?.displayName}</p>
+    {#if isLoadingGroups}
+      <p class="text-muted">Laster grupper...</p>
+    {:else}
+      <div class="group-memberships">
+        <div class="group-memberships-header d-flex align-items-center mb-1">
+          <div class="flex-grow-1"></div>
+          {#each userGroupRoles as role}
+            <div class="group-role-col text-center">
+              <small class="fw-bold">{role.name === USER_ROLES.TEACHER ? 'Lærer' : 'Elev'}</small>
+            </div>
+          {/each}
+        </div>
+        {#each sortedSchoolGroups as group}
+          <div class="group-row d-flex align-items-center mb-1">
+            <span class="flex-grow-1 text-truncate">{group.displayName}</span>
+            {#each userGroupRoles as role}
+              <div class="group-role-col text-center">
+                <pkt-checkbox
+                  isSwitch="true"
+                  checked={!!updatedRoleIdsByGroupId[group.id]?.includes(role.id)}
+                  onchange={() => toggleUserGroupMembership(group.id, role.id)}
+                ></pkt-checkbox>
+              </div>
+            {/each}
+          </div>
+        {/each}
+      </div>
+    {/if}
   </div>
 
   <div class="d-flex gap-3 justify-content-start mt-5">
@@ -190,7 +311,7 @@
         iconName: 'check',
         skin: 'primary',
         variant: 'label-only',
-        disabled: !isFormValid || isSaving,
+        disabled: !isFormValid,
         onClick: () => handleSave(),
       }}
     >
@@ -209,6 +330,7 @@
       Avbryt
     </ButtonMini>
   </div>
+  <pre>{JSON.stringify({ updatedRoleIdsByGroupId, updatedUserSchoolRoleIds }, null, 2)}</pre>
 </div>
 
 <style>
@@ -222,5 +344,15 @@
 
   input {
     width: 100% !important;
+  }
+
+  .group-role-col {
+    width: 56px;
+    flex-shrink: 0;
+  }
+
+  .group-memberships {
+    max-height: 400px;
+    overflow-y: auto;
   }
 </style>
