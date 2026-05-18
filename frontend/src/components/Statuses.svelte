@@ -43,31 +43,34 @@
     <span class="visually-hidden">Laster...</span>
   </div>
 {:else if statuses.length > 0}
-  <div class="statuses-container">
+  <ul class="statuses-container">
     <pkt-icon
       class="watermark-icon pkt-icon--large"
       name="achievement"
       aria-hidden="true"
     ></pkt-icon>
+
     {#each statuses as status (status.id)}
-      <span class="status-item" title={status.title}>
+      <li class="status-item" title={status.title}>
         <Link to={`/statuses/${status.id}/`}>{status.title}</Link>
-      </span>
+      </li>
     {/each}
-  </div>
+  </ul>
 {/if}
 
 <style>
   .statuses-container {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 32px;
-    padding: 0.25rem 0.5rem;
-    background-color: var(--pkt-color-surface-strong-light-green);
+    padding: 0.5rem 1.2rem;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      var(--pkt-color-surface-strong-light-green) 10%,
+      var(--pkt-color-surface-strong-light-green) 90%,
+      transparent
+    );
     overflow: hidden;
-    gap: 0.125rem;
+    margin: 0;
   }
 
   .watermark-icon {
@@ -81,12 +84,8 @@
   }
 
   .status-item {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
     font-size: 0.75rem;
-    line-height: 1.2;
+    line-height: 1.3;
     z-index: 1;
   }
 </style>
