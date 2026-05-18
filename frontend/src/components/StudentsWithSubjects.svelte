@@ -168,10 +168,11 @@
   .students-grid :global(.item) {
     padding: 0.5rem;
     border-bottom: 1px solid var(--bs-border-color);
-    min-height: 3rem;
+    height: 3.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow-y: hidden;
   }
 
   .students-grid .item.header-row {

@@ -5,7 +5,7 @@
   import { MISSING_REASON_NO_OBSERVATIONS, MISSING_REASON_NO_GOALS } from '../utils/constants'
 
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
-  import Link from './Link.svelte'
+  import UserNameLink from './UserNameLink.svelte'
   import Statuses from './Statuses.svelte'
 
   type MasteryState = {
@@ -27,7 +27,7 @@
 </script>
 
 <span class="item student-name">
-  <Link to={`/students/${student.id}`}>{student.name}</Link>
+  <UserNameLink user={student} />
   <span class="student-actions">
     {#key statusesKey}
       <Statuses {student} subject={null} />
