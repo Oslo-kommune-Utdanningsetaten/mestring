@@ -48,6 +48,9 @@
     secondsLeft = delay
     isActive = true
     startCountdown()
+    return () => {
+      clearCountdown()
+    }
   })
 </script>
 
