@@ -1,6 +1,6 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
-  import type { UserType, SubjectType, ObservationType } from '../generated/types.gen'
+  import type { UserType, SubjectType, ObservationType, GoalType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { fetchGoalsForSubjectAndStudent, isNumber } from '../utils/functions'
   import { useMasteryCalculations, getMasteryLevelColorByValue } from '../utils/masteryHelpers'
@@ -9,10 +9,20 @@
 
   ChartJS.register(Title, Tooltip, Legend, ArcElement, RadialLinearScale)
 
-  const { subject, student } = $props<{
+  const {
+    subject,
+    student,
+    size = 'large',
+  } = $props<{
     subject: SubjectType
     student: UserType
+    size?: 'small' | 'large'
   }>()
+
+  const sizeToHeight: Record<string, number> = {
+    small: 100,
+    large: 250,
+  }
 
   let { masterySchemas, currentSchool, currentUser } = $derived($dataStore)
   let goalsForSubjectDecorated = $state<GoalDecorated[]>([])
@@ -38,7 +48,7 @@
           display: false, // Hide numeric labels
         },
         pointLabels: {
-          display: true,
+          display: size === 'large', // only dispaly goal labels for large version
           centerPointLabels: true,
           font: {
             size: 12,
@@ -66,28 +76,31 @@
   }
 
   const assembleChartData = () => {
-    // data
-    const tempData = goalsForSubjectDecorated.map(goal => {
-      const masteryValue = goal.observations.reduce(
-        (max: number, observation: ObservationType) =>
-          isNumber(observation.masteryValue) && observation.masteryValue > (max ?? -Infinity)
-            ? observation.masteryValue
-            : max,
-        null as number | null
-      )
-      return masteryValue || 0
-    })
-    data.datasets[0].data = tempData
+    const numberOfGoals = goalsForSubjectDecorated.length
+    const maxNumberOfObservations = Math.max(
+      ...goalsForSubjectDecorated.map(goal => goal.observations.length)
+    )
+    const datasets = [{ data: [] as number[], backgroundColor: [] as string[] }]
+    // initialize datasets
+    for (let i = 0; i < maxNumberOfObservations; i++) {
+      datasets[i] = { data: new Array(numberOfGoals), backgroundColor: new Array(numberOfGoals) }
+    }
 
-    // colors
-    //data.datasets[0].backgroundColor = goalsForSubjectDecorated.map(goal => goal.displayColor)
-    tempData.forEach(value => {
-      const color = getMasteryLevelColorByValue(value, masterySchema, 0.5)
-      data.datasets[0].backgroundColor.push(color)
+    goalsForSubjectDecorated.forEach((goal: GoalDecorated, goalIndex: number) => {
+      goal.observations.forEach((observation: ObservationType, observationIndex: number) => {
+        if (isNumber(observation.masteryValue)) {
+          const value = observation.masteryValue
+          datasets[observationIndex].data[goalIndex] = value
+          const color = getMasteryLevelColorByValue(value, masterySchema, 0.5)
+          datasets[observationIndex].backgroundColor[goalIndex] = color
+        }
+      })
     })
+
+    data.datasets = datasets
 
     // labels
-    data.labels = goalsForSubjectDecorated.map(goal => goal.title)
+    data.labels = goalsForSubjectDecorated.map(goal => goal.title || goal.sortOrder.toString())
     data = { ...data } // Trigger reactivity
   }
 
@@ -98,13 +111,9 @@
   })
 </script>
 
-<div class="chart-container">
+<div class="chart-container" style="height: {sizeToHeight[size]}px">
   <PolarArea {data} options={chartOptions} />
 </div>
 
 <style>
-  .chart-container {
-    padding: 2rem 0rem;
-    height: 300px;
-  }
 </style>

@@ -53,6 +53,7 @@
   let isObservationViewerOpen = $state<boolean>(false)
   let isStatusEditorOpen = $state<boolean>(false)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
+  let chartKey = $state<number>(0) // key used to force re-render of StudentSubjectChart component when goals are updated
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
 
@@ -70,6 +71,7 @@
       $dataStore.currentSchool?.id!,
       $dataStore.currentUser.allGroups
     )
+    chartKey++
   }
 
   const handleEditStatus = async (status: Partial<StatusType> | null) => {
@@ -322,7 +324,9 @@
 </div>
 
 {#if $isSubjectPolarChartVisible}
-  <StudentSubjectChart {student} {subject} />
+  {#key chartKey}
+    <StudentSubjectChart {student} {subject} size="large" />
+  {/key}
 {/if}
 
 {#snippet goalInList(goal: GoalDecorated, index: number)}
