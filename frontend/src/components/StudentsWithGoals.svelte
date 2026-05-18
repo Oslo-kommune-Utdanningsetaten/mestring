@@ -3,12 +3,13 @@
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
   import { hasUserAccessToFeature } from '../stores/access'
+  import { localStorage } from '../stores/localStorage'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import MasteryBarChart from './MasteryBarChart.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
   import Statuses from './Statuses.svelte'
   import Link from './Link.svelte'
-  import { localStorage } from '../stores/localStorage'
+  import UserNameLink from './UserNameLink.svelte'
 
   let {
     students,
@@ -123,7 +124,7 @@
   {/each}
   {#each sortedStudents as student (student.id)}
     <span class="item student-cell">
-      <Link to={`/students/${student.id}`}>{student.name}</Link>
+      <UserNameLink user={student} />
       {#if $dataStore.currentSchool.isStatusEnabled && subject}
         <div class="status-controls">
           {#key statusesKey}

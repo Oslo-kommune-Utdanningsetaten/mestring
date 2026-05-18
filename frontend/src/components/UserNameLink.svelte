@@ -25,9 +25,9 @@
 <style>
   .name-wrapper {
     flex: 1;
-    min-width: 0;
     display: grid;
     overflow: hidden;
+    min-width: 2.5rem;
   }
 
   .first-name {

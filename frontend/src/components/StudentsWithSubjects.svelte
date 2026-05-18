@@ -168,7 +168,7 @@
   .students-grid :global(.item) {
     padding: 0.5rem;
     border-bottom: 1px solid var(--bs-border-color);
-    height: 3.8rem;
+    min-height: 3.7rem;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -4,6 +4,7 @@
   import { statusList } from '../generated/sdk.gen'
   import Link from './Link.svelte'
   import MasteryBadge from './MasteryBadge.svelte'
+  import UserNameLink from './UserNameLink.svelte'
 
   let {
     students,
@@ -119,7 +120,7 @@
   {/each}
   {#each sortedStudents as student (student.id)}
     <span class="item student-name">
-      <Link to={`/students/${student.id}`}>{student.name}</Link>
+      <UserNameLink user={student} />
     </span>
 
     {#each subjects as subject}
@@ -149,7 +150,7 @@
   .students-grid :global(.item) {
     padding: 0.5rem;
     border-bottom: 1px solid var(--bs-border-color);
-    min-height: 3rem;
+    min-height: 3.7rem;
     display: flex;
     align-items: center;
     justify-content: center;
