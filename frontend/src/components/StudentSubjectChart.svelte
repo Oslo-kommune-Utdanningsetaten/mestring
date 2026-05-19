@@ -16,7 +16,7 @@
   } = $props<{
     subject: SubjectType
     student: UserType
-    size?: 'small' | 'large'
+    size?: 'small' | 'medium' | 'large'
   }>()
 
   const labelMaxLength = 18
@@ -58,6 +58,9 @@
     plugins: {
       legend: {
         display: false,
+      },
+      tooltip: {
+        enabled: size === 'large', // only enable tooltips for large version
       },
     },
     responsive: true,
@@ -121,12 +124,12 @@
   }
 
   .chart-medium {
-    width: 75px;
-    height: 75px;
+    width: 70px;
+    height: 70px;
   }
 
   .chart-large {
-    width: min(350px, 100%);
-    aspect-ratio: 1;
+    width: 80%;
+    max-height: 20rem;
   }
 </style>

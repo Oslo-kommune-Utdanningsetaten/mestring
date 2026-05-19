@@ -324,7 +324,7 @@
 </div>
 
 {#if $isSubjectPolarChartVisible}
-  <div class="d-flex justify-content-center">
+  <div class="d-flex justify-content-center p-2">
     {#key chartKey}
       <StudentSubjectChart {student} {subject} size="large" />
     {/key}

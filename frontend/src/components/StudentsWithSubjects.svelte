@@ -17,13 +17,19 @@
   let {
     students,
     subjects,
+    group,
   }: {
     students: UserType[]
     subjects: SubjectType[]
+    group?: GroupType
   } = $props()
 
   const allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
-  const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
+
+  // Only display polar chart if students list is scoped -> avoids performance issues
+  const isSubjectPolarChartVisible = $derived(
+    !!group && localStorage<boolean>('isSubjectPolarChartVisible')
+  )
 
   // Sort state
   type SortKey = 'name' | string // 'name' or subjectId
@@ -184,19 +190,19 @@
   </button>
 
   {#each subjects as subject (subject.id)}
-    <button
-      class="item header header-row sortable"
-      onclick={() => handleHeaderClick(subject.id)}
-      title="Sorter etter antall observasjoner i {subject.displayName}"
-    >
-      <span class="column-header">
+    <span class="item header header-row">
+      <button
+        class="column-header-button sortable"
+        onclick={() => handleHeaderClick(subject.id)}
+        title="Sorter etter antall observasjoner i {subject.displayName}"
+      >
         {#if subject.ownedBySchoolId}
           {subject.shortName}{getSortIndicator(subject.id)}
         {:else}
           {subject.grepCode}{getSortIndicator(subject.id)}
         {/if}
-      </span>
-    </button>
+      </button>
+    </span>
   {/each}
   {#each sortedStudents as student (student.id)}
     {@render studentRow(student, dataByStudentId[student.id]?.masteryBySubjectId)}
@@ -212,7 +218,6 @@
 
   .students-grid .item {
     padding: 0.5rem;
-    border-bottom: 1px solid var(--bs-border-color);
     min-height: 3.7rem;
     display: flex;
     align-items: center;
@@ -245,7 +250,7 @@
     background-color: var(--bs-gray-300);
   }
 
-  .column-header {
+  .column-header-button {
     overflow-wrap: break-word;
     width: 100%;
     font-size: 0.8rem;

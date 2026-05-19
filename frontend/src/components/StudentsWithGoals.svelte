@@ -44,7 +44,7 @@
   const gridTemplateColumns = $derived.by(() => {
     const nameCol = 'minmax(5rem, 10rem)'
     const normalCol = 'minmax(4rem, 10rem)'
-    const statusCol = 'minmax(12rem, 18rem)'
+    const statusCol = 'minmax(min-content, 18rem)'
     const cols: string[] = [nameCol]
     if ($dataStore.currentSchool?.isStatusEnabled && subject) {
       cols.push(statusCol) // status column needs more space
@@ -156,11 +156,11 @@
   {/each}
 
   {#each sortedStudents as student (student.id)}
-    <span class="item student-cell">
+    <span class="item">
       <UserNameLink user={student} />
     </span>
     {#if $dataStore.currentSchool.isStatusEnabled && subject}
-      <span class="item student-cell">
+      <span class="item centered">
         <div class="status-controls">
           {#key statusesKey}
             <Statuses {student} {subject} />
@@ -180,8 +180,8 @@
       </span>
     {/if}
     {#if $isSubjectPolarChartVisible && student && subject}
-      <span class="item student-cell">
-        <StudentSubjectChart {student} {subject} size="small" />
+      <span class="item centered p-1">
+        <StudentSubjectChart {student} {subject} size="medium" />
       </span>
     {/if}
     {#each goals as goal (goal.id)}
@@ -236,6 +236,7 @@
     justify-content: space-between;
     border-right: 1px solid var(--bs-border-color);
     border-bottom: 1px solid var(--bs-border-color);
+    gap: 0.5rem;
   }
 
   .students-grid .item.header-row {
@@ -258,13 +259,6 @@
     background-color: var(--bs-gray);
   }
 
-  .student-cell {
-    justify-content: space-between;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
   .status-controls {
     display: flex;
     align-items: center;
@@ -274,6 +268,14 @@
 
   .add-observation-button {
     display: flex;
+  }
+
+  .students-grid .item.centered {
+    justify-content: center;
+  }
+
+  .students-grid .item.centered .status-controls {
+    margin-left: 0;
   }
 
   .students-grid .goal-cell {

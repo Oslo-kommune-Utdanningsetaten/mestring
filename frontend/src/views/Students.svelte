@@ -160,7 +160,7 @@
   {:else if students.length === 0}
     <div class="mt-3">Her var det tomt</div>
   {:else if selectedFocus === focusOptions[0].value}
-    <StudentsWithSubjects students={filteredStudents} {subjects} />
+    <StudentsWithSubjects students={filteredStudents} {subjects} group={selectedGroup} />
   {:else if selectedFocus === focusOptions[1].value}
     <StudentsWithStatuses
       students={filteredStudents}

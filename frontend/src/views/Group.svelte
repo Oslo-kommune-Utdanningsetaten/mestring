@@ -384,7 +384,7 @@
     <h3 class="mb-3">Elever</h3>
 
     {#if group.type === GROUP_TYPE_BASIS}
-      <StudentsWithSubjects {students} {subjects} />
+      <StudentsWithSubjects {students} {subjects} {group} />
     {:else if group.type === GROUP_TYPE_TEACHING}
       <StudentsWithGoals
         {students}
