@@ -20,7 +20,7 @@
   import AlertBar from './components/AlertBar.svelte'
   import Footer from './components/Footer.svelte'
   import Analytics from './components/Analytics.svelte'
-  const API_CHECK_INTERVAL = 60 * 1000 // every 60 seconds
+  const API_CHECK_INTERVAL = 1000 * 60 * 10 // every 10 minutes
 
   onMount(() => {
     apiHealth.checkHealth()
