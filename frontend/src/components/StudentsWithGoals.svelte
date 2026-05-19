@@ -40,21 +40,12 @@
   let sortBy = $state<SortKey>('name')
   let sortDirection = $state<'asc' | 'desc'>('asc')
 
-  const columnsCount = $derived.by(() => {
-    let result = 1 + goals.length // name column + one column per goal
-    if (isSubjectPolarChartVisible) {
-      result += 1 // add extra column for polar chart
-    }
-    if ($dataStore.currentSchool?.isStatusEnabled && subject) {
-      result += 1 // add extra column for statuses
-    }
-    return result
-  })
-
+  // Compute grid template columns based on which features are enabled
   const gridTemplateColumns = $derived.by(() => {
+    const nameCol = 'minmax(5rem, 10rem)'
     const normalCol = 'minmax(4rem, 10rem)'
     const statusCol = 'minmax(12rem, 18rem)'
-    const cols: string[] = [normalCol] // name column
+    const cols: string[] = [nameCol]
     if ($dataStore.currentSchool?.isStatusEnabled && subject) {
       cols.push(statusCol) // status column needs more space
     }
