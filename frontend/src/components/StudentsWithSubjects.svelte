@@ -8,8 +8,11 @@
     countObservationsBySubjectId,
     aggregateMasterys,
   } from '../utils/functions'
+  import { localStorage } from '../stores/localStorage'
   import { MISSING_REASON_NO_OBSERVATIONS, MISSING_REASON_NO_GOALS } from '../utils/constants'
-  import StudentRow from './StudentRow.svelte'
+  import MasteryLevelBadge from './MasteryLevelBadge.svelte'
+  import UserNameLink from './UserNameLink.svelte'
+  import StudentSubjectChart from './StudentSubjectChart.svelte'
 
   let {
     students,
@@ -20,6 +23,7 @@
   } = $props()
 
   const allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
+  const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
 
   // Sort state
   type SortKey = 'name' | string // 'name' or subjectId
@@ -36,6 +40,15 @@
     observationCountBySubjectId: Record<string, number>
   }
   let dataByStudentId = $state<Record<string, StudentData>>({})
+
+  // Compute grid template columns
+  const gridTemplateColumns = $derived.by(() => {
+    const nameCol = 'auto'
+    const normalCol = 'minmax(4rem, 10rem)'
+    const cols: string[] = [nameCol]
+    subjects.forEach(() => cols.push(normalCol)) // one column per goal
+    return cols.join(' ')
+  })
 
   // Sorted students list
   let sortedStudents = $derived.by(() => {
@@ -125,7 +138,43 @@
   })
 </script>
 
-<div class="students-grid" aria-label="Elevliste" style="--columns-count: {subjects.length}">
+{#snippet studentRow(student: UserType, masteryBySubjectId: any)}
+  <span class="item student-name">
+    <UserNameLink user={student} />
+  </span>
+
+  {#each subjects as subject}
+    <span class="item">
+      {#if isSubjectPolarChartVisible}
+        <StudentSubjectChart {student} {subject} size="small" />
+      {/if}
+      {#if masteryBySubjectId?.[subject.id]?.mastery}
+        <MasteryLevelBadge
+          masteryData={masteryBySubjectId[subject.id].mastery!}
+          masterySchema={$dataStore.defaultMasterySchema}
+        />
+      {:else if masteryBySubjectId?.[subject.id]?.missingReason === MISSING_REASON_NO_OBSERVATIONS}
+        <MasteryLevelBadge isBadgeEmpty={true} />
+      {:else if masteryBySubjectId?.[subject.id]?.missingReason === MISSING_REASON_NO_GOALS}
+        <MasteryLevelBadge isBadgeVoid={true} />
+      {:else}
+        <div class="d-flex align-items-center gap-2 text-secondary small py-2">
+          <span
+            class="spinner-border spinner-border-sm"
+            role="status"
+            aria-label="Henter data"
+          ></span>
+        </div>
+      {/if}
+    </span>
+  {/each}
+{/snippet}
+
+<div
+  class="students-grid"
+  style="grid-template-columns: {gridTemplateColumns}"
+  aria-label="Elevliste"
+>
   <button
     class="item header header-row sortable"
     onclick={() => handleHeaderClick('name')}
@@ -133,6 +182,7 @@
   >
     Elev{getSortIndicator('name')}
   </button>
+
   {#each subjects as subject (subject.id)}
     <button
       class="item header header-row sortable"
@@ -149,23 +199,18 @@
     </button>
   {/each}
   {#each sortedStudents as student (student.id)}
-    <StudentRow
-      {student}
-      {subjects}
-      masteryBySubjectId={dataByStudentId[student.id]?.masteryBySubjectId}
-    />
+    {@render studentRow(student, dataByStudentId[student.id]?.masteryBySubjectId)}
   {/each}
 </div>
 
 <style>
   .students-grid {
     display: grid;
-    grid-template-columns: 1.2fr repeat(var(--columns-count, 8), 1fr);
     align-items: start;
     gap: 0;
   }
 
-  .students-grid :global(.item) {
+  .students-grid .item {
     padding: 0.5rem;
     border-bottom: 1px solid var(--bs-border-color);
     min-height: 3.7rem;
@@ -173,6 +218,9 @@
     align-items: center;
     justify-content: center;
     overflow-y: hidden;
+    gap: 0.5rem;
+    border-right: 1px solid var(--bs-border-color);
+    border-bottom: 1px solid var(--bs-border-color);
   }
 
   .students-grid .item.header-row {
@@ -181,8 +229,8 @@
     max-height: 3rem;
   }
 
-  .students-grid :global(.item.header:first-child),
-  .students-grid :global(.item.student-name) {
+  .students-grid .item.header:first-child,
+  .students-grid .item.student-name {
     justify-content: flex-start;
   }
 

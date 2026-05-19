@@ -110,18 +110,23 @@
   })
 </script>
 
-<div class={size === 'large' ? 'chart-large' : 'chart-small'}>
+<div class="chart-{size}">
   <PolarArea {data} options={chartOptions} />
 </div>
 
 <style>
+  .chart-small {
+    width: 32px;
+    height: 32px;
+  }
+
+  .chart-medium {
+    width: 75px;
+    height: 75px;
+  }
+
   .chart-large {
     width: min(350px, 100%);
     aspect-ratio: 1;
-  }
-
-  .chart-small {
-    width: 75px;
-    height: 75px;
   }
 </style>
