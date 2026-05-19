@@ -1,6 +1,6 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
-  import type { UserType, SubjectType, ObservationType, GoalType } from '../generated/types.gen'
+  import type { UserType, SubjectType, ObservationType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { fetchGoalsForSubjectAndStudent, isNumber } from '../utils/functions'
   import { useMasteryCalculations, getMasteryLevelColorByValue } from '../utils/masteryHelpers'
@@ -18,8 +18,6 @@
     student: UserType
     size?: 'small' | 'medium' | 'large'
   }>()
-
-  const labelMaxLength = 18
 
   let { masterySchemas, currentSchool, currentUser } = $derived($dataStore)
   let goalsForSubjectDecorated = $state<GoalDecorated[]>([])
@@ -50,8 +48,6 @@
           font: {
             size: 12,
           },
-          callback: (label: string) =>
-            label.length > labelMaxLength ? label.slice(0, labelMaxLength - 1) + '…' : label,
         },
       },
     },

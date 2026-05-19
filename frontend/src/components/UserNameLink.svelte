@@ -37,7 +37,7 @@
     text-overflow: ellipsis;
   }
   .last-names {
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
