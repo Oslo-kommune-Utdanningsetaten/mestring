@@ -145,7 +145,8 @@
     }
     const beginMonth = formatMonthName(aStatus.beginAt)
     const endMonth = formatMonthName(aStatus.endAt)
-    return `Status ${beginMonth} - ${endMonth}`
+    const result = `${beginMonth} - ${endMonth}`
+    return result.charAt(0).toUpperCase() + result.slice(1)
   }
 
   const handleGenerateTitle = () => {
