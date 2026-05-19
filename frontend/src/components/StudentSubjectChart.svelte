@@ -19,10 +19,7 @@
     size?: 'small' | 'large'
   }>()
 
-  const sizeToHeight: Record<string, number> = {
-    small: 75,
-    large: 250,
-  }
+  const labelMaxLength = 18
 
   let { masterySchemas, currentSchool, currentUser } = $derived($dataStore)
   let goalsForSubjectDecorated = $state<GoalDecorated[]>([])
@@ -53,6 +50,8 @@
           font: {
             size: 12,
           },
+          callback: (label: string) =>
+            label.length > labelMaxLength ? label.slice(0, labelMaxLength - 1) + '…' : label,
         },
       },
     },
@@ -111,9 +110,18 @@
   })
 </script>
 
-<div style="height: {sizeToHeight[size]}px; width: {sizeToHeight[size]}px;">
+<div class={size === 'large' ? 'chart-large' : 'chart-small'}>
   <PolarArea {data} options={chartOptions} />
 </div>
 
 <style>
+  .chart-large {
+    width: min(350px, 100%);
+    aspect-ratio: 1;
+  }
+
+  .chart-small {
+    width: 75px;
+    height: 75px;
+  }
 </style>

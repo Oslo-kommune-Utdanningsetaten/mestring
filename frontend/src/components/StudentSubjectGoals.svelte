@@ -324,9 +324,11 @@
 </div>
 
 {#if $isSubjectPolarChartVisible}
-  {#key chartKey}
-    <StudentSubjectChart {student} {subject} size="large" />
-  {/key}
+  <div class="d-flex justify-content-center">
+    {#key chartKey}
+      <StudentSubjectChart {student} {subject} size="large" />
+    {/key}
+  </div>
 {/if}
 
 {#snippet goalInList(goal: GoalDecorated, index: number)}
