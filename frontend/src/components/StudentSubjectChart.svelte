@@ -20,7 +20,7 @@
   }>()
 
   const sizeToHeight: Record<string, number> = {
-    small: 100,
+    small: 75,
     large: 250,
   }
 
@@ -111,7 +111,7 @@
   })
 </script>
 
-<div class="chart-container" style="height: {sizeToHeight[size]}px">
+<div style="height: {sizeToHeight[size]}px; width: {sizeToHeight[size]}px;">
   <PolarArea {data} options={chartOptions} />
 </div>
 

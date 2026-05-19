@@ -8,8 +8,8 @@
   import MasteryBarChart from './MasteryBarChart.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
   import Statuses from './Statuses.svelte'
-  import Link from './Link.svelte'
   import UserNameLink from './UserNameLink.svelte'
+  import StudentSubjectChart from './StudentSubjectChart.svelte'
 
   let {
     students,
@@ -33,10 +33,37 @@
     onEditStatus: (status: null, student: UserType) => void
   } = $props()
 
+  const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
+
   // Sort state
   type SortKey = 'name' | string // 'name' or goalId
   let sortBy = $state<SortKey>('name')
   let sortDirection = $state<'asc' | 'desc'>('asc')
+
+  const columnsCount = $derived.by(() => {
+    let result = 1 + goals.length // name column + one column per goal
+    if (isSubjectPolarChartVisible) {
+      result += 1 // add extra column for polar chart
+    }
+    if ($dataStore.currentSchool?.isStatusEnabled && subject) {
+      result += 1 // add extra column for statuses
+    }
+    return result
+  })
+
+  const gridTemplateColumns = $derived.by(() => {
+    const normalCol = 'minmax(4rem, 10rem)'
+    const statusCol = 'minmax(12rem, 18rem)'
+    const cols: string[] = [normalCol] // name column
+    if ($dataStore.currentSchool?.isStatusEnabled && subject) {
+      cols.push(statusCol) // status column needs more space
+    }
+    if ($isSubjectPolarChartVisible) {
+      cols.push(normalCol) // polar chart column
+    }
+    goals.forEach(() => cols.push(normalCol)) // one column per goal
+    return cols.join(' ')
+  })
 
   // Compute observation count per student per goal
   let observationCountByStudentAndGoal = $derived.by(() => {
@@ -103,29 +130,46 @@
   }
 </script>
 
-<div class="students-grid my-3" aria-label="Elevliste" style="--columns-count: {goals.length}">
-  <button
-    class="item header header-row sortable"
-    onclick={() => handleHeaderClick('name')}
-    title="Sorter etter elevnavn"
-  >
-    Elev{getSortIndicator('name')}
-  </button>
-  {#each goals as goal (goal.id)}
+<div
+  class="students-grid my-3"
+  aria-label="Elevliste"
+  style="grid-template-columns: {gridTemplateColumns}"
+>
+  <span class="item header header-row">
     <button
-      class="item header header-row sortable"
-      onclick={() => handleHeaderClick(goal.id)}
-      title="Sorter etter antall observasjoner for dette målet"
+      class="column-header-button sortable"
+      onclick={() => handleHeaderClick('name')}
+      title="Sorter etter elevnavn"
     >
-      <span class="column-header {goal.isRelevant ? '' : 'hatched-background text-muted'}">
-        {goal.title || goal.sortOrder}{getSortIndicator(goal.id)}
-      </span>
+      Elev{getSortIndicator('name')}
     </button>
+  </span>
+  {#if $dataStore.currentSchool.isStatusEnabled && subject}
+    <span class="item header header-row">Status</span>
+  {/if}
+  {#if $isSubjectPolarChartVisible}
+    <span class="item header header-row">Oversikt</span>
+  {/if}
+  {#each goals as goal (goal.id)}
+    <span class="item header header-row">
+      <button
+        onclick={() => handleHeaderClick(goal.id)}
+        class="column-header-button sortable {goal.isRelevant
+          ? ''
+          : 'hatched-background text-muted'}"
+        title="Sorter etter antall observasjoner for dette målet"
+      >
+        {goal.title || goal.sortOrder}{getSortIndicator(goal.id)}
+      </button>
+    </span>
   {/each}
+
   {#each sortedStudents as student (student.id)}
     <span class="item student-cell">
       <UserNameLink user={student} />
-      {#if $dataStore.currentSchool.isStatusEnabled && subject}
+    </span>
+    {#if $dataStore.currentSchool.isStatusEnabled && subject}
+      <span class="item student-cell">
         <div class="status-controls">
           {#key statusesKey}
             <Statuses {student} {subject} />
@@ -142,8 +186,13 @@
             />
           {/if}
         </div>
-      {/if}
-    </span>
+      </span>
+    {/if}
+    {#if $isSubjectPolarChartVisible && student && subject}
+      <span class="item student-cell">
+        <StudentSubjectChart {student} {subject} size="small" />
+      </span>
+    {/if}
     {#each goals as goal (goal.id)}
       {@const decoratedGoal = getDecoratedGoalFor(student.id, goal.id)}
       <span class="item gap-1 goal-cell">
@@ -182,7 +231,6 @@
 <style>
   .students-grid {
     display: grid;
-    grid-template-columns: auto repeat(var(--columns-count, 8), minmax(4rem, 10rem));
     grid-auto-rows: minmax(2rem, 1fr);
     align-items: stretch;
     gap: 0;
@@ -200,8 +248,12 @@
   }
 
   .students-grid .item.header-row {
+    padding: 0rem 0.2rem 0rem 0.2rem;
     background-color: var(--bs-light);
     font-weight: 800;
+    font-size: 0.8rem;
+    overflow-wrap: break-word;
+    justify-content: center;
   }
 
   .sortable {
@@ -212,7 +264,7 @@
   }
 
   .sortable:hover {
-    background-color: var(--bs-gray-300);
+    background-color: var(--bs-gray);
   }
 
   .student-cell {
@@ -237,11 +289,9 @@
     justify-content: center;
   }
 
-  .column-header {
-    overflow-wrap: break-word;
+  .column-header-button {
     width: 100%;
-    font-size: 0.8rem;
-    padding: 0.1rem 0.5rem 0.1rem 0.5rem;
+    padding: 0.1rem 0.2rem 0.1rem 0.2rem;
     background-color: color-mix(
       in srgb,
       var(--pkt-color-surface-strong-light-green) 70%,
@@ -249,5 +299,6 @@
     );
     border: 1px solid var(--pkt-color-grays-gray-100);
     z-index: 2;
+    min-height: 2.8rem;
   }
 </style>

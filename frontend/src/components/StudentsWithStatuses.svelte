@@ -160,6 +160,7 @@
     background-color: var(--bs-light);
     font-weight: 800;
     max-height: 3rem;
+    min-height: 2rem;
   }
 
   .students-grid :global(.item.header:first-child),
