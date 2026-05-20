@@ -82,9 +82,11 @@ export const registerUserStatus = async (school: SchoolType) => {
     userSchool =>
       userSchool.role.name === USER_ROLES.INSPECTOR && userSchool.school.id === school.id
   )
+  const isStudent = studentGroups.length > 0
+  const isTeacher = teacherGroups.length > 0
   const userRoles = [
-    studentGroups.length > 0 ? USER_ROLES.STUDENT : null,
-    teacherGroups.length > 0 ? USER_ROLES.TEACHER : null,
+    isStudent ? USER_ROLES.STUDENT : null,
+    isTeacher ? USER_ROLES.TEACHER : null,
     isSchoolAdmin ? USER_ROLES.ADMIN : null,
     isSchoolInspector ? USER_ROLES.INSPECTOR : null,
     user.isSuperadmin ? USER_ROLES.SUPERADMIN : null,
@@ -97,6 +99,8 @@ export const registerUserStatus = async (school: SchoolType) => {
     teacherGroups,
     studentGroups,
     userSchools,
+    isStudent,
+    isTeacher,
     isSchoolAdmin,
     isSchoolInspector,
     roles: userRoles,

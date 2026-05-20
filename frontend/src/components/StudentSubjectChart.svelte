@@ -78,8 +78,8 @@
     const maxNumberOfObservations = Math.max(
       ...goalsForSubjectDecorated.map(goal => goal.observations.length)
     )
-    const datasets = [{ data: [] as number[], backgroundColor: [] as string[] }]
     // initialize datasets
+    const datasets = [{ data: [] as number[], backgroundColor: [] as string[] }]
     for (let i = 0; i < maxNumberOfObservations; i++) {
       datasets[i] = { data: new Array(numberOfGoals), backgroundColor: new Array(numberOfGoals) }
     }

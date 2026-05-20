@@ -5,6 +5,7 @@
   import GroupsCompact from '../components/GroupsCompact.svelte'
   import ObservationsLatest from '../components/ObservationsLatest.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
+  import StudentSubjects from '../components/StudentSubjects.svelte'
 
   const router = useTinyRouter()
   const errorFromUrl = $derived(router.getQueryParam('error'))
@@ -12,6 +13,9 @@
 
 {#if $currentUser}
   <GroupsCompact />
+  {#if $currentUser.isStudent && !$currentUser.isTeacher}
+    <StudentSubjects />
+  {/if}
   <ObservationsLatest />
 {:else}
   <h2 class="mb-4">Hei på deg!</h2>
