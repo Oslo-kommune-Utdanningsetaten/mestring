@@ -12,11 +12,11 @@
   const {
     subject,
     student,
-    size = 'large',
+    isLabelsEnabled = false,
   } = $props<{
     subject: SubjectType
     student: UserType
-    size?: 'small' | 'medium' | 'large'
+    isLabelsEnabled?: boolean
   }>()
 
   let { masterySchemas, currentSchool, currentUser } = $derived($dataStore)
@@ -43,7 +43,7 @@
           display: false, // Hide numeric labels
         },
         pointLabels: {
-          display: size === 'large', // only dispaly goal labels for large version
+          display: isLabelsEnabled,
           centerPointLabels: true,
           font: {
             size: 12,
@@ -109,23 +109,13 @@
   })
 </script>
 
-<div class="chart-{size}">
+<div class="chart-container">
   <PolarArea {data} options={chartOptions} />
 </div>
 
 <style>
-  .chart-small {
-    width: 32px;
-    height: 32px;
-  }
-
-  .chart-medium {
-    width: 70px;
-    height: 70px;
-  }
-
-  .chart-large {
-    width: auto;
-    height: 20rem;
+  .chart-container {
+    width: 100%;
+    height: 100%;
   }
 </style>

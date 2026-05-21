@@ -181,7 +181,9 @@
     {/if}
     {#if $isSubjectPolarChartVisible && student && subject}
       <span class="item centered p-1">
-        <StudentSubjectChart {student} {subject} size="medium" />
+        <div class="chart-wrapper">
+          <StudentSubjectChart {student} {subject} />
+        </div>
       </span>
     {/if}
     {#each goals as goal (goal.id)}
@@ -220,6 +222,11 @@
 </div>
 
 <style>
+  .chart-wrapper {
+    width: 70px;
+    height: 70px;
+  }
+
   .students-grid {
     display: grid;
     grid-auto-rows: minmax(2rem, 1fr);

@@ -152,7 +152,9 @@
   {#each subjects as subject}
     <span class="item">
       {#if isSubjectPolarChartVisible}
-        <StudentSubjectChart {student} {subject} size="small" />
+        <div class="chart-wrapper">
+          <StudentSubjectChart {student} {subject} />
+        </div>
       {/if}
       {#if masteryBySubjectId?.[subject.id]?.mastery}
         <MasteryLevelBadge
@@ -210,6 +212,11 @@
 </div>
 
 <style>
+  .chart-wrapper {
+    width: 32px;
+    height: 32px;
+  }
+
   .students-grid {
     display: grid;
     align-items: start;

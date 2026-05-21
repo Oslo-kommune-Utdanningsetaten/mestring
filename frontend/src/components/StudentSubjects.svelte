@@ -90,7 +90,7 @@
               </ul>
 
               <div class="chart-wrapper">
-                <StudentSubjectChart student={currentUser} {subject} size="medium" />
+                <StudentSubjectChart student={currentUser} {subject} />
               </div>
             </div>
           </li>
@@ -131,6 +131,8 @@
 
   .chart-wrapper {
     flex-shrink: 0;
+    width: 70px;
+    height: 70px;
   }
 
   @media (min-width: 768px) {

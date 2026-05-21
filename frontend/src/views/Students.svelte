@@ -73,6 +73,7 @@
   }
 
   const handleGroupSelect = (groupId: string): void => {
+    isLoadingStudents = true
     if (groupId && groupId !== '0') {
       router.navigate(urlStringFrom({ groupId }, { path: '/students', mode: 'merge' }))
     } else {

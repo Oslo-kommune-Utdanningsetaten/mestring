@@ -326,7 +326,9 @@
 {#if $isSubjectPolarChartVisible}
   <div class="d-flex justify-content-center p-2">
     {#key chartKey}
-      <StudentSubjectChart {student} {subject} size="large" />
+      <div class="chart-wrapper">
+        <StudentSubjectChart {student} {subject} isLabelsEnabled={true} />
+      </div>
     {/key}
   </div>
 {/if}
@@ -601,6 +603,11 @@
 </Offcanvas>
 
 <style>
+  .chart-wrapper {
+    width: 100%;
+    height: 20rem;
+  }
+
   div.observation-item > span {
     font-family: 'Courier New', Courier, monospace !important;
     font-size: 0.95rem;
