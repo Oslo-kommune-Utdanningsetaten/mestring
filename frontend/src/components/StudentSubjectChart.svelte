@@ -26,8 +26,8 @@
     labels: string[]
   }>({ datasets: [{ data: [], backgroundColor: [] }], labels: [] })
 
+  // assume all goals for this subject use same mastery schema, just grab the first one
   const masterySchema = $derived(
-    // assume all goals for this subject use same mastery schema, just grab the first one
     masterySchemas.find(ms => ms.id === goalsForSubjectDecorated[0]?.masterySchemaId)
   )
 
@@ -56,7 +56,7 @@
         display: false,
       },
       tooltip: {
-        enabled: size === 'large', // only enable tooltips for large version
+        enabled: false, // dispable built-in tooltip since an exact number isn't what we really want from this chart
       },
     },
     responsive: true,
@@ -125,7 +125,7 @@
   }
 
   .chart-large {
-    width: 80%;
-    max-height: 20rem;
+    width: auto;
+    height: 20rem;
   }
 </style>
