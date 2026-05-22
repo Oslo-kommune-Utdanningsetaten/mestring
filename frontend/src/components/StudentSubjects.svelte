@@ -125,19 +125,22 @@
     border-bottom: none;
   }
 
-  .chart-wrapper {
-    height: 100%;
-  }
-
   @media (min-width: 768px) {
     .subject-card-layout {
-      flex-direction: row;
-      align-items: flex-start;
+      position: relative;
+      padding-right: calc(35% + 1rem);
     }
 
     .goals-list {
-      flex: 1;
-      min-width: 0;
+      width: 100%;
+    }
+
+    .chart-wrapper {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 35%;
     }
   }
 </style>
