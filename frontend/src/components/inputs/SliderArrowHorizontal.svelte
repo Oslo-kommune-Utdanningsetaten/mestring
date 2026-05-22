@@ -34,17 +34,26 @@
     return (valuesCountCurrentLevel / valuesCountTotal) * 100
   }
 
-  const calculateRungHeight = (index: number) => {
-    return (index + 1) * (100 / calculations.masteryLevels.length)
-  }
-
   const parseColor = (color: string) => {
     const rgb = color.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/)
-    if (rgb) return { r: parseInt(rgb[1]), g: parseInt(rgb[2]), b: parseInt(rgb[3]) }
-    const hex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color)
+    if (rgb) return { r: parseInt(rgb[1]), g: parseInt(rgb[2]), b: parseInt(rgb[3]), a: 1 }
+    const rgba = color.match(/rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/)
+    if (rgba)
+      return {
+        r: parseInt(rgba[1]),
+        g: parseInt(rgba[2]),
+        b: parseInt(rgba[3]),
+        a: parseFloat(rgba[4]),
+      }
+    const hex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(color)
     return hex
-      ? { r: parseInt(hex[1], 16), g: parseInt(hex[2], 16), b: parseInt(hex[3], 16) }
-      : { r: 0, g: 0, b: 0 }
+      ? {
+          r: parseInt(hex[1], 16),
+          g: parseInt(hex[2], 16),
+          b: parseInt(hex[3], 16),
+          a: hex[4] !== undefined ? parseInt(hex[4], 16) / 255 : 1,
+        }
+      : { r: 0, g: 0, b: 0, a: 1 }
   }
 
   const interpolateColor = (color1: string, color2: string, t: number) => {
@@ -53,7 +62,8 @@
     const r = Math.round(c1.r + (c2.r - c1.r) * t)
     const g = Math.round(c1.g + (c2.g - c1.g) * t)
     const b = Math.round(c1.b + (c2.b - c1.b) * t)
-    return `rgb(${r}, ${g}, ${b})`
+    const a = c1.a + (c2.a - c1.a) * t
+    return a < 1 ? `rgba(${r}, ${g}, ${b}, ${a.toFixed(3)})` : `rgb(${r}, ${g}, ${b})`
   }
 
   const rungColor = $derived(

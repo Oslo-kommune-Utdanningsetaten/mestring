@@ -79,7 +79,7 @@
               <ul class="goals-list list-unstyled mb-0">
                 {#each sortedGoals(subject.id) as goal (goal.id)}
                   <li class="goal-row d-flex align-items-center justify-content-between gap-2 py-1">
-                    <span class="goal-title text-truncate">{goal.title}</span>
+                    <span>{goal.title}</span>
                     {#if goal.observations?.length}
                       <span class="badge rounded-pill bg-secondary flex-shrink-0">
                         {goal.observations.length}
@@ -114,7 +114,7 @@
   }
 
   .goals-list {
-    width: 100%;
+    width: 60%;
   }
 
   .goal-row {
@@ -125,14 +125,8 @@
     border-bottom: none;
   }
 
-  .goal-title {
-    font-size: 0.9rem;
-  }
-
   .chart-wrapper {
-    flex-shrink: 0;
-    width: 70px;
-    height: 70px;
+    height: 100%;
   }
 
   @media (min-width: 768px) {
