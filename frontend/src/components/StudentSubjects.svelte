@@ -10,6 +10,7 @@
   let groups = $state<GroupType[]>([])
   let goalsBySubjectId = $state<Record<string, GoalDecorated[]>>({})
   let hoveredSubjectId = $state<string | null>(null)
+  let hoveredGoalId = $state<string | null>(null)
   let studentSubjects = $state<SubjectType[]>([])
 
   const fetchData = async () => {
@@ -34,18 +35,9 @@
           currentSchool?.id!,
           currentUser.allGroups
         )
-        goals.sort((a, b) => latestObservationDate(b).localeCompare(latestObservationDate(a)))
         goalsBySubjectId = { ...goalsBySubjectId, [subject.id]: goals }
       })
     )
-  }
-
-  const latestObservationDate = (goal: GoalDecorated): string => {
-    if (!goal.observations?.length) return ''
-    return goal.observations
-      .map((o: ObservationType) => o.observedAt || o.createdAt || '')
-      .sort()
-      .at(-1)!
   }
 
   $effect(() => {
@@ -77,11 +69,22 @@
                   {#each goalsBySubjectId[subject.id] as goal (goal.id)}
                     <li
                       class="goal-row d-flex align-items-center justify-content-between gap-2 py-1"
+                      onmouseenter={() => {
+                        hoveredGoalId = goal.id
+                      }}
+                      onmouseleave={() => {
+                        hoveredGoalId = null
+                      }}
                     >
                       <span>{goal.title}</span>
                       {#if goal.observations?.length}
-                        <span class="badge rounded-pill bg-secondary flex-shrink-0">
-                          {goal.observations.length}
+                        <span
+                          class="badge rounded-pill bg-secondary flex-shrink-0"
+                          class:highlighted={hoveredGoalId === goal.id}
+                        >
+                          {goal.observations.length} observasjon{goal.observations.length === 1
+                            ? ''
+                            : 'er'}
                         </span>
                       {/if}
                     </li>
@@ -109,6 +112,7 @@
                     student={currentUser}
                     {subject}
                     isLabelEnabled={hoveredSubjectId === subject.id}
+                    highlightedGoalId={hoveredGoalId}
                   />
                 </div>
               </div>
@@ -143,6 +147,10 @@
 
   .goal-row:last-child {
     border-bottom: none;
+  }
+
+  .highlighted {
+    background-color: var(--bs-primary) !important;
   }
 
   @media (min-width: 768px) {

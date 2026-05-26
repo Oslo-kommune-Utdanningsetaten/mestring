@@ -4,6 +4,7 @@
   import type { GoalDecorated } from '../types/models'
   import { fetchGoalsForSubjectAndStudent, isNumber } from '../utils/functions'
   import { useMasteryCalculations, getMasteryLevelColorByValue } from '../utils/masteryHelpers'
+  import { untrack } from 'svelte'
   import { PolarArea } from 'svelte-chartjs'
   import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, RadialLinearScale } from 'chart.js'
 
@@ -13,18 +14,20 @@
     subject,
     student,
     isLabelEnabled = false,
+    highlightedGoalId = null,
   } = $props<{
     subject: SubjectType
     student: UserType
     isLabelEnabled?: boolean
+    highlightedGoalId?: string | null
   }>()
 
   let { masterySchemas, currentSchool, currentUser } = $derived($dataStore)
   let goalsForSubjectDecorated = $state<GoalDecorated[]>([])
   let data = $state<{
-    datasets: { data: number[]; backgroundColor: string[] }[]
+    datasets: { data: number[]; backgroundColor: string[]; hoverBackgroundColor: string[] }[]
     labels: string[]
-  }>({ datasets: [{ data: [], backgroundColor: [] }], labels: [] })
+  }>({ datasets: [{ data: [], backgroundColor: [], hoverBackgroundColor: [] }], labels: [] })
 
   // Assume all goals for this subject use same mastery schema, just grab the first one
   const masterySchema = $derived(
@@ -61,6 +64,7 @@
     },
     responsive: true,
     maintainAspectRatio: false,
+    animation: false,
   })
 
   const fetchGoals = async () => {
@@ -81,9 +85,19 @@
       ...goalsForSubjectDecorated.map(goal => goal.observations.length)
     )
     // initialize datasets
-    const datasets = [{ data: [] as number[], backgroundColor: [] as string[] }]
+    const datasets = [
+      {
+        data: [] as number[],
+        backgroundColor: [] as string[],
+        hoverBackgroundColor: [] as string[],
+      },
+    ]
     for (let i = 0; i < maxNumberOfObservations; i++) {
-      datasets[i] = { data: new Array(numberOfGoals), backgroundColor: new Array(numberOfGoals) }
+      datasets[i] = {
+        data: new Array(numberOfGoals),
+        backgroundColor: new Array(numberOfGoals),
+        hoverBackgroundColor: new Array(numberOfGoals),
+      }
     }
 
     goalsForSubjectDecorated.forEach((goal: GoalDecorated, goalIndex: number) => {
@@ -91,8 +105,17 @@
         if (isNumber(observation.masteryValue)) {
           const value = observation.masteryValue
           datasets[observationIndex].data[goalIndex] = value
-          const color = getMasteryLevelColorByValue(value, masterySchema, 0.5)
-          datasets[observationIndex].backgroundColor[goalIndex] = color
+          const opacity = goal.id === highlightedGoalId ? 0.9 : 0.5
+          datasets[observationIndex].backgroundColor[goalIndex] = getMasteryLevelColorByValue(
+            value,
+            masterySchema,
+            opacity
+          )
+          datasets[observationIndex].hoverBackgroundColor[goalIndex] = getMasteryLevelColorByValue(
+            value,
+            masterySchema,
+            0.9
+          )
         }
       })
     })
@@ -108,6 +131,15 @@
     if (student && subject) {
       fetchGoals()
     }
+  })
+
+  $effect(() => {
+    highlightedGoalId // only this is tracked as a dependency
+    untrack(() => {
+      if (goalsForSubjectDecorated.length) {
+        assembleChartData()
+      }
+    })
   })
 </script>
 
