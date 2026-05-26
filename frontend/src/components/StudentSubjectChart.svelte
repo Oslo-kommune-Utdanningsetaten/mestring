@@ -26,7 +26,7 @@
     labels: string[]
   }>({ datasets: [{ data: [], backgroundColor: [] }], labels: [] })
 
-  // assume all goals for this subject use same mastery schema, just grab the first one
+  // Assume all goals for this subject use same mastery schema, just grab the first one
   const masterySchema = $derived(
     masterySchemas.find(ms => ms.id === goalsForSubjectDecorated[0]?.masterySchemaId)
   )
@@ -70,7 +70,9 @@
       currentSchool?.id!,
       currentUser.allGroups
     )
-    assembleChartData()
+    if (goalsForSubjectDecorated.length) {
+      assembleChartData()
+    }
   }
 
   const assembleChartData = () => {
@@ -109,9 +111,11 @@
   })
 </script>
 
-<div class="chart-container">
-  <PolarArea {data} options={chartOptions} />
-</div>
+{#if data.datasets[0].data.length > 0}
+  <div class="chart-container">
+    <PolarArea {data} options={chartOptions} />
+  </div>
+{/if}
 
 <style>
   .chart-container {

@@ -100,6 +100,9 @@ export const fetchGoalsForSubjectAndStudent = async (
       },
     })
     const goals = goalsResult.data || []
+    if (goals.length === 0) {
+      return []
+    }
     const groupIds = goals.map(goal => goal.groupId).filter(Boolean) as string[]
     const groups = studentGroups.filter((group: GroupType) => groupIds.includes(group.id))
     const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(studentId, goals, groups)

@@ -27,9 +27,8 @@
   const allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
 
   // Only display polar chart if students list is scoped -> avoids performance issues
-  const isSubjectPolarChartVisible = $derived(
-    !!group && localStorage<boolean>('isSubjectPolarChartVisible')
-  )
+  const polarChartStore = localStorage<boolean>('isSubjectPolarChartVisible')
+  const isSubjectPolarChartVisible = $derived(!!group && ($polarChartStore ?? false))
 
   // Sort state
   type SortKey = 'name' | string // 'name' or subjectId
@@ -50,7 +49,7 @@
   // Compute grid template columns
   const gridTemplateColumns = $derived.by(() => {
     const nameCol = 'auto'
-    const normalCol = 'minmax(4rem, 10rem)'
+    const normalCol = 'minmax(2rem, 10rem)'
     const cols: string[] = [nameCol]
     subjects.forEach(() => cols.push(normalCol)) // one column per goal
     return cols.join(' ')
