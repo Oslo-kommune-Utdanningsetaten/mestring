@@ -40,11 +40,16 @@
   let sortBy = $state<SortKey>('name')
   let sortDirection = $state<'asc' | 'desc'>('asc')
 
+  // Top scrollbar mirror
+  let gridElement = $state<HTMLDivElement | null>(null)
+  let topScrollElement = $state<HTMLDivElement | null>(null)
+  let gridScrollWidth = $state(0)
+
   // Compute grid template columns based on which features are enabled
   const gridTemplateColumns = $derived.by(() => {
-    const nameCol = 'minmax(5rem, 10rem)'
-    const normalCol = 'minmax(4rem, 10rem)'
-    const statusCol = 'minmax(min-content, 18rem)'
+    const nameCol = 'minmax(10rem, auto)'
+    const normalCol = '7rem'
+    const statusCol = '13rem'
     const cols: string[] = [nameCol]
     if ($dataStore.currentSchool?.isStatusEnabled && subject) {
       cols.push(statusCol) // status column needs more space
@@ -105,6 +110,14 @@
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
 
+  const syncFromGrid = () => {
+    if (topScrollElement && gridElement) topScrollElement.scrollLeft = gridElement.scrollLeft
+  }
+
+  const syncFromTop = () => {
+    if (gridElement && topScrollElement) gridElement.scrollLeft = topScrollElement.scrollLeft
+  }
+
   const getMasterySchemaForGoal = (goal: GoalType) => {
     return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
   }
@@ -119,10 +132,24 @@
     const observations: ObservationType[] = goal.observations
     return observations.map(o => o.masteryValue).filter((v): v is number => v != null)
   }
+
+  $effect(() => {
+    if (!gridElement) return
+    const observer = new ResizeObserver(() => {
+      gridScrollWidth = gridElement!.scrollWidth
+    })
+    observer.observe(gridElement)
+    return () => observer.disconnect()
+  })
 </script>
 
+<div class="scroll-mirror" bind:this={topScrollElement} onscroll={syncFromTop}>
+  <div style="width: {gridScrollWidth}px; height: 1px;"></div>
+</div>
 <div
   class="students-grid my-3"
+  bind:this={gridElement}
+  onscroll={syncFromGrid}
   aria-label="Elevliste"
   style="grid-template-columns: {gridTemplateColumns}"
 >
@@ -156,7 +183,7 @@
   {/each}
 
   {#each sortedStudents as student (student.id)}
-    <span class="item">
+    <span class="item student-name">
       <UserNameLink user={student} />
     </span>
     {#if $dataStore.currentSchool.isStatusEnabled && subject}
@@ -227,11 +254,17 @@
     height: 70px;
   }
 
+  .scroll-mirror {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
   .students-grid {
     display: grid;
     grid-auto-rows: minmax(2rem, 1fr);
     align-items: stretch;
     gap: 0;
+    overflow-x: auto;
   }
 
   .students-grid .item {
@@ -253,6 +286,16 @@
     font-size: 0.8rem;
     overflow-wrap: break-word;
     justify-content: center;
+  }
+
+  .students-grid .item.header {
+    border-top: 1px solid var(--bs-border-color);
+  }
+
+  .students-grid .item.header:first-child,
+  .students-grid .item.student-name {
+    justify-content: flex-start;
+    border-left: 1px solid var(--bs-border-color);
   }
 
   .sortable {
