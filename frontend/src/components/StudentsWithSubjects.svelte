@@ -49,7 +49,7 @@
   // Compute grid template columns
   const gridTemplateColumns = $derived.by(() => {
     const nameCol = 'auto'
-    const normalCol = 'minmax(2rem, 10rem)'
+    const normalCol = 'minmax(2rem, 7rem)'
     const cols: string[] = [nameCol]
     subjects.forEach(() => cols.push(normalCol)) // one column per goal
     return cols.join(' ')
@@ -182,13 +182,15 @@
   style="grid-template-columns: {gridTemplateColumns}"
   aria-label="Elevliste"
 >
-  <button
-    class="item header header-row sortable"
-    onclick={() => handleHeaderClick('name')}
-    title="Sorter etter elevnavn"
-  >
-    Elev{getSortIndicator('name')}
-  </button>
+  <span class="item header header-row">
+    <button
+      class="column-header-button sortable"
+      onclick={() => handleHeaderClick('name')}
+      title="Sorter etter elevnavn"
+    >
+      Navn{getSortIndicator('name')}
+    </button>
+  </span>
 
   {#each subjects as subject (subject.id)}
     <span class="item header header-row">
@@ -224,7 +226,7 @@
 
   .students-grid .item {
     padding: 0.5rem;
-    min-height: 3.7rem;
+    min-height: 3.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -237,7 +239,6 @@
   .students-grid .item.header-row {
     background-color: var(--bs-light);
     font-weight: 800;
-    max-height: 3rem;
   }
 
   .students-grid .item.header:first-child,
