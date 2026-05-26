@@ -35,6 +35,11 @@
   let sortBy = $state<SortKey>('name')
   let sortDirection = $state<'asc' | 'desc'>('asc')
 
+  // Top scrollbar mirror
+  let gridElement = $state<HTMLDivElement | null>(null)
+  let topScrollElement = $state<HTMLDivElement | null>(null)
+  let gridScrollWidth = $state(0)
+
   // Data per student: mastery and observation counts by subject
   type MasteryState = {
     mastery?: Mastery
@@ -48,10 +53,10 @@
 
   // Compute grid template columns
   const gridTemplateColumns = $derived.by(() => {
-    const nameCol = 'auto'
-    const normalCol = 'minmax(2rem, 7rem)'
+    const nameCol = 'minmax(6rem, 10rem)'
+    const normalCol = '7.1rem'
     const cols: string[] = [nameCol]
-    subjects.forEach(() => cols.push(normalCol)) // one column per goal
+    subjects.forEach(() => cols.push(normalCol)) // one column per subject
     return cols.join(' ')
   })
 
@@ -135,11 +140,28 @@
     return sortDirection === 'asc' ? ' ▲' : ' ▼'
   }
 
+  const syncFromGrid = () => {
+    if (topScrollElement && gridElement) topScrollElement.scrollLeft = gridElement.scrollLeft
+  }
+
+  const syncFromTop = () => {
+    if (gridElement && topScrollElement) gridElement.scrollLeft = topScrollElement.scrollLeft
+  }
+
   // Fetch data for all students
   $effect(() => {
     if (students.length > 0) {
       fetchAllStudentData()
     }
+  })
+
+  $effect(() => {
+    if (!gridElement) return
+    const observer = new ResizeObserver(() => {
+      gridScrollWidth = gridElement!.scrollWidth
+    })
+    observer.observe(gridElement)
+    return () => observer.disconnect()
   })
 </script>
 
@@ -177,8 +199,13 @@
   {/each}
 {/snippet}
 
+<div class="scroll-mirror" bind:this={topScrollElement} onscroll={syncFromTop}>
+  <div style="width: {gridScrollWidth}px; height: 1px;"></div>
+</div>
 <div
   class="students-grid"
+  bind:this={gridElement}
+  onscroll={syncFromGrid}
   style="grid-template-columns: {gridTemplateColumns}"
   aria-label="Elevliste"
 >
@@ -218,10 +245,16 @@
     height: 32px;
   }
 
+  .scroll-mirror {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
   .students-grid {
     display: grid;
     align-items: start;
     gap: 0;
+    overflow-x: auto;
   }
 
   .students-grid .item {
@@ -241,9 +274,14 @@
     font-weight: 800;
   }
 
+  .students-grid .item.header {
+    border-top: 1px solid var(--bs-border-color);
+  }
+
   .students-grid .item.header:first-child,
   .students-grid .item.student-name {
     justify-content: flex-start;
+    border-left: 1px solid var(--bs-border-color);
   }
 
   .sortable {
