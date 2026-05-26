@@ -327,7 +327,7 @@
   <div class="d-flex justify-content-center p-2">
     {#key chartKey}
       <div class="chart-wrapper">
-        <StudentSubjectChart {student} {subject} isLabelsEnabled={true} />
+        <StudentSubjectChart {student} {subject} isLabelEnabled={true} />
       </div>
     {/key}
   </div>

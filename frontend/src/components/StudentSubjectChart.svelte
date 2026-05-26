@@ -12,11 +12,11 @@
   const {
     subject,
     student,
-    isLabelsEnabled = false,
+    isLabelEnabled = false,
   } = $props<{
     subject: SubjectType
     student: UserType
-    isLabelsEnabled?: boolean
+    isLabelEnabled?: boolean
   }>()
 
   let { masterySchemas, currentSchool, currentUser } = $derived($dataStore)
@@ -43,7 +43,7 @@
           display: false, // Hide numeric labels
         },
         pointLabels: {
-          display: isLabelsEnabled,
+          display: isLabelEnabled,
           centerPointLabels: true,
           font: {
             size: 12,

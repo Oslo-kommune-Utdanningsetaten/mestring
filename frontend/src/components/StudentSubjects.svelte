@@ -12,6 +12,7 @@
   let studentSubjects = $derived(
     subjects.filter(subject => groups.some(group => group.subjectId === subject.id))
   )
+  let hoveredSubjectId = $state<string | null>(null)
 
   const fetchData = async () => {
     try {
@@ -70,9 +71,10 @@
       <ul class="list-group list-group-flush">
         {#each groups as group (group.id)}
           {@const subject = studentSubjects.find(s => s.id === group.subjectId)}
+          {@const subjectName = subject.shortName || subject.displayName || subject.grepCode}
           <li class="list-group-item">
             <h3 class="mt-3 mb-1">
-              {subject.shortName || subject.displayName || subject.grepCode}
+              {subjectName}
             </h3>
             <hr class="border border-1 mt-0" />
             <div class="subject-card-layout py-3">
@@ -89,8 +91,28 @@
                 {/each}
               </ul>
 
-              <div class="chart-wrapper">
-                <StudentSubjectChart student={currentUser} {subject} />
+              <div
+                class="chart-wrapper"
+                role="img"
+                aria-label="Mestringsoversikt for {subjectName}"
+                onmouseover={() => {
+                  hoveredSubjectId = subject.id
+                }}
+                onmouseleave={() => {
+                  hoveredSubjectId = null
+                }}
+                onfocus={() => {
+                  hoveredSubjectId = subject.id
+                }}
+                onblur={() => {
+                  hoveredSubjectId = null
+                }}
+              >
+                <StudentSubjectChart
+                  student={currentUser}
+                  {subject}
+                  isLabelEnabled={hoveredSubjectId === subject.id}
+                />
               </div>
             </div>
           </li>
