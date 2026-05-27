@@ -38,7 +38,7 @@
     if (!masterySchema || !isNumber(observation.masteryValue)) {
       return null
     }
-    return getMasteryLevelColorByValue(observation.masteryValue as number, masterySchema)
+    return getMasteryLevelColorByValue(observation.masteryValue as number, masterySchema, 0.7)
   }
 
   const handleViewObservation = (observation: ObservationType) => {
@@ -114,9 +114,7 @@
 
 <style>
   div.observation-item > span {
-    font-family: 'Courier New', Courier, monospace !important;
-    font-size: 0.95rem;
-    letter-spacing: -0.07em;
+    font-size: 0.85rem;
   }
 
   .goal-secondary-row {

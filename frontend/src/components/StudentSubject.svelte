@@ -50,22 +50,19 @@
   <ul class="goals-list list-unstyled mb-0">
     {#each goals as goal (goal.id)}
       {@const isExpanded = expandedGoalIds.includes(goal.id)}
-
       <div
-        class="list-group-item goal-item {isExpanded
-          ? 'shadow border-2 z-1 expanded'
-          : ''}  {goal.isRelevant ? '' : 'hatched-background'}"
+        class="list-group-item goal-item {isExpanded ? 'shadow z-1 expanded' : ''}"
+        class:hatched-background={!goal.isRelevant}
         title={goal.isRelevant ? '' : 'Målet er ikke lenger relevant for eleven'}
+        role="listitem"
+        onmouseenter={() => {
+          hoveredGoalId = goal.id
+        }}
+        onmouseleave={() => {
+          hoveredGoalId = null
+        }}
       >
-        <li
-          class="goal-row d-flex align-items-center justify-content-between gap-2 py-1"
-          onmouseenter={() => {
-            hoveredGoalId = goal.id
-          }}
-          onmouseleave={() => {
-            hoveredGoalId = null
-          }}
-        >
+        <li class="goal-row d-flex align-items-center justify-content-between gap-2 py-1">
           <span>{goal.title}</span>
           <span class="d-flex align-items-center gap-2 flex-shrink-0">
             {#if goal.observations?.length}
@@ -150,6 +147,8 @@
   .goal-item.expanded {
     margin-inline: -0.5rem;
     border-radius: var(--bs-border-radius);
+    border-color: var(--bs-border-color);
+    border-width: 0.2px !important;
   }
 
   .highlighted {
