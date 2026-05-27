@@ -14,7 +14,7 @@
 {#if $currentUser}
   <GroupsCompact />
   {#if $currentUser.isStudent && !$currentUser.isTeacher}
-    <StudentSubjects />
+    <StudentSubjects student={$currentUser} />
   {/if}
   <ObservationsLatest />
 {:else}

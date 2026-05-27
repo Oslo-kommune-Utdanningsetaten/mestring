@@ -1,27 +1,32 @@
 <script lang="ts">
-  import type { ObservationType, GroupType, SubjectType } from '../generated/types.gen'
+  import type { UserType, GroupType, SubjectType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
   import { groupsList } from '../generated/sdk.gen'
   import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
-  import StudentSubjectChart from './StudentSubjectChart.svelte'
+  import StudentSubject from './StudentSubject.svelte'
 
-  let { currentSchool, currentUser, subjects } = $derived($dataStore)
+  const { student } = $props<{
+    student: UserType
+  }>()
+
+  let { currentSchool, subjects } = $derived($dataStore)
   let groups = $state<GroupType[]>([])
   let goalsBySubjectId = $state<Record<string, GoalDecorated[]>>({})
-  let hoveredSubjectId = $state<string | null>(null)
-  let hoveredGoalId = $state<string | null>(null)
   let studentSubjects = $state<SubjectType[]>([])
+  let isLoading = $state(true)
 
   const fetchData = async () => {
     try {
       const groupsResult = await groupsList({
-        query: { school: currentSchool.id, user: currentUser.id },
+        query: { school: currentSchool.id, user: student.id },
       })
       groups = (groupsResult.data || []).filter(group => group.type === 'teaching')
     } catch (error) {
-      console.error(`Could not load subjects for ${currentUser.id}`, error)
+      console.error(`Could not load subjects for ${student.id}`, error)
       groups = []
+      isLoading = false
+      return
     }
     studentSubjects = subjects.filter(subject =>
       groups.some(group => group.subjectId === subject.id)
@@ -31,13 +36,14 @@
       studentSubjects.map(async subject => {
         const goals = await fetchGoalsForSubjectAndStudent(
           subject.id,
-          currentUser.id,
+          student.id,
           currentSchool?.id!,
-          currentUser.allGroups
+          student.allGroups
         )
         goalsBySubjectId = { ...goalsBySubjectId, [subject.id]: goals }
       })
     )
+    isLoading = false
   }
 
   $effect(() => {
@@ -49,126 +55,25 @@
 
 <section class="py-4">
   <h2>Mine fag</h2>
-
-  {#if groups.length < 1}
+  {#if isLoading}
+    <div class="spinner-border spinner-border-sm" role="status">
+      <span class="visually-hidden">Henter data...</span>
+    </div>
+  {:else if groups.length < 1}
     <div class="mt-3">🫤 Ingen fag, gitt.</div>
   {:else}
-    <div class="card shadow-sm mt-4">
-      <ul class="list-group list-group-flush">
-        {#each groups as group (group.id)}
-          {@const subject = studentSubjects.find(s => s.id === group.subjectId)}
-          {#if subject}
-            {@const subjectName = subject.shortName || subject.displayName || subject.grepCode}
-            <li class="list-group-item">
-              <h3 class="mt-3 mb-1">
-                {subjectName}
-              </h3>
-              <hr class="border border-1 mt-0" />
-              <div class="subject-card-layout py-3">
-                <ul class="goals-list list-unstyled mb-0">
-                  {#each goalsBySubjectId[subject.id] as goal (goal.id)}
-                    <li
-                      class="goal-row d-flex align-items-center justify-content-between gap-2 py-1"
-                      onmouseenter={() => {
-                        hoveredGoalId = goal.id
-                      }}
-                      onmouseleave={() => {
-                        hoveredGoalId = null
-                      }}
-                    >
-                      <span>{goal.title}</span>
-                      {#if goal.observations?.length}
-                        <span
-                          class="badge rounded-pill bg-secondary flex-shrink-0"
-                          class:highlighted={hoveredGoalId === goal.id}
-                        >
-                          {goal.observations.length} observasjon{goal.observations.length === 1
-                            ? ''
-                            : 'er'}
-                        </span>
-                      {/if}
-                    </li>
-                  {/each}
-                </ul>
-
-                <div
-                  class="chart-wrapper"
-                  role="img"
-                  aria-label="Mestringsoversikt for {subjectName}"
-                  onmouseover={() => {
-                    hoveredSubjectId = subject.id
-                  }}
-                  onmouseleave={() => {
-                    hoveredSubjectId = null
-                  }}
-                  onfocus={() => {
-                    hoveredSubjectId = subject.id
-                  }}
-                  onblur={() => {
-                    hoveredSubjectId = null
-                  }}
-                >
-                  <StudentSubjectChart
-                    student={currentUser}
-                    {subject}
-                    isLabelEnabled={hoveredSubjectId === subject.id}
-                    highlightedGoalId={hoveredGoalId}
-                  />
-                </div>
-              </div>
-            </li>
-          {/if}
-        {/each}
-      </ul>
+    <div class="card shadow-sm mt-4 list-group">
+      {#each groups as group (group.id)}
+        {@const subject = studentSubjects.find(s => s.id === group.subjectId)}
+        {#if subject}
+          <div class="list-group-item">
+            <StudentSubject {student} {subject} goals={goalsBySubjectId[subject.id]} />
+          </div>
+        {/if}
+      {/each}
     </div>
   {/if}
 </section>
 
 <style>
-  hr {
-    border-color: var(--bs-primary-rgb) !important;
-    opacity: 25%;
-  }
-
-  .subject-card-layout {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    align-items: center;
-  }
-
-  .goals-list {
-    width: 60%;
-  }
-
-  .goal-row {
-    border-bottom: 1px solid var(--bs-border-color);
-  }
-
-  .goal-row:last-child {
-    border-bottom: none;
-  }
-
-  .highlighted {
-    background-color: var(--bs-primary) !important;
-  }
-
-  @media (min-width: 768px) {
-    .subject-card-layout {
-      position: relative;
-      padding-right: calc(35% + 1rem);
-    }
-
-    .goals-list {
-      width: 100%;
-    }
-
-    .chart-wrapper {
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 35%;
-    }
-  }
 </style>
