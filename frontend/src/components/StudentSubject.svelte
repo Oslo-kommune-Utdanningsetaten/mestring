@@ -80,11 +80,9 @@
               </span>
 
               <!-- Mastery Badge -->
-              <span>
-                {#if goal.masteryData}
-                  <MasteryLevelBadge masteryData={goal.masteryData} {masterySchema} />
-                {/if}
-              </span>
+              {#if goal.masteryData}
+                <MasteryLevelBadge masteryData={goal.masteryData} {masterySchema} />
+              {/if}
 
               <ButtonIcon
                 options={{
