@@ -43,6 +43,11 @@
     }
   })
 
+  const handleToggleVisibility = () => {
+    localObservation.isVisibleToStudent = !localObservation.isVisibleToStudent
+    localObservation = { ...localObservation } // Trigger reactivity
+  }
+
   const handleSave = async () => {
     localObservation.studentId = student?.id
     localObservation.goalId = goal?.id
@@ -92,6 +97,16 @@
         title="Hvor godt mestrer {student?.name} {goal?.title || 'dette målet'}?"
       />
     {/if}
+
+    <pkt-checkbox
+      class="ms-auto"
+      label={localObservation.isVisibleToStudent ? 'Synlig for eleven' : 'IKKE synlig for eleven'}
+      labelPosition="right"
+      isSwitch="true"
+      aria-checked={localObservation.isVisibleToStudent}
+      checked={localObservation.isVisibleToStudent}
+      onchange={() => handleToggleVisibility()}
+    ></pkt-checkbox>
 
     {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
       <div class="form-group">
