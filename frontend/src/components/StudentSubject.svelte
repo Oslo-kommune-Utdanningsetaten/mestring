@@ -1,7 +1,7 @@
 <script lang="ts">
   import { useTinyRouter } from 'svelte-tiny-router'
 
-  import type { SubjectType, UserType } from '../generated/types.gen'
+  import type { SubjectType, UserType, GoalType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
@@ -9,6 +9,7 @@
   import StudentSubjectChart from './StudentSubjectChart.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
   import GoalObservations from './GoalObservations.svelte'
+  import MasteryLevelBadge from './MasteryLevelBadge.svelte'
 
   const { subject, student, goals } = $props<{
     subject: SubjectType
@@ -40,6 +41,10 @@
       : urlStringFrom({})
     router.navigate(newUrl)
   }
+
+  const getMasterySchmemaForGoal = (goal: GoalType) => {
+    return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
+  }
 </script>
 
 <h3 class="mt-3 mb-1">
@@ -50,6 +55,7 @@
   <ul class="goals-list list-unstyled mb-0">
     {#each goals as goal (goal.id)}
       {@const isExpanded = expandedGoalIds.includes(goal.id)}
+      {@const masterySchema = getMasterySchmemaForGoal(goal)}
       <div
         class="list-group-item goal-item {isExpanded ? 'shadow z-1 expanded' : ''}"
         class:hatched-background={!goal.isRelevant}
@@ -63,7 +69,7 @@
         }}
       >
         <li class="goal-row d-flex align-items-center justify-content-between gap-2 py-1">
-          <span>{goal.title}</span>
+          <span>{goal.title || goal.sortOrder}</span>
           <span class="d-flex align-items-center gap-2 flex-shrink-0">
             {#if goal.observations?.length}
               <span
@@ -72,6 +78,14 @@
               >
                 {goal.observations.length} observasjon{goal.observations.length === 1 ? '' : 'er'}
               </span>
+
+              <!-- Mastery Badge -->
+              <span>
+                {#if goal.masteryData}
+                  <MasteryLevelBadge masteryData={goal.masteryData} {masterySchema} />
+                {/if}
+              </span>
+
               <ButtonIcon
                 options={{
                   iconName: `chevron-thin-${expandedGoalIds.includes(goal.id) ? 'up' : 'down'}`,
@@ -145,7 +159,7 @@
   }
 
   .goal-item.expanded {
-    margin-inline: -0.5rem;
+    margin-inline: -1.5rem;
     border-radius: var(--bs-border-radius);
     border-color: var(--bs-border-color);
     border-width: 0.2px !important;

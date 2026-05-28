@@ -2,11 +2,8 @@
   import type { ObservationType, SubjectType, UserType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
-  import { localStorage } from '../stores/localStorage'
-  import { fetchGoalsForSubjectAndStudent, isNumber } from '../utils/functions'
+  import { getContrastFriendlyTextColor, isNumber } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/access'
-  import { addAlert } from '../stores/alerts'
-  import { trackEvent } from '../stores/analytics'
   import { getMasteryLevelColorByValue, getMasteryTitleByValue } from '../utils/masteryHelpers'
 
   import AuthorInfo from './AuthorInfo.svelte'
@@ -57,19 +54,19 @@
 <div class="goal-secondary-row">
   {#if goal.observations?.length}
     {#each goal?.observations as observation, index}
+      {@const bgColor = getMasteryLevelColor(observation) ?? 'inherit'}
+      {@const color = getContrastFriendlyTextColor(bgColor)}
       <div class="student-observations-row observation-item">
         <span>
           <AuthorInfo item={observation} />
         </span>
-        <span
-          class="px-1"
-          style="background-color: {getMasteryLevelColor(observation) ?? 'inherit'}"
-        >
+        <span class="px-1 my-1" style="background-color: {bgColor}; color: {color};">
           {getMasteryLevelTitle(observation)}
           {#if isMasteryValueAvailable(observation)}
             [{observation.masteryValue}]
           {/if}
         </span>
+
         <span>
           <ButtonIcon
             options={{

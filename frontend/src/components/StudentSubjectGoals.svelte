@@ -54,6 +54,9 @@
   let isStatusEditorOpen = $state<boolean>(false)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
   let chartKey = $state<number>(0) // key used to force re-render of StudentSubjectChart component when goals are updated
+  let subjectName = $derived(
+    subject ? subject.shortName || subject.displayName || subject.grepCode : 'ukjent fag'
+  )
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
 
@@ -295,7 +298,7 @@
 
 <div class="d-flex align-items-center gap-2 mt-2">
   <h3>
-    {subject ? subject.displayName : 'Ukjent'}
+    {subjectName}
   </h3>
   {#if $hasUserAccessToFeature( 'goal', 'create', { subjectId: subject.id, studentId: student.id, studentGroupIds: student.groupIds } )}
     <ButtonIcon
