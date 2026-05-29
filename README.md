@@ -17,7 +17,6 @@ python import/fetch_feide_groups.py # download all feide groups the application 
 python import/import_fetched_groups_to_db.py # import everything in groups.json into the database
 python import/fetch_feide_users.py # for groups in the db, download members from feide, write all to local users.json file
 python import/import_fetched_users_to_db.py # import everything in users.json into the database
-python import/import_from_excel.py # imports any data in the excel file, into the database
 ```
 
 ### Problems encountered with Django, MSSQL and macOS

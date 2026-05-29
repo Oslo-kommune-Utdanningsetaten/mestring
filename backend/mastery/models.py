@@ -148,6 +148,10 @@ class User(BaseModel):
         """Get all groups of a specific type (e.g. 'basis', 'teaching')"""
         return self.groups.filter(type=group_type)
 
+    def _get_groups_at_school(self, school):
+        """Get all groups at a specific school wherein the user is member"""
+        return self.groups.filter(school=school)
+
     def get_schools(self):
         """Return all schools a user belongs to, via group or school memberships"""
         group_schools = School.objects.filter(groups__members=self)
@@ -356,13 +360,11 @@ class Observation(BaseModel):
     goal = models.ForeignKey(Goal, on_delete=models.CASCADE, null=False, related_name='observations')
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False,
                                 related_name='observations_received')
-    observer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
-                                 related_name='observations_performed')
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name='observations')
     mastery_value = models.IntegerField(null=True)
     mastery_description = models.TextField(null=True)
     feedforward = models.TextField(null=True)
-    observed_at = models.DateTimeField(null=True)
+    observed_at = models.DateTimeField(null=True)  # do we need this?
     is_visible_to_student = models.BooleanField(default=True)
 
     def save(self, **kwargs):

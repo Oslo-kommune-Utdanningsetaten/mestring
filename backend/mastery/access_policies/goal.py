@@ -74,8 +74,8 @@ class GoalAccessPolicy(BaseAccessPolicy):
         if requester.is_superadmin:
             return qs
         try:
-            teacher_group_ids = list(
-                requester.teacher_groups.values_list('id', flat=True))
+            teacher_teaching_group_ids = list(
+                requester.teacher_groups.filter(type='teaching').values_list('id', flat=True))
             teacher_basis_group_ids = list(
                 requester.teacher_groups.filter(type='basis').values_list('id', flat=True))
             student_group_ids = list(
@@ -92,24 +92,33 @@ class GoalAccessPolicy(BaseAccessPolicy):
                 filters |= Q(school_id__in=school_employee_ids)
 
             # Teaching group teachers: Group goals + individual goals for students they teach
-            if teacher_group_ids:
+            if teacher_teaching_group_ids:
                 # Group goals in groups they teach
-                filters |= Q(group_id__in=teacher_group_ids)
+                filters |= Q(group_id__in=teacher_teaching_group_ids)
 
-                # Check if teacher teaches the subject to the student
+                # Check if teacher teaches the subject to the student at the same school
                 student_in_teacher_subject = UserGroup.objects.filter(
                     user_id=OuterRef('student_id'),  # Student from the goal
-                    group_id__in=teacher_group_ids,  # Groups the teacher teaches
+                    group_id__in=teacher_teaching_group_ids,  # Groups the teacher teaches
                     group__subject_id=OuterRef('subject_id'),  # Subject from the goal
+                    group__school_id=OuterRef('school_id'),  # Same school as the goal
                 )
 
                 qs = qs.annotate(teacher_teaches_student_subject=Exists(student_in_teacher_subject))
                 filters |= Q(student__isnull=False, teacher_teaches_student_subject=True)
 
-            # Basis group teachers: All goals for students in their basis group
+            # Basis group teachers: All goals for students in their basis group at the same school
             if teacher_basis_group_ids:
-                filters |= Q(student__groups__id__in=teacher_basis_group_ids)
-                filters |= Q(group__members__groups__id__in=teacher_basis_group_ids)
+                # Individual goals for students in basis group at the same school
+                basis_membership = UserGroup.objects.filter(
+                    user_id=OuterRef('student_id'),
+                    group_id__in=teacher_basis_group_ids,
+                    group__school_id=OuterRef('school_id'),
+                )
+                qs = qs.annotate(student_in_basis_group=Exists(basis_membership))
+                filters |= Q(student_in_basis_group=True)
+                # Group goals where the group is one of the teacher's basis groups
+                filters |= Q(group_id__in=teacher_basis_group_ids)
 
             # Students: Own individual goals + group goals in their groups
             filters |= Q(student=requester)

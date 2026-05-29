@@ -34,7 +34,6 @@
   interface DeletedObservation {
     id: string
     student_Name: string
-    observer_Name: string
     goal_Title: string
   }
 
@@ -230,14 +229,14 @@
         {#each data.changes.observation['soft-deleted'] as observation}
           <tr class="table-warning">
             <td>{observation.student_Name}</td>
-            <td>{observation.observer_Name}</td>
+            <td>{observation.creator_Name}</td>
             <td>{observation.goal_Title}</td>
           </tr>
         {/each}
         {#each data.changes.observation['hard-deleted'] as observation}
           <tr class="table-danger">
             <td>{observation.student_Name}</td>
-            <td>{observation.observer_Name}</td>
+            <td>{observation.creator_Name}</td>
             <td>{observation.goal_Title}</td>
           </tr>
         {/each}

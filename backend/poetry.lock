@@ -766,18 +766,6 @@ offline = ["drf-spectacular-sidecar"]
 sidecar = ["drf-spectacular-sidecar"]
 
 [[package]]
-name = "et-xmlfile"
-version = "2.0.0"
-description = "An implementation of lxml.xmlfile for the standard library"
-optional = false
-python-versions = ">=3.8"
-groups = ["main"]
-files = [
-    {file = "et_xmlfile-2.0.0-py3-none-any.whl", hash = "sha256:7a91720bc756843502c3b7504c77b8fe44217c85c537d85037f0f536151b2caa"},
-    {file = "et_xmlfile-2.0.0.tar.gz", hash = "sha256:dab3f4764309081ce75662649be815c4c9081e88f0837825f90fd28317d4da54"},
-]
-
-[[package]]
 name = "gunicorn"
 version = "23.0.0"
 description = "WSGI HTTP Server for UNIX"
@@ -918,18 +906,6 @@ files = [
 referencing = ">=0.31.0"
 
 [[package]]
-name = "lml"
-version = "0.2.0"
-description = "Load me later. A lazy plugin management system."
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "lml-0.2.0-py2.py3-none-any.whl", hash = "sha256:20c80728189e46e8d986f5d0cdf6d83c493471fc25b1c31a8cb3fa96e80b58f8"},
-    {file = "lml-0.2.0.tar.gz", hash = "sha256:8dd5afb4367a593d1cdb2144a05874cd9938f5266bebb0c9e1413200423c0d74"},
-]
-
-[[package]]
 name = "msgpack"
 version = "1.1.2"
 description = "MessagePack serializer"
@@ -1041,21 +1017,6 @@ files = [
 rsa = ["cryptography (>=3.0.0)"]
 signals = ["blinker (>=1.4.0)"]
 signedtoken = ["cryptography (>=3.0.0)", "pyjwt (>=2.0.0,<3)"]
-
-[[package]]
-name = "openpyxl"
-version = "3.1.5"
-description = "A Python library to read/write Excel 2010 xlsx/xlsm files"
-optional = false
-python-versions = ">=3.8"
-groups = ["main"]
-files = [
-    {file = "openpyxl-3.1.5-py2.py3-none-any.whl", hash = "sha256:5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2"},
-    {file = "openpyxl-3.1.5.tar.gz", hash = "sha256:cf0e3cf56142039133628b5acffe8ef0c12bc902d2aadd3e0fe5878dc08d1050"},
-]
-
-[package.dependencies]
-et-xmlfile = "*"
 
 [[package]]
 name = "packaging"
@@ -1246,43 +1207,6 @@ files = [
     {file = "pycparser-3.0.tar.gz", hash = "sha256:600f49d217304a5902ac3c37e1281c9fe94e4d0489de643a9504c5cdfdfc6b29"},
 ]
 markers = {main = "platform_python_implementation != \"PyPy\" and implementation_name != \"PyPy\"", dev = "implementation_name != \"PyPy\""}
-
-[[package]]
-name = "pyexcel-io"
-version = "0.6.7"
-description = "A python library to read and write structured data in csv, zipped csvformat and to/from databases"
-optional = false
-python-versions = ">=3.6"
-groups = ["main"]
-files = [
-    {file = "pyexcel_io-0.6.7-py2.py3-none-any.whl", hash = "sha256:add9f3c1489070ab0a3226bab7d23d4b84a364f5b44f3a14e2ce785ede88fcb3"},
-    {file = "pyexcel_io-0.6.7.tar.gz", hash = "sha256:2c33d8df505e21a13bed585ac6ab7d30ec826a9f156b758394af5d22359bddb9"},
-]
-
-[package.dependencies]
-lml = ">=0.0.4"
-
-[package.extras]
-extra = ["chardet"]
-ods = ["pyexcel-ods3 (>=0.6.0)"]
-xls = ["pyexcel-xls (>=0.6.0)"]
-xlsx = ["pyexcel-xlsx (>=0.6.0)"]
-
-[[package]]
-name = "pyexcel-xlsx"
-version = "0.6.1"
-description = "A wrapper library to read, manipulate and write data in xlsx and xlsmformat"
-optional = false
-python-versions = ">=3.6"
-groups = ["main"]
-files = [
-    {file = "pyexcel_xlsx-0.6.1-py2.py3-none-any.whl", hash = "sha256:c17d8c90ae6c2ae5672e469e6afe4336597e4ff479e5a93ba846ae46b7b80769"},
-    {file = "pyexcel_xlsx-0.6.1.tar.gz", hash = "sha256:80b7985d394b73abf5c52212027bbbc0c7f6090192bcbc76403f8672d74c7960"},
-]
-
-[package.dependencies]
-openpyxl = ">=2.6.1"
-pyexcel-io = ">=0.6.2"
 
 [[package]]
 name = "pygments"
@@ -1974,4 +1898,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.14"
-content-hash = "e42ddcb2634eb7b2d130d355ecabf2ac3d07125c898e9cc10c1578b23e351bb1"
+content-hash = "826daee5e7bbd127430103a5b45cddde600f65eb4425982f202acf104d384b27"

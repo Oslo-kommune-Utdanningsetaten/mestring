@@ -51,7 +51,6 @@
   const handleSave = async () => {
     localObservation.studentId = student?.id
     localObservation.goalId = goal?.id
-    localObservation.observerId = $currentUser?.id
     localObservation.observedAt = new Date().toISOString()
     let action = undefined
     try {

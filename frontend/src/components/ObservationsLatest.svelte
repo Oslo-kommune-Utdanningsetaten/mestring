@@ -28,7 +28,7 @@
     try {
       const query: Record<string, any> = { limit, school: currentSchool?.id }
       if (viewMode === 'teacher') {
-        query.observer = currentUser?.id
+        query.created_by = currentUser?.id
       } else if (viewMode === 'student') {
         query.student = currentUser?.id
       }

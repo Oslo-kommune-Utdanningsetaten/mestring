@@ -762,8 +762,8 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='observer',
-                description='Filter observations by who has done the observing.',
+                name='created_by',
+                description='Filter observations by creator.',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
@@ -838,7 +838,7 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
 
         if self.action == 'list':
             student_param, _ = get_request_param(self.request.query_params, 'student')
-            observer_param, _ = get_request_param(self.request.query_params, 'observer')
+            creator_param, _ = get_request_param(self.request.query_params, 'created_by')
             goal_param, _ = get_request_param(self.request.query_params, 'goal')
             subject_param, _ = get_request_param(self.request.query_params, 'subject')
             group_param, _ = get_request_param(self.request.query_params, 'group')
@@ -846,17 +846,17 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
             from_param, _ = get_request_param(self.request.query_params, 'from')
             to_param, _ = get_request_param(self.request.query_params, 'to')
 
-            if (not student_param) and (not observer_param) and (not goal_param) and (not group_param) and (not school_param):
+            if (not student_param) and (not creator_param) and (not goal_param) and (not group_param) and (not school_param):
                 raise ValidationError(
                     {'error': 'missing-parameter',
-                     'message': 'At least one of "student", "observer", "group" or "goal" parameters are required.'})
+                     'message': 'At least one of "student", "created_by", "group" or "goal" parameters are required.'})
 
             if student_param:
                 qs = qs.filter(
                     Q(student_id=student_param)
                 )
-            if observer_param:
-                qs = qs.filter(observer_id=observer_param)
+            if creator_param:
+                qs = qs.filter(created_by_id=creator_param)
             if goal_param:
                 qs = qs.filter(goal_id=goal_param)
             if subject_param:

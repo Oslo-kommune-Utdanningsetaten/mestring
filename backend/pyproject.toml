@@ -23,7 +23,6 @@ pyopenssl = ">=25.3,<27.0"
 gunicorn = "^23.0.0"
 uvicorn = "^0.38.0"
 nanoid = "^2.0.0"
-pyexcel-xlsx = "^0.6.1"
 psycopg2-binary = "^2.9.9"
 names = "^0.3.0"
 

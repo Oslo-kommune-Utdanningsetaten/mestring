@@ -85,14 +85,21 @@ class StatusAccessPolicy(BaseAccessPolicy):
                     user_id=OuterRef('student_id'),
                     group_id__in=teacher_group_ids,
                     group__subject_id=OuterRef('subject_id'),
+                    group__school_id=OuterRef('school_id'),
                 )
                 qs = qs.annotate(teacher_teaches_student_subject=Exists(
                     memberships_in_teacher_group_on_subject))
                 filters |= Q(student__isnull=False, teacher_teaches_student_subject=True)
 
-            # Basis teachers: All statuses for students in their basis group
+            # Basis teachers: All statuses for students in their basis group at the same school
             if teacher_basis_group_ids:
-                filters |= Q(student__groups__id__in=teacher_basis_group_ids)
+                overlapping_basis_memberships = UserGroup.objects.filter(
+                    user_id=OuterRef('student_id'),
+                    group_id__in=teacher_basis_group_ids,
+                    group__school_id=OuterRef('school_id'),
+                )
+                qs = qs.annotate(student_in_basis_group=Exists(overlapping_basis_memberships))
+                filters |= Q(student_in_basis_group=True)
 
             # Students: Statuses about themselves, if current date is after end_at
             filters |= Q(student=requester, end_at__lt=timezone.now())

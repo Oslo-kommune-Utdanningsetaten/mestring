@@ -135,11 +135,11 @@
 
   $effect(() => {
     if (!gridElement) return
-    const observer = new ResizeObserver(() => {
+    const obs = new ResizeObserver(() => {
       gridScrollWidth = gridElement!.scrollWidth
     })
-    observer.observe(gridElement)
-    return () => observer.disconnect()
+    obs.observe(gridElement)
+    return () => obs.disconnect()
   })
 </script>
 

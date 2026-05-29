@@ -182,7 +182,6 @@
         masteryValue: previousObservation?.masteryValue || null,
         studentId: student.id,
         goalId: goal.id,
-        observerId: $dataStore.currentUser.id,
       }
     }
     isObservationEditorOpen = true

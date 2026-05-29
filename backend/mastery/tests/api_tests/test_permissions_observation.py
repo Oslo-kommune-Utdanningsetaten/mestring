@@ -1,6 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
-from mastery.models import Observation, Goal, User
+from mastery.models import Observation, Goal, User, Group, Role
 
 
 @pytest.mark.django_db
@@ -34,13 +34,13 @@ def test_superadmin_observation_access(
     expected_ids = {observation_on_individual_goal.id, observation_on_group_goal.id}
     assert expected_ids.issubset({role["id"] for role in data})
 
-    # Can list observations by observer
-    observation_on_group_goal.observer = teacher
+    # Can list observations by creator
+    observation_on_group_goal.created_by = teacher
     observation_on_group_goal.save()
-    observation_on_individual_goal.observer = teacher
+    observation_on_individual_goal.created_by = teacher
     observation_on_individual_goal.save()
     resp = client.get(
-        "/api/observations/", {"observer": observation_on_individual_goal.observer.id}
+        "/api/observations/", {"created_by": observation_on_individual_goal.created_by.id}
     )
     assert resp.status_code == 200
     data = resp.json()
@@ -215,13 +215,6 @@ def test_user_observation_access(
         resp = client.get(f"/api/observations/{observation_on_individual_goal_other_student.id}/")
         assert resp.status_code == 200
 
-        # User can retrieve observations where they are observer
-        observation_on_individual_goal_other_student.created_by = other_student
-        observation_on_individual_goal_other_student.observer = user
-        observation_on_individual_goal_other_student.save()
-        resp = client.get(f"/api/observations/{observation_on_individual_goal_other_student.id}/")
-        assert resp.status_code == 200
-
 
 @pytest.mark.django_db
 def test_teaching_group_teacher_observation_access(
@@ -277,8 +270,8 @@ def test_teaching_group_teacher_observation_access(
     resp = client.get(f"/api/observations/{observation_untaught_subject.id}/")
     assert resp.status_code == 404
 
-    # Teacher can retrieve if they're the observer
-    observation_untaught_subject.observer = teacher
+    # Teacher can retrieve if they're the creator
+    observation_untaught_subject.created_by = teacher
     observation_untaught_subject.save()
     resp = client.get(f"/api/observations/{observation_untaught_subject.id}/")
     assert resp.status_code == 200
@@ -493,7 +486,7 @@ def test_basis_group_teacher_observation_access(
 @pytest.mark.django_db
 def test_student_observation_access(
         student, observation_on_individual_goal, observation_on_group_goal, other_student,
-        observation_on_individual_goal_other_student):
+        observation_on_individual_goal_other_student, other_school, teacher_role):
     client = APIClient()
     client.force_authenticate(user=student)
 
@@ -523,7 +516,7 @@ def test_student_observation_access(
     assert resp.status_code == 201
     created_obs_id = resp.json()["id"]
 
-    # Student cannot create observation and set is_visible_to_student to False it forces to True
+    # Student cannot create observation and set is_visible_to_student to False, it forces to True
     resp = client.post("/api/observations/", {
         "student_id": student.id,
         "goal_id": observation_on_individual_goal.goal.id,
@@ -577,6 +570,39 @@ def test_student_observation_access(
     # Cannot DELETE observation they didn't create
     resp = client.delete(f"/api/observations/{observation_on_group_goal.id}/")
     assert resp.status_code == 403
+
+    # Bug test: Student who is also a teacher at another school should not see
+    # invisible observations about themselves via the basis group filter leaking
+    # from the other school.
+    basis_group_at_other_school = Group.objects.create(
+        feide_id="fc:group:basis-at-other-school",
+        display_name="Klasse 1a",
+        type="basis",
+        school=other_school,
+        is_enabled=True,
+    )
+    # Make the student also a teacher in a basis group at the other school
+    basis_group_at_other_school.add_member(student, teacher_role)
+
+    # Now the student's teacher_groups includes basis_group_at_other_school,
+    # so scope_queryset will add student__groups__id__in=[basis_group_at_other_school.id]
+    # Make the student also a student member of that basis group (simulating cross-school membership)
+    student_role_obj = Role.objects.get(name="student")
+    basis_group_at_other_school.add_member(student, student_role_obj)
+
+    # Create an invisible observation about the student on a goal at their original school
+    invisible_observation_self = Observation.objects.create(
+        student=student,
+        goal=observation_on_group_goal.goal,
+        is_visible_to_student=False  # Not visible to students
+    )
+
+    # Student should NOT be able to see this invisible observation
+    resp = client.get(f"/api/observations/{invisible_observation_self.id}/")
+    assert resp.status_code == 404, (
+        "Student should not see invisible observations about themselves "
+        "via basis group filter leaking from another school"
+    )
 
 
 @pytest.mark.django_db

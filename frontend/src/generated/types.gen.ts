@@ -124,7 +124,6 @@ export type ObservationType = {
     readonly updatedById: string;
     goalId: string;
     studentId: string;
-    observerId?: string | null;
     subjectId?: string | null;
 };
 
@@ -222,7 +221,6 @@ export type PatchedObservationType = {
     readonly updatedById?: string;
     goalId?: string;
     studentId?: string;
-    observerId?: string | null;
     subjectId?: string | null;
 };
 
@@ -563,7 +561,6 @@ export type ObservationCreateType = {
     isVisibleToStudent?: boolean;
     goalId: string;
     studentId: string;
-    observerId?: string | null;
     subjectId?: string | null;
 };
 
@@ -630,7 +627,6 @@ export type PatchedObservationCreateType = {
     isVisibleToStudent?: boolean;
     goalId?: string;
     studentId?: string;
-    observerId?: string | null;
     subjectId?: string | null;
 };
 
@@ -1531,6 +1527,10 @@ export type ObservationsListData = {
     path?: never;
     query?: {
         /**
+         * Filter observations by creator.
+         */
+        createdBy?: string;
+        /**
          * Filter observations by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
         deleted?: 'exclude' | 'include' | 'only';
@@ -1550,10 +1550,6 @@ export type ObservationsListData = {
          * The maximum number of observations to return. Default is no limit.
          */
         limit?: number;
-        /**
-         * Filter observations by who has done the observing.
-         */
-        observer?: string;
         /**
          * Filter observations by goal.school_id
          */

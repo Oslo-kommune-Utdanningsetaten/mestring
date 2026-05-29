@@ -61,13 +61,13 @@ class ObservationAccessPolicy(BaseAccessPolicy):
     def scope_queryset(self, request, qs):
         """
         Filter observations based on who can see them:
-        - Everyone: Observations they created or observed (if visible)
+        - Everyone: Observations they created
         - School inspectors and admins: All observations with goals at their schools
         - Teaching group teachers:
           - Observations on group goals in groups they teach
           - Observations on individual goals for students they teach in that subject
         - Basis group teachers: All observations for students in their basis group
-        - Students: Observations about themselves (if visible)
+        - Students: Observations about themselves, if visible
         """
         requester = request.user
         if not requester:
@@ -83,9 +83,8 @@ class ObservationAccessPolicy(BaseAccessPolicy):
                 user_id=requester.id, role__name__in=["admin", "inspector"]).values_list(
                 "school_id", flat=True).distinct()
 
-            # Everyone can see observations they created or observed
+            # Everyone can see observations they created
             filters = Q(created_by=requester)
-            filters |= Q(observer=requester, is_visible_to_student=True)
 
             # School inspectors and admins: All observations for goals at their schools
             if school_employee_ids:
@@ -102,6 +101,7 @@ class ObservationAccessPolicy(BaseAccessPolicy):
                     user_id=OuterRef('goal__student_id'),
                     group_id__in=teacher_teaching_group_ids,
                     group__subject_id=OuterRef('subject_id'),
+                    group__school_id=OuterRef('goal__school_id'),
                 )
                 qs = qs.annotate(teacher_teaches_student_subject=Exists(
                     memberships_in_teacher_group_on_subject))
@@ -109,11 +109,16 @@ class ObservationAccessPolicy(BaseAccessPolicy):
 
             # Basis teachers: All observations for students in their basis group
             if teacher_basis_group_ids:
-                filters |= Q(student__groups__id__in=teacher_basis_group_ids)
+                overlapping_basis_memberships = UserGroup.objects.filter(
+                    user_id=OuterRef('student_id'),
+                    group_id__in=teacher_basis_group_ids,
+                    group__school_id=OuterRef('goal__school_id'),
+                )
+                qs = qs.annotate(student_in_basis_group=Exists(overlapping_basis_memberships))
+                filters |= Q(student_in_basis_group=True)
 
-            # Students: Observations about themselves (if visible)
+            # Students: Observations about themselves, if visible
             filters |= Q(student=requester, is_visible_to_student=True)
-
             return qs.filter(filters).distinct()
         except Exception:
             logger.exception("ObservationAccessPolicy.scope_queryset")
