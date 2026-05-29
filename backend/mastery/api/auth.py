@@ -136,6 +136,10 @@ def feidecallback(request):
         user, _ = User.objects.update_or_create(
             feide_id=feide_user_id,
             defaults={
+                'email': feide_user_id.replace('@feide.', '@'),
+                'last_activity_at': datetime.now()
+            },
+            create_defaults={
                 'name': user_info.get("displayName"),
                 'email': feide_user_id.replace('@feide.', '@'),
                 'last_activity_at': datetime.now()
