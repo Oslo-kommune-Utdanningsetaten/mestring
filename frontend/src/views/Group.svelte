@@ -35,6 +35,7 @@
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
   import UserTag from '../components/UserTag.svelte'
+  import StudentSubject from '../components/StudentSubject.svelte'
 
   const { groupId } = $props<{ groupId: string }>()
   const today = new Date()
@@ -60,6 +61,10 @@
   let subjects = $state<SubjectType[]>([])
   let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
+
+  let isCurrentUserOnlyStudent = $derived(
+    $dataStore.currentUser?.isStudent && !$dataStore.currentUser?.isTeacher
+  )
 
   const fetchGroupData = async () => {
     try {
@@ -320,13 +325,15 @@
             <div class="list-group-item goal-row {goal.isRelevant ? '' : 'hatched-background'}">
               <!-- Drag handle -->
               <span>
-                <pkt-icon
-                  title="Endre rekkefølge"
-                  class="me-2 row-handle-draggable"
-                  name="drag"
-                  role="button"
-                  tabindex="0"
-                ></pkt-icon>
+                {#if $hasUserAccessToFeature('goal', 'update', { groupId: group.id })}
+                  <pkt-icon
+                    title="Endre rekkefølge"
+                    class="me-2 row-handle-draggable"
+                    name="drag"
+                    role="button"
+                    tabindex="0"
+                  ></pkt-icon>
+                {/if}
               </span>
               <!-- Numbering -->
               <span>
@@ -340,31 +347,36 @@
               </span>
               <!-- Actions -->
               <span>
-                {#if isGoalInUse(goal.id)}
+                {#if isGoalInUse(goal.id) && $hasUserAccessToFeature( 'goal', 'update', { groupId: group.id } )}
                   <pkt-icon
                     name="lock-locked"
                     size="small"
                     title="Målet er i bruk av en eller flere elever"
                   ></pkt-icon>
-                {:else}
-                  <ButtonIcon
-                    options={{
-                      iconName: 'trash-can',
-                      title: 'Slett mål',
-                      classes: 'bordered',
-                      disabled: !goal.isRelevant || isGoalInUse(goal.id),
-                      onClick: () => handleDeleteGoal(goal.id),
-                      delayActionFor: 3,
-                    }}
-                  />
-                  <ButtonIcon
-                    options={{
-                      iconName: 'edit',
-                      title: 'Rediger mål',
-                      classes: 'bordered',
-                      onClick: () => handleEditGoal(goal),
-                    }}
-                  />
+                {/if}
+                {#if !isGoalInUse(goal.id)}
+                  {#if $hasUserAccessToFeature('goal', 'delete', { groupId: group.id })}
+                    <ButtonIcon
+                      options={{
+                        iconName: 'trash-can',
+                        title: 'Slett mål',
+                        classes: 'bordered',
+                        disabled: !goal.isRelevant || isGoalInUse(goal.id),
+                        onClick: () => handleDeleteGoal(goal.id),
+                        delayActionFor: 3,
+                      }}
+                    />
+                  {/if}
+                  {#if $hasUserAccessToFeature('goal', 'update', { groupId: group.id })}
+                    <ButtonIcon
+                      options={{
+                        iconName: 'edit',
+                        title: 'Rediger mål',
+                        classes: 'bordered',
+                        onClick: () => handleEditGoal(goal),
+                      }}
+                    />
+                  {/if}
                 {/if}
               </span>
             </div>
@@ -379,10 +391,30 @@
   {/if}
 
   <!-- Students Section -->
-  <section>
-    <h3 class="mb-3">Elever</h3>
+  {#if isCurrentUserOnlyStudent && subject}
+    <section class="card shadow-sm mt-4 list-group">
+      <div class="list-group-item">
+        <StudentSubject
+          student={$dataStore.currentUser}
+          {subject}
+          goals={goalsWithCalculatedMasteryByStudentId[$dataStore.currentUser.id]}
+          isTitleEnabled={false}
+        />
+      </div>
+    </section>
+  {/if}
 
-    {#if group.type === GROUP_TYPE_BASIS}
+  <!-- Students Section -->
+  <section>
+    <h3 class="mb-3">Elever i denne gruppa</h3>
+
+    {#if isCurrentUserOnlyStudent}
+      <section class="card shadow-sm mt-4 list-group">
+        <div class="list-group-item">
+          {students.map(student => student.name).join(', ')}
+        </div>
+      </section>
+    {:else if group.type === GROUP_TYPE_BASIS}
       <StudentsWithSubjects {students} {subjects} {group} />
     {:else if group.type === GROUP_TYPE_TEACHING}
       <StudentsWithGoals
@@ -398,8 +430,8 @@
       <div class="alert alert-warning">
         <div>Hm, denne gruppa har en uventet datastruktur</div>
         <pre>
-            {JSON.stringify(group, null, 2)}
-          </pre>
+        {JSON.stringify(group, null, 2)}
+      </pre>
       </div>
     {/if}
   </section>
@@ -479,7 +511,7 @@
 
   .goal-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 6fr 2fr;
+    grid-template-columns: 1fr 1fr 1fr 20fr 2fr;
     column-gap: 5px;
     background-color: var(--bs-light);
     min-height: 3rem;

@@ -11,10 +11,16 @@
   import GoalObservations from './GoalObservations.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
 
-  const { subject, student, goals } = $props<{
+  const {
+    subject,
+    student,
+    goals,
+    isTitleEnabled = true,
+  } = $props<{
     subject: SubjectType
     student: UserType
     goals: GoalDecorated[]
+    isTitleEnabled?: boolean
   }>()
 
   let { currentUser } = $derived($dataStore)
@@ -47,10 +53,12 @@
   }
 </script>
 
-<h3 class="mt-3 mb-1">
-  {subjectName}
-</h3>
-<hr class="border border-1 mt-0" />
+{#if isTitleEnabled}
+  <h3 class="mt-3 mb-1">
+    {subjectName}
+  </h3>
+  <hr class="border border-1 mt-0" />
+{/if}
 <div class="subject-card-layout py-3">
   <ul class="goals-list list-unstyled mb-0">
     {#each goals as goal (goal.id)}
