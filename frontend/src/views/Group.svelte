@@ -304,7 +304,7 @@
 
   {#if group.isEnabled}
     <!-- Group goals Section -->
-    {#if currentSchool?.isGroupGoalEnabled && group.subjectId}
+    {#if currentSchool?.isGroupGoalEnabled && group.subjectId && !isCurrentUserOnlyStudent}
       <section>
         <div class="d-flex align-items-center gap-2">
           <h3>Mål</h3>
@@ -390,30 +390,32 @@
     </h3>
   {/if}
 
-  <!-- Students Section -->
   {#if isCurrentUserOnlyStudent && subject}
-    <section class="card shadow-sm mt-4 list-group">
-      <div class="list-group-item">
-        <StudentSubject
-          student={$dataStore.currentUser}
-          {subject}
-          goals={goalsWithCalculatedMasteryByStudentId[$dataStore.currentUser.id]}
-          isTitleEnabled={false}
-        />
+    <section>
+      <h3 class="mb-3">Mål</h3>
+      <div class="card shadow-sm mt-4 list-group">
+        <div class="list-group-item">
+          <StudentSubject
+            student={$dataStore.currentUser}
+            {subject}
+            goals={goalsWithCalculatedMasteryByStudentId[$dataStore.currentUser.id]}
+            isTitleEnabled={false}
+          />
+        </div>
       </div>
     </section>
   {/if}
 
   <!-- Students Section -->
   <section>
-    <h3 class="mb-3">Elever i denne gruppa</h3>
+    <h3 class="mb-3">Elever</h3>
 
     {#if isCurrentUserOnlyStudent}
-      <section class="card shadow-sm mt-4 list-group">
+      <div class="card shadow-sm mt-4 list-group">
         <div class="list-group-item">
           {students.map(student => student.name).join(', ')}
         </div>
-      </section>
+      </div>
     {:else if group.type === GROUP_TYPE_BASIS}
       <StudentsWithSubjects {students} {subjects} {group} />
     {:else if group.type === GROUP_TYPE_TEACHING}
