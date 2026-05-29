@@ -2,7 +2,7 @@
   import { usersRetrieve } from '../generated/sdk.gen'
   import { fetchUserData } from '../utils/functions'
   import { USER_ROLES } from '../utils/constants'
-  import { dataStore, setCurrentSchool, currentUser } from '../stores/data'
+  import { dataStore, setCurrentSchool, currentUser, currentSchool } from '../stores/data'
   import type { GroupType, SchoolType } from '../generated/types.gen'
   import { localStorage } from '../stores/localStorage'
   import GroupTag from '../components/GroupTag.svelte'
@@ -120,7 +120,7 @@
             <div class="text-muted">{user.id}</div>
           </div>
           <div class="col-md-3 mb-2">
-            <strong>Roller</strong>
+            <strong>Roller ved {$dataStore.currentSchool.displayName.split(' ')[0]}</strong>
             <div class="text-muted">{userRoles.join(', ')}</div>
           </div>
         </div>
