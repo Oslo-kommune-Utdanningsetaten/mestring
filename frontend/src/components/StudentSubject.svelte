@@ -43,8 +43,11 @@
     }
     expandedGoalIds = Array.from(nextExpandedGoals)
     const newUrl = expandedGoalIds.length
-      ? urlStringFrom({ expanded: expandedGoalIds.join(',') }, { mode: 'merge' })
-      : urlStringFrom({})
+      ? urlStringFrom(
+          { expanded: expandedGoalIds.join(',') },
+          { path: window.location.pathname, mode: 'merge' }
+        )
+      : urlStringFrom({}, { path: window.location.pathname })
     router.navigate(newUrl)
   }
 
