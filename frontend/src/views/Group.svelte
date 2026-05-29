@@ -321,66 +321,70 @@
         </div>
 
         <div bind:this={goalsListElement} class="list-group mt-3">
-          {#each groupGoals as goal, index (goal.id)}
-            <div class="list-group-item goal-row {goal.isRelevant ? '' : 'hatched-background'}">
-              <!-- Drag handle -->
-              <span>
-                {#if $hasUserAccessToFeature('goal', 'update', { groupId: group.id })}
-                  <pkt-icon
-                    title="Endre rekkefølge"
-                    class="me-2 row-handle-draggable"
-                    name="drag"
-                    role="button"
-                    tabindex="0"
-                  ></pkt-icon>
-                {/if}
-              </span>
-              <!-- Numbering -->
-              <span>
-                {goal.sortOrder || index + 1}
-              </span>
-              <!-- Goal type icon -->
-              <span class="goal-type-icon"><GroupSVG /></span>
-              <!-- Goal title -->
-              <span>
-                {$dataStore.currentSchool.isGoalTitleEnabled ? goal.title : ''}
-              </span>
-              <!-- Actions -->
-              <span>
-                {#if isGoalInUse(goal.id) && $hasUserAccessToFeature( 'goal', 'update', { groupId: group.id } )}
-                  <pkt-icon
-                    name="lock-locked"
-                    size="small"
-                    title="Målet er i bruk av en eller flere elever"
-                  ></pkt-icon>
-                {/if}
-                {#if !isGoalInUse(goal.id)}
-                  {#if $hasUserAccessToFeature('goal', 'delete', { groupId: group.id })}
-                    <ButtonIcon
-                      options={{
-                        iconName: 'trash-can',
-                        title: 'Slett mål',
-                        classes: 'bordered',
-                        disabled: !goal.isRelevant || isGoalInUse(goal.id),
-                        onClick: () => handleDeleteGoal(goal.id),
-                        delayActionFor: 3,
-                      }}
-                    />
-                  {/if}
+          {#if groupGoals.length === 0}
+            Det er visst ikke noen mål for denne gruppa
+          {:else}
+            {#each groupGoals as goal, index (goal.id)}
+              <div class="list-group-item goal-row {goal.isRelevant ? '' : 'hatched-background'}">
+                <!-- Drag handle -->
+                <span>
                   {#if $hasUserAccessToFeature('goal', 'update', { groupId: group.id })}
-                    <ButtonIcon
-                      options={{
-                        iconName: 'edit',
-                        title: 'Rediger mål',
-                        classes: 'bordered',
-                        onClick: () => handleEditGoal(goal),
-                      }}
-                    />
+                    <pkt-icon
+                      title="Endre rekkefølge"
+                      class="me-2 row-handle-draggable"
+                      name="drag"
+                      role="button"
+                      tabindex="0"
+                    ></pkt-icon>
                   {/if}
-                {/if}
-              </span>
-            </div>
-          {/each}
+                </span>
+                <!-- Numbering -->
+                <span>
+                  {goal.sortOrder || index + 1}
+                </span>
+                <!-- Goal type icon -->
+                <span class="goal-type-icon"><GroupSVG /></span>
+                <!-- Goal title -->
+                <span>
+                  {$dataStore.currentSchool.isGoalTitleEnabled ? goal.title : ''}
+                </span>
+                <!-- Actions -->
+                <span>
+                  {#if isGoalInUse(goal.id) && $hasUserAccessToFeature( 'goal', 'update', { groupId: group.id } )}
+                    <pkt-icon
+                      name="lock-locked"
+                      size="small"
+                      title="Målet er i bruk av en eller flere elever"
+                    ></pkt-icon>
+                  {/if}
+                  {#if !isGoalInUse(goal.id)}
+                    {#if $hasUserAccessToFeature('goal', 'delete', { groupId: group.id })}
+                      <ButtonIcon
+                        options={{
+                          iconName: 'trash-can',
+                          title: 'Slett mål',
+                          classes: 'bordered',
+                          disabled: !goal.isRelevant || isGoalInUse(goal.id),
+                          onClick: () => handleDeleteGoal(goal.id),
+                          delayActionFor: 3,
+                        }}
+                      />
+                    {/if}
+                    {#if $hasUserAccessToFeature('goal', 'update', { groupId: group.id })}
+                      <ButtonIcon
+                        options={{
+                          iconName: 'edit',
+                          title: 'Rediger mål',
+                          classes: 'bordered',
+                          onClick: () => handleEditGoal(goal),
+                        }}
+                      />
+                    {/if}
+                  {/if}
+                </span>
+              </div>
+            {/each}
+          {/if}
         </div>
       </section>
     {/if}
