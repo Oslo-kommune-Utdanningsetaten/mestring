@@ -20,6 +20,8 @@
     href?: string
   }>()
 
+  const skin: string = 'gray'
+
   const iconName = $derived<string>(
     role === USER_ROLES.TEACHER ? 'lecture' : role === USER_ROLES.STUDENT ? 'education' : 'person'
   )
@@ -44,7 +46,7 @@
 </script>
 
 {#if userToDisplay}
-  <pkt-tag {iconName} skin="yellow">
+  <pkt-tag {iconName} {skin}>
     {#if href}
       <Link to={href}>
         {abbreviateName(userToDisplay.name, otherNames)}

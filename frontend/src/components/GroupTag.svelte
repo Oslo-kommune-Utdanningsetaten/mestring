@@ -36,7 +36,8 @@
       .join(' - ')
   )
 
-  const skin: string = $derived(group.type === GROUP_TYPE_BASIS ? 'blue' : 'green')
+  // const skin: string = $derived(group.type === GROUP_TYPE_BASIS ? 'blue' : 'green')
+  const skin: string = 'gray'
 
   const isGroupTypeChanged = $derived.by(() => {
     // Inspect feideId to determine original group type

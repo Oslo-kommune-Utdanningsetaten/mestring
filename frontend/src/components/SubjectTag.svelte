@@ -1,21 +1,34 @@
 <script lang="ts">
   import type { SubjectType } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
+  import Link from './Link.svelte'
 
-  const { subjectId } = $props<{
+  const { subjectId, title, onclick, href, classes } = $props<{
     subjectId: string | null | undefined
+    onclick?: () => void
+    href?: string
+    classes?: string
   }>()
 
+  const skin: string = 'gray'
+
   const subject = $derived($dataStore.subjects.find((sub: SubjectType) => sub.id === subjectId))
+  const subjectName = $derived(
+    subject ? subject.shortName || subject.displayName || subject.grep : 'ukjent fag'
+  )
 </script>
 
-<span class="subject">
-  {#if subject}
-    {subject.shortName || subject.displayName || subject.grepCode || `Fag med id ${subject.id}`}
-  {:else}
-    ukjent fag :/
-  {/if}
-</span>
+{#if href}
+  <pkt-tag {skin} class={classes}>
+    <Link to={href}>
+      {subjectName}
+    </Link>
+  </pkt-tag>
+{:else}
+  <pkt-tag {skin} class={classes}>
+    {subjectName}
+  </pkt-tag>
+{/if}
 
 <style>
   .subject {
