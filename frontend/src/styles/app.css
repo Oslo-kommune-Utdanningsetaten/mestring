@@ -85,65 +85,32 @@ h1 {
   margin-bottom: 0.3em;
 }
 
-a {
+a,
+a.nav-link,
+a.dropdown-item {
   cursor: pointer;
-  text-decoration-line: none;
-  text-decoration-thickness: 0px;
-  text-underline-offset: 0px;
-  text-decoration-color: from-font;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--bs-primary-hover) 20%, transparent);
   transition:
     text-decoration-thickness 0.2s ease-in,
     text-underline-offset 0.2s ease-in,
-    text-decoration-color 0.8s ease-in;
+    text-decoration-color 0.4s ease-in;
 }
 
-a:hover {
+a:hover,
+a.nav-link:hover,
+a.dropdown-item:hover {
   text-decoration-line: underline;
   text-decoration-thickness: 3px;
-  text-underline-offset: 4px;
+  text-underline-offset: 5px;
   text-decoration-color: var(--bs-primary-hover);
 }
 
 #app {
   max-width: none;
   padding: 0;
-}
-
-.link-button {
-  background-color: transparent;
-  border: 1px solid var(--bs-primary);
-  cursor: pointer;
-  padding: 4px 8px 3px 8px;
-  text-align: center;
-  text-decoration: none;
-  border-radius: 4px;
-  font-size: 1em;
-  transition:
-    background-color 0.2s ease-in,
-    color 0.2s ease-in;
-}
-
-.link-button:hover {
-  text-decoration: none;
-  background-color: var(--bs-primary-hover);
-  color: var(--bs-light) !important;
-}
-
-.student-grid-row {
-  display: grid;
-  grid-template-columns: var(--grid-template-student-columns);
-  gap: 1rem;
-  padding: 0.5rem 1rem;
-  align-items: center;
-  justify-items: start;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.student-grid-row.header {
-  background-color: var(--bs-light);
-  border-top-right-radius: inherit;
-  border-top-left-radius: inherit;
-  align-items: start;
 }
 
 .user-grid-row {
@@ -163,36 +130,6 @@ a:hover {
   align-items: start;
 }
 
-.group-grid-columns {
-  display: grid;
-  grid-template-columns: var(--grid-template-group-columns);
-  width: 100%;
-  gap: 0.5rem;
-}
-
-.group-grid-column {
-  padding: 0px;
-  text-align: left;
-  font-size: 0.8em;
-}
-
-.group-card-header {
-  border-top-right-radius: inherit;
-  border-top-left-radius: inherit;
-}
-
-.hover-glow {
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-}
-
-.hover-glow:hover {
-  filter: drop-shadow(0 0 15px var(--bs-primary-hover));
-  transform: scale(1.4);
-  background-color: rgba(0, 123, 255, 0.1);
-  border-radius: 50%;
-}
-
 .custom-button {
   background-color: var(--bs-primary);
   color: #fff;
@@ -208,16 +145,7 @@ a:hover {
   border: 2px solid var(--bs-primary);
   text-decoration: underline;
 }
-
-.rounded button {
-  svg {
-    border-radius: 50%;
-    width: 3rem;
-    height: 3rem;
-  }
-}
-
-.hatched-background {
+s .hatched-background {
   background-image: linear-gradient(
     135deg,
     #ededed 25%,

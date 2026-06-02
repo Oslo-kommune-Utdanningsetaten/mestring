@@ -87,15 +87,16 @@
             <li class="nav-item dropdown">
               <!-- svelte-ignore a11y_invalid_attribute -->
               <a
-                class={`nav-link dropdown-toggle ${isSchoolActive ? 'active' : ''}`}
-                id="navbarDropdown"
+                class={'nav-link dropdown-toggle'}
+                class:active={isSchoolActive}
+                id="navbarDropdownSchool"
                 role="button"
                 data-bs-toggle="dropdown"
                 href="#"
               >
                 Skolen
               </a>
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownSchool">
                 <!-- Students -->
                 {#if $hasUserAccessToPath('/students')}
                   <li class="nav-item">
@@ -126,15 +127,16 @@
             <li class="nav-item dropdown">
               <!-- svelte-ignore a11y_invalid_attribute -->
               <a
-                class={`nav-link dropdown-toggle ${isAdminActive ? 'active' : ''}`}
-                id="navbarDropdown"
+                class={'nav-link dropdown-toggle'}
+                class:active={isAdminActive}
+                id="navbarDropdownAdmin"
                 role="button"
                 data-bs-toggle="dropdown"
                 href="#"
               >
                 Admin
               </a>
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownAdmin">
                 {#if $hasUserAccessToPath('/admin/schools')}
                   <li>
                     <Link to="/admin/schools" className="dropdown-item">Alle skoler</Link>
@@ -196,15 +198,16 @@
           {#if $hasUserAccessToPath('/profile')}
             <li class="nav-item dropdown" title="Logget på som {$currentUser.name}">
               <a
-                class={`nav-link dropdown-toggle ${isProfileActive ? 'active' : ''}`}
-                id="navbarDropdown"
+                class={'nav-link dropdown-toggle'}
+                class:active={isProfileActive}
+                id="navbarDropdownProfile"
                 role="button"
                 data-bs-toggle="dropdown"
                 href="#"
               >
                 Profil
               </a>
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownProfile">
                 <li><Link to="/profile" className="dropdown-item">Min side</Link></li>
                 <li>
                   <Link to="/" className="dropdown-item" onclick={logout}>Logg ut</Link>
@@ -217,7 +220,7 @@
         <!-- Login -->
         {#if !$currentUser}
           <li class="nav-item">
-            <a class="nav-link" href="#" onclick={login}>Logg inn</a>
+            <Link to="#" className="nav-link" onclick={login}>Logg inn</Link>
           </li>
         {/if}
       </ul>
