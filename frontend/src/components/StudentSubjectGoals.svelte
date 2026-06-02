@@ -366,11 +366,11 @@
 
       <!-- Goal type icon -->
       {#if goal.isIndividual}
-        <span class="individual-goal-icon item" title="Individuelt mål">
+        <span class="item" title="Individuelt mål">
           <pkt-icon name="person" aria-hidden="true"></pkt-icon>
         </span>
       {:else}
-        <span class="group-goal-icon item" title="Gruppemål">
+        <span class="item" title="Gruppemål">
           <pkt-icon name="group" aria-hidden="true"></pkt-icon>
         </span>
       {/if}

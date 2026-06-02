@@ -145,7 +145,8 @@ a.dropdown-item:hover {
   border: 2px solid var(--bs-primary);
   text-decoration: underline;
 }
-s .hatched-background {
+
+.hatched-background {
   background-image: linear-gradient(
     135deg,
     #ededed 25%,
@@ -157,6 +158,10 @@ s .hatched-background {
     #fff 100%
   );
   background-size: 14.14px 14.14px;
+}
+
+.goal-type-icon > svg {
+  height: 1.2em;
 }
 
 mark {

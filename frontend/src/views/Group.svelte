@@ -528,8 +528,4 @@
     cursor: move;
     vertical-align: -8%;
   }
-
-  .goal-type-icon > :global(svg) {
-    height: 1.2em;
-  }
 </style>

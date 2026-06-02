@@ -80,7 +80,21 @@
         }}
       >
         <li class="goal-row d-flex align-items-center justify-content-between gap-2 py-1">
-          <span>{goal.title || goal.sortOrder}</span>
+          <span class="d-flex align-content-center gap-2">
+            {goal.title || goal.sortOrder}
+            {#if isExpanded}
+              {#if goal.isIndividual}
+                <span title="Individuelt mål">
+                  <pkt-icon class="goal-type-icon" name="person" aria-hidden="true"></pkt-icon>
+                </span>
+              {:else}
+                <span title="Gruppemål">
+                  <pkt-icon class="goal-type-icon" name="group" aria-hidden="true"></pkt-icon>
+                </span>
+              {/if}
+            {/if}
+          </span>
+
           <span class="d-flex align-items-center gap-2 flex-shrink-0">
             {#if goal.observations?.length}
               <span
