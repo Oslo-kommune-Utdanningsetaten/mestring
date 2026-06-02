@@ -68,7 +68,7 @@
       {@const isExpanded = expandedGoalIds.includes(goal.id)}
       {@const masterySchema = getMasterySchmemaForGoal(goal)}
       <div
-        class="list-group-item goal-item {isExpanded ? 'shadow z-1 expanded' : ''}"
+        class="list-group-item goal-item {isExpanded ? 'shadow expanded' : ''}"
         class:hatched-background={!goal.isRelevant}
         title={goal.isRelevant ? '' : 'Målet er ikke lenger relevant for eleven'}
         role="listitem"
@@ -183,6 +183,7 @@
 
   .goal-item.expanded {
     margin-inline: -1.5rem;
+    margin-bottom: 1.25rem;
     border-radius: var(--bs-border-radius);
     border-color: var(--bs-border-color);
     border-width: 0.2px !important;

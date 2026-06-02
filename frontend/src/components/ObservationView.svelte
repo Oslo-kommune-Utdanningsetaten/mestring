@@ -7,10 +7,11 @@
   import MasteryValueInput from './MasteryValueInput.svelte'
   import AuthorInfo from './AuthorInfo.svelte'
 
-  const { student, goal, observation, onDone } = $props<{
+  const { student, goal, observation, masteryTitle, onDone } = $props<{
     student: UserType | null
     goal: GoalType | null
     observation: ObservationType | {} | null
+    masteryTitle?: string
     onDone: () => void
   }>()
 
@@ -18,6 +19,9 @@
     $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
   )
   const calculations = $derived(useMasteryCalculations(masterySchema))
+  const masteryValueTitle = $derived(
+    masteryTitle || `Hvor godt mestrer ${student.name} ${goal.title || 'dette målet'}?`
+  )
 
   let localObservation = $state<Partial<ObservationType> & { masteryValue?: number }>({})
 
@@ -59,7 +63,7 @@
           {masterySchema}
           isInputEnabled={false}
           bind:value={localObservation.masteryValue}
-          title="Hvor godt mestrer {student?.name} {goal?.title || 'dette målet'}?"
+          title={masteryValueTitle}
         />
       </div>
     {/if}
@@ -67,14 +71,14 @@
     {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
       <div class="form-group mb-5">
         <h4 class="mb-2">Beskrivelse/tilbakemelding</h4>
-        <p>{localObservation.masteryDescription}</p>
+        <p>{localObservation.masteryDescription || 'Ingen beskrivelse'}</p>
       </div>
     {/if}
 
     {#if masterySchema?.config?.isFeedforwardInputEnabled}
       <div class="form-group mb-3">
         <h4 class="mb-2">Fremovermelding</h4>
-        <p>{localObservation.feedforward}</p>
+        <p>{localObservation.feedforward || 'Ingen fremovermelding'}</p>
       </div>
     {/if}
 

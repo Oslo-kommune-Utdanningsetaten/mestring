@@ -5,7 +5,10 @@
   import { getContrastFriendlyTextColor, isNumber } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { getMasteryLevelColorByValue, getMasteryTitleByValue } from '../utils/masteryHelpers'
+  import { addAlert } from '../stores/alerts'
 
+  import Offcanvas from './Offcanvas.svelte'
+  import ObservationView from './ObservationView.svelte'
   import AuthorInfo from './AuthorInfo.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
 
@@ -16,6 +19,9 @@
   }>()
 
   let masterySchema = $derived($dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId))
+  let observationWip = $state<ObservationType | {} | null>(null)
+  let isObservationEditorOpen = $state<boolean>(false)
+  let isObservationViewerOpen = $state<boolean>(false)
 
   const isMasteryValueAvailable = (observation: ObservationType): boolean => {
     if (!masterySchema || !isNumber(observation.masteryValue)) {
@@ -40,6 +46,15 @@
 
   const handleViewObservation = (observation: ObservationType) => {
     console.log('Viewing observation', observation)
+    if (observation) {
+      observationWip = observation
+      isObservationViewerOpen = true
+    } else {
+      addAlert({
+        type: 'danger',
+        message: 'Kunne ikke finne observasjon. Hvis du mener dette er en feil, kontakt support.',
+      })
+    }
   }
 
   const handleEditObservation = (observation: ObservationType) => {
@@ -60,7 +75,7 @@
         <span>
           <AuthorInfo item={observation} />
         </span>
-        <span class="px-1 my-1" style="background-color: {bgColor}; color: {color};">
+        <span class="masteryLevelTitle" style="background-color: {bgColor}; color: {color};">
           {getMasteryLevelTitle(observation)}
           {#if isMasteryValueAvailable(observation)}
             [{observation.masteryValue}]
@@ -109,6 +124,28 @@
   {/if}
 </div>
 
+<!-- offcanvas for viewing observations -->
+<Offcanvas
+  bind:isOpen={isObservationViewerOpen}
+  ariaLabel="Se observasjon"
+  onClosed={() => {
+    observationWip = null
+  }}
+>
+  {#if observationWip}
+    <ObservationView
+      {student}
+      observation={observationWip}
+      {goal}
+      masteryTitle=" "
+      onDone={() => {
+        observationWip = null
+        isObservationViewerOpen = false
+      }}
+    />
+  {/if}
+</Offcanvas>
+
 <style>
   div.observation-item > span {
     font-size: 0.85rem;
@@ -126,6 +163,11 @@
     grid-template-columns: 8fr 5fr 4fr;
     column-gap: 0.5rem;
     align-items: center;
+  }
+
+  .masteryLevelTitle {
+    padding: 0 0.25rem;
+    display: inline-block;
   }
 
   .student-observations-row > span:last-child {
