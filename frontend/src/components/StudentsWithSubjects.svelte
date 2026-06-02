@@ -54,7 +54,7 @@
   // Compute grid template columns
   const gridTemplateColumns = $derived.by(() => {
     const nameCol = 'minmax(6rem, 10rem)'
-    const normalCol = '7.1rem'
+    const normalCol = '7.2rem'
     const cols: string[] = [nameCol]
     subjects.forEach(() => cols.push(normalCol)) // one column per subject
     return cols.join(' ')
@@ -220,17 +220,16 @@
   </span>
 
   {#each subjects as subject (subject.id)}
+    {@const subjectName =
+      subject.shortName || subject.displayName || subject.grepCode || 'ukjent fag'}
+
     <span class="item header header-row">
       <button
         class="column-header-button sortable"
         onclick={() => handleHeaderClick(subject.id)}
-        title="Sorter etter antall observasjoner i {subject.displayName}"
+        title="Sorter etter antall observasjoner i {subject.grepCode}"
       >
-        {#if subject.ownedBySchoolId}
-          {subject.shortName}{getSortIndicator(subject.id)}
-        {:else}
-          {subject.grepCode}{getSortIndicator(subject.id)}
-        {/if}
+        {subjectName}{getSortIndicator(subject.id)}
       </button>
     </span>
   {/each}
