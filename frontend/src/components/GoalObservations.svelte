@@ -103,7 +103,7 @@
               />
             {/if}
           {/if}
-          {#if $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById } )}
+          {#if $hasUserAccessToFeature( 'observation', 'delete', { groupId: goal.groupId, createdById: observation.createdById } )}
             {#key observation.id}
               <ButtonIcon
                 options={{
