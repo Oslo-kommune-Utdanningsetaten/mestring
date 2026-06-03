@@ -136,6 +136,7 @@
               : undefined}
           >
             {#if observation.masteryDescription || observation.feedforward}
+              <!-- Description and/or feedforward -->
               {#if observation.masteryDescription}
                 <span class="mastery-text">
                   <span class="mastery-icon">←</span>
@@ -162,13 +163,17 @@
                 </span>
               {/if}
             {:else if isNumber(observation.masteryValue)}
+              <!-- Only value -->
               <div class="mastery-only">
-                <span class="mastery-level-title-only">{getMasteryLevelTitle(observation)}</span>
+                <span class="mastery-level-title-only">
+                  {getMasteryLevelTitle(observation)}
+                </span>
                 {#if isMasteryValueAvailable(observation)}
                   <span class="mastery-value-only">{observation.masteryValue}</span>
                 {/if}
               </div>
             {:else}
+              <!-- Nothing much to see here -->
               <span class="mastery-empty">–</span>
             {/if}
           </div>
@@ -277,8 +282,6 @@
 
   .mastery-level-title-corner {
     font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08rem;
     opacity: 0.85;
     font-weight: 600;
   }
@@ -294,13 +297,11 @@
 
   .mastery-level-title-only {
     font-size: clamp(0.8rem, 8cqi, 2rem);
-    text-transform: uppercase;
     font-weight: 900;
     line-height: 1;
   }
 
   .mastery-value-only {
-    letter-spacing: 0.1em;
     opacity: 0.85;
     font-weight: 600;
     opacity: 0.5;
