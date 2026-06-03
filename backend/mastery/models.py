@@ -404,7 +404,8 @@ class Status(BaseModel):
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='statuses')
     mastery_schema = models.ForeignKey(
         MasterySchema, on_delete=models.SET_NULL, null=True, related_name='statuses')
-    # if set, the status inherits the category's title, mastery_schema and period, and is linked to the category for easier querying. If not set, these fields are set on the status itself and can be used freely.
+    # If category is set, the status inherits the category's title and mastery_schema
+    # If not set, title and mastery_schema are set on the status itself
     category = models.ForeignKey(StatusCategory, on_delete=models.SET_NULL,
                                  null=True, related_name='statuses')
     begin_at = models.DateTimeField(null=False)  # begin and end define the period this status covers
