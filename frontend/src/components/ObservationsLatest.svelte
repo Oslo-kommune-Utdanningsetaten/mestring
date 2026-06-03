@@ -108,7 +108,6 @@
               />
             {/if}
             <div class="observation-goal-row">
-              <SubjectTag subjectId={observation.subjectId} />
               {#if cachedGoals[observation.goalId]}
                 <span class="observation-goal">
                   <Link to={`/students/${observation.studentId}?expanded=${observation.goalId}`}>
@@ -124,6 +123,7 @@
                   aria-hidden="true"
                 ></span>
               {/if}
+              <SubjectTag subjectId={observation.subjectId} />
             </div>
             <div class="observation-author">
               <AuthorInfo item={observation} />
