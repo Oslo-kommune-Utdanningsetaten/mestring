@@ -111,7 +111,7 @@
       } else {
         console.error('Unknown category', { statusCategory })
       }
-      return [statusCategory.title, ' ', season, yearShort].join('')
+      return [statusCategory.title, ' - ', season, yearShort].join('')
     }
     const beginMonth = formatMonthName(aStatus.beginAt)
     const endMonth = formatMonthName(aStatus.endAt)
