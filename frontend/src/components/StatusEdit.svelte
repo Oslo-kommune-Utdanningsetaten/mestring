@@ -32,64 +32,20 @@
     onDone: () => void
   }>()
 
-  const getUpdatedStatus = (aStatus: Partial<StatusType>): Partial<StatusType> => {
-    const updatedStatus = { ...aStatus }
-    const statusCategory = $dataStore.statusCategories.find(cat => cat.id === aStatus.categoryId)
-    if (statusCategory) {
-      const currentMasterySchema = $dataStore.masterySchemas.find(
-        ms => ms.id === aStatus.masterySchemaId
-      )
-      const nextMasterySchema = $dataStore.masterySchemas.find(
-        ms => ms.id === statusCategory.masterySchemaId
-      )
-      if (!areSchemaValuesConsistent([currentMasterySchema, nextMasterySchema])) {
-        updatedStatus.masteryValue = null // Reset mastery value if schemas are inconsistent
-      }
-      updatedStatus.title = statusCategory.title
-      updatedStatus.masterySchemaId = statusCategory.masterySchemaId
-
-      if (!statusCategory.isSubjectSpecific) {
-        updatedStatus.subjectId = null // Unset subject for non-subject-specific category
-      }
-      const { startAt, midyearAt, endAt } = calculateSchoolYearMilestones()
-      if (statusCategory.name === 'midyear') {
-        // Halvtårs
-        updatedStatus.beginAt = startAt
-        updatedStatus.endAt = midyearAt
-      } else if (statusCategory.name === 'endyear') {
-        // Standpunkt
-        updatedStatus.beginAt = startAt
-        updatedStatus.endAt = endAt
-      } else if (statusCategory.name === 'risk') {
-        // IVF/G
-        updatedStatus.beginAt = startAt
-        updatedStatus.endAt = endAt
-      } else {
-        console.error('Unknown category', { statusCategory })
-      }
-    } else {
-      updatedStatus.title = null
-      updatedStatus.masterySchemaId = $dataStore.defaultMasterySchema.id
-      updatedStatus.subjectId = subject?.id
-      updatedStatus.beginAt = status.beginAt?.split('T')[0]
-      updatedStatus.endAt = status.endAt?.split('T')[0]
-    }
-    return updatedStatus
-  }
-
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   let localStudent = $state<UserType | null>(null)
+  let localStatus = $state<Partial<StatusType> & { masteryValue?: number | null }>({ ...status })
+  let localGoals = $state<GoalDecorated[] | null>([])
+  let isGoalSectionExpanded = $state<boolean>(false)
+  let validationErrors = $state<{ beginAt?: string; endAt?: string }>({})
+
   let selectableSubjects = $derived(
     subjectsInCommon($dataStore.currentUser, localStudent!, $dataStore.subjects)
   )
+
   let subject = $derived(
     status.subjectId && selectableSubjects?.find((s: SubjectType) => s.id === status.subjectId)
   )
-  let localStatus = $state<Partial<StatusType> & { masteryValue?: number | null }>(
-    getUpdatedStatus(status)
-  )
-  let localGoals = $state<GoalDecorated[] | null>([])
-  let isGoalSectionExpanded = $state<boolean>(false)
 
   let selectableStatusCategories = $derived(
     $dataStore.statusCategories.filter(
@@ -119,8 +75,6 @@
     )
   })
 
-  let validationErrors = $state<{ beginAt?: string; endAt?: string }>({})
-
   const getMasterySchemaForGoal = (goal: GoalType) => {
     return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
   }
@@ -136,12 +90,28 @@
       currentSchoolId,
       $dataStore.currentUser.allGroups
     )
+    localStatus = getUpdatedStatus(localStatus)
   }
 
   const generateTitle = (aStatus: Partial<StatusType>): string => {
     const statusCategory = selectableStatusCategories.find(cat => cat.id === aStatus.categoryId)
     if (statusCategory) {
-      return statusCategory.title
+      const today = new Date()
+      let season = ''
+      let yearShort = ''
+      if (statusCategory.name === 'midyear') {
+        season = 'h'
+        yearShort = (today.getFullYear() - 1).toString().slice(-2)
+      } else if (statusCategory.name === 'endyear') {
+        season = 'v'
+        yearShort = today.getFullYear().toString().slice(-2)
+      } else if (statusCategory.name === 'risk') {
+        season = today.getMonth() < 7 ? 'v' : 'h'
+        yearShort = today.getFullYear().toString().slice(-2)
+      } else {
+        console.error('Unknown category', { statusCategory })
+      }
+      return [statusCategory.title, ' ', season, yearShort].join('')
     }
     const beginMonth = formatMonthName(aStatus.beginAt)
     const endMonth = formatMonthName(aStatus.endAt)
@@ -224,6 +194,51 @@
         message: `Noe gikk galt ved lagring av status for ${localStudent?.name}.`,
       })
     }
+  }
+
+  const getUpdatedStatus = (aStatus: Partial<StatusType>): Partial<StatusType> => {
+    const updatedStatus = { ...aStatus }
+    const statusCategory = $dataStore.statusCategories.find(cat => cat.id === aStatus.categoryId)
+    if (statusCategory) {
+      const currentMasterySchema = $dataStore.masterySchemas.find(
+        ms => ms.id === aStatus.masterySchemaId
+      )
+      const nextMasterySchema = $dataStore.masterySchemas.find(
+        ms => ms.id === statusCategory.masterySchemaId
+      )
+      if (!areSchemaValuesConsistent([currentMasterySchema, nextMasterySchema])) {
+        updatedStatus.masteryValue = null // Reset mastery value if schemas are inconsistent
+      }
+      updatedStatus.title = generateTitle(updatedStatus)
+      updatedStatus.masterySchemaId = statusCategory.masterySchemaId
+
+      if (!statusCategory.isSubjectSpecific) {
+        updatedStatus.subjectId = null // Unset subject for non-subject-specific category
+      }
+      const { startAt, midyearAt, endAt } = calculateSchoolYearMilestones()
+      if (statusCategory.name === 'midyear') {
+        // Halvtårs
+        updatedStatus.beginAt = startAt
+        updatedStatus.endAt = midyearAt
+      } else if (statusCategory.name === 'endyear') {
+        // Standpunkt
+        updatedStatus.beginAt = startAt
+        updatedStatus.endAt = endAt
+      } else if (statusCategory.name === 'risk') {
+        // IVF/G
+        updatedStatus.beginAt = startAt
+        updatedStatus.endAt = endAt
+      } else {
+        console.error('Unknown category', { statusCategory })
+      }
+    } else {
+      updatedStatus.title = null
+      updatedStatus.masterySchemaId = $dataStore.defaultMasterySchema.id
+      updatedStatus.subjectId = subject?.id
+      updatedStatus.beginAt = status.beginAt?.split('T')[0]
+      updatedStatus.endAt = status.endAt?.split('T')[0]
+    }
+    return updatedStatus
   }
 
   $effect(() => {
