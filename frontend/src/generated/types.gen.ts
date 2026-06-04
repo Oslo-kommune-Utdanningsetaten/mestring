@@ -1895,17 +1895,17 @@ export type StatusListData = {
     path?: never;
     query?: {
         /**
+         * Filter statuses by status_category.name.
+         */
+        categoryName?: string;
+        /**
          * Filter statuses by users who have created or updated it.
          */
         editor?: string;
         /**
-         * Filter statuses by group.
+         * Filter statuses by students in group.
          */
         group?: 'exclude' | 'include' | 'only';
-        /**
-         * Filter statuses by status name.
-         */
-        name?: string;
         /**
          * Filter statuses by school.
          */

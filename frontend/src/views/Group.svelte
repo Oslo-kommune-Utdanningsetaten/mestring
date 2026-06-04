@@ -36,6 +36,7 @@
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
   import UserTag from '../components/UserTag.svelte'
   import StudentSubject from '../components/StudentSubject.svelte'
+  import Link from '../components/Link.svelte'
 
   const { groupId } = $props<{ groupId: string }>()
   const today = new Date()
@@ -64,6 +65,10 @@
 
   let isCurrentUserOnlyStudent = $derived(
     $dataStore.currentUser?.isStudent && !$dataStore.currentUser?.isTeacher
+  )
+
+  const availableStatusCategories = $derived(
+    $dataStore.statusCategories.filter(cat => cat.isEnabled)
   )
 
   const fetchGroupData = async () => {
@@ -303,6 +308,20 @@
   </section>
 
   {#if group.isEnabled}
+    <!-- Group goals Section -->
+    {#if availableStatusCategories.length}
+      <section>
+        <h3 class="mb-3">Status?</h3>
+        <ul>
+          {#each availableStatusCategories as category}
+            <li>
+              <Link to="/groups/{group.id}/statuses/{category.name}">{category.title}</Link>
+            </li>
+          {/each}
+        </ul>
+      </section>
+    {/if}
+
     <!-- Group goals Section -->
     {#if currentSchool?.isGroupGoalEnabled && group.subjectId && !isCurrentUserOnlyStudent}
       <section>

@@ -84,10 +84,12 @@
   })
 </script>
 
-<div class="mt-4 mb-4">
-  <label class="form-label" for="mastery-slider">
-    {label}
-  </label>
+<div>
+  {#if label}
+    <label class="form-label" for="mastery-slider">
+      {label}
+    </label>
+  {/if}
 
   <div class="stairs-container d-flex align-items-end mb-5">
     {#each calculations.masteryLevels as masteryLevel, index}

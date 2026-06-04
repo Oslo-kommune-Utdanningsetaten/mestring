@@ -90,11 +90,13 @@
     </h3>
 
     {#if masterySchema?.config?.isMasteryValueInputEnabled}
-      <MasteryValueInput
-        {masterySchema}
-        bind:value={localObservation.masteryValue}
-        title="Hvor godt mestrer {student?.name} {goal?.title || 'dette målet'}?"
-      />
+      <div class="my-4">
+        <MasteryValueInput
+          {masterySchema}
+          bind:value={localObservation.masteryValue}
+          title="Hvor godt mestrer {student?.name} {goal?.title || 'dette målet'}?"
+        />
+      </div>
     {/if}
 
     <pkt-checkbox

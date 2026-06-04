@@ -104,7 +104,7 @@
     />
   </div>
 
-  <div>
+  <div class="my-4">
     <MasteryValueInput
       masterySchema={localMasterySchema as MasterySchemaType}
       bind:value={placeholderMasteryValue}

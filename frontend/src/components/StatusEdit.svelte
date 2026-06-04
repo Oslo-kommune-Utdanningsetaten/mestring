@@ -17,6 +17,7 @@
     formatDateHumanly,
     calculateSchoolYearMilestones,
     subjectsInCommon,
+    generateStatusTitle,
   } from '../utils/functions'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
@@ -90,39 +91,18 @@
       currentSchoolId,
       $dataStore.currentUser.allGroups
     )
-    localStatus = getUpdatedStatus(localStatus)
+    localStatus = getUpdatedStatus()
   }
 
-  const generateTitle = (aStatus: Partial<StatusType>): string => {
-    const statusCategory = selectableStatusCategories.find(cat => cat.id === aStatus.categoryId)
-    if (statusCategory) {
-      const today = new Date()
-      let season = ''
-      let yearShort = ''
-      if (statusCategory.name === 'midyear') {
-        season = 'h'
-        yearShort = (today.getFullYear() - 1).toString().slice(-2)
-      } else if (statusCategory.name === 'endyear') {
-        season = 'v'
-        yearShort = today.getFullYear().toString().slice(-2)
-      } else if (statusCategory.name === 'risk') {
-        season = today.getMonth() < 7 ? 'v' : 'h'
-        yearShort = today.getFullYear().toString().slice(-2)
-      } else {
-        console.error('Unknown category', { statusCategory })
-      }
-      return [statusCategory.title, ' - ', season, yearShort].join('')
-    }
-    const beginMonth = formatMonthName(aStatus.beginAt)
-    const endMonth = formatMonthName(aStatus.endAt)
-    const result = `${beginMonth} - ${endMonth}`
-    return result.charAt(0).toUpperCase() + result.slice(1)
+  const generateTitle = (): string => {
+    const statusCategory = selectableStatusCategories.find(cat => cat.id === localStatus.categoryId)
+    return generateStatusTitle(localStatus, statusCategory)
   }
 
   const handleGenerateTitle = () => {
     localStatus = {
       ...localStatus,
-      title: generateTitle(localStatus),
+      title: generateTitle(),
     }
   }
 
@@ -135,7 +115,7 @@
       localStorage('preferredStatusCategoryId').remove()
     }
     // update fields according to new category
-    localStatus = getUpdatedStatus(localStatus)
+    localStatus = getUpdatedStatus()
   }
 
   const toggleGoalsExpansion = () => {
@@ -164,7 +144,7 @@
 
     localStatus.studentId = localStudent?.id
     localStatus.schoolId = $dataStore.currentSchool?.id
-    localStatus.title = localStatus.title?.trim() || generateTitle(localStatus)
+    localStatus.title = localStatus.title?.trim() || generateTitle()
     let action = undefined
 
     try {
@@ -196,12 +176,15 @@
     }
   }
 
-  const getUpdatedStatus = (aStatus: Partial<StatusType>): Partial<StatusType> => {
-    const updatedStatus = { ...aStatus }
-    const statusCategory = $dataStore.statusCategories.find(cat => cat.id === aStatus.categoryId)
+  const getUpdatedStatus = (): Partial<StatusType> => {
+    const updatedStatus = { ...localStatus }
+    const statusCategory = $dataStore.statusCategories.find(
+      cat => cat.id === localStatus.categoryId
+    )
+    updatedStatus.title = generateTitle()
     if (statusCategory) {
       const currentMasterySchema = $dataStore.masterySchemas.find(
-        ms => ms.id === aStatus.masterySchemaId
+        ms => ms.id === localStatus.masterySchemaId
       )
       const nextMasterySchema = $dataStore.masterySchemas.find(
         ms => ms.id === statusCategory.masterySchemaId
@@ -209,7 +192,6 @@
       if (!areSchemaValuesConsistent([currentMasterySchema, nextMasterySchema])) {
         updatedStatus.masteryValue = null // Reset mastery value if schemas are inconsistent
       }
-      updatedStatus.title = generateTitle(updatedStatus)
       updatedStatus.masterySchemaId = statusCategory.masterySchemaId
 
       if (!statusCategory.isSubjectSpecific) {
@@ -232,7 +214,6 @@
         console.error('Unknown category', { statusCategory })
       }
     } else {
-      updatedStatus.title = null
       updatedStatus.masterySchemaId = $dataStore.defaultMasterySchema.id
       updatedStatus.subjectId = subject?.id
       updatedStatus.beginAt = status.beginAt?.split('T')[0]

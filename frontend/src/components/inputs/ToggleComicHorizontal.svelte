@@ -37,10 +37,12 @@
   const selectedColor = $derived(masteryLevels[Math.max(0, selectedIndex)]?.color ?? '#ffd700')
 </script>
 
-<div class="mt-4 mb-4">
-  <label class="form-label">
-    {label}
-  </label>
+<div>
+  {#if label}
+    <label class="form-label">
+      {label}
+    </label>
+  {/if}
 
   <div
     class="comic-radio-group"

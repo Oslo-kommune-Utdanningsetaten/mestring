@@ -963,7 +963,7 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
             ),
             OpenApiParameter(
                 name='group',
-                description='Filter statuses by group.',
+                description='Filter statuses by students in group.',
                 required=False,
                 type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
@@ -976,8 +976,8 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='name',
-                description='Filter statuses by status name.',
+                name='category_name',
+                description='Filter statuses by status_category.name.',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
@@ -1014,7 +1014,7 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
                     qs = qs.filter(student_id__in=student_ids)
 
             if group_param:
-                student_ids = UserGroup.objects.filter(
+                student_ids = models.UserGroup.objects.filter(
                     group_id=group_param, role__name='student', deleted_at__isnull=True).values_list(
                     'user_id', flat=True)
                 if student_ids:

@@ -14,37 +14,32 @@
     isInputEnabled?: boolean
   } = $props()
 
+  // generate a unique name to ensure multiple instances of this component can coexist
+  const inputName = `mastery-toggle-${Math.random().toString(36).slice(2)}`
+
   const calculations = $derived(useMasteryCalculations(masterySchema))
   const { masteryLevels } = $derived(calculations)
-
-  // Set default value when masteryValue is null/undefined and schema is available
-  $effect(() => {
-    if ((masteryValue === null || masteryValue === undefined) && calculations.hasLevels) {
-      masteryValue = calculations.defaultValue
-    }
-  })
 </script>
 
-<div class="mt-4 mb-4">
+{#if label}
   <label class="form-label" for="mastery-slider">
     {label}
   </label>
-
-  <div class="d-flex justify-content-center">
-    <div class="radio-buttons">
-      {#each masteryLevels as masteryLevel}
-        <label class="radio" style="--particle-color: {masteryLevel.color}">
-          <input
-            type="radio"
-            name="radio"
-            value={masteryLevel.minValue}
-            bind:group={masteryValue}
-            disabled={!isInputEnabled || !masterySchema?.config?.isMasteryValueInputEnabled}
-          />
-          <span class="name">{masteryLevel.title}</span>
-        </label>
-      {/each}
-    </div>
+{/if}
+<div class="d-flex justify-content-center">
+  <div class="radio-buttons">
+    {#each masteryLevels as masteryLevel}
+      <label class="radio" style="--particle-color: {masteryLevel.color}">
+        <input
+          type="radio"
+          name={inputName}
+          value={masteryLevel.minValue}
+          bind:group={masteryValue}
+          disabled={!isInputEnabled || !masterySchema?.config?.isMasteryValueInputEnabled}
+        />
+        <span class="name">{masteryLevel.title}</span>
+      </label>
+    {/each}
   </div>
 </div>
 
@@ -58,12 +53,10 @@
     display: flex;
     flex-wrap: wrap;
     border-radius: 0.5rem;
-    background-color: #eee;
     box-sizing: border-box;
-    box-shadow: 0 0 0px 1px rgba(0, 0, 0, 0.06);
-    min-width: 70%;
-    font-size: 14px;
-    margin: 2rem 0rem 1rem 0rem;
+    width: 100%;
+    font-size: 0.9rem;
+    gap: 0.3rem;
   }
 
   .radio-buttons .radio {
@@ -85,6 +78,7 @@
     padding: 0.5rem 0;
     color: rgba(51, 65, 85, 1);
     transition: all 0.15s ease-in-out;
+    background-color: #ddd;
   }
 
   .radio-buttons .radio input:checked + .name {
@@ -94,6 +88,7 @@
 
   /* Hover effect */
   .radio-buttons .radio:hover .name {
+    box-shadow: 0 0 0px 1px rgba(0, 0, 0, 0.06);
     background-color: rgba(255, 255, 255, 0.5);
   }
 

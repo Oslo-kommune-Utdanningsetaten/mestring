@@ -65,7 +65,7 @@ export const ROUTES = [
     accessibleBy: allRoles,
   },
   {
-    path: '/groups/:groupId/statuses/:statusCategoryId',
+    path: '/groups/:groupId/statuses/:statusCategoryName',
     component: StatusesEdit,
     isPublic: false,
     accessibleBy: [

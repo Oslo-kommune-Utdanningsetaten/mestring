@@ -5,6 +5,8 @@ import type {
   ObservationType,
   GroupType,
   UserType,
+  StatusType,
+  StatusCategoryType,
 } from '../generated/types.gen'
 import { goalsList, userGroupsList, userSchoolsList } from '../generated/sdk.gen'
 import { nb as noLocale } from 'date-fns/locale'
@@ -248,6 +250,34 @@ export const abbreviateName = (fullName: string, otherNames?: string[]): string 
     return `${first} ${rest.map(n => n.charAt(0).toUpperCase() + '.').join(' ')}`
   }
   return first
+}
+
+export const generateStatusTitle = (
+  aStatus: Partial<StatusType>,
+  statusCategory: StatusCategoryType | undefined
+): string => {
+  if (statusCategory) {
+    const today = new Date()
+    let season = ''
+    let yearShort = ''
+    if (statusCategory.name === 'midyear') {
+      season = 'h'
+      yearShort = (today.getFullYear() - 1).toString().slice(-2)
+    } else if (statusCategory.name === 'endyear') {
+      season = 'v'
+      yearShort = today.getFullYear().toString().slice(-2)
+    } else if (statusCategory.name === 'risk') {
+      season = today.getMonth() < 7 ? 'v' : 'h'
+      yearShort = today.getFullYear().toString().slice(-2)
+    } else {
+      console.error('Unknown category', { statusCategory })
+    }
+    return [statusCategory.title, ' - ', season, yearShort].join('')
+  }
+  const beginMonth = formatMonthName(aStatus.beginAt)
+  const endMonth = formatMonthName(aStatus.endAt)
+  const result = `${beginMonth} - ${endMonth}`
+  return result.charAt(0).toUpperCase() + result.slice(1)
 }
 
 export const isNumber = (value: any) => {
