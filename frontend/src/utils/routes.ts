@@ -21,6 +21,7 @@ import School from '../views/admin/School.svelte'
 import SchoolStats from '../views/admin/SchoolStats.svelte'
 import UsersByRole from '../views/UsersByRole.svelte'
 import StatusCategories from '../views/admin/StatusCategories.svelte'
+import StatusesEdit from '../views/StatusesEdit.svelte'
 
 import { USER_ROLES } from './constants'
 
@@ -62,6 +63,17 @@ export const ROUTES = [
     component: Group,
     isPublic: false,
     accessibleBy: allRoles,
+  },
+  {
+    path: '/groups/:groupId/statuses/:statusCategoryId',
+    component: StatusesEdit,
+    isPublic: false,
+    accessibleBy: [
+      USER_ROLES.TEACHER,
+      USER_ROLES.INSPECTOR,
+      USER_ROLES.ADMIN,
+      USER_ROLES.SUPERADMIN,
+    ],
   },
   {
     path: '/profile',
