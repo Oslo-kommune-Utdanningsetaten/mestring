@@ -85,6 +85,7 @@
             categoryId: statusCategory.id,
             masterySchemaId: statusCategory.masterySchemaId,
             masteryValue: null,
+            schoolId: schoolId,
             beginAt: getDateRange().beginAt,
             endAt: getDateRange().endAt,
           } as StatusType
@@ -101,7 +102,7 @@
     }
   }
 
-  const storeStatus = async (status: Partial<StatusType>, row: RowType) => {
+  const createOrUpdateStatus = async (status: Partial<StatusType>, row: RowType) => {
     row.isSaving = true
     try {
       if (status.id) {
@@ -137,7 +138,7 @@
     }
     row.saveTimer = setTimeout(() => {
       row.saveTimer = null
-      storeStatus(status, row)
+      createOrUpdateStatus(status, row)
     }, 400)
   }
 
@@ -190,10 +191,7 @@
                 {@const masterySchema = $dataStore.masterySchemas.find(
                   ms => ms.id === status.masterySchemaId
                 )}
-                <div
-                  class="mastery-input-container"
-                  onchange={() => handleChangeStatus(status, index)}
-                >
+                <div class="mastery-input-container">
                   {status.title} [{status.id}]
                   {#if status.id && $hasUserAccessToFeature( 'status', 'delete', { groupId, createdById: status.createdById } )}
                     {#key status.id}
@@ -208,7 +206,9 @@
                       />
                     {/key}
                   {/if}
-                  <MasteryValueInput {masterySchema} bind:value={status.masteryValue} />
+                  <span onchange={() => handleChangeStatus(status, index)}>
+                    <MasteryValueInput {masterySchema} bind:value={status.masteryValue} />
+                  </span>
                 </div>
               {/each}
             </span>
@@ -239,7 +239,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: top;
     border-right: 1px solid var(--bs-border-color);
     border-bottom: 1px solid var(--bs-border-color);
   }
@@ -252,7 +252,7 @@
 
   .students-grid .item:first-child,
   .students-grid .item.student-name {
-    justify-content: flex-start;
+    align-items: start;
     border-left: 1px solid var(--bs-border-color);
   }
 
