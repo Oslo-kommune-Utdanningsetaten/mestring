@@ -204,7 +204,7 @@
       {:else}
         <div class="students-grid" aria-label="Elevliste">
           <span class="item header-row-item">Elev</span>
-          <span class="item header-row-item">{statusCategory.title}</span>
+          <span class="item header-row-item">Status</span>
 
           {#each students as student, rowIndex (student.id)}
             <span class="item student-name">
@@ -222,7 +222,15 @@
                 {/if}
                 <div class="status-entry">
                   <div class="status-card-header">
-                    <span class="status-title">{status.title || 'Ny status'}</span>
+                    <span class="status-title">
+                      {#if status.id}
+                        <Link to="/statuses/{status.id}">
+                          {status.title}
+                        </Link>
+                      {:else}
+                        {status.title}
+                      {/if}
+                    </span>
                     {#if status.id && $hasUserAccessToFeature( 'status', 'delete', { groupId, createdById: status.createdById } )}
                       {#key status.id}
                         <ButtonIcon
@@ -282,20 +290,17 @@
     align-items: stretch;
     justify-content: flex-start;
     gap: 0.5rem;
-    border-right: 1px solid var(--bs-border-color);
     border-bottom: 4px solid var(--bs-border-color);
   }
 
   .students-grid .item.header-row-item {
     background-color: var(--bs-light);
     font-weight: 800;
-    border-top: 1px solid var(--bs-border-color);
   }
 
   .students-grid .item:first-child,
   .students-grid .item.student-name {
     align-items: start;
-    border-left: 1px solid var(--bs-border-color);
   }
 
   .status-divider {
