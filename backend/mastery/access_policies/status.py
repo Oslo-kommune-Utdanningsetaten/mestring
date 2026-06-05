@@ -75,7 +75,7 @@ class StatusAccessPolicy(BaseAccessPolicy):
 
             # School inspectors and admins: All statuses at their schools
             if school_employee_ids:
-                # Statuses on goals at their schools
+                # Statuses at their schools
                 filters |= Q(school_id__in=school_employee_ids)
 
             # Teaching group teachers: Statuses for students they teach, in those subjects only
