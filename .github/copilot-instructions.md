@@ -74,6 +74,7 @@ Open / search in this exact order until sufficient context is found:
 - Centralize API interaction helpers; don't sprinkle raw fetch in views.
 - Keep stores lean: computation-heavy logic belongs in functions/utils.
 - Use new Svelte 5 runes syntax for reactive declarations, avoid onMount and `$:`
+- Important additional Svelte resource: https://svelte.dev/docs/svelte/llms-small.txt
 
 ### Frontend Quick Checks
 
