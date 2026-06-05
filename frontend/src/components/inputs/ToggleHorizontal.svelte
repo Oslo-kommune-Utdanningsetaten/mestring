@@ -29,7 +29,7 @@
 <div class="d-flex justify-content-center">
   <div class="radio-buttons">
     {#each masteryLevels as masteryLevel}
-      <label class="radio" style="--particle-color: {masteryLevel.color}">
+      <label class="radio" style="--effect-color: {masteryLevel.color}">
         <input
           type="radio"
           name={inputName}
@@ -95,7 +95,8 @@
   /* Animation */
   .radio-buttons .radio input:checked + .name {
     position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid color-mix(in srgb, var(--effect-color) 60%);
+    box-shadow: 0px 0px 10px color-mix(in srgb, black 60%);
     animation: select 0.3s ease;
   }
 
@@ -119,7 +120,7 @@
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background-color: var(--particle-color);
+    background-color: var(--effect-color);
     opacity: 0;
     animation: particles 0.5s ease forwards;
   }
