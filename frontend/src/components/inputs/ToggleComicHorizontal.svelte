@@ -17,20 +17,10 @@
   const calculations = $derived(useMasteryCalculations(masterySchema))
   const { masteryLevels } = $derived(calculations)
 
-  const handleClick = (value: number) => {
-    if (isInputEnabled) {
-      masteryValue = value
-    }
-  }
+  // Random name to ensure multiple instances of this component can coexist
+  const inputName = `toggle-${Math.random().toString(36).slice(2)}`
+  const labelId = `${inputName}-label`
 
-  // Set default value when masteryValue is null/undefined and schema is available
-  $effect(() => {
-    if ((masteryValue === null || masteryValue === undefined) && calculations.hasLevels) {
-      masteryValue = calculations.defaultValue
-    }
-  })
-
-  const groupId = Math.random().toString(36).slice(2, 8)
   const selectedIndex = $derived(
     masteryLevels.findIndex((level: any) => level.minValue === masteryValue)
   )
@@ -39,25 +29,27 @@
 
 <div>
   {#if label}
-    <label class="form-label">
+    <span id={labelId} class="form-label">
       {label}
-    </label>
+    </span>
   {/if}
 
   <div
     class="comic-radio-group"
+    role="group"
+    aria-labelledby={labelId}
     style="--option-count: {masteryLevels.length}; --selected-index: {selectedIndex}; --selected-color: {selectedColor}"
   >
     {#each masteryLevels as level, i}
       <input
         type="radio"
-        name="mastery-{groupId}"
-        id="mastery-{groupId}-{i}"
+        name={inputName}
+        id="mastery-{inputName}-{i}"
         value={level.minValue}
         bind:group={masteryValue}
         disabled={!isInputEnabled || !masterySchema?.config?.isMasteryValueInputEnabled}
       />
-      <label for="mastery-{groupId}-{i}">
+      <label for="mastery-{inputName}-{i}">
         {level.title}
       </label>
     {/each}

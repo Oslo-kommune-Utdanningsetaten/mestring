@@ -14,20 +14,21 @@
     isInputEnabled?: boolean
   } = $props()
 
-  // generate a unique name to ensure multiple instances of this component can coexist
-  const inputName = `mastery-toggle-${Math.random().toString(36).slice(2)}`
+  // Random name to ensure multiple instances of this component can coexist
+  const inputName = `toggle-${Math.random().toString(36).slice(2)}`
+  const labelId = `${inputName}-label`
 
   const calculations = $derived(useMasteryCalculations(masterySchema))
   const { masteryLevels } = $derived(calculations)
 </script>
 
 {#if label}
-  <label class="form-label" for="mastery-slider">
+  <span id={labelId} class="form-label">
     {label}
-  </label>
+  </span>
 {/if}
 <div class="d-flex justify-content-center">
-  <div class="radio-buttons">
+  <div class="radio-buttons" role="group" aria-labelledby={labelId}>
     {#each masteryLevels as masteryLevel}
       <label class="radio" style="--effect-color: {masteryLevel.color}">
         <input
@@ -96,7 +97,7 @@
   .radio-buttons .radio input:checked + .name {
     position: relative;
     border: 2px solid color-mix(in srgb, var(--effect-color) 60%);
-    box-shadow: 0px 0px 10px color-mix(in srgb, black 60%);
+    box-shadow: 0px 0px 10px color-mix(in srgb, black 30%);
     animation: select 0.3s ease;
   }
 

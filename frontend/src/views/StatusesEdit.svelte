@@ -24,7 +24,7 @@
 
   type RowType = {
     isSaving: boolean
-    saveTimer: ReturnType<typeof setTimeout> | null
+    studentId: string | undefined
   }
 
   let rows = $state<RowType[]>([])
@@ -36,8 +36,8 @@
   let isLoading = $state(true)
   let statusesByStudentId = $state<Record<string, StatusType[]>>({})
 
-  let statusCategory = $derived<StatusCategoryType | null>(
-    $dataStore.statusCategories.find(sc => sc.name === statusCategoryName) || null
+  let statusCategory = $derived<StatusCategoryType | undefined>(
+    $dataStore.statusCategories.find(sc => sc.name === statusCategoryName) || undefined
   )
 
   const getDateRange = () => {
@@ -78,19 +78,9 @@
           allStatuses.filter(
             status => status.studentId === student.id && status.categoryId === statusCategory.id
           ) || []
-        rows.push({ isSaving: false, saveTimer: null })
+        rows.push({ isSaving: false, studentId: student.id })
         if (statuses.length === 0) {
-          const statusWip = {
-            studentId: student.id,
-            categoryId: statusCategory.id,
-            masterySchemaId: statusCategory.masterySchemaId,
-            masteryValue: null,
-            schoolId: schoolId,
-            beginAt: getDateRange().beginAt,
-            endAt: getDateRange().endAt,
-          } as StatusType
-          statusWip.title = generateStatusTitle(statusWip, statusCategory)
-          statuses.push(statusWip)
+          statuses.push(getNewStatus(student.id))
         }
         statusesByStudentId = { ...statusesByStudentId, [student.id]: statuses }
       })
@@ -100,6 +90,39 @@
     } finally {
       isLoading = false
     }
+  }
+
+  const getNewStatus = (studentId: string) => {
+    const newStatus = {
+      studentId: studentId,
+      categoryId: statusCategory?.id || '',
+      masterySchemaId: statusCategory?.masterySchemaId || '',
+      masteryValue: null,
+      schoolId: $dataStore.currentSchool?.id || '',
+      beginAt: getDateRange().beginAt,
+      endAt: getDateRange().endAt,
+    } as StatusType
+    newStatus.title = generateStatusTitle(newStatus, statusCategory)
+    return newStatus
+  }
+
+  const refreshDataForRow = async (row: RowType) => {
+    const studentId = row.studentId as string
+    if (!studentId) return
+    const statusResult = await statusList({
+      query: {
+        group: groupId,
+        students: studentId,
+        school: $dataStore.currentSchool?.id,
+        categoryName: statusCategoryName,
+      },
+    })
+    const studenStatuses = statusResult.data || []
+    if (studenStatuses.length === 0) {
+      studenStatuses.push(getNewStatus(studentId))
+    }
+
+    statusesByStudentId = { ...statusesByStudentId, [studentId]: studenStatuses }
   }
 
   const createOrUpdateStatus = async (status: Partial<StatusType>, row: RowType) => {
@@ -119,7 +142,7 @@
           } as StatusType,
         })
       }
-      await fetchData() // Refresh data after save to get updated list of statuses with ids
+      await refreshDataForRow(row)
     } catch (error) {
       console.error('Error saving status:', error)
       addAlert({
@@ -131,19 +154,14 @@
     }
   }
 
-  const handleChangeStatus = (status: Partial<StatusType>, rowIndex: number) => {
+  const handleChangeStatus = async (status: Partial<StatusType>, rowIndex: number) => {
     const row = rows[rowIndex]
-    if (row.saveTimer !== null) {
-      clearTimeout(row.saveTimer)
-    }
-    row.saveTimer = setTimeout(() => {
-      row.saveTimer = null
-      createOrUpdateStatus(status, row)
-    }, 400)
+    await createOrUpdateStatus(status, row)
   }
 
-  const handleDeleteStatus = async (status: StatusType) => {
+  const handleDeleteStatus = async (status: StatusType, rowIndex: number) => {
     if (!status) return
+    const row = rows[rowIndex]
     try {
       await statusDestroy({ path: { id: status.id } })
       trackEvent('Status', 'Delete')
@@ -159,7 +177,7 @@
         message: `Kunne ikke slette status "${status.title}". Hvis du mener dette er en feil, kontakt support.`,
       })
     }
-    await fetchData()
+    await refreshDataForRow(row)
   }
 
   $effect(() => {
@@ -184,7 +202,7 @@
           <span class="item header-row-item">Elev</span>
           <span class="item header-row-item">{statusCategory.title}</span>
 
-          {#each students as student, index (student.id)}
+          {#each students as student, rowIndex (student.id)}
             <span class="item student-name">{student.name}</span>
             <span class="item">
               {#each statusesByStudentId[student.id] as status (status.id)}
@@ -200,13 +218,13 @@
                           iconName: 'trash-can',
                           title: 'Slett status',
                           classes: 'bordered',
-                          onClick: () => handleDeleteStatus(status),
-                          delayActionFor: 3,
+                          onClick: () => handleDeleteStatus(status, rowIndex),
+                          delayActionFor: 2,
                         }}
                       />
                     {/key}
                   {/if}
-                  <span onchange={() => handleChangeStatus(status, index)}>
+                  <span onchange={() => handleChangeStatus(status, rowIndex)}>
                     <MasteryValueInput {masterySchema} bind:value={status.masteryValue} />
                   </span>
                 </div>
