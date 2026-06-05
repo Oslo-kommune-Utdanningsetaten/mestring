@@ -96,7 +96,7 @@
   /* Animation */
   .radio-buttons .radio input:checked + .name {
     position: relative;
-    border: 2px solid color-mix(in srgb, var(--effect-color) 60%);
+    border: 1px solid color-mix(in srgb, var(--effect-color) 50%);
     box-shadow: 0px 0px 10px color-mix(in srgb, black 30%);
     animation: select 0.3s ease;
   }

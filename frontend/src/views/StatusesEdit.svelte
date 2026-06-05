@@ -15,7 +15,9 @@
 
   import MasteryValueInput from '../components/MasteryValueInput.svelte'
   import ButtonIcon from '../components/ButtonIcon.svelte'
+  import AuthorInfo from '../components/AuthorInfo.svelte'
   import Status from './Status.svelte'
+  import Link from '../components/Link.svelte'
 
   let { groupId, statusCategoryName } = $props<{
     groupId: string
@@ -135,12 +137,14 @@
             ...status,
           } as StatusType,
         })
+        trackEvent('Status', 'Update')
       } else {
         await statusCreate({
           body: {
             ...status,
           } as StatusType,
         })
+        trackEvent('Status', 'Create')
       }
       await refreshDataForRow(row)
     } catch (error) {
@@ -187,8 +191,8 @@
   })
 </script>
 
-<section>
-  <h2>Statuser</h2>
+<h2 class="my-4">Status - {statusCategory?.title}</h2>
+<section class="shadow-sm">
   {#if group && statusCategory}
     {#if group.subjectId}
       {#if isLoading}
@@ -203,30 +207,49 @@
           <span class="item header-row-item">{statusCategory.title}</span>
 
           {#each students as student, rowIndex (student.id)}
-            <span class="item student-name">{student.name}</span>
+            <span class="item student-name">
+              <Link to="/students/{student.id}">
+                {student.name}
+              </Link>
+            </span>
             <span class="item">
-              {#each statusesByStudentId[student.id] as status (status.id)}
+              {#each statusesByStudentId[student.id] as status, statusIndex (status.id)}
                 {@const masterySchema = $dataStore.masterySchemas.find(
                   ms => ms.id === status.masterySchemaId
                 )}
-                <div class="mastery-input-container">
-                  {status.title} [{status.id}]
-                  {#if status.id && $hasUserAccessToFeature( 'status', 'delete', { groupId, createdById: status.createdById } )}
-                    {#key status.id}
-                      <ButtonIcon
-                        options={{
-                          iconName: 'trash-can',
-                          title: 'Slett status',
-                          classes: 'bordered',
-                          onClick: () => handleDeleteStatus(status, rowIndex),
-                          delayActionFor: 2,
-                        }}
-                      />
-                    {/key}
+                {#if statusIndex > 0}
+                  <hr class="status-divider" />
+                {/if}
+                <div class="status-entry">
+                  <div class="status-card-header">
+                    <span class="status-title">{status.title || 'Ny status'}</span>
+                    {#if status.id && $hasUserAccessToFeature( 'status', 'delete', { groupId, createdById: status.createdById } )}
+                      {#key status.id}
+                        <ButtonIcon
+                          options={{
+                            iconName: 'trash-can',
+                            title: 'Slett status',
+                            classes: 'bordered',
+                            onClick: () => handleDeleteStatus(status, rowIndex),
+                            delayActionFor: 2,
+                          }}
+                        />
+                      {/key}
+                    {/if}
+                  </div>
+                  {#if status.id}
+                    <div class="status-meta">
+                      <AuthorInfo item={status} />
+                    </div>
+                  {:else}
+                    <div class="status-meta status-unsaved">Ikke lagret</div>
                   {/if}
-                  <span onchange={() => handleChangeStatus(status, rowIndex)}>
+                  <div
+                    onchange={() => handleChangeStatus(status, rowIndex)}
+                    class="mastery-input-container"
+                  >
                     <MasteryValueInput {masterySchema} bind:value={status.masteryValue} />
-                  </span>
+                  </div>
                 </div>
               {/each}
             </span>
@@ -256,10 +279,11 @@
     padding: 0.5rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: top;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0.5rem;
     border-right: 1px solid var(--bs-border-color);
-    border-bottom: 1px solid var(--bs-border-color);
+    border-bottom: 4px solid var(--bs-border-color);
   }
 
   .students-grid .item.header-row-item {
@@ -274,7 +298,41 @@
     border-left: 1px solid var(--bs-border-color);
   }
 
+  .status-divider {
+    margin: 0.1rem 0;
+    border: 2px dotted var(--bs-border-color);
+    opacity: 1;
+  }
+
+  .status-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .status-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .status-title {
+    font-weight: 600;
+    color: var(--bs-body-color);
+  }
+
+  .status-meta {
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color, #6c757d);
+  }
+
+  .status-unsaved {
+    font-style: italic;
+  }
+
   .mastery-input-container {
     width: 100%;
+    margin-bottom: 0.3rem;
   }
 </style>
