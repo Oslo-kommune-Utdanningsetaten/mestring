@@ -311,7 +311,7 @@
     <!-- Group goals Section -->
     {#if availableStatusCategories.length}
       <section>
-        <h3 class="mb-3">Status?</h3>
+        <h3 class="mb-3">Opprett statuser for hele gruppa</h3>
         <ul>
           {#each availableStatusCategories as category}
             <li>

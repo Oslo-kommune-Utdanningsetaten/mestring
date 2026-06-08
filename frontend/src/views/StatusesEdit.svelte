@@ -169,7 +169,6 @@
     try {
       await statusDestroy({ path: { id: status.id } })
       trackEvent('Status', 'Delete')
-
       addAlert({
         type: 'success',
         message: `Slettet status "${status.title}"`,
