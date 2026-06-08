@@ -2,9 +2,9 @@
   import type { UserType, SubjectType, GroupType, StatusType } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
   import { statusList } from '../generated/sdk.gen'
-  import Link from './Link.svelte'
   import MasteryBadge from './MasteryBadge.svelte'
   import UserNameLink from './UserNameLink.svelte'
+  import Link from './Link.svelte'
 
   let {
     students,
@@ -16,18 +16,13 @@
     category: string
   } = $props()
 
-  const allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
-
   // Sort state
   type SortKey = 'name' | string // 'name' or subjectId
   let sortBy = $state<SortKey>('name')
   let sortDirection = $state<'asc' | 'desc'>('asc')
 
-  // Data per student: status by subject
-  type StudentData = {
-    statusBySubjectId: Record<string, StatusType | undefined>
-  }
-  let dataByStudentId = $state<Record<string, StudentData>>({})
+  // Data per student per subject: flat map keyed by `studentId:subjectId`
+  let statusesByStudentIdAndSubjectId = $state<Record<string, StatusType[]>>({})
 
   // Sorted students list
   let sortedStudents = $derived.by(() => {
@@ -39,8 +34,11 @@
       } else {
         // sortBy contains a subjectId when not sorting by name
         const subjectId = sortBy
-        const countA = dataByStudentId[a.id]?.statusBySubjectId[subjectId]?.masteryValue ?? 0
-        const countB = dataByStudentId[b.id]?.statusBySubjectId[subjectId]?.masteryValue ?? 0
+        const statusesA = statusesByStudentIdAndSubjectId[`${a.id}:${subjectId}`]
+        const statusesB = statusesByStudentIdAndSubjectId[`${b.id}:${subjectId}`]
+        const aggregate = sortDirection === 'asc' ? Math.min : Math.max
+        const countA = statusesA?.length ? aggregate(...statusesA.map(s => s.masteryValue ?? 0)) : 0
+        const countB = statusesB?.length ? aggregate(...statusesB.map(s => s.masteryValue ?? 0)) : 0
         comparison = countA - countB
       }
       return sortDirection === 'asc' ? comparison : -comparison
@@ -49,7 +47,13 @@
   })
 
   const fetchAllStudentData = async () => {
-    const newData: Record<string, StudentData> = {}
+    const newData: Record<string, StatusType[]> = {}
+    // Initialize empty status arrays for all students + subjects
+    students.forEach(student => {
+      subjects.forEach(subject => {
+        newData[`${student.id}:${subject.id}`] = []
+      })
+    })
 
     const query = {
       students: students.map(s => s.id).join(','),
@@ -61,14 +65,11 @@
 
     statuses.forEach(status => {
       const { studentId, subjectId } = status
-      if (!newData[studentId]) {
-        newData[studentId] = { statusBySubjectId: {} }
-      }
-      if (subjectId) {
-        newData[studentId].statusBySubjectId[subjectId] = status
+      if (studentId && subjectId) {
+        newData[`${studentId}:${subjectId}`]?.push(status)
+        statusesByStudentIdAndSubjectId = newData
       }
     })
-    dataByStudentId = newData
   }
 
   const handleHeaderClick = (key: SortKey) => {
@@ -124,13 +125,17 @@
     </span>
 
     {#each subjects as subject}
-      {@const status = dataByStudentId[student.id]?.statusBySubjectId[subject.id]}
-      {#if status}
+      {@const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`]}
+      {#if statuses?.length}
         <span class="item">
-          <MasteryBadge
-            masteryValue={status.masteryValue}
-            masterySchemaId={status.masterySchemaId}
-          />
+          {#each statuses as status}
+            <span class="me-1" title={status.title}>
+              <MasteryBadge
+                masteryValue={status.masteryValue}
+                masterySchemaId={status.masterySchemaId}
+              />
+            </span>
+          {/each}
         </span>
       {:else}
         <span class="item">-</span>

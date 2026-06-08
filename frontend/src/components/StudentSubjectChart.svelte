@@ -74,7 +74,7 @@
       currentSchool?.id!,
       currentUser.allGroups
     )
-    if (goalsForSubjectDecorated.length) {
+    if (goalsForSubjectDecorated?.length) {
       assembleChartData()
     }
   }

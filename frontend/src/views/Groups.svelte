@@ -87,7 +87,7 @@
             {#if currentSchool.isStudentListEnabled || $hasUserAccessToPath('/students')}
               <Link
                 to={urlStringFrom(
-                  { groupId: group.id },
+                  { group: group.id },
                   {
                     path: '/students',
                     mode: 'replace',

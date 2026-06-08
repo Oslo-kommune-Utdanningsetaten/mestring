@@ -11,15 +11,17 @@
   import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
 
   const router = useTinyRouter()
-  let selectedGroupId = $derived(router.getQueryParam('groupId'))
-  let currentSchool = $derived($dataStore.currentSchool)
-  let allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
+
   let students = $state<UserType[]>([])
   let isLoadingStudents = $state<boolean>(false)
   let nameFilter = $state<string>('')
   let subjects = $state<SubjectType[]>([])
 
+  let currentSchool = $derived($dataStore.currentSchool)
+  let allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
+
   const focusOptions = $derived.by(() => {
+    if (!$dataStore.statusCategories) return []
     const options = [{ value: 'mastery', label: 'Mestring i fag' }]
     $dataStore.statusCategories
       .filter(cat => cat.isEnabled)
@@ -29,6 +31,7 @@
     return options
   })
 
+  let selectedGroupId = $derived(router.getQueryParam('group'))
   let selectedFocus = $derived(router.getQueryParam('focus') || focusOptions[0].value)
 
   let filteredStudents = $derived(
@@ -76,16 +79,19 @@
   }
 
   const handleGroupSelect = (groupId: string): void => {
-    isLoadingStudents = true
-    if (groupId && groupId !== '0') {
-      router.navigate(urlStringFrom({ groupId }, { path: '/students', mode: 'merge' }))
-    } else {
-      router.navigate(urlStringFrom({}, { path: '/students', mode: 'replace' }))
+    const params: Record<string, string> = groupId === '0' ? {} : { group: groupId }
+    if (selectedFocus) {
+      params['focus'] = selectedFocus
     }
+    router.navigate(urlStringFrom(params, { path: '/students', mode: 'replace' }))
   }
 
   const handleFocusSelect = (focusValue: string): void => {
-    router.navigate(urlStringFrom({ focus: focusValue }, { path: '/students', mode: 'merge' }))
+    const params: Record<string, string> = { focus: focusValue }
+    if (selectedGroupId) {
+      params['group'] = selectedGroupId
+    }
+    router.navigate(urlStringFrom(params, { path: '/students', mode: 'replace' }))
   }
 
   $effect(() => {

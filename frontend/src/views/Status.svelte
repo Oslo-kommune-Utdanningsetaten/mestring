@@ -40,7 +40,6 @@
 
   const fetchData = async () => {
     isLoading = true
-    console.log('Fetching status data for statusId:', statusId)
     try {
       // Fetch status
       const statusResult = await statusRetrieve({ path: { id: statusId } })

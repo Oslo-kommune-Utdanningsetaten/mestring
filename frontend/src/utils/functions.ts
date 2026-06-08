@@ -280,6 +280,35 @@ export const generateStatusTitle = (
   return result.charAt(0).toUpperCase() + result.slice(1)
 }
 
+export const getDateSpanForStatusCategory = (categoryName: string) => {
+  const { startAt, midyearAt, endAt } = calculateSchoolYearMilestones()
+  if (categoryName === 'midyear') {
+    // Halvtårs
+    return {
+      beginAt: midyearAt,
+      endAt: midyearAt,
+    }
+  } else if (categoryName === 'endyear') {
+    // Standpunkt
+    return {
+      beginAt: startAt,
+      endAt: endAt,
+    }
+  } else if (categoryName === 'risk') {
+    // IVF/G
+    return {
+      beginAt: startAt,
+      endAt: endAt,
+    }
+  } else {
+    console.error('Unknown category', { categoryName })
+    return {
+      beginAt: undefined,
+      endAt: undefined,
+    }
+  }
+}
+
 export const isNumber = (value: any) => {
   return typeof value === 'number'
 }

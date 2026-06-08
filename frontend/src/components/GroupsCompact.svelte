@@ -78,7 +78,7 @@
             <div class="text-end text-nowrap">
               {#if currentSchool.isStudentListEnabled || $hasUserAccessToPath('/students')}
                 <Link
-                  to={urlStringFrom({ groupId: group.id }, { path: '/students', mode: 'replace' })}
+                  to={urlStringFrom({ group: group.id }, { path: '/students', mode: 'replace' })}
                 >
                   {membersByGroupId[group.id].students.length}
                   {membersByGroupId[group.id].students.length === 1 ? 'elev' : 'elever'}

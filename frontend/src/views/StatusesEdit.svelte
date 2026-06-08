@@ -8,7 +8,11 @@
     statusDestroy,
   } from '../generated/sdk.gen'
   import { hasUserAccessToFeature } from '../stores/access'
-  import { calculateSchoolYearMilestones, generateStatusTitle } from '../utils/functions'
+  import {
+    calculateSchoolYearMilestones,
+    generateStatusTitle,
+    getDateSpanForStatusCategory,
+  } from '../utils/functions'
   import { dataStore } from '../stores/data'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
@@ -73,13 +77,17 @@
         query: { group: groupId, school: schoolId, categoryName: statusCategoryName },
       })
       const allStatuses = statusResult.data || []
-      // TODO: Filter statuses by date range (beginAt/endAt) to get current statuses only
 
+      const { beginAt, endAt } = getDateSpanForStatusCategory(statusCategory.name)
       students.forEach(student => {
         const statuses =
-          allStatuses.filter(
-            status => status.studentId === student.id && status.categoryId === statusCategory.id
-          ) || []
+          allStatuses
+            .filter(status => status.studentId === student.id)
+            .filter(status => status.categoryId === statusCategory.id)
+            .filter(
+              status =>
+                status.beginAt.split('T')[0] === beginAt && status.endAt.split('T')[0] === endAt
+            ) || []
         rows.push({ isSaving: false, studentId: student.id })
         if (statuses.length === 0) {
           statuses.push(getNewStatus(student.id))
@@ -97,10 +105,11 @@
   const getNewStatus = (studentId: string) => {
     const newStatus = {
       studentId: studentId,
-      categoryId: statusCategory?.id || '',
-      masterySchemaId: statusCategory?.masterySchemaId || '',
+      subjectId: group?.subjectId,
+      categoryId: statusCategory?.id,
+      masterySchemaId: statusCategory?.masterySchemaId,
       masteryValue: null,
-      schoolId: $dataStore.currentSchool?.id || '',
+      schoolId: $dataStore.currentSchool?.id,
       beginAt: getDateRange().beginAt,
       endAt: getDateRange().endAt,
     } as StatusType

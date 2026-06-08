@@ -13,11 +13,11 @@
   import { dataStore } from '../stores/data'
   import {
     fetchGoalsForSubjectAndStudent,
-    formatMonthName,
     formatDateHumanly,
     calculateSchoolYearMilestones,
     subjectsInCommon,
     generateStatusTitle,
+    getDateSpanForStatusCategory,
   } from '../utils/functions'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
@@ -183,6 +183,7 @@
     )
     updatedStatus.title = generateTitle()
     if (statusCategory) {
+      // a status category has been selected - update mastery schema and dates according to category
       const currentMasterySchema = $dataStore.masterySchemas.find(
         ms => ms.id === localStatus.masterySchemaId
       )
@@ -197,23 +198,11 @@
       if (!statusCategory.isSubjectSpecific) {
         updatedStatus.subjectId = null // Unset subject for non-subject-specific category
       }
-      const { startAt, midyearAt, endAt } = calculateSchoolYearMilestones()
-      if (statusCategory.name === 'midyear') {
-        // Halvtårs
-        updatedStatus.beginAt = startAt
-        updatedStatus.endAt = midyearAt
-      } else if (statusCategory.name === 'endyear') {
-        // Standpunkt
-        updatedStatus.beginAt = startAt
-        updatedStatus.endAt = endAt
-      } else if (statusCategory.name === 'risk') {
-        // IVF/G
-        updatedStatus.beginAt = startAt
-        updatedStatus.endAt = endAt
-      } else {
-        console.error('Unknown category', { statusCategory })
-      }
+      const { beginAt, endAt } = getDateSpanForStatusCategory(statusCategory.name)
+      updatedStatus.beginAt = beginAt
+      updatedStatus.endAt = endAt
     } else {
+      // no category selected - use input values and defaults
       updatedStatus.masterySchemaId = $dataStore.defaultMasterySchema.id
       updatedStatus.subjectId = subject?.id
       updatedStatus.beginAt = status.beginAt?.split('T')[0]
@@ -308,7 +297,7 @@
         <div class="field-group">
           <label for="categorySelect" class="field-label">Kategori</label>
           <select
-            class="form-control rounded-0 border-2 border-primary"
+            class="form-control rounded-0 border-2 border-primary pkt-input"
             id="categorySelect"
             bind:value={localStatus.categoryId}
             onchange={handleCategoryChange}
