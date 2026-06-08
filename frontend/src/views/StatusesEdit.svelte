@@ -20,7 +20,6 @@
   import MasteryValueInput from '../components/MasteryValueInput.svelte'
   import ButtonIcon from '../components/ButtonIcon.svelte'
   import AuthorInfo from '../components/AuthorInfo.svelte'
-  import Status from './Status.svelte'
   import Link from '../components/Link.svelte'
 
   let { groupId, statusCategoryName } = $props<{
@@ -199,9 +198,9 @@
   })
 </script>
 
-<h2 class="my-4">Status - {statusCategory?.title}</h2>
-<section class="shadow-sm">
-  {#if group && statusCategory}
+{#if group && statusCategory}
+  <h2 class="my-4">{group?.displayName} - {statusCategory?.title}</h2>
+  <section class="shadow-sm">
     {#if group.subjectId}
       {#if isLoading}
         <div class="spinner-border spinner-border-sm text-primary" role="status">
@@ -277,11 +276,11 @@
         Gruppa {group.displayName} har ingen fagtilknytning, og elevene kan derfor ikke tilordnes status.
       </p>
     {/if}
-  {:else}
-    <p>Gruppe: {group?.id}</p>
-    <p>Statuskategori: {statusCategory?.id}</p>
-  {/if}
-</section>
+  </section>
+{:else}
+  <p>Gruppe: {group?.id}</p>
+  <p>Statuskategori: {statusCategory?.id}</p>
+{/if}
 
 <style>
   .students-grid {
