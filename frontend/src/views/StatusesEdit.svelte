@@ -21,6 +21,8 @@
   import ButtonIcon from '../components/ButtonIcon.svelte'
   import AuthorInfo from '../components/AuthorInfo.svelte'
   import Link from '../components/Link.svelte'
+  import StatusEdit from '../components/StatusEdit.svelte'
+  import Offcanvas from '../components/Offcanvas.svelte'
 
   let { groupId, statusCategoryName } = $props<{
     groupId: string
@@ -40,6 +42,8 @@
   let students = $state<UserType[]>([])
   let isLoading = $state(true)
   let statusesByStudentId = $state<Record<string, StatusType[]>>({})
+  let statusWip = $state<StatusType | null>(null)
+  let isStatusEditorOpen = $state(false)
 
   let statusCategory = $derived<StatusCategoryType | undefined>(
     $dataStore.statusCategories.find(sc => sc.name === statusCategoryName) || undefined
@@ -116,8 +120,7 @@
     return newStatus
   }
 
-  const refreshDataForRow = async (row: RowType) => {
-    const studentId = row.studentId as string
+  const refetchDataForRow = async (studentId: string) => {
     if (!studentId) return
     const statusResult = await statusList({
       query: {
@@ -135,7 +138,8 @@
     statusesByStudentId = { ...statusesByStudentId, [studentId]: studenStatuses }
   }
 
-  const createOrUpdateStatus = async (status: Partial<StatusType>, row: RowType) => {
+  const createOrUpdateStatus = async (status: Partial<StatusType>, rowIndex: number) => {
+    const row = rows[rowIndex]
     row.isSaving = true
     try {
       if (status.id) {
@@ -154,7 +158,7 @@
         })
         trackEvent('Status', 'Create')
       }
-      await refreshDataForRow(row)
+      await refetchDataForRow(status.studentId as string)
     } catch (error) {
       console.error('Error saving status:', error)
       addAlert({
@@ -167,13 +171,12 @@
   }
 
   const handleChangeStatus = async (status: Partial<StatusType>, rowIndex: number) => {
-    const row = rows[rowIndex]
-    await createOrUpdateStatus(status, row)
+    await createOrUpdateStatus(status, rowIndex)
   }
 
-  const handleDeleteStatus = async (status: StatusType, rowIndex: number) => {
+  const handleDeleteStatus = async (status: StatusType) => {
     if (!status) return
-    const row = rows[rowIndex]
+    const { studentId } = status
     try {
       await statusDestroy({ path: { id: status.id } })
       trackEvent('Status', 'Delete')
@@ -188,7 +191,21 @@
         message: `Kunne ikke slette status "${status.title}". Hvis du mener dette er en feil, kontakt support.`,
       })
     }
-    await refreshDataForRow(row)
+    await refetchDataForRow(studentId)
+  }
+
+  const handleEditStatus = async (status: StatusType) => {
+    statusWip = {
+      ...status,
+    }
+    isStatusEditorOpen = true
+  }
+
+  const handleStatusDone = async () => {
+    const { studentId } = statusWip as StatusType
+    statusWip = null
+    isStatusEditorOpen = false
+    await refetchDataForRow(studentId as string)
   }
 
   $effect(() => {
@@ -222,7 +239,7 @@
             <span class="item">
               {#each statusesByStudentId[student.id] as status, statusIndex (status.id)}
                 {@const masterySchema = $dataStore.masterySchemas.find(
-                  ms => ms.id === status.masterySchemaId
+                  ms => ms.id === 'GnqQ1aNlg75Y' //status.masterySchemaId
                 )}
                 {#if statusIndex > 0}
                   <hr class="status-divider" />
@@ -238,19 +255,31 @@
                         {status.title}
                       {/if}
                     </span>
-                    {#if status.id && $hasUserAccessToFeature( 'status', 'delete', { groupId, createdById: status.createdById } )}
-                      {#key status.id}
+
+                    <div class="status-card-actions">
+                      {#if status.id && $hasUserAccessToFeature( 'status', 'update', { groupId, createdById: status.createdById } )}
+                        <ButtonIcon
+                          options={{
+                            iconName: 'edit',
+                            title: 'Rediger status',
+                            classes: 'bordered',
+                            onClick: () => handleEditStatus(status),
+                          }}
+                        />
+                      {/if}
+
+                      {#if status.id && $hasUserAccessToFeature( 'status', 'delete', { groupId, createdById: status.createdById } )}
                         <ButtonIcon
                           options={{
                             iconName: 'trash-can',
                             title: 'Slett status',
                             classes: 'bordered',
-                            onClick: () => handleDeleteStatus(status, rowIndex),
+                            onClick: () => handleDeleteStatus(status),
                             delayActionFor: 2,
                           }}
                         />
-                      {/key}
-                    {/if}
+                      {/if}
+                    </div>
                   </div>
                   {#if status.id}
                     <div class="status-meta">
@@ -265,6 +294,11 @@
                   >
                     <MasteryValueInput {masterySchema} bind:value={status.masteryValue} />
                   </div>
+                  {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
+                    <span class="fst-italic">
+                      {status.masteryDescription}
+                    </span>
+                  {/if}
                 </div>
               {/each}
             </span>
@@ -281,6 +315,19 @@
   <p>Gruppe: {group?.id}</p>
   <p>Statuskategori: {statusCategory?.id}</p>
 {/if}
+
+<!-- offcanvas for creating/editing status -->
+<Offcanvas
+  bind:isOpen={isStatusEditorOpen}
+  ariaLabel="Rediger status"
+  onClosed={() => {
+    statusWip = null
+  }}
+>
+  {#if statusWip}
+    <StatusEdit status={statusWip} onDone={handleStatusDone} />
+  {/if}
+</Offcanvas>
 
 <style>
   .students-grid {
@@ -327,6 +374,13 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
+  }
+
+  .status-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
   }
 
   .status-title {
