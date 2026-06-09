@@ -14,12 +14,12 @@
     isInputEnabled?: boolean
   } = $props()
 
-  const calculations = $derived(useMasteryCalculations(masterySchema))
-  const { masteryLevels } = $derived(calculations)
-
   // Random name to ensure multiple instances of this component can coexist
   const inputName = `toggle-${Math.random().toString(36).slice(2)}`
   const labelId = `${inputName}-label`
+
+  const calculations = $derived(useMasteryCalculations(masterySchema))
+  const { masteryLevels } = $derived(calculations)
 
   const selectedIndex = $derived(
     masteryLevels.findIndex((level: any) => level.minValue === masteryValue)
@@ -27,34 +27,31 @@
   const selectedColor = $derived(masteryLevels[Math.max(0, selectedIndex)]?.color ?? '#ffd700')
 </script>
 
-<div>
-  {#if label}
-    <span id={labelId} class="form-label">
-      {label}
-    </span>
-  {/if}
-
-  <div
-    class="comic-radio-group"
-    role="group"
-    aria-labelledby={labelId}
-    style="--option-count: {masteryLevels.length}; --selected-index: {selectedIndex}; --selected-color: {selectedColor}"
-  >
-    {#each masteryLevels as level, i}
-      <input
-        type="radio"
-        name={inputName}
-        id="mastery-{inputName}-{i}"
-        value={level.minValue}
-        bind:group={masteryValue}
-        disabled={!isInputEnabled || !masterySchema?.config?.isMasteryValueInputEnabled}
-      />
-      <label for="mastery-{inputName}-{i}">
-        {level.title}
-      </label>
-    {/each}
-    <div class="comic-glider"></div>
-  </div>
+{#if label}
+  <span id={labelId} class="form-label">
+    {label}
+  </span>
+{/if}
+<div
+  class="comic-radio-group"
+  role="group"
+  aria-labelledby={labelId}
+  style="--option-count: {masteryLevels.length}; --selected-index: {selectedIndex}; --selected-color: {selectedColor}"
+>
+  {#each masteryLevels as level, i}
+    <input
+      type="radio"
+      name={inputName}
+      id="mastery-{inputName}-{i}"
+      value={level.minValue}
+      bind:group={masteryValue}
+      disabled={!isInputEnabled || !masterySchema?.config?.isMasteryValueInputEnabled}
+    />
+    <label for="mastery-{inputName}-{i}">
+      {level.title}
+    </label>
+  {/each}
+  <div class="comic-glider"></div>
 </div>
 
 <style>
@@ -70,12 +67,11 @@
     border: 4px solid #000;
     box-shadow: 8px 8px 0px #000;
     overflow: hidden;
-    width: fit-content;
-    min-width: 70%;
+    width: 100%;
     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     font-style: italic;
-    font-weight: 500;
-    margin: 2rem auto 1rem auto;
+    font-weight: 600;
+    margin: 1rem auto 1rem auto;
   }
 
   .comic-radio-group input {

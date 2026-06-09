@@ -56,9 +56,12 @@
     label={title || ''}
   />
 {:else}
-  <p class="text-danger">
-    Ugyldig masterySchema.config: {masterySchema?.config?.valueInput}
-  </p>
+  <div class="text-danger">
+    <h3>Huhmf, ugyldig masterySchema</h3>
+    <pre>
+      {JSON.stringify(masterySchema, null, 2)}
+    </pre>
+  </div>
 {/if}
 
 <style>
