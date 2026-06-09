@@ -15,9 +15,10 @@
     isInputEnabled?: boolean
   } = $props()
 
-  const calculations = $derived(useMasteryCalculations(masterySchema))
   let thumbYPosition = $state(0)
   let yOffset = $state(0)
+
+  const calculations = $derived(useMasteryCalculations(masterySchema))
 
   const sortedMasteryLevels = $derived(
     [...calculations.masteryLevels].sort((a, b) => b.minValue - a.minValue)
@@ -50,13 +51,14 @@
   })
 </script>
 
-<div class="mb-4">
+<div class="mb-2">
   <label class="form-label" for="mastery-slider">
     {label}
   </label>
 
   <div class="d-flex gap-1 position-relative">
     {#if masterySchema?.config?.isMasteryValueInputEnabled && isInputEnabled}
+      <!-- Slider input -->
       <input
         id="mastery-slider"
         type="range"
@@ -67,7 +69,9 @@
         bind:value={masteryValue}
       />
     {/if}
+
     {#if masterySchema?.config?.isValueIndicatorEnabled}
+      <!-- mastery value number -->
       <div id="valueIndicatorContainer">
         <div
           id="valueIndicator"
@@ -80,13 +84,16 @@
 
     <div class="stairs-container">
       {#if masterySchema?.config?.isIncrementIndicatorEnabled}
+        <!-- bar visualizing mastery position -->
         <div
           id="incrementIndicator"
           title={`${safeMasteryValue}`}
           style="bottom: clamp(0%, {thumbYPosition + yOffset}%, calc(100% - 10px));"
         ></div>
       {/if}
+
       {#each sortedMasteryLevels as masteryLevel, index}
+        <!-- levels -->
         <span
           class="rung px-2"
           style="width: {(index + 1) * widthMultiplier}%; height: {calculateRungHeight(

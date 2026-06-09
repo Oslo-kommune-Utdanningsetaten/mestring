@@ -239,7 +239,7 @@
             <span class="item">
               {#each statusesByStudentId[student.id] as status, statusIndex (status.id)}
                 {@const masterySchema = $dataStore.masterySchemas.find(
-                  ms => ms.id === 'GnqQ1aNlg75Y' //status.masterySchemaId
+                  ms => ms.id === status.masterySchemaId
                 )}
                 {#if statusIndex > 0}
                   <hr class="status-divider" />

@@ -46,60 +46,66 @@
   })
 </script>
 
-<div>
-  {#if label}
-    <label class="form-label" for="mastery-slider">
-      {label}
-    </label>
+{#if label}
+  <label class="form-label" for="mastery-slider">
+    {label}
+  </label>
+{/if}
+
+<div class="stairs-container d-flex align-items-end mb-2">
+  {#each calculations.masteryLevels as masteryLevel, index}
+    <!-- levels -->
+    <span
+      class="rung flex-grow d-flex align-items-end justify-content-center text-center"
+      style="width: {calculateRungWidth(index)}%; height: {calculateRungHeight(
+        index
+      )}%; background-color: {masteryLevel.color}; color: {getContrastFriendlyTextColor(
+        masteryLevel.color
+      )};"
+    >
+      <span class="pb-1 mx-2 lh-sm">
+        {masteryLevel.title}
+      </span>
+    </span>
+  {/each}
+
+  {#if masterySchema?.config?.isIncrementIndicatorEnabled}
+    <!-- bar visualizing mastery position -->
+    <div
+      id="incrementIndicator"
+      title={`${safeMasteryValue}`}
+      style="left: clamp(0%, {thumbXPosition + xOffset}%, calc(100% - 10px));"
+    ></div>
+  {/if}
+</div>
+
+<div
+  class="input-container d-flex align-items-end mt-{masterySchema?.config?.isValueIndicatorEnabled
+    ? '5'
+    : '3'} mb-4"
+>
+  {#if masterySchema?.config?.isValueIndicatorEnabled}
+    <!-- mastery value number -->
+    <div
+      id="valueIndicator"
+      style="left: clamp(0%, calc({thumbXPosition + xOffset}% - 0.5rem), calc(100%));"
+    >
+      {safeMasteryValue}
+    </div>
   {/if}
 
-  <div class="stairs-container d-flex align-items-end mb-5">
-    {#each calculations.masteryLevels as masteryLevel, index}
-      <span
-        class="rung flex-grow d-flex align-items-end justify-content-center text-center"
-        style="width: {calculateRungWidth(index)}%; height: {calculateRungHeight(
-          index
-        )}%; background-color: {masteryLevel.color}; color: {getContrastFriendlyTextColor(
-          masteryLevel.color
-        )};"
-      >
-        <span class="pb-1 mx-2 lh-sm">
-          {masteryLevel.title}
-        </span>
-      </span>
-    {/each}
-    {#if masterySchema?.config?.isIncrementIndicatorEnabled}
-      <!-- bar visualizing mastery position -->
-      <div
-        id="incrementIndicator"
-        title={`${safeMasteryValue}`}
-        style="left: clamp(0%, {thumbXPosition + xOffset}%, calc(100% - 10px));"
-      ></div>
-    {/if}
-  </div>
-  <div class="input-container d-flex align-items-end my-5">
-    {#if masterySchema?.config?.isValueIndicatorEnabled}
-      <!-- mastery value number -->
-      <div
-        id="valueIndicator"
-        style="left: clamp(0%, calc({thumbXPosition + xOffset}% - 0.5rem), calc(100%));"
-      >
-        {safeMasteryValue}
-      </div>
-    {/if}
-    {#if masterySchema?.config?.isMasteryValueInputEnabled && isInputEnabled}
-      <!-- slider input -->
-      <input
-        id="mastery-slider"
-        type="range"
-        min={calculations.minValue}
-        max={calculations.maxValue}
-        step={calculations.sliderValueIncrement}
-        class="slider"
-        bind:value={masteryValue}
-      />
-    {/if}
-  </div>
+  {#if masterySchema?.config?.isMasteryValueInputEnabled && isInputEnabled}
+    <!-- slider input -->
+    <input
+      id="mastery-slider"
+      type="range"
+      min={calculations.minValue}
+      max={calculations.maxValue}
+      step={calculations.sliderValueIncrement}
+      class="slider"
+      bind:value={masteryValue}
+    />
+  {/if}
 </div>
 
 <style>

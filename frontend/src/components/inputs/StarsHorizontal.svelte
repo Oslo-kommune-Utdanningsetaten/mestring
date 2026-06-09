@@ -14,10 +14,10 @@
     isInputEnabled?: boolean
   } = $props()
 
+  let hoveredValue = $state<number | null>(null)
+
   const calculations = $derived(useMasteryCalculations(masterySchema))
   const { masteryLevels } = $derived(calculations)
-
-  let hoveredValue = $state<number | null>(null)
 
   const isValueHighlighted = (value: number): boolean => {
     const targetValue = hoveredValue ?? masteryValue
