@@ -15,19 +15,24 @@
     isInputEnabled?: boolean
   } = $props()
 
-  const calculations = $derived(useMasteryCalculations(masterySchema))
+  const {
+    minValue,
+    maxValue,
+    inputValueIncrement,
+    masteryLevels,
+    hasLevels,
+    defaultValue,
+    calculateSafeMasteryValue,
+  } = $derived(useMasteryCalculations(masterySchema))
+
   let thumbXPosition = $derived(
-    Math.round(
-      ((masteryValue - calculations.minValue) / (calculations.maxValue - calculations.minValue)) *
-        100
-    )
+    Math.round(((masteryValue - minValue) / (maxValue - minValue)) * 100)
   )
   let xOffset = $derived(thumbXPosition > 40 ? -((thumbXPosition - 40) / 40) * 1.1 : 0)
 
-  const safeMasteryValue = $derived(calculations.calculateSafeMasteryValue(masteryValue))
+  const safeMasteryValue = $derived(calculateSafeMasteryValue(masteryValue))
 
   const calculateRungWidth = (index: number) => {
-    const { minValue, maxValue, masteryLevels } = calculations
     const currentLevel = masteryLevels[index]
     const valuesCountTotal = maxValue - minValue + 1
     const valuesCountCurrentLevel = currentLevel.maxValue - currentLevel.minValue + 1
@@ -67,78 +72,80 @@
   }
 
   const rungColor = $derived(
-    calculations.masteryLevels.length >= 2
+    masteryLevels.length > 1
       ? interpolateColor(
-          calculations.masteryLevels[0].color,
-          calculations.masteryLevels[calculations.masteryLevels.length - 1].color,
+          masteryLevels[0].color,
+          masteryLevels[masteryLevels.length - 1].color,
           thumbXPosition / 100
         )
-      : (calculations.masteryLevels[0]?.color ?? '#cccccc')
+      : (masteryLevels[0]?.color ?? '#cccccc')
   )
 
   // Set default value when masteryValue is null/undefined and schema is available
   $effect(() => {
-    if ((masteryValue === null || masteryValue === undefined) && calculations.hasLevels) {
-      masteryValue = calculations.defaultValue
+    if ((masteryValue === null || masteryValue === undefined) && hasLevels) {
+      masteryValue = defaultValue
     }
   })
 </script>
 
-<div>
-  {#if label}
-    <label class="form-label" for="mastery-slider">
-      {label}
-    </label>
-  {/if}
+{#if label}
+  <label class="form-label" for="mastery-slider">
+    {label}
+  </label>
+{/if}
 
-  <div class="stairs-container d-flex align-items-end mb-5">
-    {#each calculations.masteryLevels as masteryLevel, index}
-      <span
-        class="rung flex-grow d-flex align-items-end {index === 0
-          ? 'justify-content-start text-start'
-          : index === calculations.masteryLevels.length - 1
-            ? 'justify-content-end text-end'
-            : 'justify-content-center text-center'}"
-        style="width: {calculateRungWidth(index)}%; height:100%; background-color: {rungColor};"
-      >
-        <span class="pb-1 mx-2 lh-sm" style="color: {getContrastFriendlyTextColor(rungColor)};">
-          {masteryLevel.title}
-        </span>
+<div class="stairs-container d-flex align-items-end">
+  {#each masteryLevels as masteryLevel, index}
+    <span
+      class="rung flex-grow d-flex align-items-end {index === 0
+        ? 'justify-content-start text-start'
+        : index === masteryLevels.length - 1
+          ? 'justify-content-end text-end'
+          : 'justify-content-center text-center'}"
+      style="width: {calculateRungWidth(index)}%; height:100%; background-color: {rungColor};"
+    >
+      <span class="pb-1 mx-2 lh-sm" style="color: {getContrastFriendlyTextColor(rungColor)};">
+        {masteryLevel.title}
       </span>
-    {/each}
-    {#if masterySchema?.config?.isIncrementIndicatorEnabled}
-      <!-- horizontal arrow visualizing mastery position -->
-      <div
-        id="incrementIndicator"
-        title={`${safeMasteryValue}`}
-        style="width: clamp(0px, calc({thumbXPosition}% - 40px), calc(100%));"
-      ></div>
-    {/if}
-  </div>
+    </span>
+  {/each}
+  {#if masterySchema?.config?.isIncrementIndicatorEnabled}
+    <!-- horizontal arrow visualizing mastery position -->
+    <div
+      id="incrementIndicator"
+      title={`${safeMasteryValue}`}
+      style="width: clamp(0px, calc({thumbXPosition}% - 40px), calc(100%));"
+    ></div>
+  {/if}
+</div>
 
-  <div class="input-container d-flex align-items-end my-5">
-    {#if masterySchema?.config?.isValueIndicatorEnabled}
-      <!-- mastery value number -->
-      <div
-        id="valueIndicator"
-        style="left: clamp(0%, calc({thumbXPosition + xOffset}% - 0.5rem), calc(100%));"
-      >
-        {safeMasteryValue}
-      </div>
-    {/if}
-    {#if masterySchema?.config?.isMasteryValueInputEnabled && isInputEnabled}
-      <!-- slider input -->
-      <input
-        id="mastery-slider"
-        type="range"
-        min={calculations.minValue}
-        max={calculations.maxValue}
-        step={calculations.sliderValueIncrement}
-        class="slider"
-        bind:value={masteryValue}
-      />
-    {/if}
-  </div>
+<div
+  class="input-container d-flex align-items-end mt-{masterySchema?.config?.isValueIndicatorEnabled
+    ? '5'
+    : '3'} mb-4"
+>
+  {#if masterySchema?.config?.isValueIndicatorEnabled}
+    <!-- mastery value number -->
+    <div
+      id="valueIndicator"
+      style="left: clamp(0%, calc({thumbXPosition + xOffset}% - 0.5rem), calc(100%));"
+    >
+      {safeMasteryValue}
+    </div>
+  {/if}
+  {#if masterySchema?.config?.isMasteryValueInputEnabled && isInputEnabled}
+    <!-- slider input -->
+    <input
+      id="mastery-slider"
+      type="range"
+      min={minValue}
+      max={maxValue}
+      step={inputValueIncrement}
+      class="slider"
+      bind:value={masteryValue}
+    />
+  {/if}
 </div>
 
 <style>

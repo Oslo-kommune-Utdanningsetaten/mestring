@@ -160,7 +160,7 @@
           data={calculateTrendRepresentation(masteriesBySubjectId[subject.id])}
           width={50}
           height={30}
-          yResolution={calculations.sliderValueIncrement}
+          yResolution={calculations.inputValueIncrement}
         />
 
         {#if $isMasteryBarChartVisible && assumedMasterySchema}

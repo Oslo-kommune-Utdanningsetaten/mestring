@@ -32,7 +32,7 @@
     if (!hasSufficientData) return ''
 
     const stepX = width / (data.length - 1)
-    const yChunkCount = calculations.maxValue / calculations.sliderValueIncrement
+    const yChunkCount = calculations.maxValue / calculations.inputValueIncrement
     const yChunkHeight = height / yChunkCount
 
     return data

@@ -35,7 +35,7 @@
 <BarChart
   {data}
   yMaxValue={calculations.maxValue}
-  yResolution={calculations.sliderValueIncrement}
+  yResolution={calculations.inputValueIncrement}
   {width}
   {height}
   {colorLookup}

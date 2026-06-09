@@ -74,7 +74,7 @@ export function useMasteryCalculations(masterySchema: MasterySchemaWithConfig | 
   const maxValue = hasLevels
     ? Math.max(...masteryLevels.map((lev: MasteryConfigLevel) => lev.maxValue))
     : 100
-  const sliderValueIncrement = masterySchema?.config?.inputIncrement || 1
+  const inputValueIncrement = masterySchema?.config?.inputIncrement || 1
   const defaultValue = Math.floor((minValue + maxValue) / 2)
   const deltaValue = maxValue - minValue
   const flatTrendThreshold = masterySchema?.config?.flatTrendThreshold || 1
@@ -92,7 +92,7 @@ export function useMasteryCalculations(masterySchema: MasterySchemaWithConfig | 
     minValue,
     maxValue,
     deltaValue,
-    sliderValueIncrement,
+    inputValueIncrement,
     defaultValue,
     calculateSafeMasteryValue,
     flatTrendThreshold,

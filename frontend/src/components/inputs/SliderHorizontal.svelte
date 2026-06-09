@@ -101,7 +101,7 @@
       type="range"
       min={calculations.minValue}
       max={calculations.maxValue}
-      step={calculations.sliderValueIncrement}
+      step={calculations.inputValueIncrement}
       class="slider"
       bind:value={masteryValue}
     />
