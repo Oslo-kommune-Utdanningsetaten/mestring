@@ -236,17 +236,20 @@
               <h3 class="card-title">
                 {masterySchema.title}
               </h3>
-              <p>
+              <div>
                 {masterySchema.description || 'Ingen beskrivelse'}
-              </p>
-              <p class="text-muted">
-                Range: {getMasteryLevelsSummary(masterySchema)}
-                <br />
-                Input: {masterySchema.config.valueInput}
-                <br />
-                ID: {masterySchema.id}
-                <br />
-              </p>
+              </div>
+              <div class="text-muted my-3">
+                <div>
+                  Range: {getMasteryLevelsSummary(masterySchema)}
+                </div>
+                <div>
+                  Input: {masterySchema.config.valueInput}
+                </div>
+                <div>
+                  ID: {masterySchema.id}
+                </div>
+              </div>
 
               <div class="mb-2">
                 <pkt-checkbox
