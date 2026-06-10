@@ -114,14 +114,14 @@ def test_invalid_group_access(
         resp = client.get(f'/api/groups/{invalid_group.id}/')
         assert resp.status_code == 404
 
-        # Can list the group when including isValid param
-        resp = client.get('/api/groups/', {'school': school.id, 'isValid': False})
+        # Can list the group when including valid param
+        resp = client.get('/api/groups/', {'school': school.id, 'valid': 'exclude'})
         assert resp.status_code == 200
         expected_ids = {invalid_group.id, invalid_group_no_from.id, invalid_group_no_to.id}
         received_ids = {group['id'] for group in resp.json()}
         assert expected_ids == received_ids
 
-        # Can retrieve the specific group when including isValid param
-        resp = client.get(f'/api/groups/{invalid_group.id}/', {'isValid': False})
+        # Can retrieve the specific group when including valid param
+        resp = client.get(f'/api/groups/{invalid_group.id}/', {'valid': 'exclude'})
         assert resp.status_code == 200
         assert resp.json()['id'] == invalid_group.id

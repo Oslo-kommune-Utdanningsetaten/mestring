@@ -1,6 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
-from mastery.models import User, Goal
+from mastery.models import User, Goal, Group
 
 
 @pytest.mark.django_db
@@ -601,12 +601,11 @@ def test_basis_group_teacher_goal_access(
 ):
     """
     Test access for basis group teachers.
-    Basis group teachers have FULL access to their students:
-    - Can see ALL goals (individual + group) for students in their basis group
+    Basis group teachers have FULL read access to their students:
     - Can see ALL goals (individual + group) for students in their basis group
     - Can see group goals in other teaching groups if student is in their basis group
     - Can modify individual goals only for students in their basis groups
-    - Cannot modify group goals unless they also teach that group
+    - Cannot modify group goals unless they also teach that teaching group
     """
     client = APIClient()
     client.force_authenticate(user=teacher)
@@ -619,14 +618,6 @@ def test_basis_group_teacher_goal_access(
     individual_goal = Goal.objects.create(
         title="Student's individual goal",
         student=student,
-        subject=subject_owned_by_school,
-        school=school,
-    )
-
-    # Individual goal for student not in teacher's basis group
-    individual_goal_other = Goal.objects.create(
-        title="Other student individual goal",
-        student=other_student,
         subject=subject_owned_by_school,
         school=school,
     )
@@ -646,6 +637,14 @@ def test_basis_group_teacher_goal_access(
         school=school,
     )
 
+    # Individual goal for other student not in teacher's basis group
+    individual_goal_other = Goal.objects.create(
+        title="Other student individual goal",
+        student=other_student,
+        subject=subject_owned_by_school,
+        school=school,
+    )
+
     # Basis teacher needs at least one parameter to list goals
     resp = client.get('/api/goals/')
     assert resp.status_code == 400
@@ -660,6 +659,7 @@ def test_basis_group_teacher_goal_access(
     received_ids = {goal['id'] for goal in resp.json()}
     assert individual_goal.id in received_ids
     assert group_goal_own.id in received_ids
+    print('🦊group_goal_other:', group_goal_other.__dict__)
     assert group_goal_other.id in received_ids
     assert individual_goal_other.id not in received_ids
 
@@ -909,3 +909,102 @@ def test_school_admin_goal_access(
         'title': 'Try update other school'
     }, format='json')
     assert resp.status_code in (403, 404)
+
+
+@pytest.mark.django_db
+def test_basis_group_only_teacher_goal_scope(
+    basis_group,
+    school,
+    teacher_role,
+    student_role,
+    subject_owned_by_school,
+):
+    """
+    Teacher is ONLY a member of a basis group (no teaching groups).
+    StudentA is in the basis group AND in an unrelated teaching group.
+    StudentB is in that teaching group but NOT in the basis group.
+
+    The teacher should be able to see all goals belonging to StudentA,
+    but must not be able to see any goals belonging to StudentB — even
+    though both students share the same teaching group.
+    """
+    client = APIClient()
+
+    basis_only_teacher = User.objects.create(
+        name="Basis Only Teacher",
+        feide_id="basis-only-teacher@example.com",
+        email="basis-only-teacher@example.com",
+    )
+    student_a = User.objects.create(
+        name="Student A",
+        feide_id="student-a@example.com",
+        email="student-a@example.com",
+    )
+    student_b = User.objects.create(
+        name="Student B",
+        feide_id="student-b@example.com",
+        email="student-b@example.com",
+    )
+
+    teaching_group = Group.objects.create(
+        feide_id="fc:group:teaching-group-b",
+        display_name="Matte 8b",
+        type="teaching",
+        school=school,
+        is_enabled=True,
+    )
+
+    # Teacher is only in the basis group
+    basis_group.add_member(basis_only_teacher, teacher_role)
+    basis_group.add_member(student_a, student_role)
+
+    # StudentA and StudentB are both member of teaching_group; teacher is NOT a member
+    teaching_group.add_member(student_a, student_role)
+    teaching_group.add_member(student_b, student_role)
+
+    individual_goal_a = Goal.objects.create(
+        title="StudentA individual goal",
+        student=student_a,
+        subject=subject_owned_by_school,
+        school=school,
+    )
+    individual_goal_b = Goal.objects.create(
+        title="StudentB individual goal",
+        student=student_b,
+        subject=subject_owned_by_school,
+        school=school,
+    )
+    group_goal_teaching_group = Goal.objects.create(
+        title="Group goal in teaching-group-b",
+        group=teaching_group,
+        school=school,
+    )
+
+    client.force_authenticate(user=basis_only_teacher)
+
+    # Teacher can list all goals for StudentA (individual + group goal via shared group)
+    resp = client.get('/api/goals/', {'student': student_a.id, 'school': school.id})
+    assert resp.status_code == 200
+    received_ids = {goal['id'] for goal in resp.json()}
+    assert individual_goal_a.id in received_ids
+    assert group_goal_teaching_group.id in received_ids
+    assert individual_goal_b.id not in received_ids
+
+    # Teacher can retrieve StudentA's individual goal
+    resp = client.get(f'/api/goals/{individual_goal_a.id}/')
+    assert resp.status_code == 200
+
+    # Teacher can retrieve the group goal (because StudentA is in the group and in basis group)
+    resp = client.get(f'/api/goals/{group_goal_teaching_group.id}/')
+    assert resp.status_code == 200
+
+    # Teacher cannot list goals via student_b: although group_goal_teaching_group is in scope
+    # (via StudentA's basis membership), filtering by student_b must not reveal it, otherwise the
+    # teacher could infer student_b's group memberships despite having no access to student_b
+    resp = client.get('/api/goals/', {'student': student_b.id, 'school': school.id})
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+    # Teacher cannot retrieve StudentB's individual goal
+    resp = client.get(f'/api/goals/{individual_goal_b.id}/')
+    assert resp.status_code == 404

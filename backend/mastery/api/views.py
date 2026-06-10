@@ -26,13 +26,16 @@ def apply_deleted_filter(query_params, qs):
 
 
 def apply_valid_group_filter(query_params, qs):
-    is_valid_param, is_valid_set = get_request_param(query_params, 'is_valid')
+    valid_param, valid_set = get_request_param(query_params, 'valid')
 
-    if is_valid_set and not is_valid_param:
+    if valid_set and valid_param == 'include':
+        # All groups, valid and non-valid
+        return qs
+    elif valid_set and valid_param == 'exclude':
         # Only invalid groups
         return qs.outside_validity_period()
     else:
-        # By default, include only valid groups
+        # Default, include only valid groups
         return qs.within_validity_period()
 
 
@@ -407,10 +410,10 @@ class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='is_valid',
-                description='Filter groups by whether they are valid by date',
+                name='valid',
+                description='Filter groups by wether they are valid by date: "only" (default, only valid), "include" (both valid and non-valid), or "exclude" (only non-valid)',
                 required=False,
-                type={'type': 'boolean'},
+                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
         ]
@@ -669,11 +672,19 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
             if group_param:
                 qs = qs.filter(group_id=group_param)
             if student_param:
-                # Student can be either the owner of a individual goal or a member of a group goal
-                qs = qs.filter(
-                    Q(student_id=student_param) |
-                    Q(group__user_groups__user_id=student_param, group__user_groups__deleted_at__isnull=True)
-                )
+                # Student can be either the owner of an individual goal or a member of a group goal.
+                # The group-membership match is only applied if the requester is allowed to see the
+                # queried student (per UserAccessPolicy). Otherwise a requester could infer a student's
+                # group memberships by probing which in-scope group goals surface for that student id.
+                student_filter = Q(student_id=student_param)
+                can_see_student = UserAccessPolicy().scope_queryset(
+                    self.request, models.User.objects.all()
+                ).filter(id=student_param).exists()
+                if can_see_student:
+                    student_filter |= Q(
+                        group__user_groups__user_id=student_param,
+                        group__user_groups__deleted_at__isnull=True)
+                qs = qs.filter(student_filter)
             if subject_param:
                 # Subject can be either on a individual goal or a group goal
                 qs = qs.filter(

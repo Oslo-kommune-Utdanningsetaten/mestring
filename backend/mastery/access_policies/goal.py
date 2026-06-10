@@ -109,16 +109,36 @@ class GoalAccessPolicy(BaseAccessPolicy):
 
             # Basis group teachers: All goals for students in their basis group at the same school
             if teacher_basis_group_ids:
-                # Individual goals for students in basis group at the same school
-                basis_membership = UserGroup.objects.filter(
-                    user_id=OuterRef('student_id'),
+
+                student_memberships_in_teachers_basis_groups = UserGroup.objects.filter(
                     group_id__in=teacher_basis_group_ids,
+                    role__name='student',
                     group__school_id=OuterRef('school_id'),
                 )
-                qs = qs.annotate(student_in_basis_group=Exists(basis_membership))
-                filters |= Q(student_in_basis_group=True)
-                # Group goals where the group is one of the teacher's basis groups
-                filters |= Q(group_id__in=teacher_basis_group_ids)
+
+                # All individual goals (across any group) for students who are member of a basis group that the teacher teaches at the same school. Note: individual goals have group_id = null, and a value for student_id
+                filters |= Q(
+                    student_id__in=student_memberships_in_teachers_basis_groups.values('user_id'),
+                    group_id__isnull=True)
+
+                # All group goals (across any group) for students who are member of a basis group that the teacher teaches at the same school. Note: group goals have a group_id value and student_id = null
+
+                # First, find the student IDs in the teacher's basis groups
+                student_ids_in_teachers_basis_groups = UserGroup.objects.filter(
+                    group_id__in=teacher_basis_group_ids,
+                    role__name='student',
+                ).values('user_id')
+
+                # Then, find all groups at the same school where those students are members
+                all_groups_of_basis_students = UserGroup.objects.filter(
+                    user_id__in=student_ids_in_teachers_basis_groups,
+                    role__name='student',
+                    group__school_id=OuterRef('school_id'),
+                ).values('group_id')
+
+                filters |= Q(
+                    group_id__in=all_groups_of_basis_students,
+                    student_id__isnull=True)
 
             # Students: Own individual goals + group goals in their groups
             filters |= Q(student=requester)
