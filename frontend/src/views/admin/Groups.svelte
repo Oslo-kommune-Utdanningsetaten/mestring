@@ -17,7 +17,9 @@
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingGroups = $state<boolean>(false)
   let enabledSelection = $state<'include' | 'only' | 'exclude'>('only')
+  let validSelection = $state<'include' | 'only' | 'exclude'>('only')
   let deletedSelection = $state<'include' | 'only' | 'exclude'>('include')
+
   let selectedSchool = $derived.by(() => {
     const schoolIdFromUrl = router.getQueryParam('school')
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
@@ -29,8 +31,8 @@
   // Options for filtering by enabled
   const enabledOptions = [
     { value: 'include', label: 'All' },
-    { value: 'only', label: 'Enabled groups' },
-    { value: 'exclude', label: 'Disabled groups' },
+    { value: 'only', label: 'Enabled' },
+    { value: 'exclude', label: 'Disabled' },
   ] as const
 
   // Options for filtering by deleted
@@ -38,6 +40,13 @@
     { value: 'include', label: 'All' },
     { value: 'only', label: 'Deleted' },
     { value: 'exclude', label: 'Non-deleted' },
+  ] as const
+
+  // Options for filtering by valid
+  const validOptions = [
+    { value: 'include', label: 'All' },
+    { value: 'only', label: 'Valid' },
+    { value: 'exclude', label: 'Invalid' },
   ] as const
 
   let filteredGroups = $derived(
@@ -49,6 +58,7 @@
   let groupFetchOptions = $derived({
     enabled: enabledSelection,
     deleted: deletedSelection,
+    valid: validSelection,
   })
 
   const subjectsById: Record<string, SubjectType> = $derived(
@@ -257,6 +267,22 @@
             name="deletedOptions"
             value={option.value}
             bind:group={deletedSelection}
+          />
+          <span class="ms-2">{option.label}</span>
+        </label>
+      {/each}
+    </fieldset>
+
+    <!-- Radio buttons for valid status -->
+    <fieldset class="border p-3 rounded">
+      <legend class="w-auto fs-6">Valid by date?</legend>
+      {#each validOptions as option}
+        <label class="my-2 ms-1 d-block">
+          <input
+            type="radio"
+            name="validOptions"
+            value={option.value}
+            bind:group={validSelection}
           />
           <span class="ms-2">{option.label}</span>
         </label>
