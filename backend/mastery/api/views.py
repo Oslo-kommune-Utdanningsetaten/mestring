@@ -671,26 +671,27 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
 
             if group_param:
                 qs = qs.filter(group_id=group_param)
+
             if student_param:
                 # Student can be either the owner of an individual goal or a member of a group goal.
-                # The group-membership match is only applied if the requester is allowed to see the
-                # queried student (per UserAccessPolicy). Otherwise a requester could infer a student's
-                # group memberships by probing which in-scope group goals surface for that student id.
+                # Only return goals for students that the requester has access to (per UserAccessPolicy)
                 student_filter = Q(student_id=student_param)
-                can_see_student = UserAccessPolicy().scope_queryset(
+                has_access_to_student = UserAccessPolicy().scope_queryset(
                     self.request, models.User.objects.all()
                 ).filter(id=student_param).exists()
-                if can_see_student:
+                if has_access_to_student:
                     student_filter |= Q(
                         group__user_groups__user_id=student_param,
                         group__user_groups__deleted_at__isnull=True)
                 qs = qs.filter(student_filter)
+
             if subject_param:
                 # Subject can be either on a individual goal or a group goal
                 qs = qs.filter(
                     Q(subject_id=subject_param) |
                     Q(group__subject_id=subject_param)
                 )
+
             if include_observations_param and (student_param or group_param):
                 # Prefetch observations with access-policy scoping applied
                 self.serializer_class = serializers.GoalWithObservationsSerializer
