@@ -1,10 +1,9 @@
 <script lang="ts">
-  import type { UserType, SubjectType, GroupType, StatusType } from '../generated/types.gen'
+  import type { UserType, SubjectType, StatusType } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
   import { statusList } from '../generated/sdk.gen'
-  import MasteryBadge from './MasteryBadge.svelte'
+  import MasterySchemaLevel from './MasterySchemaLevel.svelte'
   import UserNameLink from './UserNameLink.svelte'
-  import Link from './Link.svelte'
 
   let {
     students,
@@ -130,7 +129,7 @@
         <span class="item">
           {#each statuses as status}
             <span class="me-1" title={status.title}>
-              <MasteryBadge
+              <MasterySchemaLevel
                 masteryValue={status.masteryValue}
                 masterySchemaId={status.masterySchemaId}
               />

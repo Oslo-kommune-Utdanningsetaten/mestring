@@ -18,7 +18,7 @@
   import Offcanvas from '../components/Offcanvas.svelte'
   import AuthorInfo from '../components/AuthorInfo.svelte'
   import Link from '../components/Link.svelte'
-  import MasteryBadge from '../components/MasteryBadge.svelte'
+  import MasterySchemaLevel from '../components/MasterySchemaLevel.svelte'
 
   let { statusId } = $props<{
     statusId: string
@@ -205,7 +205,7 @@
                 class:inactive={status.masteryValue < level.minValue ||
                   status.masteryValue > level.maxValue}
               >
-                <MasteryBadge
+                <MasterySchemaLevel
                   masteryValue={level.minValue}
                   masterySchemaId={status.masterySchemaId}
                 />

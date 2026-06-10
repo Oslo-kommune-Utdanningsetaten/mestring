@@ -14,7 +14,7 @@
   import { dataStore } from '../../stores/data'
   import { useMasteryCalculations, areSchemaValuesConsistent } from '../../utils/masteryHelpers'
   import ButtonMini from '../../components/ButtonMini.svelte'
-  import MasteryBadge from '../../components/MasteryBadge.svelte'
+  import MasterySchemaLevel from '../../components/MasterySchemaLevel.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
   import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
 
@@ -276,7 +276,7 @@
               <div class="mb-4 d-flex gap-2">
                 {#each masterySchema?.config?.levels || [] as level}
                   <div class="d-flex flex-column align-items-center">
-                    <MasteryBadge masteryValue={level.minValue} {masterySchema} />
+                    <MasterySchemaLevel masteryValue={level.minValue} {masterySchema} />
                     <span class="small text-muted py-1 bg-light w-100 text-center">
                       {level.minValue}&nbsp;➡&nbsp;{level.maxValue}
                     </span>
