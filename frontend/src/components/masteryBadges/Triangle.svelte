@@ -31,15 +31,20 @@
   const masteryIndicatorHeight = 2
   const masteryIndicatorWidth = trendBoxSizeX
 
-  // circle size scales with magnitude of trend value
-  const mincircleSize = 6
-  const maxcircleSize = trendBoxSizeX
-  const circleFraction = $derived(
+  const minTriangleSize = 6
+  const maxTriangleSize = trendBoxSizeX
+
+  // Triangle size scales with magnitude of trend value
+  const triangleFraction = $derived(
     calculations.deltaValue > 0 ? Math.min(Math.abs(trend) / calculations.deltaValue, 1) : 0
   )
-  const circleSize = $derived(
-    Math.round(mincircleSize + circleFraction * (maxcircleSize - mincircleSize))
+  const triangleWidth = $derived(
+    Math.round(minTriangleSize + triangleFraction * (maxTriangleSize - minTriangleSize))
   )
+
+  // Equilateral triangle: height = width * sqrt(3) / 2
+  const triangleHeight = $derived(Math.round((triangleWidth * Math.sqrt(3)) / 2))
+
   // Calculate mastery indicator position based on available space
   const indicatorPosition = (masteryValue: number) => {
     const maxY = trendBoxSizeY - masteryIndicatorHeight
@@ -65,8 +70,8 @@
       ></span>
     {/if}
     <span
-      class="trend-circle {isDecreasing ? 'hollow' : 'filled'}"
-      style="width: {circleSize}px; height: {circleSize}px;"
+      class="trend-triangle {isDecreasing ? 'down' : 'up'}"
+      style={`--triangle-width: ${triangleWidth}px; --triangle-height: ${triangleHeight}px;`}
     ></span>
   {:else if isBadgeEmpty}
     <span
@@ -98,21 +103,23 @@
     box-sizing: border-box;
   }
 
-  .trend-circle {
+  .trend-triangle {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    border-radius: 50%;
+    width: 0;
+    height: 0;
+    border-left: calc(var(--triangle-width) / 2) solid transparent;
+    border-right: calc(var(--triangle-width) / 2) solid transparent;
   }
 
-  .filled {
-    border-radius: 50%;
-    background-color: var(--bs-dark);
+  .trend-triangle.up {
+    border-bottom: var(--triangle-height) solid var(--bs-dark);
   }
 
-  .hollow {
-    border: 1px solid var(--bs-dark);
+  .trend-triangle.down {
+    border-top: var(--triangle-height) solid var(--bs-dark);
   }
 
   .mastery-indicator {
