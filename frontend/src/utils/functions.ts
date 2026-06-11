@@ -1,4 +1,4 @@
-import type { Mastery, GoalDecorated, UserDecorated } from '../types/models'
+import type { MasteryData, GoalDecorated, UserDecorated } from '../types/models'
 import type {
   GoalType,
   SubjectType,
@@ -199,7 +199,7 @@ const calculateTrend = (values: number[]): number => {
   return lastValue - firstValue
 }
 
-export const inferMastery = (observations: ObservationType[]): Mastery | null => {
+export const inferMastery = (observations: ObservationType[]): MasteryData | null => {
   if (observations.length === 0) {
     return null
   }
@@ -215,7 +215,7 @@ export const inferMastery = (observations: ObservationType[]): Mastery | null =>
   }
 }
 
-export const aggregateMasterys = (goals: GoalDecorated[]): Mastery | null => {
+export const aggregateMasterys = (goals: GoalDecorated[]): MasteryData | null => {
   const masteryValues: number[] = []
   const trendValues: number[] = []
   goals.forEach(goal => {

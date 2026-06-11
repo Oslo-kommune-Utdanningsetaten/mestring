@@ -5,7 +5,7 @@ export type deploymentEnvironment = 'localhost' | 'development' | 'production'
 
 export type UserRoleType = (typeof USER_ROLES)[keyof typeof USER_ROLES]
 
-export type Mastery = {
+export type MasteryData = {
   mastery: number
   trend: number
   title: string
@@ -30,7 +30,7 @@ export type HasUserAccessToFeatureOptions = {
 }
 
 export type GoalDecorated = GoalType & {
-  masteryData?: Mastery | null
+  masteryData?: MasteryData | null
   observations?: ObservationType[]
 }
 

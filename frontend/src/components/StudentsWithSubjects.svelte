@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { UserType, SubjectType, GroupType } from '../generated/types.gen'
-  import type { Mastery } from '../types/models'
+  import type { MasteryData } from '../types/models'
   import { dataStore } from '../stores/data'
   import { goalsList } from '../generated/sdk.gen'
   import {
@@ -42,7 +42,7 @@
 
   // Data per student: mastery and observation counts by subject
   type MasteryState = {
-    mastery?: Mastery
+    mastery?: MasteryData
     missingReason?: typeof MISSING_REASON_NO_OBSERVATIONS | typeof MISSING_REASON_NO_GOALS
   }
   type StudentData = {
@@ -177,7 +177,7 @@
           <StudentSubjectChart {student} {subject} />
         </div>
       {/if}
-      {#if masteryBySubjectId?.[subject.id]?.mastery}
+      {#if masteryBySubjectId?.[subject.id]}
         <MasteryLevelBadge
           masteryData={masteryBySubjectId[subject.id].mastery!}
           masterySchema={$dataStore.defaultMasterySchema}

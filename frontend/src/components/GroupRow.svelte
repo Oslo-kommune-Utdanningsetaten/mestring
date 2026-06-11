@@ -5,7 +5,7 @@
     ObservationType,
     MasterySchemaType,
   } from '../generated/types.gen'
-  import type { Mastery } from '../types/models'
+  import type { MasteryData } from '../types/models'
 
   import { inferMastery } from '../utils/functions'
   import { dataStore } from '../stores/data'
@@ -74,11 +74,11 @@
 
   // Next pass: Infer mastery for observations within each subject, student and goal
   // Then aggregate masteries by subject, so we have arrays of mastery objects for each subject, which we can use to render the trend bars
-  const masteriesBySubjectId: Record<string, Mastery[]> = $derived.by(() => {
-    const result: Record<string, Mastery[]> = {}
+  const masteriesBySubjectId: Record<string, MasteryData[]> = $derived.by(() => {
+    const result: Record<string, MasteryData[]> = {}
     Object.entries(observationsBySubjectIdAndStudentIdAndGoalId).forEach(
       ([subjectId, observationsByStudentIdAndGoalId]) => {
-        const masteriesForSubject: Mastery[] = []
+        const masteriesForSubject: MasteryData[] = []
         Object.values(observationsByStudentIdAndGoalId).forEach(observationsByGoalId => {
           Object.values(observationsByGoalId).forEach(observationsForGoal => {
             const mastery = inferMastery(observationsForGoal)
@@ -120,7 +120,7 @@
   }
 
   // Takes a list of mastery objects and returns an array containing the count of decreasing, flat and inreasing values
-  const calculateTrendRepresentation = (masteries: Mastery[]): [number, number, number] => {
+  const calculateTrendRepresentation = (masteries: MasteryData[]): [number, number, number] => {
     let decreasing = 0
     let flat = 0
     let inreasing = 0
