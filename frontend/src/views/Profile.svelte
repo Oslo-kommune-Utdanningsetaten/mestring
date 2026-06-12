@@ -1,18 +1,34 @@
 <script lang="ts">
   import { usersRetrieve } from '../generated/sdk.gen'
   import { fetchUserData } from '../utils/functions'
-  import { USER_ROLES } from '../utils/constants'
+  import { USER_ROLES, MASTERY_BADGE_VARIANTS } from '../utils/constants'
   import { dataStore, setCurrentSchool, currentUser, currentSchool } from '../stores/data'
   import type { GroupType, SchoolType } from '../generated/types.gen'
   import { localStorage } from '../stores/localStorage'
   import GroupTag from '../components/GroupTag.svelte'
   import type { UserRoleType, UserDecorated } from '../types/models'
+  import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
 
   const { userId } = $props<{ userId?: string }>()
   const isProfileMode = $derived($currentUser.id && !userId)
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
+  const preferredMasteryBadgeVariant = localStorage<MASTERY_BADGE_VARIANTS>(
+    'preferredMasteryBadgeVariant'
+  )
+  // Fall back to the default when nothing is stored yet
+  const selectedBadgeVariant = $derived(
+    $preferredMasteryBadgeVariant || MASTERY_BADGE_VARIANTS.BEEHIVE
+  )
+
+  // Options for mastery badge variant selection
+  const badgeOptions = [
+    { value: MASTERY_BADGE_VARIANTS.BEEHIVE, label: 'Bikube' },
+    { value: MASTERY_BADGE_VARIANTS.CIRCLE, label: 'Sirkel' },
+    { value: MASTERY_BADGE_VARIANTS.TRIANGLE, label: 'Trekant' },
+    { value: MASTERY_BADGE_VARIANTS.SMILEY, label: 'Smiley' },
+  ] as const
 
   // For admin viewing another user's profile
   let otherUser = $state<UserDecorated | undefined>(undefined)
@@ -86,6 +102,9 @@
   const handleToggleSubjectPolarChart = () =>
     isSubjectPolarChartVisible.set(!isSubjectPolarChartVisible.get())
 
+  const handleSelectBadgeVariant = (variant: MASTERY_BADGE_VARIANTS) =>
+    localStorage('preferredMasteryBadgeVariant').set(variant)
+
   $effect(() => {
     // Only load data when viewing another user's profile (admin mode)
     if (!isProfileMode && userId) {
@@ -145,7 +164,7 @@
               onchange={() => handleToggleMasteryBarChart()}
             ></pkt-checkbox>
           </div>
-          <div class="mb-2">
+          <div class="mb-4">
             <strong>Radial-diagram pr. elev og fag</strong>
             <pkt-checkbox
               label={$isSubjectPolarChartVisible ? 'Vises' : 'Skjules'}
@@ -155,6 +174,22 @@
               checked={$isSubjectPolarChartVisible}
               onchange={() => handleToggleSubjectPolarChart()}
             ></pkt-checkbox>
+          </div>
+
+          <div class="mb-2">
+            <strong>Mestringsmerke</strong>
+            <fieldset class="d-flex flex-wrap gap-4 mt-2">
+              <legend class="visually-hidden">Velg type mestringsmerke</legend>
+              {#each badgeOptions as option}
+                <pkt-radiobutton
+                  name="preferredMasteryBadgeVariant"
+                  value={option.value}
+                  label={option.label}
+                  checked={selectedBadgeVariant === option.value}
+                  onchange={() => handleSelectBadgeVariant(option.value)}
+                ></pkt-radiobutton>
+              {/each}
+            </fieldset>
           </div>
         </div>
       </div>

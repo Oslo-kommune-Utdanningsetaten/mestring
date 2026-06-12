@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { UserType, SubjectType, GroupType } from '../generated/types.gen'
-  import type { MasteryData, MasteryState } from '../types/models'
+  import type { MasteryState } from '../types/models'
   import { dataStore } from '../stores/data'
   import { goalsList } from '../generated/sdk.gen'
   import {
@@ -178,7 +178,6 @@
           masteryData={masteryBySubjectId[subject.id].mastery!}
           masterySchema={$dataStore.defaultMasterySchema}
           dataMissingReason={masteryBySubjectId[subject.id].missingReason}
-          variant="smiley"
         />
       {:else}
         <div class="d-flex align-items-center gap-2 text-secondary small py-2">

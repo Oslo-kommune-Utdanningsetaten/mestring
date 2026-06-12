@@ -6,3 +6,4 @@ currentSchool -> object, only needed for users with multiple schools. Why an obj
 preferredStatusCategoryId -> string, last used status category, for easy consecutive status create
 isMasteryBarChartVisible -> boolean, personal setting, should mini mastery bar charts be visible
 isSubjectPolarChartVisible -> boolean, personal setting, should polar charts for student+subject be visible
+preferredMasteryBadgeVariant --> string, personal setting, which mastery badge variant is preferred

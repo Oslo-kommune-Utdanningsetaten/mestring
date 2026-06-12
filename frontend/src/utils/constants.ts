@@ -47,6 +47,13 @@ export enum USER_ROLES {
   SUPERADMIN = 'superadmin',
 }
 
+export enum MASTERY_BADGE_VARIANTS {
+  SMILEY = 'smiley',
+  CIRCLE = 'circle',
+  TRIANGLE = 'triangle',
+  BEEHIVE = 'beehive',
+}
+
 export const STATUS_CATEGORY_NAMES: Record<string, string> = {
   midyear: 'Halvtår',
   endyear: 'Standpunkt',
