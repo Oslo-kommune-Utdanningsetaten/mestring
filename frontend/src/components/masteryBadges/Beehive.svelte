@@ -18,7 +18,9 @@
 
   const mastery = $derived(masteryData?.mastery ?? 0)
   const trend = $derived(masteryData?.trend ?? 0)
-  const title = $derived([masterySchema?.title, masteryData?.title].filter(Boolean).join('\n'))
+  const title = $derived(
+    [masterySchema?.title, masteryData?.title, 'Trend: ' + trend].filter(Boolean).join('\n')
+  )
   const calculations = $derived(useMasteryCalculations(masterySchema))
 
   // Trend

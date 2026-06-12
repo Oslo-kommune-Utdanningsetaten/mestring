@@ -2,6 +2,7 @@
   import type { GoalType, UserType, SubjectType, ObservationType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
+  import { MISSING_REASON_NO_OBSERVATIONS } from '../utils/constants'
   import { hasUserAccessToFeature } from '../stores/access'
   import { localStorage } from '../stores/localStorage'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
@@ -216,19 +217,16 @@
     {#each goals as goal (goal.id)}
       {@const decoratedGoal = getDecoratedGoalFor(student.id, goal.id)}
       <span class="item gap-1 goal-cell">
-        {#if decoratedGoal?.masteryData}
-          <MasteryLevelBadge
-            masteryData={decoratedGoal.masteryData}
+        <MasteryLevelBadge
+          masteryData={decoratedGoal.masteryData}
+          masterySchema={getMasterySchemaForGoal(goal)}
+          dataMissingReason={decoratedGoal.masteryData ? undefined : MISSING_REASON_NO_OBSERVATIONS}
+        />
+        {#if $isMasteryBarChartVisible}
+          <MasteryBarChart
+            data={getObservationValues(decoratedGoal)}
             masterySchema={getMasterySchemaForGoal(goal)}
           />
-          {#if $isMasteryBarChartVisible}
-            <MasteryBarChart
-              data={getObservationValues(decoratedGoal)}
-              masterySchema={getMasterySchemaForGoal(goal)}
-            />
-          {/if}
-        {:else}
-          <MasteryLevelBadge isBadgeEmpty={true} />
         {/if}
         <span class="add-observation-button">
           {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, subjectId: subject?.id, studentGroupIds: student.groupIds } )}

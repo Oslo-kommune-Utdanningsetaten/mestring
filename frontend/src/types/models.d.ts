@@ -11,6 +11,12 @@ export type MasteryData = {
   title: string
 }
 
+// Data per student: mastery and observation counts by subject
+export type MasteryState = {
+  mastery?: MasteryData
+  missingReason?: typeof MISSING_REASON_NO_OBSERVATIONS | typeof MISSING_REASON_NO_GOALS
+}
+
 export type AppData = {
   subjects: SubjectType[]
   currentSchool: SchoolType | null

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { UserType, SubjectType, GroupType } from '../generated/types.gen'
-  import type { MasteryData } from '../types/models'
+  import type { MasteryData, MasteryState } from '../types/models'
   import { dataStore } from '../stores/data'
   import { goalsList } from '../generated/sdk.gen'
   import {
@@ -41,10 +41,6 @@
   let gridScrollWidth = $state(0)
 
   // Data per student: mastery and observation counts by subject
-  type MasteryState = {
-    mastery?: MasteryData
-    missingReason?: typeof MISSING_REASON_NO_OBSERVATIONS | typeof MISSING_REASON_NO_GOALS
-  }
   type StudentData = {
     masteryBySubjectId: Record<string, MasteryState>
     observationCountBySubjectId: Record<string, number>
@@ -54,7 +50,7 @@
   // Compute grid template columns
   const gridTemplateColumns = $derived.by(() => {
     const nameCol = 'minmax(6rem, 10rem)'
-    const normalCol = '7.2rem'
+    const normalCol = '17.2rem'
     const cols: string[] = [nameCol]
     subjects.forEach(() => cols.push(normalCol)) // one column per subject
     return cols.join(' ')
@@ -181,11 +177,9 @@
         <MasteryLevelBadge
           masteryData={masteryBySubjectId[subject.id].mastery!}
           masterySchema={$dataStore.defaultMasterySchema}
+          dataMissingReason={masteryBySubjectId[subject.id].missingReason}
+          variant="smiley"
         />
-      {:else if masteryBySubjectId?.[subject.id]?.missingReason === MISSING_REASON_NO_OBSERVATIONS}
-        <MasteryLevelBadge isBadgeEmpty={true} />
-      {:else if masteryBySubjectId?.[subject.id]?.missingReason === MISSING_REASON_NO_GOALS}
-        <MasteryLevelBadge isBadgeVoid={true} />
       {:else}
         <div class="d-flex align-items-center gap-2 text-secondary small py-2">
           <span
