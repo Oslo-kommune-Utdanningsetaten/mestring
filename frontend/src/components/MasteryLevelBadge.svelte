@@ -10,7 +10,7 @@
     masteryData,
     masterySchema,
     isLastValueVisible = true,
-    variant = 'smiley',
+    variant = 'beehive',
     dataMissingReason = undefined,
   } = $props<{
     masteryData?: MasteryData
