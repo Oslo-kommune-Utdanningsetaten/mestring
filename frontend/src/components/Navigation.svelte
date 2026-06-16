@@ -182,10 +182,7 @@
 
                 {#if $hasUserAccessToPath('/admin/analytics')}
                   <li>
-                    <Link
-                      to="https://mestring.osloskolen.no/analytics/index.php"
-                      className="dropdown-item"
-                    >
+                    <Link to="https://analytics.osloskolen.no/index.php" className="dropdown-item">
                       Analytics
                     </Link>
                   </li>
