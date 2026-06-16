@@ -3,7 +3,7 @@ import { getCookie } from './cookieJar'
 import { CookieConsent } from '../utils/constants'
 
 const currentDeploymentEnv = import.meta.env.VITE_SERVER_DEPLOYMENT as deploymentEnvironment
-const analyticsEnvironments: deploymentEnvironment[] = ['production']
+const analyticsEnvironments: deploymentEnvironment[] = ['production', 'development']
 const matomoSiteId = import.meta.env.VITE_MATOMO_SITE_ID
 const matomoUrl = import.meta.env.VITE_MATOMO_URL
 const scriptId = 'matomo-script'

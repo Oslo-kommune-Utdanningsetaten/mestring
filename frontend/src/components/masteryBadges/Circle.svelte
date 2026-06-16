@@ -30,18 +30,20 @@
   // Dimensions
   const trendBoxSizeX = 30
   const trendBoxSizeY = 30
-  const masteryIndicatorHeight = 2
+  const masteryIndicatorHeight = 4
   const masteryIndicatorWidth = trendBoxSizeX
 
-  // circle size scales with magnitude of trend value
-  const mincircleSize = 6
-  const maxcircleSize = trendBoxSizeX
-  const circleFraction = $derived(
-    calculations.deltaValue > 0 ? Math.min(Math.abs(trend) / calculations.deltaValue, 1) : 0
-  )
+  // Circle size scales with magnitude of trend value.
+  // A full-range trend is very rare, so we consider half range as maxed out
+  const minCircleSize = 4
+  const maxCircleSize = trendBoxSizeX
+  const maxTrendFractionOfRange = 0.2
+  const maxMeaningfulTrend = $derived(calculations.deltaValue * maxTrendFractionOfRange)
+  const circleFraction = $derived(Math.min(Math.abs(trend) / maxMeaningfulTrend, 1))
   const circleSize = $derived(
-    Math.round(mincircleSize + circleFraction * (maxcircleSize - mincircleSize))
+    Math.round(minCircleSize + circleFraction * (maxCircleSize - minCircleSize))
   )
+
   // Calculate mastery indicator position based on available space
   const indicatorPosition = (masteryValue: number) => {
     const maxY = trendBoxSizeY - masteryIndicatorHeight
@@ -51,12 +53,12 @@
   }
 </script>
 
-<span class="badge-container d-flex align-items-center">
+<span class="badge-container d-flex align-items-center" title={`${title}`}>
   {#if masteryData}
+    <span class="trend-box" style="width: {trendBoxSizeX}px; height: {trendBoxSizeY}px;"></span>
     <span
-      class="trend-box"
-      style="width: {trendBoxSizeX}px; height: {trendBoxSizeY}px;"
-      title={`${title}`}
+      class="trend-circle {isDecreasing ? 'filled' : 'hollow'}"
+      style="width: {circleSize}px; height: {circleSize}px;"
     ></span>
     {#if isLastValueVisible}
       <span
@@ -66,10 +68,6 @@
         )}px; width: {masteryIndicatorWidth}px; height: {masteryIndicatorHeight}px; left: 0px;"
       ></span>
     {/if}
-    <span
-      class="trend-circle {isDecreasing ? 'hollow' : 'filled'}"
-      style="width: {circleSize}px; height: {circleSize}px;"
-    ></span>
   {:else if isBadgeEmpty}
     <span
       class="trend-box missing-mastery"
@@ -110,18 +108,18 @@
 
   .filled {
     border-radius: 50%;
-    background-color: var(--bs-dark);
+    background-color: var(--bs-secondary);
   }
 
   .hollow {
-    border: 1px solid var(--bs-dark);
+    border: 1px solid var(--bs-secondary);
   }
 
   .mastery-indicator {
-    border-width: 1px 1px 1px 1px;
-    border-style: solid;
+    border: 1px solid var(--bs-secondary);
+    border-radius: 0px;
     position: absolute;
-    border-color: var(--bs-secondary);
+    background-color: white;
   }
 
   .missing-mastery {

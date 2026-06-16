@@ -33,13 +33,14 @@
   const masteryIndicatorHeight = 2
   const masteryIndicatorWidth = trendBoxSizeX
 
-  const minTriangleSize = 6
+  const minTriangleSize = 4
   const maxTriangleSize = trendBoxSizeX
 
-  // Triangle size scales with magnitude of trend value
-  const triangleFraction = $derived(
-    calculations.deltaValue > 0 ? Math.min(Math.abs(trend) / calculations.deltaValue, 1) : 0
-  )
+  // Triangle size scales with magnitude of trend value.
+  // A full-range trend is very rare, so we consider half range as maxed out
+  const maxTrendFractionOfRange = 0.5
+  const maxMeaningfulTrend = $derived(calculations.deltaValue * maxTrendFractionOfRange)
+  const triangleFraction = $derived(Math.min(Math.abs(trend) / maxMeaningfulTrend, 1))
   const triangleWidth = $derived(
     Math.round(minTriangleSize + triangleFraction * (maxTriangleSize - minTriangleSize))
   )
@@ -63,6 +64,10 @@
       style="width: {trendBoxSizeX}px; height: {trendBoxSizeY}px;"
       title={`${title}`}
     ></span>
+    <span
+      class="trend-triangle {isDecreasing ? 'down' : 'up'}"
+      style={`--triangle-width: ${triangleWidth}px; --triangle-height: ${triangleHeight}px;`}
+    ></span>
     {#if isLastValueVisible}
       <span
         class="mastery-indicator"
@@ -71,10 +76,6 @@
         )}px; width: {masteryIndicatorWidth}px; height: {masteryIndicatorHeight}px; left: 0px;"
       ></span>
     {/if}
-    <span
-      class="trend-triangle {isDecreasing ? 'down' : 'up'}"
-      style={`--triangle-width: ${triangleWidth}px; --triangle-height: ${triangleHeight}px;`}
-    ></span>
   {:else if isBadgeEmpty}
     <span
       class="trend-box missing-mastery"
@@ -117,18 +118,18 @@
   }
 
   .trend-triangle.up {
-    border-bottom: var(--triangle-height) solid var(--bs-dark);
+    border-bottom: var(--triangle-height) solid var(--bs-secondary);
   }
 
   .trend-triangle.down {
-    border-top: var(--triangle-height) solid var(--bs-dark);
+    border-top: var(--triangle-height) solid var(--bs-secondary);
   }
 
   .mastery-indicator {
-    border-width: 1px 1px 1px 1px;
-    border-style: solid;
+    border: 1px solid var(--bs-secondary);
+    border-radius: 0px;
     position: absolute;
-    border-color: var(--bs-secondary);
+    background-color: white;
   }
 
   .missing-mastery {
