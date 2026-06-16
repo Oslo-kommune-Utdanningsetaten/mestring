@@ -40,6 +40,12 @@ const init = () => {
   isInitialized = true
 }
 
+// Flag that there might have been a change to cookie consent settings
+export const reconsiderCookieConsent = () => {
+  isInitialized = false
+  isEnabled = false
+}
+
 // Queue a command for Matomo to execute
 export const addAnalyticsCommand = (command: any[]) => {
   init()
@@ -60,6 +66,12 @@ export const trackEvent = (
 
 // Track a page view, needed on SPA route changes
 export const trackPageView = (pageUrl?: string) => {
-  addAnalyticsCommand(['setCustomUrl', pageUrl || window.location.href])
+  // Matomo's setCustomUrl expects an absolute URL. Prepend the origin when missing.
+  const resolvedUrl = pageUrl
+    ? pageUrl.startsWith('http')
+      ? pageUrl
+      : new URL(pageUrl, window.location.origin).href
+    : window.location.href
+  addAnalyticsCommand(['setCustomUrl', resolvedUrl])
   addAnalyticsCommand(['trackPageView'])
 }

@@ -1,7 +1,9 @@
 <script lang="ts">
   import Link from './Link.svelte'
   import { setCookie, getCookie } from '../stores/cookieJar'
+  import { reconsiderCookieConsent } from '../stores/analytics'
   import { CookieConsent } from '../utils/constants'
+
   const cookieName = 'cookie_consent'
   let isExpanded = $state(getCookie(cookieName) === null)
 
@@ -11,6 +13,7 @@
 
   const handleConsent = (choice: typeof CookieConsent.ALL | typeof CookieConsent.NECESSARY) => {
     setCookie(cookieName, choice)
+    reconsiderCookieConsent()
     isExpanded = false
   }
 </script>
