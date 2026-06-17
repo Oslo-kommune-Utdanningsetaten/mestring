@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { MasteryData, MasterySchemaWithConfig } from '../../types/models'
-  import { useMasteryCalculations } from '../../utils/masteryHelpers'
+  import { useMasteryCalculations, calculateTrendFraction } from '../../utils/masteryHelpers'
 
   const {
     masteryData,
@@ -33,13 +33,10 @@
   const masteryIndicatorHeight = 4
   const masteryIndicatorWidth = trendBoxSizeX
 
-  // Circle size scales with magnitude of trend value.
-  // A full-range trend is very rare, so we consider half range as maxed out
+  // Circle size scales with the magnitude of the trend.
   const minCircleSize = 4
   const maxCircleSize = trendBoxSizeX
-  const maxTrendFractionOfRange = 0.2
-  const maxMeaningfulTrend = $derived(calculations.deltaValue * maxTrendFractionOfRange)
-  const circleFraction = $derived(Math.min(Math.abs(trend) / maxMeaningfulTrend, 1))
+  const circleFraction = $derived(calculateTrendFraction(trend, calculations.deltaValue))
   const circleSize = $derived(
     Math.round(minCircleSize + circleFraction * (maxCircleSize - minCircleSize))
   )

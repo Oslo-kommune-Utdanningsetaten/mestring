@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { MasteryData, MasterySchemaWithConfig } from '../../types/models'
-  import { useMasteryCalculations } from '../../utils/masteryHelpers'
+  import { useMasteryCalculations, calculateTrendFraction } from '../../utils/masteryHelpers'
 
   const {
     masteryData,
@@ -44,15 +44,8 @@
   // Largest central angle the mouth arc may reach (kept below 180° => minor arc)
   const maxMouthAngle = (160 * Math.PI) / 180
 
-  // Trend is change in mastery value over time
-  // Trend magnitude can never exceed deltaValue.
-  // In practice though, a move spanning the whole scale is extremely rare
-  // Thus we treat a trend of half range as maxed out
-  const maxTrendFractionOfRange = 0.5
-  const maxMeaningfulTrend = $derived(calculations.deltaValue * maxTrendFractionOfRange)
-  const trendFraction = $derived(
-    maxMeaningfulTrend > 0 ? Math.min(Math.abs(trend) / maxMeaningfulTrend, 1) : 0
-  )
+  // Trend is change in mastery value over time.
+  const trendFraction = $derived(calculateTrendFraction(trend, calculations.deltaValue))
 
   // The mouth is a minor arc whose central angle grows with the trend magnitude.
   // Positive trend bulges the arc downwards (smile), negative bulges it up (frown).

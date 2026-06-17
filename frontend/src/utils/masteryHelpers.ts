@@ -64,6 +64,20 @@ export const areSchemaValuesConsistent = (masterySchemas: MasterySchemaType[]) =
   return result
 }
 
+/**
+ * Maps a trend magnitude to a normalized [0, 1] fraction used to size trend badges.
+ *
+ * - Normalizing by deltaValue (the full scale span) makes this range-independent:
+ *   the result is "how much of the entire scale was traversed", identical for a
+ *   1-5 or a 1-100 schema.
+ * - The sqrt curve is concave (diminishing returns): it exaggerates small trends and
+ *   saturates toward the max, rather than scaling linearly.
+ */
+export const calculateTrendFraction = (trend: number, deltaValue: number): number => {
+  if (deltaValue <= 0) return 0
+  return Math.sqrt(Math.min(Math.abs(trend) / deltaValue, 1))
+}
+
 export function useMasteryCalculations(masterySchema: MasterySchemaWithConfig | null) {
   const masteryLevels = masterySchema?.config?.levels || []
   const hasLevels = masteryLevels.length > 0

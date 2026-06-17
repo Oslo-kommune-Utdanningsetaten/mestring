@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { MasteryData, MasterySchemaWithConfig } from '../../types/models'
-  import { useMasteryCalculations } from '../../utils/masteryHelpers'
+  import { useMasteryCalculations, calculateTrendFraction } from '../../utils/masteryHelpers'
 
   const {
     masteryData,
@@ -36,11 +36,8 @@
   const minTriangleSize = 4
   const maxTriangleSize = trendBoxSizeX
 
-  // Triangle size scales with magnitude of trend value.
-  // A full-range trend is very rare, so we consider half range as maxed out
-  const maxTrendFractionOfRange = 0.5
-  const maxMeaningfulTrend = $derived(calculations.deltaValue * maxTrendFractionOfRange)
-  const triangleFraction = $derived(Math.min(Math.abs(trend) / maxMeaningfulTrend, 1))
+  // Triangle size scales with the magnitude of the trend.
+  const triangleFraction = $derived(calculateTrendFraction(trend, calculations.deltaValue))
   const triangleWidth = $derived(
     Math.round(minTriangleSize + triangleFraction * (maxTriangleSize - minTriangleSize))
   )
