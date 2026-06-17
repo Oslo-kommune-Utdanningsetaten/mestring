@@ -9,6 +9,12 @@
   import { MASTERY_BADGE_VARIANTS } from '../utils/constants'
 
   const millisecondsInDay = 24 * 60 * 60 * 1000
+  const variants = [
+    MASTERY_BADGE_VARIANTS.CIRCLE,
+    MASTERY_BADGE_VARIANTS.TRIANGLE,
+    MASTERY_BADGE_VARIANTS.SMILEY,
+    MASTERY_BADGE_VARIANTS.BEEHIVE,
+  ]
 
   let selectedSchemaId = $state($dataStore.masterySchemas[0]?.id || undefined)
 
@@ -17,13 +23,6 @@
   )
 
   const calculations = $derived(useMasteryCalculations(masterySchema))
-
-  const variants = [
-    MASTERY_BADGE_VARIANTS.CIRCLE,
-    MASTERY_BADGE_VARIANTS.TRIANGLE,
-    MASTERY_BADGE_VARIANTS.SMILEY,
-    MASTERY_BADGE_VARIANTS.BEEHIVE,
-  ]
 
   // Turn an list of mastery values into an observation sequence,
   // spacing them one day apart so inferMastery can calculate a trend
@@ -71,8 +70,7 @@
     isAdding = false
   }
 
-  // Sweep across the real range: each row is an observation sequence rising from the
-  // bottom of the scale up to a different end value -> realistic trends of varying strength.
+  // Each row is an observation sequence, from lowest value up to a differing end value (ranges useful for evaluating badge rendering)
   const rows = $derived.by(() => {
     const { minValue, maxValue } = calculations
     if (maxValue <= minValue) return []
