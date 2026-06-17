@@ -207,6 +207,6 @@ export const ROUTES = [
     path: '/dev/badge-lab',
     component: BadgeLab,
     isPublic: false,
-    accessibleBy: [USER_ROLES.SUPERADMIN],
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
 ]

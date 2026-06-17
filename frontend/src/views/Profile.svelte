@@ -2,12 +2,14 @@
   import { usersRetrieve } from '../generated/sdk.gen'
   import { fetchUserData } from '../utils/functions'
   import { USER_ROLES, MASTERY_BADGE_VARIANTS } from '../utils/constants'
-  import { dataStore, setCurrentSchool, currentUser, currentSchool } from '../stores/data'
+  import { dataStore, setCurrentSchool, currentUser } from '../stores/data'
   import type { GroupType, SchoolType } from '../generated/types.gen'
   import { localStorage } from '../stores/localStorage'
-  import GroupTag from '../components/GroupTag.svelte'
+  import { hasUserAccessToPath } from '../stores/access'
   import type { UserRoleType, UserDecorated } from '../types/models'
   import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
+  import GroupTag from '../components/GroupTag.svelte'
+  import Link from '../components/Link.svelte'
 
   const { userId } = $props<{ userId?: string }>()
   const isProfileMode = $derived($currentUser.id && !userId)
@@ -178,6 +180,11 @@
 
           <div class="mb-2">
             <strong>Mestringsmerke</strong>
+            {#if $hasUserAccessToPath('/dev/badge-lab')}
+              <span class="text-muted">
+                - [<Link to="/dev/badge-lab">kan testes her</Link>]
+              </span>
+            {/if}
             <fieldset class="d-flex flex-wrap gap-4 mt-2">
               <legend class="visually-hidden">Velg type mestringsmerke</legend>
               {#each badgeOptions as option}
