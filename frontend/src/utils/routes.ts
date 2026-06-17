@@ -23,6 +23,9 @@ import UsersByRole from '../views/UsersByRole.svelte'
 import StatusCategories from '../views/admin/StatusCategories.svelte'
 import StatusesEdit from '../views/StatusesEdit.svelte'
 
+// Dev views
+import BadgeLab from '../dev/BadgeLab.svelte'
+
 import { USER_ROLES } from './constants'
 
 const allRoles = [
@@ -197,6 +200,12 @@ export const ROUTES = [
   {
     path: '/admin/schools/:schoolId',
     component: School,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.SUPERADMIN],
+  },
+  {
+    path: '/dev/badge-lab',
+    component: BadgeLab,
     isPublic: false,
     accessibleBy: [USER_ROLES.SUPERADMIN],
   },

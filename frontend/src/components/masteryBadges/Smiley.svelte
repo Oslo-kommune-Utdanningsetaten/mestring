@@ -93,11 +93,10 @@
   })
 </script>
 
-<span class="badge-container d-flex align-items-center">
+<span class="badge-container d-inline-flex align-items-center" {title}>
   <svg class="trend-box" width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
     <circle class="face" cx={center} cy={center} r={faceRadius} />
     {#if masteryData}
-      <title>{title}</title>
       <!-- draw a face-->
       {#if isLastValueVisible}
         {#each hairStrands as strand}

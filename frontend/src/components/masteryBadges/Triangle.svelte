@@ -57,13 +57,9 @@
   }
 </script>
 
-<span class="badge-container d-flex align-items-center">
+<span class="badge-container d-inline-flex align-items-center" {title}>
   {#if masteryData}
-    <span
-      class="trend-box"
-      style="width: {trendBoxSizeX}px; height: {trendBoxSizeY}px;"
-      title={`${title}`}
-    ></span>
+    <span class="trend-box" style="width: {trendBoxSizeX}px; height: {trendBoxSizeY}px;"></span>
     <span
       class="trend-triangle {isDecreasing ? 'down' : 'up'}"
       style={`--triangle-width: ${triangleWidth}px; --triangle-height: ${triangleHeight}px;`}

@@ -49,12 +49,11 @@
   }
 </script>
 
-<span class="badge-container d-flex align-items-center">
+<span class="badge-container d-inline-flex align-items-center" {title}>
   {#if masteryData}
     <span
       class="trend-box"
       style="background-color: {trendColor}; width: {trendBoxSizeX}px; height: {trendBoxSizeY}px;"
-      title={`${title}`}
     ></span>
     {#if isLastValueVisible}
       <span

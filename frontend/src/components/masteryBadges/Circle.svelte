@@ -53,7 +53,7 @@
   }
 </script>
 
-<span class="badge-container d-flex align-items-center" title={`${title}`}>
+<span class="badge-container d-inline-flex align-items-center" {title}>
   {#if masteryData}
     <span class="trend-box" style="width: {trendBoxSizeX}px; height: {trendBoxSizeY}px;"></span>
     <span
