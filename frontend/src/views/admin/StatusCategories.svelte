@@ -140,7 +140,7 @@
 </script>
 
 <section class="pt-3">
-  <h2 class="mb-4">Status categories</h2>
+  <h2 class="mb-4">Kategorier for status</h2>
   <!-- Filter groups -->
   {#if isLoadingSchools}
     <div class="m-4">
@@ -191,21 +191,27 @@
     <div class="mt-4">
       {#if statusCategories.length > 0}
         {#each statusCategories as statusCategory}
-          <div class="card shadow-sm">
-            <div class="card-body">
-              <h3 class="card-title">
-                {statusCategory.title}
-              </h3>
-              <p>
-                Mastery schema: {masterySchemas?.find(
-                  ms => ms.id === statusCategory.masterySchemaId
-                )?.title || '?'}
-              </p>
-              <p>
-                Name: {STATUS_CATEGORY_NAMES[statusCategory.name]} ({statusCategory.name})
-              </p>
+          <div class="card shadow-sm mb-3">
+            <div class="card-body status-card">
+              <div class="status-info">
+                <h3 class="card-title mb-2">
+                  {statusCategory.title}
+                </h3>
+                <dl class="status-meta mb-0">
+                  <dt>Mastery schema</dt>
+                  <dd>
+                    {masterySchemas?.find(ms => ms.id === statusCategory.masterySchemaId)?.title ||
+                      '?'}
+                  </dd>
+                  <dt>Name</dt>
+                  <dd>
+                    {STATUS_CATEGORY_NAMES[statusCategory.name]}
+                    <span class="text-muted">({statusCategory.name})</span>
+                  </dd>
+                </dl>
+              </div>
 
-              <div class="mb-4">
+              <div class="status-actions">
                 <pkt-checkbox
                   label={statusCategory.isEnabled ? 'Currently enabled' : 'Currently disabled'}
                   labelPosition="right"
@@ -214,9 +220,8 @@
                   checked={statusCategory.isEnabled}
                   onchange={() => toggleIsEnabled(statusCategory)}
                 ></pkt-checkbox>
-              </div>
 
-              <div class="mb-4">
+                <!-- 
                 <pkt-checkbox
                   label={statusCategory.isSubjectSpecific
                     ? 'Specific for subject'
@@ -229,47 +234,50 @@
                   disabled={true}
                   title="Not editable yet, needs a use case :)"
                 ></pkt-checkbox>
+                -->
+
+                <div class="status-buttons">
+                  <ButtonMini
+                    options={{
+                      title: 'Rediger',
+                      iconName: 'edit',
+                      skin: 'secondary',
+                      variant: 'icon-left',
+                      classes: '',
+                      onClick: () => handleEditStatusCategory(statusCategory),
+                    }}
+                  >
+                    Rediger
+                  </ButtonMini>
+
+                  <ButtonMini
+                    options={{
+                      title: 'Kopier',
+                      iconName: 'copy',
+                      skin: 'secondary',
+                      variant: 'icon-left',
+                      classes: '',
+                      onClick: () => handleCopyStatusCategory(statusCategory),
+                    }}
+                  >
+                    Kopier
+                  </ButtonMini>
+
+                  <ButtonMini
+                    options={{
+                      title: 'Slett',
+                      iconName: 'trash-can',
+                      skin: 'secondary',
+                      variant: 'icon-left',
+                      classes: '',
+                      onClick: () => handleDeleteStatusCategory(statusCategory.id),
+                      delayActionFor: 4,
+                    }}
+                  >
+                    Slett
+                  </ButtonMini>
+                </div>
               </div>
-
-              <ButtonMini
-                options={{
-                  title: 'Rediger',
-                  iconName: 'edit',
-                  skin: 'secondary',
-                  variant: 'icon-left',
-                  classes: 'my-2 me-2',
-                  onClick: () => handleEditStatusCategory(statusCategory),
-                }}
-              >
-                Rediger
-              </ButtonMini>
-
-              <ButtonMini
-                options={{
-                  title: 'Kopier',
-                  iconName: 'copy',
-                  skin: 'secondary',
-                  variant: 'icon-left',
-                  classes: 'my-2 me-2',
-                  onClick: () => handleCopyStatusCategory(statusCategory),
-                }}
-              >
-                Kopier
-              </ButtonMini>
-
-              <ButtonMini
-                options={{
-                  title: 'Slett',
-                  iconName: 'trash-can',
-                  skin: 'secondary',
-                  variant: 'icon-left',
-                  classes: 'my-2',
-                  onClick: () => handleDeleteStatusCategory(statusCategory.id),
-                  delayActionFor: 4,
-                }}
-              >
-                Slett
-              </ButtonMini>
             </div>
           </div>
         {/each}
@@ -310,5 +318,50 @@
     flex: 1 1 20rem;
     min-width: 3rem;
     max-width: 25rem;
+  }
+
+  .status-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .status-info {
+    flex: 1 1 18rem;
+    min-width: 14rem;
+  }
+
+  .status-meta {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 0.75rem;
+    row-gap: 0.15rem;
+    font-size: 0.9rem;
+  }
+
+  .status-meta dt {
+    font-weight: 600;
+    color: var(--bs-secondary-color, #6c757d);
+  }
+
+  .status-meta dd {
+    margin: 0;
+  }
+
+  .status-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.75rem;
+  }
+
+  .status-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
   }
 </style>
