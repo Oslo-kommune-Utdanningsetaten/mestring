@@ -64,7 +64,7 @@
 </script>
 
 <section>
-  <h2>Sammenlign grupper</h2>
+  <h2>Sammenlign grupper [BETA]</h2>
   <GroupsCompareSelect />
   <p class="text-muted">Valgt: {groups.map(g => g.displayName).join(', ')}</p>
   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
