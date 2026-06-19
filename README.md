@@ -1,11 +1,22 @@
 # Mestring
 
-Prototyping what a keep-track-of-student-mastery app could be!
+## Hva er mestring.osloskolen.no?
 
-- Some [temporary notes](./notes/notes.md)
-- Check out the [data model](./notes/data_model.jpeg)
+- En tjeneste som gjør det enkelt for lærere å holde oversikt over hvordan det står til med elevenes mestring i de ulike fagene.
+- Gi skolens ledelse en måte å holde oversikt over hvordan det står til på skolen generelt + fange opp elever som sliter.
+- Det er foreløpig bare primitiv støtte for at elever kan bruke tjenesten, og ingen støtte for foreldretilgang.
+- Klienten (det som brukerne forholder seg til) er et webgrensesnitt og funker på alle moderne nettlesere.
+- Pålogging + datasynkronisering (brukere, grupper og tilganger) skjer via Feide.
+- Programvaren er gratis å bruke, men du må kunne installere og host'e hele løsningen selv. Når dette er satt opp, kan tjenesten brukes for alle skolene i kommunen.
 
-## Importing data
+## Dev notes
+
+- Svelte frontend
+- Python w/django backend
+- PostgreSQL database
+- Check out the [data model](./notes/mestring-diagram-2026-04-15.drawio.png)
+
+- Some [old notes](./notes/old-notes.md)
 
 ```bash
 cd backend
