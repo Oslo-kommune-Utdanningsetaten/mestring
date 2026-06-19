@@ -138,9 +138,9 @@
     </div>
   </div>
 
-  {#if focusOptions.length > 1 || $hasUserAccessToPath('/admin/status-categories')}
+  <!-- Focus / view-mode switch if more than one option -->
+  {#if focusOptions.length > 1}
     <div class="focus-row mt-3">
-      <!-- Focus / view-mode switch (only meaningful with more than one option) -->
       {#if focusOptions.length > 1}
         <pkt-tabs
           ontab-selected={(event: CustomEvent) =>
