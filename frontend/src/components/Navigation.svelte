@@ -237,6 +237,14 @@
     margin: 0;
   }
 
+  /* Suppress the lingering focus frame after a mouse click,
+     but keep it for keyboard users (:focus-visible) for accessibility. */
+  nav :global(.nav-link:focus:not(:focus-visible)),
+  nav :global(.navbar-brand:focus:not(:focus-visible)) {
+    outline: 0;
+    box-shadow: none;
+  }
+
   .goal-icon-wrapper {
     position: relative;
     display: inline-flex;

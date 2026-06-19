@@ -1,9 +1,12 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-select.js'
   import '@oslokommune/punkt-elements/dist/pkt-textinput.js'
+  import '@oslokommune/punkt-elements/dist/pkt-tabs.js'
   import { useTinyRouter } from 'svelte-tiny-router'
   import { dataStore } from '../stores/data'
+  import { hasUserAccessToPath } from '../stores/access'
   import { urlStringFrom } from '../utils/functions'
+  import Link from '../components/Link.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithStatuses from '../components/StudentsWithStatuses.svelte'
   import { USER_ROLES } from '../utils/constants'
@@ -135,24 +138,28 @@
     </div>
   </div>
 
-  {#if focusOptions.length > 1}
-    <div class="d-flex flex-wrap gap-3 mt-3">
-      <!-- Radio buttons for focus -->
-      <fieldset class="border p-3 rounded">
-        <legend class="fs-6 fw-bold">Fokus</legend>
-        {#each focusOptions as option (option.value)}
-          <label class="my-2 ms-1 d-block">
-            <input
-              type="radio"
-              name="focusOptions"
-              value={option.value}
-              onclick={() => handleFocusSelect(option.value)}
-              checked={selectedFocus === option.value}
-            />
-            <span class="ms-2">{option.label}</span>
-          </label>
-        {/each}
-      </fieldset>
+  {#if focusOptions.length > 1 || $hasUserAccessToPath('/admin/status-categories')}
+    <div class="focus-row mt-3">
+      <!-- Focus / view-mode switch (only meaningful with more than one option) -->
+      {#if focusOptions.length > 1}
+        <pkt-tabs
+          ontab-selected={(event: CustomEvent) =>
+            handleFocusSelect(focusOptions[event.detail.index].value)}
+        >
+          {#each focusOptions as option, index (option.value)}
+            <pkt-tab-item {index} active={selectedFocus === option.value}>
+              {option.label}
+            </pkt-tab-item>
+          {/each}
+        </pkt-tabs>
+      {/if}
+
+      <!-- Shortcut to manage status categories, for users who may -->
+      {#if $hasUserAccessToPath('/admin/status-categories')}
+        <Link to="/admin/status-categories" className="status-categories-link">
+          Administrer kategorier
+        </Link>
+      {/if}
     </div>
   {/if}
 </section>
@@ -199,5 +206,24 @@
     height: 48px;
     margin-top: 0px;
     padding-left: 15px;
+  }
+
+  .focus-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .focus-row :global(.status-categories-link) {
+    white-space: nowrap;
+  }
+
+  /* Suppress the lingering focus frame after a mouse click,
+     but keep it for keyboard users (:focus-visible) for accessibility. */
+  .focus-row :global(.pkt-tabs__link:focus:not(:focus-visible)),
+  .focus-row :global(.pkt-tabs__button:focus:not(:focus-visible)) {
+    outline: 0;
   }
 </style>
