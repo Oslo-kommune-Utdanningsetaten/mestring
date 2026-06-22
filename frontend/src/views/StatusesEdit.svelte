@@ -262,7 +262,7 @@
                   <hr class="status-divider" />
                 {/if}
                 <div class="status-entry">
-                  <div class="status-card-header">
+                  <div class="status-card-header mb-2">
                     <span class="status-title">
                       {#if status.id}
                         <Link to="/statuses/{status.id}">
@@ -272,6 +272,14 @@
                         {status.title}
                       {/if}
                     </span>
+
+                    {#if status.id}
+                      <span class="status-meta">
+                        <AuthorInfo item={status} />
+                      </span>
+                    {:else}
+                      <span class="status-meta status-unsaved">Ikke lagret</span>
+                    {/if}
 
                     <div class="status-card-actions">
                       {#if status.id && $hasUserAccessToFeature( 'status', 'update', { groupId, createdById: status.createdById } )}
@@ -298,13 +306,6 @@
                       {/if}
                     </div>
                   </div>
-                  {#if status.id}
-                    <div class="status-meta">
-                      <AuthorInfo item={status} />
-                    </div>
-                  {:else}
-                    <div class="status-meta status-unsaved">Ikke lagret</div>
-                  {/if}
                   <div
                     onchange={() => handleChangeStatus(status, rowIndex)}
                     class="mastery-input-container"
@@ -401,6 +402,7 @@
     align-items: center;
     gap: 0.25rem;
     flex-shrink: 0;
+    margin-left: auto;
   }
 
   .status-title {
