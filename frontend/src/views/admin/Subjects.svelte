@@ -339,6 +339,7 @@
     grid-template-columns: 1.5fr 2fr 0.5fr 1.5fr 1fr 0.5fr;
     align-items: start;
     gap: 0;
+    border-bottom: 1px solid var(--bs-border-color);
   }
 
   .item.header-row {
@@ -348,21 +349,9 @@
   .item {
     padding: 0.5rem;
     border-top: 1px solid var(--bs-border-color);
-    min-height: 3.2rem;
-  }
-
-  .item:nth-last-child(-n + 6) {
-    border-bottom: 1px solid var(--bs-border-color);
   }
 
   .item.header {
     font-weight: 800;
-  }
-
-  .group-link {
-    display: inline-block;
-    white-space: nowrap;
-    font-size: 0.875rem;
-    margin-right: 0.25rem;
   }
 </style>
