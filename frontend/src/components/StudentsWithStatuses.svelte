@@ -128,7 +128,7 @@
       {#if statuses?.length}
         <span class="item">
           {#each statuses as status}
-            <span class="me-1" title={status.title}>
+            <span class="me-1" title={status.title + ' i ' + subject.grepCode}>
               <MasterySchemaLevel
                 masteryValue={status.masteryValue}
                 masterySchemaId={status.masterySchemaId}

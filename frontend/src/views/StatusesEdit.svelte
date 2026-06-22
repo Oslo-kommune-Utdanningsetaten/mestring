@@ -395,6 +395,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
+    min-height: 32px; /* Same height as the edit/delete mini buttons */
   }
 
   .status-card-actions {
