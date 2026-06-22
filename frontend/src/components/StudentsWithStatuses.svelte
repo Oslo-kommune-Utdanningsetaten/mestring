@@ -101,7 +101,9 @@
     onclick={() => handleHeaderClick('name')}
     title="Sorter etter elevnavn"
   >
-    Elev{getSortIndicator('name')}
+    <span class="column-header">
+      Navn{getSortIndicator('name')}
+    </span>
   </button>
   {#each subjects as subject (subject.id)}
     <button
