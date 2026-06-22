@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { dataStore } from '../../stores/data'
   import type { GroupType } from '../../generated/types.gen'
+  import { dataStore } from '../../stores/data'
+  import { getSubjectName } from '../../utils/functions'
+
   import GroupTag from '../../components/GroupTag.svelte'
   import Link from '../../components/Link.svelte'
   import ObservationsBarChart from '../../components/ObservationsBarChart.svelte'
@@ -8,9 +10,9 @@
   let currentSchool = $derived($dataStore.currentSchool)
   let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
 
-  const getSubjectName = (subjectId: string) => {
+  const getSubjectNameBySubjectId = (subjectId: string) => {
     const subject = $dataStore.subjects.find(subj => subj.id === subjectId)
-    return subject ? subject.displayName : 'Ukjent fag'
+    return subject ? getSubjectName(subject) : 'Ukjent fag'
   }
 
   $effect(() => {})
@@ -36,7 +38,7 @@
 
         {#if group.subjectId}
           <div class="text-muted">
-            {getSubjectName(group.subjectId)}
+            {getSubjectNameBySubjectId(group.subjectId)}
           </div>
         {/if}
 

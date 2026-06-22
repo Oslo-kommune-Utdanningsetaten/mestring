@@ -4,7 +4,7 @@
   import type { SubjectType, UserType, GoalType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
-  import { urlStringFrom } from '../utils/functions'
+  import { urlStringFrom, getSubjectName } from '../utils/functions'
 
   import StudentSubjectChart from './StudentSubjectChart.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
@@ -23,15 +23,11 @@
     isTitleEnabled?: boolean
   }>()
 
-  let { currentUser } = $derived($dataStore)
+  const router = useTinyRouter()
   let hoveredSubjectId = $state<string | null>(null)
   let hoveredGoalId = $state<string | null>(null)
-
-  let subjectName = $derived(
-    subject ? subject.shortName || subject.displayName || subject.grepCode : 'ukjent fag'
-  )
-
-  const router = useTinyRouter()
+  let { currentUser } = $derived($dataStore)
+  let subjectName = $derived(getSubjectName(subject))
   let expandedGoalIds = $derived<string[]>(router.getQueryParam('expanded')?.split(',') || [])
 
   const handleToggleGoal = (goalId: string) => {

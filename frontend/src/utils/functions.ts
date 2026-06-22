@@ -72,6 +72,16 @@ export const subjectsInCommon = (
   )
 }
 
+export const getSubjectName = (
+  subject: SubjectType,
+  preferredField?: 'shortName' | 'displayName' | 'grepCode' | undefined
+) => {
+  if (!!preferredField && subject[preferredField]) {
+    return subject[preferredField] as string
+  }
+  return subject.shortName || subject.displayName || subject.grepCode || 'ukjent fag'
+}
+
 export const subjectNamesFromStudentGoals = (
   goals: GoalType[],
   allSubjects: SubjectType[]
@@ -80,7 +90,7 @@ export const subjectNamesFromStudentGoals = (
   goals.forEach((goal: GoalType) => {
     const subject = allSubjects.find((subject: SubjectType) => subject.id === goal.subjectId)
     if (subject) {
-      result.add(subject.displayName)
+      result.add(getSubjectName(subject, 'displayName'))
     }
   })
   return Array.from(result)

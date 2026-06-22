@@ -11,6 +11,14 @@
   } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { observationsDestroy, goalsDestroy, goalsUpdate, goalsCreate } from '../generated/sdk.gen'
+
+  import Sortable, { type SortableEvent } from 'sortablejs'
+  import { localStorage } from '../stores/localStorage'
+  import { fetchGoalsForSubjectAndStudent, urlStringFrom, getSubjectName } from '../utils/functions'
+  import { hasUserAccessToFeature } from '../stores/access'
+  import { addAlert } from '../stores/alerts'
+  import { trackEvent } from '../stores/analytics'
+
   import Link from './Link.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import MasteryBarChart from './MasteryBarChart.svelte'
@@ -24,13 +32,6 @@
   import Statuses from '../components/Statuses.svelte'
   import AuthorInfo from './AuthorInfo.svelte'
   import StudentSubjectChart from './StudentSubjectChart.svelte'
-
-  import Sortable, { type SortableEvent } from 'sortablejs'
-  import { localStorage } from '../stores/localStorage'
-  import { fetchGoalsForSubjectAndStudent, urlStringFrom } from '../utils/functions'
-  import { hasUserAccessToFeature } from '../stores/access'
-  import { addAlert } from '../stores/alerts'
-  import { trackEvent } from '../stores/analytics'
 
   const { subject, student, onRefreshRequired } = $props<{
     subject: SubjectType
@@ -54,9 +55,7 @@
   let isStatusEditorOpen = $state<boolean>(false)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
   let chartKey = $state<number>(0) // key used to force re-render of StudentSubjectChart component when goals are updated
-  let subjectName = $derived(
-    subject ? subject.shortName || subject.displayName || subject.grepCode : 'ukjent fag'
-  )
+  let subjectName = $derived(subject ? getSubjectName(subject) : 'ukjent fag')
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
 

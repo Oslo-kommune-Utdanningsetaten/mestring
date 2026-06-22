@@ -4,6 +4,7 @@
   import { statusList } from '../generated/sdk.gen'
   import MasterySchemaLevel from './MasterySchemaLevel.svelte'
   import UserNameLink from './UserNameLink.svelte'
+  import { getSubjectName } from '../utils/functions'
 
   let {
     students,
@@ -109,11 +110,11 @@
     <button
       class="item header header-row sortable"
       onclick={() => handleHeaderClick(subject.id)}
-      title="Sorter etter antall observasjoner i {subject.displayName}"
+      title="Sorter etter antall observasjoner i {getSubjectName(subject, 'displayName')}"
     >
       <span class="column-header">
         {#if subject.ownedBySchoolId}
-          {subject.shortName}{getSortIndicator(subject.id)}
+          {getSubjectName(subject)}{getSortIndicator(subject.id)}
         {:else}
           {subject.grepCode}{getSortIndicator(subject.id)}
         {/if}

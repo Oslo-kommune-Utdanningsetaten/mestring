@@ -1,10 +1,10 @@
 <script lang="ts">
+  import type { GroupType, UserType } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
-  import { urlStringFrom } from '../utils/functions'
+  import { urlStringFrom, getSubjectName } from '../utils/functions'
   import { hasUserAccessToPath } from '../stores/access'
   import { USER_ROLES } from '../utils/constants'
   import { usersList } from '../generated/sdk.gen'
-  import type { GroupType, UserType } from '../generated/types.gen'
   import GroupTag from '../components/GroupTag.svelte'
   import UserTag from '../components/UserTag.svelte'
   import Link from '../components/Link.svelte'
@@ -32,9 +32,9 @@
     })
   }
 
-  const getSubjectName = (subjectId: string) => {
+  const getSubjectNameBySubjectId = (subjectId: string) => {
     const subject = $dataStore.subjects.find(subj => subj.id === subjectId)
-    return subject ? subject.displayName : 'Ukjent fag'
+    return subject ? getSubjectName(subject) : 'Ukjent fag'
   }
 
   $effect(() => {
@@ -77,7 +77,7 @@
 
         {#if group.subjectId}
           <div class="mt-3">
-            {getSubjectName(group.subjectId)}
+            {getSubjectNameBySubjectId(group.subjectId)}
           </div>
         {/if}
 

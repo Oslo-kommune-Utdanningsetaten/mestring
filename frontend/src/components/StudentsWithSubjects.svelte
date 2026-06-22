@@ -7,9 +7,11 @@
     goalsWithCalculatedMasteryBySubjectId,
     countObservationsBySubjectId,
     aggregateMasterys,
+    getSubjectName,
   } from '../utils/functions'
   import { localStorage } from '../stores/localStorage'
   import { MISSING_REASON_NO_OBSERVATIONS, MISSING_REASON_NO_GOALS } from '../utils/constants'
+
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import UserNameLink from './UserNameLink.svelte'
   import StudentSubjectChart from './StudentSubjectChart.svelte'
@@ -213,16 +215,13 @@
   </span>
 
   {#each subjects as subject (subject.id)}
-    {@const subjectName =
-      subject.shortName || subject.displayName || subject.grepCode || 'ukjent fag'}
-
     <span class="item header header-row">
       <button
         class="column-header-button sortable"
         onclick={() => handleHeaderClick(subject.id)}
         title="Sorter etter antall observasjoner i {subject.grepCode}"
       >
-        {subjectName}{getSortIndicator(subject.id)}
+        {getSubjectName(subject, 'grepCode')}{getSortIndicator(subject.id)}
       </button>
     </span>
   {/each}
