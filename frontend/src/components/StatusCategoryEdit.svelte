@@ -59,14 +59,14 @@
     />
   </div>
 
-  <!-- Name -->
+  <!-- Category -->
   <div class="form-group mb-3">
     <label for="nameSelect" class="mb-1">Velg kategori-navn</label>
     <select
       class="pkt-input"
       id="nameSelect"
       bind:value={localStatusCategory.name}
-      disabled={localStatusCategory.isEnabled}
+      disabled={!localStatusCategory.isEnabled}
     >
       {#each Object.keys(STATUS_CATEGORY_NAMES) as key}
         <option value={key} selected={key === localStatusCategory.name}>
@@ -83,7 +83,7 @@
       <select
         id="masterySchemaSelect"
         class="pkt-input"
-        disabled={localStatusCategory.isEnabled}
+        disabled={!localStatusCategory.isEnabled}
         value={selectedMasterySchemaId}
         onchange={e => handleChangeMasterySchema((e.target as HTMLSelectElement).value)}
       >
