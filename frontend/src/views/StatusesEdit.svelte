@@ -1,5 +1,11 @@
 <script lang="ts">
-  import type { GroupType, StatusCategoryType, StatusType, UserType } from '../generated/types.gen'
+  import type {
+    GroupType,
+    StatusCategoryType,
+    StatusType,
+    UserType,
+    SubjectType,
+  } from '../generated/types.gen'
   import {
     usersList,
     statusList,
@@ -39,6 +45,10 @@
   let group = $state<GroupType | null>(
     $dataStore.currentUser.allGroups.find((group: GroupType) => group.id === groupId) || null
   )
+  const subject = $derived<SubjectType | undefined>(
+    $dataStore.subjects.find(s => s.id === group?.subjectId)
+  )
+
   let students = $state<UserType[]>([])
   let isLoading = $state(true)
   let statusesByStudentId = $state<Record<string, StatusType[]>>({})
@@ -58,7 +68,7 @@
   }
 
   const fetchData = async () => {
-    if (!group || !statusCategory) {
+    if (!group || !statusCategory || !subject) {
       return
     }
     isLoading = true
@@ -77,7 +87,12 @@
       }
 
       const statusResult = await statusList({
-        query: { group: groupId, school: schoolId, categoryName: statusCategoryName },
+        query: {
+          group: groupId,
+          subject: subject.id,
+          school: schoolId,
+          categoryName: statusCategoryName,
+        },
       })
       const allStatuses = statusResult.data || []
 
@@ -121,11 +136,12 @@
   }
 
   const refetchDataForRow = async (studentId: string) => {
-    if (!studentId) return
+    if (!group || !subject || !studentId) return
     const statusResult = await statusList({
       query: {
         group: groupId,
         students: studentId,
+        subject: subject.id,
         school: $dataStore.currentSchool?.id,
         categoryName: statusCategoryName,
       },
@@ -141,6 +157,7 @@
   const createOrUpdateStatus = async (status: Partial<StatusType>, rowIndex: number) => {
     const row = rows[rowIndex]
     row.isSaving = true
+
     try {
       if (status.id) {
         await statusUpdate({
@@ -215,7 +232,7 @@
   })
 </script>
 
-{#if group && statusCategory}
+{#if group && statusCategory && subject}
   <h2 class="my-4">{group?.displayName} - {statusCategory?.title}</h2>
   <section class="shadow-sm">
     {#if group.subjectId}
@@ -312,8 +329,11 @@
     {/if}
   </section>
 {:else}
+  <h2>Manglende data</h2>
+  <p>Denne komponenten krever (foreløpig) at gruppa er knyttet til et fag</p>
   <p>Gruppe: {group?.id}</p>
   <p>Statuskategori: {statusCategory?.id}</p>
+  <p>Fag: {subject?.id}</p>
 {/if}
 
 <!-- offcanvas for creating/editing status -->
