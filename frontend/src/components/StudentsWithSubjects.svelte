@@ -51,8 +51,8 @@
 
   // Compute grid template columns
   const gridTemplateColumns = $derived.by(() => {
-    const nameCol = 'minmax(6rem, 10rem)'
-    const normalCol = '7.2rem'
+    const nameCol = '1.2fr'
+    const normalCol = '1fr'
     const cols: string[] = [nameCol]
     subjects.forEach(() => cols.push(normalCol)) // one column per subject
     return cols.join(' ')
