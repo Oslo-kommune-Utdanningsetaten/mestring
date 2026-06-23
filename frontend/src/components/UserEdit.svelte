@@ -251,7 +251,7 @@
       type="text"
       class="form-control rounded-0 border-2 border-primary input-field"
       bind:value={localUser.feideId}
-      disabled={false}
+      disabled={true}
       placeholder="tinsni001@feide.osloskolen.no"
     />
   </div>
