@@ -134,7 +134,7 @@
           </p>
         </div>
         <div class="d-flex gap-2">
-          {#if $hasUserAccessToFeature( 'status', 'edit', { subjectId: subject?.id, studentGroupIds: student.groupIds } )}
+          {#if $hasUserAccessToFeature( 'status', 'update', { subjectId: subject?.id, studentGroupIds: student.groupIds } )}
             <ButtonMini
               options={{
                 title: 'Rediger status',

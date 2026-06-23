@@ -282,7 +282,7 @@
                     {/if}
 
                     <div class="status-card-actions">
-                      {#if status.id && $hasUserAccessToFeature( 'status', 'update', { groupId, createdById: status.createdById } )}
+                      {#if status.id && $hasUserAccessToFeature( 'status', 'update', { groupId, createdById: status.createdById, subjectId: subject.id, studentGroupIds: [group.id] } )}
                         <ButtonIcon
                           options={{
                             iconName: 'edit',
@@ -293,7 +293,7 @@
                         />
                       {/if}
 
-                      {#if status.id && $hasUserAccessToFeature( 'status', 'delete', { groupId, createdById: status.createdById } )}
+                      {#if status.id && $hasUserAccessToFeature( 'status', 'update', { groupId, createdById: status.createdById, subjectId: subject.id, studentGroupIds: [group.id] } )}
                         <ButtonIcon
                           options={{
                             iconName: 'trash-can',
