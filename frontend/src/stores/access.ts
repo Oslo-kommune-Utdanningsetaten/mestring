@@ -124,9 +124,9 @@ const checkUserAccessToFeature = (
         return false
       })
     } else if (['update', 'delete'].includes(action)) {
-      // Must be the creator of the observation (matches backend requirement)
-      if (createdById !== currentUser.id) return false
       return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
+        // Must be the creator of the observation (matches backend requirement)
+        if (createdById !== currentUser.id) return false
         // Group goal: user is teacher in this group
         if (groupId && groupId === teacherGroup.id) {
           return true
