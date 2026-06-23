@@ -69,6 +69,10 @@ const checkUserAccessToFeature = (
         ) {
           return true
         }
+        // User is teacher in this group (used for group-level status editing)
+        if (groupId && groupId === teacherGroup.id) {
+          return true
+        }
         return false
       })
     }
@@ -121,10 +125,21 @@ const checkUserAccessToFeature = (
       })
     } else if (['update', 'delete'].includes(action)) {
       return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
-        // User is teacher in this group and the observation was created by the user
-        if (groupId && groupId === teacherGroup.id && createdById === currentUser.id) {
+        // Must be the creator of the observation (matches backend requirement)
+        if (createdById !== currentUser.id) return false
+        // Group goal: user is teacher in this group
+        if (groupId && groupId === teacherGroup.id) {
           return true
         }
+        // Individual goal (no groupId): basis group teacher with the student
+        if (!groupId && teacherGroup.type === GROUP_TYPE_BASIS && studentGroupIds?.includes(teacherGroup.id)) {
+          return true
+        }
+        // Individual goal (no groupId): teacher teaches the subject to this student
+        if (!groupId && subjectId && teacherGroup.subjectId === subjectId && studentGroupIds?.includes(teacherGroup.id)) {
+          return true
+        }
+        return false
       })
     }
   } else if (resource === 'group') {
