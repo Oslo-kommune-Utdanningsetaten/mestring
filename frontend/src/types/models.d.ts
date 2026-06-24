@@ -66,7 +66,7 @@ export type MasterySchemaConfig = {
   valueInput: (typeof VALUE_INPUT_VARIANTS)[number]
   flatTrendThreshold: number
   isIncrementIndicatorEnabled?: boolean
-  isValueIndicatorEnabled?: boolean
+  isMasteryValueVisible?: boolean
   isMasteryValueInputEnabled?: boolean
   isMasteryDescriptionInputEnabled?: boolean
   isFeedforwardInputEnabled?: boolean

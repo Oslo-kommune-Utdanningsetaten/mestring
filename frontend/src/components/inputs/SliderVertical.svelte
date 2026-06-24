@@ -70,7 +70,7 @@
       />
     {/if}
 
-    {#if masterySchema?.config?.isValueIndicatorEnabled}
+    {#if masterySchema?.config?.isMasteryValueVisible}
       <!-- mastery value number -->
       <div id="valueIndicatorContainer">
         <div

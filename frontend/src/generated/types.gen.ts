@@ -1219,10 +1219,6 @@ export type GroupsListData = {
          */
         ids?: string;
         /**
-         * Filter groups by whether they are valid by date
-         */
-        isValid?: boolean;
-        /**
          * Filter groups by roles a user has in that group (comma-separated list of role names, e.g., student,teacher)
          */
         roles?: string;
@@ -1242,6 +1238,10 @@ export type GroupsListData = {
          * Filter groups by user ID (groups where the user is a member)
          */
         user?: string;
+        /**
+         * Filter groups by wether they are valid by date: "only" (default, only valid), "include" (both valid and non-valid), or "exclude" (only non-valid)
+         */
+        valid?: 'exclude' | 'include' | 'only';
     };
     url: '/api/groups/';
 };

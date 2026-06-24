@@ -80,7 +80,7 @@
     if (!masterySchema || !isNumber(observation.masteryValue)) {
       return false
     }
-    return masterySchema?.config?.isMasteryValueInputEnabled
+    return masterySchema?.config?.isMasteryValueVisible
   }
 
   $effect(() => {

@@ -59,7 +59,7 @@
       class="slider"
       bind:value={masteryValue}
     />
-    {#if masterySchema?.config?.isValueIndicatorEnabled && isInputEnabled}
+    {#if masterySchema?.config?.isMasteryValueVisible && isInputEnabled}
       <div id="valueIndicatorContainer">
         <div
           id="valueIndicator"

@@ -80,11 +80,11 @@
 </div>
 
 <div
-  class="input-container d-flex align-items-end mt-{masterySchema?.config?.isValueIndicatorEnabled
+  class="input-container d-flex align-items-end mt-{masterySchema?.config?.isMasteryValueVisible
     ? '5'
     : '3'} mb-4"
 >
-  {#if masterySchema?.config?.isValueIndicatorEnabled}
+  {#if masterySchema?.config?.isMasteryValueVisible}
     <!-- mastery value number -->
     <div
       id="valueIndicator"

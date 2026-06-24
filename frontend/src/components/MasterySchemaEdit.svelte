@@ -32,11 +32,11 @@
     valueInput: 'sliderHorizontal',
     inputIncrement: 1,
     flatTrendThreshold: 6,
-    isValueIndicatorEnabled: true,
-    isFeedforwardInputEnabled: true,
     isIncrementIndicatorEnabled: true,
+    isMasteryValueVisible: true,
     isMasteryValueInputEnabled: true,
     isMasteryDescriptionInputEnabled: true,
+    isFeedforwardInputEnabled: true,
   }
 
   const { masterySchema, onDone } = $props<{
@@ -44,9 +44,9 @@
     onDone: () => void
   }>()
   let localMasterySchema = $state<Partial<MasterySchemaWithConfig>>({ ...masterySchema })
-  let editorContent = $state<Content>({ json: localMasterySchema?.config || defaultConfig })
+  let editorContent = $derived<Content>({ json: localMasterySchema?.config || defaultConfig })
   let calculations = $derived(useMasteryCalculations(localMasterySchema))
-  let placeholderMasteryValue = $state(calculations.defaultValue)
+  let placeholderMasteryValue = $derived(calculations.defaultValue)
 
   const handleSave = async () => {
     try {

@@ -14,8 +14,8 @@
   const {
     masteryData,
     masterySchema,
-    isLastValueVisible = true,
     variant,
+    isLastValueVisible = true,
     dataMissingReason = undefined,
   } = $props<{
     masteryData?: MasteryData
