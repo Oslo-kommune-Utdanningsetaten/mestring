@@ -166,7 +166,7 @@
   }
 
   .masteryLevelTitle {
-    padding: 0 0.25rem;
+    padding: 0.25rem 0.5rem;
     display: inline-block;
   }
 

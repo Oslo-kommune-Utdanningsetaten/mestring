@@ -6,6 +6,7 @@
   import ButtonMini from './ButtonMini.svelte'
   import MasteryValueInput from './MasteryValueInput.svelte'
   import AuthorInfo from './AuthorInfo.svelte'
+  import MasterySchemaLevels from './MasterySchemaLevels.svelte'
 
   const { student, goal, observation, masteryTitle, onDone } = $props<{
     student: UserType | null
@@ -56,28 +57,30 @@
 
     <hr />
 
-    {#if masterySchema?.config?.isMasteryValueInputEnabled}
-      <div class="form-group mb-5">
-        <h4 class="mb-2">Mestring</h4>
+    <div class="form-group mb-5">
+      <h4 class="mb-3">Mestring</h4>
+      {#if masterySchema?.config?.isMasteryValueVisible}
         <MasteryValueInput
           {masterySchema}
           isInputEnabled={false}
           bind:value={localObservation.masteryValue}
           title={masteryValueTitle}
         />
-      </div>
-    {/if}
+      {:else}
+        <MasterySchemaLevels masteryValue={localObservation.masteryValue} {masterySchema} />
+      {/if}
+    </div>
 
     {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
       <div class="form-group mb-5">
-        <h4 class="mb-2">Beskrivelse/tilbakemelding</h4>
+        <h4 class="mb-3">Beskrivelse/tilbakemelding</h4>
         <p>{localObservation.masteryDescription || 'Ingen beskrivelse'}</p>
       </div>
     {/if}
 
     {#if masterySchema?.config?.isFeedforwardInputEnabled}
       <div class="form-group mb-3">
-        <h4 class="mb-2">Fremovermelding</h4>
+        <h4 class="mb-3">Fremovermelding</h4>
         <p>{localObservation.feedforward || 'Ingen fremovermelding'}</p>
       </div>
     {/if}
