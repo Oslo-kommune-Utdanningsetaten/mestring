@@ -125,7 +125,7 @@
 
   const getDecoratedGoalFor = (studentId: string, goalId: string): GoalDecorated | null => {
     const studentGoals = goalsWithMasteryByStudentId[studentId] || []
-    return studentGoals.find(g => g.id === goalId) || null
+    return studentGoals.find(goal => goal.id === goalId) || null
   }
 
   const getObservationValues = (goal: GoalDecorated | null): number[] => {

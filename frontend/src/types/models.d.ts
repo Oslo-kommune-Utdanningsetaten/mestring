@@ -8,7 +8,8 @@ export type UserRoleType = (typeof USER_ROLES)[keyof typeof USER_ROLES]
 export type MasteryData = {
   mastery: number
   trend: number
-  title: string
+  observationValues: number[]
+  goalsCount?: number
 }
 
 // Data per student: mastery and observation counts by subject

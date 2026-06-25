@@ -5,12 +5,14 @@
   const {
     masteryData,
     masterySchema,
+    title,
     isBadgeEmpty = false,
     isBadgeVoid = false,
     isLastValueVisible = true,
   } = $props<{
     masteryData?: MasteryData
     masterySchema?: MasterySchemaWithConfig | null
+    title: string
     isBadgeEmpty?: boolean
     isBadgeVoid?: boolean
     isLastValueVisible?: boolean
@@ -18,9 +20,6 @@
 
   const mastery = $derived(masteryData?.mastery ?? 0)
   const trend = $derived(masteryData?.trend ?? 0)
-  const title = $derived(
-    [masterySchema?.title, masteryData?.title, 'Trend: ' + trend].filter(Boolean).join('\n')
-  )
   const calculations = $derived(useMasteryCalculations(masterySchema))
 
   // Trend

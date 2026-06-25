@@ -98,15 +98,17 @@
       // For each student, fetch their goals with calculated mastery
       await Promise.all(
         students.map(async student => {
-          const groupGoalsWithOnlyStudentObservations = groupGoals.map((goal: GoalDecorated) => {
-            const studentObservations =
-              goal.observations?.filter((obs: ObservationType) => obs.studentId === student.id) ||
-              []
-            return {
-              ...goal,
-              observations: studentObservations,
+          const groupGoalsWithOnlyStudentObservations: GoalDecorated[] = groupGoals.map(
+            (goal: GoalDecorated) => {
+              const studentObservations =
+                goal.observations?.filter((obs: ObservationType) => obs.studentId === student.id) ||
+                []
+              return {
+                ...goal,
+                observations: studentObservations,
+              }
             }
-          })
+          )
           goalsWithCalculatedMasteryByStudentId[student.id] = goalsWithCalculatedMastery(
             groupGoalsWithOnlyStudentObservations
           )

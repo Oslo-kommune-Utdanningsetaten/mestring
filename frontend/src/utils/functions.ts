@@ -221,29 +221,33 @@ export const inferMastery = (observations: ObservationType[]): MasteryData | nul
   return {
     mastery: lastValue || 0,
     trend: trend,
-    title: `Siste verdi: ${lastValue}. Trend: ${trend}`,
+    observationValues: masteryValues,
   }
 }
 
 export const aggregateMasterys = (goals: GoalDecorated[]): MasteryData | null => {
   const masteryValues: number[] = []
   const trendValues: number[] = []
+  const observationValues: number[] = []
   goals.forEach(goal => {
     if (isNumber(goal.masteryData?.mastery)) {
       masteryValues.push(goal.masteryData.mastery)
+      observationValues.push(...(goal.masteryData.observationValues || []))
     }
     if (isNumber(goal.masteryData?.trend)) {
       trendValues.push(goal.masteryData.trend)
     }
   })
-  // if there are no mastery values, there will not be a trend either
+  // if there are no mastery values, we're out of luck
   if (masteryValues.length === 0) {
     return null
   }
   return {
+    // it's important to use average here, not the linear regression trend, because observations accross goals are not necessarily in chronological order
     mastery: findAverage(masteryValues),
     trend: findAverage(trendValues),
-    title: `Aggregert: ${masteryValues.length}/${goals.length} mål har data`,
+    observationValues,
+    goalsCount: goals.length,
   }
 }
 
