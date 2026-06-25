@@ -310,8 +310,8 @@
   </section>
 
   {#if group.isEnabled}
-    <!-- Group goals Section -->
-    {#if availableStatusCategories.length}
+    {#if availableStatusCategories.length && $hasUserAccessToFeature( 'status', 'create', { groupId, createdById: $dataStore.currentUser.id, subjectId: group.subjectId || undefined } )}
+      <!-- Group goals Section -->
       <section>
         <h3 class="mb-3">Opprett statuser for hele gruppa</h3>
         <ul>

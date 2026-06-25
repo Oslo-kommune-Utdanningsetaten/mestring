@@ -293,7 +293,7 @@
                         />
                       {/if}
 
-                      {#if status.id && $hasUserAccessToFeature( 'status', 'update', { groupId, createdById: status.createdById, subjectId: subject.id, studentGroupIds: [group.id] } )}
+                      {#if status.id && $hasUserAccessToFeature( 'status', 'delete', { groupId, createdById: status.createdById, subjectId: subject.id, studentGroupIds: [group.id] } )}
                         <ButtonIcon
                           options={{
                             iconName: 'trash-can',
