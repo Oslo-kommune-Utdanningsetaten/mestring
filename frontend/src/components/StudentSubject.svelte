@@ -1,10 +1,10 @@
 <script lang="ts">
   import { useTinyRouter } from 'svelte-tiny-router'
 
-  import type { SubjectType, UserType, GoalType } from '../generated/types.gen'
+  import type { SubjectType, UserType, GoalType, ObservationType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
-  import { urlStringFrom, getSubjectName } from '../utils/functions'
+  import { urlStringFrom, getSubjectName, isNumber } from '../utils/functions'
 
   import StudentSubjectChart from './StudentSubjectChart.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
@@ -50,6 +50,14 @@
   const getMasterySchmemaForGoal = (goal: GoalType) => {
     return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
   }
+
+  // Chart should be visible if user is not student, or no goals have masterySchema with config.isMasteryValueVisible set to false
+  const isChartVisible = $derived(
+    !currentUser.isStudent ||
+      goals.every(
+        (goal: GoalType) => getMasterySchmemaForGoal(goal)?.config?.isMasteryValueVisible ?? false
+      )
+  )
 </script>
 
 {#if isTitleEnabled}
@@ -58,7 +66,7 @@
   </h3>
   <hr class="border border-1 mt-0" />
 {/if}
-<div class="subject-card-layout py-3">
+<div class="subject-card-layout py-3" class:has-chart={isChartVisible}>
   <ul class="goals-list list-unstyled mb-0">
     {#each goals as goal (goal.id)}
       {@const isExpanded = expandedGoalIds.includes(goal.id)}
@@ -123,30 +131,32 @@
     {/each}
   </ul>
 
-  <div
-    class="chart-wrapper"
-    role="img"
-    aria-label="Mestringsoversikt for {subjectName}"
-    onmouseover={() => {
-      hoveredSubjectId = subject.id
-    }}
-    onmouseleave={() => {
-      hoveredSubjectId = null
-    }}
-    onfocus={() => {
-      hoveredSubjectId = subject.id
-    }}
-    onblur={() => {
-      hoveredSubjectId = null
-    }}
-  >
-    <StudentSubjectChart
-      student={currentUser}
-      {subject}
-      isLabelEnabled={hoveredSubjectId === subject.id}
-      highlightedGoalId={hoveredGoalId}
-    />
-  </div>
+  {#if isChartVisible}
+    <div
+      class="chart-wrapper"
+      role="img"
+      aria-label="Mestringsoversikt for {subjectName}"
+      onmouseover={() => {
+        hoveredSubjectId = subject.id
+      }}
+      onmouseleave={() => {
+        hoveredSubjectId = null
+      }}
+      onfocus={() => {
+        hoveredSubjectId = subject.id
+      }}
+      onblur={() => {
+        hoveredSubjectId = null
+      }}
+    >
+      <StudentSubjectChart
+        student={currentUser}
+        {subject}
+        isLabelEnabled={hoveredSubjectId === subject.id}
+        highlightedGoalId={hoveredGoalId}
+      />
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -190,7 +200,7 @@
   }
 
   @media (min-width: 768px) {
-    .subject-card-layout {
+    .subject-card-layout.has-chart {
       position: relative;
       padding-right: calc(35% + 1rem);
     }

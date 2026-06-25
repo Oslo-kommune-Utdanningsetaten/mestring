@@ -23,11 +23,11 @@
   let isObservationEditorOpen = $state<boolean>(false)
   let isObservationViewerOpen = $state<boolean>(false)
 
-  const isMasteryValueAvailable = (observation: ObservationType): boolean => {
+  const isMasteryValueVisible = (observation: ObservationType): boolean => {
     if (!masterySchema || !isNumber(observation.masteryValue)) {
       return false
     }
-    return masterySchema?.config?.isMasteryValueInputEnabled
+    return masterySchema?.config?.isMasteryValueVisible ?? false
   }
 
   const getMasteryLevelTitle = (observation: ObservationType): string | null => {
@@ -77,7 +77,7 @@
         </span>
         <span class="masteryLevelTitle" style="background-color: {bgColor}; color: {color};">
           {getMasteryLevelTitle(observation)}
-          {#if isMasteryValueAvailable(observation)}
+          {#if isMasteryValueVisible(observation)}
             [{observation.masteryValue}]
           {/if}
         </span>
