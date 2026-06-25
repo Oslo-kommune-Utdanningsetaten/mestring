@@ -6,16 +6,16 @@
     masteryData,
     masterySchema,
     title,
+    isLastValueVisible,
     isBadgeEmpty = false,
     isBadgeVoid = false,
-    isLastValueVisible = true,
   } = $props<{
     masteryData?: MasteryData
     masterySchema?: MasterySchemaWithConfig | null
     title: string
+    isLastValueVisible: boolean
     isBadgeEmpty?: boolean
     isBadgeVoid?: boolean
-    isLastValueVisible?: boolean
   }>()
 
   const mastery = $derived(masteryData?.mastery ?? 0)

@@ -35,32 +35,31 @@
     variant || $preferredMasteryBadgeVariant || MASTERY_BADGE_VARIANTS.BEEHIVE
   )
   const isMasteryValueVisible = $derived(masterySchema?.config?.isMasteryValueVisible ?? false)
+
   // Students should not see mastery values if the schema is configured to hide them
   const isLastValueVisible = $derived(!$currentUser.isStudent || isMasteryValueVisible)
+
+  // multiple goals means aggregated data
+  const isAggregated = $derived(masteryData?.goalsCount > 1)
   const isBadgeEmpty = $derived(dataMissingReason === MISSING_REASON_NO_OBSERVATIONS)
   const isBadgeVoid = $derived(dataMissingReason === MISSING_REASON_NO_GOALS)
 
   const mastery = $derived(masteryData?.mastery ?? 0)
   const trend = $derived(masteryData?.trend ?? 0)
+  const observationValues = $derived(masteryData?.observationValues ?? [])
 
   const title = $derived.by(() => {
-    const isAggregated = masteryData?.goalsCount > 1 // multiple goals means aggregated data
-    const lastValueTitle = isMasteryValueVisible && isAggregated ? `Siste verdi: ${mastery}` : ''
+    const lastValueTitle = isAggregated && isMasteryValueVisible ? `Siste verdi: ${mastery}` : ''
     const observationsTitle =
-      isMasteryValueVisible && !isAggregated && masteryData?.observationValues?.length
+      !isAggregated && isMasteryValueVisible && observationValues
         ? `Observasjoner: [${masteryData.observationValues.join(', ')}]`
         : ''
-    const obsCount = masteryData?.observationValues.length ?? 0
     const aggregatedTitle = isAggregated
-      ? `Aggregert: ${obsCount} observasjon${obsCount === 1 ? '' : 'er'} fordelt på ${masteryData.goalsCount} mål`
+      ? `Aggregert: ${observationValues.length} observasjon${observationValues.length === 1 ? '' : 'er'} fordelt på ${masteryData.goalsCount} mål`
       : ''
-    return [
-      masterySchema?.title,
-      lastValueTitle,
-      observationsTitle,
-      aggregatedTitle,
-      'Trend: ' + trend,
-    ]
+    const trendTitle = `Trend: ${trend}`
+
+    return [masterySchema?.title, lastValueTitle, observationsTitle, aggregatedTitle, trendTitle]
       .filter(Boolean)
       .join('\n')
   })
