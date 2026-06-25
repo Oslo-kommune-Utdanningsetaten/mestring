@@ -1,4 +1,6 @@
 <script lang="ts">
+  import MasterySchemaLevels from '../components/MasterySchemaLevels.svelte'
+
   import type { StatusType, SubjectType, UserType } from '../generated/types.gen'
   import {
     statusRetrieve,
@@ -188,32 +190,10 @@
       </div>
 
       <!-- Mestring -->
-      {#if masterySchema?.config?.isMasteryValueInputEnabled && status.masteryValue !== null && status.masteryValue !== undefined}
-        <div class="field-group">
-          <span class="field-label">Mestring</span>
-          <div
-            class="mastery-scale"
-            class:mastery-scale-horizontal={masterySchema?.config?.valueInput ===
-              'sliderHorizontal'}
-            class:mastery-scale-vertical={masterySchema?.config?.valueInput === 'sliderVertical'}
-          >
-            {#each calculations.masteryLevels as level}
-              <span
-                class="mastery-level-wrapper"
-                class:active={status.masteryValue >= level.minValue &&
-                  status.masteryValue <= level.maxValue}
-                class:inactive={status.masteryValue < level.minValue ||
-                  status.masteryValue > level.maxValue}
-              >
-                <MasterySchemaLevel
-                  masteryValue={level.minValue}
-                  masterySchemaId={status.masterySchemaId}
-                />
-              </span>
-            {/each}
-          </div>
-        </div>
-      {/if}
+      <div class="field-group">
+        <span class="field-label">Mestring</span>
+        <MasterySchemaLevels masteryValue={status.masteryValue} {masterySchema} />
+      </div>
 
       <!-- Beskrivelse -->
       {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
