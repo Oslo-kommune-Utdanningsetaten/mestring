@@ -27,7 +27,6 @@
   }
 
   const handleStarClick = (value: number) => {
-    console.log('Star clicked with value:', value)
     if (isInputEnabled && masterySchema?.config?.isMasteryValueInputEnabled) {
       masteryValue = value
     }
