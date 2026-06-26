@@ -14,9 +14,11 @@ let isInitialized = false
 let isEnabled = false
 
 const init = () => {
-  // Lazy initialization, only set up stuff on first pass
+  // Lazy initialization, only set up stuff once
   if (isInitialized) return
   isEnabled =
+    matomoSiteId &&
+    matomoUrl &&
     analyticsEnvironments.includes(currentDeploymentEnv) &&
     getCookie('cookie_consent') === CookieConsent.ALL
 
@@ -40,10 +42,9 @@ const init = () => {
   isInitialized = true
 }
 
-// Flag that there might have been a change to cookie consent settings
+// Unset to allow re-initialization
 export const reconsiderCookieConsent = () => {
   isInitialized = false
-  isEnabled = false
 }
 
 // Queue a command for Matomo to execute
