@@ -51,7 +51,11 @@
 
   let filteredGroups = $derived(
     nameFilter
-      ? groups.filter(group => group.displayName.toLowerCase().includes(nameFilter.toLowerCase()))
+      ? groups.filter(
+          group =>
+            group.id === nameFilter ||
+            group.displayName.toLowerCase().includes(nameFilter.toLowerCase())
+        )
       : groups
   )
 
@@ -316,9 +320,14 @@
         <!-- Data rows -->
         {#each filteredGroups as group (group.id)}
           <div class="group-grid-row">
-            <Link to="/groups/{group.id}">
-              {group.displayName}
-            </Link>
+            <span>
+              <Link to="/groups/{group.id}">
+                {group.displayName}
+              </Link>
+              <div class="text-muted small">
+                {group.id}
+              </div>
+            </span>
             <GroupTag
               {group}
               title="Endre gruppetype"
