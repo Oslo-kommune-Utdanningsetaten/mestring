@@ -9,7 +9,8 @@ COPY pyproject.toml poetry.lock ./
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev,test --no-root
 
 FROM python:3.14-slim as runtime
-RUN apt-get update && \
+RUN find /etc/apt \( -name "*.sources" -o -name "*.list" \) -print | xargs -r sed -i 's|http://|https://|g' && \
+    apt-get update && \
     apt-get install -y libpq-dev curl && \
     rm -rf /var/lib/apt/lists/*
 ENV VIRTUAL_ENV=/app/.venv \
