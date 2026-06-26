@@ -32,6 +32,7 @@
   import Statuses from '../components/Statuses.svelte'
   import AuthorInfo from './AuthorInfo.svelte'
   import StudentSubjectChart from './StudentSubjectChart.svelte'
+  import MasteryLevelTitle from './MasteryLevelTitle.svelte'
 
   const { subject, student, onRefreshRequired } = $props<{
     subject: SubjectType
@@ -299,6 +300,7 @@
   <h3>
     {subjectName}
   </h3>
+
   {#if $hasUserAccessToFeature( 'goal', 'create', { subjectId: subject.id, studentId: student.id, studentGroupIds: student.groupIds } )}
     <ButtonIcon
       options={{
@@ -309,6 +311,7 @@
       }}
     />
   {/if}
+
   {#if $hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
     <ButtonIcon
       options={{
@@ -386,7 +389,7 @@
             masteryData={goal.masteryData}
             masterySchema={getMasterySchmemaForGoal(goal)}
           />
-          {#if $isMasteryBarChartVisible}
+          {#if $isMasteryBarChartVisible && !$dataStore.currentUser.isStudent}
             <MasteryBarChart
               data={goal.observations?.map((o: ObservationType) => o.masteryValue)}
               masterySchema={getMasterySchmemaForGoal(goal)}
@@ -437,7 +440,7 @@
                 <AuthorInfo item={observation} />
               </span>
               <span class="bordered">
-                {observation.masteryValue}
+                <MasteryLevelTitle {observation} masterySchema={getMasterySchmemaForGoal(goal)} />
               </span>
               <span>
                 <ButtonIcon

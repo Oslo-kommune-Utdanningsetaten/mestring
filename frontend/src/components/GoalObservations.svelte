@@ -11,6 +11,7 @@
   import ObservationView from './ObservationView.svelte'
   import AuthorInfo from './AuthorInfo.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
+  import MasteryLevelTitle from './MasteryLevelTitle.svelte'
 
   const { subject, student, goal } = $props<{
     subject: SubjectType
@@ -75,11 +76,9 @@
         <span>
           <AuthorInfo item={observation} />
         </span>
-        <span class="masteryLevelTitle" style="background-color: {bgColor}; color: {color};">
-          {getMasteryLevelTitle(observation)}
-          {#if isMasteryValueVisible(observation)}
-            [{observation.masteryValue}]
-          {/if}
+
+        <span>
+          <MasteryLevelTitle {observation} {masterySchema} />
         </span>
 
         <span>
@@ -163,11 +162,6 @@
     grid-template-columns: 8fr 5fr 4fr;
     column-gap: 0.5rem;
     align-items: center;
-  }
-
-  .masteryLevelTitle {
-    padding: 0.25rem 0.5rem;
-    display: inline-block;
   }
 
   .student-observations-row > span:last-child {
