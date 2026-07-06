@@ -9,6 +9,7 @@
 
   import Offcanvas from './Offcanvas.svelte'
   import ObservationView from './ObservationView.svelte'
+  import ObservationEdit from './ObservationEdit.svelte'
   import AuthorInfo from './AuthorInfo.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
   import MasteryLevelTitle from './MasteryLevelTitle.svelte'
@@ -60,6 +61,8 @@
 
   const handleEditObservation = (observation: ObservationType) => {
     console.log('Editing observation', observation)
+    observationWip = observation
+    isObservationEditorOpen = true
   }
 
   const handleDeleteObservation = async (observationId: string) => {
@@ -131,7 +134,7 @@
     observationWip = null
   }}
 >
-  {#if observationWip}
+  {#if observationWip && isObservationViewerOpen}
     <ObservationView
       {student}
       observation={observationWip}
@@ -140,6 +143,27 @@
       onDone={() => {
         observationWip = null
         isObservationViewerOpen = false
+      }}
+    />
+  {/if}
+</Offcanvas>
+
+<!-- offcanvas for editing observations -->
+<Offcanvas
+  bind:isOpen={isObservationEditorOpen}
+  ariaLabel="Rediger observasjon"
+  onClosed={() => {
+    observationWip = null
+  }}
+>
+  {#if observationWip && isObservationEditorOpen}
+    <ObservationEdit
+      {student}
+      observation={observationWip}
+      {goal}
+      onDone={() => {
+        observationWip = null
+        isObservationEditorOpen = false
       }}
     />
   {/if}
