@@ -4,12 +4,15 @@
   import type { SubjectType, UserType, GoalType, ObservationType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
-  import { urlStringFrom, getSubjectName, isNumber } from '../utils/functions'
+  import { urlStringFrom, getSubjectName } from '../utils/functions'
+  import { hasUserAccessToFeature } from '../stores/access'
 
   import StudentSubjectChart from './StudentSubjectChart.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
   import GoalObservations from './GoalObservations.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
+  import Offcanvas from './Offcanvas.svelte'
+  import ObservationEdit from './ObservationEdit.svelte'
 
   const {
     subject,
@@ -29,6 +32,9 @@
   let { currentUser } = $derived($dataStore)
   let subjectName = $derived(getSubjectName(subject))
   let expandedGoalIds = $derived<string[]>(router.getQueryParam('expanded')?.split(',') || [])
+  let observationWip = $state<ObservationType | {} | null>(null)
+  let goalForObservation = $state<GoalDecorated | null>(null)
+  let isObservationEditorOpen = $state<boolean>(false)
 
   const handleToggleGoal = (goalId: string) => {
     const nextExpandedGoals = new Set(expandedGoalIds)
@@ -58,6 +64,20 @@
         (goal: GoalType) => getMasterySchmemaForGoal(goal)?.config?.isMasteryValueVisible ?? false
       )
   )
+
+  const handleEditObservation = (observation: ObservationType | null, goal: GoalDecorated) => {
+    if (observation?.id) {
+      // edit existing observation
+      observationWip = observation
+    } else {
+      // create new observation, prefill with value from previous observation
+      const prevousObservations = goal?.observations || []
+      const previousObservation = prevousObservations[prevousObservations.length - 1]
+      observationWip = { masteryValue: previousObservation?.masteryValue || null }
+    }
+    goalForObservation = { ...goal }
+    isObservationEditorOpen = true
+  }
 </script>
 
 {#if isTitleEnabled}
@@ -113,6 +133,18 @@
                 <MasteryLevelBadge masteryData={goal.masteryData} {masterySchema} />
               {/if}
 
+              {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, subjectId: subject.id, studentGroupIds: student.groupIds } )}
+                <ButtonIcon
+                  options={{
+                    iconName: 'bullseye',
+                    title: 'Ny observasjon',
+                    classes: 'bordered',
+                    disabled: !goal.isRelevant,
+                    onClick: () => handleEditObservation(null, goal),
+                  }}
+                />
+              {/if}
+
               <ButtonIcon
                 options={{
                   iconName: `chevron-thin-${expandedGoalIds.includes(goal.id) ? 'up' : 'down'}`,
@@ -158,6 +190,27 @@
     </div>
   {/if}
 </div>
+
+<!-- offcanvas for editing observations -->
+<Offcanvas
+  bind:isOpen={isObservationEditorOpen}
+  ariaLabel="Ny observasjon"
+  onClosed={() => {
+    observationWip = null
+  }}
+>
+  {#if observationWip && isObservationEditorOpen}
+    <ObservationEdit
+      {student}
+      observation={observationWip}
+      goal={goalForObservation}
+      onDone={() => {
+        observationWip = null
+        isObservationEditorOpen = false
+      }}
+    />
+  {/if}
+</Offcanvas>
 
 <style>
   hr {

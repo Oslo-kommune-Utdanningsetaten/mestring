@@ -2,9 +2,7 @@
   import type { ObservationType, SubjectType, UserType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
-  import { getContrastFriendlyTextColor, isNumber } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/access'
-  import { getMasteryLevelColorByValue, getMasteryTitleByValue } from '../utils/masteryHelpers'
   import { addAlert } from '../stores/alerts'
 
   import Offcanvas from './Offcanvas.svelte'
@@ -25,29 +23,7 @@
   let isObservationEditorOpen = $state<boolean>(false)
   let isObservationViewerOpen = $state<boolean>(false)
 
-  const isMasteryValueVisible = (observation: ObservationType): boolean => {
-    if (!masterySchema || !isNumber(observation.masteryValue)) {
-      return false
-    }
-    return masterySchema?.config?.isMasteryValueVisible ?? false
-  }
-
-  const getMasteryLevelTitle = (observation: ObservationType): string | null => {
-    if (!masterySchema || !isNumber(observation.masteryValue)) {
-      return null
-    }
-    return getMasteryTitleByValue(observation.masteryValue as number, masterySchema)
-  }
-
-  const getMasteryLevelColor = (observation: ObservationType): string | null => {
-    if (!masterySchema || !isNumber(observation.masteryValue)) {
-      return null
-    }
-    return getMasteryLevelColorByValue(observation.masteryValue as number, masterySchema, 0.7)
-  }
-
   const handleViewObservation = (observation: ObservationType) => {
-    console.log('Viewing observation', observation)
     if (observation) {
       observationWip = observation
       isObservationViewerOpen = true
@@ -60,7 +36,6 @@
   }
 
   const handleEditObservation = (observation: ObservationType) => {
-    console.log('Editing observation', observation)
     observationWip = observation
     isObservationEditorOpen = true
   }
@@ -73,8 +48,6 @@
 <div class="goal-secondary-row">
   {#if goal.observations?.length}
     {#each goal?.observations as observation, index}
-      {@const bgColor = getMasteryLevelColor(observation) ?? 'inherit'}
-      {@const color = getContrastFriendlyTextColor(bgColor)}
       <div class="student-observations-row observation-item">
         <span>
           <AuthorInfo item={observation} />
