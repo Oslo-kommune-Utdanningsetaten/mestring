@@ -206,6 +206,22 @@
     }
   }
 
+  const toggleCreateEnabledForStudents = async () => {
+    if (!school) return
+    try {
+      await schoolsPartialUpdate({
+        path: { id: school.id },
+        body: { isCreateEnabledForStudents: !school.isCreateEnabledForStudents },
+      })
+      await fetchSchool()
+    } catch (error) {
+      addAlert({
+        type: 'danger',
+        message: `Feil ved oppdatering av elevers skrivetilgang for skole ${school.displayName}`,
+      })
+    }
+  }
+
   // Toggle whether group goals can be created at the school
   const toggleGroupGoalEnabled = async () => {
     if (!school) return
@@ -535,7 +551,18 @@
           aria-checked={school.isServiceEnabledForStudents}
           checked={school.isServiceEnabledForStudents}
           onchange={() => toggleServiceEnabledForStudents()}
-          disabled={true}
+        ></pkt-checkbox>
+
+        <pkt-checkbox
+          id={'student-create-access-' + school.id}
+          class="ms-1"
+          label={`Elever har ${school.isCreateEnabledForStudents ? '' : 'IKKE'} skrivetilgang (egenvurdering)`}
+          labelPosition="right"
+          isSwitch="true"
+          aria-checked={school.isCreateEnabledForStudents}
+          checked={school.isCreateEnabledForStudents}
+          onchange={() => toggleCreateEnabledForStudents()}
+          disabled={!school.isServiceEnabledForStudents}
         ></pkt-checkbox>
       </section>
 
