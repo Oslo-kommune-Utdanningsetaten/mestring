@@ -1,9 +1,11 @@
 <script lang="ts">
   import type { ObservationType, SubjectType, UserType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
+  import { observationsDestroy } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
   import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
+  import { trackEvent } from '../stores/analytics'
 
   import Offcanvas from './Offcanvas.svelte'
   import ObservationView from './ObservationView.svelte'
@@ -42,6 +44,21 @@
 
   const handleDeleteObservation = async (observationId: string) => {
     console.log('Deleting observation', observationId)
+    try {
+      await observationsDestroy({ path: { id: observationId } })
+      addAlert({
+        type: 'success',
+        message: `Slettet observasjon`,
+      })
+      trackEvent('Observations', 'Delete')
+      //await fetchGoals()
+    } catch (error) {
+      console.error('Error deleting observation:', error)
+      addAlert({
+        type: 'danger',
+        message: `Kunne ikke slette observasjon. Hvis du mener dette er en feil, kontakt support.`,
+      })
+    }
   }
 </script>
 
@@ -66,19 +83,17 @@
               onClick: () => handleViewObservation(observation),
             }}
           />
-          {#if $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById } )}
-            {#if index === goal?.observations.length - 1}
-              <ButtonIcon
-                options={{
-                  iconName: 'edit',
-                  title: 'Rediger observasjon',
-                  classes: 'bordered',
-                  onClick: () => handleEditObservation(observation),
-                }}
-              />
-            {/if}
+          {#if $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, studentId: observation.studentId, createdById: observation.createdById } )}
+            <ButtonIcon
+              options={{
+                iconName: 'edit',
+                title: 'Rediger observasjon',
+                classes: 'bordered',
+                onClick: () => handleEditObservation(observation),
+              }}
+            />
           {/if}
-          {#if $hasUserAccessToFeature( 'observation', 'delete', { groupId: goal.groupId, createdById: observation.createdById } )}
+          {#if $hasUserAccessToFeature( 'observation', 'delete', { groupId: goal.groupId, studentId: observation.studentId, createdById: observation.createdById } )}
             {#key observation.id}
               <ButtonIcon
                 options={{
