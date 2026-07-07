@@ -14,10 +14,11 @@
   import ButtonIcon from './ButtonIcon.svelte'
   import MasteryLevelTitle from './MasteryLevelTitle.svelte'
 
-  const { subject, student, goal } = $props<{
+  const { subject, student, goal, onRefreshNeeded } = $props<{
     subject: SubjectType
     student: UserType
     goal: GoalDecorated
+    onRefreshNeeded: () => void
   }>()
 
   let masterySchema = $derived($dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId))
@@ -51,7 +52,7 @@
         message: `Slettet observasjon`,
       })
       trackEvent('Observations', 'Delete')
-      //await fetchGoals()
+      onRefreshNeeded()
     } catch (error) {
       console.error('Error deleting observation:', error)
       addAlert({
@@ -152,6 +153,7 @@
       onDone={() => {
         observationWip = null
         isObservationEditorOpen = false
+        onRefreshNeeded()
       }}
     />
   {/if}

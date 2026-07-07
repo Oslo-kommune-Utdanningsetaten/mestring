@@ -181,7 +181,7 @@
           </span>
         </li>
         {#if expandedGoalIds.includes(goal.id) && goal.observations?.length}
-          <GoalObservations {goal} {student} {subject} />
+          <GoalObservations {goal} {student} {subject} onRefreshNeeded={fetchData} />
         {/if}
       </div>
     {/each}
@@ -231,6 +231,7 @@
       onDone={() => {
         observationWip = null
         isObservationEditorOpen = false
+        fetchData()
       }}
     />
   {/if}
