@@ -99,6 +99,16 @@ const checkUserAccessToFeature = (
     }
   } else if (resource === 'observation') {
     if (['create'].includes(action)) {
+      // Student check
+      if (
+        currentSchool.isServiceEnabledForStudents &&
+        currentSchool.isCreateEnabledForStudents &&
+        currentUser.id === studentId &&
+        currentUser.studentGroups.some((studentGroup: GroupType) => studentGroup.id === groupId)
+      )
+        return true
+
+      // Teacher check
       return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
         // Teacher teaches the subject to this student
         if (

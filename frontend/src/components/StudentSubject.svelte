@@ -133,7 +133,7 @@
                 <MasteryLevelBadge masteryData={goal.masteryData} {masterySchema} />
               {/if}
 
-              {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, subjectId: subject.id, studentGroupIds: student.groupIds } )}
+              {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, studentId: student.id } )}
                 <ButtonIcon
                   options={{
                     iconName: 'bullseye',
