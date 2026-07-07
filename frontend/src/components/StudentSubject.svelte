@@ -6,6 +6,7 @@
   import { dataStore } from '../stores/data'
   import { urlStringFrom, getSubjectName } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/access'
+  import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
 
   import StudentSubjectChart from './StudentSubjectChart.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
@@ -17,19 +18,19 @@
   const {
     subject,
     student,
-    goals,
     isTitleEnabled = true,
   } = $props<{
     subject: SubjectType
     student: UserType
-    goals: GoalDecorated[]
     isTitleEnabled?: boolean
   }>()
 
   const router = useTinyRouter()
+  let goals = $state<GoalDecorated[]>([])
+  let isLoading = $state(false)
   let hoveredSubjectId = $state<string | null>(null)
   let hoveredGoalId = $state<string | null>(null)
-  let { currentUser } = $derived($dataStore)
+  let { currentUser, currentSchool } = $derived($dataStore)
   let subjectName = $derived(getSubjectName(subject))
   let expandedGoalIds = $derived<string[]>(router.getQueryParam('expanded')?.split(',') || [])
   let observationWip = $state<ObservationType | {} | null>(null)
@@ -65,6 +66,23 @@
       )
   )
 
+  const fetchData = async () => {
+    isLoading = true
+    try {
+      goals = await fetchGoalsForSubjectAndStudent(
+        subject.id,
+        student.id,
+        currentSchool?.id!,
+        student.allGroups
+      )
+    } catch (error) {
+      console.error(`Could not load goals for ${student.id} and ${subject.id}`, error)
+      goals = []
+    } finally {
+      isLoading = false
+    }
+  }
+
   const handleEditObservation = (observation: ObservationType | null, goal: GoalDecorated) => {
     if (observation?.id) {
       // edit existing observation
@@ -78,6 +96,12 @@
     goalForObservation = { ...goal }
     isObservationEditorOpen = true
   }
+
+  $effect(() => {
+    if (currentSchool) {
+      fetchData()
+    }
+  })
 </script>
 
 {#if isTitleEnabled}

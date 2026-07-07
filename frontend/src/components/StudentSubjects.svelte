@@ -1,9 +1,7 @@
 <script lang="ts">
   import type { UserType, GroupType, SubjectType } from '../generated/types.gen'
-  import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
   import { groupsList } from '../generated/sdk.gen'
-  import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
   import StudentSubject from './StudentSubject.svelte'
 
   const { student } = $props<{
@@ -12,38 +10,26 @@
 
   let { currentSchool, subjects } = $derived($dataStore)
   let groups = $state<GroupType[]>([])
-  let goalsBySubjectId = $state<Record<string, GoalDecorated[]>>({})
   let studentSubjects = $state<SubjectType[]>([])
-  let isLoading = $state(true)
+  let isLoading = $state(false)
 
   const fetchData = async () => {
+    isLoading = true
     try {
       const groupsResult = await groupsList({
         query: { school: currentSchool.id, user: student.id },
       })
       groups = (groupsResult.data || []).filter(group => group.type === 'teaching')
+      studentSubjects = subjects.filter(subject =>
+        groups.some(group => group.subjectId === subject.id)
+      )
     } catch (error) {
       console.error(`Could not load subjects for ${student.id}`, error)
       groups = []
-      isLoading = false
       return
+    } finally {
+      isLoading = false
     }
-    studentSubjects = subjects.filter(subject =>
-      groups.some(group => group.subjectId === subject.id)
-    )
-
-    await Promise.all(
-      studentSubjects.map(async subject => {
-        const goals = await fetchGoalsForSubjectAndStudent(
-          subject.id,
-          student.id,
-          currentSchool?.id!,
-          student.allGroups
-        )
-        goalsBySubjectId = { ...goalsBySubjectId, [subject.id]: goals }
-      })
-    )
-    isLoading = false
   }
 
   $effect(() => {
@@ -67,7 +53,7 @@
         {@const subject = studentSubjects.find(s => s.id === group.subjectId)}
         {#if subject}
           <div class="list-group-item">
-            <StudentSubject {student} {subject} goals={goalsBySubjectId[subject.id]} />
+            <StudentSubject {student} {subject} />
           </div>
         {/if}
       {/each}
