@@ -41,6 +41,7 @@ class School(BaseModel):
     owner = models.CharField(max_length=200, null=True)
     is_service_enabled = models.BooleanField(default=False)
     is_service_enabled_for_students = models.BooleanField(default=False)  # can students use the service
+    is_create_enabled_for_students = models.BooleanField(default=False)  # can students create/edit stuff
     is_group_goal_enabled = models.BooleanField(default=True)  # can group goals can be created
     is_student_list_enabled = models.BooleanField(default=False)  # can teachers see the /students menu item
     is_goal_title_enabled = models.BooleanField(default=True)  # are goals displayed with titles

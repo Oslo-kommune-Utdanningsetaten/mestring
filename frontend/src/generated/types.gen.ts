@@ -248,6 +248,7 @@ export type PatchedSchoolType = {
     owner?: string | null;
     isServiceEnabled?: boolean;
     isServiceEnabledForStudents?: boolean;
+    isCreateEnabledForStudents?: boolean;
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
@@ -377,6 +378,7 @@ export type SchoolType = {
     owner?: string | null;
     isServiceEnabled?: boolean;
     isServiceEnabledForStudents?: boolean;
+    isCreateEnabledForStudents?: boolean;
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
@@ -644,6 +646,7 @@ export type PatchedSchoolCreateType = {
     owner?: string | null;
     isServiceEnabled?: boolean;
     isServiceEnabledForStudents?: boolean;
+    isCreateEnabledForStudents?: boolean;
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
@@ -723,6 +726,7 @@ export type SchoolCreateType = {
     owner?: string | null;
     isServiceEnabled?: boolean;
     isServiceEnabledForStudents?: boolean;
+    isCreateEnabledForStudents?: boolean;
     isGroupGoalEnabled?: boolean;
     isStudentListEnabled?: boolean;
     isGoalTitleEnabled?: boolean;
