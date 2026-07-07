@@ -130,6 +130,17 @@ const checkUserAccessToFeature = (
         return false
       })
     } else if (['update', 'delete'].includes(action)) {
+      // Student check
+      if (
+        currentSchool.isServiceEnabledForStudents &&
+        currentSchool.isCreateEnabledForStudents &&
+        currentUser.id === studentId &&
+        currentUser.id === createdById &&
+        currentUser.studentGroups.some((studentGroup: GroupType) => studentGroup.id === groupId)
+      )
+        return true
+
+      // Teacher check
       return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
         // User is teacher in this group and the observation was created by the user
         if (groupId && groupId === teacherGroup.id && createdById === currentUser.id) {
