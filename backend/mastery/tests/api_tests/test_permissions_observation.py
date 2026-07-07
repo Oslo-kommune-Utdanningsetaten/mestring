@@ -485,7 +485,7 @@ def test_basis_group_teacher_observation_access(
 
 @pytest.mark.django_db
 def test_student_observation_access(
-        student, observation_on_individual_goal, observation_on_group_goal, other_student,
+        student, school, observation_on_individual_goal, observation_on_group_goal, other_student,
         observation_on_individual_goal_other_student, other_school, teacher_role):
     client = APIClient()
     client.force_authenticate(user=student)
@@ -505,6 +505,40 @@ def test_student_observation_access(
     # Student cannot access observations about other students
     resp = client.get(f"/api/observations/{observation_on_individual_goal_other_student.id}/")
     assert resp.status_code == 404
+
+    # School has disabled student access by default
+
+    # Student cannot create observation when school has not enabled student access
+    resp = client.post("/api/observations/", {
+        "student_id": student.id,
+        "goal_id": observation_on_individual_goal.goal.id,
+        "is_visible_to_student": True,
+        "created_by_id": student.id,
+    }, format='json')
+    assert resp.status_code == 403
+
+    # Student cannot update or delete an observation about themselves when flags are off
+    obs_created_before_flags = Observation.objects.create(
+        student=student,
+        goal=observation_on_individual_goal.goal,
+        is_visible_to_student=True,
+        created_by=student,
+    )
+    resp = client.put(f"/api/observations/{obs_created_before_flags.id}/", {
+        "student_id": student.id,
+        "goal_id": observation_on_individual_goal.goal.id,
+        "is_visible_to_student": True,
+        "feedforward": "Cannot do this without flags",
+    }, format='json')
+    assert resp.status_code == 403
+
+    resp = client.delete(f"/api/observations/{obs_created_before_flags.id}/")
+    assert resp.status_code == 403
+
+    # Enable student access for the school
+    school.is_service_enabled_for_students = True
+    school.is_create_enabled_for_students = True
+    school.save()
 
     # Can CREATE observation about themselves
     resp = client.post("/api/observations/", {

@@ -169,9 +169,15 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             return False
 
     def can_student_create_observation(self, request, view, action):
-        """Students can only create observations about themselves."""
+        """Students can only create observations about themselves. Given that school has enabled student access."""
         try:
             student_id = request.data.get("student_id")
+            goal_id = request.data.get("goal_id")
+            school = Goal.objects.filter(id=goal_id).first().school
+
+            if not school or not school.is_service_enabled_for_students or not school.is_create_enabled_for_students:
+                return False
+
             requester = request.user
 
             # Force it so that students cannot create invisible observations
@@ -183,11 +189,15 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             return False
 
     def can_student_modify_observation(self, request, view, action):
-        """Students can only modify observations they created about themselves."""
+        """Students can only modify observations they created about themselves. Given that school has enabled student access."""
         try:
             target_observation = view.get_object()
-            requester = request.user
+            school = target_observation.goal.school if target_observation.goal else None
 
+            if not school or not school.is_service_enabled_for_students or not school.is_create_enabled_for_students:
+                return False
+
+            requester = request.user
             return (target_observation.created_by_id == requester.id and
                     target_observation.student_id == requester.id)
         except Exception:
