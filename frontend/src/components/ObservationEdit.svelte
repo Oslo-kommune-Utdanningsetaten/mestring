@@ -99,15 +99,17 @@
       </div>
     {/if}
 
-    <pkt-checkbox
-      class="ms-auto"
-      label={localObservation.isVisibleToStudent ? 'Synlig for eleven' : 'IKKE synlig for eleven'}
-      labelPosition="right"
-      isSwitch="true"
-      aria-checked={localObservation.isVisibleToStudent}
-      checked={localObservation.isVisibleToStudent}
-      onchange={() => handleToggleVisibility()}
-    ></pkt-checkbox>
+    {#if !$currentUser.isStudent}
+      <pkt-checkbox
+        class="ms-auto"
+        label={localObservation.isVisibleToStudent ? 'Synlig for eleven' : 'IKKE synlig for eleven'}
+        labelPosition="right"
+        isSwitch="true"
+        aria-checked={localObservation.isVisibleToStudent}
+        checked={localObservation.isVisibleToStudent}
+        onchange={() => handleToggleVisibility()}
+      ></pkt-checkbox>
+    {/if}
 
     {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
       <div class="form-group">
