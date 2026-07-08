@@ -22,6 +22,7 @@ const checkUserAccessToPath = (currentUser: UserDecorated | null, pathString: st
   const { isPublic, accessibleBy } = path || {}
   if (isPublic) return true
   if (!currentUser) return false
+  if (currentUser.isSuperadmin) return true
 
   // check for overlapping roles and accessibleBy
   if (accessibleBy) {

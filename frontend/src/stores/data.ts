@@ -32,9 +32,9 @@ export const setCurrentSchool = (school: SchoolType) => {
     dataStore.update(data => {
       return { ...data, currentSchool: school }
     })
+    registerUserStatus(school)
     if (school?.id) {
       registerSubjects(school)
-      registerUserStatus(school)
       registerMasterySchemas(school)
       registerStatusCategories(school)
     }
@@ -58,16 +58,16 @@ export const setCurrentUser = (user: UserDecorated | null) => {
   dataStore.update(data => ({ ...data, currentUser: user }))
 }
 
-export const registerUserStatus = async (school: SchoolType) => {
+export const registerUserStatus = async (school?: SchoolType) => {
   const user = get(dataStore).currentUser
+  if (!school) {
+    if (user.isSuperadmin) setCurrentUser({ ...user, roles: [USER_ROLES.SUPERADMIN] })
+    return
+  }
   const [userData, schoolsResult, allGroupsResult] = await Promise.all([
     fetchUserData(user.id, school.id),
-    schoolsList({
-      query: { isServiceEnabled: true },
-    }),
-    groupsList({
-      query: { school: school.id },
-    }),
+    schoolsList({ query: { isServiceEnabled: true } }),
+    groupsList({ query: { school: school.id } }),
   ])
   const { teacherGroups, studentGroups, userSchools } = userData
   const allGroups = allGroupsResult.data || []
