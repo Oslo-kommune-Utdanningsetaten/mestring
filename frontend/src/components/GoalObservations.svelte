@@ -44,7 +44,6 @@
   }
 
   const handleDeleteObservation = async (observationId: string) => {
-    console.log('Deleting observation', observationId)
     try {
       await observationsDestroy({ path: { id: observationId } })
       addAlert({
