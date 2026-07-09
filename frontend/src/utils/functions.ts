@@ -213,14 +213,17 @@ export const inferMastery = (observations: ObservationType[]): MasteryData | nul
   if (observations.length === 0) {
     return null
   }
-  // ensure observations are sorted by createdAt ascending
-  observations.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-  const lastValue = observations[observations.length - 1]?.masteryValue
-  const masteryValues = observations.map(obs => obs.masteryValue).filter(isNumber) as number[]
-  const trend = calculateLinearRegressionTrend(masteryValues)
+  const tidyObservations = observations
+    .filter(obs => isNumber(obs.masteryValue)) // only perfom calculations on observations with a numerical value
+    .filter(obs => obs.createdById !== obs.studentId && obs.updatedById !== obs.studentId) // exclude observations created or updated by the student themselves
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) // sort by date
+
+  const lastValue = tidyObservations[tidyObservations.length - 1]?.masteryValue
+  const masteryValues = tidyObservations.map(obs => obs.masteryValue) as number[]
+
   return {
-    mastery: lastValue || 0,
-    trend: trend,
+    mastery: lastValue ?? 0,
+    trend: calculateLinearRegressionTrend(masteryValues),
     observationValues: masteryValues,
   }
 }
