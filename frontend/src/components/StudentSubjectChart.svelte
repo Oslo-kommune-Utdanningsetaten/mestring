@@ -80,6 +80,7 @@
   }
 
   const assembleChartData = () => {
+    const schema = masterySchemas.find(ms => ms.id === goalsForSubjectDecorated[0]?.masterySchemaId)
     const numberOfGoals = goalsForSubjectDecorated.length
     const maxNumberOfObservations = Math.max(
       ...goalsForSubjectDecorated.map(goal => goal.observations.length)
@@ -108,12 +109,12 @@
           const opacity = goal.id === highlightedGoalId ? 0.9 : 0.5
           datasets[observationIndex].backgroundColor[goalIndex] = getMasteryLevelColorByValue(
             value,
-            masterySchema,
+            schema,
             opacity
           )
           datasets[observationIndex].hoverBackgroundColor[goalIndex] = getMasteryLevelColorByValue(
             value,
-            masterySchema,
+            schema,
             0.9
           )
         }
