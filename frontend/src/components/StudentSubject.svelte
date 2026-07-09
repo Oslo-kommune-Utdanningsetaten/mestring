@@ -159,19 +159,21 @@
               {#if goal.masteryData}
                 <MasteryLevelBadge masteryData={goal.masteryData} {masterySchema} />
               {/if}
+            {/if}
 
-              {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, studentId: student.id } )}
-                <ButtonIcon
-                  options={{
-                    iconName: 'bullseye',
-                    title: 'Ny observasjon',
-                    classes: 'bordered',
-                    disabled: !goal.isRelevant,
-                    onClick: () => handleEditObservation(null, goal),
-                  }}
-                />
-              {/if}
+            {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, goalStudentId: goal.studentId, studentId: student.id } )}
+              <ButtonIcon
+                options={{
+                  iconName: 'bullseye',
+                  title: 'Ny observasjon',
+                  classes: 'bordered',
+                  disabled: !goal.isRelevant,
+                  onClick: () => handleEditObservation(null, goal),
+                }}
+              />
+            {/if}
 
+            {#if goal.observations?.length}
               <ButtonIcon
                 options={{
                   iconName: `chevron-thin-${expandedGoalIds.includes(goal.id) ? 'up' : 'down'}`,

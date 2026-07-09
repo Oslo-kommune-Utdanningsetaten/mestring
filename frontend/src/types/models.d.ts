@@ -31,6 +31,7 @@ export type AppData = {
 export type HasUserAccessToFeatureOptions = {
   subjectId?: string
   studentId?: string
+  goalStudentId?: string | null
   studentGroupIds?: string[]
   groupId?: string | null
   createdById?: string

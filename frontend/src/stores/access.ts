@@ -43,7 +43,7 @@ const checkUserAccessToFeature = (
   if (!currentUser) return false // not logged in, no access
   if (currentUser.isSchoolAdmin || currentUser.isSuperadmin) return true // school admins and superadmins have access to everything
 
-  const { subjectId, studentGroupIds, studentId, groupId, createdById } = options
+  const { subjectId, studentGroupIds, studentId, goalStudentId, groupId, createdById } = options
   const subject = subjects.find(s => s.id === subjectId)
 
   if (resource === 'status') {
@@ -105,13 +105,14 @@ const checkUserAccessToFeature = (
         currentSchool.isServiceEnabledForStudents &&
         currentSchool.isCreateEnabledForStudents &&
         currentUser.id === studentId &&
-        currentUser.studentGroups.some((studentGroup: GroupType) => studentGroup.id === groupId)
+        (groupId
+          ? currentUser.studentGroups.some((studentGroup: GroupType) => studentGroup.id === groupId)
+          : goalStudentId === studentId)
       )
         return true
 
       // Teacher check
       return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
-        // Teacher teaches the subject to this student
         if (
           subjectId &&
           teacherGroup.subjectId === subjectId &&
@@ -137,7 +138,9 @@ const checkUserAccessToFeature = (
         currentSchool.isCreateEnabledForStudents &&
         currentUser.id === studentId &&
         currentUser.id === createdById &&
-        currentUser.studentGroups.some((studentGroup: GroupType) => studentGroup.id === groupId)
+        (groupId
+          ? currentUser.studentGroups.some((studentGroup: GroupType) => studentGroup.id === groupId)
+          : goalStudentId === studentId)
       )
         return true
 

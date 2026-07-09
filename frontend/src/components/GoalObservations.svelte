@@ -84,7 +84,7 @@
               onClick: () => handleViewObservation(observation),
             }}
           />
-          {#if $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, studentId: observation.studentId, createdById: observation.createdById } )}
+          {#if $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, studentId: observation.studentId, createdById: observation.createdById, goalStudentId: goal.studentId } )}
             <ButtonIcon
               options={{
                 iconName: 'edit',
@@ -94,7 +94,7 @@
               }}
             />
           {/if}
-          {#if $hasUserAccessToFeature( 'observation', 'delete', { groupId: goal.groupId, studentId: observation.studentId, createdById: observation.createdById } )}
+          {#if $hasUserAccessToFeature( 'observation', 'delete', { groupId: goal.groupId, studentId: observation.studentId, createdById: observation.createdById, goalStudentId: goal.studentId } )}
             {#key observation.id}
               <ButtonIcon
                 options={{
