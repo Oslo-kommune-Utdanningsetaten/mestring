@@ -7,6 +7,7 @@
   import { urlStringFrom, getSubjectName } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
+  import { localStorage } from '../stores/localStorage'
 
   import StudentSubjectChart from './StudentSubjectChart.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
@@ -26,8 +27,8 @@
   }>()
 
   const router = useTinyRouter()
+  const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
   let goals = $state<GoalDecorated[]>([])
-  let isLoading = $state(false)
   let hoveredSubjectId = $state<string | null>(null)
   let hoveredGoalId = $state<string | null>(null)
   let { currentUser, currentSchool } = $derived($dataStore)
@@ -58,16 +59,16 @@
     return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
   }
 
-  // Chart should be visible if user is not student, or no goals have masterySchema with config.isMasteryValueVisible set to false
+  // Chart is visible if configured AND (user is teacher or all masterySchemas allow)
   const isChartVisible = $derived(
-    !currentUser.isStudent ||
-      goals.every(
-        (goal: GoalType) => getMasterySchmemaForGoal(goal)?.config?.isMasteryValueVisible ?? false
-      )
+    $isSubjectPolarChartVisible &&
+      (currentUser.isTeacher ||
+        goals.every(
+          (goal: GoalType) => getMasterySchmemaForGoal(goal)?.config?.isMasteryValueVisible ?? false
+        ))
   )
 
   const fetchData = async () => {
-    isLoading = true
     try {
       goals = await fetchGoalsForSubjectAndStudent(
         subject.id,
@@ -78,8 +79,6 @@
     } catch (error) {
       console.error(`Could not load goals for ${student.id} and ${subject.id}`, error)
       goals = []
-    } finally {
-      isLoading = false
     }
   }
 
@@ -186,7 +185,12 @@
           </span>
         </li>
         {#if expandedGoalIds.includes(goal.id) && goal.observations?.length}
-          <GoalObservations {goal} {student} {subject} onRefreshNeeded={fetchData} />
+          <GoalObservations
+            {goal}
+            {student}
+            onRefreshNeeded={fetchData}
+            onEditObservation={handleEditObservation}
+          />
         {/if}
       </div>
     {/each}

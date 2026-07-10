@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ObservationType, SubjectType, UserType } from '../generated/types.gen'
+  import type { ObservationType, SubjectType, UserType, GoalType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { observationsDestroy } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
@@ -9,22 +9,30 @@
 
   import Offcanvas from './Offcanvas.svelte'
   import ObservationView from './ObservationView.svelte'
-  import ObservationEdit from './ObservationEdit.svelte'
   import AuthorInfo from './AuthorInfo.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
   import MasteryLevelTitle from './MasteryLevelTitle.svelte'
 
-  const { subject, student, goal, onRefreshNeeded } = $props<{
-    subject: SubjectType
+  const { student, goal, onRefreshNeeded, onEditObservation } = $props<{
     student: UserType
     goal: GoalDecorated
     onRefreshNeeded: () => void
+    onEditObservation: (observation: ObservationType | null, goal: GoalType) => void
   }>()
 
-  let masterySchema = $derived($dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId))
   let observationWip = $state<ObservationType | {} | null>(null)
-  let isObservationEditorOpen = $state<boolean>(false)
   let isObservationViewerOpen = $state<boolean>(false)
+  let masterySchema = $derived($dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId))
+  let observations = $derived(
+    goal.observations
+      ? goal.observations.toSorted((goalA: GoalType, goalB: GoalType) => {
+          // sort observations by createdAt ascending
+          const dateA = new Date(goalA.createdAt)
+          const dateB = new Date(goalB.createdAt)
+          return dateA.getTime() - dateB.getTime()
+        })
+      : []
+  )
 
   const handleViewObservation = (observation: ObservationType) => {
     if (observation) {
@@ -38,9 +46,8 @@
     }
   }
 
-  const handleEditObservation = (observation: ObservationType) => {
-    observationWip = observation
-    isObservationEditorOpen = true
+  const handleEditObservation = (observation: ObservationType | null, goal: GoalType) => {
+    onEditObservation(observation, goal)
   }
 
   const handleDeleteObservation = async (observationId: string) => {
@@ -63,8 +70,8 @@
 </script>
 
 <div class="goal-secondary-row">
-  {#if goal.observations?.length}
-    {#each goal?.observations as observation, index}
+  {#if observations.length}
+    {#each observations as observation}
       <div class="student-observations-row observation-item">
         <span>
           <AuthorInfo item={observation} />
@@ -89,7 +96,7 @@
                 iconName: 'edit',
                 title: 'Rediger observasjon',
                 classes: 'bordered',
-                onClick: () => handleEditObservation(observation),
+                onClick: () => handleEditObservation(observation, goal),
               }}
             />
           {/if}
@@ -131,28 +138,6 @@
       onDone={() => {
         observationWip = null
         isObservationViewerOpen = false
-      }}
-    />
-  {/if}
-</Offcanvas>
-
-<!-- offcanvas for editing observations -->
-<Offcanvas
-  bind:isOpen={isObservationEditorOpen}
-  ariaLabel="Rediger observasjon"
-  onClosed={() => {
-    observationWip = null
-  }}
->
-  {#if observationWip && isObservationEditorOpen}
-    <ObservationEdit
-      {student}
-      observation={observationWip}
-      {goal}
-      onDone={() => {
-        observationWip = null
-        isObservationEditorOpen = false
-        onRefreshNeeded()
       }}
     />
   {/if}
