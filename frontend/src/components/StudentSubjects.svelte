@@ -3,6 +3,11 @@
   import { dataStore } from '../stores/data'
   import { groupsList } from '../generated/sdk.gen'
   import StudentSubject from './StudentSubject.svelte'
+  import { GROUP_VALIDITY_OPTIONS } from '../utils/constants'
+  import { localStorage } from '../stores/localStorage'
+
+  const preferredGroupValidity = localStorage<GROUP_VALIDITY_OPTIONS>('preferredGroupValidity')
+  const groupValidity = $derived($preferredGroupValidity || GROUP_VALIDITY_OPTIONS.ONLY)
 
   const { student } = $props<{
     student: UserType
@@ -17,7 +22,7 @@
     isLoading = true
     try {
       const groupsResult = await groupsList({
-        query: { school: currentSchool.id, user: student.id },
+        query: { school: currentSchool.id, user: student.id, valid: groupValidity },
       })
       groups = (groupsResult.data || []).filter(group => group.type === 'teaching')
       studentSubjects = subjects.filter(subject =>

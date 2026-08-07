@@ -22,6 +22,12 @@
   import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
   import ButtonMini from './ButtonMini.svelte'
 
+  import { GROUP_VALIDITY_OPTIONS } from '../utils/constants'
+  import { localStorage } from '../stores/localStorage'
+
+  const preferredGroupValidity = localStorage<GROUP_VALIDITY_OPTIONS>('preferredGroupValidity')
+  const groupValidity = $derived($preferredGroupValidity || GROUP_VALIDITY_OPTIONS.ONLY)
+
   const { user, school, onDone } = $props<{
     user: Partial<UserDecorated>
     school: SchoolType
@@ -69,7 +75,9 @@
 
   const fetchSchoolGroups = async () => {
     try {
-      const result = await groupsList({ query: { school: school.id, enabled: 'only' } })
+      const result = await groupsList({
+        query: { school: school.id, enabled: 'only', valid: groupValidity },
+      })
       schoolGroups = result.data || []
     } catch (e) {
       console.error('Error fetching groups:', e)

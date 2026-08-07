@@ -21,9 +21,9 @@
   let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingGroups = $state<boolean>(false)
-  let enabledSelection = $state<'include' | 'only' | 'exclude'>('only')
-  let validSelection = $state<'include' | 'only' | 'exclude'>('only')
-  let deletedSelection = $state<'include' | 'only' | 'exclude'>('include')
+  let enabledSelection = $state<GROUP_ENABLED_OPTIONS>(GROUP_ENABLED_OPTIONS.ONLY)
+  let validSelection = $state<GROUP_VALIDITY_OPTIONS>(GROUP_VALIDITY_OPTIONS.ONLY)
+  let deletedSelection = $state<GROUP_DELETED_OPTIONS>(GROUP_DELETED_OPTIONS.INCLUDE)
 
   let selectedSchool = $derived.by(() => {
     const schoolIdFromUrl = router.getQueryParam('school')
