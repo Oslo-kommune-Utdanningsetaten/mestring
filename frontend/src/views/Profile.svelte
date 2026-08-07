@@ -1,7 +1,7 @@
 <script lang="ts">
   import { usersRetrieve } from '../generated/sdk.gen'
   import { fetchUserData } from '../utils/functions'
-  import { USER_ROLES, MASTERY_BADGE_VARIANTS } from '../utils/constants'
+  import { USER_ROLES, MASTERY_BADGE_VARIANTS, GROUP_VALIDITY_OPTIONS } from '../utils/constants'
   import { dataStore, setCurrentSchool, currentUser } from '../stores/data'
   import type { GroupType, SchoolType } from '../generated/types.gen'
   import { localStorage } from '../stores/localStorage'
@@ -19,10 +19,13 @@
   const preferredMasteryBadgeVariant = localStorage<MASTERY_BADGE_VARIANTS>(
     'preferredMasteryBadgeVariant'
   )
+  const preferredGroupValidity = localStorage<GROUP_VALIDITY_OPTIONS>('preferredGroupValidity')
+
   // Fall back to the default when nothing is stored yet
   const selectedBadgeVariant = $derived(
     $preferredMasteryBadgeVariant || MASTERY_BADGE_VARIANTS.BEEHIVE
   )
+  const selectedGroupValidity = $derived($preferredGroupValidity || GROUP_VALIDITY_OPTIONS.ONLY)
 
   // Options for mastery badge variant selection
   const badgeOptions = [
@@ -30,6 +33,13 @@
     { value: MASTERY_BADGE_VARIANTS.CIRCLE, label: 'Sirkel' },
     { value: MASTERY_BADGE_VARIANTS.TRIANGLE, label: 'Trekant' },
     { value: MASTERY_BADGE_VARIANTS.SMILEY, label: 'Smiley' },
+  ] as const
+
+  // Options for filtering by groups by date validity
+  const groupValidityOptions = [
+    { value: GROUP_VALIDITY_OPTIONS.INCLUDE, label: 'Alt' },
+    { value: GROUP_VALIDITY_OPTIONS.ONLY, label: 'Kun dette skoleåret' },
+    { value: GROUP_VALIDITY_OPTIONS.EXCLUDE, label: 'Ikke i dette skoleåret' },
   ] as const
 
   // For admin viewing another user's profile
@@ -107,6 +117,9 @@
   const handleSelectBadgeVariant = (variant: MASTERY_BADGE_VARIANTS) =>
     localStorage('preferredMasteryBadgeVariant').set(variant)
 
+  const handleSelectGroupValidity = (validity: GROUP_VALIDITY_OPTIONS) =>
+    localStorage('preferredGroupValidity').set(validity)
+
   $effect(() => {
     // Only load data when viewing another user's profile (admin mode)
     if (!isProfileMode && userId) {
@@ -141,7 +154,7 @@
             <div class="text-muted">{user.id}</div>
           </div>
           <div class="col-md-3 mb-2">
-            <strong>Roller ved {$dataStore.currentSchool.displayName.split(' ')[0]}</strong>
+            <strong>Roller ved {$dataStore.currentSchool?.displayName.split(' ')[0]}</strong>
             <div class="text-muted">{userRoles.join(', ')}</div>
           </div>
         </div>
@@ -166,6 +179,7 @@
               onchange={() => handleToggleMasteryBarChart()}
             ></pkt-checkbox>
           </div>
+
           <div class="mb-4">
             <strong>Radial-diagram pr. elev og fag</strong>
             <pkt-checkbox
@@ -178,7 +192,7 @@
             ></pkt-checkbox>
           </div>
 
-          <div class="mb-2">
+          <div class="mb-4">
             <strong>Mestringsmerke</strong>
             {#if $hasUserAccessToPath('/dev/badge-lab')}
               <span class="text-muted">
@@ -194,6 +208,22 @@
                   label={option.label}
                   checked={selectedBadgeVariant === option.value}
                   onchange={() => handleSelectBadgeVariant(option.value)}
+                ></pkt-radiobutton>
+              {/each}
+            </fieldset>
+          </div>
+
+          <div class="mb-2">
+            <strong>Synlige data</strong>
+            <fieldset class="d-flex flex-wrap gap-4 mt-2">
+              <legend class="visually-hidden">Velg type mestringsmerke</legend>
+              {#each groupValidityOptions as option}
+                <pkt-radiobutton
+                  name="preferredMasteryBadgeVariant"
+                  value={option.value}
+                  label={option.label}
+                  checked={selectedGroupValidity === option.value}
+                  onchange={() => handleSelectGroupValidity(option.value)}
                 ></pkt-radiobutton>
               {/each}
             </fieldset>

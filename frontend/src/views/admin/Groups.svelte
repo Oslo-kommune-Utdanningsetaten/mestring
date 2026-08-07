@@ -9,7 +9,12 @@
   import GroupTag from '../../components/GroupTag.svelte'
   import ButtonIcon from '../../components/ButtonIcon.svelte'
   import Link from '../../components/Link.svelte'
-  import { NONE_FIELD_VALUE } from '../../utils/constants'
+  import {
+    NONE_FIELD_VALUE,
+    GROUP_VALIDITY_OPTIONS,
+    GROUP_DELETED_OPTIONS,
+    GROUP_ENABLED_OPTIONS,
+  } from '../../utils/constants'
 
   const router = useTinyRouter()
   let groups = $state<GroupType[]>([])
@@ -30,23 +35,23 @@
 
   // Options for filtering by enabled
   const enabledOptions = [
-    { value: 'include', label: 'All' },
-    { value: 'only', label: 'Enabled' },
-    { value: 'exclude', label: 'Disabled' },
+    { value: GROUP_ENABLED_OPTIONS.INCLUDE, label: 'All' },
+    { value: GROUP_ENABLED_OPTIONS.ONLY, label: 'Enabled' },
+    { value: GROUP_ENABLED_OPTIONS.EXCLUDE, label: 'Disabled' },
   ] as const
 
   // Options for filtering by deleted
   const deletedOptions = [
-    { value: 'include', label: 'All' },
-    { value: 'only', label: 'Deleted' },
-    { value: 'exclude', label: 'Non-deleted' },
+    { value: GROUP_DELETED_OPTIONS.INCLUDE, label: 'All' },
+    { value: GROUP_DELETED_OPTIONS.ONLY, label: 'Deleted' },
+    { value: GROUP_DELETED_OPTIONS.EXCLUDE, label: 'Not deleted' },
   ] as const
 
   // Options for filtering by valid
   const validOptions = [
-    { value: 'include', label: 'All' },
-    { value: 'only', label: 'Valid' },
-    { value: 'exclude', label: 'Invalid' },
+    { value: GROUP_VALIDITY_OPTIONS.INCLUDE, label: 'All' },
+    { value: GROUP_VALIDITY_OPTIONS.ONLY, label: 'Valid' },
+    { value: GROUP_VALIDITY_OPTIONS.EXCLUDE, label: 'Invalid' },
   ] as const
 
   let filteredGroups = $derived(

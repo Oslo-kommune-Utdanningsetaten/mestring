@@ -54,6 +54,27 @@ export enum MASTERY_BADGE_VARIANTS {
   BEEHIVE = 'beehive',
 }
 
+// Options for filtering groups by date validity
+export enum GROUP_VALIDITY_OPTIONS {
+  INCLUDE = 'include',
+  ONLY = 'only',
+  EXCLUDE = 'exclude',
+}
+
+// Options for filtering groups by deleted
+export enum GROUP_DELETED_OPTIONS {
+  INCLUDE = 'include',
+  ONLY = 'only',
+  EXCLUDE = 'exclude',
+}
+
+// Options for filtering groups by enabled
+export enum GROUP_ENABLED_OPTIONS {
+  INCLUDE = 'include',
+  ONLY = 'only',
+  EXCLUDE = 'exclude',
+}
+
 export const STATUS_CATEGORY_NAMES: Record<string, string> = {
   midyear: 'Halvtår',
   endyear: 'Standpunkt',
