@@ -740,3 +740,105 @@ def test_school_admin_observation_access(
 
     resp = client.delete(f"/api/observations/{created_individual_obs_id}/")
     assert resp.status_code == 204
+
+
+@pytest.mark.django_db
+def test_teacher_retains_creator_access_to_observations_after_leaving_school(
+    school, other_school, teacher, student, teacher_role, student_role
+):
+    """
+    A teacher that moves to another school keeps read access to observations
+    they created while at the first school because the access policy grants
+    access to observations the user created.
+    """
+    from mastery.models import Group, Goal, Observation
+
+    client = APIClient()
+
+    # Teacher is a member of a teaching group at school A
+    group_at_school_a = Group.objects.create(
+        feide_id="fc:group:school-a-teaching-group",
+        display_name="Engelsk 7a",
+        type="teaching",
+        school=school,
+        is_enabled=True,
+    )
+    group_at_school_a.add_member(teacher, teacher_role)
+    group_at_school_a.add_member(student, student_role)
+
+    # Teacher creates an observation for a student in that group
+    group_goal = Goal.objects.create(
+        title="Lese 2 bøker",
+        group=group_at_school_a,
+        school=school,
+    )
+    observation = Observation.objects.create(
+        student=student,
+        goal=group_goal,
+        is_visible_to_student=True,
+        created_by=teacher,
+    )
+
+    # Teacher can access the observation while at school A
+    client.force_authenticate(user=teacher)
+    resp = client.get(f"/api/observations/{observation.id}/")
+    assert resp.status_code == 200
+
+    resp = client.get("/api/observations/", {"student": student.id})
+    assert resp.status_code == 200
+    received_ids = {obs["id"] for obs in resp.json()}
+    assert observation.id in received_ids
+
+    # Teacher moves to school B (no longer member of any groups at school A)
+    group_at_school_b = Group.objects.create(
+        feide_id="fc:group:school-b-teaching-group",
+        display_name="Naturfag 8b",
+        type="teaching",
+        school=other_school,
+        is_enabled=True,
+    )
+    group_at_school_b.add_member(teacher, teacher_role)
+
+    # Remove teacher from school A group
+    teacher_user_group = teacher.user_groups.get(
+        group=group_at_school_a, role=teacher_role
+    )
+    teacher_user_group.delete()
+
+    assert not teacher.teacher_groups.filter(school=school).exists()
+
+    # Teacher still has access to the observation they created at school A
+    resp = client.get(f"/api/observations/{observation.id}/")
+    assert resp.status_code == 200
+
+    resp = client.get("/api/observations/", {"student": student.id})
+    assert resp.status_code == 200
+    received_ids = {obs["id"] for obs in resp.json()}
+    assert observation.id in received_ids
+
+    # Teacher can still access observations at school B
+    school_b_student = User.objects.create(
+        name="Student at school B",
+        feide_id="student-b@example.com",
+        email="student-b@example.com",
+    )
+    group_at_school_b.add_member(school_b_student, student_role)
+    school_b_goal = Goal.objects.create(
+        title="Lage modell",
+        group=group_at_school_b,
+        school=other_school,
+    )
+    school_b_observation = Observation.objects.create(
+        student=school_b_student,
+        goal=school_b_goal,
+        is_visible_to_student=True,
+        created_by=teacher,
+    )
+
+    resp = client.get(f"/api/observations/{school_b_observation.id}/")
+    assert resp.status_code == 200
+
+    resp = client.get("/api/observations/", {"student": school_b_student.id})
+    assert resp.status_code == 200
+    received_ids = {obs["id"] for obs in resp.json()}
+    assert school_b_observation.id in received_ids
