@@ -16,15 +16,15 @@
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
+
   const preferredMasteryBadgeVariant = localStorage<MASTERY_BADGE_VARIANTS>(
     'preferredMasteryBadgeVariant'
   )
-  const preferredGroupValidity = localStorage<GROUP_VALIDITY_OPTIONS>('preferredGroupValidity')
-
-  // Fall back to the default when nothing is stored yet
   const selectedBadgeVariant = $derived(
     $preferredMasteryBadgeVariant || MASTERY_BADGE_VARIANTS.BEEHIVE
   )
+
+  const preferredGroupValidity = localStorage<GROUP_VALIDITY_OPTIONS>('preferredGroupValidity')
   const selectedGroupValidity = $derived($preferredGroupValidity || GROUP_VALIDITY_OPTIONS.ONLY)
 
   // Options for mastery badge variant selection
