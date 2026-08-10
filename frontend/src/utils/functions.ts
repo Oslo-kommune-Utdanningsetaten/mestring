@@ -7,11 +7,12 @@ import type {
   UserType,
   StatusType,
   StatusCategoryType,
+  SchoolType,
 } from '../generated/types.gen'
 import { goalsList, userGroupsList, userSchoolsList } from '../generated/sdk.gen'
 import { nb as noLocale } from 'date-fns/locale'
 import { format, formatDistance, formatDistanceToNow } from 'date-fns'
-import { USER_ROLES, GROUP_TYPE_BASIS } from './constants'
+import { USER_ROLES, GROUP_TYPE_BASIS, GROUP_VALIDITY_OPTIONS } from './constants'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
   [key: string]: string
@@ -480,4 +481,27 @@ export const calculateSchoolYearMilestones = (customDate?: Date) => {
     midyearAt: `${schoolStartYear + 1}-01-15`,
     endAt: `${schoolStartYear + 1}-06-30`,
   }
+}
+
+export const getAllSchoolYears = (asOfDate?: Date) => {
+  const firstYearStart = 2025 // Mestring was launched in 2025, so no older data exists
+  const currentYearStart = Number(calculateSchoolYearMilestones(asOfDate).startAt.split('-')[0])
+  const schoolYears: string[] = []
+  for (let year = firstYearStart; year <= currentYearStart; year++) {
+    schoolYears.push(`${year}-${year + 1}`)
+  }
+  return schoolYears
+}
+
+// Assuming schoolYears is an ascending array of strings like "2025-2026"
+// Return createdBefore and createdAfter params
+export const inferCreatedParams = (schoolYears: string[] = []) => {
+  if (!schoolYears?.length) {
+    return {}
+  }
+  const firstYear = (schoolYears[0] as string).split('-')[0]
+  const lastYear = (schoolYears[schoolYears.length - 1] as string).split('-')[0]
+  const { startAt: createdAfter } = calculateSchoolYearMilestones(new Date(`${firstYear}-08-15`))
+  const { endAt: createdBefore } = calculateSchoolYearMilestones(new Date(`${lastYear}-08-15`))
+  return { createdAfter, createdBefore }
 }

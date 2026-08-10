@@ -12,7 +12,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
+# Define common query parameters for filtering by creation date
 CREATED_RANGE_PARAMETERS = [
     OpenApiParameter(
         name='created_before',
@@ -30,6 +30,7 @@ CREATED_RANGE_PARAMETERS = [
     ),
 ]
 
+# Define common query parameter for filtering by soft-deleted status
 DELETED_FILTER_PARAMETER = OpenApiParameter(
     name='deleted',
     description='Filter by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',

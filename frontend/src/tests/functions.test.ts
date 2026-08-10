@@ -1,5 +1,10 @@
 import { describe, it, expect, assert } from 'vitest'
-import { inferMastery, aggregateMasterys } from '../utils/functions'
+import {
+  inferMastery,
+  aggregateMasterys,
+  getAllSchoolYears,
+  inferCreatedParams,
+} from '../utils/functions'
 import type { ObservationType } from '../generated/types.gen'
 import type { GoalDecorated } from '../types/models'
 
@@ -197,6 +202,66 @@ describe('aggregateMasterys', () => {
     const result = aggregateMasterys(goals)
     assert(result !== null)
     expect(result.trend).toBe(0)
+  })
+})
+
+// getAllSchoolYears
+describe('getAllSchoolYears', () => {
+  it('returns all school years from 2025 up to the current school year (autumn)', () => {
+    const result = getAllSchoolYears(new Date('2026-08-10'))
+    expect(result).toEqual(['2025-2026', '2026-2027'])
+  })
+
+  it('returns only the 2025 school year when inside the 2025-2026 school year', () => {
+    const result = getAllSchoolYears(new Date('2025-09-01'))
+    expect(result).toEqual(['2025-2026'])
+  })
+
+  it('rolls over to the new school year in August', () => {
+    const resultBefore = getAllSchoolYears(new Date('2026-07-31'))
+    const resultAfter = getAllSchoolYears(new Date('2026-08-15'))
+    expect(resultBefore).toEqual(['2025-2026'])
+    expect(resultAfter).toEqual(['2025-2026', '2026-2027'])
+  })
+
+  it('returns just 2025-2026 when given the first possible date', () => {
+    const result = getAllSchoolYears(new Date('2025-08-15'))
+    expect(result).toEqual(['2025-2026'])
+  })
+})
+
+// inferCreatedParams
+describe('inferCreatedParams', () => {
+  it('returns an empty object when given an empty array', () => {
+    expect(inferCreatedParams([])).toEqual({})
+  })
+
+  it('returns default values when called with no argument', () => {
+    expect(inferCreatedParams()).toEqual({})
+  })
+
+  it('returns start of earliest and end of latest year', () => {
+    const result = inferCreatedParams(['2025-2026'])
+    expect(result).toEqual({
+      createdAfter: '2025-08-15',
+      createdBefore: '2026-06-30',
+    })
+  })
+
+  it('returns start of earliest and end of latest year when given multiple years', () => {
+    const result = inferCreatedParams(['2025-2026', '2026-2027'])
+    expect(result).toEqual({
+      createdAfter: '2025-08-15',
+      createdBefore: '2027-06-30',
+    })
+  })
+
+  it('works with years not starting at 2025', () => {
+    const result = inferCreatedParams(['2027-2028', '2028-2029'])
+    expect(result).toEqual({
+      createdAfter: '2027-08-15',
+      createdBefore: '2029-06-30',
+    })
   })
 })
 
