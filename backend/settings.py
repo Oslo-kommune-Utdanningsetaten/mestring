@@ -121,6 +121,9 @@ STATIC_URL = 'static/'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Ignore Django's 30-char limit on index names, since PostgreSQL allows longer names
+SILENCED_SYSTEM_CHECKS = ['models.E034']
+
 # DRF stuff
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (

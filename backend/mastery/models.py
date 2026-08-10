@@ -27,11 +27,17 @@ class BaseModel(models.Model):
 
     class Meta:
         abstract = True
+        indexes = [
+            models.Index(fields=['created_at'], name='%(class)s_created_at_idx'),
+            models.Index(fields=['updated_at'], name='%(class)s_updated_at_idx'),
+            models.Index(fields=['deleted_at'], name='%(class)s_deleted_at_null_idx',
+                         condition=models.Q(deleted_at__isnull=True))
+        ]
 
 
 class School(BaseModel):
     """
-    School matches a Feide school 1:1 
+    School matches a Feide school 1:1
     https://docs.feide.no/reference/apis/groups_api/group_types/pse_school.html
     """
     feide_id = models.CharField(max_length=200, unique=True)
@@ -358,10 +364,12 @@ class Observation(BaseModel):
     """
     An Observation represents an observation of a student, performed by a teacher or student. Only teachers, inspectors and admins can access an observation if is_visible_to_student is False.
     """
-    goal = models.ForeignKey(Goal, on_delete=models.CASCADE, null=False, related_name='observations')
+    goal = models.ForeignKey(Goal, on_delete=models.CASCADE,
+                             null=False, related_name='observations')
     student = models.ForeignKey(User, on_delete=models.CASCADE, null=False,
                                 related_name='observations_received')
-    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, related_name='observations')
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL,
+                                null=True, related_name='observations')
     mastery_value = models.IntegerField(null=True)
     mastery_description = models.TextField(null=True)
     feedforward = models.TextField(null=True)
