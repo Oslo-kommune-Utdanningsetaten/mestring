@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { GoalCreateType, UserType, SubjectType, GroupType } from '../generated/types.gen'
-  import type { GoalDecorated } from '../types/models'
   import {
     usersRetrieve,
     goalsCreate,
@@ -8,7 +7,8 @@
     groupsList,
     subjectsList,
   } from '../generated/sdk.gen'
-  import { subjectsInCommon } from '../utils/functions'
+  import type { GoalDecorated } from '../types/models'
+  import { subjectsInCommon, getPreferredCreatedParams } from '../utils/functions'
   import { SUBJECTS_ALLOWED_CUSTOM, GROUP_VALIDITY_OPTIONS } from '../utils/constants'
   import { hasUserAccessToFeature } from '../stores/access'
   import { dataStore } from '../stores/data'
@@ -79,7 +79,9 @@
   }
 
   const countStudentGoals = async () => {
-    const result = await goalsList({ query: { student: studentId, school: currentSchool.id } })
+    const result = await goalsList({
+      query: { student: studentId, school: currentSchool.id, ...getPreferredCreatedParams() },
+    })
     studentGoalsCount = result.data?.length
   }
 

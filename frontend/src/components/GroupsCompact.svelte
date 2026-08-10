@@ -1,9 +1,9 @@
 <script lang="ts">
   import { dataStore } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
+  import { usersList } from '../generated/sdk.gen'
   import { hasUserAccessToPath } from '../stores/access'
   import { USER_ROLES } from '../utils/constants'
-  import { usersList } from '../generated/sdk.gen'
   import type { GroupType, UserType } from '../generated/types.gen'
   import GroupTag from './GroupTag.svelte'
   import UserTag from './UserTag.svelte'
@@ -16,12 +16,16 @@
 
   const fetchAllmembersByGroupId = async () => {
     groups.forEach(async group => {
+      const queryParams = {
+        groups: group.id,
+        school: currentSchool.id,
+      }
       try {
         const teachersResult = await usersList({
-          query: { groups: group.id, school: currentSchool.id, roles: USER_ROLES.TEACHER },
+          query: { ...queryParams, roles: USER_ROLES.TEACHER },
         })
         const studentsResult = await usersList({
-          query: { groups: group.id, school: currentSchool.id, roles: USER_ROLES.STUDENT },
+          query: { ...queryParams, roles: USER_ROLES.STUDENT },
         })
         const teachers = teachersResult.data || []
         const students = studentsResult.data || []

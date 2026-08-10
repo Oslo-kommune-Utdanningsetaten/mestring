@@ -7,12 +7,12 @@ import type {
   UserType,
   StatusType,
   StatusCategoryType,
-  SchoolType,
 } from '../generated/types.gen'
 import { goalsList, userGroupsList, userSchoolsList } from '../generated/sdk.gen'
 import { nb as noLocale } from 'date-fns/locale'
 import { format, formatDistance, formatDistanceToNow } from 'date-fns'
-import { USER_ROLES, GROUP_TYPE_BASIS, GROUP_VALIDITY_OPTIONS } from './constants'
+import { USER_ROLES, GROUP_TYPE_BASIS } from './constants'
+import { localStorage } from '../stores/localStorage'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
   [key: string]: string
@@ -110,6 +110,7 @@ export const fetchGoalsForSubjectAndStudent = async (
         subject: subjectId,
         includeObservations: true,
         school: schoolId,
+        ...getPreferredCreatedParams(),
       },
     })
     const goals = goalsResult.data || []
@@ -493,15 +494,21 @@ export const getAllSchoolYears = (asOfDate?: Date) => {
   return schoolYears
 }
 
-// Assuming schoolYears is an ascending array of strings like "2025-2026"
+// Assuming schoolYear is a string like "2025-2026" or "2025-2027"
 // Return createdBefore and createdAfter params
-export const inferCreatedParams = (schoolYears: string[] = []) => {
-  if (!schoolYears?.length) {
+export const inferCreatedParams = (yearRange: string) => {
+  if (yearRange === 'all') {
     return {}
   }
-  const firstYear = (schoolYears[0] as string).split('-')[0]
-  const lastYear = (schoolYears[schoolYears.length - 1] as string).split('-')[0]
+  const firstYear = Number(yearRange.split('-')[0])
+  const lastYear = Number(yearRange.split('-')[1])
   const { startAt: createdAfter } = calculateSchoolYearMilestones(new Date(`${firstYear}-08-15`))
-  const { endAt: createdBefore } = calculateSchoolYearMilestones(new Date(`${lastYear}-08-15`))
+  const { endAt: createdBefore } = calculateSchoolYearMilestones(new Date(`${lastYear - 1}-08-15`))
   return { createdAfter, createdBefore }
+}
+
+export const getPreferredCreatedParams = () => {
+  let preferredSchoolYear: any =
+    localStorage<string>('preferredSchoolYear').get() || getAllSchoolYears()[-1]
+  return inferCreatedParams(preferredSchoolYear)
 }

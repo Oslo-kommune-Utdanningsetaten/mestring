@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { UserType, SubjectType, StatusType } from '../generated/types.gen'
-  import { dataStore } from '../stores/data'
   import { statusList } from '../generated/sdk.gen'
+  import { dataStore } from '../stores/data'
+  import { getSubjectName, getPreferredCreatedParams } from '../utils/functions'
   import MasterySchemaLevel from './MasterySchemaLevel.svelte'
   import UserNameLink from './UserNameLink.svelte'
-  import { getSubjectName } from '../utils/functions'
 
   let {
     students,
@@ -59,6 +59,7 @@
       students: students.map(s => s.id).join(','),
       school: $dataStore.currentSchool?.id,
       categoryName: category,
+      ...getPreferredCreatedParams(),
     }
     const result = await statusList({ query })
     const statuses = result.data || []

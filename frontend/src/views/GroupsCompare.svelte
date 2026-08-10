@@ -1,10 +1,11 @@
 <script lang="ts">
   import { useTinyRouter } from 'svelte-tiny-router'
-  import { dataStore } from '../stores/data'
   import { observationsList } from '../generated/sdk.gen'
   import type { GroupType, ObservationType } from '../generated/types.gen'
-  import GroupRow from '../components/GroupRow.svelte'
+  import { dataStore } from '../stores/data'
+  import { getPreferredCreatedParams } from '../utils/functions'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
+  import GroupRow from '../components/GroupRow.svelte'
   import GroupsCompareSelect from '../components/GroupsCompareSelect.svelte'
 
   const router = useTinyRouter()
@@ -31,7 +32,7 @@
       await Promise.all(
         groups.map(async (group: GroupType) => {
           const observationsResult = await observationsList({
-            query: { group: group.id, school: currentSchool.id },
+            query: { group: group.id, school: currentSchool.id, ...getPreferredCreatedParams() },
           })
           // All observations for this group, accross subjects
           const observations = observationsResult.data || []

@@ -2,6 +2,7 @@
   import type { StatusType, SubjectType, UserType } from '../generated/types.gen'
   import { statusList } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
+  import { getPreferredCreatedParams } from '../utils/functions'
   import Link from './Link.svelte'
 
   let { student, subject } = $props<{
@@ -19,6 +20,7 @@
         students: student.id,
         subject: subject ? subject.id : '',
         school: $dataStore.currentSchool?.id,
+        ...getPreferredCreatedParams(),
       }
       const result = await statusList({ query })
       statuses = (result.data || []).sort(

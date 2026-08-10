@@ -16,14 +16,14 @@
     GroupType,
   } from '../generated/types.gen'
   import type { UserDecorated } from '../types/models.d.ts'
+  import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
   import { dataStore } from '../stores/data'
   import { addAlert } from '../stores/alerts'
   import { USER_ROLES } from '../utils/constants'
-  import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
-  import ButtonMini from './ButtonMini.svelte'
-
+  import { getPreferredCreatedParams } from '../utils/functions'
   import { GROUP_VALIDITY_OPTIONS } from '../utils/constants'
   import { localStorage } from '../stores/localStorage'
+  import ButtonMini from './ButtonMini.svelte'
 
   const preferredGroupValidity = localStorage<GROUP_VALIDITY_OPTIONS>('preferredGroupValidity')
   const groupValidity = $derived($preferredGroupValidity || GROUP_VALIDITY_OPTIONS.ONLY)
@@ -76,7 +76,12 @@
   const fetchSchoolGroups = async () => {
     try {
       const result = await groupsList({
-        query: { school: school.id, enabled: 'only', valid: groupValidity },
+        query: {
+          school: school.id,
+          enabled: 'only',
+          valid: groupValidity,
+          ...getPreferredCreatedParams(),
+        },
       })
       schoolGroups = result.data || []
     } catch (e) {

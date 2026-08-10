@@ -18,6 +18,7 @@
     calculateSchoolYearMilestones,
     generateStatusTitle,
     getDateSpanForStatusCategory,
+    getPreferredCreatedParams,
   } from '../utils/functions'
   import { dataStore } from '../stores/data'
   import { addAlert } from '../stores/alerts'
@@ -92,6 +93,7 @@
           subject: subject.id,
           school: schoolId,
           categoryName: statusCategoryName,
+          ...getPreferredCreatedParams(),
         },
       })
       const allStatuses = statusResult.data || []
@@ -144,6 +146,7 @@
         subject: subject.id,
         school: $dataStore.currentSchool?.id,
         categoryName: statusCategoryName,
+        ...getPreferredCreatedParams(),
       },
     })
     const studenStatuses = statusResult.data || []

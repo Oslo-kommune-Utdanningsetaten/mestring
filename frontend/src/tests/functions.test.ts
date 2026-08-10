@@ -232,36 +232,30 @@ describe('getAllSchoolYears', () => {
 
 // inferCreatedParams
 describe('inferCreatedParams', () => {
-  it('returns an empty object when given an empty array', () => {
-    expect(inferCreatedParams([])).toEqual({})
-  })
-
-  it('returns default values when called with no argument', () => {
-    expect(inferCreatedParams()).toEqual({})
-  })
-
   it('returns start of earliest and end of latest year', () => {
-    const result = inferCreatedParams(['2025-2026'])
+    const result = inferCreatedParams('2025-2026')
     expect(result).toEqual({
       createdAfter: '2025-08-15',
       createdBefore: '2026-06-30',
     })
+    const result2 = inferCreatedParams('2026-2027')
+    expect(result2).toEqual({
+      createdAfter: '2026-08-15',
+      createdBefore: '2027-06-30',
+    })
   })
 
-  it('returns start of earliest and end of latest year when given multiple years', () => {
-    const result = inferCreatedParams(['2025-2026', '2026-2027'])
+  it('returns a longer range if params require it', () => {
+    const result = inferCreatedParams('2025-2027')
     expect(result).toEqual({
       createdAfter: '2025-08-15',
       createdBefore: '2027-06-30',
     })
   })
 
-  it('works with years not starting at 2025', () => {
-    const result = inferCreatedParams(['2027-2028', '2028-2029'])
-    expect(result).toEqual({
-      createdAfter: '2027-08-15',
-      createdBefore: '2029-06-30',
-    })
+  it('returns an empty object when give the "all" param', () => {
+    const result = inferCreatedParams('all')
+    expect(result).toEqual({})
   })
 })
 

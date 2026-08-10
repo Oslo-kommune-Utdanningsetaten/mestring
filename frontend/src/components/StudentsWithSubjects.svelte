@@ -1,13 +1,14 @@
 <script lang="ts">
+  import { goalsList } from '../generated/sdk.gen'
   import type { UserType, SubjectType, GroupType } from '../generated/types.gen'
   import type { MasteryState } from '../types/models'
   import { dataStore } from '../stores/data'
-  import { goalsList } from '../generated/sdk.gen'
   import {
     goalsWithCalculatedMasteryBySubjectId,
     countObservationsBySubjectId,
     aggregateMasterys,
     getSubjectName,
+    getPreferredCreatedParams,
   } from '../utils/functions'
   import { localStorage } from '../stores/localStorage'
   import { MISSING_REASON_NO_OBSERVATIONS, MISSING_REASON_NO_GOALS } from '../utils/constants'
@@ -87,6 +88,7 @@
             student: student.id,
             includeObservations: true,
             school: $dataStore.currentSchool?.id,
+            ...getPreferredCreatedParams(),
           },
         })
         const studentGoals = result.data || []

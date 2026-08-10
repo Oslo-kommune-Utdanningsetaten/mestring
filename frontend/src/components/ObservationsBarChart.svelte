@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getISOWeek } from 'date-fns'
   import type { ObservationType } from '../generated'
+  import { getPreferredCreatedParams } from '../utils/functions'
   import { observationsList } from '../generated/sdk.gen'
   import BarChart from './BarChart.svelte'
 
@@ -53,6 +54,7 @@
   const fetchObservations = async () => {
     const query: any = {
       from: fromDate,
+      ...getPreferredCreatedParams(),
     }
     if (groupId) {
       query['group'] = groupId

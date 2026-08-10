@@ -1,10 +1,11 @@
 <script lang="ts">
   import type { UserType, GroupType, SubjectType } from '../generated/types.gen'
-  import { dataStore } from '../stores/data'
   import { groupsList } from '../generated/sdk.gen'
-  import StudentSubject from './StudentSubject.svelte'
+  import { dataStore } from '../stores/data'
+  import { getPreferredCreatedParams } from '../utils/functions'
   import { GROUP_VALIDITY_OPTIONS } from '../utils/constants'
   import { localStorage } from '../stores/localStorage'
+  import StudentSubject from './StudentSubject.svelte'
 
   const preferredGroupValidity = localStorage<GROUP_VALIDITY_OPTIONS>('preferredGroupValidity')
   const groupValidity = $derived($preferredGroupValidity || GROUP_VALIDITY_OPTIONS.ONLY)
@@ -22,7 +23,12 @@
     isLoading = true
     try {
       const groupsResult = await groupsList({
-        query: { school: currentSchool.id, user: student.id, valid: groupValidity },
+        query: {
+          school: currentSchool.id,
+          user: student.id,
+          valid: groupValidity,
+          ...getPreferredCreatedParams(),
+        },
       })
       groups = (groupsResult.data || []).filter(group => group.type === 'teaching')
       studentSubjects = subjects.filter(subject =>

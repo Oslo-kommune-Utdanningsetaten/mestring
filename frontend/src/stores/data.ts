@@ -9,7 +9,7 @@ import {
 } from '../generated/sdk.gen'
 import type { SchoolType, MasterySchemaType } from '../generated/types.gen'
 import { localStorage } from '../stores/localStorage'
-import { fetchUserData } from '../utils/functions'
+import { fetchUserData, getPreferredCreatedParams } from '../utils/functions'
 import {
   SUBJECTS_ALLOWED_ALL,
   SUBJECTS_ALLOWED_CUSTOM,

@@ -8,7 +8,7 @@
   import SubjectTag from './SubjectTag.svelte'
   import Link from './Link.svelte'
   import { USER_ROLES } from '../utils/constants'
-  import { isNumber } from '../utils/functions'
+  import { isNumber, getPreferredCreatedParams } from '../utils/functions'
 
   const limit = 10
   let { masterySchemas, currentSchool, currentUser } = $derived($dataStore)
@@ -26,7 +26,11 @@
 
   const fetchObservations = async () => {
     try {
-      const query: Record<string, any> = { limit, school: currentSchool?.id }
+      const query: Record<string, any> = {
+        limit,
+        school: currentSchool?.id,
+        ...getPreferredCreatedParams(),
+      }
       if (viewMode === 'teacher') {
         query.created_by = currentUser?.id
       } else if (viewMode === 'student') {
