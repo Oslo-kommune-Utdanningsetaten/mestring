@@ -797,6 +797,14 @@ export type DataMaintenanceTasksListData = {
     path?: never;
     query?: {
         /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
+        /**
          * Filter tasks by status
          */
         status?: string;
@@ -1081,6 +1089,14 @@ export type GoalsListData = {
     path?: never;
     query: {
         /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
+        /**
          * Filter goals by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
         deleted?: 'exclude' | 'include' | 'only';
@@ -1210,6 +1226,14 @@ export type GroupsListData = {
     body?: never;
     path?: never;
     query: {
+        /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
         /**
          * Filter groups by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
@@ -1406,6 +1430,14 @@ export type MasterySchemasListData = {
     path?: never;
     query?: {
         /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
+        /**
          * Filter mastery schemas by School ID
          */
         school?: string;
@@ -1530,6 +1562,14 @@ export type ObservationsListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
         /**
          * Filter observations by creator.
          */
@@ -1686,6 +1726,14 @@ export type RolesListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
         /**
          * Filter roles by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
@@ -1903,6 +1951,14 @@ export type StatusListData = {
          */
         categoryName?: string;
         /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
+        /**
          * Filter statuses by users who have created or updated it.
          */
         editor?: string;
@@ -1949,6 +2005,14 @@ export type StatusCategoriesListData = {
     body?: never;
     path?: never;
     query: {
+        /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
         /**
          * Filter statuses by name.
          */
@@ -2135,6 +2199,14 @@ export type SubjectsListData = {
     path?: never;
     query: {
         /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
+        /**
          * Filter subjects by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
         deleted?: 'exclude' | 'include' | 'only';
@@ -2252,6 +2324,14 @@ export type UserGroupsListData = {
     body?: never;
     path?: never;
     query: {
+        /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
         /**
          * Filter user_goups by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
@@ -2375,6 +2455,14 @@ export type UserSchoolsListData = {
     path?: never;
     query: {
         /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
+        /**
          * Filter user_schools by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
         deleted?: 'exclude' | 'include' | 'only';
@@ -2492,6 +2580,14 @@ export type UsersListData = {
     body?: never;
     path?: never;
     query: {
+        /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
         /**
          * Filter users by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */

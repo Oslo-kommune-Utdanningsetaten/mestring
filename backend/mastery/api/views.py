@@ -13,6 +13,24 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+CREATED_RANGE_PARAMETERS = [
+    OpenApiParameter(
+        name='created_before',
+        description='Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00',
+        required=False,
+        type={'type': 'string'},
+        location=OpenApiParameter.QUERY
+    ),
+    OpenApiParameter(
+        name='created_after',
+        description='Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00',
+        required=False,
+        type={'type': 'string'},
+        location=OpenApiParameter.QUERY
+    ),
+]
+
+
 def apply_deleted_filter(query_params, qs):
     deleted_param, _ = get_request_param(query_params, 'deleted')
     if deleted_param == 'only':
@@ -23,6 +41,31 @@ def apply_deleted_filter(query_params, qs):
         return qs
     # Default: non-deleted
     return qs.filter(deleted_at__isnull=True)
+
+
+def apply_created_filter(query_params, qs):
+    created_after_param, created_after_set = get_request_param(query_params, 'created_after')
+    created_before_param, created_before_set = get_request_param(query_params, 'created_before')
+
+    if created_after_set:
+        try:
+            created_after_dt = datetime.fromisoformat(created_after_param)
+            qs = qs.filter(created_at__gt=created_after_dt)
+        except ValueError:
+            raise ValidationError(
+                {'error': 'invalid-parameter',
+                 'message': 'The "created_after" parameter must be a valid ISO 8601 datetime string.'})
+
+    if created_before_set:
+        try:
+            created_before_dt = datetime.fromisoformat(created_before_param)
+            qs = qs.filter(created_at__lt=created_before_dt)
+        except ValueError:
+            raise ValidationError(
+                {'error': 'invalid-parameter',
+                 'message': 'The "created_before" parameter must be a valid ISO 8601 datetime string.'})
+
+    return qs
 
 
 def apply_valid_group_filter(query_params, qs):
@@ -86,12 +129,15 @@ class SchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
     access_policy = SchoolAccessPolicy
 
     def get_queryset(self):
-        return self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = apply_created_filter(self.request.query_params, qs)
+        return qs
 
 
 @extend_schema_view(
     list=extend_schema(
         parameters=[
+            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='school',
                 description='Filter users by School ID (users in any group of that school)',
@@ -146,6 +192,7 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('name')
 
         qs = apply_deleted_filter(self.request.query_params, qs)
+        qs = apply_created_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
@@ -209,6 +256,7 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
 @extend_schema_view(
     list=extend_schema(
         parameters=[
+            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='school',
                 description='School ID',
@@ -253,6 +301,7 @@ class UserSchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mo
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
         qs = apply_deleted_filter(self.request.query_params, qs)
+        qs = apply_created_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
@@ -276,6 +325,7 @@ class UserSchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mo
 @extend_schema_view(
     list=extend_schema(
         parameters=[
+            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='school',
                 description='School ID',
@@ -327,6 +377,7 @@ class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
         qs = apply_deleted_filter(self.request.query_params, qs)
+        qs = apply_created_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
@@ -353,6 +404,7 @@ class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
 @extend_schema_view(
     list=extend_schema(
         parameters=[
+            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='ids',
                 description='Filter by ids (comma-separated list of group ids, e.g., xyx,123)',
@@ -427,6 +479,7 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('display_name')
         qs = apply_deleted_filter(self.request.query_params, qs)
+        qs = apply_created_filter(self.request.query_params, qs)
         qs = apply_valid_group_filter(self.request.query_params, qs)
 
         if self.action == 'list':
@@ -498,6 +551,7 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
 @extend_schema_view(
     list=extend_schema(
         parameters=[
+            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='school',
                 description='All subjects belonging to school, either directly via owned_by_school or via groups belonging to school',
@@ -537,6 +591,7 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('display_name')
         qs = apply_deleted_filter(self.request.query_params, qs)
+        qs = apply_created_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
@@ -591,6 +646,7 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
 @extend_schema_view(
     list=extend_schema(
         parameters=[
+            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='school',
                 description='Filter goals by school',
@@ -647,6 +703,7 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('sort_order')
         qs = apply_deleted_filter(self.request.query_params, qs)
+        qs = apply_created_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
@@ -715,6 +772,7 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
 @extend_schema_view(
     list=extend_schema(
         parameters=[
+            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='deleted',
                 description='Filter roles by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
@@ -733,12 +791,14 @@ class RoleViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('name')
         qs = apply_deleted_filter(self.request.query_params, qs)
+        qs = apply_created_filter(self.request.query_params, qs)
         return qs
 
 
 @extend_schema_view(
     list=extend_schema(
         parameters=[
+            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='school',
                 description='Filter mastery schemas by School ID',
@@ -756,6 +816,7 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
 
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('title')
+        qs = apply_created_filter(self.request.query_params, qs)
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
             if school_param:
@@ -766,6 +827,7 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
 @extend_schema_view(
     list=extend_schema(
         parameters=[
+            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='student',
                 description='Filter observations by the observed student.',
@@ -847,6 +909,7 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('-observed_at')
         qs = apply_deleted_filter(self.request.query_params, qs)
+        qs = apply_created_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             student_param, _ = get_request_param(self.request.query_params, 'student')
@@ -921,6 +984,7 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
 @extend_schema_view(
     list=extend_schema(
         parameters=[
+            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='status',
                 description='Filter tasks by status',
@@ -938,6 +1002,7 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
 
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = apply_created_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             statuts_param, _ = get_request_param(self.request.query_params, 'status')
@@ -952,6 +1017,7 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
 @extend_schema_view(
     list=extend_schema(
         parameters=[
+            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='students',
                 description='Filter statuses by students.',
@@ -1005,6 +1071,7 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
         qs = apply_deleted_filter(self.request.query_params, qs)
+        qs = apply_created_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             students_param, _ = get_request_param(self.request.query_params, 'students')
@@ -1051,6 +1118,7 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
 @extend_schema_view(
     list=extend_schema(
         parameters=[
+            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='school',
                 description='Filter statuses by school.',
@@ -1076,6 +1144,7 @@ class StatusCategoryViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewset
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
         qs = apply_deleted_filter(self.request.query_params, qs)
+        qs = apply_created_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
