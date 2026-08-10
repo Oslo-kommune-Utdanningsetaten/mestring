@@ -1097,7 +1097,7 @@ export type GoalsListData = {
          */
         createdBefore?: string;
         /**
-         * Filter goals by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
+         * Filter by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
         deleted?: 'exclude' | 'include' | 'only';
         /**
@@ -1235,7 +1235,7 @@ export type GroupsListData = {
          */
         createdBefore?: string;
         /**
-         * Filter groups by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
+         * Filter by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
         deleted?: 'exclude' | 'include' | 'only';
         /**
@@ -1575,7 +1575,7 @@ export type ObservationsListData = {
          */
         createdBy?: string;
         /**
-         * Filter observations by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
+         * Filter by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
         deleted?: 'exclude' | 'include' | 'only';
         /**
@@ -1735,7 +1735,7 @@ export type RolesListData = {
          */
         createdBefore?: string;
         /**
-         * Filter roles by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
+         * Filter by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
         deleted?: 'exclude' | 'include' | 'only';
     };
@@ -2014,6 +2014,10 @@ export type StatusCategoriesListData = {
          */
         createdBefore?: string;
         /**
+         * Filter by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
+         */
+        deleted?: 'exclude' | 'include' | 'only';
+        /**
          * Filter statuses by name.
          */
         name?: string;
@@ -2207,7 +2211,7 @@ export type SubjectsListData = {
          */
         createdBefore?: string;
         /**
-         * Filter subjects by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
+         * Filter by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
         deleted?: 'exclude' | 'include' | 'only';
         /**
@@ -2333,7 +2337,7 @@ export type UserGroupsListData = {
          */
         createdBefore?: string;
         /**
-         * Filter user_goups by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
+         * Filter by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
         deleted?: 'exclude' | 'include' | 'only';
         /**
@@ -2463,7 +2467,7 @@ export type UserSchoolsListData = {
          */
         createdBefore?: string;
         /**
-         * Filter user_schools by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
+         * Filter by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
         deleted?: 'exclude' | 'include' | 'only';
         /**
@@ -2589,7 +2593,7 @@ export type UsersListData = {
          */
         createdBefore?: string;
         /**
-         * Filter users by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
+         * Filter by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
          */
         deleted?: 'exclude' | 'include' | 'only';
         /**

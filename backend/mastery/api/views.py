@@ -30,6 +30,12 @@ CREATED_RANGE_PARAMETERS = [
     ),
 ]
 
+DELETED_FILTER_PARAMETER = OpenApiParameter(
+    name='deleted',
+    description='Filter by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
+    required=False, type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
+    location=OpenApiParameter.QUERY)
+
 
 def apply_deleted_filter(query_params, qs):
     deleted_param, _ = get_request_param(query_params, 'deleted')
@@ -137,7 +143,6 @@ class SchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
 @extend_schema_view(
     list=extend_schema(
         parameters=[
-            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='school',
                 description='Filter users by School ID (users in any group of that school)',
@@ -173,13 +178,8 @@ class SchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
-            OpenApiParameter(
-                name='deleted',
-                description='Filter users by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
-                required=False,
-                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
-                location=OpenApiParameter.QUERY
-            ),
+            DELETED_FILTER_PARAMETER,
+            *CREATED_RANGE_PARAMETERS,
         ]
     )
 )
@@ -256,7 +256,6 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
 @extend_schema_view(
     list=extend_schema(
         parameters=[
-            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='school',
                 description='School ID',
@@ -278,13 +277,8 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
-            OpenApiParameter(
-                name='deleted',
-                description='Filter user_schools by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
-                required=False,
-                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
-                location=OpenApiParameter.QUERY
-            ),
+            DELETED_FILTER_PARAMETER,
+            *CREATED_RANGE_PARAMETERS,
         ]
     )
 )
@@ -325,7 +319,6 @@ class UserSchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mo
 @extend_schema_view(
     list=extend_schema(
         parameters=[
-            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='school',
                 description='School ID',
@@ -354,13 +347,8 @@ class UserSchoolViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mo
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
-            OpenApiParameter(
-                name='deleted',
-                description='Filter user_goups by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
-                required=False,
-                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
-                location=OpenApiParameter.QUERY
-            ),
+            DELETED_FILTER_PARAMETER,
+            *CREATED_RANGE_PARAMETERS,
         ]
     )
 )
@@ -404,7 +392,6 @@ class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
 @extend_schema_view(
     list=extend_schema(
         parameters=[
-            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='ids',
                 description='Filter by ids (comma-separated list of group ids, e.g., xyx,123)',
@@ -455,19 +442,14 @@ class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='deleted',
-                description='Filter groups by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
-                required=False,
-                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
-                location=OpenApiParameter.QUERY
-            ),
-            OpenApiParameter(
                 name='valid',
                 description='Filter groups by wether they are valid by date: "only" (default, only valid), "include" (both valid and non-valid), or "exclude" (only non-valid)',
                 required=False,
                 type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
+            DELETED_FILTER_PARAMETER,
+            *CREATED_RANGE_PARAMETERS,
         ]
     )
 )
@@ -551,7 +533,6 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
 @extend_schema_view(
     list=extend_schema(
         parameters=[
-            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='school',
                 description='All subjects belonging to school, either directly via owned_by_school or via groups belonging to school',
@@ -573,13 +554,8 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
                 type={'type': 'boolean'},
                 location=OpenApiParameter.QUERY
             ),
-            OpenApiParameter(
-                name='deleted',
-                description='Filter subjects by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
-                required=False,
-                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
-                location=OpenApiParameter.QUERY
-            ),
+            DELETED_FILTER_PARAMETER,
+            *CREATED_RANGE_PARAMETERS,
         ]
     )
 )
@@ -646,7 +622,6 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
 @extend_schema_view(
     list=extend_schema(
         parameters=[
-            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='school',
                 description='Filter goals by school',
@@ -676,19 +651,14 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='deleted',
-                description='Filter goals by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
-                required=False,
-                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
-                location=OpenApiParameter.QUERY
-            ),
-            OpenApiParameter(
                 name='include_observations',
                 description='Include related observations in the response',
                 required=False,
                 type={'type': 'boolean'},
                 location=OpenApiParameter.QUERY
             ),
+            DELETED_FILTER_PARAMETER,
+            *CREATED_RANGE_PARAMETERS,
         ]
     )
 )
@@ -772,14 +742,8 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
 @extend_schema_view(
     list=extend_schema(
         parameters=[
+            DELETED_FILTER_PARAMETER,
             *CREATED_RANGE_PARAMETERS,
-            OpenApiParameter(
-                name='deleted',
-                description='Filter roles by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
-                required=False,
-                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
-                location=OpenApiParameter.QUERY
-            ),
         ]
     )
 )
@@ -798,7 +762,6 @@ class RoleViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
 @extend_schema_view(
     list=extend_schema(
         parameters=[
-            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='school',
                 description='Filter mastery schemas by School ID',
@@ -806,6 +769,7 @@ class RoleViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
+            *CREATED_RANGE_PARAMETERS,
         ]
     )
 )
@@ -827,7 +791,6 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
 @extend_schema_view(
     list=extend_schema(
         parameters=[
-            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='student',
                 description='Filter observations by the observed student.',
@@ -885,19 +848,14 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='deleted',
-                description='Filter observations by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)',
-                required=False,
-                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
-                location=OpenApiParameter.QUERY
-            ),
-            OpenApiParameter(
                 name='limit',
                 description='The maximum number of observations to return. Default is no limit.',
                 required=False,
                 type={'type': 'number'},
                 location=OpenApiParameter.QUERY
             ),
+            DELETED_FILTER_PARAMETER,
+            *CREATED_RANGE_PARAMETERS,
         ]
     )
 )
@@ -984,14 +942,14 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
 @extend_schema_view(
     list=extend_schema(
         parameters=[
-            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='status',
                 description='Filter tasks by status',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
-            )
+            ),
+            *CREATED_RANGE_PARAMETERS,
         ]
     )
 )
@@ -1017,7 +975,6 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
 @extend_schema_view(
     list=extend_schema(
         parameters=[
-            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='students',
                 description='Filter statuses by students.',
@@ -1060,6 +1017,7 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
+            *CREATED_RANGE_PARAMETERS,
         ]
     )
 )
@@ -1118,7 +1076,6 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
 @extend_schema_view(
     list=extend_schema(
         parameters=[
-            *CREATED_RANGE_PARAMETERS,
             OpenApiParameter(
                 name='school',
                 description='Filter statuses by school.',
@@ -1133,6 +1090,8 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
+            DELETED_FILTER_PARAMETER,
+            *CREATED_RANGE_PARAMETERS,
         ]
     )
 )
