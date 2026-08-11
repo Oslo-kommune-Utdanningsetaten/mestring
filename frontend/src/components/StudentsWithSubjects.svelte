@@ -179,7 +179,7 @@
       {/if}
       {#if masteryBySubjectId?.[subject.id]}
         <MasteryLevelBadge
-          masteryData={masteryBySubjectId[subject.id].mastery!}
+          masteryData={masteryBySubjectId[subject.id].mastery}
           masterySchema={$dataStore.defaultMasterySchema}
           dataMissingReason={masteryBySubjectId[subject.id].missingReason}
         />

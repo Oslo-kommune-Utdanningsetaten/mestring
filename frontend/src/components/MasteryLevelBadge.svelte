@@ -51,11 +51,11 @@
   const title = $derived.by(() => {
     const lastValueTitle = isAggregated && isMasteryValueVisible ? `Siste verdi: ${mastery}` : ''
     const observationsTitle =
-      !isAggregated && isMasteryValueVisible && observationValues
-        ? `Observasjoner: [${masteryData.observationValues.join(', ')}]`
+      !isAggregated && isMasteryValueVisible && observationValues.length > 0
+        ? `Observasjoner: [${observationValues.join(', ')}]`
         : ''
     const aggregatedTitle = isAggregated
-      ? `Aggregert: ${observationValues.length} observasjon${observationValues.length === 1 ? '' : 'er'} fordelt på ${masteryData.goalsCount} mål`
+      ? `Aggregert: ${observationValues.length} observasjon${observationValues.length === 1 ? '' : 'er'} fordelt på ${masteryData?.goalsCount ?? 0} mål`
       : ''
     const trendTitle = `Trend: ${trend}`
 
