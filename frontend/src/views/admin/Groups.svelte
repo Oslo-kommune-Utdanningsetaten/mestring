@@ -5,16 +5,22 @@
   import type { GroupType, SchoolType, SubjectType } from '../../generated/types.gen'
   import { groupsList, schoolsList, groupsUpdate } from '../../generated/sdk.gen'
   import { urlStringFrom } from '../../utils/functions'
-  import { dataStore } from '../../stores/data'
-  import GroupTag from '../../components/GroupTag.svelte'
-  import ButtonIcon from '../../components/ButtonIcon.svelte'
-  import Link from '../../components/Link.svelte'
   import {
     NONE_FIELD_VALUE,
     GROUP_VALIDITY_OPTIONS,
     GROUP_DELETED_OPTIONS,
     GROUP_ENABLED_OPTIONS,
   } from '../../utils/constants'
+  import {
+    getAllSchoolYears,
+    getCurrentSchoolYear,
+    inferCreatedParams,
+  } from '../../utils/schoolYear'
+
+  import { dataStore } from '../../stores/data'
+  import GroupTag from '../../components/GroupTag.svelte'
+  import ButtonIcon from '../../components/ButtonIcon.svelte'
+  import Link from '../../components/Link.svelte'
 
   const router = useTinyRouter()
   let groups = $state<GroupType[]>([])
@@ -29,6 +35,10 @@
     const schoolIdFromUrl = router.getQueryParam('school')
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
   })
+
+  let selectedYearOption = $state<string>(
+    (router.getQueryParam('year') as string) || getCurrentSchoolYear()
+  )
 
   let nameFilter = $state<string>('')
   let openRows = $state<Record<string, boolean>>({})
@@ -54,6 +64,17 @@
     { value: GROUP_VALIDITY_OPTIONS.EXCLUDE, label: 'Invalid' },
   ] as const
 
+  // Options for filtering by groups by date validity
+  const createdOptions = [
+    { value: 'all', label: 'Any year' },
+    ...getAllSchoolYears()
+      .reverse()
+      .map((year: string) => ({
+        value: year,
+        label: year,
+      })),
+  ] as const
+
   let filteredGroups = $derived(
     nameFilter
       ? groups.filter(
@@ -68,6 +89,7 @@
     enabled: enabledSelection,
     deleted: deletedSelection,
     valid: validSelection,
+    ...inferCreatedParams(selectedYearOption),
   })
 
   const subjectsById: Record<string, SubjectType> = $derived(
@@ -292,6 +314,22 @@
             name="validOptions"
             value={option.value}
             bind:group={validSelection}
+          />
+          <span class="ms-2">{option.label}</span>
+        </label>
+      {/each}
+    </fieldset>
+
+    <!-- Radio buttons for created in year -->
+    <fieldset class="border p-3 rounded">
+      <legend class="w-auto fs-6">Year created?</legend>
+      {#each createdOptions as option}
+        <label class="my-2 ms-1 d-block">
+          <input
+            type="radio"
+            name="createdOptions"
+            value={option.value}
+            bind:group={selectedYearOption}
           />
           <span class="ms-2">{option.label}</span>
         </label>

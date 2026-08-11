@@ -32,12 +32,13 @@
     (router.getQueryParam('deleted') as 'include' | 'only' | 'exclude') || 'include'
   )
   let nameFilter = $state<string>(router.getQueryParam('name') || '')
+
   let selectedSchool = $derived.by(() => {
     const schoolIdFromUrl = router.getQueryParam('school')
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
   })
 
-  let createdSelection = $state<string>(
+  let selectedYearOption = $state<string>(
     (router.getQueryParam('year') as string) || getCurrentSchoolYear()
   )
 
@@ -135,7 +136,7 @@
 
   // Options for filtering by groups by date validity
   const createdOptions = [
-    { value: 'all', label: 'Alle år' },
+    { value: 'all', label: 'Any year' },
     ...getAllSchoolYears()
       .reverse()
       .map((year: string) => ({
@@ -164,7 +165,7 @@
           school: selectedSchool.id,
           deleted: deletedSelection,
           roles: roles.join(','),
-          ...inferCreatedParams(createdSelection),
+          ...inferCreatedParams(selectedYearOption),
         },
       })
       users = result.data || []
@@ -260,7 +261,7 @@
         name: nameFilter || null,
         roles: selectedRoles.join(',') || null,
         deleted: deletedSelection,
-        year: createdSelection || null,
+        year: selectedYearOption || null,
       },
       { path: '/admin/users', mode: 'merge' }
     )
@@ -339,14 +340,14 @@
 
       <!-- Radio buttons for school year -->
       <fieldset class="border p-3 rounded">
-        <legend class="w-auto fs-6">Created in year</legend>
+        <legend class="w-auto fs-6">Year created?</legend>
         {#each createdOptions as option}
           <label class="my-2 ms-1 d-block">
             <input
               type="radio"
               name="createdOptions"
               value={option.value}
-              bind:group={createdSelection}
+              bind:group={selectedYearOption}
             />
             <span class="ms-2">{option.label}</span>
           </label>
