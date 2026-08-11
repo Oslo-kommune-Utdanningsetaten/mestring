@@ -1,20 +1,58 @@
 <script lang="ts">
+  import { useTinyRouter } from 'svelte-tiny-router'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import type { GoalType } from '../../generated/types.gen'
   import { goalsList, usersList } from '../../generated/sdk.gen'
   import { formatDateTime } from '../../utils/functions'
   import { addAlert } from '../../stores/alerts'
   import { dataStore } from '../../stores/data'
+  import { GROUP_DELETED_OPTIONS } from '../../utils/constants'
+  import {
+    getAllSchoolYears,
+    getCurrentSchoolYear,
+    inferCreatedParams,
+  } from '../../utils/schoolYear'
   import Link from '../../components/Link.svelte'
 
+  const router = useTinyRouter()
   const currentSchool = $derived($dataStore.currentSchool)
   let goals = $state<GoalType[]>([])
   let creatorsById = $state<Record<string, string>>({})
+
+  let selectedDeletedOption = $state<GROUP_DELETED_OPTIONS>(GROUP_DELETED_OPTIONS.EXCLUDE)
+
+  let selectedYearOption = $state<string>(
+    (router.getQueryParam('year') as string) || getCurrentSchoolYear()
+  )
 
   // Sort state
   type SortKey = 'type' | 'title' | 'createdBy' | 'createdAt' | 'belongsTo' | 'masterySchema'
   let sortBy = $state<SortKey>('createdAt')
   let sortDirection = $state<'asc' | 'desc'>('desc')
+
+  // Options for filtering by deleted
+  const deletedOptions = [
+    { value: GROUP_DELETED_OPTIONS.INCLUDE, label: 'Alle, uansett slettet-status' },
+    { value: GROUP_DELETED_OPTIONS.ONLY, label: 'Kun slettete mål' },
+    { value: GROUP_DELETED_OPTIONS.EXCLUDE, label: 'Kun IKKE slettete mål' },
+  ] as const
+
+  // Options for filtering by groups by date validity
+  const createdOptions = [
+    { value: 'all', label: 'Alle år' },
+    ...getAllSchoolYears()
+      .reverse()
+      .map((year: string) => ({
+        value: year,
+        label: year,
+      })),
+  ] as const
+
+  let queryOptions = $derived({
+    school: currentSchool.id,
+    deleted: selectedDeletedOption,
+    ...inferCreatedParams(selectedYearOption),
+  })
 
   const masterySchemasById = $derived.by(() => {
     const map: Record<string, any> = {}
@@ -26,7 +64,7 @@
 
   const fetchGoals = async () => {
     try {
-      const result = await goalsList({ query: { school: currentSchool?.id } })
+      const result = await goalsList({ query: queryOptions })
 
       goals = result.data || []
       fetchGoalCreators()
@@ -123,12 +161,46 @@
   }
 
   $effect(() => {
-    fetchGoals()
+    if (currentSchool) fetchGoals()
   })
 </script>
 
 <section class="py-3">
   <h2>Alle mål ved skolen</h2>
+
+  <div class="d-flex flex-wrap gap-3 mt-3">
+    <!-- Radio buttons for deleted status -->
+    <fieldset class="border p-3 rounded">
+      <legend class="w-auto fs-6">Slettet</legend>
+      {#each deletedOptions as option}
+        <label class="my-2 ms-1 d-block">
+          <input
+            type="radio"
+            name="deletedOptions"
+            value={option.value}
+            bind:group={selectedDeletedOption}
+          />
+          <span class="ms-2">{option.label}</span>
+        </label>
+      {/each}
+    </fieldset>
+
+    <!-- Radio buttons for created in year -->
+    <fieldset class="border p-3 rounded">
+      <legend class="w-auto fs-6">År opprettet</legend>
+      {#each createdOptions as option}
+        <label class="my-2 ms-1 d-block">
+          <input
+            type="radio"
+            name="createdOptions"
+            value={option.value}
+            bind:group={selectedYearOption}
+          />
+          <span class="ms-2">{option.label}</span>
+        </label>
+      {/each}
+    </fieldset>
+  </div>
 
   {#if goals.length > 0}
     <!-- Header -->
