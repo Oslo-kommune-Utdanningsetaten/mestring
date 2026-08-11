@@ -20,10 +20,12 @@
     subject,
     student,
     isTitleEnabled = true,
+    goals: goalsProp,
   } = $props<{
     subject: SubjectType
     student: UserType
     isTitleEnabled?: boolean
+    goals?: GoalDecorated[]
   }>()
 
   const router = useTinyRouter()
@@ -112,6 +114,7 @@
   </h3>
   <hr class="border border-1 mt-0" />
 {/if}
+
 <div class="subject-card-layout py-3" class:has-chart={isChartVisible}>
   <ul class="goals-list list-unstyled mb-0">
     {#each goals as goal (goal.id)}

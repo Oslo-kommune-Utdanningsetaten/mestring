@@ -8,8 +8,8 @@
     countObservationsBySubjectId,
     aggregateMasterys,
     getSubjectName,
-    getPreferredCreatedParams,
   } from '../utils/functions'
+  import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import { localStorage } from '../stores/localStorage'
   import { MISSING_REASON_NO_OBSERVATIONS, MISSING_REASON_NO_GOALS } from '../utils/constants'
 

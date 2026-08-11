@@ -14,11 +14,11 @@
   import {
     fetchGoalsForSubjectAndStudent,
     formatDateHumanly,
-    calculateSchoolYearMilestones,
     subjectsInCommon,
     generateStatusTitle,
     getDateSpanForStatusCategory,
   } from '../utils/functions'
+  import { calculateSchoolYearMilestones } from '../utils/schoolYear'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
   import ButtonMini from './ButtonMini.svelte'

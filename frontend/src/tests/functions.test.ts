@@ -1,10 +1,6 @@
 import { describe, it, expect, assert } from 'vitest'
-import {
-  inferMastery,
-  aggregateMasterys,
-  getAllSchoolYears,
-  inferCreatedParams,
-} from '../utils/functions'
+import { inferMastery, aggregateMasterys } from '../utils/functions'
+import { getAllSchoolYears, inferCreatedParams } from '../utils/schoolYear'
 import type { ObservationType } from '../generated/types.gen'
 import type { GoalDecorated } from '../types/models'
 

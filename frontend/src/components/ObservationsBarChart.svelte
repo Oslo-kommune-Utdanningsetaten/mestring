@@ -1,7 +1,8 @@
 <script lang="ts">
   import { getISOWeek } from 'date-fns'
   import type { ObservationType } from '../generated'
-  import { getPreferredCreatedParams } from '../utils/functions'
+  import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
+
   import { observationsList } from '../generated/sdk.gen'
   import BarChart from './BarChart.svelte'
 

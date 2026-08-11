@@ -3,12 +3,14 @@
   import { dataStore } from '../stores/data'
   import { goalsRetrieve, observationsList } from '../generated/sdk.gen'
   import { getMasteryLevelColorByValue, getMasteryTitleByValue } from '../utils/masteryHelpers'
+  import { USER_ROLES } from '../utils/constants'
+  import { isNumber } from '../utils/functions'
+  import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
+
   import AuthorInfo from './AuthorInfo.svelte'
   import UserTag from './UserTag.svelte'
   import SubjectTag from './SubjectTag.svelte'
   import Link from './Link.svelte'
-  import { USER_ROLES } from '../utils/constants'
-  import { isNumber, getPreferredCreatedParams } from '../utils/functions'
 
   const limit = 10
   let { masterySchemas, currentSchool, currentUser } = $derived($dataStore)

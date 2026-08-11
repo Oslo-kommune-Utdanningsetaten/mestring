@@ -20,13 +20,11 @@
   import { dataStore } from '../stores/data'
   import { addAlert } from '../stores/alerts'
   import { USER_ROLES } from '../utils/constants'
-  import { getPreferredCreatedParams } from '../utils/functions'
-  import { GROUP_VALIDITY_OPTIONS } from '../utils/constants'
-  import { localStorage } from '../stores/localStorage'
+  import {
+    getPreferredCreatedParams,
+    getPreferredGroupValidity,
+  } from '../stores/localStorageFunctions'
   import ButtonMini from './ButtonMini.svelte'
-
-  const preferredGroupValidity = localStorage<GROUP_VALIDITY_OPTIONS>('preferredGroupValidity')
-  const groupValidity = $derived($preferredGroupValidity || GROUP_VALIDITY_OPTIONS.ONLY)
 
   const { user, school, onDone } = $props<{
     user: Partial<UserDecorated>
@@ -79,7 +77,7 @@
         query: {
           school: school.id,
           enabled: 'only',
-          valid: groupValidity,
+          valid: getPreferredGroupValidity(),
           ...getPreferredCreatedParams(),
         },
       })

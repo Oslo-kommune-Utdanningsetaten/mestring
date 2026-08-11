@@ -14,12 +14,9 @@
     statusDestroy,
   } from '../generated/sdk.gen'
   import { hasUserAccessToFeature } from '../stores/access'
-  import {
-    calculateSchoolYearMilestones,
-    generateStatusTitle,
-    getDateSpanForStatusCategory,
-    getPreferredCreatedParams,
-  } from '../utils/functions'
+  import { generateStatusTitle, getDateSpanForStatusCategory } from '../utils/functions'
+  import { calculateSchoolYearMilestones } from '../utils/schoolYear'
+  import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import { dataStore } from '../stores/data'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'

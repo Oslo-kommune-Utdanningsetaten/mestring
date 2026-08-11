@@ -9,20 +9,19 @@ import {
 } from '../generated/sdk.gen'
 import type { SchoolType, MasterySchemaType } from '../generated/types.gen'
 import { localStorage } from '../stores/localStorage'
-import { fetchUserData, getPreferredCreatedParams } from '../utils/functions'
 import {
-  SUBJECTS_ALLOWED_ALL,
-  SUBJECTS_ALLOWED_CUSTOM,
-  USER_ROLES,
-  GROUP_VALIDITY_OPTIONS,
-} from '../utils/constants'
+  getPreferredGroupValidity,
+  getPreferredMasterySchemaId,
+} from '../stores/localStorageFunctions'
+import { fetchUserData } from '../utils/functions'
+import { SUBJECTS_ALLOWED_ALL, SUBJECTS_ALLOWED_CUSTOM, USER_ROLES } from '../utils/constants'
 import type { AppData, UserDecorated } from '../types/models'
 
 const setMasterySchemas = (schemas: MasterySchemaType[]) => {
   // Default mastery schema is either school default, or the user's preferred, or simply first in list
   const defaultSchema =
     schemas.find(schema => schema.isDefault) ||
-    schemas.find(schema => schema.id === localStorage<string>('preferredMasterySchemaId').get()) ||
+    schemas.find(schema => schema.id === getPreferredMasterySchemaId()) ||
     (schemas.length > 0 ? schemas[0] : null)
   dataStore.update(data => {
     return { ...data, masterySchemas: schemas, defaultMasterySchema: defaultSchema }
@@ -69,9 +68,6 @@ export const registerUserStatus = async (school?: SchoolType) => {
     if (user.isSuperadmin) setCurrentUser({ ...user, roles: [USER_ROLES.SUPERADMIN] })
     return
   }
-  const groupValidity =
-    localStorage<GROUP_VALIDITY_OPTIONS>('preferredGroupValidity').get() ||
-    GROUP_VALIDITY_OPTIONS.ONLY
 
   const [userData, schoolsResult, allGroupsResult] = await Promise.all([
     fetchUserData(user.id, school.id),
@@ -79,7 +75,7 @@ export const registerUserStatus = async (school?: SchoolType) => {
     groupsList({
       query: {
         school: school.id,
-        valid: groupValidity,
+        valid: getPreferredGroupValidity(),
       },
     }),
   ])

@@ -14,6 +14,10 @@
 
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { localStorage } from '../stores/localStorage'
+  import {
+    getPreferredStatusCategory,
+    getPreferredSubjectId,
+  } from '../stores/localStorageFunctions'
   import { fetchGoalsForSubjectAndStudent, urlStringFrom, getSubjectName } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
@@ -87,7 +91,7 @@
         subjectId: subject.id,
         studentId: student.id,
         schoolId: $dataStore.currentSchool.id,
-        categoryId: localStorage('preferredStatusCategoryId').get() as string | null,
+        categoryId: getPreferredStatusCategory(),
         beginAt: sixtyDaysAgo.toISOString().split('T')[0],
         endAt: today.toISOString().split('T')[0],
       }
@@ -100,7 +104,7 @@
     if (goal.id) {
       goalWip = {
         ...goal,
-        subjectId: goal?.subjectId || localStorage<string>('preferredSubjectId').get(),
+        subjectId: goal?.subjectId || getPreferredSubjectId(),
         studentId: student.id,
         sortOrder: goal?.sortOrder || (goalsForSubject?.length ? goalsForSubject.length + 1 : 1),
         masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,

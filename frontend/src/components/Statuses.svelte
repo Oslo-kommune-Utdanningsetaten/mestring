@@ -2,7 +2,7 @@
   import type { StatusType, SubjectType, UserType } from '../generated/types.gen'
   import { statusList } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
-  import { getPreferredCreatedParams } from '../utils/functions'
+  import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import Link from './Link.svelte'
 
   let { student, subject } = $props<{

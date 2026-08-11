@@ -2,7 +2,9 @@
   import type { UserType, SubjectType, StatusType } from '../generated/types.gen'
   import { statusList } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
-  import { getSubjectName, getPreferredCreatedParams } from '../utils/functions'
+  import { getSubjectName } from '../utils/functions'
+  import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
+
   import MasterySchemaLevel from './MasterySchemaLevel.svelte'
   import UserNameLink from './UserNameLink.svelte'
 

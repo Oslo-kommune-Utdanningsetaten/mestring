@@ -3,7 +3,7 @@
   import { observationsList } from '../generated/sdk.gen'
   import type { GroupType, ObservationType } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
-  import { getPreferredCreatedParams } from '../utils/functions'
+  import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
   import GroupRow from '../components/GroupRow.svelte'
   import GroupsCompareSelect from '../components/GroupsCompareSelect.svelte'

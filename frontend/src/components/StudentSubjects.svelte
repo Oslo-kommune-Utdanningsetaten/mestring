@@ -2,13 +2,11 @@
   import type { UserType, GroupType, SubjectType } from '../generated/types.gen'
   import { groupsList } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
-  import { getPreferredCreatedParams } from '../utils/functions'
-  import { GROUP_VALIDITY_OPTIONS } from '../utils/constants'
-  import { localStorage } from '../stores/localStorage'
+  import {
+    getPreferredCreatedParams,
+    getPreferredGroupValidity,
+  } from '../stores/localStorageFunctions'
   import StudentSubject from './StudentSubject.svelte'
-
-  const preferredGroupValidity = localStorage<GROUP_VALIDITY_OPTIONS>('preferredGroupValidity')
-  const groupValidity = $derived($preferredGroupValidity || GROUP_VALIDITY_OPTIONS.ONLY)
 
   const { student } = $props<{
     student: UserType
@@ -26,7 +24,7 @@
         query: {
           school: currentSchool.id,
           user: student.id,
-          valid: groupValidity,
+          valid: getPreferredGroupValidity(),
           ...getPreferredCreatedParams(),
         },
       })

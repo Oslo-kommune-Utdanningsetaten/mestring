@@ -8,8 +8,13 @@
     subjectsList,
   } from '../generated/sdk.gen'
   import type { GoalDecorated } from '../types/models'
-  import { subjectsInCommon, getPreferredCreatedParams } from '../utils/functions'
-  import { SUBJECTS_ALLOWED_CUSTOM, GROUP_VALIDITY_OPTIONS } from '../utils/constants'
+  import { subjectsInCommon } from '../utils/functions'
+  import {
+    getPreferredCreatedParams,
+    getPreferredGroupValidity,
+    getPreferredSubjectId,
+  } from '../stores/localStorageFunctions'
+  import { SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
   import { hasUserAccessToFeature } from '../stores/access'
   import { dataStore } from '../stores/data'
   import { trackEvent } from '../stores/analytics'
@@ -21,9 +26,6 @@
   import ButtonIcon from '../components/ButtonIcon.svelte'
   import StudentSVG from '../assets/education.svg.svelte'
   import GroupTag from '../components/GroupTag.svelte'
-
-  const preferredGroupValidity = localStorage<GROUP_VALIDITY_OPTIONS>('preferredGroupValidity')
-  const groupValidity = $derived($preferredGroupValidity || GROUP_VALIDITY_OPTIONS.ONLY)
 
   const { studentId } = $props<{ studentId: string }>()
   const individualGoalcount = 3
@@ -69,7 +71,7 @@
   const fetchGroups = async (studentId: string) => {
     try {
       const groupsResult = await groupsList({
-        query: { user: studentId, school: currentSchool.id, valid: groupValidity },
+        query: { user: studentId, school: currentSchool.id, valid: getPreferredGroupValidity() },
       })
       groups = groupsResult.data || []
     } catch (error) {
@@ -117,7 +119,7 @@
       // editing existing goal
       goalWip = {
         ...goal,
-        subjectId: goal?.subjectId || localStorage<string>('preferredSubjectId').get(),
+        subjectId: goal?.subjectId || getPreferredSubjectId(),
         studentId: student.id,
         sortOrder: goal?.sortOrder,
         masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,

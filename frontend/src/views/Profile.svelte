@@ -1,6 +1,12 @@
 <script lang="ts">
   import { usersRetrieve } from '../generated/sdk.gen'
-  import { fetchUserData, getAllSchoolYears } from '../utils/functions'
+  import { fetchUserData } from '../utils/functions'
+  import { getAllSchoolYears } from '../utils/schoolYear'
+  import {
+    getPreferredSchoolYear,
+    getPreferredGroupValidity,
+    getPreferredMasteryBadgeVariant,
+  } from '../stores/localStorageFunctions'
   import { USER_ROLES, MASTERY_BADGE_VARIANTS, GROUP_VALIDITY_OPTIONS } from '../utils/constants'
   import { dataStore, setCurrentSchool, currentUser } from '../stores/data'
   import type { GroupType, SchoolType } from '../generated/types.gen'
@@ -16,19 +22,6 @@
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
-
-  const preferredMasteryBadgeVariant = localStorage<MASTERY_BADGE_VARIANTS>(
-    'preferredMasteryBadgeVariant'
-  )
-  const selectedBadgeVariant = $derived(
-    $preferredMasteryBadgeVariant || MASTERY_BADGE_VARIANTS.BEEHIVE
-  )
-
-  const preferredGroupValidity = localStorage<GROUP_VALIDITY_OPTIONS>('preferredGroupValidity')
-  const selectedGroupValidity = $derived($preferredGroupValidity || GROUP_VALIDITY_OPTIONS.ONLY)
-
-  const preferredSchoolYear = localStorage<string>('preferredSchoolYear')
-  const selectedSchoolYear = $derived($preferredSchoolYear || getAllSchoolYears()[-1])
 
   // Options for mastery badge variant selection
   const badgeOptions = [
@@ -223,7 +216,7 @@
                   name="preferredMasteryBadgeVariant"
                   value={option.value}
                   label={option.label}
-                  checked={selectedBadgeVariant === option.value}
+                  checked={getPreferredMasteryBadgeVariant() === option.value}
                   onchange={() => handleSelectBadgeVariant(option.value)}
                 ></pkt-radiobutton>
               {/each}
@@ -236,10 +229,10 @@
               <legend class="visually-hidden">Velg hvilke grupper som vises</legend>
               {#each groupValidityOptions as option}
                 <pkt-radiobutton
-                  name="preferredMasteryBadgeVariant"
+                  name="preferredGroupValidity"
                   value={option.value}
                   label={option.label}
-                  checked={selectedGroupValidity === option.value}
+                  checked={getPreferredGroupValidity() === option.value}
                   onchange={() => handleSelectGroupValidity(option.value)}
                 ></pkt-radiobutton>
               {/each}
@@ -255,7 +248,7 @@
                   name="preferredSchoolYear"
                   value={option.value}
                   label={option.label}
-                  checked={selectedSchoolYear === option.value}
+                  checked={getPreferredSchoolYear() === option.value}
                   onchange={() => handleSelectSchoolYear(option.value)}
                 ></pkt-radiobutton>
               {/each}

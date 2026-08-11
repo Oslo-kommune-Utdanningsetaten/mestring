@@ -1,5 +1,6 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-tag.js'
+  import Sortable, { type SortableEvent } from 'sortablejs'
   import {
     groupsRetrieve,
     usersList,
@@ -18,10 +19,9 @@
   } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
-  import Sortable, { type SortableEvent } from 'sortablejs'
   import { dataStore } from '../stores/data'
-  import { localStorage } from '../stores/localStorage'
   import { goalsWithCalculatedMastery } from '../utils/functions'
+  import { getPreferredStatusCategory } from '../stores/localStorageFunctions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
@@ -213,7 +213,7 @@
         subjectId: subject?.id,
         studentId: student.id,
         schoolId: $dataStore.currentSchool.id,
-        categoryId: localStorage('preferredStatusCategoryId').get() as string | null,
+        categoryId: getPreferredStatusCategory(),
         beginAt: sixtyDaysAgo.toISOString().split('T')[0],
         endAt: today.toISOString().split('T')[0],
       }
@@ -424,12 +424,7 @@
       <h3 class="mb-3">Mål</h3>
       <div class="card shadow-sm mt-4 list-group">
         <div class="list-group-item">
-          <StudentSubject
-            student={$dataStore.currentUser}
-            {subject}
-            goals={goalsWithCalculatedMasteryByStudentId[$dataStore.currentUser.id]}
-            isTitleEnabled={false}
-          />
+          <StudentSubject student={$dataStore.currentUser} {subject} isTitleEnabled={false} />
         </div>
       </div>
     </section>
