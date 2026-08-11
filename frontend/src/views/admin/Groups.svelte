@@ -27,9 +27,10 @@
   let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingGroups = $state<boolean>(false)
-  let enabledSelection = $state<GROUP_ENABLED_OPTIONS>(GROUP_ENABLED_OPTIONS.ONLY)
-  let validSelection = $state<GROUP_VALIDITY_OPTIONS>(GROUP_VALIDITY_OPTIONS.ONLY)
-  let deletedSelection = $state<GROUP_DELETED_OPTIONS>(GROUP_DELETED_OPTIONS.INCLUDE)
+
+  let selectedEnabledOption = $state<GROUP_ENABLED_OPTIONS>(GROUP_ENABLED_OPTIONS.ONLY)
+  let selectedValidOption = $state<GROUP_VALIDITY_OPTIONS>(GROUP_VALIDITY_OPTIONS.ONLY)
+  let selectedDeletedOption = $state<GROUP_DELETED_OPTIONS>(GROUP_DELETED_OPTIONS.INCLUDE)
 
   let selectedSchool = $derived.by(() => {
     const schoolIdFromUrl = router.getQueryParam('school')
@@ -86,9 +87,10 @@
   )
 
   let groupFetchOptions = $derived({
-    enabled: enabledSelection,
-    deleted: deletedSelection,
-    valid: validSelection,
+    school: selectedSchool.id,
+    enabled: selectedEnabledOption,
+    deleted: selectedDeletedOption,
+    valid: selectedValidOption,
     ...inferCreatedParams(selectedYearOption),
   })
 
@@ -142,8 +144,7 @@
     if (!selectedSchool) return
     try {
       isLoadingGroups = true
-      const queryOption = { ...groupFetchOptions, school: selectedSchool.id }
-      const result = await groupsList({ query: queryOption })
+      const result = await groupsList({ query: groupFetchOptions })
       groups = (result.data || []).sort((a, b) =>
         a.displayName.localeCompare(b.displayName, 'no', { sensitivity: 'base' })
       )
@@ -271,8 +272,9 @@
       </div>
     </div>
   {/if}
-  <!-- Radio buttons for enabled status -->
+
   <div class="d-flex flex-wrap gap-3 mt-3">
+    <!-- Radio buttons for enabled status -->
     <fieldset class="border p-3 rounded">
       <legend class="w-auto fs-6">Enabled?</legend>
       {#each enabledOptions as option}
@@ -281,7 +283,7 @@
             type="radio"
             name="enabledOptions"
             value={option.value}
-            bind:group={enabledSelection}
+            bind:group={selectedEnabledOption}
           />
           <span class="ms-2">{option.label}</span>
         </label>
@@ -297,7 +299,7 @@
             type="radio"
             name="deletedOptions"
             value={option.value}
-            bind:group={deletedSelection}
+            bind:group={selectedDeletedOption}
           />
           <span class="ms-2">{option.label}</span>
         </label>
@@ -313,7 +315,7 @@
             type="radio"
             name="validOptions"
             value={option.value}
-            bind:group={validSelection}
+            bind:group={selectedValidOption}
           />
           <span class="ms-2">{option.label}</span>
         </label>

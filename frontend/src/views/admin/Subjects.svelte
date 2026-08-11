@@ -3,13 +3,20 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import { subjectsDestroy, subjectsList, schoolsList } from '../../generated/sdk.gen'
   import type { SubjectType, SchoolType, GroupType } from '../../generated/types.gen'
+  import { GROUP_DELETED_OPTIONS } from '../../utils/constants'
   import { urlStringFrom } from '../../utils/functions'
+  import { dataStore } from '../../stores/data'
+  import {
+    getAllSchoolYears,
+    getCurrentSchoolYear,
+    inferCreatedParams,
+  } from '../../utils/schoolYear'
+
   import ButtonMini from '../../components/ButtonMini.svelte'
   import ButtonIcon from '../../components/ButtonIcon.svelte'
   import SubjectEdit from '../../components/SubjectEdit.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
   import GroupTag from '../../components/GroupTag.svelte'
-  import { dataStore } from '../../stores/data'
 
   const router = useTinyRouter()
   let subjects = $derived<SubjectType[]>([])
@@ -24,6 +31,12 @@
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
   })
 
+  let selectedDeletedOption = $state<GROUP_DELETED_OPTIONS>(GROUP_DELETED_OPTIONS.EXCLUDE)
+
+  let selectedYearOption = $state<string>(
+    (router.getQueryParam('year') as string) || getCurrentSchoolYear()
+  )
+
   // Radio options for subject filtering
   const subjectFetchOptions = [
     { value: 'all', label: 'Alle fag' },
@@ -31,13 +44,35 @@
     { value: 'only-school-owned', label: 'Fag tilknyttet skolen' },
   ] as const
 
-  let subjectFetchOption = $derived(
-    subjectFetchSelection === 'all'
-      ? {}
-      : subjectFetchSelection === 'only-global'
-        ? { isOwnedBySchool: false }
-        : { isOwnedBySchool: true }
-  )
+  // Options for filtering by deleted
+  const deletedOptions = [
+    { value: GROUP_DELETED_OPTIONS.INCLUDE, label: 'All' },
+    { value: GROUP_DELETED_OPTIONS.ONLY, label: 'Deleted' },
+    { value: GROUP_DELETED_OPTIONS.EXCLUDE, label: 'Not deleted' },
+  ] as const
+
+  // Options for filtering by groups by date validity
+  const createdOptions = [
+    { value: 'all', label: 'Any year' },
+    ...getAllSchoolYears()
+      .reverse()
+      .map((year: string) => ({
+        value: year,
+        label: year,
+      })),
+  ] as const
+
+  let queryOptions = $derived.by(() => {
+    const result: any = {
+      school: selectedSchool.id,
+      deleted: selectedDeletedOption,
+      ...inferCreatedParams(selectedYearOption),
+    }
+    if (subjectFetchSelection !== 'all') {
+      result.isOwnedBySchool = subjectFetchSelection === 'only-school-owned'
+    }
+    return result
+  })
 
   let filteredSubjects = $derived(
     nameFilter
@@ -81,8 +116,7 @@
   const fetchSubjects = async () => {
     if (!selectedSchool) return
     try {
-      const queryOption = { ...subjectFetchOption, school: selectedSchool.id }
-      const result = await subjectsList({ query: queryOption })
+      const result = await subjectsList({ query: queryOptions })
       subjects = (result.data || []).sort((a, b) =>
         a.displayName.localeCompare(b.displayName, 'no', { sensitivity: 'base' })
       )
@@ -195,21 +229,55 @@
     </div>
   </div>
 
-  <!-- Radio buttons for filtering subjects -->
-  <fieldset class="mt-3 border p-3 rounded">
-    <legend class="w-auto fs-6 pb-2">Filtrer fag</legend>
-    {#each subjectFetchOptions as option}
-      <label class="my-2 ms-1 d-block">
-        <input
-          type="radio"
-          name="subjectFetchInclusion"
-          value={option.value}
-          bind:group={subjectFetchSelection}
-        />
-        <span class="ms-2">{option.label}</span>
-      </label>
-    {/each}
-  </fieldset>
+  <div class="d-flex flex-wrap gap-3 mt-3">
+    <!-- Radio buttons for filtering subjects -->
+    <fieldset class="border p-3 rounded">
+      <legend class="w-auto fs-6 pb-2">Filtrer fag</legend>
+      {#each subjectFetchOptions as option}
+        <label class="my-2 ms-1 d-block">
+          <input
+            type="radio"
+            name="subjectFetchInclusion"
+            value={option.value}
+            bind:group={subjectFetchSelection}
+          />
+          <span class="ms-2">{option.label}</span>
+        </label>
+      {/each}
+    </fieldset>
+
+    <!-- Radio buttons for deleted status -->
+    <fieldset class="border p-3 rounded">
+      <legend class="w-auto fs-6">Deleted</legend>
+      {#each deletedOptions as option}
+        <label class="my-2 ms-1 d-block">
+          <input
+            type="radio"
+            name="deletedOptions"
+            value={option.value}
+            bind:group={selectedDeletedOption}
+          />
+          <span class="ms-2">{option.label}</span>
+        </label>
+      {/each}
+    </fieldset>
+
+    <!-- Radio buttons for created in year -->
+    <fieldset class="border p-3 rounded">
+      <legend class="w-auto fs-6">Year created</legend>
+      {#each createdOptions as option}
+        <label class="my-2 ms-1 d-block">
+          <input
+            type="radio"
+            name="createdOptions"
+            value={option.value}
+            bind:group={selectedYearOption}
+          />
+          <span class="ms-2">{option.label}</span>
+        </label>
+      {/each}
+    </fieldset>
+  </div>
 </section>
 
 <section class="py-4">
