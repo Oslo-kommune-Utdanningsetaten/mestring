@@ -6,6 +6,11 @@
   import { urlStringFrom, fetchUserData } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
   import { USER_ROLES } from '../../utils/constants'
+  import {
+    getAllSchoolYears,
+    getCurrentSchoolYear,
+    inferCreatedParams,
+  } from '../../utils/schoolYear'
   import User from '../../components/User.svelte'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
@@ -31,6 +36,10 @@
     const schoolIdFromUrl = router.getQueryParam('school')
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
   })
+
+  let createdSelection = $state<string>(
+    (router.getQueryParam('year') as string) || getCurrentSchoolYear()
+  )
 
   // Array of fetched users
   let users = $state<UserType[]>([])
@@ -124,11 +133,16 @@
     { value: 'exclude', label: 'Non-deleted' },
   ] as const
 
-  let headerText = $derived.by(() => {
-    let text = selectedSchool ? `Brukere ved: ${selectedSchool.displayName}` : 'Alle brukere'
-    text = nameFilter ? `${text} med navn som inneholder "${nameFilter}"` : text
-    return text
-  })
+  // Options for filtering by groups by date validity
+  const createdOptions = [
+    { value: 'all', label: 'Alle år' },
+    ...getAllSchoolYears()
+      .reverse()
+      .map((year: string) => ({
+        value: year,
+        label: year,
+      })),
+  ] as const
 
   const fetchSchools = async () => {
     try {
@@ -146,7 +160,12 @@
     try {
       isLoadingUsers = true
       const result = await usersList({
-        query: { school: selectedSchool.id, deleted: deletedSelection, roles: roles.join(',') },
+        query: {
+          school: selectedSchool.id,
+          deleted: deletedSelection,
+          roles: roles.join(','),
+          ...inferCreatedParams(createdSelection),
+        },
       })
       users = result.data || []
       users.forEach(user => {
@@ -241,6 +260,7 @@
         name: nameFilter || null,
         roles: selectedRoles.join(',') || null,
         deleted: deletedSelection,
+        year: createdSelection || null,
       },
       { path: '/admin/users', mode: 'merge' }
     )
@@ -311,6 +331,22 @@
               name="deletedOptions"
               value={option.value}
               bind:group={deletedSelection}
+            />
+            <span class="ms-2">{option.label}</span>
+          </label>
+        {/each}
+      </fieldset>
+
+      <!-- Radio buttons for school year -->
+      <fieldset class="border p-3 rounded">
+        <legend class="w-auto fs-6">Created in year</legend>
+        {#each createdOptions as option}
+          <label class="my-2 ms-1 d-block">
+            <input
+              type="radio"
+              name="createdOptions"
+              value={option.value}
+              bind:group={createdSelection}
             />
             <span class="ms-2">{option.label}</span>
           </label>
