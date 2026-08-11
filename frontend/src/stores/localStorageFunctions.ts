@@ -1,10 +1,10 @@
 import { localStorage } from './localStorage'
 import { GROUP_VALIDITY_OPTIONS, MASTERY_BADGE_VARIANTS } from '../utils/constants'
-import { getAllSchoolYears, inferCreatedParams } from '../utils/schoolYear'
+import { getCurrentSchoolYear, inferCreatedParams } from '../utils/schoolYear'
 
 export const getPreferredCreatedParams = () => {
   const preferredSchoolYear =
-    localStorage<string>('preferredSchoolYear').get() || getAllSchoolYears()[-1]
+    localStorage<string>('preferredSchoolYear').get() || getCurrentSchoolYear()
   return inferCreatedParams(preferredSchoolYear)
 }
 
@@ -17,7 +17,7 @@ export const getPreferredGroupValidity = () => {
 
 export const getPreferredSchoolYear = () => {
   const preferredSchoolYear = localStorage<string>('preferredSchoolYear').get()
-  const defaultSchoolYear = getAllSchoolYears()[-1]
+  const defaultSchoolYear = getCurrentSchoolYear()
   return preferredSchoolYear || defaultSchoolYear
 }
 

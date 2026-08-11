@@ -1,19 +1,20 @@
 <script lang="ts">
+  import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
   import { usersRetrieve } from '../generated/sdk.gen'
-  import { fetchUserData } from '../utils/functions'
-  import { getAllSchoolYears } from '../utils/schoolYear'
+  import type { GroupType, SchoolType } from '../generated/types.gen'
   import {
     getPreferredSchoolYear,
     getPreferredGroupValidity,
     getPreferredMasteryBadgeVariant,
   } from '../stores/localStorageFunctions'
-  import { USER_ROLES, MASTERY_BADGE_VARIANTS, GROUP_VALIDITY_OPTIONS } from '../utils/constants'
   import { dataStore, setCurrentSchool, currentUser } from '../stores/data'
-  import type { GroupType, SchoolType } from '../generated/types.gen'
   import { localStorage } from '../stores/localStorage'
   import { hasUserAccessToPath } from '../stores/access'
+  import { USER_ROLES, MASTERY_BADGE_VARIANTS, GROUP_VALIDITY_OPTIONS } from '../utils/constants'
+  import { fetchUserData } from '../utils/functions'
+  import { getAllSchoolYears, getCurrentSchoolYear } from '../utils/schoolYear'
   import type { UserRoleType, UserDecorated } from '../types/models'
-  import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
+
   import GroupTag from '../components/GroupTag.svelte'
   import Link from '../components/Link.svelte'
 
@@ -22,6 +23,7 @@
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
+  let selectedGroupValidity = $state<GROUP_VALIDITY_OPTIONS>(getPreferredGroupValidity())
 
   // Options for mastery badge variant selection
   const badgeOptions = [
@@ -124,11 +126,27 @@
   const handleSelectBadgeVariant = (variant: MASTERY_BADGE_VARIANTS) =>
     localStorage('preferredMasteryBadgeVariant').set(variant)
 
-  const handleSelectGroupValidity = (validity: GROUP_VALIDITY_OPTIONS) =>
+  const handleSelectGroupValidity = (validity: GROUP_VALIDITY_OPTIONS) => {
     localStorage('preferredGroupValidity').set(validity)
+    selectedGroupValidity = getPreferredGroupValidity()
+  }
 
-  const handleSelectSchoolYear = (shoolYear: string) =>
-    localStorage('preferredSchoolYear').set(shoolYear)
+  // When school year is changed by user, also update the group validity (not the other way)
+  const handleSelectSchoolYear = (schoolYear: string) => {
+    localStorage('preferredSchoolYear').set(schoolYear)
+    if (schoolYear === 'all') {
+      // All years selected --> include all groups regardless of validity
+      localStorage('preferredGroupValidity').set(GROUP_VALIDITY_OPTIONS.INCLUDE)
+    } else if (schoolYear === getCurrentSchoolYear()) {
+      // Current year selected --> only include valid groups
+      localStorage('preferredGroupValidity').set(GROUP_VALIDITY_OPTIONS.ONLY)
+    } else {
+      // Past year selected --> only include invalid groups
+      localStorage('preferredGroupValidity').set(GROUP_VALIDITY_OPTIONS.EXCLUDE)
+    }
+    // Update local state
+    selectedGroupValidity = getPreferredGroupValidity()
+  }
 
   $effect(() => {
     // Only load data when viewing another user's profile (admin mode)
@@ -224,22 +242,6 @@
           </div>
 
           <div class="mb-4">
-            <strong>Gruppers gyldighet (på dato fra Feide)</strong>
-            <fieldset class="d-flex flex-wrap gap-4 mt-2">
-              <legend class="visually-hidden">Velg hvilke grupper som vises</legend>
-              {#each groupValidityOptions as option}
-                <pkt-radiobutton
-                  name="preferredGroupValidity"
-                  value={option.value}
-                  label={option.label}
-                  checked={getPreferredGroupValidity() === option.value}
-                  onchange={() => handleSelectGroupValidity(option.value)}
-                ></pkt-radiobutton>
-              {/each}
-            </fieldset>
-          </div>
-
-          <div class="mb-2">
             <strong>Data fra skoleår</strong>
             <fieldset class="d-flex flex-wrap gap-4 mt-2">
               <legend class="visually-hidden">Velg skoleår</legend>
@@ -251,6 +253,26 @@
                   checked={getPreferredSchoolYear() === option.value}
                   onchange={() => handleSelectSchoolYear(option.value)}
                 ></pkt-radiobutton>
+              {/each}
+            </fieldset>
+          </div>
+
+          <div class="mb-2">
+            <strong>Gruppers gyldighet (på dato fra Feide)</strong>
+            <fieldset class="d-flex flex-wrap gap-4 mt-2">
+              <legend class="visually-hidden">Velg hvilke grupper som vises</legend>
+              {#each groupValidityOptions as option}
+                {#key selectedGroupValidity + option.value}
+                  <pkt-radiobutton
+                    name="preferredGroupValidity"
+                    value={option.value}
+                    label={option.label}
+                    checked={selectedGroupValidity === option.value}
+                    onchange={() => handleSelectGroupValidity(option.value)}
+                    disabled={!$currentUser?.isSuperadmin}
+                    id={'preferredGroupValidity-' + option.value}
+                  ></pkt-radiobutton>
+                {/key}
               {/each}
             </fieldset>
           </div>
