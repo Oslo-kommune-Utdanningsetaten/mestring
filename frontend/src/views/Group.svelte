@@ -20,12 +20,14 @@
   import type { GoalDecorated } from '../types/models'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
   import { dataStore } from '../stores/data'
-  import { goalsWithCalculatedMastery } from '../utils/functions'
+  import { goalsWithCalculatedMastery, formatDateTime } from '../utils/functions'
   import { getPreferredStatusCategory } from '../stores/localStorageFunctions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
+  import { getSchoolYearForGroup } from '../utils/schoolYear'
   import GroupSVG from '../assets/group.svg.svelte'
+
   import ButtonIcon from '../components/ButtonIcon.svelte'
   import ObservationEdit from '../components/ObservationEdit.svelte'
   import StatusEdit from '../components/StatusEdit.svelte'
@@ -58,10 +60,11 @@
   let isObservationEditorOpen = $state<boolean>(false)
   let isStatusEditorOpen = $state<boolean>(false)
   let isGoalEditorOpen = $state<boolean>(false)
-  let currentSchool = $derived($dataStore.currentSchool)
   let subjects = $state<SubjectType[]>([])
-  let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
+
+  let currentSchool = $derived($dataStore.currentSchool)
+  let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
 
   let isCurrentUserOnlyStudent = $derived(
     $dataStore.currentUser?.isStudent && !$dataStore.currentUser?.isTeacher
@@ -313,6 +316,14 @@
     </div>
   </section>
 
+  {#if !group.isValid}
+    <div class="alert alert-warning">
+      <h4>Denne gruppa er fra skoleåret: {getSchoolYearForGroup(group)}</h4>
+      <p class="mt-4 fs-6">{group.validFrom} --> {group.validTo}</p>
+      <p class="mb-0">Hvis du mener dette er en feil, kontakt support.</p>
+    </div>
+  {/if}
+
   {#if group.isEnabled}
     {#if availableStatusCategories.length && $hasUserAccessToFeature( 'status', 'create', { groupId, createdById: $dataStore.currentUser.id, subjectId: group.subjectId || undefined } )}
       <!-- Group goals Section -->
@@ -424,7 +435,12 @@
       <h3 class="mb-3">Mål</h3>
       <div class="card shadow-sm mt-4 list-group">
         <div class="list-group-item">
-          <StudentSubject student={$dataStore.currentUser} {subject} isTitleEnabled={false} />
+          <StudentSubject
+            student={$dataStore.currentUser}
+            {subject}
+            isTitleEnabled={false}
+            {group}
+          />
         </div>
       </div>
     </section>
@@ -469,7 +485,6 @@
       <li>Den har aldri eksistert</li>
       <li>Er slettet</li>
       <li>Er skrudd av for visning</li>
-      <li>Har gått ut på dato (en gruppe varer typisk et skoleår)</li>
       <li>Brukeren du er logget på med mangler tilgang</li>
     </ul>
     <p>Hvis du mener dette er en feil, kontakt support.</p>

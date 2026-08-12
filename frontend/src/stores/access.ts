@@ -45,6 +45,12 @@ const checkUserAccessToFeature = (
 
   const { subjectId, studentGroupIds, studentId, goalStudentId, groupId, createdById } = options
   const subject = subjects.find(s => s.id === subjectId)
+  const group = groupId ? currentUser.allGroups.find((g: GroupType) => g.id === groupId) : null
+
+  if (groupId && (!group || !group.isValid)) {
+    // group is inaccessible to normal users
+    return false
+  }
 
   if (resource === 'status') {
     if (!currentSchool.isStatusEnabled) {

@@ -1,4 +1,5 @@
 import { GROUP_VALIDITY_OPTIONS } from './constants'
+import type { GroupType } from '../generated/types.gen'
 
 export const calculateSchoolYearMilestones = (customDate?: Date) => {
   const date = customDate || new Date()
@@ -11,6 +12,16 @@ export const calculateSchoolYearMilestones = (customDate?: Date) => {
     midyearAt: `${schoolStartYear + 1}-01-15`,
     endAt: `${schoolStartYear + 1}-06-30`,
   }
+}
+
+// Returns a string like "2025-2026" describing to which school year the group belongs
+export const getSchoolYearForGroup = (group: GroupType): string | undefined => {
+  if (!group.validFrom || !group.validTo) {
+    return undefined
+  }
+  const startYear = group.validFrom.split('-')[0]
+  const endYear = group.validTo.split('-')[0]
+  return `${startYear}-${endYear}`
 }
 
 // Returns an array of ascending school years since launch e.g. ["2025-2026", "2026-2027"]

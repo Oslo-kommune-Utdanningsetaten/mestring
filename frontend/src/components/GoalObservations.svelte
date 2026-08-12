@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ObservationType, SubjectType, UserType, GoalType } from '../generated/types.gen'
+  import type { ObservationType, UserType, GoalType, GroupType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { observationsDestroy } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
@@ -13,9 +13,10 @@
   import ButtonIcon from './ButtonIcon.svelte'
   import MasteryLevelTitle from './MasteryLevelTitle.svelte'
 
-  const { student, goal, onRefreshNeeded, onEditObservation } = $props<{
+  const { student, goal, group, onRefreshNeeded, onEditObservation } = $props<{
     student: UserType
     goal: GoalDecorated
+    group: GroupType
     onRefreshNeeded: () => void
     onEditObservation: (observation: ObservationType | null, goal: GoalType) => void
   }>()
@@ -90,7 +91,7 @@
               onClick: () => handleViewObservation(observation),
             }}
           />
-          {#if $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, studentId: observation.studentId, createdById: observation.createdById, goalStudentId: goal.studentId } )}
+          {#if $hasUserAccessToFeature( 'observation', 'update', { groupId: group.id, studentId: observation.studentId, createdById: observation.createdById, goalStudentId: goal.studentId } )}
             <ButtonIcon
               options={{
                 iconName: 'edit',
@@ -100,7 +101,7 @@
               }}
             />
           {/if}
-          {#if $hasUserAccessToFeature( 'observation', 'delete', { groupId: goal.groupId, studentId: observation.studentId, createdById: observation.createdById, goalStudentId: goal.studentId } )}
+          {#if $hasUserAccessToFeature( 'observation', 'delete', { groupId: group.id, studentId: observation.studentId, createdById: observation.createdById, goalStudentId: goal.studentId } )}
             {#key observation.id}
               <ButtonIcon
                 options={{

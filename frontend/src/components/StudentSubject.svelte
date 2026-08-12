@@ -1,7 +1,13 @@
 <script lang="ts">
   import { useTinyRouter } from 'svelte-tiny-router'
 
-  import type { SubjectType, UserType, GoalType, ObservationType } from '../generated/types.gen'
+  import type {
+    SubjectType,
+    UserType,
+    GoalType,
+    ObservationType,
+    GroupType,
+  } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
   import { urlStringFrom, getSubjectName } from '../utils/functions'
@@ -18,12 +24,14 @@
 
   const {
     subject,
+    group,
     student,
     isTitleEnabled = true,
     goals: goalsProp,
   } = $props<{
     subject: SubjectType
     student: UserType
+    group: GroupType
     isTitleEnabled?: boolean
     goals?: GoalDecorated[]
   }>()
@@ -163,7 +171,7 @@
               {/if}
             {/if}
 
-            {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, goalStudentId: goal.studentId, studentId: student.id } )}
+            {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: group.id, goalStudentId: goal.studentId, studentId: student.id } )}
               <ButtonIcon
                 options={{
                   iconName: 'bullseye',
@@ -191,6 +199,7 @@
           <GoalObservations
             {goal}
             {student}
+            {group}
             onRefreshNeeded={fetchData}
             onEditObservation={handleEditObservation}
           />
