@@ -28,14 +28,23 @@
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingGroups = $state<boolean>(false)
 
-  let selectedEnabledOption = $state<GROUP_ENABLED_OPTIONS>(GROUP_ENABLED_OPTIONS.ONLY)
-  let selectedValidOption = $state<GROUP_VALIDITY_OPTIONS>(GROUP_VALIDITY_OPTIONS.ONLY)
-  let selectedDeletedOption = $state<GROUP_DELETED_OPTIONS>(GROUP_DELETED_OPTIONS.INCLUDE)
+  let selectedSchool = $derived(schools.find(s => s.id === selectedSchoolId))
 
-  let selectedSchool = $derived.by(() => {
-    const schoolIdFromUrl = router.getQueryParam('school')
-    return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
-  })
+  let selectedSchoolId = $state<string>(
+    router.getQueryParam('school') || $dataStore.currentSchool?.id
+  )
+
+  let selectedEnabledOption = $state<GROUP_ENABLED_OPTIONS>(
+    (router.getQueryParam('enabled') as GROUP_ENABLED_OPTIONS) || GROUP_ENABLED_OPTIONS.ONLY
+  )
+
+  let selectedValidOption = $state<GROUP_VALIDITY_OPTIONS>(
+    (router.getQueryParam('valid') as GROUP_VALIDITY_OPTIONS) || GROUP_VALIDITY_OPTIONS.ONLY
+  )
+
+  let selectedDeletedOption = $state<GROUP_DELETED_OPTIONS>(
+    (router.getQueryParam('deleted') as GROUP_DELETED_OPTIONS) || GROUP_DELETED_OPTIONS.INCLUDE
+  )
 
   let selectedYearOption = $state<string>(
     (router.getQueryParam('year') as string) || getCurrentSchoolYear()
@@ -87,7 +96,7 @@
   )
 
   let groupFetchOptions = $derived({
-    school: selectedSchool.id,
+    school: selectedSchoolId,
     enabled: selectedEnabledOption,
     deleted: selectedDeletedOption,
     valid: selectedValidOption,
@@ -157,11 +166,7 @@
   }
 
   const handleSchoolSelect = (schoolId: string): void => {
-    if (schoolId && schoolId !== '0') {
-      router.navigate(urlStringFrom({ school: schoolId }, { path: '/admin/groups', mode: 'merge' }))
-    } else {
-      router.navigate('/admin/groups')
-    }
+    selectedSchoolId = schoolId
   }
 
   const handleGroupTypeToggle = async (group: GroupType) => {
@@ -233,6 +238,20 @@
     if (selectedSchool) {
       fetchGroups()
     }
+  })
+
+  $effect(() => {
+    const url = urlStringFrom(
+      {
+        school: selectedSchoolId || null,
+        deleted: selectedDeletedOption || null,
+        year: selectedYearOption || null,
+        enabled: selectedEnabledOption || null,
+        valid: selectedValidOption || null,
+      },
+      { path: '/admin/groups', mode: 'merge' }
+    )
+    router.navigate(url)
   })
 </script>
 
