@@ -75,6 +75,12 @@ export enum GROUP_ENABLED_OPTIONS {
   EXCLUDE = 'exclude',
 }
 
+export enum SUBJECT_OWNERSHIP_OPTIONS {
+  ANY = 'any',
+  ONLY_GLOBAL = 'only-global',
+  ONLY_SCHOOL_OWNED = 'only-school-owned',
+}
+
 export const STATUS_CATEGORY_NAMES: Record<string, string> = {
   midyear: 'Halvtår',
   endyear: 'Standpunkt',

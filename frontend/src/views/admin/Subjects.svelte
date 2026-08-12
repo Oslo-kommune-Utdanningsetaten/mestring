@@ -1,15 +1,20 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { useTinyRouter } from 'svelte-tiny-router'
-  import { subjectsDestroy, subjectsList, schoolsList } from '../../generated/sdk.gen'
+  import { subjectsDestroy, subjectsList, schoolsList, groupsList } from '../../generated/sdk.gen'
   import type { SubjectType, SchoolType, GroupType } from '../../generated/types.gen'
-  import { GROUP_DELETED_OPTIONS } from '../../utils/constants'
+  import {
+    GROUP_DELETED_OPTIONS,
+    GROUP_VALIDITY_OPTIONS,
+    SUBJECT_OWNERSHIP_OPTIONS,
+  } from '../../utils/constants'
   import { urlStringFrom } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
   import {
     getAllSchoolYears,
     getCurrentSchoolYear,
     inferCreatedParams,
+    inferGroupValidityParams,
   } from '../../utils/schoolYear'
 
   import ButtonMini from '../../components/ButtonMini.svelte'
@@ -23,15 +28,21 @@
   let subjectWip = $state<SubjectType | null>(null)
   let isSubjectEditorOpen = $state(false)
   let schools = $state<SchoolType[]>([])
-  let subjectFetchSelection = $state<string>('only-school-owned')
   let groupsBySubjectId = $state<Record<string, GroupType[]>>({})
   let nameFilter = $state<string>('')
+
   let selectedSchool = $derived.by(() => {
     const schoolIdFromUrl = router.getQueryParam('school')
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
   })
 
-  let selectedDeletedOption = $state<GROUP_DELETED_OPTIONS>(GROUP_DELETED_OPTIONS.EXCLUDE)
+  let selectedSubjectsFetchOption = $state<SUBJECT_OWNERSHIP_OPTIONS>(
+    (router.getQueryParam('owner') as SUBJECT_OWNERSHIP_OPTIONS) || SUBJECT_OWNERSHIP_OPTIONS.ANY
+  )
+
+  let selectedDeletedOption = $state<GROUP_DELETED_OPTIONS>(
+    (router.getQueryParam('deleted') as GROUP_DELETED_OPTIONS) || GROUP_DELETED_OPTIONS.EXCLUDE
+  )
 
   let selectedYearOption = $state<string>(
     (router.getQueryParam('year') as string) || getCurrentSchoolYear()
@@ -39,9 +50,9 @@
 
   // Radio options for subject filtering
   const subjectFetchOptions = [
-    { value: 'all', label: 'Alle fag' },
-    { value: 'only-global', label: 'Globale fag' },
-    { value: 'only-school-owned', label: 'Fag tilknyttet skolen' },
+    { value: SUBJECT_OWNERSHIP_OPTIONS.ANY, label: 'Alle fag' },
+    { value: SUBJECT_OWNERSHIP_OPTIONS.ONLY_GLOBAL, label: 'Globale fag' },
+    { value: SUBJECT_OWNERSHIP_OPTIONS.ONLY_SCHOOL_OWNED, label: 'Fag tilknyttet skolen' },
   ] as const
 
   // Options for filtering by deleted
@@ -62,16 +73,15 @@
       })),
   ] as const
 
-  let queryOptions = $derived.by(() => {
-    const result: any = {
+  let subjectsQueryOptions = $derived.by(() => {
+    const options: any = {
       school: selectedSchool.id,
       deleted: selectedDeletedOption,
-      ...inferCreatedParams(selectedYearOption),
     }
-    if (subjectFetchSelection !== 'all') {
-      result.isOwnedBySchool = subjectFetchSelection === 'only-school-owned'
+    if (selectedSubjectsFetchOption !== 'any') {
+      options.isOwnedBySchool = selectedSubjectsFetchOption === 'only-school-owned'
     }
-    return result
+    return options
   })
 
   let filteredSubjects = $derived(
@@ -88,6 +98,16 @@
     return text
   })
 
+  const getGroupsQueryOptions: any = (subjectId: string) => {
+    return {
+      subject: subjectId,
+      school: selectedSchool.id,
+      deleted: 'all',
+      ...inferCreatedParams(selectedYearOption),
+      ...inferGroupValidityParams(selectedYearOption),
+    }
+  }
+
   const fetchSchools = async () => {
     try {
       const result = await schoolsList({})
@@ -103,11 +123,8 @@
     if (Object.hasOwn(groupsBySubjectId, subjectId)) return
     groupsBySubjectId[subjectId] = []
     try {
-      const groups = $dataStore.currentUser.allGroups.filter(
-        (group: GroupType) => group.subjectId === subjectId
-      )
-      groups.forEach((group: GroupType) => groupsBySubjectId[subjectId].push(group))
-      groupsBySubjectId = { ...groupsBySubjectId }
+      const result = await groupsList({ query: getGroupsQueryOptions(subjectId) })
+      groupsBySubjectId[subjectId] = result.data || []
     } catch (error) {
       console.error('Error fetching group:', error)
     }
@@ -116,7 +133,7 @@
   const fetchSubjects = async () => {
     if (!selectedSchool) return
     try {
-      const result = await subjectsList({ query: queryOptions })
+      const result = await subjectsList({ query: subjectsQueryOptions })
       subjects = (result.data || []).sort((a, b) =>
         a.displayName.localeCompare(b.displayName, 'no', { sensitivity: 'base' })
       )
@@ -172,6 +189,18 @@
       fetchSubjects()
     }
   })
+
+  $effect(() => {
+    const url = urlStringFrom(
+      {
+        deleted: selectedDeletedOption || null,
+        year: selectedYearOption || null,
+        owner: selectedSubjectsFetchOption || null,
+      },
+      { path: '/admin/subjects', mode: 'merge' }
+    )
+    router.navigate(url)
+  })
 </script>
 
 {#snippet groupsInfo(groups: GroupType[])}
@@ -187,14 +216,10 @@
     <!-- grep code -->
     {#if subject.grepCode}
       <span title="grepCode">{subject.grepCode}</span>
-    {:else}
-      <span class="fst-italic">mangler</span>
     {/if}
     <!-- Opplæringsfag / grepGroupCode -->
     {#if subject.grepGroupCode}
-      <span title="grepGroupCode">{subject.grepGroupCode}</span>
-    {:else}
-      <span class="fst-italic">mangler</span>
+      <span title="grepGroupCode">({subject.grepGroupCode})</span>
     {/if}
   {/if}
 {/snippet}
@@ -239,7 +264,7 @@
             type="radio"
             name="subjectFetchInclusion"
             value={option.value}
-            bind:group={subjectFetchSelection}
+            bind:group={selectedSubjectsFetchOption}
           />
           <span class="ms-2">{option.label}</span>
         </label>
@@ -300,7 +325,6 @@
     <div class="subjects-grid" aria-label="Fagliste">
       <span class="item header header-row">Fag</span>
       <span class="item header header-row">Eies av</span>
-      <span class="item header header-row">Elever</span>
       <span class="item header header-row">Grupper</span>
       <span class="item header header-row">Fagkode</span>
       <span class="item header header-row">Handlinger</span>
@@ -320,10 +344,6 @@
           {:else}
             <span class="fst-italic">Globalt</span>
           {/if}
-        </span>
-
-        <span class="item">
-          <span class="fst-italic">0</span>
         </span>
 
         <!-- Grupper -->
@@ -404,7 +424,7 @@
 
   .subjects-grid {
     display: grid;
-    grid-template-columns: 1.5fr 2fr 0.5fr 1.5fr 1fr 0.5fr;
+    grid-template-columns: 2fr 1fr 2fr 1fr 1fr;
     align-items: start;
     gap: 0;
     border-bottom: 1px solid var(--bs-border-color);

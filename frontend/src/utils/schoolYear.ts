@@ -1,3 +1,5 @@
+import { GROUP_VALIDITY_OPTIONS } from './constants'
+
 export const calculateSchoolYearMilestones = (customDate?: Date) => {
   const date = customDate || new Date()
   const year = date.getFullYear()
@@ -38,4 +40,19 @@ export const inferCreatedParams = (yearRange: string) => {
   const { startAt: createdAfter } = calculateSchoolYearMilestones(new Date(`${firstYear}-08-15`))
   const { endAt: createdBefore } = calculateSchoolYearMilestones(new Date(`${lastYear - 1}-08-15`))
   return { createdAfter, createdBefore }
+}
+
+export const inferGroupValidityParams = (schoolYear: string) => {
+  const params: Record<'valid', string> = { valid: '' }
+  if (schoolYear === 'all') {
+    // All years selected --> include all groups regardless of validity
+    params.valid = GROUP_VALIDITY_OPTIONS.INCLUDE
+  } else if (schoolYear === getCurrentSchoolYear()) {
+    // Current year selected --> only include valid groups
+    params.valid = GROUP_VALIDITY_OPTIONS.ONLY
+  } else {
+    // Past year selected --> only include invalid groups
+    params.valid = GROUP_VALIDITY_OPTIONS.EXCLUDE
+  }
+  return params
 }

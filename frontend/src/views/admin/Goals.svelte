@@ -19,7 +19,9 @@
   let goals = $state<GoalType[]>([])
   let creatorsById = $state<Record<string, string>>({})
 
-  let selectedDeletedOption = $state<GROUP_DELETED_OPTIONS>(GROUP_DELETED_OPTIONS.EXCLUDE)
+  let selectedDeletedOption = $state<GROUP_DELETED_OPTIONS>(
+    (router.getQueryParam('year') as GROUP_DELETED_OPTIONS) || GROUP_DELETED_OPTIONS.EXCLUDE
+  )
 
   let selectedYearOption = $state<string>(
     (router.getQueryParam('year') as string) || getCurrentSchoolYear()
@@ -32,7 +34,7 @@
 
   // Options for filtering by deleted
   const deletedOptions = [
-    { value: GROUP_DELETED_OPTIONS.INCLUDE, label: 'Alle, uansett slettet-status' },
+    { value: GROUP_DELETED_OPTIONS.INCLUDE, label: 'Alle mål, uansett slettet-status' },
     { value: GROUP_DELETED_OPTIONS.ONLY, label: 'Kun slettete mål' },
     { value: GROUP_DELETED_OPTIONS.EXCLUDE, label: 'Kun IKKE slettete mål' },
   ] as const
@@ -169,22 +171,6 @@
   <h2>Alle mål ved skolen</h2>
 
   <div class="d-flex flex-wrap gap-3 mt-3">
-    <!-- Radio buttons for deleted status -->
-    <fieldset class="border p-3 rounded">
-      <legend class="w-auto fs-6">Slettet</legend>
-      {#each deletedOptions as option}
-        <label class="my-2 ms-1 d-block">
-          <input
-            type="radio"
-            name="deletedOptions"
-            value={option.value}
-            bind:group={selectedDeletedOption}
-          />
-          <span class="ms-2">{option.label}</span>
-        </label>
-      {/each}
-    </fieldset>
-
     <!-- Radio buttons for created in year -->
     <fieldset class="border p-3 rounded">
       <legend class="w-auto fs-6">År opprettet</legend>
@@ -200,6 +186,24 @@
         </label>
       {/each}
     </fieldset>
+
+    {#if $dataStore.currentUser.isSuperadmin}
+      <!-- Radio buttons for deleted status -->
+      <fieldset class="border p-3 rounded">
+        <legend class="w-auto fs-6">Slettet</legend>
+        {#each deletedOptions as option}
+          <label class="my-2 ms-1 d-block">
+            <input
+              type="radio"
+              name="deletedOptions"
+              value={option.value}
+              bind:group={selectedDeletedOption}
+            />
+            <span class="ms-2">{option.label}</span>
+          </label>
+        {/each}
+      </fieldset>
+    {/if}
   </div>
 
   {#if goals.length > 0}
