@@ -3,7 +3,7 @@
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import type { GoalType } from '../../generated/types.gen'
   import { goalsList, usersList } from '../../generated/sdk.gen'
-  import { formatDateTime } from '../../utils/functions'
+  import { formatDateTime, urlStringFrom } from '../../utils/functions'
   import { addAlert } from '../../stores/alerts'
   import { dataStore } from '../../stores/data'
   import { GROUP_DELETED_OPTIONS } from '../../utils/constants'
@@ -20,7 +20,7 @@
   let creatorsById = $state<Record<string, string>>({})
 
   let selectedDeletedOption = $state<GROUP_DELETED_OPTIONS>(
-    (router.getQueryParam('year') as GROUP_DELETED_OPTIONS) || GROUP_DELETED_OPTIONS.EXCLUDE
+    (router.getQueryParam('deleted') as GROUP_DELETED_OPTIONS) || GROUP_DELETED_OPTIONS.EXCLUDE
   )
 
   let selectedYearOption = $state<string>(
@@ -165,6 +165,17 @@
   $effect(() => {
     if (currentSchool) fetchGoals()
   })
+
+  $effect(() => {
+    const url = urlStringFrom(
+      {
+        deleted: selectedDeletedOption || null,
+        year: selectedYearOption || null,
+      },
+      { path: '/goals', mode: 'merge' }
+    )
+    router.navigate(url)
+  })
 </script>
 
 <section class="py-3">
@@ -187,8 +198,8 @@
       {/each}
     </fieldset>
 
+    <!-- Only superadmins need be bothered with deleted status -->
     {#if $dataStore.currentUser.isSuperadmin}
-      <!-- Radio buttons for deleted status -->
       <fieldset class="border p-3 rounded">
         <legend class="w-auto fs-6">Slettet</legend>
         {#each deletedOptions as option}
