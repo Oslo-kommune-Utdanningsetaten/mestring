@@ -65,6 +65,7 @@ export type GroupType = {
     readonly updatedById: string;
     subjectId?: string | null;
     schoolId: string;
+    readonly isValid: boolean;
 };
 
 export type MasterySchemaType = {
@@ -188,6 +189,7 @@ export type PatchedGroupType = {
     readonly updatedById?: string;
     subjectId?: string | null;
     schoolId?: string;
+    readonly isValid?: boolean;
 };
 
 export type PatchedMasterySchemaType = {

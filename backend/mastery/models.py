@@ -227,9 +227,15 @@ class Group(BaseModel):
     valid_to = models.DateTimeField(null=True)
     is_enabled = models.BooleanField(default=False)  # whether the group is active in the system
 
-    def is_currently_valid(self):
+    @property
+    def is_valid(self):
         """Return True if in valid_from <--> valid_to range, or if no range is set"""
-        return Group.objects.filter(id=self.id).within_validity_period().exists()
+        now = timezone.now()
+        if self.valid_from and self.valid_from > now:
+            return False
+        if self.valid_to and self.valid_to < now:
+            return False
+        return True
 
     def get_members(self, role=None):
         """

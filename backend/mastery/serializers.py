@@ -120,6 +120,12 @@ class GroupSerializer(BaseModelSerializer):
         model = models.Group
         fields = '__all__'
 
+    def get_fields(self):
+        fields = super().get_fields()
+        # Add computed/property fields
+        fields['is_valid'] = serializers.BooleanField(read_only=True)
+        return fields
+
 
 class GoalSerializer(BaseModelSerializer):
     class Meta:

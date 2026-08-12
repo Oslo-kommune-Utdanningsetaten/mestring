@@ -463,7 +463,10 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('display_name')
         qs = apply_deleted_filter(self.request.query_params, qs)
         qs = apply_created_filter(self.request.query_params, qs)
-        qs = apply_valid_group_filter(self.request.query_params, qs)
+
+        if self.action != 'retrieve':
+            # Fetching a single group by ID does not require filtering by validity
+            qs = apply_valid_group_filter(self.request.query_params, qs)
 
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
