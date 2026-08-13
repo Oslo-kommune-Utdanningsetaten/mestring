@@ -460,6 +460,7 @@
       <StudentsWithSubjects {students} {subjects} {group} />
     {:else if group.type === GROUP_TYPE_TEACHING}
       <StudentsWithGoals
+        {group}
         {students}
         goals={groupGoals}
         goalsWithMasteryByStudentId={goalsWithCalculatedMasteryByStudentId}
@@ -471,9 +472,7 @@
     {:else}
       <div class="alert alert-warning">
         <div>Hm, denne gruppa har en uventet datastruktur</div>
-        <pre>
-        {JSON.stringify(group, null, 2)}
-      </pre>
+        <pre>{JSON.stringify(group, null, 2)}</pre>
       </div>
     {/if}
   </section>

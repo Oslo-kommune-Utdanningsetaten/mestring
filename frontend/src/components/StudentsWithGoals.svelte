@@ -1,5 +1,11 @@
 <script lang="ts">
-  import type { GoalType, UserType, SubjectType, ObservationType } from '../generated/types.gen'
+  import type {
+    GoalType,
+    UserType,
+    SubjectType,
+    ObservationType,
+    GroupType,
+  } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
   import { MISSING_REASON_NO_OBSERVATIONS } from '../utils/constants'
@@ -13,6 +19,7 @@
   import StudentSubjectChart from './StudentSubjectChart.svelte'
 
   let {
+    group,
     students,
     goals,
     goalsWithMasteryByStudentId,
@@ -21,6 +28,7 @@
     onEditObservation,
     onEditStatus,
   }: {
+    group: GroupType
     students: UserType[]
     goals: GoalType[]
     goalsWithMasteryByStudentId: Record<string, GoalDecorated[]>
@@ -194,7 +202,7 @@
             <Statuses {student} {subject} />
           {/key}
 
-          {#if $hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
+          {#if $hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentGroupIds: student.groupIds, groupId: group.id } )}
             <ButtonIcon
               options={{
                 iconName: 'achievement',
@@ -229,7 +237,7 @@
           />
         {/if}
         <span class="add-observation-button">
-          {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, subjectId: subject?.id, studentGroupIds: student.groupIds } )}
+          {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: group.id, subjectId: subject?.id, studentGroupIds: student.groupIds } )}
             <ButtonIcon
               options={{
                 iconName: 'bullseye',
