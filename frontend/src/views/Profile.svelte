@@ -66,6 +66,13 @@
   const studentGroups = $derived(
     isProfileMode ? $currentUser?.studentGroups || [] : otherStudentGroups
   )
+
+  // Derived values for filtering groups by validity
+  const validTeacherGroups = $derived(teacherGroups.filter((g: GroupType) => g.isValid))
+  const invalidTeacherGroups = $derived(teacherGroups.filter((g: GroupType) => !g.isValid))
+  const validStudentGroups = $derived(studentGroups.filter((g: GroupType) => g.isValid))
+  const invalidStudentGroups = $derived(studentGroups.filter((g: GroupType) => !g.isValid))
+
   const allGroups = $derived(
     isProfileMode ? $currentUser?.allGroups || [] : [...otherTeacherGroups, ...otherStudentGroups]
   )
@@ -314,17 +321,29 @@
     <!-- Group access -->
     <div class="card mb-3">
       <div class="card-header d-flex">
-        <h3 class="mb-0">Tilgang til grupper ({groupsCount})</h3>
+        <h3 class="mb-0">Tilgang til grupper</h3>
       </div>
+
       <div class="card-body">
         <!-- Teacher groups -->
         <h4 class="mt-1 mb-2">Som lærer</h4>
         {#if teacherGroups?.length > 0}
-          <div class="d-flex flex-wrap gap-2">
-            {#each teacherGroups as group}
-              <GroupTag {group} isGroupNameEnabled={true} href={`/groups/${group.id}/`} />
-            {/each}
-          </div>
+          {#if validTeacherGroups?.length > 0}
+            <h5 class="mt-3 mb-2">Dette skoleåret ({getCurrentSchoolYear()})</h5>
+            <div class="d-flex flex-wrap gap-2">
+              {#each validTeacherGroups as group}
+                <GroupTag {group} isGroupNameEnabled={true} href={`/groups/${group.id}/`} />
+              {/each}
+            </div>
+          {/if}
+          {#if invalidTeacherGroups?.length > 0}
+            <h5 class="mt-3 mb-2">Tidligere år</h5>
+            <div class="d-flex flex-wrap gap-2">
+              {#each invalidTeacherGroups as group}
+                <GroupTag {group} isGroupNameEnabled={true} href={`/groups/${group.id}/`} />
+              {/each}
+            </div>
+          {/if}
         {:else}
           <span class="text-muted">Ikke medlem av noen grupper som lærer</span>
         {/if}
@@ -332,11 +351,22 @@
         <!-- Student groups -->
         <h4 class="mt-4 mb-2">Som elev</h4>
         {#if studentGroups?.length > 0}
-          <div class="d-flex flex-wrap gap-2">
-            {#each studentGroups as group}
-              <GroupTag {group} isGroupNameEnabled={true} href={`/groups/${group.id}/`} />
-            {/each}
-          </div>
+          {#if validStudentGroups?.length > 0}
+            <h5 class="mt-3 mb-2">Dette skoleåret ({getCurrentSchoolYear()})</h5>
+            <div class="d-flex flex-wrap gap-2">
+              {#each validStudentGroups as group}
+                <GroupTag {group} isGroupNameEnabled={true} href={`/groups/${group.id}/`} />
+              {/each}
+            </div>
+          {/if}
+          {#if invalidStudentGroups?.length > 0}
+            <h5 class="mt-3 mb-2">Tidligere år</h5>
+            <div class="d-flex flex-wrap gap-2">
+              {#each invalidStudentGroups as group}
+                <GroupTag {group} isGroupNameEnabled={true} href={`/groups/${group.id}/`} />
+              {/each}
+            </div>
+          {/if}
         {:else}
           <span class="text-muted">Ikke medlem av noen grupper som elev</span>
         {/if}

@@ -707,6 +707,7 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 # Student can be either the owner of an individual goal or a member of a group goal.
                 # Only return goals for students that the requester has access to (per UserAccessPolicy)
                 student_filter = Q(student_id=student_param)
+
                 has_access_to_student = UserAccessPolicy().scope_queryset(
                     self.request, models.User.objects.all()
                 ).filter(id=student_param).exists()

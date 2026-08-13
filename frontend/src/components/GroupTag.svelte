@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { GroupType } from '../generated/types.gen'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
+  import { getSchoolYearForGroup, getCurrentSchoolYear } from '../utils/schoolYear'
   import Link from './Link.svelte'
 
   const {
@@ -23,6 +24,10 @@
     classes?: string
   }>()
 
+  const isSchoolYearEnabled: boolean = $derived(
+    getCurrentSchoolYear() !== getSchoolYearForGroup(group)
+  )
+
   const label: string = $derived(
     [
       isGroupNameEnabled ? group?.displayName : null,
@@ -31,13 +36,14 @@
           ? 'Basisgruppe'
           : 'Undervisningsgruppe'
         : null,
+      isSchoolYearEnabled ? getSchoolYearForGroup(group) : null,
     ]
       .filter(Boolean)
       .join(' - ')
   )
 
   // const skin: string = $derived(group.type === GROUP_TYPE_BASIS ? 'blue' : 'green')
-  const skin: string = 'gray'
+  const skin: string = $derived('gray')
 
   const isGroupTypeChanged = $derived.by(() => {
     // Inspect feideId to determine original group type
@@ -78,20 +84,14 @@
   {:else if href}
     <pkt-tag iconName="group" {skin} class={classes}>
       <Link to={href}>
-        <span
-          class={group.isEnabled ? '' : 'disabled'}
-          title={group.isEnabled ? 'Enabled' : 'Disabled'}
-        >
+        <span class:disabled={!group.isEnabled} title={group.isEnabled ? '' : 'Disabled'}>
           {label}
         </span>
       </Link>
     </pkt-tag>
   {:else}
     <pkt-tag iconName="group" {skin} class={classes}>
-      <span
-        class={group.isEnabled ? '' : 'disabled'}
-        title={group.isEnabled ? 'Enabled' : 'Disabled'}
-      >
+      <span class:disabled={!group.isEnabled} title={group.isEnabled ? '' : 'Disabled'}>
         {label}
       </span>
     </pkt-tag>
@@ -133,5 +133,9 @@
     text-decoration-thickness: 3px;
     text-decoration-color: color-mix(in srgb, var(--pkt-color-brand-red-1000) 80%, transparent);
     opacity: 0.7;
+  }
+
+  .invalid {
+    background-color: var(--bs-warning-bg);
   }
 </style>

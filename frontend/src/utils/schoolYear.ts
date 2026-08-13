@@ -8,7 +8,7 @@ export const calculateSchoolYearMilestones = (customDate?: Date) => {
   const schoolStartYear = month < 7 ? year - 1 : year
 
   return {
-    startAt: `${schoolStartYear}-08-15`,
+    startAt: `${schoolStartYear}-08-07`,
     midyearAt: `${schoolStartYear + 1}-01-15`,
     endAt: `${schoolStartYear + 1}-06-30`,
   }

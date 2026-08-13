@@ -101,7 +101,7 @@
       teachers = teachersResult.data || []
       students = studentsResult.data || []
       groupGoals = goalsResult.data || []
-
+      console.log('groupGoals', groupGoals)
       // For each student, fetch their goals with calculated mastery
       await Promise.all(
         students.map(async student => {
@@ -432,7 +432,7 @@
 
   {#if isCurrentUserOnlyStudent && subject}
     <section>
-      <h3 class="mb-3">Mål</h3>
+      <h3 class="mb-3">Mine mål</h3>
       <div class="card shadow-sm mt-4 list-group">
         <div class="list-group-item">
           <StudentSubject
@@ -448,7 +448,7 @@
 
   <!-- Students Section -->
   <section>
-    <h3 class="mb-3">Elever</h3>
+    <h3 class="mb-3">Elevene i denne gruppa</h3>
 
     {#if isCurrentUserOnlyStudent}
       <div class="card shadow-sm mt-4 list-group">

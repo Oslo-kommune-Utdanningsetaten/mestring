@@ -115,6 +115,7 @@ export const fetchGoalsForSubjectAndStudent = async (
       },
     })
     const goals = goalsResult.data || []
+    console.log('🦊goals', goals)
     if (goals.length === 0) {
       return []
     }

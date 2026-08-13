@@ -4,6 +4,8 @@ import { ROUTES } from '../utils/routes'
 import type { GroupType, SchoolType, SubjectType } from '../generated/types.gen'
 import type { UserDecorated, UserRoleType, HasUserAccessToFeatureOptions } from '../types/models'
 import { currentUser, currentSchool, subjects } from './data'
+import { getCurrentSchoolYear } from '../utils/schoolYear'
+import { getPreferredSchoolYear } from './localStorageFunctions'
 
 export const hasUserAccessToPath = derived(
   currentUser,
@@ -49,6 +51,15 @@ const checkUserAccessToFeature = (
 
   if (groupId && (!group || !group.isValid)) {
     // group is inaccessible to normal users
+    return false
+  }
+
+  // Disallow create/update/delete actions if the user has selected a different school year than the current one
+  // Prevents modifying data in past (or future) school years
+  if (
+    getCurrentSchoolYear() !== getPreferredSchoolYear() &&
+    ['create', 'update', 'delete'].includes(action)
+  ) {
     return false
   }
 
