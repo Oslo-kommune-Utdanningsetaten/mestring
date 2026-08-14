@@ -107,12 +107,7 @@ export const ROUTES = [
     path: '/students',
     component: Students,
     isPublic: false,
-    accessibleBy: [
-      USER_ROLES.TEACHER,
-      USER_ROLES.INSPECTOR,
-      USER_ROLES.ADMIN,
-      USER_ROLES.SUPERADMIN,
-    ],
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
   {
     path: '/groups-compare',
