@@ -8,8 +8,10 @@ import { getCurrentSchoolYear } from '../utils/schoolYear'
 import { getPreferredSchoolYear } from './localStorageFunctions'
 
 export const hasUserAccessToPath = derived(
-  currentUser,
-  $currentUser => (pathString: string) => checkUserAccessToPath($currentUser, pathString)
+  [currentUser, currentSchool],
+  ([$currentUser, $currentSchool]) =>
+    (pathString: string) =>
+      checkUserAccessToPath($currentUser, $currentSchool, pathString)
 )
 
 export const hasUserAccessToFeature = derived(
@@ -19,16 +21,28 @@ export const hasUserAccessToFeature = derived(
       checkUserAccessToFeature($currentUser, $currentSchool, $subjects, resource, action, options)
 )
 
-const checkUserAccessToPath = (currentUser: UserDecorated | null, pathString: string): boolean => {
+const checkUserAccessToPath = (
+  currentUser: UserDecorated | null,
+  currentSchool: SchoolType | null,
+  pathString: string
+): boolean => {
   const path = ROUTES.find(route => route.path === pathString)
-  const { isPublic, accessibleBy } = path || {}
+  const { isPublic, accessibleBy, schoolConfig } = path || {}
   if (isPublic) return true
   if (!currentUser) return false
   if (currentUser.isSuperadmin) return true
 
   // check for overlapping roles and accessibleBy
   if (accessibleBy) {
-    return currentUser.roles?.some((role: UserRoleType) => accessibleBy.includes(role))
+    const hasUserRoleAccess = currentUser.roles?.some((role: UserRoleType) =>
+      accessibleBy.includes(role)
+    )
+    if (hasUserRoleAccess && currentSchool && schoolConfig) {
+      // check if the school config is enabled
+      return Boolean(currentSchool[schoolConfig as keyof SchoolType])
+    } else {
+      return hasUserRoleAccess
+    }
   }
   return false
 }

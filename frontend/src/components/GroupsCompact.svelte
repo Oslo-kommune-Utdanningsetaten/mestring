@@ -80,7 +80,7 @@
             </div>
 
             <div class="text-end text-nowrap">
-              {#if currentSchool.isStudentListEnabled || $hasUserAccessToPath('/students')}
+              {#if $hasUserAccessToPath('/students')}
                 <Link
                   to={urlStringFrom({ group: group.id }, { path: '/students', mode: 'replace' })}
                 >

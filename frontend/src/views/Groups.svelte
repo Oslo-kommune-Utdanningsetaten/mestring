@@ -84,7 +84,7 @@
         <!-- students -->
         <div class="mt-3 mb-1">
           {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
-            {#if currentSchool.isStudentListEnabled || $hasUserAccessToPath('/students')}
+            {#if $hasUserAccessToPath('/students')}
               <Link
                 to={urlStringFrom(
                   { group: group.id },
