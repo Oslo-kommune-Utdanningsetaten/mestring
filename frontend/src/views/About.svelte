@@ -58,7 +58,7 @@
         Utdanningsetaten
       </Link>
       i tett samarbeid med
-      <Link to="https://haukasen.osloskolen.no/">Haukåsen skole</Link>.
+      <Link to="https://stig.osloskolen.no/">Stig skole</Link>.
     </li>
     <li>
       Kildekoden er åpen og tilgjengelig på
