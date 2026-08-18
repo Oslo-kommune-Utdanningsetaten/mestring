@@ -13,7 +13,7 @@
 
   const skin: string = 'gray'
   const subject = $derived($dataStore.subjects.find((sub: SubjectType) => sub.id === subjectId))
-  const subjectName = $derived(getSubjectName(subject))
+  const subjectName = $derived(subject && getSubjectName(subject))
 </script>
 
 {#if href}
