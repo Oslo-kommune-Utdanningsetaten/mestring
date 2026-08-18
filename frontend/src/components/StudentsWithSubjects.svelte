@@ -248,11 +248,13 @@
     align-items: start;
     gap: 0;
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: 80vh;
   }
 
   .students-grid .item {
     padding: 0.5rem;
-    min-height: 3.8rem;
+    min-height: 4rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -265,6 +267,9 @@
   .students-grid .item.header-row {
     background-color: var(--bs-light);
     font-weight: 800;
+    position: sticky;
+    top: 0;
+    z-index: 10;
   }
 
   .students-grid .item.header {
