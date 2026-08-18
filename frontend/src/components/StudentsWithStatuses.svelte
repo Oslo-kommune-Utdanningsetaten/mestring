@@ -155,6 +155,8 @@
     grid-template-columns: 1.2fr repeat(var(--columns-count, 8), 1fr);
     align-items: start;
     gap: 0;
+    overflow-y: auto;
+    max-height: 80vh;
   }
 
   .students-grid :global(.item) {
@@ -170,7 +172,10 @@
     background-color: var(--bs-light);
     font-weight: 800;
     max-height: 3rem;
-    min-height: 2rem;
+    min-height: 2.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
   }
 
   .students-grid :global(.item.header:first-child),
