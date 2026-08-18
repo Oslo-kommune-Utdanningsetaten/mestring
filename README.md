@@ -14,7 +14,7 @@
 - Svelte frontend
 - Python w/django backend
 - PostgreSQL database
-- Check out the [data model](./notes/mestring-diagram-2026-04-15.drawio.png)
+- Check out the [data model](./notes/mestring-diagram.drawio.png)
 
 - Some [old notes](./notes/old-notes.md)
 
