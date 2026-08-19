@@ -12,10 +12,12 @@
     student: UserType
   }>()
 
-  let { currentSchool, subjects } = $derived($dataStore)
   let groups = $state<GroupType[]>([])
-  let studentSubjects = $state<SubjectType[]>([])
   let isLoading = $state(false)
+  let { currentSchool, subjects } = $derived($dataStore)
+  let studentSubjects = $derived<SubjectType[]>(
+    subjects.filter(subject => groups.some(group => group.subjectId === subject.id))
+  )
 
   const fetchData = async () => {
     isLoading = true
@@ -29,13 +31,9 @@
         },
       })
       groups = (groupsResult.data || []).filter(group => group.type === 'teaching')
-      studentSubjects = subjects.filter(subject =>
-        groups.some(group => group.subjectId === subject.id)
-      )
     } catch (error) {
-      console.error(`Could not load subjects for ${student.id}`, error)
+      console.error(`Failed to load groups for ${student.id}`, error)
       groups = []
-      return
     } finally {
       isLoading = false
     }
@@ -49,18 +47,18 @@
 </script>
 
 <section class="py-4">
-  <h2>Mine fag</h2>
+  <h2>Mine faglige mål</h2>
   {#if isLoading}
     <div class="spinner-border spinner-border-sm" role="status">
       <span class="visually-hidden">Henter data...</span>
     </div>
-  {:else if groups.length < 1}
+  {:else if studentSubjects.length < 1}
     <div class="mt-3">🫤 Ingen fag, gitt.</div>
   {:else}
     <div class="card shadow-sm mt-4 list-group">
-      {#each groups as group (group.id)}
-        {@const subject = studentSubjects.find(s => s.id === group.subjectId)}
-        {#if subject}
+      {#each studentSubjects as subject (subject.id)}
+        {@const group = groups.find(g => g.subjectId === subject.id)}
+        {#if group}
           <div class="list-group-item">
             <StudentSubject {student} {subject} {group} />
           </div>
