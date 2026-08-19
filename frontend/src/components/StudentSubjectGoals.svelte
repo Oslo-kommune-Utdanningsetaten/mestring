@@ -1,7 +1,8 @@
 <script lang="ts">
   import { useTinyRouter } from 'svelte-tiny-router'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
-  import { dataStore } from '../stores/data'
+  import Sortable, { type SortableEvent } from 'sortablejs'
+  import type { GoalDecorated } from '../types/models'
   import type {
     UserType,
     ObservationType,
@@ -9,10 +10,9 @@
     StatusType,
     SubjectType,
   } from '../generated/types.gen'
-  import type { GoalDecorated } from '../types/models'
   import { observationsDestroy, goalsDestroy, goalsUpdate, goalsCreate } from '../generated/sdk.gen'
 
-  import Sortable, { type SortableEvent } from 'sortablejs'
+  import { dataStore } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
   import {
     getPreferredStatusCategory,
