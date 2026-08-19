@@ -69,4 +69,8 @@
 </section>
 
 <style>
+  /* Remove noisy default bottom border on all list-group-item except the last one */
+  .list-group-item:not(:last-of-type) {
+    border-bottom: none;
+  }
 </style>
