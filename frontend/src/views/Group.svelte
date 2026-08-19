@@ -101,7 +101,7 @@
       teachers = teachersResult.data || []
       students = studentsResult.data || []
       groupGoals = goalsResult.data || []
-      console.log('groupGoals', groupGoals)
+
       // For each student, fetch their goals with calculated mastery
       await Promise.all(
         students.map(async student => {
