@@ -659,7 +659,7 @@ def test_basis_group_teacher_goal_access(
     received_ids = {goal['id'] for goal in resp.json()}
     assert individual_goal.id in received_ids
     assert group_goal_own.id in received_ids
-    print('🦊group_goal_other:', group_goal_other.__dict__)
+
     assert group_goal_other.id in received_ids
     assert individual_goal_other.id not in received_ids
 
