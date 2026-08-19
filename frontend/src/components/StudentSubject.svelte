@@ -286,6 +286,16 @@
     background-color: var(--bs-light);
   }
 
+  .goal-item:first-of-type {
+    border-top-left-radius: var(--bs-border-radius);
+    border-top-right-radius: var(--bs-border-radius);
+  }
+
+  .goal-item:last-of-type {
+    border-bottom-left-radius: var(--bs-border-radius);
+    border-bottom-right-radius: var(--bs-border-radius);
+  }
+
   .goal-item.expanded {
     margin-inline: -1.5rem;
     margin-bottom: 1.25rem;
