@@ -13,10 +13,10 @@
   import ButtonIcon from './ButtonIcon.svelte'
   import MasteryLevelTitle from './MasteryLevelTitle.svelte'
 
-  const { student, goal, group, onRefreshNeeded, onEditObservation } = $props<{
+  const { student, group, goal, onRefreshNeeded, onEditObservation } = $props<{
     student: UserType
-    goal: GoalDecorated
     group: GroupType
+    goal: GoalDecorated
     onRefreshNeeded: () => void
     onEditObservation: (observation: ObservationType | null, goal: GoalType) => void
   }>()

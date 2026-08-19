@@ -38,9 +38,9 @@
   import StudentSubjectChart from './StudentSubjectChart.svelte'
   import MasteryLevelTitle from './MasteryLevelTitle.svelte'
 
-  const { subject, student, onRefreshRequired } = $props<{
-    subject: SubjectType
+  const { student, subject, onRefreshRequired } = $props<{
     student: UserType
+    subject: SubjectType
     onRefreshRequired?: Function
   }>()
 

@@ -23,15 +23,15 @@
   import ObservationEdit from './ObservationEdit.svelte'
 
   const {
-    subject,
-    group,
     student,
+    group,
+    subject,
     isTitleEnabled = true,
     goals: goalsProp,
   } = $props<{
-    subject: SubjectType
     student: UserType
     group: GroupType
+    subject: SubjectType
     isTitleEnabled?: boolean
     goals?: GoalDecorated[]
   }>()
