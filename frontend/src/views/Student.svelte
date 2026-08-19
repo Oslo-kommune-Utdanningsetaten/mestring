@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { GoalCreateType, UserType, SubjectType, GroupType } from '../generated/types.gen'
+  import type { GoalDecorated } from '../types/models'
   import {
     usersRetrieve,
     goalsCreate,
@@ -7,7 +8,6 @@
     groupsList,
     subjectsList,
   } from '../generated/sdk.gen'
-  import type { GoalDecorated } from '../types/models'
   import { subjectsInCommon } from '../utils/functions'
   import {
     getPreferredCreatedParams,
@@ -18,7 +18,7 @@
   import { hasUserAccessToFeature } from '../stores/access'
   import { dataStore } from '../stores/data'
   import { trackEvent } from '../stores/analytics'
-  import { localStorage } from '../stores/localStorage'
+
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
   import GoalEdit from '../components/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'

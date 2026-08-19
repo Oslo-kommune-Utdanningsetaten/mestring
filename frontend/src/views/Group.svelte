@@ -18,16 +18,17 @@
     StatusType,
   } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
+
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
   import { dataStore } from '../stores/data'
-  import { goalsWithCalculatedMastery, formatDateTime } from '../utils/functions'
+  import { goalsWithCalculatedMastery } from '../utils/functions'
   import { getPreferredStatusCategory } from '../stores/localStorageFunctions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
   import { getSchoolYearForGroup } from '../utils/schoolYear'
-  import GroupSVG from '../assets/group.svg.svelte'
 
+  import GroupSVG from '../assets/group.svg.svelte'
   import ButtonIcon from '../components/ButtonIcon.svelte'
   import ObservationEdit from '../components/ObservationEdit.svelte'
   import StatusEdit from '../components/StatusEdit.svelte'

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { useTinyRouter } from 'svelte-tiny-router'
-
   import type {
     SubjectType,
     UserType,
