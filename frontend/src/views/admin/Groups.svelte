@@ -75,15 +75,17 @@
   ] as const
 
   // Options for filtering by groups by date validity
-  const createdOptions = [
-    { value: 'all', label: 'Any year' },
-    ...getAllSchoolYears()
-      .reverse()
-      .map((year: string) => ({
+  const createdOptions = $derived.by(() => {
+    if (!$dataStore.currentSchool) return []
+    const allYears = getAllSchoolYears(new Date($dataStore.currentSchool.createdAt)).reverse()
+    return [
+      ...allYears.map(year => ({
         value: year,
         label: year,
       })),
-  ] as const
+      allYears.length > 1 ? { value: 'all', label: 'Alle år' } : null,
+    ].filter(Boolean) as { value: string; label: string }[]
+  })
 
   let filteredGroups = $derived(
     nameFilter

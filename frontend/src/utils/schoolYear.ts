@@ -25,9 +25,9 @@ export const getSchoolYearForGroup = (group: GroupType): string | undefined => {
 }
 
 // Returns an array of ascending school years since launch e.g. ["2025-2026", "2026-2027"]
-export const getAllSchoolYears = (asOfDate?: Date) => {
-  const firstYearStart = 2025 // Mestring was launched in 2025, so no older data exists
-  const currentYearStart = Number(calculateSchoolYearMilestones(asOfDate).startAt.split('-')[0])
+export const getAllSchoolYears = (beginningAt: Date) => {
+  const firstYearStart = Number(calculateSchoolYearMilestones(beginningAt).startAt.split('-')[0])
+  const currentYearStart = Number(calculateSchoolYearMilestones(new Date()).startAt.split('-')[0])
   const schoolYears: string[] = []
   for (let year = firstYearStart; year <= currentYearStart; year++) {
     schoolYears.push(`${year}-${year + 1}`)
@@ -37,7 +37,7 @@ export const getAllSchoolYears = (asOfDate?: Date) => {
 
 // Convenience function to get the current school year
 export const getCurrentSchoolYear = () => {
-  return getAllSchoolYears().reverse()[0]
+  return getAllSchoolYears(new Date()).reverse()[0]
 }
 
 // Assuming schoolYear is a string like "2025-2026" or "2025-2027"

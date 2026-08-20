@@ -39,16 +39,19 @@
     { value: GROUP_DELETED_OPTIONS.EXCLUDE, label: 'Kun IKKE slettete mål' },
   ] as const
 
-  // Options for filtering by groups by date validity
-  const createdOptions = [
-    { value: 'all', label: 'Alle år' },
-    ...getAllSchoolYears()
-      .reverse()
-      .map((year: string) => ({
+  // Options for filtering by goals by date validity
+  const createdOptions = $derived.by(() => {
+    if (!$currentSchool) return []
+
+    const allYears = getAllSchoolYears(new Date($dataStore.currentSchool.createdAt)).reverse()
+    return [
+      ...allYears.map(year => ({
         value: year,
         label: year,
       })),
-  ] as const
+      allYears.length > 1 ? { value: 'all', label: 'Alle år' } : null,
+    ].filter(Boolean) as { value: string; label: string }[]
+  })
 
   let queryOptions = $derived({
     school: currentSchool.id,

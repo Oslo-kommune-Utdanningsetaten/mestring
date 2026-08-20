@@ -7,7 +7,7 @@
     getPreferredGroupValidity,
     getPreferredMasteryBadgeVariant,
   } from '../stores/localStorageFunctions'
-  import { dataStore, setCurrentSchool, currentUser } from '../stores/data'
+  import { dataStore, setCurrentSchool, currentUser, currentSchool } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
   import { hasUserAccessToPath } from '../stores/access'
   import { USER_ROLES, MASTERY_BADGE_VARIANTS, GROUP_VALIDITY_OPTIONS } from '../utils/constants'
@@ -40,17 +40,6 @@
     { value: GROUP_VALIDITY_OPTIONS.EXCLUDE, label: 'Kun ugyldige grupper' },
   ] as const
 
-  // Options for filtering by groups by date validity
-  const createdOptions = [
-    { value: 'all', label: 'Alle år' },
-    ...getAllSchoolYears()
-      .reverse()
-      .map(year => ({
-        value: year,
-        label: year,
-      })),
-  ] as const
-
   // For admin viewing another user's profile
   let otherUser = $state<UserDecorated | undefined>(undefined)
   let otherUserRoles = $state<UserRoleType[]>([])
@@ -66,6 +55,20 @@
   const studentGroups = $derived(
     isProfileMode ? $currentUser?.studentGroups || [] : otherStudentGroups
   )
+
+  // Options for filtering by date validity
+  const createdOptions = $derived.by(() => {
+    if (!$currentSchool) return []
+
+    const allYears = getAllSchoolYears(new Date($currentSchool.createdAt)).reverse()
+    return [
+      ...allYears.map(year => ({
+        value: year,
+        label: year,
+      })),
+      allYears.length > 1 ? { value: 'all', label: 'Alle år' } : null,
+    ].filter(Boolean) as { value: string; label: string }[]
+  })
 
   // Derived values for filtering groups by validity
   const validTeacherGroups = $derived(teacherGroups.filter((g: GroupType) => g.isValid))

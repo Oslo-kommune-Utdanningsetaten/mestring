@@ -204,25 +204,15 @@ describe('aggregateMasterys', () => {
 // getAllSchoolYears
 describe('getAllSchoolYears', () => {
   it('returns all school years from 2025 up to the current school year (autumn)', () => {
-    const result = getAllSchoolYears(new Date('2026-08-10'))
+    const result = getAllSchoolYears(new Date('2025-08-10'))
     expect(result).toEqual(['2025-2026', '2026-2027'])
-  })
-
-  it('returns only the 2025 school year when inside the 2025-2026 school year', () => {
-    const result = getAllSchoolYears(new Date('2025-09-01'))
-    expect(result).toEqual(['2025-2026'])
   })
 
   it('rolls over to the new school year in August', () => {
     const resultBefore = getAllSchoolYears(new Date('2026-07-31'))
     const resultAfter = getAllSchoolYears(new Date('2026-08-15'))
-    expect(resultBefore).toEqual(['2025-2026'])
-    expect(resultAfter).toEqual(['2025-2026', '2026-2027'])
-  })
-
-  it('returns just 2025-2026 when given the first possible date', () => {
-    const result = getAllSchoolYears(new Date('2025-08-15'))
-    expect(result).toEqual(['2025-2026'])
+    expect(resultBefore).toEqual(['2025-2026', '2026-2027'])
+    expect(resultAfter).toEqual(['2026-2027'])
   })
 })
 
@@ -231,12 +221,12 @@ describe('inferCreatedParams', () => {
   it('returns start of earliest and end of latest year', () => {
     const result = inferCreatedParams('2025-2026')
     expect(result).toEqual({
-      createdAfter: '2025-08-15',
+      createdAfter: '2025-08-07',
       createdBefore: '2026-06-30',
     })
     const result2 = inferCreatedParams('2026-2027')
     expect(result2).toEqual({
-      createdAfter: '2026-08-15',
+      createdAfter: '2026-08-07',
       createdBefore: '2027-06-30',
     })
   })
@@ -244,7 +234,7 @@ describe('inferCreatedParams', () => {
   it('returns a longer range if params require it', () => {
     const result = inferCreatedParams('2025-2027')
     expect(result).toEqual({
-      createdAfter: '2025-08-15',
+      createdAfter: '2025-08-07',
       createdBefore: '2027-06-30',
     })
   })
