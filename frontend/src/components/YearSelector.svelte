@@ -11,8 +11,6 @@
     $currentSchool ? getAllSchoolYears(new Date($currentSchool.createdAt)).reverse() : []
   )
 
-  const color = 'green'
-
   // Options for filtering by date validity
   const createdOptions = $derived.by(() => {
     if (!$currentSchool) return []
@@ -41,7 +39,7 @@
     }
     addAlert({
       type: 'success',
-      message: `Valgt skoleår: ${schoolYear}. For å se innholdt fra det valgt året må du refreshe nettsiden.`,
+      message: `Valgt skoleår: ${schoolYear === 'all' ? 'Alle år' : schoolYear}. Husk å refreshe nettsiden.`,
     })
   }
 </script>
@@ -49,7 +47,7 @@
 {#if $currentUser}
   <div class="radio-buttons" role="group">
     {#each createdOptions as option}
-      <label class="radio-button mx-2" style="--effect-color: {color}">
+      <label class="radio-button mx-2">
         <input
           type="radio"
           name="preferredSchoolYear"

@@ -222,7 +222,7 @@
 
           <!-- Don't bother the user with this selector if school has only been using mestring this current year -->
           {#if allYearsForCurrentSchool.length > 1}
-            <li class="nav-item dropdown" title="Valgt skoleår: {$preferredSchoolYear}">
+            <li class="nav-item dropdown" title="Velg skoleår">
               <span
                 class={'nav-link dropdown-toggle'}
                 class:warning={$preferredSchoolYear !== getCurrentSchoolYear()}
