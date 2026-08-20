@@ -3,7 +3,7 @@
   import { usersRetrieve } from '../generated/sdk.gen'
   import type { GroupType, SchoolType } from '../generated/types.gen'
   import {
-    getPreferredSchoolYear,
+    preferredSchoolYear,
     getPreferredGroupValidity,
     getPreferredMasteryBadgeVariant,
   } from '../stores/localStorageFunctions'
@@ -80,8 +80,6 @@
     isProfileMode ? $currentUser?.allGroups || [] : [...otherTeacherGroups, ...otherStudentGroups]
   )
   const schools = $derived<SchoolType[]>(isProfileMode ? $currentUser?.schools || [] : [])
-
-  const groupsCount = $derived(allGroups.length)
 
   const otherGroups = $derived.by(() => {
     if (!allGroups || !teacherGroups || !studentGroups) return []
@@ -246,22 +244,6 @@
                   label={option.label}
                   checked={getPreferredMasteryBadgeVariant() === option.value}
                   onchange={() => handleSelectBadgeVariant(option.value)}
-                ></pkt-radiobutton>
-              {/each}
-            </fieldset>
-          </div>
-
-          <div class="mb-4">
-            <strong>Data fra skoleår</strong>
-            <fieldset class="d-flex flex-wrap gap-4 mt-2">
-              <legend class="visually-hidden">Velg skoleår</legend>
-              {#each createdOptions as option}
-                <pkt-radiobutton
-                  name="preferredSchoolYear"
-                  value={option.value}
-                  label={option.label}
-                  checked={getPreferredSchoolYear() === option.value}
-                  onchange={() => handleSelectSchoolYear(option.value)}
                 ></pkt-radiobutton>
               {/each}
             </fieldset>

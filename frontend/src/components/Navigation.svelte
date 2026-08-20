@@ -1,13 +1,20 @@
 <script lang="ts">
-  import { dataStore, currentUser } from '../stores/data'
+  import { currentUser, currentSchool } from '../stores/data'
   import { login, logout } from '../stores/auth'
   import { currentPath } from '../stores/navigation'
   import { hasUserAccessToPath } from '../stores/access'
+  import oslologoUrl from '@oslokommune/punkt-assets/dist/logos/oslologo.svg?url'
+  import { preferredSchoolYear } from '../stores/localStorageFunctions'
+  import { getAllSchoolYears, getCurrentSchoolYear } from '../utils/schoolYear'
+
   import Link from './Link.svelte'
   import GoalIconCelebration from './GoalIconCelebration.svelte'
-  import oslologoUrl from '@oslokommune/punkt-assets/dist/logos/oslologo.svg?url'
+  import YearSelector from './YearSelector.svelte'
 
-  let currentSchool = $derived($dataStore.currentSchool)
+  const allYearsForCurrentSchool = $derived(
+    $currentSchool ? getAllSchoolYears(new Date($currentSchool.createdAt)).reverse() : []
+  )
+
   let isHomeActive = $derived($currentPath === '/')
   let isStudentsActive = $derived($currentPath.startsWith('/students'))
   let isSchoolActive = $derived(
@@ -38,7 +45,7 @@
     <Link
       className="navbar-brand d-flex align-items-center"
       to={$hasUserAccessToPath('/admin/schools/:schoolId')
-        ? `/admin/schools/${currentSchool?.id}`
+        ? `/admin/schools/${$currentSchool?.id}`
         : '/'}
     >
       <!-- Mestring icon -->
@@ -49,7 +56,7 @@
         </span>
       </span>
 
-      <h1>{currentSchool?.displayName || 'INGEN SKOLE VALGT'}</h1>
+      <h1>{$currentSchool?.displayName || 'INGEN SKOLE VALGT'}</h1>
     </Link>
 
     <!-- Burger menu button, visible on narrow displays -->
@@ -74,7 +81,7 @@
             <Link to="/" className={`nav-link ${isHomeActive ? 'active' : ''}`}>Hjem</Link>
           </li>
 
-          {#if currentSchool?.isStudentListEnabled && $hasUserAccessToPath('/students')}
+          {#if $currentSchool?.isStudentListEnabled && $hasUserAccessToPath('/students')}
             <li class="nav-item">
               <Link to="/students" className={`nav-link ${isStudentsActive ? 'active' : ''}`}>
                 Elever
@@ -212,6 +219,28 @@
               </ul>
             </li>
           {/if}
+
+          <!-- Don't bother the user with this selector if school has only been using mestring this current year -->
+          {#if allYearsForCurrentSchool.length > 1}
+            <li class="nav-item dropdown" title="Valgt skoleår: {$preferredSchoolYear}">
+              <span
+                class={'nav-link dropdown-toggle'}
+                class:warning={$preferredSchoolYear !== getCurrentSchoolYear()}
+                id="navbarDropdownYearSelector"
+                role="button"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="outside"
+              >
+                {$preferredSchoolYear === 'all' ? 'Alle år' : $preferredSchoolYear}
+              </span>
+              <span
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="navbarDropdownYearSelector"
+              >
+                <YearSelector />
+              </span>
+            </li>
+          {/if}
         {/if}
 
         <!-- Login -->
@@ -235,6 +264,11 @@
     font-size: 1.8rem;
     line-height: 1;
     margin: 0;
+  }
+
+  .warning {
+    background-color: #ffc107;
+    border: 2px solid #ff9800;
   }
 
   /* Suppress the lingering focus frame after a mouse click,

@@ -24,8 +24,8 @@
     classes?: string
   }>()
 
-  const isSchoolYearEnabled: boolean = $derived(
-    getCurrentSchoolYear() !== getSchoolYearForGroup(group)
+  const earlierYear = $derived(
+    getCurrentSchoolYear() !== getSchoolYearForGroup(group) ? getSchoolYearForGroup(group) : null
   )
 
   const label: string = $derived(
@@ -36,7 +36,6 @@
           ? 'Basisgruppe'
           : 'Undervisningsgruppe'
         : null,
-      isSchoolYearEnabled ? getSchoolYearForGroup(group) : null,
     ]
       .filter(Boolean)
       .join(' - ')
@@ -68,7 +67,12 @@
         aria-label={accessibleLabel}
       >
         <pkt-tag iconName="group" {skin} class={classes}>
-          <span>{label}</span>
+          <span>
+            {label}
+            {#if earlierYear}
+              <span class="text-muted">({earlierYear})</span>
+            {/if}
+          </span>
           {#if isGroupTypeChanged && isTypeWarningEnabled}
             <span class="colored-icon">
               <pkt-icon
@@ -86,6 +90,9 @@
       <Link to={href}>
         <span class:disabled={!group.isEnabled} title={group.isEnabled ? '' : 'Disabled'}>
           {label}
+          {#if earlierYear}
+            <span class="text-muted">({earlierYear})</span>
+          {/if}
         </span>
       </Link>
     </pkt-tag>

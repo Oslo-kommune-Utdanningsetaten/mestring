@@ -317,14 +317,6 @@
     </div>
   </section>
 
-  {#if !group.isValid}
-    <div class="alert alert-warning">
-      <h4>Denne gruppa er fra skoleåret: {getSchoolYearForGroup(group)}</h4>
-      <p class="mt-4 fs-6">{group.validFrom} --> {group.validTo}</p>
-      <p class="mb-0">Hvis du mener dette er en feil, kontakt support.</p>
-    </div>
-  {/if}
-
   {#if group.isEnabled}
     {#if availableStatusCategories.length && $hasUserAccessToFeature( 'status', 'create', { groupId, createdById: $dataStore.currentUser.id, subjectId: group.subjectId || undefined } )}
       <!-- Group goals Section -->

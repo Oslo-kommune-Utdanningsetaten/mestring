@@ -5,7 +5,7 @@ import type { GroupType, SchoolType, SubjectType } from '../generated/types.gen'
 import type { UserDecorated, UserRoleType, HasUserAccessToFeatureOptions } from '../types/models'
 import { currentUser, currentSchool, subjects } from './data'
 import { getCurrentSchoolYear } from '../utils/schoolYear'
-import { getPreferredSchoolYear } from './localStorageFunctions'
+import { preferredSchoolYear } from './localStorageFunctions'
 
 export const hasUserAccessToPath = derived(
   [currentUser, currentSchool],
@@ -15,10 +15,18 @@ export const hasUserAccessToPath = derived(
 )
 
 export const hasUserAccessToFeature = derived(
-  [currentUser, currentSchool, subjects],
-  ([$currentUser, $currentSchool, $subjects]) =>
+  [currentUser, currentSchool, subjects, preferredSchoolYear],
+  ([$currentUser, $currentSchool, $subjects, $preferredSchoolYear]) =>
     (resource: string, action: string, options: HasUserAccessToFeatureOptions = {}) =>
-      checkUserAccessToFeature($currentUser, $currentSchool, $subjects, resource, action, options)
+      checkUserAccessToFeature(
+        $currentUser,
+        $currentSchool,
+        $subjects,
+        resource,
+        action,
+        options,
+        $preferredSchoolYear
+      )
 )
 
 const checkUserAccessToPath = (
@@ -53,7 +61,8 @@ const checkUserAccessToFeature = (
   subjects: SubjectType[],
   resource: string,
   action: string,
-  options: HasUserAccessToFeatureOptions = {}
+  options: HasUserAccessToFeatureOptions = {},
+  preferredSchoolYear: string
 ): boolean => {
   if (!currentSchool) return false // no school, no access
   if (!currentUser) return false // not logged in, no access
@@ -71,7 +80,7 @@ const checkUserAccessToFeature = (
   // Disallow create/update/delete actions if the user has selected a different school year than the current one
   // Prevents modifying data in past (or future) school years
   if (
-    getCurrentSchoolYear() !== getPreferredSchoolYear() &&
+    getCurrentSchoolYear() !== preferredSchoolYear &&
     ['create', 'update', 'delete'].includes(action)
   ) {
     return false
