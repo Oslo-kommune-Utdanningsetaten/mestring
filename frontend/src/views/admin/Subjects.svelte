@@ -79,6 +79,7 @@
     const options: any = {
       school: selectedSchool.id,
       deleted: selectedDeletedOption,
+      ...inferCreatedParams(selectedYearOption),
     }
     if (selectedSubjectsFetchOption !== 'any') {
       options.isOwnedBySchool = selectedSubjectsFetchOption === 'only-school-owned'
