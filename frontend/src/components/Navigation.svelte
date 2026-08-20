@@ -209,7 +209,7 @@
                 data-bs-toggle="dropdown"
                 href="#"
               >
-                Profil
+                {$currentUser.name.split(' ')[0]}
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownProfile">
                 <li><Link to="/profile" className="dropdown-item">Min side</Link></li>
