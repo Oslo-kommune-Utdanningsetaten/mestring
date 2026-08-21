@@ -38,6 +38,13 @@
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
   })
 
+  let headerText = $derived.by(() => {
+    if (!selectedSchool) return null
+    let text = `Brukere ved ${selectedSchool.displayName}`
+    text = nameFilter ? `${text} som inneholder "${nameFilter}"` : text
+    return text
+  })
+
   let selectedYearOption = $state<string>(
     (router.getQueryParam('year') as string) || getCurrentSchoolYear()
   )
@@ -134,6 +141,13 @@
     { value: 'exclude', label: 'Non-deleted' },
   ] as const
 
+  // Options for filtering by gourps
+  const groupCountOptions = [
+    { value: 'no', label: 'No groups' },
+    { value: 'yes', label: 'Has groups' },
+    { value: 'any', label: 'Whatever' },
+  ] as const
+
   // Options for filtering by groups by date validity
   const createdOptions = $derived.by(() => {
     if (!$dataStore.currentSchool) return []
@@ -145,6 +159,16 @@
       })),
       allYears.length > 1 ? { value: 'all', label: 'Alle år' } : null,
     ].filter(Boolean) as { value: string; label: string }[]
+  })
+
+  const usersOptions = $derived.by(() => {
+    const options: Record<string, any> & { school: string } = {
+      school: selectedSchool?.id as string,
+      deleted: deletedSelection,
+      roles: selectedRoles.includes('all') ? [] : selectedRoles,
+      ...inferCreatedParams(selectedYearOption),
+    }
+    return options
   })
 
   const fetchSchools = async () => {
@@ -159,16 +183,10 @@
 
   const fetchUsers = async () => {
     if (!selectedSchool) return
-    const roles = selectedRoles.includes('all') ? [] : selectedRoles
     try {
       isLoadingUsers = true
       const result = await usersList({
-        query: {
-          school: selectedSchool.id,
-          deleted: deletedSelection,
-          roles: roles.join(','),
-          ...inferCreatedParams(selectedYearOption),
-        },
+        query: usersOptions,
       })
       users = result.data || []
       users.forEach(user => {
@@ -272,6 +290,7 @@
 </script>
 
 <section class="pt-3">
+  <h2 class="py-3">{headerText}</h2>
   <!-- Filter groups -->
   {#if isLoadingSchools}
     <div class="m-4">

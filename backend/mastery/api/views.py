@@ -251,6 +251,7 @@ class UserViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
             # If filtering by roles and superadmin is included, also include superadmins who may not have a UserSchool or UserGroup entry
             if include_superadmins:
                 qs = qs | self.access_policy().scope_queryset(self.request, super().get_queryset()).filter(is_superadmin=True)
+
         return qs.distinct()
 
 
