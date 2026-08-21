@@ -50,6 +50,10 @@
     (router.getQueryParam('year') as string) || getCurrentSchoolYear()
   )
 
+  let selectedMembersCountOption = $state<string>(
+    (router.getQueryParam('members_count') as string) || 'any'
+  )
+
   let nameFilter = $state<string>('')
   let openRows = $state<Record<string, boolean>>({})
 
@@ -72,6 +76,13 @@
     { value: GROUP_VALIDITY_OPTIONS.INCLUDE, label: 'All' },
     { value: GROUP_VALIDITY_OPTIONS.ONLY, label: 'Valid' },
     { value: GROUP_VALIDITY_OPTIONS.EXCLUDE, label: 'Invalid' },
+  ] as const
+
+  // Options for filtering by members
+  const membersCountOptions = [
+    { value: 'no', label: 'No members' },
+    { value: 'yes', label: 'Has members' },
+    { value: 'any', label: 'Whatever' },
   ] as const
 
   // Options for filtering by groups by date validity
@@ -97,12 +108,20 @@
       : groups
   )
 
-  let groupFetchOptions = $derived({
-    school: selectedSchoolId,
-    enabled: selectedEnabledOption,
-    deleted: selectedDeletedOption,
-    valid: selectedValidOption,
-    ...inferCreatedParams(selectedYearOption),
+  let groupFetchOptions = $derived.by(() => {
+    const options: Record<string, any> = {
+      school: selectedSchoolId,
+      enabled: selectedEnabledOption,
+      deleted: selectedDeletedOption,
+      valid: selectedValidOption,
+      ...inferCreatedParams(selectedYearOption),
+    }
+    if (selectedMembersCountOption === 'no') {
+      options['members_count_lte'] = 0
+    } else if (selectedMembersCountOption === 'yes') {
+      options['members_count_gte'] = 1
+    }
+    return options
   })
 
   const subjectsById: Record<string, SubjectType> = $derived(
@@ -250,6 +269,7 @@
         year: selectedYearOption || null,
         enabled: selectedEnabledOption || null,
         valid: selectedValidOption || null,
+        members_count: selectedMembersCountOption || null,
       },
       { path: '/admin/groups', mode: 'merge' }
     )
@@ -353,6 +373,22 @@
             name="createdOptions"
             value={option.value}
             bind:group={selectedYearOption}
+          />
+          <span class="ms-2">{option.label}</span>
+        </label>
+      {/each}
+    </fieldset>
+
+    <!-- Min and max member count -->
+    <fieldset class="border p-3 rounded">
+      <legend class="w-auto fs-6">Members?</legend>
+      {#each membersCountOptions as option}
+        <label class="my-2 ms-1 d-block">
+          <input
+            type="radio"
+            name="membersCountOptions"
+            value={option.value}
+            bind:group={selectedMembersCountOption}
           />
           <span class="ms-2">{option.label}</span>
         </label>
