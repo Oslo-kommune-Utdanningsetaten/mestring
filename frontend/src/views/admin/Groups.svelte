@@ -109,8 +109,8 @@
   )
 
   let groupFetchOptions = $derived.by(() => {
-    const options: Record<string, any> = {
-      school: selectedSchoolId,
+    const options: Record<string, any> & { school: string } = {
+      school: selectedSchoolId as string,
       enabled: selectedEnabledOption,
       deleted: selectedDeletedOption,
       valid: selectedValidOption,
