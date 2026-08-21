@@ -388,3 +388,51 @@ def test_basis_teacher_without_students_sees_only_own_group(
     received_ids = {group['id'] for group in data}
 
     assert received_ids == {basis_group.id}
+
+
+@pytest.mark.django_db
+def test_group_members_count_filter(
+        school, superadmin, teaching_group_with_members, teaching_group_without_members,
+        other_teaching_group, teacher, teacher_role):
+    """
+    Test that members_count_lte and members_count_gte correctly filter groups by member count.
+    """
+    # teaching_group_with_members has 2 members (1 teacher + 1 student)
+    # teaching_group_without_members has 0 members
+    # other_teaching_group is given exactly 1 member
+    other_teaching_group.add_member(teacher, teacher_role)
+
+    client = APIClient()
+    client.force_authenticate(user=superadmin)
+
+    # members_count_lte=0 returns only the group with no members
+    resp = client.get('/api/groups/', {'school': school.id, 'members_count_lte': 0})
+    assert resp.status_code == 200
+    received_ids = {group['id'] for group in resp.json()}
+    assert received_ids == {teaching_group_without_members.id}
+
+    # members_count_lte=1 returns groups with 0 or 1 members
+    resp = client.get('/api/groups/', {'school': school.id, 'members_count_lte': 1})
+    assert resp.status_code == 200
+    received_ids = {group['id'] for group in resp.json()}
+    assert received_ids == {teaching_group_without_members.id, other_teaching_group.id}
+
+    # members_count_gte=2 returns only the group with 2 members
+    resp = client.get('/api/groups/', {'school': school.id, 'members_count_gte': 2})
+    assert resp.status_code == 200
+    received_ids = {group['id'] for group in resp.json()}
+    assert received_ids == {teaching_group_with_members.id}
+
+    # Combining lte and gte also works (narrows result down to the group with exactly 1 member)
+    resp = client.get('/api/groups/', {
+        'school': school.id, 'members_count_gte': 1, 'members_count_lte': 1})
+    assert resp.status_code == 200
+    received_ids = {group['id'] for group in resp.json()}
+    assert received_ids == {other_teaching_group.id}
+
+    # Invalid values form params raise a validation error
+    resp = client.get('/api/groups/', {'school': school.id, 'members_count_lte': 'not-a-number'})
+    assert resp.status_code == 400
+
+    resp = client.get('/api/groups/', {'school': school.id, 'members_count_gte': 'not-a-number'})
+    assert resp.status_code == 400

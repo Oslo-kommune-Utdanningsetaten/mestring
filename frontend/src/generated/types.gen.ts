@@ -1249,6 +1249,14 @@ export type GroupsListData = {
          */
         ids?: string;
         /**
+         * Groups with members count greater than or equal to this value
+         */
+        membersCountGte?: number;
+        /**
+         * Groups with members count less than or equal to this value
+         */
+        membersCountLte?: number;
+        /**
          * Filter groups by roles a user has in that group (comma-separated list of role names, e.g., student,teacher)
          */
         roles?: string;

@@ -1,5 +1,5 @@
 from .. import models, serializers
-from django.db.models import Q, Prefetch, Exists, OuterRef
+from django.db.models import Q, Prefetch, Exists, OuterRef, Count
 from datetime import datetime
 from rest_framework import viewsets
 from rest_framework.filters import OrderingFilter
@@ -449,6 +449,20 @@ class UserGroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Mod
                 type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
                 location=OpenApiParameter.QUERY
             ),
+            OpenApiParameter(
+                name='members_count_lte',
+                description='Groups with members count less than or equal to this value',
+                required=False,
+                type={'type': 'number'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='members_count_gte',
+                description='Groups with members count greater than or equal to this value',
+                required=False,
+                type={'type': 'number'},
+                location=OpenApiParameter.QUERY
+            ),
             DELETED_FILTER_PARAMETER,
             *CREATED_RANGE_PARAMETERS,
         ]
@@ -476,6 +490,10 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
             roles_param, _ = get_request_param(self.request.query_params, 'roles')
             ids_param, _ = get_request_param(self.request.query_params, 'ids')
             enabled_param, _ = get_request_param(self.request.query_params, 'enabled')
+            members_count_lte_param, _ = get_request_param(
+                self.request.query_params, 'members_count_lte')
+            members_count_gte_param, _ = get_request_param(
+                self.request.query_params, 'members_count_gte')
 
             if not school_param:
                 raise ValidationError(
@@ -528,6 +546,39 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
                     logger.warning("Unknown value for 'enabled' parameter: %s", enabled_param)
             else:
                 qs = qs.filter(is_enabled=True)  # default
+
+            # Apply members count filters. Only accessible user_groups are counted
+            if members_count_lte_param or members_count_gte_param:
+                accessible_user_group_ids = UserGroupAccessPolicy().scope_queryset(
+                    self.request,
+                    models.UserGroup.objects.filter(deleted_at__isnull=True)
+                ).values_list('id', flat=True)
+                qs = qs.annotate(
+                    members_count=Count(
+                        'user_groups',
+                        filter=Q(user_groups__id__in=accessible_user_group_ids),
+                        distinct=True
+                    )
+                )
+
+                if members_count_lte_param:
+                    try:
+                        members_count_lte = int(members_count_lte_param)
+                    except ValueError:
+                        raise ValidationError(
+                            {'error': 'invalid-parameter',
+                             'message': 'The "members_count_lte" parameter must be a valid integer.'})
+                    qs = qs.filter(members_count__lte=members_count_lte)
+
+                if members_count_gte_param:
+                    try:
+                        members_count_gte = int(members_count_gte_param)
+                    except ValueError:
+                        raise ValidationError(
+                            {'error': 'invalid-parameter',
+                             'message': 'The "members_count_gte" parameter must be a valid integer.'})
+                    qs = qs.filter(members_count__gte=members_count_gte)
+
             return qs
 
         # non-list actions (retrieve, create, update, destroy) do not require parameters
