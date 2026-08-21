@@ -379,22 +379,6 @@
       {/each}
     </fieldset>
 
-    <!-- Radio buttons for created in year -->
-    <fieldset class="border p-3 rounded">
-      <legend class="w-auto fs-6">Year created?</legend>
-      {#each createdOptions as option}
-        <label class="my-2 ms-1 d-block">
-          <input
-            type="radio"
-            name="createdOptions"
-            value={option.value}
-            bind:group={selectedYearOption}
-          />
-          <span class="ms-2">{option.label}</span>
-        </label>
-      {/each}
-    </fieldset>
-
     <!-- Min and max member count -->
     <fieldset class="border p-3 rounded">
       <legend class="w-auto fs-6">Members?</legend>
