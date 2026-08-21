@@ -269,6 +269,9 @@
   .warning {
     background-color: #ffc107;
     border: 2px solid #ff9800;
+    border-radius: 3px;
+    padding: 5px 0px 4px 0px;
+    margin: 0;
   }
 
   /* Suppress the lingering focus frame after a mouse click,
