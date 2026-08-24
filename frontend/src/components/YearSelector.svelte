@@ -1,7 +1,7 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
   import { preferredSchoolYear } from '../stores/localStorageFunctions'
-  import { currentUser, currentSchool } from '../stores/data'
+  import { loadData, currentUser, currentSchool } from '../stores/data'
   import { addAlert } from '../stores/alerts'
   import { localStorage } from '../stores/localStorage'
   import { GROUP_VALIDITY_OPTIONS } from '../utils/constants'
@@ -37,9 +37,10 @@
       // Past year selected --> only include invalid groups
       localStorage('preferredGroupValidity').set(GROUP_VALIDITY_OPTIONS.EXCLUDE)
     }
+    loadData()
     addAlert({
       type: 'success',
-      message: `Valgt skoleår: ${schoolYear === 'all' ? 'Alle år' : schoolYear}. Husk å refreshe nettsiden.`,
+      message: `Valgt skoleår: ${schoolYear === 'all' ? 'Alle år' : schoolYear}`,
     })
   }
 </script>
