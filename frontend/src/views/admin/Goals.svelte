@@ -5,7 +5,7 @@
   import { goalsList, usersList } from '../../generated/sdk.gen'
   import { formatDateTime, urlStringFrom } from '../../utils/functions'
   import { addAlert } from '../../stores/alerts'
-  import { dataStore } from '../../stores/data'
+  import { dataStore, currentSchool } from '../../stores/data'
   import { GROUP_DELETED_OPTIONS } from '../../utils/constants'
   import {
     getAllSchoolYears,
@@ -15,7 +15,6 @@
   import Link from '../../components/Link.svelte'
 
   const router = useTinyRouter()
-  const currentSchool = $derived($dataStore.currentSchool)
   let goals = $state<GoalType[]>([])
   let creatorsById = $state<Record<string, string>>({})
 
@@ -43,7 +42,7 @@
   const createdOptions = $derived.by(() => {
     if (!$currentSchool) return []
 
-    const allYears = getAllSchoolYears(new Date($dataStore.currentSchool.createdAt)).reverse()
+    const allYears = getAllSchoolYears(new Date($currentSchool.createdAt)).reverse()
     return [
       ...allYears.map(year => ({
         value: year,
@@ -54,7 +53,7 @@
   })
 
   let queryOptions = $derived({
-    school: currentSchool.id,
+    school: $currentSchool.id,
     deleted: selectedDeletedOption,
     ...inferCreatedParams(selectedYearOption),
   })
@@ -89,7 +88,7 @@
       if (creatorIds.length === 0) return
 
       const result = await usersList({
-        query: { ids: creatorIds.join(','), school: currentSchool.id },
+        query: { ids: creatorIds.join(','), school: $currentSchool.id },
       })
       const users = result.data || []
       creatorsById = users.reduce(
@@ -166,7 +165,7 @@
   }
 
   $effect(() => {
-    if (currentSchool) fetchGoals()
+    if ($currentSchool) fetchGoals()
   })
 
   $effect(() => {
@@ -238,7 +237,7 @@
           onclick={() => handleHeaderClick('title')}
           title="Sorter etter tittel"
         >
-          {currentSchool?.isGoalTitleEnabled ? 'Tittel' : 'Sortering'}
+          {$currentSchool?.isGoalTitleEnabled ? 'Tittel' : 'Sortering'}
           {getSortIndicator('title')}
         </button>
       </span>
