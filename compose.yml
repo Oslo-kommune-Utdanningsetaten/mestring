@@ -36,7 +36,7 @@ services:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     volumes:
-      - ./backend/mastery/data_import/data:/code/mastery/data_import/data:ro # ensre data import files are available in the container (read-only)
+      - ./backend/mastery/data_import/data:/code/mastery/data_import/data:ro # make data import files available in the container (read-only)
     profiles:
       - prod
       - dev
