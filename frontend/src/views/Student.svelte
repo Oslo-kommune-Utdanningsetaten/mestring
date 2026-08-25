@@ -62,6 +62,12 @@
         query: { school: currentSchool.id, students: studentId },
       })
       subjects = subjectsResult.data || []
+      if (subjects.length === 0 && currentSchool.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM) {
+        // No subjects for this student, but since school allows custom subjects display all those subjects
+        subjects = $dataStore.subjects.filter(
+          subject => subject.ownedBySchoolId === currentSchool.id
+        )
+      }
     } catch (error) {
       console.error(`Could not load subjects for ${studentId}`, error)
       subjects = []
