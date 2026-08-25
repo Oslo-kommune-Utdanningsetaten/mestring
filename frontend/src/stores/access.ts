@@ -66,14 +66,21 @@ const checkUserAccessToFeature = (
 ): boolean => {
   if (!currentSchool) return false // no school, no access
   if (!currentUser) return false // not logged in, no access
-  if (currentUser.isSchoolAdmin || currentUser.isSuperadmin) return true // school admins and superadmins have access to everything
 
   const { subjectId, studentGroupIds, studentId, goalStudentId, groupId, createdById } = options
   const subject = subjects.find(s => s.id === subjectId)
   const group = groupId ? currentUser.allGroups.find((g: GroupType) => g.id === groupId) : null
 
+  // Disallow any status shenanigans if the school has disabled the status feature
+  if (resource === 'status' && !currentSchool.isStatusEnabled) {
+    return false
+  }
+
+  // school admins and superadmins have access to everything below this point
+  if (currentUser.isSchoolAdmin || currentUser.isSuperadmin) return true
+
+  // group is inaccessible to normal users
   if (groupId && (!group || !group.isValid)) {
-    // group is inaccessible to normal users
     return false
   }
 
@@ -87,9 +94,6 @@ const checkUserAccessToFeature = (
   }
 
   if (resource === 'status') {
-    if (!currentSchool.isStatusEnabled) {
-      return false
-    }
     if (['create', 'update', 'delete'].includes(action)) {
       return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
         // Teacher teaches the subject to this student
