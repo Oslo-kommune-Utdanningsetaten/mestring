@@ -35,6 +35,8 @@ services:
       DB_HOST: ${DB_HOST}
     extra_hosts:
       - 'host.docker.internal:host-gateway'
+    volumes:
+      - ./backend/mastery/data_import/data:/code/mastery/data_import/data:ro
     profiles:
       - prod
       - dev

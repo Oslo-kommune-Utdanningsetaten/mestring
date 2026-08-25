@@ -101,7 +101,7 @@
           },
           memberships: {
             fetchedCount: memberships?.fetchedCount,
-            fetchedAt: users?.fetchedAt,
+            fetchedAt: memberships?.fetchedAt,
             dbCount: memberships?.dbCount || 0,
             diff: memberships?.diff,
           },

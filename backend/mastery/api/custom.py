@@ -564,6 +564,7 @@ def fetch_school_import_status(request, org_number):
         },
         "memberships": {
             "fetchedCount": fetched_stats['memberships_count'],
+            "fetchedAt": users_fetched_at,
             "dbCount": user_groups_db_count,
             "diff": user_groups_diff,
         },
