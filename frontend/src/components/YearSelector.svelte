@@ -40,7 +40,7 @@
     loadData()
     addAlert({
       type: 'success',
-      message: `Valgt skoleår: ${schoolYear === 'all' ? 'Alle år' : schoolYear}`,
+      message: `Valgt skoleår: ${schoolYear === 'all' ? 'Alle år' : schoolYear}. Husk å refreshe siden for å se endringene.`,
     })
   }
 </script>
