@@ -22,7 +22,13 @@
         <li>
           <Link to="/about">Om tjenesten</Link>
         </li>
-        <li><Link to="/about">Personvern</Link></li>
+        <li>
+          <Link
+            to="https://aktuelt.osloskolen.no/larerik-bruk-av-laringsteknologi/informasjonssikkerhet-og-personvern/feide-tjenester/Mestring/"
+          >
+            Personvern
+          </Link>
+        </li>
         <li>
           <Link
             to="https://uustatus.no/nb/erklaringer/publisert/cd426ab2-6214-4fb8-bec4-7d637b139e0a"
