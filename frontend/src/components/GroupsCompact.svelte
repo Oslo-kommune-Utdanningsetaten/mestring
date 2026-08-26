@@ -1,44 +1,49 @@
 <script lang="ts">
-  import { dataStore } from '../stores/data'
+  import type { GroupType, UserType, UserGroupType } from '../generated/types.gen'
+  import { userGroupsList } from '../generated/sdk.gen'
+  import { currentSchool, currentUser } from '../stores/data'
   import { urlStringFrom } from '../utils/functions'
-  import { usersList } from '../generated/sdk.gen'
   import { hasUserAccessToPath } from '../stores/access'
   import { USER_ROLES } from '../utils/constants'
-  import type { GroupType, UserType } from '../generated/types.gen'
+  import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
+
   import GroupTag from './GroupTag.svelte'
   import UserTag from './UserTag.svelte'
   import SubjectTag from './SubjectTag.svelte'
   import Link from './Link.svelte'
 
-  let currentSchool = $derived($dataStore.currentSchool)
-  let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
+  let groups = $derived<GroupType[]>($currentUser.allGroups || [])
   let membersByGroupId = $state<Record<string, { teachers: UserType[]; students: UserType[] }>>({})
 
   const fetchAllmembersByGroupId = async () => {
     groups.forEach(async group => {
       const queryParams = {
-        groups: group.id,
-        school: currentSchool.id,
+        group: group.id,
+        school: $currentSchool.id,
+        ...getPreferredCreatedParams(),
       }
       try {
-        const teachersResult = await usersList({
-          query: { ...queryParams, roles: USER_ROLES.TEACHER },
+        const teachersResult = await userGroupsList({
+          query: { ...queryParams, role: USER_ROLES.TEACHER },
         })
-        const studentsResult = await usersList({
-          query: { ...queryParams, roles: USER_ROLES.STUDENT },
+        const studentsResult = await userGroupsList({
+          query: { ...queryParams, role: USER_ROLES.STUDENT },
         })
-        const teachers = teachersResult.data || []
-        const students = studentsResult.data || []
+        const teachers = (teachersResult.data || []).map((ug: any) => ug.user)
+        const students = (studentsResult.data || []).map((ug: any) => ug.user)
         membersByGroupId = { ...membersByGroupId, [group.id]: { teachers, students } }
       } catch (error) {
         console.error(`Error fetching members for group ${group.id}:`, error)
-        membersByGroupId = { ...membersByGroupId, [group.id]: { teachers: [], students: [] } }
+        membersByGroupId = {
+          ...membersByGroupId,
+          [group.id]: { teachers: [], students: [] },
+        }
       }
     })
   }
 
   $effect(() => {
-    if (currentSchool) {
+    if ($currentSchool) {
       fetchAllmembersByGroupId()
     }
   })
@@ -49,7 +54,7 @@
 
   {#if groups.length === 0}
     <div class="mt-3">
-      🫤 Du har visst ikke tilgang til noen grupper på {currentSchool?.displayName}.
+      🫤 Du har visst ikke tilgang til noen grupper på {$currentSchool?.displayName}.
     </div>
   {:else}
     <div class="card shadow-sm mt-4 groups-grid">
