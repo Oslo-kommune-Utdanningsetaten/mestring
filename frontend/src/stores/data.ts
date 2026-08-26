@@ -12,6 +12,8 @@ import { localStorage } from '../stores/localStorage'
 import {
   getPreferredGroupValidity,
   getPreferredMasterySchemaId,
+  getPreferredCreatedParams,
+  preferredSchoolYear,
 } from '../stores/localStorageFunctions'
 import { fetchUserData } from '../utils/functions'
 import { SUBJECTS_ALLOWED_ALL, SUBJECTS_ALLOWED_CUSTOM, USER_ROLES } from '../utils/constants'
@@ -70,12 +72,13 @@ export const registerUserStatus = async (school?: SchoolType) => {
   }
 
   const [userData, schoolsResult, allGroupsResult] = await Promise.all([
-    fetchUserData(user.id, school.id),
+    fetchUserData(user.id, school.id, get(preferredSchoolYear) as any),
     schoolsList({ query: { isServiceEnabled: true } }),
     groupsList({
       query: {
         school: school.id,
         valid: getPreferredGroupValidity(),
+        ...getPreferredCreatedParams(),
       },
     }),
   ])

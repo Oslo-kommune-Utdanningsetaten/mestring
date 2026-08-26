@@ -12,7 +12,7 @@ import { goalsList, userGroupsList, userSchoolsList } from '../generated/sdk.gen
 import { nb as noLocale } from 'date-fns/locale'
 import { format, formatDistance, formatDistanceToNow } from 'date-fns'
 import { USER_ROLES, GROUP_TYPE_BASIS } from './constants'
-import { calculateSchoolYearMilestones } from './schoolYear'
+import { calculateSchoolYearMilestones, isEntityFromSchoolYear } from './schoolYear'
 import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
@@ -280,8 +280,9 @@ export const generateStatusTitle = (
     let season = ''
     let yearShort = ''
     if (statusCategory.name === 'midyear') {
+      // FIXME: this sometimes fails
       season = 'h'
-      yearShort = (today.getFullYear() - 1).toString().slice(-2)
+      yearShort = today.getFullYear().toString().slice(-2)
     } else if (statusCategory.name === 'endyear') {
       season = 'v'
       yearShort = today.getFullYear().toString().slice(-2)
@@ -396,7 +397,7 @@ export const getContrastFriendlyTextColor = (bgColor: string) => {
   return contrastWithWhite > contrastWithBlack ? '#ffffff' : '#000000'
 }
 
-export const fetchUserData = async (userId: string, schoolId: string) => {
+export const fetchUserData = async (userId: string, schoolId: string, schoolYear = undefined) => {
   const [userGroupsResult, userSchoolsResult] = await Promise.all([
     userGroupsList({
       query: { user: userId, school: schoolId },
@@ -405,7 +406,12 @@ export const fetchUserData = async (userId: string, schoolId: string) => {
       query: { user: userId, school: schoolId },
     }),
   ])
-  const userGroups = userGroupsResult.data || []
+
+  // filter by school year if provided, otherwise return all
+  const userGroups = (userGroupsResult.data || []).filter(ug =>
+    schoolYear ? isEntityFromSchoolYear(ug, schoolYear) : true
+  )
+
   const teacherGroups = userGroups
     .filter(ug => ug.role.name === USER_ROLES.TEACHER)
     .map(ug => ug.group)

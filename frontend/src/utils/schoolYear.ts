@@ -24,6 +24,16 @@ export const getSchoolYearForGroup = (group: GroupType): string | undefined => {
   return `${startYear}-${endYear}`
 }
 
+export const isEntityFromSchoolYear = (
+  entity: { createdAt: string },
+  schoolYear: string
+): boolean => {
+  const startYear = entity.createdAt.split('-')[0]
+  const endYear = entity.createdAt.split('-')[0]
+  const entitySchoolYear = `${startYear}-${endYear}`
+  return entitySchoolYear === schoolYear
+}
+
 // Returns an array of ascending school years since launch e.g. ["2025-2026", "2026-2027"]
 export const getAllSchoolYears = (beginningAt: Date) => {
   const firstYearStart = Number(calculateSchoolYearMilestones(beginningAt).startAt.split('-')[0])

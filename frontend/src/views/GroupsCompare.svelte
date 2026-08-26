@@ -1,8 +1,8 @@
 <script lang="ts">
   import { useTinyRouter } from 'svelte-tiny-router'
   import { observationsList } from '../generated/sdk.gen'
-  import type { GroupType, ObservationType } from '../generated/types.gen'
-  import { dataStore } from '../stores/data'
+  import type { GroupType, ObservationType, SubjectType } from '../generated/types.gen'
+  import { dataStore, currentSchool, currentUser } from '../stores/data'
   import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
   import GroupRow from '../components/GroupRow.svelte'
@@ -12,18 +12,17 @@
   const groupIds = $derived(router.getQueryParam('groups')?.split(',') || [])
 
   let isLoading = $state<boolean>(true)
-  let currentSchool = $derived($dataStore.currentSchool)
   let groups = $derived<GroupType[]>(
-    $dataStore.currentUser.allGroups.filter((group: GroupType) => groupIds.includes(group.id))
+    $currentUser?.allGroups?.filter((group: GroupType) => groupIds.includes(group.id)) ?? []
   )
-  let areAllGroupsOfSameType = $derived(
+  let areAllGroupsOfSameType: Boolean = $derived(
     groups.length > 0 ? groups.every(group => group.type === groups[0].type) : true
   )
   let groupType = $derived(areAllGroupsOfSameType ? groups[0].type : null)
   let observationsByGroupId = $state<Record<string, ObservationType[]>>({})
   let uniqueSubjectIds = $derived<Set<string>>(new Set())
   let uniqueSubjects = $derived(
-    $dataStore.subjects.filter(subject => uniqueSubjectIds.has(subject.id))
+    $dataStore.subjects?.filter(subject => uniqueSubjectIds.has(subject.id))
   )
 
   const fetchGroups = async () => {
@@ -32,7 +31,7 @@
       await Promise.all(
         groups.map(async (group: GroupType) => {
           const observationsResult = await observationsList({
-            query: { group: group.id, school: currentSchool.id, ...getPreferredCreatedParams() },
+            query: { group: group.id, school: $currentSchool.id, ...getPreferredCreatedParams() },
           })
           // All observations for this group, accross subjects
           const observations = observationsResult.data || []
@@ -57,6 +56,13 @@
     }
   }
 
+  // Look up subjects for a given groupId, returning only subjects which have observations for that group
+  const getSubjects = (groupId: string): SubjectType[] => {
+    return uniqueSubjects.filter((subject: SubjectType) =>
+      observationsByGroupId[groupId]?.some(obs => obs.subjectId === subject.id)
+    )
+  }
+
   $effect(() => {
     if (groupIds) {
       fetchGroups()
@@ -67,7 +73,7 @@
 <section>
   <h2>Sammenlign grupper [BETA]</h2>
   <GroupsCompareSelect />
-  <p class="text-muted">Valgt: {groups.map(g => g.displayName).join(', ')}</p>
+  <p class="text-muted">Valgt: {groups?.map(g => g.displayName).join(', ')}</p>
   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
   <p>
     {@html 'Diagrammet viser tre kategorier: Antall mål der elever beveger seg <span class="fw-bold">ned</span>, <span class="fw-bold">er uforandret</span>, eller <span class="fw-bold">opp</span> i mestringstrappa.'}
@@ -101,12 +107,7 @@
       {#each groups as group (group.id)}
         <GroupRow
           {group}
-          subjects={uniqueSubjects.map(subject => {
-            const hasObservationsForSubject = observationsByGroupId[group.id]?.some(
-              obs => obs.subjectId === subject.id
-            )
-            return hasObservationsForSubject ? subject : null
-          })}
+          subjects={getSubjects(group.id)}
           observations={observationsByGroupId[group.id]}
         />
       {/each}

@@ -9,7 +9,7 @@
   const router = useTinyRouter()
   const groupIds = $derived(router.getQueryParam('groups')?.split(',') || [])
 
-  let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups)
+  let groups = $derived<GroupType[]>($dataStore.currentUser?.allGroups ?? [])
   let basisGroups = $derived(groups.filter((g: GroupType) => g.type === GROUP_TYPE_BASIS))
   let teachingGroups = $derived(groups.filter((g: GroupType) => g.type === GROUP_TYPE_TEACHING))
 
