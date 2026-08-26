@@ -37,11 +37,7 @@
       // Past year selected --> only include invalid groups
       localStorage('preferredGroupValidity').set(GROUP_VALIDITY_OPTIONS.EXCLUDE)
     }
-    loadData()
-    addAlert({
-      type: 'success',
-      message: `Valgt skoleår: ${schoolYear === 'all' ? 'Alle år' : schoolYear}. Husk å refreshe siden for å se endringene.`,
-    })
+    window.location.reload()
   }
 </script>
 

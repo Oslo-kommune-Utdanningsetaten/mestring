@@ -122,7 +122,9 @@
   }
 
   const handleSelectSchool = (school: SchoolType) => {
-    setCurrentSchool(school)
+    // set localStorage and reload, which in turn will trigger dataStore to update with school-specific data
+    localStorage<SchoolType>('currentSchool').set(school)
+    window.location.reload()
   }
 
   const handleToggleMasteryBarChart = () =>
