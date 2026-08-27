@@ -46,12 +46,60 @@
 
 <!-- About the app -->
 <section class="mt-3 mb-5" id="about">
-  <h2 class="my-3">Om tjenesten</h2>
-  <ul class="my-3">
+  <h2>Hva er mestring.osloskolen.no?</h2>
+  <p class="mb-4">
+    Webapplikasjonen er utviklet av UDA for å gi lærere og skoleledelse bedre oversikt over elevenes
+    faglige utvikling. Løsningen gjør underveisvurdering i en travel hverdag enklere ved å samle mål
+    og løpende observasjoner på ett sted. Samtidig får ledelsen oversikt over hvilke elever som
+    trenger ekstra innsats.
+  </p>
+
+  <h3>Hovedfunksjoner</h3>
+  <ul>
     <li>
-      Denne tjenesten (kjent som "Mestring") er en prototype på tracking av elevenes utvikling i
-      tilrettelagt opplæring.
+      <span class="fw-bold">Enkelt:</span>
+      Det krever få klikk for læreren å registrere løpende observasjoner.
     </li>
+    <li>
+      <span class="fw-bold">Målsetting:</span>
+      Læreren kan sette individuelle mål for hver enkelt elev, eller felles mål for en hel gruppe (for
+      eksempel faglige temaer eller kompetansemål).
+    </li>
+    <li>
+      <span class="fw-bold">Metodefrihet:</span>
+      Løsningen ble opprinnelig bygget rundt «Mestringstrappa» for Stig skole, men støtter også kvalitative
+      kommentarer, klassisk karakterskala og metodikker som «two stars and a wish».
+    </li>
+  </ul>
+
+  <h3>Fordeler med løsningen</h3>
+  <ul>
+    <li>
+      <span class="fw-bold">For læreren:</span>
+      Frigjør tid ved å erstatte parallell skyggeføring i Excel-ark, Word-filer eller OneNote. Gir oversikt
+      over elevens prosess og faglige progresjon.
+    </li>
+    <li>
+      <span class="fw-bold">For ledelsen:</span>
+      Gir oversikt over hvilke elever som kan trenge ekstra ressurser eller tilrettelegging.
+    </li>
+    <li>
+      <span class="fw-bold">For skolen:</span>
+      Bruk av et felles verktøy bidrar til en likere, mer enhetlig og rettferdig vurderingspraksis.
+    </li>
+    <li>
+      <span class="fw-bold">Videre utvikling:</span>
+      Løsningen er ikke «hyllevare», men utviklet av og for Osloskolen. Det betyr at feil rettes fort,
+      og vi står fritt til å implementere funksjonalitet som skolene trenger.
+    </li>
+  </ul>
+</section>
+
+<!-- General technicalities -->
+<section class="mt-3 mb-5">
+  <h2>Teknisk om tjenesten</h2>
+
+  <ul>
     <li>
       Utviklet av Seksjon for Læringsteknologi i
       <Link to="https://www.oslo.kommune.no/etater-foretak-og-ombud/utdanningsetaten/">
@@ -67,23 +115,18 @@
       vi jobber med.
     </li>
   </ul>
-</section>
 
-<!-- General guidelines -->
-<section class="mt-3 mb-5" id="guidelines">
-  <h2 class="my-3">Retningslinjer for bruk</h2>
-  <ul class="my-3">
+  <h3 id="guidelines">Retningslinjer for bruk</h3>
+  <ul>
     <li>Minimér informasjon som kan knyttes til personer.</li>
     <li>Der det er mulig, bruk nøytrale, ikke-sensitive formuleringer om personer.</li>
     <li>Husk å låse PCen, slik at andre ikke kan få tilgang til informasjon via din bruker.</li>
     <li>Ikke ta utskrifter - papir har en tendens til å bli liggende der andre har tilgang.</li>
   </ul>
-</section>
 
-<!-- Access info -->
-<section class="my-5" id="access">
-  <h3>Hvem har tilgang til hva?</h3>
-  <ul class="my-3">
+  <!-- Access info -->
+  <h3 id="access">Hvem har tilgang til hva?</h3>
+  <ul>
     <li>
       <span class="fw-bold">Lærer i undervisningsgruppe</span>
       kan opprette mål og observasjoner for elevene gruppa, i faget som undervises.
@@ -116,13 +159,11 @@
       {@render rolesCount(USER_ROLES.SUPERADMIN)}
     </li>
   </ul>
-</section>
 
-<!-- Data retention info -->
-<section class="my-5" id="storage">
+  <!-- Data retention info -->
   <h3>Hvor lenge lagres data?</h3>
   {#if metadata.deleteRules}
-    <ul class="my-3">
+    <ul>
       {#each Object.values(metadata.deleteRules) as deleteRule}
         <li>
           {deleteRule}
@@ -132,11 +173,10 @@
   {:else}
     <p>Logg på for å se oppdatert informasjon om datalagring.</p>
   {/if}
-</section>
 
-<section class="my-5" id="icons">
+  <!-- About the icons -->
   <h3>Hva betyr ikonene?</h3>
-  <p class="my-3">
+  <p>
     Ikonene i mestring er hentet fra
     <Link to="https://punkt.oslo.kommune.no/latest/ikoner/">Punkt</Link>
     og har følgende betydning:
@@ -192,14 +232,14 @@
     </div>
 
     <div class="icon">
-      <span class="svg-container" title="Status">
+      <span class="svg-container" title="Slett">
         <pkt-icon name="trash-can"></pkt-icon>
       </span>
       <span class="icon-label">Slett</span>
     </div>
 
     <div class="icon">
-      <span class="svg-container" title="Status">
+      <span class="svg-container" title="Rediger">
         <pkt-icon name="edit"></pkt-icon>
       </span>
       <span class="icon-label">Rediger</span>
@@ -210,6 +250,17 @@
 <style>
   li {
     margin-bottom: 0.8rem;
+  }
+
+  h2,
+  h3 {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  ul {
+    margin-top: 1rem;
+    margin-bottom: 2rem;
   }
 
   .icon-grid {
