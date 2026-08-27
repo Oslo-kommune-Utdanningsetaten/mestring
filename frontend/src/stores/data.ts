@@ -72,7 +72,7 @@ export const registerUserStatus = async (school?: SchoolType) => {
   }
 
   const [userData, schoolsResult, allGroupsResult] = await Promise.all([
-    fetchUserData(user.id, school.id, get(preferredSchoolYear) as any),
+    fetchUserData(user.id, school.id, get(preferredSchoolYear)),
     schoolsList({ query: { isServiceEnabled: true } }),
     groupsList({
       query: {

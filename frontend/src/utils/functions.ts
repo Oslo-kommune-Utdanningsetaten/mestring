@@ -397,7 +397,7 @@ export const getContrastFriendlyTextColor = (bgColor: string) => {
   return contrastWithWhite > contrastWithBlack ? '#ffffff' : '#000000'
 }
 
-export const fetchUserData = async (userId: string, schoolId: string, schoolYear = undefined) => {
+export const fetchUserData = async (userId: string, schoolId: string, schoolYear?: string) => {
   const [userGroupsResult, userSchoolsResult] = await Promise.all([
     userGroupsList({
       query: { user: userId, school: schoolId },

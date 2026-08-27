@@ -5,12 +5,14 @@
   import { usersList, schoolsList } from '../../generated/sdk.gen'
   import { urlStringFrom, fetchUserData } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
+  import { preferredSchoolYear } from '../../stores/localStorageFunctions'
   import { USER_ROLES } from '../../utils/constants'
   import {
     getAllSchoolYears,
     getCurrentSchoolYear,
     inferCreatedParams,
   } from '../../utils/schoolYear'
+
   import User from '../../components/User.svelte'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
@@ -207,7 +209,8 @@
     try {
       const { teacherGroups, studentGroups, userGroups, userSchools } = await fetchUserData(
         userId,
-        selectedSchool.id
+        selectedSchool.id,
+        $preferredSchoolYear
       )
       const user = users.find(u => u.id === userId)
       if (!user) {

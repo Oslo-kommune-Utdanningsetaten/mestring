@@ -28,9 +28,8 @@ export const isEntityFromSchoolYear = (
   entity: { createdAt: string },
   schoolYear: string
 ): boolean => {
-  const startYear = entity.createdAt.split('-')[0]
-  const endYear = entity.createdAt.split('-')[0]
-  const entitySchoolYear = `${startYear}-${endYear}`
+  const { startAt, endAt } = calculateSchoolYearMilestones(new Date(entity.createdAt))
+  const entitySchoolYear = `${startAt.split('-')[0]}-${endAt.split('-')[0]}`
   return entitySchoolYear === schoolYear
 }
 

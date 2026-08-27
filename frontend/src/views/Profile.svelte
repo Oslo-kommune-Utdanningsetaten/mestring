@@ -2,9 +2,11 @@
   import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
   import { usersRetrieve } from '../generated/sdk.gen'
   import type { GroupType, SchoolType } from '../generated/types.gen'
+  import type { UserRoleType, UserDecorated } from '../types/models'
   import {
     getPreferredGroupValidity,
     getPreferredMasteryBadgeVariant,
+    preferredSchoolYear,
   } from '../stores/localStorageFunctions'
   import { dataStore, currentUser, currentSchool } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
@@ -12,7 +14,6 @@
   import { USER_ROLES, MASTERY_BADGE_VARIANTS, GROUP_VALIDITY_OPTIONS } from '../utils/constants'
   import { fetchUserData } from '../utils/functions'
   import { getAllSchoolYears, getCurrentSchoolYear } from '../utils/schoolYear'
-  import type { UserRoleType, UserDecorated } from '../types/models'
 
   import GroupTag from '../components/GroupTag.svelte'
   import Link from '../components/Link.svelte'
@@ -358,7 +359,4 @@
 {/if}
 
 <style>
-  button {
-    border-radius: 0px;
-  }
 </style>
