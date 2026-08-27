@@ -3,11 +3,10 @@
   import { usersRetrieve } from '../generated/sdk.gen'
   import type { GroupType, SchoolType } from '../generated/types.gen'
   import {
-    preferredSchoolYear,
     getPreferredGroupValidity,
     getPreferredMasteryBadgeVariant,
   } from '../stores/localStorageFunctions'
-  import { dataStore, setCurrentSchool, currentUser, currentSchool } from '../stores/data'
+  import { dataStore, currentUser, currentSchool } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
   import { hasUserAccessToPath } from '../stores/access'
   import { USER_ROLES, MASTERY_BADGE_VARIANTS, GROUP_VALIDITY_OPTIONS } from '../utils/constants'
@@ -17,6 +16,7 @@
 
   import GroupTag from '../components/GroupTag.svelte'
   import Link from '../components/Link.svelte'
+  import SchoolSelector from '../components/SchoolSelector.svelte'
 
   const { userId } = $props<{ userId?: string }>()
   const isProfileMode = $derived($currentUser.id && !userId)
@@ -281,26 +281,7 @@
           <h3>Aktiv skole</h3>
         </div>
         <div class="card-body">
-          {#if schools.length > 0}
-            <div class="row g-2">
-              {#each schools as school}
-                <div class="col-md-6">
-                  <button
-                    class="btn w-100 {$dataStore.currentSchool?.id === school.id
-                      ? 'btn-primary'
-                      : 'btn-outline-secondary'}"
-                    onclick={() => handleSelectSchool(school)}
-                  >
-                    {school.displayName}
-                  </button>
-                </div>
-              {/each}
-            </div>
-          {:else}
-            <span class="text-muted">
-              Du er visst ikke tilknyttet noen skoler som bruker denne tjenesten
-            </span>
-          {/if}
+          <SchoolSelector />
         </div>
       </div>
     {/if}
