@@ -1,8 +1,7 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
   import { preferredSchoolYear } from '../stores/localStorageFunctions'
-  import { loadData, currentUser, currentSchool } from '../stores/data'
-  import { addAlert } from '../stores/alerts'
+  import { currentUser, currentSchool } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
   import { GROUP_VALIDITY_OPTIONS } from '../utils/constants'
   import { getAllSchoolYears, getCurrentSchoolYear } from '../utils/schoolYear'
