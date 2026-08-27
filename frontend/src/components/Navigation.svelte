@@ -6,10 +6,12 @@
   import oslologoUrl from '@oslokommune/punkt-assets/dist/logos/oslologo.svg?url'
   import { preferredSchoolYear } from '../stores/localStorageFunctions'
   import { getAllSchoolYears, getCurrentSchoolYear } from '../utils/schoolYear'
+  import type { SchoolType } from '../generated/types.gen'
 
   import Link from './Link.svelte'
   import GoalIconCelebration from './GoalIconCelebration.svelte'
   import YearSelector from './YearSelector.svelte'
+  import SchoolSelector from './SchoolSelector.svelte'
 
   const allYearsForCurrentSchool = $derived(
     $currentSchool ? getAllSchoolYears(new Date($currentSchool.createdAt)).reverse() : []
@@ -29,7 +31,29 @@
         ? 'localhost'
         : undefined
   )
+
+  const schools = $derived<SchoolType[]>($currentUser?.schools ?? [])
+  const hasMultipleSchools = $derived(!!$currentUser && schools.length > 1)
 </script>
+
+{#snippet schoolSelectorDropdown()}
+  <div class="dropdown navbar-brand-dropdown">
+    <button
+      id="navbarDropdownSchoolSelector"
+      class="dropdown-toggle dropdown-toggle-split nav-link py-0 ps-0"
+      type="button"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+      aria-label="Velg skole"
+      title="Velg skole"
+    >
+      <span class="visually-hidden">Velg skole</span>
+    </button>
+    <span class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownSchoolSelector">
+      <SchoolSelector />
+    </span>
+  </div>
+{/snippet}
 
 <nav class="navbar navbar-expand-md bg-light">
   {#if environmentWarning}
@@ -42,22 +66,27 @@
   {/if}
 
   <div class="container-md">
-    <Link
-      className="navbar-brand d-flex align-items-center"
-      to={$hasUserAccessToPath('/admin/schools/:schoolId')
-        ? `/admin/schools/${$currentSchool?.id}`
-        : '/'}
-    >
-      <!-- Mestring icon -->
-      <span class="goal-icon-wrapper me-2">
-        <pkt-icon name="goal" title="Mestring logo" aria-hidden="true"></pkt-icon>
-        <span class="celebration-overlay" aria-hidden="true">
-          <GoalIconCelebration />
+    <div class="d-flex align-items-center">
+      <Link
+        className="navbar-brand d-flex align-items-center"
+        to={$hasUserAccessToPath('/admin/schools/:schoolId')
+          ? `/admin/schools/${$currentSchool?.id}`
+          : '/'}
+      >
+        <!-- Mestring icon -->
+        <span class="goal-icon-wrapper me-3">
+          <pkt-icon name="goal" title="Mestring logo" aria-hidden="true"></pkt-icon>
+          <span class="celebration-overlay" aria-hidden="true">
+            <GoalIconCelebration />
+          </span>
         </span>
-      </span>
 
-      <h1>{$currentSchool?.displayName || 'INGEN SKOLE VALGT'}</h1>
-    </Link>
+        <h1>{$currentSchool?.displayName || 'INGEN SKOLE VALGT'}</h1>
+      </Link>
+      {#if hasMultipleSchools}
+        {@render schoolSelectorDropdown()}
+      {/if}
+    </div>
 
     <!-- Burger menu button, visible on narrow displays -->
     <button
@@ -223,16 +252,16 @@
           <!-- Don't bother the user with this selector if school has only been using mestring this current year -->
           {#if allYearsForCurrentSchool.length > 1}
             <li class="nav-item dropdown" title="Velg skoleår">
-              <span
+              <button
                 class={'nav-link dropdown-toggle'}
                 class:warning={$preferredSchoolYear !== getCurrentSchoolYear()}
                 id="navbarDropdownYearSelector"
-                role="button"
+                type="button"
                 data-bs-toggle="dropdown"
                 data-bs-auto-close="outside"
               >
                 {$preferredSchoolYear === 'all' ? 'Alle år' : $preferredSchoolYear}
-              </span>
+              </button>
               <span
                 class="dropdown-menu dropdown-menu-end"
                 aria-labelledby="navbarDropdownYearSelector"
@@ -331,5 +360,10 @@
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.18);
     transform: rotate(-45deg);
     pointer-events: none;
+  }
+
+  .navbar-brand-dropdown .dropdown-menu {
+    width: max-content;
+    min-width: 100%;
   }
 </style>
