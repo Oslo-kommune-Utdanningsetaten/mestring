@@ -1,4 +1,5 @@
 import { USER_ROLES, VALUE_INPUT_VARIANTS } from '../utils/constants'
+import type { StatusType } from '../generated/types.gen'
 
 // Data structure types which only exist in the frontend
 export type deploymentEnvironment = 'localhost' | 'development' | 'production'
@@ -77,6 +78,8 @@ export type MasterySchemaConfig = {
 export type MasterySchemaWithConfig = MasterySchemaType & {
   config?: MasterySchemaConfig
 }
+
+export type StatusTitleInput = Pick<StatusType, 'beginAt' | 'endAt'>
 
 export type SchoolImportStatus = {
   groups: {

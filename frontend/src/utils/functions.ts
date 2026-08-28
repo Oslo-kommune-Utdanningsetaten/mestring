@@ -1,11 +1,15 @@
-import type { MasteryData, GoalDecorated, UserDecorated } from '../types/models'
+import type {
+  MasteryData,
+  GoalDecorated,
+  UserDecorated,
+  StatusTitleInput,
+} from '../types/models'
 import type {
   GoalType,
   SubjectType,
   ObservationType,
   GroupType,
   UserType,
-  StatusType,
   StatusCategoryType,
 } from '../generated/types.gen'
 import { goalsList, userGroupsList, userSchoolsList } from '../generated/sdk.gen'
@@ -272,23 +276,25 @@ export const abbreviateName = (fullName: string, otherNames?: string[]): string 
 }
 
 export const generateStatusTitle = (
-  aStatus: Partial<StatusType>,
+  aStatus: StatusTitleInput,
   statusCategory: StatusCategoryType | undefined
 ): string => {
   if (statusCategory) {
-    const today = new Date()
     let season = ''
     let yearShort = ''
-    const { startAt, midyearAt, endAt } = calculateSchoolYearMilestones()
+    const statusBeginDate = new Date(aStatus.beginAt)
+    const { startAt, endAt } = calculateSchoolYearMilestones(statusBeginDate)
+
     if (statusCategory.name === 'midyear') {
       season = 'h'
-      yearShort = today.getFullYear().toString().slice(-2)
+      yearShort = startAt.split('-')[0].slice(-2)
     } else if (statusCategory.name === 'endyear') {
       season = 'v'
-      yearShort = today.getFullYear().toString().slice(-2)
+      yearShort = endAt.split('-')[0].slice(-2)
     } else if (statusCategory.name === 'risk') {
-      season = today.getMonth() < 7 ? 'v' : 'h'
-      yearShort = today.getFullYear().toString().slice(-2)
+      const statusEndDate = new Date(aStatus.endAt)
+      season = statusEndDate.getMonth() < 7 ? 'v' : 'h'
+      yearShort = statusEndDate.getFullYear().toString().slice(-2)
     } else {
       console.error('Unknown category', { statusCategory })
     }

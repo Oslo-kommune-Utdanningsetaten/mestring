@@ -15,6 +15,7 @@
   } from '../generated/sdk.gen'
   import { hasUserAccessToFeature } from '../stores/access'
   import { generateStatusTitle, getDateSpanForStatusCategory } from '../utils/functions'
+import type { StatusTitleInput } from '../types/models'
   import { calculateSchoolYearMilestones } from '../utils/schoolYear'
   import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import { dataStore } from '../stores/data'
@@ -130,7 +131,7 @@
       beginAt: getDateRange().beginAt,
       endAt: getDateRange().endAt,
     } as StatusType
-    newStatus.title = generateStatusTitle(newStatus, statusCategory)
+    newStatus.title = generateStatusTitle(newStatus as StatusTitleInput, statusCategory)
     return newStatus
   }
 

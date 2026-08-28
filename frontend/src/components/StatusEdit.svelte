@@ -18,6 +18,7 @@
     generateStatusTitle,
     getDateSpanForStatusCategory,
   } from '../utils/functions'
+  import type { StatusTitleInput } from '../types/models'
   import { calculateSchoolYearMilestones } from '../utils/schoolYear'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
@@ -96,7 +97,7 @@
 
   const generateTitle = (): string => {
     const statusCategory = selectableStatusCategories.find(cat => cat.id === localStatus.categoryId)
-    return generateStatusTitle(localStatus, statusCategory)
+    return generateStatusTitle(localStatus as StatusTitleInput, statusCategory)
   }
 
   const handleGenerateTitle = () => {

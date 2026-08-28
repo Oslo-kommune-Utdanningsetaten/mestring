@@ -1,7 +1,8 @@
 import { describe, it, expect, assert } from 'vitest'
 import { inferMastery, aggregateMasterys, generateStatusTitle } from '../utils/functions'
+import type { StatusTitleInput } from '../types/models'
 import { getAllSchoolYears, inferCreatedParams } from '../utils/schoolYear'
-import type { ObservationType, StatusCategoryType, StatusType } from '../generated/types.gen'
+import type { ObservationType, StatusCategoryType } from '../generated/types.gen'
 import type { GoalDecorated } from '../types/models'
 
 // Minimal observation factory
@@ -278,11 +279,51 @@ describe('infer + aggregate masterys', () => {
 
 // generateStatusTitle
 describe('generateStatusTitle', () => {
-  it('formats a date range when no category is provided', () => {
-    const status: Partial<StatusType> = {
+  it('formats title based only on status', () => {
+    const status: StatusTitleInput = {
       beginAt: '2024-01-15T00:00:00Z',
       endAt: '2024-03-15T00:00:00Z',
     }
     expect(generateStatusTitle(status, undefined)).toBe('Januar - mars')
+    const status2: StatusTitleInput = {
+      beginAt: '2024-11-01T00:00:00Z',
+      endAt: '2025-02-15T00:00:00Z',
+    }
+    expect(generateStatusTitle(status2, undefined)).toBe('November - februar')
+  })
+
+  // midyear: halvtårs/ 15. jan ish
+  // endyear: standpunkt
+  // risk: midt i semesteret
+  it('formats title based on status and statusCategory', () => {
+    const status: StatusTitleInput = {
+      beginAt: '2023-08-15T00:00:00Z',
+      endAt: '2024-01-15T00:00:00Z',
+    }
+    const statusCategoryMidyear = {
+      name: 'midyear',
+      title: 'Halvtårs',
+    } as StatusCategoryType
+    expect(generateStatusTitle(status, statusCategoryMidyear)).toBe('Halvtårs - h23')
+
+    const status2: StatusTitleInput = {
+      beginAt: '2023-08-15T00:00:00Z',
+      endAt: '2024-01-15T00:00:00Z',
+    }
+    const statusCategoryEndyear = {
+      name: 'endyear',
+      title: 'Standpunkt',
+    } as StatusCategoryType
+    expect(generateStatusTitle(status2, statusCategoryEndyear)).toBe('Standpunkt - v24')
+
+    const status3: StatusTitleInput = {
+      beginAt: '2023-08-15T00:00:00Z',
+      endAt: '2023-10-20T00:00:00Z',
+    }
+    const statusCategoryRisk = {
+      name: 'risk',
+      title: 'Vurderingsgrunnlag',
+    } as StatusCategoryType
+    expect(generateStatusTitle(status3, statusCategoryRisk)).toBe('Vurderingsgrunnlag - h23')
   })
 })
