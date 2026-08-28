@@ -1,9 +1,4 @@
-import type {
-  MasteryData,
-  GoalDecorated,
-  UserDecorated,
-  StatusTitleInput,
-} from '../types/models'
+import type { MasteryData, GoalDecorated, UserDecorated, StatusTitleInput } from '../types/models'
 import type {
   GoalType,
   SubjectType,
