@@ -61,16 +61,18 @@
       {#each groups as group, i}
         <div class="group-row" class:border-top={i > 0}>
           <div class="group-name">
-            <Link to="/groups/{group.id}" title={group.feideId}>
-              {group.displayName}
-            </Link>
+            <GroupTag
+              href="/groups/{group.id}"
+              {group}
+              isGroupTypeNameEnabled={true}
+              isGroupNameEnabled={true}
+            />
+          </div>
+
+          <div class="subject-name">
             {#if group.subjectId}
               <SubjectTag subjectId={group.subjectId} />
             {/if}
-          </div>
-
-          <div>
-            <GroupTag {group} isGroupTypeNameEnabled={true} />
           </div>
 
           {#if membersByGroupId && Object.hasOwn(membersByGroupId, group.id)}
@@ -111,8 +113,8 @@
 <style>
   .groups-grid {
     display: grid;
-    grid-template-columns: minmax(12rem, 20rem) 1fr auto 1fr;
-    column-gap: 20px;
+    grid-template-columns: auto auto auto auto;
+    column-gap: 15px;
   }
 
   .group-row {

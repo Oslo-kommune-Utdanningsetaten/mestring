@@ -11,7 +11,7 @@
     classes?: string
   }>()
 
-  const skin: string = 'gray'
+  const skin: string = $derived('beige')
   const subject = $derived($dataStore.subjects.find((sub: SubjectType) => sub.id === subjectId))
   const subjectName = $derived(subject && getSubjectName(subject))
 </script>

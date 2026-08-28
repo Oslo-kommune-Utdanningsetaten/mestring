@@ -20,7 +20,7 @@
     href?: string
   }>()
 
-  const skin: string = 'gray'
+  const skin: string = $derived('beige')
 
   const iconName = $derived<string>(
     role === USER_ROLES.TEACHER ? 'lecture' : role === USER_ROLES.STUDENT ? 'education' : 'person'
