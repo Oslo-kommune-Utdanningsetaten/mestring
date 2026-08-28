@@ -30,5 +30,8 @@ export default defineConfig(({ mode }) => {
       proxy: proxyConfig,
       host: true,
     },
+    test: {
+      setupFiles: './src/tests/setup.ts',
+    },
   }
 })

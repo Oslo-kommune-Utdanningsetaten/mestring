@@ -1,7 +1,7 @@
 import { describe, it, expect, assert } from 'vitest'
-import { inferMastery, aggregateMasterys } from '../utils/functions'
+import { inferMastery, aggregateMasterys, generateStatusTitle } from '../utils/functions'
 import { getAllSchoolYears, inferCreatedParams } from '../utils/schoolYear'
-import type { ObservationType } from '../generated/types.gen'
+import type { ObservationType, StatusCategoryType, StatusType } from '../generated/types.gen'
 import type { GoalDecorated } from '../types/models'
 
 // Minimal observation factory
@@ -273,5 +273,16 @@ describe('infer + aggregate masterys', () => {
     expect(result.observationValues).toStrictEqual([2, 4, 5, 1]) // flattened list of all observationValues
     expect(result.mastery).toBe((masteryData1.mastery + masteryData2.mastery) / 2) // mastery average
     expect(result.trend).toBe((masteryData1.trend + masteryData2.trend) / 2) // trend average
+  })
+})
+
+// generateStatusTitle
+describe('generateStatusTitle', () => {
+  it('formats a date range when no category is provided', () => {
+    const status: Partial<StatusType> = {
+      beginAt: '2024-01-15T00:00:00Z',
+      endAt: '2024-03-15T00:00:00Z',
+    }
+    expect(generateStatusTitle(status, undefined)).toBe('Januar - mars')
   })
 })

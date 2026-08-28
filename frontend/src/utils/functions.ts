@@ -279,8 +279,8 @@ export const generateStatusTitle = (
     const today = new Date()
     let season = ''
     let yearShort = ''
+    const { startAt, midyearAt, endAt } = calculateSchoolYearMilestones()
     if (statusCategory.name === 'midyear') {
-      // FIXME: this sometimes fails
       season = 'h'
       yearShort = today.getFullYear().toString().slice(-2)
     } else if (statusCategory.name === 'endyear') {
