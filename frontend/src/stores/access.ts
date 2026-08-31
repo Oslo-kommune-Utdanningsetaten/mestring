@@ -7,6 +7,10 @@ import { currentUser, currentSchool, subjects } from './data'
 import { getCurrentSchoolYear } from '../utils/schoolYear'
 import { preferredSchoolYear } from './localStorageFunctions'
 
+// Read from url the oldschool way, as the router is not available outside of components
+// The var is used to enable superadmins to edit data in past school years
+const isAdminEditEnabled = Boolean(new URLSearchParams(document.location.search).get('adminEdit'))
+
 export const hasUserAccessToPath = derived(
   [currentUser, currentSchool],
   ([$currentUser, $currentSchool]) =>
@@ -76,20 +80,20 @@ const checkUserAccessToFeature = (
     return false
   }
 
-  // school admins and superadmins have access to everything below this point
-  if (currentUser.isSchoolAdmin || currentUser.isSuperadmin) return true
-
-  // group is inaccessible to normal users
-  if (groupId && (!group || !group.isValid)) {
-    return false
-  }
-
   // Disallow create/update/delete actions if the user has selected a different school year than the current one
   // Prevents modifying data in past (or future) school years
   if (
     getCurrentSchoolYear() !== preferredSchoolYear &&
     ['create', 'update', 'delete'].includes(action)
   ) {
+    return currentUser.isSuperadmin && isAdminEditEnabled
+  }
+
+  // school admins and superadmins have access to everything below this point
+  if (currentUser.isSchoolAdmin || currentUser.isSuperadmin) return true
+
+  // group is inaccessible to normal users
+  if (groupId && (!group || !group.isValid)) {
     return false
   }
 

@@ -143,13 +143,6 @@
     { value: 'exclude', label: 'Non-deleted' },
   ] as const
 
-  // Options for filtering by gourps
-  const groupCountOptions = [
-    { value: 'no', label: 'No groups' },
-    { value: 'yes', label: 'Has groups' },
-    { value: 'any', label: 'Whatever' },
-  ] as const
-
   // Options for filtering by groups by date validity
   const createdOptions = $derived.by(() => {
     if (!$dataStore.currentSchool) return []
@@ -167,7 +160,7 @@
     const options: Record<string, any> & { school: string } = {
       school: selectedSchool?.id as string,
       deleted: deletedSelection,
-      roles: selectedRoles.includes('all') ? [] : selectedRoles,
+      roles: selectedRoles.includes('all') ? [] : selectedRoles.join(','),
       ...inferCreatedParams(selectedYearOption),
     }
     return options

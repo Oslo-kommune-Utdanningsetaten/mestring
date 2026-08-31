@@ -52,20 +52,20 @@
 
 <Analytics />
 
-<div class="d-flex flex-column min-vh-100">
-  <header class="m-0 p-0">
-    <Navigation />
-    <AlertBar />
-  </header>
+<Router>
+  <div class="d-flex flex-column min-vh-100">
+    <header class="m-0 p-0">
+      <Navigation />
+      <AlertBar />
+    </header>
 
-  <main id="main-content" class="container-md py-3 flex-grow-1">
-    {#if $isLoggingInUser}
-      <div class="d-flex align-items-center gap-2 text-secondary small py-2">
-        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        <span>Logger inn...</span>
-      </div>
-    {:else}
-      <Router>
+    <main id="main-content" class="container-md py-3 flex-grow-1">
+      {#if $isLoggingInUser}
+        <div class="d-flex align-items-center gap-2 text-secondary small py-2">
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <span>Logger inn...</span>
+        </div>
+      {:else}
         {#each ROUTES as route}
           {#if $hasUserAccessToPath(route.path)}
             <Route path={route.path} component={route.component} />
@@ -75,14 +75,14 @@
         <Route>
           <NotFound />
         </Route>
-      </Router>
-    {/if}
-  </main>
+      {/if}
+    </main>
 
-  <footer class="bg-light">
-    <Footer />
-  </footer>
-</div>
+    <footer class="bg-light">
+      <Footer />
+    </footer>
+  </div>
+</Router>
 
 <style>
   .skip-link {

@@ -1,17 +1,22 @@
 <script lang="ts">
+  import { useTinyRouter } from 'svelte-tiny-router'
+  import oslologoUrl from '@oslokommune/punkt-assets/dist/logos/oslologo.svg?url'
+  import type { SchoolType } from '../generated/types.gen'
   import { currentUser, currentSchool } from '../stores/data'
   import { login, logout } from '../stores/auth'
   import { currentPath } from '../stores/navigation'
   import { hasUserAccessToPath } from '../stores/access'
-  import oslologoUrl from '@oslokommune/punkt-assets/dist/logos/oslologo.svg?url'
+  import { urlStringFrom } from '../utils/functions'
   import { preferredSchoolYear } from '../stores/localStorageFunctions'
   import { getAllSchoolYears, getCurrentSchoolYear } from '../utils/schoolYear'
-  import type { SchoolType } from '../generated/types.gen'
 
   import Link from './Link.svelte'
   import GoalIconCelebration from './GoalIconCelebration.svelte'
   import YearSelector from './YearSelector.svelte'
   import SchoolSelector from './SchoolSelector.svelte'
+
+  const router = useTinyRouter()
+  const isAdminEditEnabled = $derived(Boolean(router && router.getQueryParam('adminEdit')))
 
   const allYearsForCurrentSchool = $derived(
     $currentSchool ? getAllSchoolYears(new Date($currentSchool.createdAt)).reverse() : []
@@ -34,6 +39,16 @@
 
   const schools = $derived<SchoolType[]>($currentUser?.schools ?? [])
   const hasMultipleSchools = $derived(!!$currentUser && schools.length > 1)
+
+  const handleAdminEditToggle = () => {
+    router.navigate(
+      urlStringFrom(
+        { adminEdit: isAdminEditEnabled ? null : 'true' },
+        { path: window.location.pathname, mode: 'merge' }
+      )
+    )
+    window.location.reload() // Reload page to rebuild UI
+  }
 </script>
 
 {#snippet schoolSelectorDropdown()}
@@ -180,7 +195,7 @@
                 {/if}
                 {#if $hasUserAccessToPath('/admin/groups')}
                   <li>
-                    <Link to="/admin/groups" className="dropdown-item">Grupper adm</Link>
+                    <Link to="/admin/groups" className="dropdown-item">Grupper</Link>
                   </li>
                 {/if}
                 {#if $hasUserAccessToPath('/admin/users')}
@@ -241,7 +256,17 @@
                 {$currentUser.name.split(' ')[0]}
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownProfile">
-                <li><Link to="/profile" className="dropdown-item">Min side</Link></li>
+                <li class="profile-menu-item">
+                  <Link to="/profile" className="dropdown-item">Min side</Link>
+                  <pkt-checkbox
+                    class="admin-edit-toggle"
+                    label={isAdminEditEnabled ? 'EON' : 'EOFF'}
+                    labelPosition="left"
+                    isSwitch="true"
+                    checked={isAdminEditEnabled}
+                    onchange={() => handleAdminEditToggle()}
+                  ></pkt-checkbox>
+                </li>
                 <li>
                   <Link to="/" className="dropdown-item" onclick={logout}>Logg ut</Link>
                 </li>
@@ -365,5 +390,22 @@
   .navbar-brand-dropdown .dropdown-menu {
     width: max-content;
     min-width: 100%;
+  }
+
+  .profile-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .profile-menu-item .admin-edit-toggle {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    margin-right: 10px;
+  }
+
+  .profile-menu-item .admin-edit-toggle:hover,
+  .profile-menu-item .admin-edit-toggle:focus-within {
+    opacity: 1;
   }
 </style>

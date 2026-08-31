@@ -117,7 +117,7 @@
               <SubjectTag subjectId={observation.subjectId} />
               {#if cachedGoals[observation.goalId]}
                 <span class="observation-goal">
-                  <Link to={`/students/${observation.studentId}?expanded=${observation.goalId}`}>
+                  <Link to={`/students/${observation.studentId}/?expanded=${observation.goalId}`}>
                     {cachedGoals[observation.goalId].title ||
                       cachedGoals[observation.goalId].sortOrder}
                   </Link>
