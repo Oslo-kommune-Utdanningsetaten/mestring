@@ -312,7 +312,12 @@
     <div class="d-flex align-items-center gap-2 mt-1">
       <GroupTag {group} isGroupTypeNameEnabled={true} />
       {#each teachers as teacher}
-        <UserTag user={teacher} role={USER_ROLES.TEACHER} allUsers={teachers} />
+        <UserTag
+          user={teacher}
+          role={USER_ROLES.TEACHER}
+          allUsers={teachers}
+          href="/users/{teacher.id}"
+        />
       {/each}
     </div>
   </section>

@@ -70,6 +70,7 @@
                 user={teacher}
                 role={USER_ROLES.TEACHER}
                 allUsers={groupMembers[group.id].teachers}
+                href="/users/{teacher.id}"
               />
             {/each}
           {/if}
