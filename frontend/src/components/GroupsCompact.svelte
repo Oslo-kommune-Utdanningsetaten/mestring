@@ -82,6 +82,7 @@
                   user={teacher}
                   role={USER_ROLES.TEACHER}
                   allUsers={membersByGroupId[group.id].teachers}
+                  href="/users/{teacher.id}"
                 />
               {/each}
             </div>

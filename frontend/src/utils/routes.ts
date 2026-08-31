@@ -56,16 +56,28 @@ export const ROUTES = [
     accessibleBy: allRoles,
   },
   {
+    path: '/groups/:groupId',
+    component: Group,
+    isPublic: false,
+    accessibleBy: allRoles,
+  },
+  {
     path: '/users',
     component: UsersByRole,
     isPublic: false,
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
   {
-    path: '/groups/:groupId',
-    component: Group,
+    path: '/users/:userId',
+    component: Profile,
     isPublic: false,
-    accessibleBy: allRoles,
+    accessibleBy: [
+      USER_ROLES.INSPECTOR,
+      USER_ROLES.ADMIN,
+      USER_ROLES.SUPERADMIN,
+      USER_ROLES.TEACHER,
+      USER_ROLES.STUDENT,
+    ],
   },
   {
     path: '/groups/:groupId/statuses/:statusCategoryName',
@@ -143,12 +155,6 @@ export const ROUTES = [
     component: undefined, // placeholder, as we just check for access to the admin menu
     isPublic: false,
     accessibleBy: [USER_ROLES.SUPERADMIN],
-  },
-  {
-    path: '/admin/users/:userId',
-    component: Profile,
-    isPublic: false,
-    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
   {
     path: '/admin/users',
