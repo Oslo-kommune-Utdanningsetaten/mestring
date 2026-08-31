@@ -207,7 +207,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
   }
 
   .observation-header-row :global(pkt-tag) {
