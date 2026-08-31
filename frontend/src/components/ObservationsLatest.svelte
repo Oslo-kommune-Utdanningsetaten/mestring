@@ -106,14 +106,15 @@
       {#each observations as observation, i}
         <div class="observation-row" class:border-top={i > 0}>
           <div class="observation-meta-panel">
-            {#if viewMode !== 'student'}
-              <UserTag
-                userId={observation.studentId}
-                role={USER_ROLES.STUDENT}
-                href="/students/{observation.studentId}"
-              />
-            {/if}
-            <div class="observation-goal-row">
+            <div class="observation-header-row">
+              {#if viewMode !== 'student'}
+                <UserTag
+                  userId={observation.studentId}
+                  role={USER_ROLES.STUDENT}
+                  href="/students/{observation.studentId}"
+                />
+              {/if}
+              <SubjectTag subjectId={observation.subjectId} />
               {#if cachedGoals[observation.goalId]}
                 <span class="observation-goal">
                   <Link to={`/students/${observation.studentId}?expanded=${observation.goalId}`}>
@@ -129,7 +130,6 @@
                   aria-hidden="true"
                 ></span>
               {/if}
-              <SubjectTag subjectId={observation.subjectId} />
             </div>
             <div class="observation-author">
               <AuthorInfo item={observation} />
@@ -203,16 +203,20 @@
     gap: 0.5em;
   }
 
-  .observation-goal-row {
+  .observation-header-row {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.4rem;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .observation-header-row :global(pkt-tag) {
+    display: inline-flex;
+    align-items: center;
   }
 
   .observation-goal {
-    font-weight: 600;
-    font-size: 1rem;
+    font-weight: 700;
     line-height: 1.3;
   }
 
