@@ -2,6 +2,7 @@ import logging
 from django.db.models import Q, Exists, OuterRef
 from .base import BaseAccessPolicy
 from mastery.models import Goal, UserGroup, UserSchool
+from ..api.school_year_functions import is_entity_from_current_school_year
 
 logger = logging.getLogger(__name__)
 
@@ -25,28 +26,28 @@ class ObservationAccessPolicy(BaseAccessPolicy):
             "action": ["create"],
             "principal": ["role:teacher"],
             "effect": "allow",
-            "condition": "can_teacher_create_observation"
+            "condition": ["can_teacher_create_observation", "is_observation_from_current_school_year"]
         },
         # Students can create observations about themselves
         {
             "action": ["create"],
             "principal": ["role:student"],
             "effect": "allow",
-            "condition": "can_student_create_observation"
+            "condition": ["can_student_create_observation", "is_observation_from_current_school_year"]
         },
         # Students can only modify observations they created about themselves
         {
             "action": ["update", "partial_update", "destroy"],
             "principal": ["role:student"],
             "effect": "allow",
-            "condition": "can_student_modify_observation"
+            "condition": ["can_student_modify_observation", "is_observation_from_current_school_year"]
         },
         # Teachers can modify observations they created and according to goal type and students they teach
         {
             "action": ["update", "partial_update", "destroy"],
             "principal": ["role:teacher"],
             "effect": "allow",
-            "condition": "can_teacher_modify_observation"
+            "condition": ["can_teacher_modify_observation", "is_observation_from_current_school_year"]
         },
         # School admins can CRUD observations for students at their school
         {
@@ -280,3 +281,14 @@ class ObservationAccessPolicy(BaseAccessPolicy):
         except Exception:
             logger.exception("ObservationAccessPolicy.is_admin_at_school")
             return False
+
+    def is_observation_from_current_school_year(self, request, view, action):
+        if action == 'create':
+            return True
+        else:
+            try:
+                observation = view.get_object()
+                return is_entity_from_current_school_year(observation)
+            except Exception:
+                logger.exception("ObservationAccessPolicy.is_observation_from_current_school_year")
+                return False

@@ -46,44 +46,16 @@ def get_current_school_year() -> str:
     return f"{start_year}-{end_year}"
 
 
-def _get_value(entity, name: str):
-    """
-    Get a value by name from either a dict or a Django model instance.
-    """
-    if isinstance(entity, dict):
-        return entity.get(name)
-    return getattr(entity, name, None)
-
-
-def is_group_from_school_year(group, school_year: str) -> bool:
-    """
-    Check if a group is from the specified school year based on its valid_from and valid_to dates.
-    """
-    valid_from_str = _get_value(group, "valid_from")
-    valid_to_str = _get_value(group, "valid_to")
-    if not valid_from_str or not valid_to_str:
-        return False
-
-    try:
-        valid_from = datetime.fromisoformat(valid_from_str)
-        valid_to = datetime.fromisoformat(valid_to_str)
-    except ValueError:
-        return False
-
-    start_year, end_year = map(int, school_year.split("-"))
-    return (
-        valid_from.year == start_year and
-        valid_to.year == end_year
-    )
-
-
-# use created_at, for groups, return is_group_from_school_year instead
+# Check if the entity belongs to the specified school year based on its created_at
+# For groups, use group.is_valid (which checks validFrom and validTo) instead of created_at
 def is_entity_from_school_year(entity, school_year: str) -> bool:
-    if _get_value(entity, "valid_from") and _get_value(entity, "valid_to"):
-        return is_group_from_school_year(entity, school_year)
-
     try:
-        created_at = datetime.fromisoformat(_get_value(entity, "created_at"))
+        if isinstance(entity, dict):
+            created_at = entity.get("created_at")
+            created_at = datetime.fromisoformat(created_at)
+        else:
+            created_at = getattr(entity, "created_at", None)
+
     except ValueError:
         return False
 
@@ -92,3 +64,9 @@ def is_entity_from_school_year(entity, school_year: str) -> bool:
         (created_at.year == start_year and created_at.month >= START_MONTH) or
         (created_at.year == end_year and created_at.month <= END_MONTH)
     )
+
+
+def is_entity_from_current_school_year(entity) -> bool:
+    # just a convenience wrapper
+    current_school_year = get_current_school_year()
+    return is_entity_from_school_year(entity, current_school_year)
