@@ -222,21 +222,21 @@ describe('inferCreatedParams', () => {
   it('returns start of earliest and end of latest year', () => {
     const result = inferCreatedParams('2025-2026')
     expect(result).toEqual({
-      createdAfter: '2025-08-07',
-      createdBefore: '2026-06-30',
+      createdAfter: '2025-08-01',
+      createdBefore: '2026-07-31',
     })
     const result2 = inferCreatedParams('2026-2027')
     expect(result2).toEqual({
-      createdAfter: '2026-08-07',
-      createdBefore: '2027-06-30',
+      createdAfter: '2026-08-01',
+      createdBefore: '2027-07-31',
     })
   })
 
   it('returns a longer range if params require it', () => {
     const result = inferCreatedParams('2025-2027')
     expect(result).toEqual({
-      createdAfter: '2025-08-07',
-      createdBefore: '2027-06-30',
+      createdAfter: '2025-08-01',
+      createdBefore: '2027-07-31',
     })
   })
 

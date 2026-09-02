@@ -8,9 +8,9 @@ export const calculateSchoolYearMilestones = (customDate?: Date) => {
   const schoolStartYear = month < 7 ? year - 1 : year
 
   return {
-    startAt: `${schoolStartYear}-08-07`,
+    startAt: `${schoolStartYear}-08-01`,
     midyearAt: `${schoolStartYear + 1}-01-15`,
-    endAt: `${schoolStartYear + 1}-06-30`,
+    endAt: `${schoolStartYear + 1}-07-31`,
   }
 }
 
@@ -24,6 +24,7 @@ export const getSchoolYearForGroup = (group: GroupType): string | undefined => {
   return `${startYear}-${endYear}`
 }
 
+// Use for anything except groups, which rely on validFrom/validTo instead of createdAt
 export const isEntityFromSchoolYear = (
   entity: { createdAt: string },
   schoolYear: string
