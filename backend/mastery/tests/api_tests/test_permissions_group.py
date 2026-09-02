@@ -1,4 +1,6 @@
 import pytest
+from datetime import timedelta
+from django.utils import timezone
 from rest_framework.test import APIClient
 from mastery.models import Group, User
 
@@ -357,6 +359,56 @@ def test_basis_teacher_can_access_student_groups(
 
     resp = client.get(f'/api/groups/{disabled_teaching_group.id}/')
     assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_school_admin_can_update_valid_group(school_admin, school):
+    client = APIClient()
+    client.force_authenticate(user=school_admin)
+
+    valid_group = Group.objects.create(
+        feide_id="fc:group:valid-group",
+        display_name="Valid Group",
+        type="teaching",
+        school=school,
+        is_enabled=True,
+        valid_from=timezone.now() - timedelta(days=1),
+        valid_to=timezone.now() + timedelta(days=1),
+    )
+
+    resp = client.patch(
+        f'/api/groups/{valid_group.id}/',
+        {'display_name': 'Updated Valid Group'},
+        format='json'
+    )
+    assert resp.status_code == 200
+    valid_group.refresh_from_db()
+    assert valid_group.display_name == 'Updated Valid Group'
+
+
+@pytest.mark.django_db
+def test_school_admin_cannot_update_invalid_group(school_admin, school):
+    client = APIClient()
+    client.force_authenticate(user=school_admin)
+
+    invalid_group = Group.objects.create(
+        feide_id="fc:group:invalid-group",
+        display_name="Invalid Group",
+        type="teaching",
+        school=school,
+        is_enabled=True,
+        valid_from=timezone.now() - timedelta(days=10),
+        valid_to=timezone.now() - timedelta(days=1),
+    )
+
+    resp = client.patch(
+        f'/api/groups/{invalid_group.id}/',
+        {'display_name': 'Updated Invalid Group'},
+        format='json'
+    )
+    assert resp.status_code == 403
+    invalid_group.refresh_from_db()
+    assert invalid_group.display_name == 'Invalid Group'
 
 
 @pytest.mark.django_db

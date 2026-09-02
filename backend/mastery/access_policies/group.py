@@ -17,8 +17,8 @@ class GroupAccessPolicy(BaseAccessPolicy):
         {
             "action": ["update", "partial_update"],
             "principal": ["role:admin"],
+            "condition": ["is_admin_at_school", "is_group_valid"],
             "effect": "allow",
-            "condition": "is_admin_at_school",
         },
         # Authenticated user can list according to scope_queryset
         {
@@ -73,3 +73,8 @@ class GroupAccessPolicy(BaseAccessPolicy):
             school_id=group.school_id,
             role__name="admin"
         ).exists()
+
+    # True if the group is currently valid (within its valid_from/valid_to range)
+    def is_group_valid(self, request, view, action):
+        group = view.get_object()
+        return group.is_valid
