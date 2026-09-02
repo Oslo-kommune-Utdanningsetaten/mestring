@@ -1,4 +1,6 @@
 import pytest
+from datetime import timedelta
+from django.utils import timezone
 from rest_framework.test import APIClient
 from mastery.models import User, Goal, Group
 
@@ -583,6 +585,47 @@ def test_teaching_group_teacher_goal_access(
     # Teacher cannot delete group goals in groups they don't teach
     resp = client.delete(f'/api/goals/{group_goal_other.id}/')
     assert resp.status_code == 403
+
+    # Teacher cannot update goals from previous school year
+    old_goal = Goal.objects.create(
+        title="Old group goal",
+        group=teaching_group_with_members,
+        school=school,
+        created_by=teacher,
+    )
+    Goal.objects.filter(id=old_goal.id).update(
+        created_at=timezone.now() - timedelta(days=400)
+    )
+    resp = client.put(f'/api/goals/{old_goal.id}/', {
+        'group_id': teaching_group_with_members.id,
+        'title': 'Should not work',
+        'school_id': school.id
+    }, format='json')
+    assert resp.status_code == 403
+
+
+@pytest.mark.django_db
+def test_teacher_can_update_goal_from_current_school_year(
+        teacher, student, teaching_group_with_members, subject_with_group, school):
+    """Teachers can update goals created in the current school year."""
+    client = APIClient()
+    client.force_authenticate(user=teacher)
+
+    current_goal = Goal.objects.create(
+        title="Current group goal",
+        group=teaching_group_with_members,
+        school=school,
+        created_by=teacher,
+    )
+
+    resp = client.put(f'/api/goals/{current_goal.id}/', {
+        'group_id': teaching_group_with_members.id,
+        'title': 'Updated goal',
+        'school_id': school.id
+    }, format='json')
+    assert resp.status_code == 200
+    current_goal.refresh_from_db()
+    assert current_goal.title == 'Updated goal'
 
 
 @pytest.mark.django_db
