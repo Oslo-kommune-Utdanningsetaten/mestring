@@ -244,13 +244,14 @@
 
           <!-- User profile menu -->
           {#if $hasUserAccessToPath('/profile')}
-            <li class="nav-item dropdown" title="Logget på som {$currentUser.name}">
+            <li class="nav-item dropdown">
               <a
                 class={'nav-link dropdown-toggle'}
                 class:active={isProfileActive}
                 id="navbarDropdownProfile"
                 role="button"
                 data-bs-toggle="dropdown"
+                title="Logget på som {$currentUser.name}"
                 href="#"
               >
                 {$currentUser.name.split(' ')[0]}
@@ -265,6 +266,7 @@
                     isSwitch="true"
                     checked={isAdminEditEnabled}
                     onchange={() => handleAdminEditToggle()}
+                    title="Toggle admin edit mode"
                   ></pkt-checkbox>
                 </li>
                 <li>
