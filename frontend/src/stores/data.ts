@@ -59,6 +59,7 @@ export const dataStore = writable<AppData>({
 export const currentUser: UserDecorated = derived(dataStore, d => d.currentUser)
 export const currentSchool = derived(dataStore, d => d.currentSchool)
 export const subjects = derived(dataStore, d => d.subjects)
+let schools: SchoolType[] = []
 
 export const setCurrentUser = (user: UserDecorated | null) => {
   dataStore.update(data => ({ ...data, currentUser: user }))
@@ -71,9 +72,8 @@ export const registerUserStatus = async (school?: SchoolType) => {
     return
   }
 
-  const [userData, schoolsResult, allGroupsResult] = await Promise.all([
+  const [userData, allGroupsResult] = await Promise.all([
     fetchUserData(user.id, school.id, get(preferredSchoolYear)),
-    schoolsList({ query: { isServiceEnabled: true } }),
     groupsList({
       query: {
         school: school.id,
@@ -84,9 +84,6 @@ export const registerUserStatus = async (school?: SchoolType) => {
   ])
   const { teacherGroups, studentGroups, userSchools } = userData
   const allGroups = allGroupsResult.data || []
-  const schools = ((schoolsResult.data || []) as SchoolType[]).sort((a, b) =>
-    a.displayName.localeCompare(b.displayName)
-  )
   const isSchoolAdmin = !!userSchools.some(
     userSchool => userSchool.role.name === USER_ROLES.ADMIN && userSchool.school.id === school.id
   )
@@ -121,10 +118,11 @@ export const registerUserStatus = async (school?: SchoolType) => {
 }
 
 const loadSchools = async () => {
-  let schools: SchoolType[] = []
   try {
-    const result = await schoolsList()
-    schools = result.data || []
+    const result = await schoolsList({ query: { isServiceEnabled: true } })
+    schools = ((result.data || []) as SchoolType[]).sort((a, b) =>
+      a.displayName.localeCompare(b.displayName)
+    )
   } catch (error) {
     console.error('Error fetching schools:', error)
     return null
