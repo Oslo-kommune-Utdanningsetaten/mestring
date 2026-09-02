@@ -340,6 +340,28 @@ def test_teaching_group_teacher_status_access(
     }, format='json')
     assert resp.status_code == 403
 
+    # Cannot update status from previous school year
+    status_old_school_year = Status.objects.create(
+        student=student,
+        subject=subject_with_group,
+        school=school,
+        begin_at=timezone.now() - timedelta(days=400),
+        end_at=timezone.now() - timedelta(days=370),
+        created_by=teacher,
+    )
+    Status.objects.filter(id=status_old_school_year.id).update(
+        created_at=timezone.now() - timedelta(days=400)
+    )
+    resp = client.put(f"/api/status/{status_old_school_year.id}/", {
+        "student_id": student.id,
+        "subject_id": subject_with_group.id,
+        "school_id": school.id,
+        "begin_at": thirty_days_ago,
+        "end_at": two_days_ago,
+        "feedforward": "Should not work!",
+    }, format='json')
+    assert resp.status_code == 403
+
     # Can delete status they have access to
     resp = client.delete(f"/api/status/{created_id}/")
     assert resp.status_code == 204
@@ -347,6 +369,35 @@ def test_teaching_group_teacher_status_access(
     # Cannot delete status for subject they don't teach
     resp = client.delete(f"/api/status/{status_untaught.id}/")
     assert resp.status_code == 403
+
+
+@pytest.mark.django_db
+def test_teacher_can_update_status_from_current_school_year(
+        school, teacher, student, subject_with_group):
+    """Teachers can update statuses created in the current school year."""
+    client = APIClient()
+    client.force_authenticate(user=teacher)
+
+    current_status = Status.objects.create(
+        student=student,
+        subject=subject_with_group,
+        school=school,
+        begin_at=timezone.now() - timedelta(days=30),
+        end_at=timezone.now() - timedelta(days=2),
+        created_by=teacher,
+    )
+
+    resp = client.put(f"/api/status/{current_status.id}/", {
+        "student_id": student.id,
+        "subject_id": subject_with_group.id,
+        "school_id": school.id,
+        "begin_at": thirty_days_ago,
+        "end_at": two_days_ago,
+        "feedforward": "Fortsett sånn",
+    }, format='json')
+    assert resp.status_code == 200
+    current_status.refresh_from_db()
+    assert current_status.feedforward == "Fortsett sånn"
 
 
 @pytest.mark.django_db

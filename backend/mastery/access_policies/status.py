@@ -2,7 +2,9 @@ import logging
 from django.db.models import Q, Exists, OuterRef
 from django.utils import timezone
 from .base import BaseAccessPolicy
-from mastery.models import Goal, UserGroup, UserSchool
+from mastery.models import UserGroup, UserSchool
+from ..api.school_year_functions import is_entity_from_current_school_year
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,14 +28,14 @@ class StatusAccessPolicy(BaseAccessPolicy):
             "action": ["create"],
             "principal": ["role:teacher"],
             "effect": "allow",
-            "condition": "can_teacher_create_status"
+            "condition": ["can_teacher_create_status", "is_status_from_current_school_year"]
         },
         # Teachers can modify statuses for and students they teach
         {
             "action": ["update", "partial_update", "destroy"],
             "principal": ["role:teacher"],
             "effect": "allow",
-            "condition": "can_teacher_modify_status"
+            "condition": ["can_teacher_modify_status", "is_status_from_current_school_year"]
         },
         # School admins can CRUD statuses belonging to their school
         {
@@ -194,3 +196,14 @@ class StatusAccessPolicy(BaseAccessPolicy):
         except Exception:
             logger.exception("StatusAccessPolicy.is_admin_at_school")
             return False
+
+    def is_status_from_current_school_year(self, request, view, action):
+        if action == 'create':
+            return True
+        else:
+            try:
+                status = view.get_object()
+                return is_entity_from_current_school_year(status)
+            except Exception:
+                logger.exception("StatusAccessPolicy.is_status_from_current_school_year")
+                return False
