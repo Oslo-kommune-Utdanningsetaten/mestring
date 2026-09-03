@@ -2,6 +2,8 @@
   import type { GroupType } from '../generated/types.gen'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
   import { getSchoolYearForGroup, getCurrentSchoolYear } from '../utils/schoolYear'
+  import { getGroupLabel } from '../utils/functions'
+
   import Link from './Link.svelte'
 
   const {
@@ -28,25 +30,8 @@
     getCurrentSchoolYear() !== getSchoolYearForGroup(group) ? getSchoolYearForGroup(group) : null
   )
 
-  // replace any occurrence of undervisningsgruppe or basisgruppe with an empty string, and trim whitespace from the start and end of the string
-  const strippedGroupName = $derived(
-    group?.displayName
-      .replace(/undervisningsgruppe/gi, '')
-      .replace(/basisgruppe/gi, '')
-      .trim()
-  )
-
   const label: string = $derived(
-    [
-      isGroupNameEnabled ? strippedGroupName : null,
-      isGroupTypeNameEnabled
-        ? group?.type === GROUP_TYPE_BASIS
-          ? 'Basisgruppe'
-          : 'Undervisningsgruppe'
-        : null,
-    ]
-      .filter(Boolean)
-      .join(' - ')
+    getGroupLabel(group, { isGroupNameEnabled, isGroupTypeNameEnabled })
   )
 
   const skin: string = $derived('beige')

@@ -11,7 +11,12 @@ import { goalsList, userGroupsList, userSchoolsList } from '../generated/sdk.gen
 import { nb as noLocale } from 'date-fns/locale'
 import { format, formatDistance, formatDistanceToNow } from 'date-fns'
 import { USER_ROLES, GROUP_TYPE_BASIS } from './constants'
-import { calculateSchoolYearMilestones, isEntityFromSchoolYear } from './schoolYear'
+import {
+  calculateSchoolYearMilestones,
+  isEntityFromSchoolYear,
+  getSchoolYearForGroup,
+  getCurrentSchoolYear,
+} from './schoolYear'
 import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
 
 function removeNullValueKeys(obj: { [key: string]: string | null }): {
@@ -421,6 +426,36 @@ export const fetchUserData = async (userId: string, schoolId: string, schoolYear
     .map(ug => ug.group)
   const userSchools = userSchoolsResult.data || []
   return { teacherGroups, studentGroups, userGroups, userSchools }
+}
+
+export const getGroupLabel = (
+  group: GroupType,
+  options: {
+    isGroupNameEnabled?: boolean
+    isGroupTypeNameEnabled?: boolean
+    includeEarlierYear?: boolean
+  }
+): string => {
+  // replace any occurrence of undervisningsgruppe or basisgruppe with an empty string, and trim whitespace from the start and end of the string
+  const strippedGroupName = group?.displayName
+    .replace(/undervisningsgruppe/gi, '')
+    .replace(/basisgruppe/gi, '')
+    .trim()
+
+  const earlierYear =
+    getCurrentSchoolYear() !== getSchoolYearForGroup(group) ? getSchoolYearForGroup(group) : null
+
+  return [
+    options.isGroupNameEnabled ? strippedGroupName : null,
+    options.isGroupTypeNameEnabled
+      ? group?.type === GROUP_TYPE_BASIS
+        ? 'Basisgruppe'
+        : 'Undervisningsgruppe'
+      : null,
+    options.includeEarlierYear && earlierYear ? `(${earlierYear})` : null,
+  ]
+    .filter(Boolean)
+    .join(' - ')
 }
 
 export const formatDateTime = (isoDate?: string | number | undefined) => {

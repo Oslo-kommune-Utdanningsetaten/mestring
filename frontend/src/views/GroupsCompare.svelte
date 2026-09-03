@@ -1,10 +1,12 @@
 <script lang="ts">
   import { useTinyRouter } from 'svelte-tiny-router'
-  import { observationsList } from '../generated/sdk.gen'
   import type { GroupType, ObservationType, SubjectType } from '../generated/types.gen'
+  import { observationsList } from '../generated/sdk.gen'
   import { dataStore, currentSchool, currentUser } from '../stores/data'
+  import { hasUserAccessToFeature } from '../stores/access'
   import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
+
   import GroupRow from '../components/GroupRow.svelte'
   import GroupsCompareSelect from '../components/GroupsCompareSelect.svelte'
 
@@ -72,48 +74,52 @@
 
 <section>
   <h2>Sammenlign grupper [BETA]</h2>
-  <GroupsCompareSelect />
-  <p class="text-muted">Valgt: {groups?.map(g => g.displayName).join(', ')}</p>
-  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-  <p>
-    {@html 'Diagrammet viser tre kategorier: Antall mål der elever beveger seg <span class="fw-bold">ned</span>, <span class="fw-bold">er uforandret</span>, eller <span class="fw-bold">opp</span> i mestringstrappa.'}
-  </p>
-  {#if isLoading}
-    <div class="mt-3">Laster...</div>
-  {:else if groups.length === 0}
-    <div class="mt-3">Ingen grupper å sammenligne 🫤</div>
-  {:else if !areAllGroupsOfSameType}
-    <p class="text-danger mb-2">Valgte grupper må være av samme type (basis/undervisning)</p>
-  {:else if groupType === GROUP_TYPE_TEACHING}
-    <p class="mt-3">Sammenligning av undervisningsgrupper er ikke støttet ennå.</p>
-  {:else if groupType === GROUP_TYPE_BASIS}
-    <div
-      class="groups-grid"
-      aria-label="Gruppeliste"
-      style="--columns-count: {uniqueSubjects.length}"
-    >
-      <span class="item header header-row">Group</span>
-      {#each uniqueSubjects as subject (subject.id)}
-        <span class="item header header-row">
-          <span class="column-header">
-            {#if subject.ownedBySchoolId}
-              {subject.shortName}
-            {:else}
-              {subject.grepCode}
-            {/if}
+  {#if $hasUserAccessToFeature('group', 'compare')}
+    <GroupsCompareSelect />
+    <p class="text-muted">Valgt: {groups?.map(g => g.displayName).join(', ')}</p>
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+    <p>
+      {@html 'Diagrammet viser tre kategorier: Antall mål der elever beveger seg <span class="fw-bold">ned</span>, <span class="fw-bold">er uforandret</span>, eller <span class="fw-bold">opp</span> i mestringstrappa.'}
+    </p>
+    {#if isLoading}
+      <div class="mt-3">Laster...</div>
+    {:else if groups.length === 0}
+      <div class="mt-3">Ingen grupper å sammenligne 🫤</div>
+    {:else if !areAllGroupsOfSameType}
+      <p class="text-danger mb-2">Valgte grupper må være av samme type (basis/undervisning)</p>
+    {:else if groupType === GROUP_TYPE_TEACHING}
+      <p class="mt-3">Sammenligning av undervisningsgrupper er ikke støttet ennå.</p>
+    {:else if groupType === GROUP_TYPE_BASIS}
+      <div
+        class="groups-grid"
+        aria-label="Gruppeliste"
+        style="--columns-count: {uniqueSubjects.length}"
+      >
+        <span class="item header header-row">Group</span>
+        {#each uniqueSubjects as subject (subject.id)}
+          <span class="item header header-row">
+            <span class="column-header">
+              {#if subject.ownedBySchoolId}
+                {subject.shortName}
+              {:else}
+                {subject.grepCode}
+              {/if}
+            </span>
           </span>
-        </span>
-      {/each}
-      {#each groups as group (group.id)}
-        <GroupRow
-          {group}
-          subjects={getSubjects(group.id)}
-          observations={observationsByGroupId[group.id]}
-        />
-      {/each}
-    </div>
+        {/each}
+        {#each groups as group (group.id)}
+          <GroupRow
+            {group}
+            subjects={getSubjects(group.id)}
+            observations={observationsByGroupId[group.id]}
+          />
+        {/each}
+      </div>
+    {:else}
+      <p class="mt-3">Ukjent gruppetype: {groupType}</p>
+    {/if}
   {:else}
-    <p class="mt-3">Ukjent gruppetype: {groupType}</p>
+    <p class="mt-3">Du har visst ikke tilgang til å sammenligne grupper.</p>
   {/if}
 </section>
 
