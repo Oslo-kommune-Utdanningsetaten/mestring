@@ -6,12 +6,9 @@
   import { formatDateTime, urlStringFrom } from '../../utils/functions'
   import { addAlert } from '../../stores/alerts'
   import { dataStore, currentSchool } from '../../stores/data'
+  import { preferredSchoolYear } from '../../stores/localStorageFunctions'
   import { GROUP_DELETED_OPTIONS } from '../../utils/constants'
-  import {
-    getAllSchoolYears,
-    getCurrentSchoolYear,
-    inferCreatedParams,
-  } from '../../utils/schoolYear'
+  import { inferCreatedParams } from '../../utils/schoolYear'
   import Link from '../../components/Link.svelte'
 
   const router = useTinyRouter()
@@ -20,10 +17,6 @@
 
   let selectedDeletedOption = $state<GROUP_DELETED_OPTIONS>(
     (router.getQueryParam('deleted') as GROUP_DELETED_OPTIONS) || GROUP_DELETED_OPTIONS.EXCLUDE
-  )
-
-  let selectedYearOption = $state<string>(
-    (router.getQueryParam('year') as string) || getCurrentSchoolYear()
   )
 
   // Sort state
@@ -38,24 +31,10 @@
     { value: GROUP_DELETED_OPTIONS.EXCLUDE, label: 'Kun IKKE slettete mål' },
   ] as const
 
-  // Options for filtering by goals by date validity
-  const createdOptions = $derived.by(() => {
-    if (!$currentSchool) return []
-
-    const allYears = getAllSchoolYears(new Date($currentSchool.createdAt)).reverse()
-    return [
-      ...allYears.map(year => ({
-        value: year,
-        label: year,
-      })),
-      allYears.length > 1 ? { value: 'all', label: 'Alle år' } : null,
-    ].filter(Boolean) as { value: string; label: string }[]
-  })
-
   let queryOptions = $derived({
     school: $currentSchool.id,
     deleted: selectedDeletedOption,
-    ...inferCreatedParams(selectedYearOption),
+    ...inferCreatedParams($preferredSchoolYear),
   })
 
   const masterySchemasById = $derived.by(() => {
@@ -172,7 +151,6 @@
     const url = urlStringFrom(
       {
         deleted: selectedDeletedOption || null,
-        year: selectedYearOption || null,
       },
       { path: '/goals', mode: 'merge' }
     )
@@ -184,22 +162,6 @@
   <h2>Alle mål ved skolen</h2>
 
   <div class="d-flex flex-wrap gap-3 mt-3">
-    <!-- Radio buttons for created in year -->
-    <fieldset class="border p-3 rounded">
-      <legend class="w-auto fs-6">År opprettet</legend>
-      {#each createdOptions as option}
-        <label class="my-2 ms-1 d-block">
-          <input
-            type="radio"
-            name="createdOptions"
-            value={option.value}
-            bind:group={selectedYearOption}
-          />
-          <span class="ms-2">{option.label}</span>
-        </label>
-      {/each}
-    </fieldset>
-
     <!-- Only superadmins need be bothered with deleted status -->
     {#if $dataStore.currentUser.isSuperadmin}
       <fieldset class="border p-3 rounded">
@@ -220,6 +182,10 @@
   </div>
 
   {#if goals.length > 0}
+    <div class="mt-4 mb-2 fw-bold">
+      Viser {sortedGoals.length} mål
+    </div>
+
     <!-- Header -->
     <div class="goals-grid mt-4">
       <span class="header">
