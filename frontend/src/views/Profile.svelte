@@ -6,7 +6,6 @@
   import {
     getPreferredGroupValidity,
     getPreferredMasteryBadgeVariant,
-    preferredSchoolYear,
   } from '../stores/localStorageFunctions'
   import { dataStore, currentUser, currentSchool } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
