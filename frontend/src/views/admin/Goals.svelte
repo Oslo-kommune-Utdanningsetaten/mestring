@@ -6,9 +6,8 @@
   import { formatDateTime, urlStringFrom } from '../../utils/functions'
   import { addAlert } from '../../stores/alerts'
   import { dataStore, currentSchool } from '../../stores/data'
-  import { preferredSchoolYear } from '../../stores/localStorageFunctions'
+  import { getPreferredCreatedParams } from '../../stores/localStorageFunctions'
   import { GROUP_DELETED_OPTIONS } from '../../utils/constants'
-  import { inferCreatedParams } from '../../utils/schoolYear'
   import Link from '../../components/Link.svelte'
 
   const router = useTinyRouter()
@@ -34,7 +33,7 @@
   let queryOptions = $derived({
     school: $currentSchool.id,
     deleted: selectedDeletedOption,
-    ...inferCreatedParams($preferredSchoolYear),
+    ...getPreferredCreatedParams(),
   })
 
   const masterySchemasById = $derived.by(() => {

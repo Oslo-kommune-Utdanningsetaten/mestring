@@ -94,6 +94,10 @@
       return labels
     })()
   )
+
+  // Determine which x-axis labels to render based on total label count.
+  // Ticks are still rendered for every bar below.
+  const xLabelRenderStep = $derived(xLabels.length > 25 ? 5 : xLabels.length > 10 ? 2 : 1)
 </script>
 
 <svg
@@ -118,8 +122,20 @@
       onmouseenter={() => (hoverIndex = index)}
       onmouseleave={() => (hoverIndex = -1)}
     ></rect>
-    {#if bar.xLabel}
-      <!-- x-axis labels-->
+    {#if xAxis > 0}
+      <!-- x-axis tick at every bar -->
+      <line
+        x1={bar.x + bar.width / 2}
+        y1={height + topPadding}
+        x2={bar.x + bar.width / 2}
+        y2={height + topPadding + fontSize * 0.3}
+        stroke="currentColor"
+        stroke-width={1}
+        vector-effect="non-scaling-stroke"
+      />
+    {/if}
+    {#if bar.xLabel && index % xLabelRenderStep === 0}
+      <!-- x-axis labels, throttled when many labels -->
       <text
         x={bar.x + bar.width / 2}
         y={height + topPadding + fontSize * 1.2}

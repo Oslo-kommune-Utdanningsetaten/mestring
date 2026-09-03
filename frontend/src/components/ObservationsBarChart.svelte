@@ -1,9 +1,8 @@
 <script lang="ts">
   import { getISOWeek } from 'date-fns'
   import type { ObservationType } from '../generated'
-  import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
-
   import { observationsList } from '../generated/sdk.gen'
+
   import BarChart from './BarChart.svelte'
 
   interface Props {
@@ -12,21 +11,28 @@
     width?: number
     height?: number
     title?: string
+    fromDate: string
+    toDate: string
   }
 
   // Props with sane defaults
-  const { groupId, schoolId, width = 200, height = 100, title: providedTitle }: Props = $props()
+  const {
+    groupId,
+    schoolId,
+    width = 200,
+    height = 100,
+    title: providedTitle,
+    fromDate,
+    toDate,
+  }: Props = $props()
 
   let observations = $state<ObservationType[]>([])
   let data = $state<number[]>([])
+
   let hasSufficientData = $derived(
     Array.isArray(data) && data.length > 0 && data.every(n => Number.isFinite(n))
   )
   const title = $derived(providedTitle ?? (hasSufficientData ? data.join(', ') : 'Mangler data'))
-  const fromDate = $derived.by(() => {
-    const now = new Date()
-    return now.getMonth() < 7 ? `${now.getFullYear()}-01-01` : `${now.getFullYear()}-08-01`
-  })
 
   let xLabels = $state<string[]>([])
   let yMaxValue = $derived.by(() => (hasSufficientData ? Math.max(...data, 10) : 10))
@@ -55,7 +61,7 @@
   const fetchObservations = async () => {
     const query: any = {
       from: fromDate,
-      ...getPreferredCreatedParams(),
+      to: toDate,
     }
     if (groupId) {
       query['group'] = groupId
@@ -63,7 +69,6 @@
     if (schoolId) {
       query['school'] = schoolId
     }
-
     const obsResults = await observationsList({ query })
     observations = obsResults.data || []
     calculateDataAndLabels()
@@ -71,17 +76,28 @@
 
   // group observation counts by week number and build week numbers xLabels array
   const calculateDataAndLabels = () => {
-    const observationsByWeek: Record<number, number> = {}
+    const observationsByWeek: Record<string, number> = {}
     observations.forEach(obs => {
-      const week = getISOWeek(new Date(obs.observedAt || obs.createdAt))
-      observationsByWeek[week] = (observationsByWeek[week] || 0) + 1
+      const date = new Date(obs.observedAt || obs.createdAt)
+      const key = `${date.getFullYear()}-W${getISOWeek(date).toString().padStart(2, '0')}`
+      observationsByWeek[key] = (observationsByWeek[key] || 0) + 1
     })
-    const beginAtWeek = getISOWeek(new Date(fromDate))
-    const endAtWeek = getISOWeek(new Date())
-    for (let week = beginAtWeek; week <= endAtWeek; week++) {
-      data.push(observationsByWeek[week] || 0)
-      xLabels.push(`${week}`)
+
+    const newData: number[] = []
+    const newLabels: string[] = []
+
+    let current = new Date(fromDate)
+    const now = new Date()
+    const end = new Date(toDate)
+    while (current <= end && current <= now) {
+      const key = `${current.getFullYear()}-W${getISOWeek(current).toString().padStart(2, '0')}`
+      newData.push(observationsByWeek[key] || 0)
+      newLabels.push(getISOWeek(current).toString())
+      current.setDate(current.getDate() + 7)
     }
+
+    data = newData
+    xLabels = newLabels
   }
 
   $effect(() => {
