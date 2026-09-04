@@ -242,6 +242,29 @@
             </li>
           {/if}
 
+          <!-- School Year Selector -->
+          <!-- Only bother the user with this widget if school has been using mestring multiple years -->
+          {#if allYearsForCurrentSchool.length > 1}
+            <li class="nav-item dropdown" title="Velg skoleår">
+              <button
+                class={'nav-link dropdown-toggle'}
+                class:warning={$preferredSchoolYear !== getCurrentSchoolYear()}
+                id="navbarDropdownYearSelector"
+                type="button"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="outside"
+              >
+                {$preferredSchoolYear === 'all' ? 'Alle år' : $preferredSchoolYear}
+              </button>
+              <span
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="navbarDropdownYearSelector"
+              >
+                <YearSelector />
+              </span>
+            </li>
+          {/if}
+
           <!-- User profile menu -->
           {#if $hasUserAccessToPath('/profile')}
             <li class="nav-item dropdown">
@@ -273,28 +296,6 @@
                   <Link to="/" className="dropdown-item" onclick={logout}>Logg ut</Link>
                 </li>
               </ul>
-            </li>
-          {/if}
-
-          <!-- Don't bother the user with this selector if school has only been using mestring this current year -->
-          {#if allYearsForCurrentSchool.length > 1}
-            <li class="nav-item dropdown" title="Velg skoleår">
-              <button
-                class={'nav-link dropdown-toggle'}
-                class:warning={$preferredSchoolYear !== getCurrentSchoolYear()}
-                id="navbarDropdownYearSelector"
-                type="button"
-                data-bs-toggle="dropdown"
-                data-bs-auto-close="outside"
-              >
-                {$preferredSchoolYear === 'all' ? 'Alle år' : $preferredSchoolYear}
-              </button>
-              <span
-                class="dropdown-menu dropdown-menu-end"
-                aria-labelledby="navbarDropdownYearSelector"
-              >
-                <YearSelector />
-              </span>
             </li>
           {/if}
         {/if}
