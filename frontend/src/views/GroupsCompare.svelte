@@ -76,7 +76,7 @@
     <p class="text-muted">Valgt: {selectedGroups?.map(g => g.displayName).join(', ')}</p>
     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
     <p>
-      {@html 'Diagrammet viser tre kategorier: Antall mål der elever beveger seg <span class="fw-bold">ned</span>, <span class="fw-bold">er uforandret</span>, eller <span class="fw-bold">opp</span>.'}
+      {@html 'Diagrammene viser tre kategorier: Antall mål der elever beveger seg <span class="fw-bold">ned</span>, <span class="fw-bold">er uforandret</span>, eller <span class="fw-bold">opp</span>.'}
     </p>
     {#if isLoading}
       <div class="mt-3">Laster...</div>
