@@ -6,9 +6,9 @@
   import { calculateSchoolYearMilestones, getCurrentSchoolYear } from '../../utils/schoolYear'
 
   import GroupTag from '../../components/GroupTag.svelte'
-  import Link from '../../components/Link.svelte'
   import ObservationsBarChart from '../../components/ObservationsBarChart.svelte'
 
+  const currentSchoolYear = getCurrentSchoolYear()
   let currentSchool = $derived($dataStore.currentSchool)
   let groups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
 
@@ -17,22 +17,17 @@
     new Date(`${$preferredSchoolYear.split('-')[0] + '-10-01'}`) // Any date in the preferred school year
   )
   const fromDate: string = $derived.by(() => {
-    if ($preferredSchoolYear === getCurrentSchoolYear()) {
+    if ($preferredSchoolYear === currentSchoolYear) {
       return now.getMonth() < 7 ? midyearAt : startAt
     }
     return startAt
   })
   const toDate: string = $derived.by(() => {
-    if ($preferredSchoolYear === getCurrentSchoolYear()) {
+    if ($preferredSchoolYear === currentSchoolYear) {
       return now.getMonth() < 7 ? endAt : midyearAt
     }
     return endAt
   })
-
-  const getSubjectNameBySubjectId = (subjectId: string) => {
-    const subject = $dataStore.subjects.find(subj => subj.id === subjectId)
-    return subject ? getSubjectName(subject) : 'Ukjent fag'
-  }
 </script>
 
 {#if currentSchool}
@@ -54,18 +49,13 @@
     {#if groups.length > 1}
       {#each groups as group}
         <div class="border border-3 mb-4 p-3">
-          <h3 class="mb-2" title={group.feideId}>
-            <Link to="/groups/{group.id}">
-              {group.displayName}
-            </Link>
-          </h3>
-          <GroupTag classes="mb-1" {group} isGroupTypeNameEnabled={true} />
-
-          {#if group.subjectId}
-            <div class="text-muted">
-              {getSubjectNameBySubjectId(group.subjectId)}
-            </div>
-          {/if}
+          <GroupTag
+            classes="mb-3 mt-2"
+            {group}
+            isGroupTypeNameEnabled={true}
+            isGroupNameEnabled={true}
+            href={`/groups/${group.id}`}
+          />
 
           <!-- students -->
           <div class="mt-2 mb-1">
