@@ -11,27 +11,30 @@
   import GroupsCompareSelect from '../components/GroupsCompareSelect.svelte'
 
   const router = useTinyRouter()
-  const groupIds = $derived(router.getQueryParam('groups')?.split(',') || [])
 
   let isLoading = $state<boolean>(true)
-  let groups = $derived<GroupType[]>(
-    $currentUser?.allGroups?.filter((group: GroupType) => groupIds.includes(group.id)) ?? []
-  )
-  let areAllGroupsOfSameType: Boolean = $derived(
-    groups.length > 0 ? groups.every(group => group.type === groups[0].type) : true
-  )
-  let groupType = $derived(areAllGroupsOfSameType ? groups[0].type : null)
   let observationsByGroupId = $state<Record<string, ObservationType[]>>({})
-  let uniqueSubjectIds = $derived<Set<string>>(new Set())
+  let uniqueSubjectIds = $state<Set<string>>(new Set())
+
   let uniqueSubjects = $derived(
     $dataStore.subjects?.filter(subject => uniqueSubjectIds.has(subject.id))
   )
+  const selectedGroupIds = $derived(router.getQueryParam('groups')?.split(',') || [])
+  let selectedGroups = $derived<GroupType[]>(
+    $currentUser?.allGroups?.filter((group: GroupType) => selectedGroupIds.includes(group.id)) ?? []
+  )
+  let areAllGroupsOfSameType: Boolean = $derived(
+    selectedGroups.length > 0
+      ? selectedGroups.every(group => group.type === selectedGroups[0].type)
+      : true
+  )
+  let groupType = $derived(areAllGroupsOfSameType ? selectedGroups[0].type : null)
 
-  const fetchGroups = async () => {
+  const fetchObservationsForSelectedGroups = async () => {
     try {
       isLoading = true
       await Promise.all(
-        groups.map(async (group: GroupType) => {
+        selectedGroups.map(async (group: GroupType) => {
           const observationsResult = await observationsList({
             query: { group: group.id, school: $currentSchool.id, ...getPreferredCreatedParams() },
           })
@@ -51,23 +54,17 @@
         })
       )
     } catch (error) {
-      console.error('Error fetching groups', { groupIds, error })
-      groups = []
+      console.error('Error fetching groups', { selectedGroupIds, error })
+      observationsByGroupId = {}
+      uniqueSubjectIds = new Set()
     } finally {
       isLoading = false
     }
   }
 
-  // Look up subjects for a given groupId, returning only subjects which have observations for that group
-  const getSubjects = (groupId: string): SubjectType[] => {
-    return uniqueSubjects.filter((subject: SubjectType) =>
-      observationsByGroupId[groupId]?.some(obs => obs.subjectId === subject.id)
-    )
-  }
-
   $effect(() => {
-    if (groupIds) {
-      fetchGroups()
+    if (selectedGroupIds.length > 0) {
+      fetchObservationsForSelectedGroups()
     }
   })
 </script>
@@ -76,19 +73,19 @@
   <h2>Sammenlign grupper [BETA]</h2>
   {#if $hasUserAccessToFeature('group', 'compare')}
     <GroupsCompareSelect />
-    <p class="text-muted">Valgt: {groups?.map(g => g.displayName).join(', ')}</p>
+    <p class="text-muted">Valgt: {selectedGroups?.map(g => g.displayName).join(', ')}</p>
     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
     <p>
-      {@html 'Diagrammet viser tre kategorier: Antall mål der elever beveger seg <span class="fw-bold">ned</span>, <span class="fw-bold">er uforandret</span>, eller <span class="fw-bold">opp</span> i mestringstrappa.'}
+      {@html 'Diagrammet viser tre kategorier: Antall mål der elever beveger seg <span class="fw-bold">ned</span>, <span class="fw-bold">er uforandret</span>, eller <span class="fw-bold">opp</span>.'}
     </p>
     {#if isLoading}
       <div class="mt-3">Laster...</div>
-    {:else if groups.length === 0}
+    {:else if selectedGroups.length === 0}
       <div class="mt-3">Ingen grupper å sammenligne 🫤</div>
     {:else if !areAllGroupsOfSameType}
       <p class="text-danger mb-2">Valgte grupper må være av samme type (basis/undervisning)</p>
     {:else if groupType === GROUP_TYPE_TEACHING}
-      <p class="mt-3">Sammenligning av undervisningsgrupper er ikke støttet ennå.</p>
+      <p class="text-danger mt-3">Sammenligning av undervisningsgrupper er ikke støttet ennå.</p>
     {:else if groupType === GROUP_TYPE_BASIS}
       <div
         class="groups-grid"
@@ -107,11 +104,11 @@
             </span>
           </span>
         {/each}
-        {#each groups as group (group.id)}
+        {#each selectedGroups as group (group.id)}
           <GroupRow
             {group}
-            subjects={getSubjects(group.id)}
             observations={observationsByGroupId[group.id]}
+            allSubjects={uniqueSubjects}
           />
         {/each}
       </div>

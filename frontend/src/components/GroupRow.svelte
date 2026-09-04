@@ -19,12 +19,12 @@
 
   let {
     group,
-    subjects,
     observations,
+    allSubjects,
   }: {
     group: GroupType
-    subjects: SubjectType[]
     observations: ObservationType[]
+    allSubjects: SubjectType[]
   } = $props()
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
@@ -33,6 +33,9 @@
   let calculations = $derived(useMasteryCalculations(assumedMasterySchema))
 
   const observationsBySubjectId = $derived.by(() => {
+    if (!observations || observations.length === 0) {
+      return {}
+    }
     const result: Record<string, ObservationType[]> = {}
     observations.forEach((obs: ObservationType) => {
       const subjectId = obs.subjectId as string
@@ -149,11 +152,11 @@
 {#if group}
   <span class="item group-name">
     <Link to={`/groups/${group.id}`}>{group.displayName}</Link>
-    {#if !assumedMasterySchema}
+    {#if !assumedMasterySchema || Object.keys(observationsBySubjectId).length === 0}
       <span class="ms-2 text-muted fs-6">[mangler data 🫤]</span>
     {/if}
   </span>
-  {#each subjects as subject}
+  {#each allSubjects as subject}
     <span class="item gap-2">
       {#if subject && observationsBySubjectId[subject.id]?.length}
         <SubjectTrendBarChart

@@ -4,23 +4,23 @@
   import type { GroupType } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING } from '../utils/constants'
-  import { getGroupLabel } from '../utils/functions'
+  import { getGroupLabel, urlStringFrom } from '../utils/functions'
 
   const router = useTinyRouter()
-  const groupIds = $derived(router.getQueryParam('groups')?.split(',') || [])
 
-  let groups = $derived<GroupType[]>(
-    ($dataStore.currentUser?.allGroups ?? []).sort((a: GroupType, b: GroupType) =>
-      b.createdAt.localeCompare(a.createdAt)
-    )
+  const selectedGroupIds = $derived(router.getQueryParam('groups')?.split(',') || [])
+  let allGroupsSorted = $derived<GroupType[]>(
+    ($dataStore.currentUser?.allGroups ?? [])
+      .sort((a: GroupType, b: GroupType) => b.createdAt.localeCompare(a.createdAt))
+      .sort((a: GroupType, b: GroupType) => a.displayName.localeCompare(b.displayName))
   )
-  let basisGroups = $derived(groups.filter((g: GroupType) => g.type === GROUP_TYPE_BASIS))
-  let teachingGroups = $derived(groups.filter((g: GroupType) => g.type === GROUP_TYPE_TEACHING))
-
+  let basisGroups = $derived(allGroupsSorted.filter((g: GroupType) => g.type === GROUP_TYPE_BASIS))
+  let teachingGroups = $derived(
+    allGroupsSorted.filter((g: GroupType) => g.type === GROUP_TYPE_TEACHING)
+  )
   let selectedGroups = $derived<GroupType[]>(
-    groups.filter((group: GroupType) => groupIds.includes(group.id))
+    allGroupsSorted.filter((group: GroupType) => selectedGroupIds.includes(group.id))
   )
-  let compareUrl = $derived(`/groups-compare/?groups=${selectedGroups.map(g => g.id).join(',')}`)
 
   const handleToggleGroup = (id: string) => {
     const nextSelectionIds = new Set(selectedGroups.map(g => g.id))
@@ -29,8 +29,13 @@
     } else {
       nextSelectionIds.add(id)
     }
-    selectedGroups = groups.filter((g: GroupType) => nextSelectionIds.has(g.id))
-    router.navigate(compareUrl)
+    const nextUrl = [...nextSelectionIds].length
+      ? urlStringFrom(
+          { groups: [...nextSelectionIds].join(',') },
+          { path: '/groups-compare/', mode: 'merge' }
+        )
+      : urlStringFrom({}, { path: '/groups-compare/' })
+    router.navigate(nextUrl)
   }
 </script>
 
