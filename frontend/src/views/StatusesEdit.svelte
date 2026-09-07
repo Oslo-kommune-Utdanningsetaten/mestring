@@ -40,19 +40,19 @@
   }
 
   let rows = $state<RowType[]>([])
-
-  let group = $state<GroupType | null>(
-    $dataStore.currentUser.allGroups.find((group: GroupType) => group.id === groupId) || null
-  )
-  const subject = $derived<SubjectType | undefined>(
-    $dataStore.subjects.find(s => s.id === group?.subjectId)
-  )
-
   let students = $state<UserType[]>([])
   let isLoading = $state(true)
   let statusesByStudentId = $state<Record<string, StatusType[]>>({})
   let statusWip = $state<StatusType | null>(null)
   let isStatusEditorOpen = $state(false)
+
+  let group = $derived<GroupType | null>(
+    $dataStore.currentUser.allGroups.find((group: GroupType) => group.id === groupId) || null
+  )
+
+  const subject = $derived<SubjectType | undefined>(
+    $dataStore.subjects.find(s => s.id === group?.subjectId)
+  )
 
   let statusCategory = $derived<StatusCategoryType | undefined>(
     $dataStore.statusCategories.find(sc => sc.name === statusCategoryName) || undefined
