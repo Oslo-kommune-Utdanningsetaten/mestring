@@ -54,10 +54,10 @@
     } else {
       nextExpandedGoals.add(goalId)
     }
-    expandedGoalIds = Array.from(nextExpandedGoals)
-    const newUrl = expandedGoalIds.length
+    const nextExpandedGoalIds = Array.from(nextExpandedGoals)
+    const newUrl = nextExpandedGoalIds.length
       ? urlStringFrom(
-          { expanded: expandedGoalIds.join(',') },
+          { expanded: nextExpandedGoalIds.join(',') },
           { path: window.location.pathname, mode: 'merge' }
         )
       : urlStringFrom({}, { path: window.location.pathname })

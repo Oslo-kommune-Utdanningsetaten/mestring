@@ -11,8 +11,9 @@
     statusCategory: Partial<StatusCategoryType> | null
     onDone: () => void
   }>()
+  let localStatusCategory = $state<Partial<StatusCategoryType>>({ ...statusCategory })
+
   let masterySchemas = $derived($dataStore.masterySchemas.filter(schema => schema.isEnabled))
-  let localStatusCategory = $derived<Partial<StatusCategoryType>>({ ...statusCategory })
   let selectedMasterySchemaId = $derived(
     localStatusCategory.masterySchemaId || $dataStore.defaultMasterySchema.id
   )

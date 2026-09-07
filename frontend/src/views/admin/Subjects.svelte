@@ -24,18 +24,12 @@
   import GroupTag from '../../components/GroupTag.svelte'
 
   const router = useTinyRouter()
-  let subjects = $derived<SubjectType[]>([])
+  let subjects = $state<SubjectType[]>([])
   let subjectWip = $state<SubjectType | null>(null)
   let isSubjectEditorOpen = $state(false)
   let schools = $state<SchoolType[]>([])
   let groupsBySubjectId = $state<Record<string, GroupType[]>>({})
   let nameFilter = $state<string>('')
-
-  let selectedSchool = $derived.by(() => {
-    const schoolIdFromUrl = router.getQueryParam('school')
-    return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
-  })
-
   let selectedSubjectsFetchOption = $state<SUBJECT_OWNERSHIP_OPTIONS>(
     (router.getQueryParam('owner') as SUBJECT_OWNERSHIP_OPTIONS) || SUBJECT_OWNERSHIP_OPTIONS.ANY
   )
@@ -61,6 +55,12 @@
     { value: GROUP_DELETED_OPTIONS.ONLY, label: 'Deleted' },
     { value: GROUP_DELETED_OPTIONS.EXCLUDE, label: 'Not deleted' },
   ] as const
+
+  // Look up selected school based on URL parameter or use current school
+  let selectedSchool = $derived.by(() => {
+    const schoolIdFromUrl = router.getQueryParam('school')
+    return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
+  })
 
   // Options for filtering by groups by date validity
   const createdOptions = $derived.by(() => {

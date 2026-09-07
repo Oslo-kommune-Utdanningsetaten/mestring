@@ -21,12 +21,13 @@
   let isEditorOpen = $state<boolean>(false)
   let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
-  let statusCategories = $derived<StatusCategoryType[]>([])
+  let statusCategories = $state<StatusCategoryType[]>([])
+  let masterySchemas = $state($dataStore.masterySchemas)
+
   let selectedSchool = $derived.by(() => {
     const schoolIdFromUrl = router.getQueryParam('school')
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
   })
-  let masterySchemas = $state($dataStore.masterySchemas)
 
   const fetchSchools = async () => {
     try {
