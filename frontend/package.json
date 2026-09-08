@@ -26,7 +26,7 @@
     "vitest": "^4.1.9"
   },
   "dependencies": {
-    "@hey-api/openapi-ts": "^0.95.0",
+    "@hey-api/openapi-ts": "^0.99.0",
     "@oslokommune/punkt-assets": "^16.0.0",
     "@oslokommune/punkt-css": "^16.7.2",
     "@oslokommune/punkt-elements": "^16.7.1",
@@ -37,5 +37,8 @@
     "svelte-chartjs": "^4.0.1",
     "svelte-jsoneditor": "^3.12.0",
     "svelte-tiny-router": "^1.0.8"
+  },
+  "overrides": {
+    "js-yaml": "^4.3.2"
   }
 }
