@@ -121,6 +121,7 @@ export type ObservationType = {
     feedforward?: string | null;
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
+    productUrl?: string | null;
     readonly createdById: string;
     readonly updatedById: string;
     goalId: string;
@@ -219,6 +220,7 @@ export type PatchedObservationType = {
     feedforward?: string | null;
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
+    productUrl?: string | null;
     readonly createdById?: string;
     readonly updatedById?: string;
     goalId?: string;
@@ -563,6 +565,7 @@ export type ObservationCreateType = {
     feedforward?: string | null;
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
+    productUrl?: string | null;
     goalId: string;
     studentId: string;
     subjectId?: string | null;
@@ -629,6 +632,7 @@ export type PatchedObservationCreateType = {
     feedforward?: string | null;
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
+    productUrl?: string | null;
     goalId?: string;
     studentId?: string;
     subjectId?: string | null;
