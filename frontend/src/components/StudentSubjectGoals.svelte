@@ -455,6 +455,16 @@
                     onClick: () => handleViewObservation(observation, goal),
                   }}
                 />
+
+                {#if observation.productUrl}
+                  <Link
+                    to={observation.productUrl}
+                    iconName="link"
+                    title="Lenke til elevprodukt"
+                    classes="bordered"
+                  />
+                {/if}
+
                 {#if $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById } )}
                   {#if index === goal?.observations.length - 1}
                     <ButtonIcon

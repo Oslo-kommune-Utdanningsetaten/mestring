@@ -139,6 +139,17 @@
       </div>
     {/if}
 
+    <div class="form-group">
+      <label for="productUrl" class="form-label visually-hidden">Lenke</label>
+      <input
+        id="goalTitle"
+        type="text"
+        class="form-control rounded-0 border-2 border-primary input-field"
+        bind:value={localObservation.productUrl}
+        placeholder="Lenke til prosjekt, produkt, lyd, video el.l."
+      />
+    </div>
+
     <div class="d-flex gap-2 justify-content-start mt-4">
       <ButtonMini
         options={{

@@ -7,6 +7,7 @@
   import MasteryValueInput from './MasteryValueInput.svelte'
   import AuthorInfo from './AuthorInfo.svelte'
   import MasterySchemaLevels from './MasterySchemaLevels.svelte'
+  import Link from './Link.svelte'
 
   const { student, goal, observation, masteryTitle, onDone } = $props<{
     student: UserType | null
@@ -72,18 +73,29 @@
     </div>
 
     {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
-      <div class="form-group mb-5">
+      <div class="form-group mb-4">
         <h4 class="mb-3">Beskrivelse/tilbakemelding</h4>
         <p>{localObservation.masteryDescription || 'Ingen beskrivelse'}</p>
       </div>
     {/if}
 
     {#if masterySchema?.config?.isFeedforwardInputEnabled}
-      <div class="form-group mb-3">
+      <div class="form-group mb-4">
         <h4 class="mb-3">Fremovermelding</h4>
         <p>{localObservation.feedforward || 'Ingen fremovermelding'}</p>
       </div>
     {/if}
+
+    <div class="form-group mb-4">
+      <h4 class="mb-3">Lenke</h4>
+      <p>
+        {#if localObservation.productUrl}
+          <Link to={localObservation.productUrl}>{localObservation.productUrl}</Link>
+        {:else}
+          Ingen lenke
+        {/if}
+      </p>
+    </div>
 
     <div class="mt-4">
       <ButtonMini
