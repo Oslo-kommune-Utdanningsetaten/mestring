@@ -381,6 +381,8 @@ class Observation(BaseModel):
     feedforward = models.TextField(null=True)
     observed_at = models.DateTimeField(null=True)  # do we need this?
     is_visible_to_student = models.BooleanField(default=True)
+    # URL to the observed product (e.g., a document or project if any)
+    product_url = models.URLField(max_length=2048, null=True)
 
     def save(self, **kwargs):
         # Auto-derive subject from goal if not explicitly set
