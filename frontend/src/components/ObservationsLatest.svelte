@@ -150,15 +150,16 @@
             </div>
           </div>
           {#if studentsById[observation.studentId]}
-            <ObservationWidgets
-              {observation}
-              goal={cachedGoals[observation.goalId]}
-              student={studentsById[observation.studentId]}
-              subject={subjects.find(s => s.id === observation.subjectId)}
-              isEditable={false}
-              onRefreshRequired={() => fetchObservations()}
-              widgets={['view', 'delete', 'edit', 'productUrl']}
-            />
+            <div class="observation-widgets-panel">
+              <ObservationWidgets
+                {observation}
+                goal={cachedGoals[observation.goalId]}
+                student={studentsById[observation.studentId]}
+                subject={subjects.find(s => s.id === observation.subjectId)}
+                onRefreshRequired={() => fetchObservations()}
+                widgets={['view', 'delete', 'update', 'productUrl']}
+              />
+            </div>
           {/if}
           <div
             class="mastery-panel"
@@ -216,16 +217,47 @@
 
 <style>
   .observation-row {
-    padding: 1rem;
+    padding: 1.5rem 1rem;
     display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
   }
 
   .observation-meta-panel {
-    flex: 1;
+    flex: 1 1 100%;
     min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 0.5em;
+  }
+
+  @media (min-width: 768px) {
+    .observation-meta-panel {
+      flex: 1;
+    }
+  }
+
+  .observation-widgets-panel {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-shrink: 0;
+    width: 100%;
+    padding: 0;
+  }
+
+  @media (min-width: 768px) {
+    .observation-widgets-panel {
+      width: 12rem;
+      padding: 0 0.75rem;
+    }
+  }
+
+  .observation-widgets-panel > :global(span) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    justify-content: flex-start;
   }
 
   .observation-header-row {
@@ -254,7 +286,7 @@
     container-type: inline-size;
     position: relative;
     flex-shrink: 0;
-    width: 40%;
+    width: 100%;
     border-radius: 4px;
     padding: 1rem 0.75rem;
     line-height: 1.45;
@@ -266,6 +298,15 @@
     /* Colors are set by --mastery-color custom property */
     --mastery-color: #888;
     background: color-mix(in srgb, var(--mastery-color) 12%, white);
+  }
+
+  @media (min-width: 768px) {
+    .mastery-panel {
+      width: 40%;
+    }
+  }
+
+  .mastery-panel {
     color: color-mix(in srgb, var(--mastery-color) 80%, black);
   }
 

@@ -19,7 +19,6 @@
     goal: GoalType
     student: UserType
     subject: SubjectType
-    isEditable: Boolean
     onRefreshRequired?: Function
     widgets: Array<'create' | 'update' | 'delete' | 'view' | 'productUrl'>
   }>()
@@ -90,16 +89,6 @@
     />
   {/if}
 
-  <!-- Product URL observation widget -->
-  {#if widgets.includes('productUrl') && observation.productUrl}
-    <Link
-      to={observation.productUrl}
-      iconName="link"
-      title="Lenke til elevprodukt"
-      classes="bordered"
-    />
-  {/if}
-
   <!-- Create observation widget -->
   {#if widgets.includes('create') && $hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, subjectId: subject.id, studentGroupIds: student.groupIds } )}
     <ButtonIcon
@@ -115,16 +104,14 @@
 
   <!-- Edit observation widget -->
   {#if widgets.includes('update') && $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById } )}
-    {#if isEditable}
-      <ButtonIcon
-        options={{
-          iconName: 'edit',
-          title: 'Rediger observasjon',
-          classes: 'bordered',
-          onClick: () => handleEditObservation(observation, goal),
-        }}
-      />
-    {/if}
+    <ButtonIcon
+      options={{
+        iconName: 'edit',
+        title: 'Rediger observasjon',
+        classes: 'bordered',
+        onClick: () => handleEditObservation(observation, goal),
+      }}
+    />
   {/if}
 
   <!-- Delete observation widget -->
@@ -140,6 +127,16 @@
         }}
       />
     {/key}
+  {/if}
+
+  <!-- Product URL observation widget -->
+  {#if widgets.includes('productUrl') && observation.productUrl}
+    <Link
+      to={observation.productUrl}
+      iconName="link"
+      title="Lenke til elevprodukt"
+      classes="bordered"
+    />
   {/if}
 </span>
 

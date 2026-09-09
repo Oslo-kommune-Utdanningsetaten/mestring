@@ -349,7 +349,6 @@
           {goal}
           {student}
           {subject}
-          isEditable={index === goal?.observations.length - 1}
           onRefreshRequired={() => fetchGoals()}
           widgets={['create']}
         />
@@ -390,7 +389,6 @@
                   {goal}
                   {student}
                   {subject}
-                  isEditable={index === goal?.observations.length - 1}
                   onRefreshRequired={() => fetchGoals()}
                   widgets={['update', 'delete', 'view', 'productUrl']}
                 />
