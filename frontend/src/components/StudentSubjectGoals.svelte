@@ -37,6 +37,7 @@
   import AuthorInfo from './AuthorInfo.svelte'
   import StudentSubjectChart from './StudentSubjectChart.svelte'
   import MasteryLevelTitle from './MasteryLevelTitle.svelte'
+  import ObservationWidgets from './ObservationWidgets.svelte'
 
   const { student, subject, onRefreshRequired } = $props<{
     student: UserType
@@ -447,49 +448,14 @@
                 <MasteryLevelTitle {observation} masterySchema={getMasterySchmemaForGoal(goal)} />
               </span>
               <span>
-                <ButtonIcon
-                  options={{
-                    iconName: 'eye',
-                    title: 'Se observasjon',
-                    classes: 'bordered',
-                    onClick: () => handleViewObservation(observation, goal),
-                  }}
+                <ObservationWidgets
+                  {observation}
+                  {goal}
+                  isEditable={index === goal?.observations.length - 1}
+                  onViewObservation={handleViewObservation}
+                  onEditObservation={handleEditObservation}
+                  onDeleteObservation={handleDeleteObservation}
                 />
-
-                {#if observation.productUrl}
-                  <Link
-                    to={observation.productUrl}
-                    iconName="link"
-                    title="Lenke til elevprodukt"
-                    classes="bordered"
-                  />
-                {/if}
-
-                {#if $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById } )}
-                  {#if index === goal?.observations.length - 1}
-                    <ButtonIcon
-                      options={{
-                        iconName: 'edit',
-                        title: 'Rediger observasjon',
-                        classes: 'bordered',
-                        onClick: () => handleEditObservation(observation, goal),
-                      }}
-                    />
-                  {/if}
-                {/if}
-                {#if $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById } )}
-                  {#key observation.id}
-                    <ButtonIcon
-                      options={{
-                        iconName: 'trash-can',
-                        title: 'Slett observasjon',
-                        classes: 'bordered',
-                        onClick: () => handleDeleteObservation(observation.id),
-                        delayActionFor: 3,
-                      }}
-                    />
-                  {/key}
-                {/if}
               </span>
             </div>
           {/each}
