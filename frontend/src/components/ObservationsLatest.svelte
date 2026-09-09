@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { ObservationType, GoalType } from '../generated/types.gen'
+  import type { ObservationType, GoalType, UserType } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
-  import { goalsRetrieve, observationsList } from '../generated/sdk.gen'
+  import { goalsRetrieve, observationsList, usersList } from '../generated/sdk.gen'
   import { getMasteryLevelColorByValue, getMasteryTitleByValue } from '../utils/masteryHelpers'
   import { USER_ROLES } from '../utils/constants'
   import { isNumber } from '../utils/functions'
@@ -11,11 +11,14 @@
   import UserTag from './UserTag.svelte'
   import SubjectTag from './SubjectTag.svelte'
   import Link from './Link.svelte'
+  import ObservationWidgets from './ObservationWidgets.svelte'
 
   const limit = 10
-  let { masterySchemas, currentSchool, currentUser } = $derived($dataStore)
+  let { masterySchemas, currentSchool, currentUser, subjects } = $derived($dataStore)
   let observations = $state<ObservationType[]>([])
   let cachedGoals = $state<Record<string, GoalType>>({})
+  let studentsById = $state<Record<string, any>>({})
+
   let viewMode = $derived(
     currentUser.isSuperadmin || currentUser.isSchoolAdmin || currentUser.isSchoolInspector
       ? 'school'
@@ -42,6 +45,17 @@
       observations = (result.data || []).sort(
         (a: ObservationType, b: ObservationType) =>
           new Date(b?.observedAt ?? 0).getTime() - new Date(a?.observedAt ?? 0).getTime()
+      )
+      const studentIds = Array.from(new Set(observations.map(o => o.studentId)))
+      const studentsResult = await usersList({
+        query: { school: currentSchool.id, ids: studentIds.join(',') },
+      })
+      studentsById = (studentsResult.data || []).reduce(
+        (acc, student: UserType) => {
+          acc[student.id] = student
+          return acc
+        },
+        {} as Record<string, any>
       )
     } catch (error) {
       console.error('Error fetching observations:', error)
@@ -135,6 +149,17 @@
               <AuthorInfo item={observation} />
             </div>
           </div>
+          {#if studentsById[observation.studentId]}
+            <ObservationWidgets
+              {observation}
+              goal={cachedGoals[observation.goalId]}
+              student={studentsById[observation.studentId]}
+              subject={subjects.find(s => s.id === observation.subjectId)}
+              isEditable={false}
+              onRefreshRequired={() => fetchObservations()}
+              widgets={['view', 'delete', 'edit', 'productUrl']}
+            />
+          {/if}
           <div
             class="mastery-panel"
             style={getMasteryLevelColor(observation)
