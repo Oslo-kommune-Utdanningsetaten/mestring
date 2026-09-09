@@ -10,7 +10,7 @@
     StatusType,
     SubjectType,
   } from '../generated/types.gen'
-  import { observationsDestroy, goalsDestroy, goalsUpdate, goalsCreate } from '../generated/sdk.gen'
+  import { goalsDestroy, goalsUpdate, goalsCreate } from '../generated/sdk.gen'
 
   import { dataStore } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
@@ -27,8 +27,6 @@
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import MasteryBarChart from './MasteryBarChart.svelte'
   import GoalEdit from './GoalEdit.svelte'
-  import ObservationEdit from './ObservationEdit.svelte'
-  import ObservationView from './ObservationView.svelte'
   import StatusEdit from './StatusEdit.svelte'
   import ButtonMini from './ButtonMini.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
@@ -46,25 +44,22 @@
   }>()
 
   const router = useTinyRouter()
-  let expandedGoalIds = $derived(router.getQueryParam('expanded')?.split(',') || [])
 
   let goalsForSubject = $state<GoalDecorated[]>([])
-  let sortableInstance: Sortable | null = null
   let goalWip = $state<GoalDecorated | null>(null)
   let statusWip = $state<Partial<StatusType> | null>(null)
-  let goalForObservation = $state<GoalDecorated | null>(null)
-  let observationWip = $state<ObservationType | {} | null>(null)
   let goalsListElement = $state<HTMLElement | null>(null)
   let isGoalEditorOpen = $state<boolean>(false)
-  let isObservationEditorOpen = $state<boolean>(false)
-  let isObservationViewerOpen = $state<boolean>(false)
   let isStatusEditorOpen = $state<boolean>(false)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
   let chartKey = $state<number>(0) // key used to force re-render of StudentSubjectChart component when goals are updated
+
   let subjectName = $derived(subject ? getSubjectName(subject) : 'ukjent fag')
+  let expandedGoalIds = $derived(router.getQueryParam('expanded')?.split(',') || [])
+  let sortableInstance: Sortable | null = null
+
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
-
   const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
   const today = new Date()
 
@@ -147,68 +142,13 @@
     if (onRefreshRequired) onRefreshRequired()
   }
 
-  const handleEditObservation = (observation: ObservationType | null, goal: GoalDecorated) => {
-    if (observation?.id) {
-      // edit existing observation
-      observationWip = observation
-    } else {
-      // create new observation, prefill with value from previous observation
-      const prevousObservations = goal?.observations || []
-      const previousObservation = prevousObservations[prevousObservations.length - 1]
-      observationWip = { masteryValue: previousObservation?.masteryValue || null }
-    }
-    goalForObservation = { ...goal }
-    isObservationEditorOpen = true
-  }
-
-  const handleViewObservation = (observation: ObservationType, goal: GoalType) => {
-    if (observation) {
-      observationWip = observation
-      isObservationViewerOpen = true
-      goalForObservation = { ...goal }
-    } else {
-      addAlert({
-        type: 'danger',
-        message: 'Kunne ikke finne observasjon. Hvis du mener dette er en feil, kontakt support.',
-      })
-    }
-  }
-
-  const handleCloseEditObservation = () => {
-    isObservationEditorOpen = false
-  }
-
   const handleGoalDone = async () => {
-    goalForObservation = null
     handleCloseEditGoal()
   }
 
   const handleStatusDone = async () => {
-    goalForObservation = null
     isStatusEditorOpen = false
     statusesKey++
-  }
-
-  const handleObservationDone = async () => {
-    handleCloseEditObservation()
-  }
-
-  const handleDeleteObservation = async (observationId: string) => {
-    try {
-      await observationsDestroy({ path: { id: observationId } })
-      addAlert({
-        type: 'success',
-        message: `Slettet observasjon`,
-      })
-      trackEvent('Observations', 'Delete')
-      await fetchGoals()
-    } catch (error) {
-      console.error('Error deleting observation:', error)
-      addAlert({
-        type: 'danger',
-        message: `Kunne ikke slette observasjon. Hvis du mener dette er en feil, kontakt support.`,
-      })
-    }
   }
 
   const handleDeleteGoal = async (goalId: string) => {
@@ -347,7 +287,7 @@
   {@const isExpanded = expandedGoalIds.includes(goal.id)}
   <div
     class="list-group-item goal-item {isExpanded
-      ? 'shadow border-2 z-1 expanded'
+      ? 'shadow border-2 expanded'
       : ''}  {goal.isRelevant ? '' : 'hatched-background'}"
     title={goal.isRelevant ? '' : 'Målet er ikke lenger relevant for eleven'}
   >
@@ -405,17 +345,14 @@
 
       <!-- New observation button -->
       <span class="item">
-        {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, subjectId: subject.id, studentGroupIds: student.groupIds } )}
-          <ButtonIcon
-            options={{
-              iconName: 'bullseye',
-              title: 'Ny observasjon',
-              classes: 'bordered',
-              disabled: !goal.isRelevant,
-              onClick: () => handleEditObservation(null, goal),
-            }}
-          />
-        {/if}
+        <ObservationWidgets
+          {goal}
+          {student}
+          {subject}
+          isEditable={index === goal?.observations.length - 1}
+          onRefreshRequired={() => fetchGoals()}
+          widgets={['create']}
+        />
       </span>
 
       <!-- Toggle goal info -->
@@ -451,10 +388,11 @@
                 <ObservationWidgets
                   {observation}
                   {goal}
+                  {student}
+                  {subject}
                   isEditable={index === goal?.observations.length - 1}
-                  onViewObservation={handleViewObservation}
-                  onEditObservation={handleEditObservation}
-                  onDeleteObservation={handleDeleteObservation}
+                  onRefreshRequired={() => fetchGoals()}
+                  widgets={['update', 'delete', 'view', 'productUrl']}
                 />
               </span>
             </div>
@@ -544,46 +482,6 @@
 >
   {#if statusWip}
     <StatusEdit status={statusWip} onDone={handleStatusDone} />
-  {/if}
-</Offcanvas>
-
-<!-- offcanvas for creating/editing observations -->
-<Offcanvas
-  bind:isOpen={isObservationEditorOpen}
-  ariaLabel="Rediger observasjon"
-  onClosed={() => {
-    observationWip = null
-    fetchGoals()
-  }}
->
-  {#if observationWip}
-    <ObservationEdit
-      {student}
-      observation={observationWip}
-      goal={goalForObservation}
-      onDone={handleObservationDone}
-    />
-  {/if}
-</Offcanvas>
-
-<!-- offcanvas for viewing observations -->
-<Offcanvas
-  bind:isOpen={isObservationViewerOpen}
-  ariaLabel="Se observasjon"
-  onClosed={() => {
-    observationWip = null
-  }}
->
-  {#if observationWip}
-    <ObservationView
-      {student}
-      observation={observationWip}
-      goal={goalForObservation}
-      onDone={() => {
-        observationWip = null
-        isObservationViewerOpen = false
-      }}
-    />
   {/if}
 </Offcanvas>
 
