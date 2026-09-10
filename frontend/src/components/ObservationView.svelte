@@ -3,6 +3,8 @@
   import type { MasterySchemaWithConfig } from '../types/models'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
+  import { localStorage } from '../stores/localStorage'
+
   import ButtonMini from './ButtonMini.svelte'
   import MasteryValueInput from './MasteryValueInput.svelte'
   import AuthorInfo from './AuthorInfo.svelte'
@@ -16,6 +18,8 @@
     masteryTitle?: string
     onDone: () => void
   }>()
+
+  const isObservationUrlEnabled = localStorage<boolean>('isObservationUrlEnabled')
 
   const masterySchema: MasterySchemaWithConfig = $derived(
     $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
@@ -86,16 +90,18 @@
       </div>
     {/if}
 
-    <div class="form-group mb-4">
-      <h4 class="mb-3">Lenke</h4>
-      <p>
-        {#if localObservation.productUrl}
-          <Link to={localObservation.productUrl}>{localObservation.productUrl}</Link>
-        {:else}
-          Ingen lenke
-        {/if}
-      </p>
-    </div>
+    {#if $isObservationUrlEnabled}
+      <div class="form-group mb-4">
+        <h4 class="mb-3">Lenke</h4>
+        <p>
+          {#if localObservation.productUrl}
+            <Link to={localObservation.productUrl}>{localObservation.productUrl}</Link>
+          {:else}
+            Ingen lenke
+          {/if}
+        </p>
+      </div>
+    {/if}
 
     <div class="mt-4">
       <ButtonMini

@@ -3,6 +3,7 @@
 currentSchool -> object, only needed for users with multiple schools. Why an object and not id?
 isMasteryBarChartVisible -> boolean, personal setting, should mini mastery bar charts be visible
 isSubjectPolarChartVisible -> boolean, personal setting, should polar charts for student+subject be visible
+isObservationUrlEnabled --> boolean, personal setting, should observation edits include productUrl field
 preferredMasterySchemaId -> string, last used mastery schema, for easy consecutive status/observation create
 preferredSubjectId -> string, last used subject, for easy consecutive observation create
 preferredStatusCategoryId -> string, last used status category, for easy consecutive status create

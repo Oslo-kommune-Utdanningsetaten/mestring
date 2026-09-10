@@ -7,12 +7,12 @@
     getPreferredGroupValidity,
     getPreferredMasteryBadgeVariant,
   } from '../stores/localStorageFunctions'
-  import { dataStore, currentUser, currentSchool } from '../stores/data'
+  import { dataStore, currentUser } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
   import { hasUserAccessToPath } from '../stores/access'
   import { USER_ROLES, MASTERY_BADGE_VARIANTS, GROUP_VALIDITY_OPTIONS } from '../utils/constants'
   import { fetchUserData } from '../utils/functions'
-  import { getAllSchoolYears, getCurrentSchoolYear } from '../utils/schoolYear'
+  import { getCurrentSchoolYear } from '../utils/schoolYear'
 
   import GroupTag from '../components/GroupTag.svelte'
   import Link from '../components/Link.svelte'
@@ -23,6 +23,7 @@
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
+  const isObservationUrlEnabled = localStorage<boolean>('isObservationUrlEnabled')
   let selectedGroupValidity = $state<GROUP_VALIDITY_OPTIONS>(getPreferredGroupValidity())
 
   // Options for mastery badge variant selection
@@ -56,20 +57,6 @@
     isProfileMode ? $currentUser?.studentGroups || [] : otherStudentGroups
   )
 
-  // Options for filtering by date validity
-  const createdOptions = $derived.by(() => {
-    if (!$currentSchool) return []
-
-    const allYears = getAllSchoolYears(new Date($currentSchool.createdAt)).reverse()
-    return [
-      ...allYears.map(year => ({
-        value: year,
-        label: year,
-      })),
-      allYears.length > 1 ? { value: 'all', label: 'Alle år' } : null,
-    ].filter(Boolean) as { value: string; label: string }[]
-  })
-
   // Derived values for filtering groups by validity
   const validTeacherGroups = $derived(teacherGroups.filter((g: GroupType) => g.isValid))
   const invalidTeacherGroups = $derived(teacherGroups.filter((g: GroupType) => !g.isValid))
@@ -79,7 +66,6 @@
   const allGroups = $derived(
     isProfileMode ? $currentUser?.allGroups || [] : [...otherTeacherGroups, ...otherStudentGroups]
   )
-  const schools = $derived<SchoolType[]>(isProfileMode ? $currentUser?.schools || [] : [])
 
   const otherGroups = $derived.by(() => {
     if (!allGroups || !teacherGroups || !studentGroups) return []
@@ -132,6 +118,9 @@
 
   const handleToggleSubjectPolarChart = () =>
     isSubjectPolarChartVisible.set(!isSubjectPolarChartVisible.get())
+
+  const handleToggleObservationUrl = () =>
+    isObservationUrlEnabled.set(!isObservationUrlEnabled.get())
 
   const handleSelectBadgeVariant = (variant: MASTERY_BADGE_VARIANTS) =>
     localStorage('preferredMasteryBadgeVariant').set(variant)
@@ -227,6 +216,18 @@
               aria-checked={$isSubjectPolarChartVisible}
               checked={$isSubjectPolarChartVisible}
               onchange={() => handleToggleSubjectPolarChart()}
+            ></pkt-checkbox>
+          </div>
+
+          <div class="mb-4">
+            <strong>Observasjoner har lenke til elevarbeid</strong>
+            <pkt-checkbox
+              label={$isObservationUrlEnabled ? 'Vises' : 'Skjules'}
+              labelPosition="right"
+              isSwitch="true"
+              aria-checked={$isObservationUrlEnabled}
+              checked={$isObservationUrlEnabled}
+              onchange={() => handleToggleObservationUrl()}
             ></pkt-checkbox>
           </div>
 

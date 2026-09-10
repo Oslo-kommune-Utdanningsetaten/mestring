@@ -4,6 +4,8 @@
   import type { MasterySchemaWithConfig } from '../types/models'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore, currentUser } from '../stores/data'
+  import { localStorage } from '../stores/localStorage'
+
   import ButtonMini from './ButtonMini.svelte'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
@@ -15,6 +17,8 @@
     observation: ObservationType | {} | null
     onDone: () => void
   }>()
+
+  const isObservationUrlEnabled = localStorage<boolean>('isObservationUrlEnabled')
 
   const masterySchema: MasterySchemaWithConfig = $derived(
     $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
@@ -139,16 +143,18 @@
       </div>
     {/if}
 
-    <div class="form-group">
-      <label for="productUrl" class="form-label visually-hidden">Lenke</label>
-      <input
-        id="goalTitle"
-        type="text"
-        class="form-control rounded-0 border-2 border-primary input-field"
-        bind:value={localObservation.productUrl}
-        placeholder="Lenke til prosjekt, produkt, lyd, video el.l."
-      />
-    </div>
+    {#if $isObservationUrlEnabled}
+      <div class="form-group">
+        <label for="productUrl" class="form-label visually-hidden">Lenke</label>
+        <input
+          id="goalTitle"
+          type="text"
+          class="form-control rounded-0 border-2 border-primary input-field"
+          bind:value={localObservation.productUrl}
+          placeholder="Lenke til prosjekt, produkt, lyd, video el.l."
+        />
+      </div>
+    {/if}
 
     <div class="d-flex gap-2 justify-content-start mt-4">
       <ButtonMini

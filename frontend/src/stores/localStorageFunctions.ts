@@ -44,3 +44,8 @@ export const getPreferredMasterySchemaId = () => {
   const preferredMasterySchemaId = localStorage<string>('preferredMasterySchemaId').get()
   return preferredMasterySchemaId || null
 }
+
+export const isObservationUrlEnabled = () => {
+  const isObservationUrlEnabled = localStorage<string>('isObservationUrlEnabled').get()
+  return Boolean(isObservationUrlEnabled)
+}
