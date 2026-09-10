@@ -26,11 +26,9 @@
   import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
-  import { getSchoolYearForGroup } from '../utils/schoolYear'
 
   import GroupSVG from '../assets/group.svg.svelte'
   import ButtonIcon from '../components/ButtonIcon.svelte'
-  import ObservationEdit from '../components/ObservationEdit.svelte'
   import StatusEdit from '../components/StatusEdit.svelte'
   import GoalEdit from '../components/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
@@ -54,11 +52,7 @@
   let groupGoals = $state<GoalType[]>([])
   let goalWip = $state<GoalDecorated | null>(null)
   let goalsWithCalculatedMasteryByStudentId = $state<Record<string, GoalDecorated[]>>({})
-  let observationWip = $state<ObservationType | {} | null>(null)
-  let goalForObservation = $state<GoalDecorated | null>(null)
   let statusWip = $state<Partial<StatusType> | null>(null)
-  let studentForObservation = $state<UserType | null>(null)
-  let isObservationEditorOpen = $state<boolean>(false)
   let isStatusEditorOpen = $state<boolean>(false)
   let isGoalEditorOpen = $state<boolean>(false)
   let subjects = $state<SubjectType[]>([])
@@ -176,37 +170,6 @@
     await fetchGroupData()
   }
 
-  const handleObservationDone = async () => {
-    isObservationEditorOpen = false
-    fetchGroupData()
-  }
-
-  const handleEditObservation = (
-    goal: GoalDecorated,
-    observation: ObservationType | null,
-    student: UserType
-  ) => {
-    goalForObservation = goal
-    studentForObservation = student
-    if (observation) {
-      // edit observation
-      observationWip = observation
-    } else {
-      // create new observation, prefill with value from previous observation
-      const studentGoal = goalsWithCalculatedMasteryByStudentId[student.id].find(
-        g => g.id === goal.id
-      )
-      const prevousObservations = studentGoal?.observations || []
-      const previousObservation = prevousObservations[prevousObservations.length - 1]
-      observationWip = {
-        masteryValue: previousObservation?.masteryValue || null,
-        studentId: student.id,
-        goalId: goal.id,
-      }
-    }
-    isObservationEditorOpen = true
-  }
-
   const handleEditStatus = async (status: Partial<StatusType> | null, student: UserType) => {
     if (status?.id) {
       statusWip = {
@@ -226,7 +189,6 @@
   }
 
   const handleStatusDone = async () => {
-    goalForObservation = null
     isStatusEditorOpen = false
     statusesKey++
   }
@@ -433,12 +395,7 @@
       <h3 class="mb-3">Mine mål</h3>
       <div class="card shadow-sm mt-4 list-group">
         <div class="list-group-item">
-          <StudentSubject
-            student={$dataStore.currentUser}
-            {subject}
-            isTitleEnabled={false}
-            {group}
-          />
+          <StudentSubject student={$dataStore.currentUser} {subject} isTitleEnabled={false} />
         </div>
       </div>
     </section>
@@ -456,7 +413,7 @@
       </div>
     {:else if group.type === GROUP_TYPE_BASIS}
       <StudentsWithSubjects {students} {subjects} {group} />
-    {:else if group.type === GROUP_TYPE_TEACHING}
+    {:else if group.type === GROUP_TYPE_TEACHING && subject}
       <StudentsWithGoals
         {group}
         {students}
@@ -464,8 +421,8 @@
         goalsWithMasteryByStudentId={goalsWithCalculatedMasteryByStudentId}
         {subject}
         {statusesKey}
-        onEditObservation={handleEditObservation}
         onEditStatus={handleEditStatus}
+        onRefreshRequired={() => fetchGroupData()}
       />
     {:else}
       <div class="alert alert-warning">
@@ -499,25 +456,6 @@
 >
   {#if goalWip}
     <GoalEdit goal={goalWip} {group} isGoalIndividual={false} onDone={handleGoalDone} />
-  {/if}
-</Offcanvas>
-
-<!-- Offcanvas for adding an observation -->
-<Offcanvas
-  bind:isOpen={isObservationEditorOpen}
-  ariaLabel="Rediger observasjon"
-  onClosed={() => {
-    observationWip = null
-    fetchGroupData()
-  }}
->
-  {#if observationWip}
-    <ObservationEdit
-      student={studentForObservation}
-      observation={observationWip}
-      goal={goalForObservation}
-      onDone={handleObservationDone}
-    />
   {/if}
 </Offcanvas>
 

@@ -17,6 +17,7 @@
   import Statuses from './Statuses.svelte'
   import UserNameLink from './UserNameLink.svelte'
   import StudentSubjectChart from './StudentSubjectChart.svelte'
+  import ObservationWidgets from './ObservationWidgets.svelte'
 
   let {
     group,
@@ -25,21 +26,17 @@
     goalsWithMasteryByStudentId,
     subject,
     statusesKey = 0,
-    onEditObservation,
     onEditStatus,
+    onRefreshRequired,
   }: {
     group: GroupType
     students: UserType[]
     goals: GoalType[]
     goalsWithMasteryByStudentId: Record<string, GoalDecorated[]>
-    subject?: SubjectType | null
+    subject: SubjectType
     statusesKey?: number
-    onEditObservation: (
-      goal: GoalDecorated,
-      observation: ObservationType | null,
-      student: UserType
-    ) => void
     onEditStatus: (status: null, student: UserType) => void
+    onRefreshRequired: () => void
   } = $props()
 
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
@@ -237,17 +234,13 @@
           />
         {/if}
         <span class="add-observation-button">
-          {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: group.id, subjectId: subject?.id, studentGroupIds: student.groupIds } )}
-            <ButtonIcon
-              options={{
-                iconName: 'bullseye',
-                title: 'Legg til observasjon',
-                classes: 'bordered',
-                disabled: !goal.isRelevant,
-                onClick: () => onEditObservation(decoratedGoal || goal, null, student),
-              }}
-            />
-          {/if}
+          <ObservationWidgets
+            {goal}
+            {student}
+            {subject}
+            onRefreshRequired={() => onRefreshRequired()}
+            widgets={['create']}
+          />
         </span>
       </span>
     {/each}
