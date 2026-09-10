@@ -279,7 +279,7 @@
   }
 
   .students-grid .item.header-row {
-    padding: 0rem 0.2rem 0rem 0.2rem;
+    padding: 0.3rem;
     background-color: var(--bs-light);
     font-weight: 800;
     font-size: 0.8rem;

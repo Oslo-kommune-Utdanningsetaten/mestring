@@ -253,7 +253,7 @@
   }
 
   .students-grid .item {
-    padding: 0.5rem;
+    padding: 0.3rem;
     min-height: 4rem;
     display: flex;
     align-items: center;
@@ -265,6 +265,7 @@
   }
 
   .students-grid .item.header-row {
+    min-height: 1rem;
     background-color: var(--bs-light);
     font-weight: 800;
     position: sticky;
