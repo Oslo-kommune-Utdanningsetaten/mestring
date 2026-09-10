@@ -140,20 +140,21 @@
               {/if}
             {/if}
 
-            <ObservationWidgets
-              {goal}
-              {student}
-              {subject}
-              onRefreshRequired={() => fetchData()}
-              widgets={['create']}
-            />
+            <span class="pt-1">
+              <ObservationWidgets
+                {goal}
+                {student}
+                {subject}
+                onRefreshRequired={() => fetchData()}
+                widgets={['create']}
+              />
+            </span>
 
             {#if goal.observations?.length}
               <ButtonIcon
                 options={{
                   iconName: `chevron-thin-${expandedGoalIds.includes(goal.id) ? 'up' : 'down'}`,
                   title: `${expandedGoalIds.includes(goal.id) ? 'Skjul' : 'Vis'} observasjoner`,
-                  classes: 'bordered',
                   onClick: () => handleToggleGoal(goal.id),
                 }}
               />

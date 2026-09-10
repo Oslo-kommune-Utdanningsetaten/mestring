@@ -253,13 +253,6 @@
     }
   }
 
-  .observation-widgets-panel > :global(span) {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    justify-content: flex-start;
-  }
-
   .observation-header-row {
     display: flex;
     flex-wrap: wrap;

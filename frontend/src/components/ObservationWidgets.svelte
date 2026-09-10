@@ -76,7 +76,7 @@
   }
 </script>
 
-<span>
+<span class="observation-widgets">
   <!-- View observation widget -->
   {#if widgets.includes('view')}
     <ButtonIcon
@@ -185,4 +185,8 @@
 </Offcanvas>
 
 <style>
+  .observation-widgets {
+    display: inline-flex;
+    gap: 0.5rem;
+  }
 </style>
