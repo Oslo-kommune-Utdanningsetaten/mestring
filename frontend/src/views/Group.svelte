@@ -21,7 +21,7 @@
 
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
   import { dataStore } from '../stores/data'
-  import { goalsWithCalculatedMastery } from '../utils/functions'
+  import { getGroupLabel, goalsWithCalculatedMastery } from '../utils/functions'
   import { getPreferredStatusCategory } from '../stores/localStorageFunctions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
@@ -32,7 +32,6 @@
   import StatusEdit from '../components/StatusEdit.svelte'
   import GoalEdit from '../components/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
-  import GroupTag from '../components/GroupTag.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
   import UserTag from '../components/UserTag.svelte'
@@ -60,6 +59,27 @@
 
   let currentSchool = $derived($dataStore.currentSchool)
   let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
+
+  const groupSubtitle = $derived.by(() => {
+    if (!group) return
+    let result = ''
+    if (subject) {
+      result += subject.displayName
+      if (group.type == GROUP_TYPE_BASIS) {
+        result += ', basisgruppe'
+      } else {
+        result += ', undervisningsgruppe'
+      }
+    } else {
+      if (group.type == GROUP_TYPE_BASIS) {
+        result += 'Basisgruppe'
+      } else {
+        result += 'Undervisningsgruppe'
+        result += ' [mangler fag]'
+      }
+    }
+    return result
+  })
 
   let isCurrentUserOnlyStudent = $derived(
     $dataStore.currentUser?.isStudent && !$dataStore.currentUser?.isTeacher
@@ -259,18 +279,15 @@
         <GroupSVG />
       </div>
       <div>
-        <h2 class="mb-2" title="Gruppe">
-          {group.displayName}
+        <h2 title="Gruppe">
+          {getGroupLabel(group, { isGroupNameEnabled: true, includeEarlierYear: true })}
         </h2>
-        {#if subject}
-          <h5 class="text-secondary" title={subject.grepCode}>{subject.displayName}</h5>
-        {:else if group.type === GROUP_TYPE_TEACHING}
-          <h5 class="text-secondary">[mangler fag]</h5>
-        {/if}
+        <h3 class="text-secondary group-subtitle" title={subject?.grepCode}>
+          {groupSubtitle}
+        </h3>
       </div>
     </div>
     <div class="d-flex align-items-center gap-2 mt-1">
-      <GroupTag {group} isGroupTypeNameEnabled={true} />
       {#each teachers as teacher}
         <UserTag
           user={teacher}
@@ -477,6 +494,11 @@
 
   section {
     margin-bottom: 2rem;
+  }
+
+  .group-subtitle {
+    font-size: 1rem;
+    font-weight: 400;
   }
 
   .group-svg > :global(svg) {
