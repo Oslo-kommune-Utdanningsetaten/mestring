@@ -152,8 +152,9 @@
 <div class="scroll-mirror" bind:this={topScrollElement} onscroll={syncFromTop}>
   <div style="width: {gridScrollWidth}px; height: 1px;"></div>
 </div>
+
 <div
-  class="students-grid my-3"
+  class="students-grid"
   bind:this={gridElement}
   onscroll={syncFromGrid}
   aria-label="Elevliste"
