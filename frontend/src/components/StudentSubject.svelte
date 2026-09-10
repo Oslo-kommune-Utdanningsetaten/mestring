@@ -1,16 +1,9 @@
 <script lang="ts">
   import { useTinyRouter } from 'svelte-tiny-router'
-  import type {
-    SubjectType,
-    UserType,
-    GoalType,
-    ObservationType,
-    GroupType,
-  } from '../generated/types.gen'
+  import type { SubjectType, UserType, GoalType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
   import { urlStringFrom, getSubjectName } from '../utils/functions'
-  import { hasUserAccessToFeature } from '../stores/access'
   import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
   import { localStorage } from '../stores/localStorage'
 
@@ -18,18 +11,15 @@
   import ButtonIcon from './ButtonIcon.svelte'
   import GoalObservations from './GoalObservations.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
-  import Offcanvas from './Offcanvas.svelte'
-  import ObservationEdit from './ObservationEdit.svelte'
+  import ObservationWidgets from './ObservationWidgets.svelte'
 
   const {
     student,
-    group,
     subject,
     isTitleEnabled = true,
     goals: goalsProp,
   } = $props<{
     student: UserType
-    group: GroupType
     subject: SubjectType
     isTitleEnabled?: boolean
     goals?: GoalDecorated[]
@@ -43,9 +33,6 @@
   let { currentUser, currentSchool } = $derived($dataStore)
   let subjectName = $derived(getSubjectName(subject))
   let expandedGoalIds = $derived<string[]>(router.getQueryParam('expanded')?.split(',') || [])
-  let observationWip = $state<ObservationType | {} | null>(null)
-  let goalForObservation = $state<GoalDecorated | null>(null)
-  let isObservationEditorOpen = $state<boolean>(false)
 
   const handleToggleGoal = (goalId: string) => {
     const nextExpandedGoals = new Set(expandedGoalIds)
@@ -89,23 +76,6 @@
       console.error(`Could not load goals for ${student.id} and ${subject.id}`, error)
       goals = []
     }
-  }
-
-  const handleEditObservation = (observation: ObservationType | null, goal: GoalDecorated) => {
-    if (observation?.id) {
-      // edit existing observation
-      observationWip = { ...observation }
-    } else {
-      // create new observation, prefill with value from previous observation
-      const prevousObservations = goal?.observations || []
-      const previousObservation = prevousObservations[prevousObservations.length - 1]
-      observationWip = {
-        masteryValue: previousObservation?.masteryValue || null,
-        isVisibleToStudent: true,
-      }
-    }
-    goalForObservation = { ...goal }
-    isObservationEditorOpen = true
   }
 
   $effect(() => {
@@ -170,17 +140,13 @@
               {/if}
             {/if}
 
-            {#if $hasUserAccessToFeature( 'observation', 'create', { groupId: group.id, goalStudentId: goal.studentId, studentId: student.id } )}
-              <ButtonIcon
-                options={{
-                  iconName: 'bullseye',
-                  title: 'Ny observasjon',
-                  classes: 'bordered',
-                  disabled: !goal.isRelevant,
-                  onClick: () => handleEditObservation(null, goal),
-                }}
-              />
-            {/if}
+            <ObservationWidgets
+              {goal}
+              {student}
+              {subject}
+              onRefreshRequired={() => fetchData()}
+              widgets={['create']}
+            />
 
             {#if goal.observations?.length}
               <ButtonIcon
@@ -195,13 +161,7 @@
           </span>
         </li>
         {#if expandedGoalIds.includes(goal.id) && goal.observations?.length}
-          <GoalObservations
-            {goal}
-            {student}
-            {group}
-            onRefreshNeeded={fetchData}
-            onEditObservation={handleEditObservation}
-          />
+          <GoalObservations {goal} {student} {subject} onRefreshNeeded={fetchData} />
         {/if}
       </div>
     {/each}
@@ -234,28 +194,6 @@
     </div>
   {/if}
 </div>
-
-<!-- offcanvas for editing observations -->
-<Offcanvas
-  bind:isOpen={isObservationEditorOpen}
-  ariaLabel="Ny observasjon"
-  onClosed={() => {
-    observationWip = null
-  }}
->
-  {#if observationWip && isObservationEditorOpen}
-    <ObservationEdit
-      {student}
-      observation={observationWip}
-      goal={goalForObservation}
-      onDone={() => {
-        observationWip = null
-        isObservationEditorOpen = false
-        fetchData()
-      }}
-    />
-  {/if}
-</Offcanvas>
 
 <style>
   hr {

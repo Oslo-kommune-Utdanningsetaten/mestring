@@ -17,7 +17,7 @@
 
   const { options }: Props = $props()
   const iconName = $derived(options.iconName || 'plus-sign')
-  const classes = $derived(options.classes || 'me-2')
+  const classes = $derived(options.classes || '')
   const title = $derived(options.title || 'TITTEL MANGLER')
   const disabled = $derived<boolean>(options.disabled || false)
   const delayActionFor = $derived(options.delayActionFor)

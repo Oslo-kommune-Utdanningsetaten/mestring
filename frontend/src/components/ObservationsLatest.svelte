@@ -149,7 +149,7 @@
               <AuthorInfo item={observation} />
             </div>
           </div>
-          {#if studentsById[observation.studentId]}
+          {#if studentsById[observation.studentId] && cachedGoals[observation.goalId]}
             <div class="observation-widgets-panel">
               <ObservationWidgets
                 {observation}

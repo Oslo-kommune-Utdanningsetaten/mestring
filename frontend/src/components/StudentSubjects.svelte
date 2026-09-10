@@ -60,7 +60,7 @@
         {@const group = groups.find(g => g.subjectId === subject.id)}
         {#if group}
           <div class="list-group-item">
-            <StudentSubject {student} {subject} {group} />
+            <StudentSubject {student} {subject} />
           </div>
         {/if}
       {/each}

@@ -14,7 +14,7 @@
   import ObservationEdit from './ObservationEdit.svelte'
   import ObservationView from './ObservationView.svelte'
 
-  const { observation, goal, student, subject, isEditable, onRefreshRequired, widgets } = $props<{
+  const { observation, goal, student, subject, onRefreshRequired, widgets } = $props<{
     observation?: ObservationType
     goal: GoalType
     student: UserType
@@ -90,7 +90,7 @@
   {/if}
 
   <!-- Create observation widget -->
-  {#if widgets.includes('create') && $hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, subjectId: subject.id, studentGroupIds: student.groupIds } )}
+  {#if widgets.includes('create') && $hasUserAccessToFeature( 'observation', 'create', { groupId: goal.groupId, subjectId: subject.id, studentGroupIds: student.groupIds, studentId: student.id } )}
     <ButtonIcon
       options={{
         iconName: 'bullseye',
@@ -103,7 +103,7 @@
   {/if}
 
   <!-- Edit observation widget -->
-  {#if widgets.includes('update') && $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById } )}
+  {#if widgets.includes('update') && $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById, studentId: student.id } )}
     <ButtonIcon
       options={{
         iconName: 'edit',
@@ -115,7 +115,7 @@
   {/if}
 
   <!-- Delete observation widget -->
-  {#if widgets.includes('delete') && $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById } )}
+  {#if widgets.includes('delete') && $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById, studentId: student.id } )}
     {#key observation.id}
       <ButtonIcon
         options={{
