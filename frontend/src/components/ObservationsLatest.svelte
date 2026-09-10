@@ -290,6 +290,7 @@
     min-height: 3.5rem;
     /* Colors are set by --mastery-color custom property */
     --mastery-color: #888;
+    color: color-mix(in srgb, var(--mastery-color) 20%, black);
     background: color-mix(in srgb, var(--mastery-color) 12%, white);
   }
 
@@ -297,10 +298,6 @@
     .mastery-panel {
       width: 40%;
     }
-  }
-
-  .mastery-panel {
-    color: color-mix(in srgb, var(--mastery-color) 80%, black);
   }
 
   .mastery-value-corner {
@@ -315,16 +312,14 @@
     justify-content: center;
     font-weight: 800;
     font-size: 0.95rem;
-    color: #fff;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    background: var(--mastery-color);
-    opacity: 0.25;
-    transition: opacity 0.8s ease;
+    background: color-mix(in srgb, var(--mastery-color) 12%, white);
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
 
-  .mastery-value-corner:hover {
-    transition: opacity 0.3s ease;
-    opacity: 0.9;
+  .mastery-panel:hover .mastery-value-corner {
+    opacity: 0.95;
   }
 
   .mastery-text {
