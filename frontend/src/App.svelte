@@ -22,6 +22,12 @@
   import Analytics from './components/Analytics.svelte'
   const API_CHECK_INTERVAL = 1000 * 60 * 10 // every 10 minutes
 
+  const deploymentEnv = import.meta.env.VITE_SERVER_DEPLOYMENT || 'production'
+  const pageTitle =
+    deploymentEnv === 'production'
+      ? 'Mestring i Osloskolen'
+      : `Mestring ${deploymentEnv.toUpperCase()}`
+
   onMount(() => {
     apiHealth.checkHealth()
 
@@ -47,6 +53,10 @@
     }
   })
 </script>
+
+<svelte:head>
+  <title>{pageTitle}</title>
+</svelte:head>
 
 <a href="#main-content" class="skip-link">Hopp til hovedinnhold</a>
 
