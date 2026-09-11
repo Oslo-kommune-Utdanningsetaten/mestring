@@ -12,6 +12,7 @@
   import SubjectTag from './SubjectTag.svelte'
   import Link from './Link.svelte'
   import ObservationWidgets from './ObservationWidgets.svelte'
+  import ObservationVisibilityMarker from './ObservationVisibilityMarker.svelte'
 
   const limit = 10
   let { masterySchemas, currentSchool, currentUser, subjects } = $derived($dataStore)
@@ -145,8 +146,11 @@
                 ></span>
               {/if}
             </div>
-            <div class="observation-author">
-              <AuthorInfo item={observation} />
+            <div>
+              <ObservationVisibilityMarker {observation} />
+              <span class="observation-author">
+                <AuthorInfo item={observation} />
+              </span>
             </div>
           </div>
           {#if studentsById[observation.studentId] && cachedGoals[observation.goalId]}

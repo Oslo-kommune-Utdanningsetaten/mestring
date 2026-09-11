@@ -81,7 +81,7 @@
   {#if widgets.includes('view')}
     <ButtonIcon
       options={{
-        iconName: 'eye',
+        iconName: 'document-text',
         title: 'Se observasjon',
         classes: 'bordered',
         onClick: () => handleViewObservation(observation, goal),
@@ -106,7 +106,7 @@
   {#if widgets.includes('update') && $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById, studentId: student.id } )}
     <ButtonIcon
       options={{
-        iconName: 'edit',
+        iconName: 'document-edit',
         title: 'Rediger observasjon',
         classes: 'bordered',
         onClick: () => handleEditObservation(observation, goal),

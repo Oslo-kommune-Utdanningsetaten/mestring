@@ -36,6 +36,7 @@
   import StudentSubjectChart from './StudentSubjectChart.svelte'
   import MasteryLevelTitle from './MasteryLevelTitle.svelte'
   import ObservationWidgets from './ObservationWidgets.svelte'
+  import ObservationVisibilityMarker from './ObservationVisibilityMarker.svelte'
 
   const { student, subject, onRefreshRequired } = $props<{
     student: UserType
@@ -377,8 +378,11 @@
           </div>
           {#each goal?.observations as observation, index}
             <div class="student-observations-row observation-item">
-              <span class="bordered">
-                <AuthorInfo item={observation} />
+              <span>
+                <span class="bordered">
+                  <ObservationVisibilityMarker {observation} />
+                  <AuthorInfo item={observation} />
+                </span>
               </span>
               <span class="bordered">
                 <MasteryLevelTitle {observation} masterySchema={getMasterySchmemaForGoal(goal)} />
