@@ -1,13 +1,10 @@
 <script lang="ts">
-  import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { useTinyRouter } from 'svelte-tiny-router'
+  import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { subjectsDestroy, subjectsList, schoolsList, groupsList } from '../../generated/sdk.gen'
   import type { SubjectType, SchoolType, GroupType } from '../../generated/types.gen'
-  import {
-    GROUP_DELETED_OPTIONS,
-    GROUP_VALIDITY_OPTIONS,
-    SUBJECT_OWNERSHIP_OPTIONS,
-  } from '../../utils/constants'
+
+  import { GROUP_DELETED_OPTIONS, SUBJECT_OWNERSHIP_OPTIONS } from '../../utils/constants'
   import { urlStringFrom } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
   import {
@@ -19,7 +16,7 @@
 
   import ButtonMini from '../../components/ButtonMini.svelte'
   import ButtonIcon from '../../components/ButtonIcon.svelte'
-  import SubjectEdit from '../../components/SubjectEdit.svelte'
+  import SubjectEdit from '../../components/edit/SubjectEdit.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
   import GroupTag from '../../components/GroupTag.svelte'
 

@@ -8,10 +8,10 @@
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
 
+  import ObservationEdit from './ObservationEdit.svelte'
   import Link from '../Link.svelte'
   import ButtonIcon from '../ButtonIcon.svelte'
   import Offcanvas from '../Offcanvas.svelte'
-  import ObservationEdit from '../ObservationEdit.svelte'
   import ObservationView from '../ObservationView.svelte'
 
   const { observation, goal, student, subject, onRefreshRequired, widgets } = $props<{

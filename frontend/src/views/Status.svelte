@@ -1,26 +1,26 @@
 <script lang="ts">
-  import MasterySchemaLevels from '../components/MasterySchemaLevels.svelte'
-
   import type { StatusType, SubjectType, UserType } from '../generated/types.gen'
+  import type { MasterySchemaWithConfig } from '../types/models'
   import {
     statusRetrieve,
     usersRetrieve,
     subjectsRetrieve,
     statusDestroy,
   } from '../generated/sdk.gen'
-  import type { MasterySchemaWithConfig } from '../types/models'
+
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
   import { formatDateHumanly } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
+
+  import MasterySchemaLevels from '../components/MasterySchemaLevels.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
-  import StatusEdit from '../components/StatusEdit.svelte'
+  import StatusEdit from '../components/edit/StatusEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
   import AuthorInfo from '../components/AuthorInfo.svelte'
   import Link from '../components/Link.svelte'
-  import MasterySchemaLevel from '../components/MasterySchemaLevel.svelte'
 
   let { statusId } = $props<{
     statusId: string

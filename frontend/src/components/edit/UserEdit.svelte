@@ -1,4 +1,12 @@
 <script lang="ts">
+  import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
+  import type {
+    SchoolType,
+    UserCreateType,
+    NestedUserSchoolType,
+    NestedUserGroupType,
+    GroupType,
+  } from '../../generated/types.gen'
   import {
     usersCreate,
     usersPartialUpdate,
@@ -7,24 +15,18 @@
     userGroupsCreate,
     userGroupsDestroy,
     groupsList,
-  } from '../generated/sdk.gen'
-  import type {
-    SchoolType,
-    UserCreateType,
-    NestedUserSchoolType,
-    NestedUserGroupType,
-    GroupType,
-  } from '../generated/types.gen'
-  import type { UserDecorated } from '../types/models.d.ts'
-  import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
-  import { dataStore } from '../stores/data'
-  import { addAlert } from '../stores/alerts'
-  import { USER_ROLES } from '../utils/constants'
+  } from '../../generated/sdk.gen'
+
+  import type { UserDecorated } from '../../types/models'
+  import { dataStore } from '../../stores/data'
+  import { addAlert } from '../../stores/alerts'
+  import { USER_ROLES } from '../../utils/constants'
   import {
     getPreferredCreatedParams,
     getPreferredGroupValidity,
-  } from '../stores/localStorageFunctions'
-  import ButtonMini from './ButtonMini.svelte'
+  } from '../../stores/localStorageFunctions'
+
+  import ButtonMini from '../ButtonMini.svelte'
 
   const { user, school, onDone } = $props<{
     user: Partial<UserDecorated>

@@ -26,7 +26,7 @@
   import ButtonIcon from '../components/ButtonIcon.svelte'
   import AuthorInfo from '../components/AuthorInfo.svelte'
   import Link from '../components/Link.svelte'
-  import StatusEdit from '../components/StatusEdit.svelte'
+  import StatusEdit from '../components/edit/StatusEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
 
   let { groupId, statusCategoryName } = $props<{

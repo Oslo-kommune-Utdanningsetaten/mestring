@@ -29,8 +29,8 @@
 
   import GroupSVG from '../assets/group.svg.svelte'
   import ButtonIcon from '../components/ButtonIcon.svelte'
-  import StatusEdit from '../components/StatusEdit.svelte'
-  import GoalEdit from '../components/GoalEdit.svelte'
+  import StatusEdit from '../components/edit/StatusEdit.svelte'
+  import GoalEdit from '../components/edit/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'

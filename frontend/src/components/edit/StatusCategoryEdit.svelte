@@ -1,11 +1,13 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
-  import { statusCategoriesUpdate, statusCategoriesCreate } from '../generated/sdk.gen'
-  import type { StatusCategoryType, StatusCategoryCreateType } from '../generated/types.gen'
-  import { STATUS_CATEGORY_NAMES, NONE_FIELD_VALUE } from '../utils/constants'
-  import { localStorage } from '../stores/localStorage'
-  import { dataStore } from '../stores/data'
-  import ButtonMini from './ButtonMini.svelte'
+  import { statusCategoriesUpdate, statusCategoriesCreate } from '../../generated/sdk.gen'
+  import type { StatusCategoryType, StatusCategoryCreateType } from '../../generated/types.gen'
+
+  import { STATUS_CATEGORY_NAMES, NONE_FIELD_VALUE } from '../../utils/constants'
+  import { localStorage } from '../../stores/localStorage'
+  import { dataStore } from '../../stores/data'
+
+  import ButtonMini from '../ButtonMini.svelte'
 
   const { statusCategory, onDone } = $props<{
     statusCategory: Partial<StatusCategoryType> | null

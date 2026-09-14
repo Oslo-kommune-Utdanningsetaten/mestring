@@ -6,28 +6,29 @@
     ObservationType,
     GoalType,
     StatusCategoryType,
-  } from '../generated/types.gen'
-  import { statusCreate, statusUpdate, usersRetrieve } from '../generated/sdk.gen'
-  import type { MasterySchemaWithConfig, GoalDecorated } from '../types/models'
-  import { areSchemaValuesConsistent } from '../utils/masteryHelpers'
-  import { dataStore } from '../stores/data'
+  } from '../../generated/types.gen'
+  import type { MasterySchemaWithConfig, GoalDecorated } from '../../types/models'
+  import { statusCreate, statusUpdate, usersRetrieve } from '../../generated/sdk.gen'
+
+  import { areSchemaValuesConsistent } from '../../utils/masteryHelpers'
+  import { dataStore } from '../../stores/data'
   import {
     fetchGoalsForSubjectAndStudent,
     formatDateHumanly,
     subjectsInCommon,
     generateStatusTitle,
     getDateSpanForStatusCategory,
-  } from '../utils/functions'
-  import type { StatusTitleInput } from '../types/models'
-  import { calculateSchoolYearMilestones } from '../utils/schoolYear'
-  import { addAlert } from '../stores/alerts'
-  import { trackEvent } from '../stores/analytics'
-  import ButtonMini from './ButtonMini.svelte'
-  import ButtonIcon from './ButtonIcon.svelte'
-  import MasteryValueInput from './MasteryValueInput.svelte'
-  import MasteryLevelBadge from './MasteryLevelBadge.svelte'
-  import MasteryBarChart from './MasteryBarChart.svelte'
-  import { localStorage } from '../stores/localStorage'
+  } from '../../utils/functions'
+  import type { StatusTitleInput } from '../../types/models'
+  import { localStorage } from '../../stores/localStorage'
+  import { addAlert } from '../../stores/alerts'
+  import { trackEvent } from '../../stores/analytics'
+
+  import ButtonMini from '../ButtonMini.svelte'
+  import ButtonIcon from '../ButtonIcon.svelte'
+  import MasteryValueInput from '../MasteryValueInput.svelte'
+  import MasteryLevelBadge from '../MasteryLevelBadge.svelte'
+  import MasteryBarChart from '../MasteryBarChart.svelte'
 
   let { status, onDone } = $props<{
     status: Partial<StatusType>

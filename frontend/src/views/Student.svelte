@@ -20,7 +20,7 @@
   import { trackEvent } from '../stores/analytics'
 
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
-  import GoalEdit from '../components/GoalEdit.svelte'
+  import GoalEdit from '../components/edit/GoalEdit.svelte'
   import Offcanvas from '../components/Offcanvas.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
   import ButtonIcon from '../components/ButtonIcon.svelte'

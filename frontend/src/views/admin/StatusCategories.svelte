@@ -14,7 +14,7 @@
   import { STATUS_CATEGORY_NAMES } from '../../utils/constants'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
-  import StatusCategoryEdit from '../../components/StatusCategoryEdit.svelte'
+  import StatusCategoryEdit from '../../components/edit/StatusCategoryEdit.svelte'
 
   const router = useTinyRouter()
   let statusCategoryWip = $state<Partial<StatusCategoryType> | null>(null)

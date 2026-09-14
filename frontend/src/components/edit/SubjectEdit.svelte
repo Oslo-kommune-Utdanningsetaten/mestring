@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { subjectsCreate, subjectsUpdate } from '../generated/sdk.gen'
-  import type { SubjectType, SchoolType } from '../generated/types.gen'
-  import ButtonMini from './ButtonMini.svelte'
+  import { subjectsCreate, subjectsUpdate } from '../../generated/sdk.gen'
+  import type { SubjectType, SchoolType } from '../../generated/types.gen'
+  import ButtonMini from '../ButtonMini.svelte'
 
   const { subject, school, onDone } = $props<{
     subject: SubjectType | null

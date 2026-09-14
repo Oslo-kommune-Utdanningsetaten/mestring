@@ -1,18 +1,20 @@
 <script lang="ts">
-  import { goalsCreate, goalsUpdate } from '../generated/sdk.gen'
   import type {
     GoalType,
     GroupType,
     UserType,
     SubjectType,
     GoalCreateType,
-  } from '../generated/types.gen'
-  import { dataStore } from '../stores/data'
-  import { localStorage } from '../stores/localStorage'
-  import ButtonMini from './ButtonMini.svelte'
-  import { NONE_FIELD_VALUE } from '../utils/constants'
-  import { addAlert } from '../stores/alerts'
-  import { trackEvent } from '../stores/analytics'
+  } from '../../generated/types.gen'
+  import { goalsCreate, goalsUpdate } from '../../generated/sdk.gen'
+
+  import { dataStore } from '../../stores/data'
+  import { localStorage } from '../../stores/localStorage'
+  import { NONE_FIELD_VALUE } from '../../utils/constants'
+  import { addAlert } from '../../stores/alerts'
+  import { trackEvent } from '../../stores/analytics'
+
+  import ButtonMini from '../ButtonMini.svelte'
 
   // This component is used for both individual and group goals!
   // If group is passed, student AND subject should be null

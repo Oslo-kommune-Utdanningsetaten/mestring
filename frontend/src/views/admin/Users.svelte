@@ -3,6 +3,7 @@
   import type { UserType, SchoolType } from '../../generated/types.gen'
   import type { UserDecorated } from '../../types/models.d.ts'
   import { usersList, schoolsList } from '../../generated/sdk.gen'
+
   import { urlStringFrom, fetchUserData } from '../../utils/functions'
   import { dataStore } from '../../stores/data'
   import { preferredSchoolYear } from '../../stores/localStorageFunctions'
@@ -16,7 +17,7 @@
   import User from '../../components/User.svelte'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
-  import UserEdit from '../../components/UserEdit.svelte'
+  import UserEdit from '../../components/edit/UserEdit.svelte'
 
   const router = useTinyRouter()
   let schools = $state<SchoolType[]>([])

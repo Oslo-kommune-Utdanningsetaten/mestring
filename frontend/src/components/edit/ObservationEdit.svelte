@@ -1,15 +1,16 @@
 <script lang="ts">
-  import type { ObservationType, GoalType, UserType } from '../generated/types.gen'
-  import { observationsCreate, observationsUpdate } from '../generated/sdk.gen'
-  import type { MasterySchemaWithConfig } from '../types/models'
-  import { useMasteryCalculations } from '../utils/masteryHelpers'
-  import { dataStore, currentUser } from '../stores/data'
-  import { localStorage } from '../stores/localStorage'
+  import type { ObservationType, GoalType, UserType } from '../../generated/types.gen'
+  import type { MasterySchemaWithConfig } from '../../types/models'
+  import { observationsCreate, observationsUpdate } from '../../generated/sdk.gen'
 
-  import ButtonMini from './ButtonMini.svelte'
-  import { addAlert } from '../stores/alerts'
-  import { trackEvent } from '../stores/analytics'
-  import MasteryValueInput from './MasteryValueInput.svelte'
+  import { useMasteryCalculations } from '../../utils/masteryHelpers'
+  import { dataStore, currentUser } from '../../stores/data'
+  import { localStorage } from '../../stores/localStorage'
+  import { addAlert } from '../../stores/alerts'
+  import { trackEvent } from '../../stores/analytics'
+
+  import ButtonMini from '../ButtonMini.svelte'
+  import MasteryValueInput from '../MasteryValueInput.svelte'
 
   const { student, goal, observation, onDone } = $props<{
     student: UserType | null
