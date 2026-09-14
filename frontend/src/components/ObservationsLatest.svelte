@@ -11,7 +11,7 @@
   import UserTag from './UserTag.svelte'
   import SubjectTag from './SubjectTag.svelte'
   import Link from './Link.svelte'
-  import ObservationWidgets from './ObservationWidgets.svelte'
+  import ObservationWidgets from './edit/ObservationWidgets.svelte'
   import ObservationVisibilityMarker from './ObservationVisibilityMarker.svelte'
 
   const limit = 10

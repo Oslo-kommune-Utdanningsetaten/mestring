@@ -1,50 +1,20 @@
 <script lang="ts">
-  import ButtonMini from './ButtonMini.svelte'
-  import MasteryValueInput from './MasteryValueInput.svelte'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import { JSONEditor, type Content } from 'svelte-jsoneditor'
-  import { masterySchemasUpdate, masterySchemasCreate } from '../generated/sdk.gen'
-  import type { MasterySchemaType, MasterySchemaCreateType } from '../generated/types.gen'
-  import type { MasterySchemaConfig, MasterySchemaWithConfig } from '../types/models'
-  import { useMasteryCalculations } from '../utils/masteryHelpers'
+  import type { MasterySchemaType, MasterySchemaCreateType } from '../../generated/types.gen'
+  import type { MasterySchemaConfig, MasterySchemaWithConfig } from '../../types/models'
+  import { masterySchemasUpdate, masterySchemasCreate } from '../../generated/sdk.gen'
+  import { useMasteryCalculations } from '../../utils/masteryHelpers'
 
-  const defaultConfig = {
-    levels: [
-      {
-        title: 'Gjengi',
-        minValue: 1,
-        maxValue: 33,
-        color: '#ff8274',
-      },
-      {
-        title: 'Forklare',
-        minValue: 34,
-        maxValue: 66,
-        color: '#f9c66b',
-      },
-      {
-        title: 'Se sammenhenger',
-        minValue: 67,
-        maxValue: 100,
-        color: '#38a87f',
-      },
-    ],
-    valueInput: 'sliderHorizontal',
-    inputIncrement: 1,
-    flatTrendThreshold: 6,
-    isIncrementIndicatorEnabled: true,
-    isMasteryValueVisible: true,
-    isMasteryValueInputEnabled: true,
-    isMasteryDescriptionInputEnabled: true,
-    isFeedforwardInputEnabled: true,
-  }
+  import ButtonMini from '../ButtonMini.svelte'
+  import MasteryValueInput from '../MasteryValueInput.svelte'
 
   const { masterySchema, onDone } = $props<{
-    masterySchema: Partial<MasterySchemaType> | null
+    masterySchema: Partial<MasterySchemaType>
     onDone: () => void
   }>()
   let localMasterySchema = $state<Partial<MasterySchemaWithConfig>>({ ...masterySchema })
-  let editorContent = $derived<Content>({ json: localMasterySchema?.config || defaultConfig })
+  let editorContent = $derived<Content>({ json: localMasterySchema.config })
   let calculations = $derived(useMasteryCalculations(localMasterySchema))
   let placeholderMasteryValue = $derived(calculations.defaultValue)
 

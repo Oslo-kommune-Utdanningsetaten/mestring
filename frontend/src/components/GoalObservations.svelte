@@ -5,7 +5,7 @@
 
   import AuthorInfo from './AuthorInfo.svelte'
   import MasteryLevelTitle from './MasteryLevelTitle.svelte'
-  import ObservationWidgets from './ObservationWidgets.svelte'
+  import ObservationWidgets from './edit/ObservationWidgets.svelte'
 
   const { student, goal, subject, onRefreshNeeded } = $props<{
     student: UserType

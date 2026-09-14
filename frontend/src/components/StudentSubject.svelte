@@ -11,7 +11,7 @@
   import ButtonIcon from './ButtonIcon.svelte'
   import GoalObservations from './GoalObservations.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
-  import ObservationWidgets from './ObservationWidgets.svelte'
+  import ObservationWidgets from './edit/ObservationWidgets.svelte'
 
   const {
     student,

@@ -17,7 +17,7 @@
   import Statuses from './Statuses.svelte'
   import UserNameLink from './UserNameLink.svelte'
   import StudentSubjectChart from './StudentSubjectChart.svelte'
-  import ObservationWidgets from './ObservationWidgets.svelte'
+  import ObservationWidgets from './edit/ObservationWidgets.svelte'
 
   let {
     group,

@@ -1,18 +1,18 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
-  import type { ObservationType, GoalType, UserType, SubjectType } from '../generated/types.gen'
-  import type { GoalDecorated } from '../types/models'
-  import { observationsDestroy } from '../generated/sdk.gen'
+  import type { ObservationType, GoalType, UserType, SubjectType } from '../../generated/types.gen'
+  import type { GoalDecorated } from '../../types/models'
+  import { observationsDestroy } from '../../generated/sdk.gen'
 
-  import { hasUserAccessToFeature } from '../stores/access'
-  import { addAlert } from '../stores/alerts'
-  import { trackEvent } from '../stores/analytics'
+  import { hasUserAccessToFeature } from '../../stores/access'
+  import { addAlert } from '../../stores/alerts'
+  import { trackEvent } from '../../stores/analytics'
 
-  import Link from './Link.svelte'
-  import ButtonIcon from './ButtonIcon.svelte'
-  import Offcanvas from './Offcanvas.svelte'
-  import ObservationEdit from './ObservationEdit.svelte'
-  import ObservationView from './ObservationView.svelte'
+  import Link from '../Link.svelte'
+  import ButtonIcon from '../ButtonIcon.svelte'
+  import Offcanvas from '../Offcanvas.svelte'
+  import ObservationEdit from '../ObservationEdit.svelte'
+  import ObservationView from '../ObservationView.svelte'
 
   const { observation, goal, student, subject, onRefreshRequired, widgets } = $props<{
     observation?: ObservationType

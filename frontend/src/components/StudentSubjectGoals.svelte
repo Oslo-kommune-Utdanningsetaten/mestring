@@ -35,7 +35,7 @@
   import AuthorInfo from './AuthorInfo.svelte'
   import StudentSubjectChart from './StudentSubjectChart.svelte'
   import MasteryLevelTitle from './MasteryLevelTitle.svelte'
-  import ObservationWidgets from './ObservationWidgets.svelte'
+  import ObservationWidgets from './edit/ObservationWidgets.svelte'
   import ObservationVisibilityMarker from './ObservationVisibilityMarker.svelte'
 
   const { student, subject, onRefreshRequired } = $props<{

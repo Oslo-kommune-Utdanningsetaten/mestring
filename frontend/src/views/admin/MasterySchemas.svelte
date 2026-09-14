@@ -1,37 +1,68 @@
 <script lang="ts">
+  import { useTinyRouter } from 'svelte-tiny-router'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
+  import type { MasterySchemaType, SchoolType } from '../../generated/types.gen'
+  import type { MasterySchemaWithConfig } from '../../types/models'
   import {
     masterySchemasDestroy,
     masterySchemasList,
     schoolsList,
     masterySchemasPartialUpdate,
   } from '../../generated/sdk.gen'
-  import type { MasterySchemaType, SchoolType } from '../../generated/types.gen'
-  import type { MasterySchemaWithConfig } from '../../types/models'
-  import { useTinyRouter } from 'svelte-tiny-router'
   import { urlStringFrom } from '../../utils/functions'
   import { VALUE_INPUT_VARIANTS } from '../../utils/constants'
   import { dataStore } from '../../stores/data'
   import { useMasteryCalculations, areSchemaValuesConsistent } from '../../utils/masteryHelpers'
+
   import ButtonMini from '../../components/ButtonMini.svelte'
   import MasterySchemaLevel from '../../components/MasterySchemaLevel.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
-  import MasterySchemaEdit from '../../components/MasterySchemaEdit.svelte'
+  import MasterySchemaEdit from '../../components/edit/MasterySchemaEdit.svelte'
 
   const router = useTinyRouter()
-  let masterySchemaWip: Partial<MasterySchemaWithConfig> | null =
-    $state<Partial<MasterySchemaType> | null>(null)
+  let masterySchemaWip = $state<Partial<MasterySchemaWithConfig> | null>(null)
   let isJsonVisible = $state<boolean>(false)
   let isEditorOpen = $state<boolean>(false)
   let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
   let masterySchemas = $state<MasterySchemaWithConfig[]>([])
+
+  const areSchemasConsistent = $derived(areSchemaValuesConsistent(masterySchemas))
   let selectedSchool = $derived.by(() => {
     const schoolIdFromUrl = router.getQueryParam('school')
     return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
   })
 
-  const areSchemasConsistent = $derived(areSchemaValuesConsistent(masterySchemas))
+  const defaultConfig = {
+    levels: [
+      {
+        title: 'Gjengi',
+        minValue: 1,
+        maxValue: 33,
+        color: '#ff8274',
+      },
+      {
+        title: 'Forklare',
+        minValue: 34,
+        maxValue: 66,
+        color: '#f9c66b',
+      },
+      {
+        title: 'Se sammenhenger',
+        minValue: 67,
+        maxValue: 100,
+        color: '#38a87f',
+      },
+    ],
+    valueInput: 'sliderHorizontal',
+    inputIncrement: 1,
+    flatTrendThreshold: 6,
+    isIncrementIndicatorEnabled: true,
+    isMasteryValueVisible: true,
+    isMasteryValueInputEnabled: true,
+    isMasteryDescriptionInputEnabled: true,
+    isFeedforwardInputEnabled: true,
+  }
 
   const fetchSchools = async () => {
     try {
@@ -65,7 +96,7 @@
   }
 
   const handleNewMasterySchema = () => {
-    masterySchemaWip = { schoolId: selectedSchool?.id }
+    masterySchemaWip = { schoolId: selectedSchool?.id, config: defaultConfig }
     isEditorOpen = true
   }
 
