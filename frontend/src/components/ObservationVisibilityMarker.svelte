@@ -3,8 +3,8 @@
   import type { ObservationType } from '../generated/types.gen'
 
   import { currentSchool } from '../stores/data'
-  import InvisibleSVG from '../assets/eye-visible.svg.svelte'
-  import VisibleSVG from '../assets/eye-invisible.svg.svelte'
+  import VisibleSVG from '../assets/eye-visible.svg.svelte'
+  import InvisibleSVG from '../assets/eye-invisible.svg.svelte'
 
   const { observation } = $props<{
     observation: ObservationType
