@@ -26,7 +26,6 @@
   import Link from './Link.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import MasteryBarChart from './MasteryBarChart.svelte'
-  import GoalEdit from './edit/GoalEdit.svelte'
   import StatusEdit from './edit/StatusEdit.svelte'
   import ButtonMini from './ButtonMini.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
@@ -35,22 +34,20 @@
   import AuthorInfo from './AuthorInfo.svelte'
   import StudentSubjectChart from './StudentSubjectChart.svelte'
   import MasteryLevelTitle from './MasteryLevelTitle.svelte'
-  import ObservationWidgets from './edit/ObservationWidgets.svelte'
   import ObservationVisibilityMarker from './ObservationVisibilityMarker.svelte'
+  import ObservationWidgets from './edit/ObservationWidgets.svelte'
+  import GoalWidgets from './edit/GoalWidgets.svelte'
 
-  const { student, subject, onRefreshRequired } = $props<{
+  const { student, subject } = $props<{
     student: UserType
     subject: SubjectType
-    onRefreshRequired?: Function
   }>()
 
   const router = useTinyRouter()
 
   let goalsForSubject = $state<GoalDecorated[]>([])
-  let goalWip = $state<GoalDecorated | null>(null)
   let statusWip = $state<Partial<StatusType> | null>(null)
   let goalsListElement = $state<HTMLElement | null>(null)
-  let isGoalEditorOpen = $state<boolean>(false)
   let isStatusEditorOpen = $state<boolean>(false)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
   let chartKey = $state<number>(0) // key used to force re-render of StudentSubjectChart component when goals are updated
@@ -96,78 +93,9 @@
     isStatusEditorOpen = true
   }
 
-  // Remember, we're only editing individual goals here
-  const handleEditGoal = async (goal: GoalDecorated | null) => {
-    if (goal.id) {
-      goalWip = {
-        ...goal,
-        subjectId: goal?.subjectId || getPreferredSubjectId(),
-        studentId: student.id,
-        sortOrder: goal?.sortOrder || (goalsForSubject?.length ? goalsForSubject.length + 1 : 1),
-        masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,
-      }
-    } else {
-      const individualGoalsCount = goalsForSubject?.filter(g => g.isIndividual).length || 0
-      const newGoal = {
-        subjectId: subject.id,
-        studentId: student.id,
-        isIndividual: true,
-        sortOrder: individualGoalsCount + 1,
-        masterySchemaId: $dataStore.defaultMasterySchema?.id,
-        schoolId: $dataStore.currentSchool.id,
-        isRelevant: true,
-      }
-
-      // If all stars are aligned, just create the goal instantly instead of exposing the user to the create goal form
-      const createInstantly =
-        !$dataStore.currentSchool.isGoalTitleEnabled &&
-        !!$dataStore.defaultMasterySchema?.id &&
-        !!subject.id
-
-      if (createInstantly) {
-        await goalsCreate({
-          body: newGoal,
-        })
-        trackEvent('Goals', 'Create', 'type', 2)
-        return onRefreshRequired()
-      } else {
-        // open the goal editor with prefilled values
-        goalWip = newGoal
-      }
-    }
-    isGoalEditorOpen = true
-  }
-
-  const handleCloseEditGoal = () => {
-    isGoalEditorOpen = false
-    if (onRefreshRequired) onRefreshRequired()
-  }
-
-  const handleGoalDone = async () => {
-    handleCloseEditGoal()
-  }
-
   const handleStatusDone = async () => {
     isStatusEditorOpen = false
     statusesKey++
-  }
-
-  const handleDeleteGoal = async (goalId: string) => {
-    try {
-      await goalsDestroy({ path: { id: goalId } })
-      addAlert({
-        type: 'success',
-        message: 'Slettet mål',
-      })
-      trackEvent('Goals', 'Delete')
-      await fetchGoals()
-    } catch (error) {
-      console.error('Error deleting goal:', error)
-      addAlert({
-        type: 'danger',
-        message: `Kunne ikke slette mål. Hvis du mener dette er en feil, kontakt support.`,
-      })
-    }
   }
 
   const handleToggleGoal = (goalId: string) => {
@@ -247,16 +175,15 @@
     {subjectName}
   </h3>
 
-  {#if $hasUserAccessToFeature( 'goal', 'create', { subjectId: subject.id, studentId: student.id, studentGroupIds: student.groupIds } )}
-    <ButtonIcon
-      options={{
-        iconName: 'goal',
-        classes: 'bordered ms-1',
-        title: 'Legg til nytt individuelt mål',
-        onClick: () => handleEditGoal({}),
-      }}
-    />
-  {/if}
+  <GoalWidgets
+    {student}
+    {subject}
+    masterySchema={$dataStore.defaultMasterySchema?.id}
+    isIndividual={true}
+    isRelevant={true}
+    onRefreshRequired={() => fetchGoals()}
+    widgets={['create']}
+  />
 
   {#if $hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
     <ButtonIcon
@@ -405,36 +332,18 @@
       </div>
       <div class="my-3">
         {#if goal.isIndividual}
-          {#if $hasUserAccessToFeature( 'goal', 'update', { studentId: student.id, studentGroupIds: student.groupIds } )}
-            <ButtonMini
-              options={{
-                iconName: 'edit',
-                classes: 'my-2 me-2',
-                title: 'Rediger individuelt mål',
-                onClick: () => handleEditGoal(goal),
-                variant: 'icon-left',
-                skin: 'secondary',
-              }}
-            >
-              Rediger individuelt mål
-            </ButtonMini>
-          {/if}
-          {#if $hasUserAccessToFeature( 'goal', 'delete', { studentId: student.id, studentGroupIds: student.groupIds } )}
-            <ButtonMini
-              options={{
-                iconName: 'trash-can',
-                classes: 'my-2',
-                title: 'Slett individuelt mål',
-                onClick: () => handleDeleteGoal(goal.id),
-                delayActionFor: 3,
-                disabled: goal.observations?.length > 0,
-                variant: 'icon-left',
-                skin: 'secondary',
-              }}
-            >
-              Slett mål
-            </ButtonMini>
-          {/if}
+          <GoalWidgets
+            {goal}
+            {student}
+            {subject}
+            masterySchema={$dataStore.defaultMasterySchema?.id}
+            isIndividual={true}
+            isRelevant={true}
+            onRefreshRequired={() => fetchGoals()}
+            widgets={['update', 'delete']}
+            disabledWidgets={goal.observations?.length > 0 ? ['delete'] : []}
+            buttonSize="large"
+          />
         {:else}
           <p>
             Dette målet er ikke individuelt, men gitt for <Link to={`/groups/${goal.groupId}/`}>
@@ -459,20 +368,6 @@
     {/each}
   </div>
 {/if}
-
-<!-- offcanvas for creating/editing goals -->
-<Offcanvas
-  bind:isOpen={isGoalEditorOpen}
-  ariaLabel="Rediger mål"
-  onClosed={() => {
-    goalWip = null
-    fetchGoals()
-  }}
->
-  {#if goalWip}
-    <GoalEdit goal={goalWip} {student} isGoalIndividual={true} onDone={handleGoalDone} />
-  {/if}
-</Offcanvas>
 
 <!-- offcanvas for creating/editing status -->
 <Offcanvas

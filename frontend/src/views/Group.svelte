@@ -37,6 +37,7 @@
   import UserTag from '../components/UserTag.svelte'
   import StudentSubject from '../components/StudentSubject.svelte'
   import Link from '../components/Link.svelte'
+  import GoalWidgets from '../components/edit/GoalWidgets.svelte'
 
   const { groupId } = $props<{ groupId: string }>()
   const today = new Date()
@@ -58,7 +59,9 @@
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
 
   let currentSchool = $derived($dataStore.currentSchool)
-  let subject = $derived<SubjectType | null>(subjects.find(s => s.id === group?.subjectId) || null)
+  let subject = $derived<SubjectType | undefined>(
+    subjects.find(s => s.id === group?.subjectId) || undefined
+  )
 
   const groupSubtitle = $derived.by(() => {
     if (!group) return
@@ -163,29 +166,6 @@
       isRelevant: goal?.id ? goal?.isRelevant : true,
     }
     isGoalEditorOpen = true
-  }
-
-  const handleDeleteGoal = async (goalId: string) => {
-    try {
-      await goalsDestroy({ path: { id: goalId } })
-      addAlert({
-        type: 'success',
-        message: 'Slettet mål',
-      })
-      trackEvent('Goals', 'Delete')
-      await fetchGroupData()
-    } catch (error) {
-      console.error('Error deleting goal:', error)
-      addAlert({
-        type: 'danger',
-        message: `Kunne ikke slette mål. Hvis du mener dette er en feil, kontakt support.`,
-      })
-    }
-  }
-
-  const handleGoalDone = async () => {
-    isGoalEditorOpen = false
-    await fetchGroupData()
   }
 
   const handleEditStatus = async (status: Partial<StatusType> | null, student: UserType) => {
@@ -319,16 +299,14 @@
       <section>
         <div class="d-flex align-items-center gap-2">
           <h3>Mål</h3>
-          {#if $hasUserAccessToFeature('goal', 'create', { groupId: group.id })}
-            <ButtonIcon
-              options={{
-                iconName: 'goal',
-                title: `Legg til nytt gruppemål for ${group.displayName}`,
-                classes: 'bordered ms-1',
-                onClick: () => handleEditGoal(null),
-              }}
-            />
-          {/if}
+          <GoalWidgets
+            {group}
+            {subject}
+            sortOrder={groupGoals.length + 1}
+            masterySchema={$dataStore.defaultMasterySchema?.id}
+            onRefreshRequired={() => fetchGroupData()}
+            widgets={['create']}
+          />
         </div>
 
         <div bind:this={goalsListElement} class="list-group mt-3">
@@ -361,36 +339,24 @@
                 </span>
                 <!-- Actions -->
                 <span>
-                  {#if isGoalInUse(goal.id) && $hasUserAccessToFeature( 'goal', 'update', { groupId: group.id } )}
+                  {#if isGoalInUse(goal.id)}
                     <pkt-icon
                       name="lock-locked"
                       size="small"
                       title="Målet er i bruk av en eller flere elever"
                     ></pkt-icon>
-                  {/if}
-                  {#if !isGoalInUse(goal.id)}
-                    {#if $hasUserAccessToFeature('goal', 'delete', { groupId: group.id })}
-                      <ButtonIcon
-                        options={{
-                          iconName: 'trash-can',
-                          title: 'Slett mål',
-                          classes: 'bordered',
-                          disabled: !goal.isRelevant || isGoalInUse(goal.id),
-                          onClick: () => handleDeleteGoal(goal.id),
-                          delayActionFor: 3,
-                        }}
-                      />
-                    {/if}
-                    {#if $hasUserAccessToFeature('goal', 'update', { groupId: group.id })}
-                      <ButtonIcon
-                        options={{
-                          iconName: 'edit',
-                          title: 'Rediger mål',
-                          classes: 'bordered',
-                          onClick: () => handleEditGoal(goal),
-                        }}
-                      />
-                    {/if}
+                  {:else}
+                    <GoalWidgets
+                      {goal}
+                      {group}
+                      {subject}
+                      masterySchema={$dataStore.defaultMasterySchema?.id}
+                      isIndividual={goal.isIndividual}
+                      isRelevant={goal.isRelevant}
+                      onRefreshRequired={() => fetchGroupData()}
+                      widgets={['update', 'delete']}
+                      disabledWidgets={!goal.isRelevant || isGoalInUse(goal.id) ? ['delete'] : []}
+                    />
                   {/if}
                 </span>
               </div>
@@ -459,20 +425,6 @@
     <p>Hvis du mener dette er en feil, kontakt support.</p>
   </div>
 {/if}
-
-<!-- Offcanvas for creating/editing goals -->
-<Offcanvas
-  bind:isOpen={isGoalEditorOpen}
-  ariaLabel="Rediger mål"
-  onClosed={() => {
-    goalWip = null
-    fetchGroupData()
-  }}
->
-  {#if goalWip}
-    <GoalEdit goal={goalWip} {group} isGoalIndividual={false} onDone={handleGoalDone} />
-  {/if}
-</Offcanvas>
 
 <!-- offcanvas for creating/editing status -->
 <Offcanvas
