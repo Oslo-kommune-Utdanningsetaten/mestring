@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { GoalCreateType, UserType, SubjectType, GroupType } from '../generated/types.gen'
-  import type { GoalDecorated } from '../types/models'
   import {
     usersRetrieve,
     goalsCreate,
@@ -8,55 +7,46 @@
     groupsList,
     subjectsList,
   } from '../generated/sdk.gen'
-  import { subjectsInCommon } from '../utils/functions'
+
   import {
     getPreferredCreatedParams,
     getPreferredGroupValidity,
-    getPreferredSubjectId,
   } from '../stores/localStorageFunctions'
   import { SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
-  import { hasUserAccessToFeature } from '../stores/access'
   import { dataStore } from '../stores/data'
   import { trackEvent } from '../stores/analytics'
+  import type { AppData } from '../types/models'
 
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
-  import GoalEdit from '../components/edit/GoalEdit.svelte'
-  import Offcanvas from '../components/Offcanvas.svelte'
+  import GoalWidgets from '../components/edit/GoalWidgets.svelte'
   import ButtonMini from '../components/ButtonMini.svelte'
-  import ButtonIcon from '../components/ButtonIcon.svelte'
-  import StudentSVG from '../assets/education.svg.svelte'
   import GroupTag from '../components/GroupTag.svelte'
+  import StudentSVG from '../assets/education.svg.svelte'
 
   const { studentId } = $props<{ studentId: string }>()
   const individualGoalcount = 3
 
-  let student = $state<UserType | null>(null)
+  let student = $state<UserType | undefined>(undefined)
   let subjects = $state<SubjectType[]>([])
   let groups = $state<GroupType[]>([])
-  let { currentSchool, currentUser } = $derived($dataStore)
-  let studentGoalsCount = $state<number | undefined>(undefined)
+  let { currentSchool } = $derived($dataStore) satisfies AppData
+  let individualStudentGoalsCount = $state<number | undefined>(undefined)
 
-  let goalWip = $state<GoalDecorated | null>(null)
-  let isGoalEditorOpen = $state<boolean>(false)
-
-  // Subjects the teacher teaches to this student via their common groups
-  const subjectsForGoalEdit = $derived(subjectsInCommon(currentUser, student!, $dataStore.subjects))
-
-  const fetchStudentData = async (userId: string) => {
+  const fetchStudentData = async () => {
     try {
-      const userResult = await usersRetrieve({ path: { id: userId } })
+      const userResult = await usersRetrieve({ path: { id: studentId } })
       student = userResult.data!
 
       if (!student) return
-      await fetchSubjects(student.id)
-      await fetchGroups(student.id)
+      await fetchSubjects()
+      await fetchGroups()
       await countStudentGoals()
     } catch (error) {
-      console.error(`Could not load data for student ${userId}`, error)
+      console.error(`Could not load data for student ${studentId}`, error)
     }
   }
 
-  const fetchSubjects = async (studentId: string) => {
+  const fetchSubjects = async () => {
     try {
       const subjectsResult = await subjectsList({
         query: { school: currentSchool.id, students: studentId },
@@ -74,7 +64,7 @@
     }
   }
 
-  const fetchGroups = async (studentId: string) => {
+  const fetchGroups = async () => {
     try {
       const groupsResult = await groupsList({
         query: { user: studentId, school: currentSchool.id, valid: getPreferredGroupValidity() },
@@ -90,69 +80,37 @@
     const result = await goalsList({
       query: { student: studentId, school: currentSchool.id, ...getPreferredCreatedParams() },
     })
-    studentGoalsCount = result.data?.length
+    individualStudentGoalsCount = (result.data || []).filter(g => g.isIndividual).length
   }
 
+  // Creates a hard coded number of individual goals for each custom subjects in the school
+  // Hack for Stig skole
   const handleCreateAllIndividualGoals = async () => {
-    if (!student || currentSchool.subjectsAllowed !== SUBJECTS_ALLOWED_CUSTOM) return
+    const studentId = (student as UserType).id
     const schoolSubjects = $dataStore.subjects
-    // This works because schoolSubjects are only custom subjects (not the whole shebang)
-    for (const subject of schoolSubjects) {
-      for (let i = 0; i < individualGoalcount; i++) {
+    // This works because at this point, schoolSubjects are only custom subjects, not all subjects whatsoever
+    const goalPromises = schoolSubjects.flatMap(subject =>
+      Array.from({ length: individualGoalcount }, (_, i) => {
         const goal: GoalCreateType = {
-          studentId: student?.id,
+          studentId,
           subjectId: subject.id,
           sortOrder: i + 1,
           masterySchemaId: $dataStore.defaultMasterySchema?.id,
           schoolId: currentSchool.id,
           isRelevant: true,
         }
-        await goalsCreate({
-          body: goal,
+        return goalsCreate({ body: goal }).then(() => {
+          trackEvent('Goals', 'Create', 'type', 2)
         })
-        trackEvent('Goals', 'Create', 'type', 2)
-      }
-    }
+      })
+    )
 
-    fetchStudentData(student.id)
-  }
-
-  // Remember, we're only editing individual goals here
-  const handleEditGoal = async (goal: GoalDecorated | null) => {
-    if (!student) return
-
-    if (goal.id) {
-      // editing existing goal
-      goalWip = {
-        ...goal,
-        subjectId: goal?.subjectId || getPreferredSubjectId(),
-        studentId: student.id,
-        sortOrder: goal?.sortOrder,
-        masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,
-      }
-    } else {
-      // new goal
-      goalWip = {
-        studentId: student.id,
-        isIndividual: true,
-        masterySchemaId: $dataStore.defaultMasterySchema?.id,
-        schoolId: currentSchool.id,
-        isRelevant: true,
-      }
-    }
-    isGoalEditorOpen = true
-  }
-
-  const handleCloseEditGoal = () => {
-    isGoalEditorOpen = false
-    goalWip = null
-    fetchStudentData(studentId)
+    await Promise.all(goalPromises)
+    fetchStudentData()
   }
 
   $effect(() => {
-    if (currentSchool && currentSchool.id) {
-      fetchStudentData(studentId)
-    }
+    fetchStudentData()
   })
 </script>
 
@@ -188,30 +146,28 @@
     <div class="card shadow-sm">
       <div class="d-flex align-items-center gap-2 card-header">
         <h2>Mål</h2>
-        {#if $hasUserAccessToFeature( 'goal', 'create', { studentId: student.id, studentGroupIds: student.groupIds } )}
-          {#if studentGoalsCount === 0 && currentSchool.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM}
-            <ButtonMini
-              options={{
-                iconName: 'goal',
-                classes: 'm-2',
-                title: `Opprett ${individualGoalcount} individuelle mål for hvert fag`,
-                onClick: () => handleCreateAllIndividualGoals(),
-                variant: 'icon-left',
-                skin: 'primary',
-              }}
-            >
-              Opprett {individualGoalcount} individuelle mål for hvert fag
-            </ButtonMini>
-          {:else}
-            <ButtonIcon
-              options={{
-                iconName: 'goal',
-                classes: 'bordered ms-1',
-                title: 'Legg til nytt individuelt mål',
-                onClick: () => handleEditGoal({}),
-              }}
-            />
-          {/if}
+        {#if individualStudentGoalsCount === 0 && currentSchool.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM}
+          <ButtonMini
+            options={{
+              iconName: 'goal',
+              classes: 'm-2',
+              title: `Opprett ${individualGoalcount} individuelle mål for hvert fag`,
+              onClick: () => handleCreateAllIndividualGoals(),
+              variant: 'icon-left',
+              skin: 'primary',
+            }}
+          >
+            Opprett {individualGoalcount} individuelle mål for hvert fag
+          </ButtonMini>
+        {:else}
+          <GoalWidgets
+            {student}
+            masterySchema={$dataStore.defaultMasterySchema?.id}
+            isIndividual={true}
+            isRelevant={true}
+            onRefreshRequired={() => fetchStudentData()}
+            widgets={['create']}
+          />
         {/if}
       </div>
 
@@ -222,7 +178,7 @@
               <StudentSubjectGoals
                 {subject}
                 {student}
-                onRefreshRequired={() => fetchStudentData(studentId)}
+                onRefreshRequired={() => fetchStudentData()}
               />
             </li>
           {/each}
@@ -235,19 +191,6 @@
     <div class="m-2">Fant ikke eleven</div>
   {/if}
 </section>
-
-<!-- offcanvas for creating/editing goals -->
-<Offcanvas bind:isOpen={isGoalEditorOpen} ariaLabel="Rediger mål" onClosed={handleCloseEditGoal}>
-  {#if goalWip}
-    <GoalEdit
-      goal={goalWip}
-      {student}
-      subjects={subjectsForGoalEdit}
-      isGoalIndividual={true}
-      onDone={handleCloseEditGoal}
-    />
-  {/if}
-</Offcanvas>
 
 <style>
   .student-svg > :global(svg) {

@@ -40,8 +40,9 @@ const checkUserAccessToPath = (
 ): boolean => {
   const path = ROUTES.find(route => route.path === pathString)
   const { isPublic, accessibleBy, schoolConfig } = path || {}
-  if (isPublic) return true
+  if (isPublic) return true // public routes can render their components without a school
   if (!currentUser) return false
+  if (!currentSchool) return false
   if (currentUser.isSuperadmin) return true
 
   // check for overlapping roles and accessibleBy

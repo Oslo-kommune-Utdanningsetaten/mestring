@@ -8,8 +8,8 @@
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
 
-  import ObservationEdit from './ObservationEdit.svelte'
   import Link from '../Link.svelte'
+  import ObservationEdit from './ObservationEdit.svelte'
   import ButtonIcon from '../ButtonIcon.svelte'
   import Offcanvas from '../Offcanvas.svelte'
   import ObservationView from '../ObservationView.svelte'

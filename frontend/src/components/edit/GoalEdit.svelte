@@ -16,7 +16,7 @@
 
   import ButtonMini from '../ButtonMini.svelte'
 
-  // This component is used for both individual and group goals!
+  // This component is used for both individual and group goals
   // If group is passed, student AND subject should be null
   // If student is passed, group should be null
 
@@ -30,7 +30,7 @@
   } = $props<{
     student?: UserType | null
     group?: GroupType | null
-    goal?: GoalType | null
+    goal?: Partial<GoalType> | null
     subjects?: SubjectType[] | null
     isGoalIndividual: boolean
     onDone?: () => void | Promise<void>
