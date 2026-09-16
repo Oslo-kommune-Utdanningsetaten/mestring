@@ -9,7 +9,11 @@
   import { usersList, statusList, statusCreate, statusUpdate } from '../generated/sdk.gen'
   import { generateStatusTitle } from '../utils/functions'
   import type { StatusTitleInput } from '../types/models'
-  import { calculateSchoolYearMilestones } from '../utils/schoolYear'
+  import {
+    calculateSchoolYearMilestones,
+    getCurrentSchoolYear,
+    isEntityFromSchoolYear,
+  } from '../utils/schoolYear'
   import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import { dataStore } from '../stores/data'
   import { addAlert } from '../stores/alerts'
@@ -31,6 +35,7 @@
   }
 
   const now = new Date()
+  const isAdminEditEnabled = Boolean(new URLSearchParams(document.location.search).get('adminEdit'))
 
   let rows = $state<RowType[]>([])
   let students = $state<UserType[]>([])
@@ -261,7 +266,12 @@
                     onchange={() => handleChangeStatus(status, rowIndex)}
                     class="mastery-input-container"
                   >
-                    <MasteryValueInput {masterySchema} bind:value={status.masteryValue} />
+                    <MasteryValueInput
+                      {masterySchema}
+                      bind:value={status.masteryValue}
+                      isInputEnabled={isAdminEditEnabled ||
+                        isEntityFromSchoolYear(status, getCurrentSchoolYear())}
+                    />
                   </div>
                   {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
                     <span class="fst-italic">
