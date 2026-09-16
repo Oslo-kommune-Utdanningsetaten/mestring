@@ -7,26 +7,25 @@
     GroupType,
   } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
+
   import { dataStore } from '../stores/data'
   import { MISSING_REASON_NO_OBSERVATIONS } from '../utils/constants'
-  import { hasUserAccessToFeature } from '../stores/access'
   import { localStorage } from '../stores/localStorage'
+
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import MasteryBarChart from './MasteryBarChart.svelte'
-  import ButtonIcon from './ButtonIcon.svelte'
   import Statuses from './Statuses.svelte'
   import UserNameLink from './UserNameLink.svelte'
   import StudentSubjectChart from './StudentSubjectChart.svelte'
   import ObservationWidgets from './edit/ObservationWidgets.svelte'
+  import StatusWidgets from './edit/StatusWidgets.svelte'
 
   let {
-    group,
     students,
     goals,
     goalsWithMasteryByStudentId,
     subject,
     statusesKey = 0,
-    onEditStatus,
     onRefreshRequired,
   }: {
     group: GroupType
@@ -35,7 +34,6 @@
     goalsWithMasteryByStudentId: Record<string, GoalDecorated[]>
     subject: SubjectType
     statusesKey?: number
-    onEditStatus: (status: null, student: UserType) => void
     onRefreshRequired: () => void
   } = $props()
 
@@ -200,16 +198,12 @@
             <Statuses {student} {subject} />
           {/key}
 
-          {#if $hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentGroupIds: student.groupIds, groupId: group.id } )}
-            <ButtonIcon
-              options={{
-                iconName: 'achievement',
-                classes: 'bordered',
-                title: 'Legg til ny status',
-                onClick: () => onEditStatus(null, student),
-              }}
-            />
-          {/if}
+          <StatusWidgets
+            {student}
+            {subject}
+            onRefreshRequired={() => onRefreshRequired()}
+            widgets={['create']}
+          />
         </div>
       </span>
     {/if}

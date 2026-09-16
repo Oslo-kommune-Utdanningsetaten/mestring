@@ -6,15 +6,8 @@
     UserType,
     SubjectType,
   } from '../generated/types.gen'
-  import {
-    usersList,
-    statusList,
-    statusCreate,
-    statusUpdate,
-    statusDestroy,
-  } from '../generated/sdk.gen'
-  import { hasUserAccessToFeature } from '../stores/access'
-  import { generateStatusTitle, getDateSpanForStatusCategory } from '../utils/functions'
+  import { usersList, statusList, statusCreate, statusUpdate } from '../generated/sdk.gen'
+  import { generateStatusTitle } from '../utils/functions'
   import type { StatusTitleInput } from '../types/models'
   import { calculateSchoolYearMilestones } from '../utils/schoolYear'
   import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
@@ -23,11 +16,9 @@
   import { trackEvent } from '../stores/analytics'
 
   import MasteryValueInput from '../components/MasteryValueInput.svelte'
-  import ButtonIcon from '../components/ButtonIcon.svelte'
   import AuthorInfo from '../components/AuthorInfo.svelte'
   import Link from '../components/Link.svelte'
-  import StatusEdit from '../components/edit/StatusEdit.svelte'
-  import Offcanvas from '../components/Offcanvas.svelte'
+  import StatusWidgets from '../components/edit/StatusWidgets.svelte'
 
   let { groupId, statusCategoryName } = $props<{
     groupId: string
@@ -39,15 +30,15 @@
     studentId: string | undefined
   }
 
+  const now = new Date()
+
   let rows = $state<RowType[]>([])
   let students = $state<UserType[]>([])
   let isLoading = $state(true)
   let statusesByStudentId = $state<Record<string, StatusType[]>>({})
-  let statusWip = $state<StatusType | null>(null)
-  let isStatusEditorOpen = $state(false)
 
   let group = $derived<GroupType | null>(
-    $dataStore.currentUser.allGroups.find((group: GroupType) => group.id === groupId) || null
+    $dataStore.currentUser.allGroups?.find((group: GroupType) => group.id === groupId) || null
   )
 
   const subject = $derived<SubjectType | undefined>(
@@ -62,6 +53,14 @@
     const { startAt, midyearAt, endAt } = calculateSchoolYearMilestones()
     if (statusCategory?.name === 'midyear') {
       return { beginAt: startAt, endAt: midyearAt }
+    }
+    if (statusCategory?.name === 'risk') {
+      const currentSemester = now.getMonth() < 7 ? 'v' : 'h'
+      if (currentSemester === 'h') {
+        return { beginAt: startAt, endAt: midyearAt }
+      } else {
+        return { beginAt: midyearAt, endAt }
+      }
     }
     return { beginAt: startAt, endAt: endAt }
   }
@@ -96,21 +95,15 @@
       })
       const allStatuses = statusResult.data || []
 
-      const { beginAt, endAt } = getDateSpanForStatusCategory(statusCategory.name)
       students.forEach(student => {
-        const statuses =
-          allStatuses
-            .filter(status => status.studentId === student.id)
-            .filter(status => status.categoryId === statusCategory.id)
-            .filter(
-              status =>
-                status.beginAt.split('T')[0] === beginAt && status.endAt.split('T')[0] === endAt
-            ) || []
+        const statusesForStudent = allStatuses
+          .filter(status => status.studentId === student.id)
+          .filter(status => status.categoryId === statusCategory.id)
         rows.push({ isSaving: false, studentId: student.id })
-        if (statuses.length === 0) {
-          statuses.push(getNewStatus(student.id))
+        if (statusesForStudent.length === 0) {
+          statusesForStudent.push(getNewStatus(student.id))
         }
-        statusesByStudentId = { ...statusesByStudentId, [student.id]: statuses }
+        statusesByStudentId = { ...statusesByStudentId, [student.id]: statusesForStudent }
       })
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -121,6 +114,7 @@
   }
 
   const getNewStatus = (studentId: string) => {
+    const { beginAt, endAt } = getDateRange()
     const newStatus = {
       studentId: studentId,
       subjectId: group?.subjectId,
@@ -128,14 +122,14 @@
       masterySchemaId: statusCategory?.masterySchemaId,
       masteryValue: null,
       schoolId: $dataStore.currentSchool?.id,
-      beginAt: getDateRange().beginAt,
-      endAt: getDateRange().endAt,
+      beginAt,
+      endAt,
     } as StatusType
     newStatus.title = generateStatusTitle(newStatus as StatusTitleInput, statusCategory)
     return newStatus
   }
 
-  const refetchDataForRow = async (studentId: string) => {
+  const refetchDataForStudent = async (studentId: string) => {
     if (!group || !subject || !studentId) return
     const statusResult = await statusList({
       query: {
@@ -176,7 +170,7 @@
         })
         trackEvent('Status', 'Create')
       }
-      await refetchDataForRow(status.studentId as string)
+      await refetchDataForStudent(status.studentId as string)
     } catch (error) {
       console.error('Error saving status:', error)
       addAlert({
@@ -192,40 +186,6 @@
     await createOrUpdateStatus(status, rowIndex)
   }
 
-  const handleDeleteStatus = async (status: StatusType) => {
-    if (!status) return
-    const { studentId } = status
-    try {
-      await statusDestroy({ path: { id: status.id } })
-      trackEvent('Status', 'Delete')
-      addAlert({
-        type: 'success',
-        message: `Slettet status "${status.title}"`,
-      })
-    } catch (error) {
-      console.error('Error deleting status:', error)
-      addAlert({
-        type: 'danger',
-        message: `Kunne ikke slette status "${status.title}". Hvis du mener dette er en feil, kontakt support.`,
-      })
-    }
-    await refetchDataForRow(studentId)
-  }
-
-  const handleEditStatus = async (status: StatusType) => {
-    statusWip = {
-      ...status,
-    }
-    isStatusEditorOpen = true
-  }
-
-  const handleStatusDone = async () => {
-    const { studentId } = statusWip as StatusType
-    statusWip = null
-    isStatusEditorOpen = false
-    await refetchDataForRow(studentId as string)
-  }
-
   $effect(() => {
     if (group && statusCategory) {
       fetchData()
@@ -234,7 +194,9 @@
 </script>
 
 {#if group && statusCategory && subject}
-  <h2 class="my-4">{group?.displayName} - {statusCategory?.title}</h2>
+  <h2 class="my-4">
+    <Link to="/groups/{group?.id}">{group?.displayName}</Link> - {statusCategory?.title}
+  </h2>
   <section class="shadow-sm">
     {#if group.subjectId}
       {#if isLoading}
@@ -283,26 +245,14 @@
                     {/if}
 
                     <div class="status-card-actions">
-                      {#if status.id && $hasUserAccessToFeature( 'status', 'update', { groupId, createdById: status.createdById, subjectId: subject.id, studentGroupIds: [group.id] } )}
-                        <ButtonIcon
-                          options={{
-                            iconName: 'edit',
-                            title: 'Rediger status',
-                            classes: 'bordered',
-                            onClick: () => handleEditStatus(status),
-                          }}
-                        />
-                      {/if}
-
-                      {#if status.id && $hasUserAccessToFeature( 'status', 'delete', { groupId, createdById: status.createdById, subjectId: subject.id, studentGroupIds: [group.id] } )}
-                        <ButtonIcon
-                          options={{
-                            iconName: 'trash-can',
-                            title: 'Slett status',
-                            classes: 'bordered',
-                            onClick: () => handleDeleteStatus(status),
-                            delayActionFor: 2,
-                          }}
+                      {#if status.id}
+                        <StatusWidgets
+                          {status}
+                          {student}
+                          {subject}
+                          onRefreshRequired={() =>
+                            refetchDataForStudent(status.studentId as string)}
+                          widgets={['update', 'delete']}
                         />
                       {/if}
                     </div>
@@ -337,19 +287,6 @@
   <p>Statuskategori: {statusCategory?.id}</p>
   <p>Fag: {subject?.id}</p>
 {/if}
-
-<!-- offcanvas for creating/editing status -->
-<Offcanvas
-  bind:isOpen={isStatusEditorOpen}
-  ariaLabel="Rediger status"
-  onClosed={() => {
-    statusWip = null
-  }}
->
-  {#if statusWip}
-    <StatusEdit status={statusWip} onDone={handleStatusDone} />
-  {/if}
-</Offcanvas>
 
 <style>
   .students-grid {

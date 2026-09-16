@@ -280,25 +280,24 @@ export const generateStatusTitle = (
   statusCategory: StatusCategoryType | undefined
 ): string => {
   if (statusCategory) {
-    let season = ''
+    let semester = ''
     let yearShort = ''
     const statusBeginDate = new Date(aStatus.beginAt)
     const { startAt, endAt } = calculateSchoolYearMilestones(statusBeginDate)
 
     if (statusCategory.name === 'midyear') {
-      season = 'h'
+      semester = 'h'
       yearShort = startAt.split('-')[0].slice(-2)
     } else if (statusCategory.name === 'endyear') {
-      season = 'v'
+      semester = 'v'
       yearShort = endAt.split('-')[0].slice(-2)
     } else if (statusCategory.name === 'risk') {
-      const statusEndDate = new Date(aStatus.endAt)
-      season = statusEndDate.getMonth() < 7 ? 'v' : 'h'
-      yearShort = statusEndDate.getFullYear().toString().slice(-2)
+      semester = statusBeginDate.getMonth() < 7 ? 'v' : 'h'
+      yearShort = statusBeginDate.getFullYear().toString().slice(-2)
     } else {
       console.error('Unknown category', { statusCategory })
     }
-    return [statusCategory.title, ' - ', season, yearShort].join('')
+    return [statusCategory.title, ' - ', semester, yearShort].join('')
   }
   const beginMonth = formatMonthName(aStatus.beginAt)
   const endMonth = formatMonthName(aStatus.endAt)

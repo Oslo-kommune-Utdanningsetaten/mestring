@@ -279,51 +279,63 @@ describe('infer + aggregate masterys', () => {
 
 // generateStatusTitle
 describe('generateStatusTitle', () => {
-  it('formats title based only on status', () => {
-    const status: StatusTitleInput = {
-      beginAt: '2024-01-15T00:00:00Z',
-      endAt: '2024-03-15T00:00:00Z',
-    }
-    expect(generateStatusTitle(status, undefined)).toBe('Januar - mars')
-    const status2: StatusTitleInput = {
-      beginAt: '2024-11-01T00:00:00Z',
-      endAt: '2025-02-15T00:00:00Z',
-    }
-    expect(generateStatusTitle(status2, undefined)).toBe('November - februar')
+  describe('without statusCategory', () => {
+    it('formats the spring semester as "Month - month"', () => {
+      const status: StatusTitleInput = {
+        beginAt: '2024-03-01T00:00:00Z',
+        endAt: '2024-05-15T00:00:00Z',
+      }
+      expect(generateStatusTitle(status, undefined)).toBe('Mars - mai')
+    })
+
+    it('formats the fall semester as "Month - month"', () => {
+      const status: StatusTitleInput = {
+        beginAt: '2024-09-01T00:00:00Z',
+        endAt: '2024-11-15T00:00:00Z',
+      }
+      expect(generateStatusTitle(status, undefined)).toBe('September - november')
+    })
   })
 
-  // midyear: halvtårs/ 15. jan ish
-  // endyear: standpunkt
-  // risk: midt i semesteret
-  it('formats title based on status and statusCategory', () => {
-    const status: StatusTitleInput = {
-      beginAt: '2023-08-15T00:00:00Z',
-      endAt: '2024-01-15T00:00:00Z',
-    }
-    const statusCategoryMidyear = {
-      name: 'midyear',
-      title: 'Halvtårs',
-    } as StatusCategoryType
-    expect(generateStatusTitle(status, statusCategoryMidyear)).toBe('Halvtårs - h23')
+  describe('with midyear statusCategory', () => {
+    it('uses semester h and the school start year in the fall semester', () => {
+      const status: StatusTitleInput = {
+        beginAt: '2023-08-01T00:00:00Z',
+        endAt: '2024-01-15T00:00:00Z',
+      }
+      const category = { name: 'midyear', title: 'Halvtår' } as StatusCategoryType
+      expect(generateStatusTitle(status, category)).toBe('Halvtår - h23')
+    })
+  })
 
-    const status2: StatusTitleInput = {
-      beginAt: '2023-08-15T00:00:00Z',
-      endAt: '2024-01-15T00:00:00Z',
-    }
-    const statusCategoryEndyear = {
-      name: 'endyear',
-      title: 'Standpunkt',
-    } as StatusCategoryType
-    expect(generateStatusTitle(status2, statusCategoryEndyear)).toBe('Standpunkt - v24')
+  describe('with endyear statusCategory', () => {
+    it('uses semester v and the school end year in the spring semester', () => {
+      const status: StatusTitleInput = {
+        beginAt: '2023-08-01T00:00:00Z',
+        endAt: '2024-06-15T00:00:00Z',
+      }
+      const category = { name: 'endyear', title: 'Standpunkt' } as StatusCategoryType
+      expect(generateStatusTitle(status, category)).toBe('Standpunkt - v24')
+    })
+  })
 
-    const status3: StatusTitleInput = {
-      beginAt: '2023-08-15T00:00:00Z',
-      endAt: '2023-10-20T00:00:00Z',
-    }
-    const statusCategoryRisk = {
-      name: 'risk',
-      title: 'Vurderingsgrunnlag',
-    } as StatusCategoryType
-    expect(generateStatusTitle(status3, statusCategoryRisk)).toBe('Vurderingsgrunnlag - h23')
+  describe('with risk statusCategory', () => {
+    it('uses semester v and the begin year in the spring semester', () => {
+      const status: StatusTitleInput = {
+        beginAt: '2024-03-01T00:00:00Z',
+        endAt: '2024-05-15T00:00:00Z',
+      }
+      const category = { name: 'risk', title: 'IVG/F' } as StatusCategoryType
+      expect(generateStatusTitle(status, category)).toBe('IVG/F - v24')
+    })
+
+    it('uses semester h and the begin year in the fall semester', () => {
+      const status: StatusTitleInput = {
+        beginAt: '2023-08-01T00:00:00Z',
+        endAt: '2024-01-15T00:00:00Z',
+      }
+      const category = { name: 'risk', title: 'IVG/F' } as StatusCategoryType
+      expect(generateStatusTitle(status, category)).toBe('IVG/F - h23')
+    })
   })
 })

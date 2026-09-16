@@ -1,44 +1,29 @@
 <script lang="ts">
   import type { StatusType, SubjectType, UserType } from '../generated/types.gen'
   import type { MasterySchemaWithConfig } from '../types/models'
-  import {
-    statusRetrieve,
-    usersRetrieve,
-    subjectsRetrieve,
-    statusDestroy,
-  } from '../generated/sdk.gen'
+  import { statusRetrieve, usersRetrieve, subjectsRetrieve } from '../generated/sdk.gen'
 
-  import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
   import { formatDateHumanly } from '../utils/functions'
-  import { hasUserAccessToFeature } from '../stores/access'
-  import { addAlert } from '../stores/alerts'
-  import { trackEvent } from '../stores/analytics'
 
   import MasterySchemaLevels from '../components/MasterySchemaLevels.svelte'
-  import ButtonMini from '../components/ButtonMini.svelte'
-  import StatusEdit from '../components/edit/StatusEdit.svelte'
-  import Offcanvas from '../components/Offcanvas.svelte'
   import AuthorInfo from '../components/AuthorInfo.svelte'
   import Link from '../components/Link.svelte'
+  import StatusWidgets from '../components/edit/StatusWidgets.svelte'
 
   let { statusId } = $props<{
     statusId: string
   }>()
 
-  let status = $state<StatusType | null>(null)
-  let statusWip = $state<Partial<StatusType> | null>(null)
-  let student = $state<UserType | null>(null)
-  let subject = $state<SubjectType | null>(null)
+  let status = $state<StatusType | undefined>(undefined)
+  let student = $state<UserType | undefined>(undefined)
+  let subject = $state<SubjectType | undefined>(undefined)
   let isLoading = $state<boolean>(true)
-  let isStatusEditorOpen = $state<boolean>(false)
 
   const masterySchema: MasterySchemaWithConfig = $derived(
     $dataStore.masterySchemas.find(ms => ms.id === status?.masterySchemaId) ||
       $dataStore.defaultMasterySchema
   )
-
-  const calculations = $derived(useMasteryCalculations(masterySchema))
 
   const fetchData = async () => {
     isLoading = true
@@ -61,39 +46,6 @@
       console.error('Error fetching status data:', error)
     } finally {
       isLoading = false
-    }
-  }
-
-  const handleEditStatus = async () => {
-    statusWip = {
-      ...status,
-    }
-    isStatusEditorOpen = true
-  }
-
-  const handleStatusDone = async () => {
-    isStatusEditorOpen = false
-    statusWip = null
-    await fetchData()
-  }
-
-  const handleDelete = async () => {
-    if (!status) return
-    try {
-      await statusDestroy({ path: { id: statusId } })
-      trackEvent('Status', 'Delete')
-
-      window.history.back() // Navigate back to whence it came!
-      addAlert({
-        type: 'success',
-        message: `Slettet status "${status.title}"`,
-      })
-    } catch (error) {
-      console.error('Error deleting status:', error)
-      addAlert({
-        type: 'danger',
-        message: `Kunne ikke slette status "${status.title}". Hvis du mener dette er en feil, kontakt support.`,
-      })
     }
   }
 
@@ -136,35 +88,14 @@
           </p>
         </div>
         <div class="d-flex gap-2">
-          {#if $hasUserAccessToFeature( 'status', 'update', { subjectId: subject?.id, studentGroupIds: student.groupIds } )}
-            <ButtonMini
-              options={{
-                title: 'Rediger status',
-                skin: 'secondary',
-                iconName: 'edit',
-                variant: 'icon-left',
-                classes: 'me-2',
-                onClick: handleEditStatus,
-              }}
-            >
-              Rediger
-            </ButtonMini>
-          {/if}
-          {#if $hasUserAccessToFeature( 'status', 'delete', { subjectId: subject?.id, studentGroupIds: student.groupIds } )}
-            <ButtonMini
-              options={{
-                title: 'Slett status',
-                skin: 'secondary',
-                iconName: 'trash-can',
-                variant: 'icon-left',
-                classes: 'me-2',
-                onClick: handleDelete,
-                delayActionFor: 3,
-              }}
-            >
-              Slett
-            </ButtonMini>
-          {/if}
+          <StatusWidgets
+            {status}
+            {student}
+            {subject}
+            onRefreshRequired={() => fetchData()}
+            widgets={['update', 'delete']}
+            buttonSize="large"
+          />
         </div>
       </div>
 
@@ -176,7 +107,7 @@
             {$dataStore.statusCategories.find(cat => cat.id === status?.categoryId)?.title ||
               'ukjent'}
           {:else}
-            ingen
+            <span class="text-muted">ingen</span>
           {/if}
         </div>
       </div>
@@ -200,7 +131,11 @@
         <div class="field-group">
           <span class="field-label">Beskrivelse</span>
           <div>
-            {status.masteryDescription || 'ingen beskrivelse'}
+            {#if status.masteryDescription}
+              {status.masteryDescription}
+            {:else}
+              <span class="text-muted">ingen beskrivelse</span>
+            {/if}
           </div>
         </div>
       {/if}
@@ -210,7 +145,11 @@
         <div class="field-group">
           <span class="field-label">Fremovermelding</span>
           <div>
-            {status.feedforward || 'ingen fremovermelding'}
+            {#if status.feedforward}
+              {status.feedforward}
+            {:else}
+              <span class="text-muted">ingen fremovermelding</span>
+            {/if}
           </div>
         </div>
       {/if}
@@ -219,19 +158,6 @@
     <p>Status ikke funnet</p>
   {/if}
 </section>
-
-<!-- offcanvas for creating/editing status -->
-<Offcanvas
-  bind:isOpen={isStatusEditorOpen}
-  ariaLabel="Rediger status"
-  onClosed={() => {
-    statusWip = null
-  }}
->
-  {#if statusWip}
-    <StatusEdit status={statusWip} onDone={handleStatusDone} />
-  {/if}
-</Offcanvas>
 
 <style>
   .field-group {
@@ -254,31 +180,5 @@
 
   .field-group :not(.field-label) {
     font-size: 1.1rem;
-  }
-
-  .mastery-scale {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .mastery-scale-vertical {
-    flex-direction: column;
-  }
-
-  .mastery-scale-horizontal {
-    flex-direction: row;
-  }
-
-  .mastery-level-wrapper {
-    transition: opacity 0.2s;
-  }
-
-  .mastery-level-wrapper.active {
-    opacity: 1;
-  }
-
-  .mastery-level-wrapper.inactive {
-    opacity: 0.2;
-    filter: grayscale(30%);
   }
 </style>

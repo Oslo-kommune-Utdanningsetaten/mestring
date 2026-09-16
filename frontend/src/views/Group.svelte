@@ -1,37 +1,28 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-tag.js'
   import Sortable, { type SortableEvent } from 'sortablejs'
-  import {
-    groupsRetrieve,
-    usersList,
-    goalsList,
-    goalsDestroy,
-    goalsUpdate,
-    subjectsList,
-  } from '../generated/sdk.gen'
   import type {
     GoalType,
     GroupType,
     UserType,
     ObservationType,
     SubjectType,
-    StatusType,
   } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
+  import {
+    groupsRetrieve,
+    usersList,
+    goalsList,
+    goalsUpdate,
+    subjectsList,
+  } from '../generated/sdk.gen'
 
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
   import { dataStore } from '../stores/data'
   import { getGroupLabel, goalsWithCalculatedMastery } from '../utils/functions'
-  import { getPreferredStatusCategory } from '../stores/localStorageFunctions'
   import { hasUserAccessToFeature } from '../stores/access'
-  import { addAlert } from '../stores/alerts'
-  import { trackEvent } from '../stores/analytics'
 
   import GroupSVG from '../assets/group.svg.svelte'
-  import ButtonIcon from '../components/ButtonIcon.svelte'
-  import StatusEdit from '../components/edit/StatusEdit.svelte'
-  import GoalEdit from '../components/edit/GoalEdit.svelte'
-  import Offcanvas from '../components/Offcanvas.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
   import UserTag from '../components/UserTag.svelte'
@@ -40,8 +31,6 @@
   import GoalWidgets from '../components/edit/GoalWidgets.svelte'
 
   const { groupId } = $props<{ groupId: string }>()
-  const today = new Date()
-  const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
 
   let isLoading = $state(true)
   let goalsListElement = $state<HTMLElement | null>(null)
@@ -50,11 +39,7 @@
   let teachers = $state<UserType[]>([])
   let students = $state<UserType[]>([])
   let groupGoals = $state<GoalType[]>([])
-  let goalWip = $state<GoalDecorated | null>(null)
   let goalsWithCalculatedMasteryByStudentId = $state<Record<string, GoalDecorated[]>>({})
-  let statusWip = $state<Partial<StatusType> | null>(null)
-  let isStatusEditorOpen = $state<boolean>(false)
-  let isGoalEditorOpen = $state<boolean>(false)
   let subjects = $state<SubjectType[]>([])
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
 
@@ -154,41 +139,6 @@
     return Object.values(goalsWithCalculatedMasteryByStudentId).some(studentGoals =>
       studentGoals.some(g => g.id === goalId && g.observations && g.observations.length > 0)
     )
-  }
-
-  const handleEditGoal = (goal: GoalDecorated | null) => {
-    goalWip = {
-      ...goal,
-      groupId: group?.id || null,
-      isGoalIndividual: false,
-      sortOrder: goal?.sortOrder || (groupGoals?.length ? groupGoals.length + 1 : 1),
-      masterySchemaId: goal?.masterySchemaId || $dataStore.defaultMasterySchema?.id,
-      isRelevant: goal?.id ? goal?.isRelevant : true,
-    }
-    isGoalEditorOpen = true
-  }
-
-  const handleEditStatus = async (status: Partial<StatusType> | null, student: UserType) => {
-    if (status?.id) {
-      statusWip = {
-        ...status,
-      }
-    } else {
-      statusWip = {
-        subjectId: subject?.id,
-        studentId: student.id,
-        schoolId: $dataStore.currentSchool.id,
-        categoryId: getPreferredStatusCategory(),
-        beginAt: sixtyDaysAgo.toISOString().split('T')[0],
-        endAt: today.toISOString().split('T')[0],
-      }
-    }
-    isStatusEditorOpen = true
-  }
-
-  const handleStatusDone = async () => {
-    isStatusEditorOpen = false
-    statusesKey++
   }
 
   const handleGoalOrderChange = async (event: SortableEvent) => {
@@ -402,7 +352,6 @@
         goalsWithMasteryByStudentId={goalsWithCalculatedMasteryByStudentId}
         {subject}
         {statusesKey}
-        onEditStatus={handleEditStatus}
         onRefreshRequired={() => fetchGroupData()}
       />
     {:else}
@@ -425,19 +374,6 @@
     <p>Hvis du mener dette er en feil, kontakt support.</p>
   </div>
 {/if}
-
-<!-- offcanvas for creating/editing status -->
-<Offcanvas
-  bind:isOpen={isStatusEditorOpen}
-  ariaLabel="Rediger status"
-  onClosed={() => {
-    statusWip = null
-  }}
->
-  {#if statusWip}
-    <StatusEdit status={statusWip} onDone={handleStatusDone} />
-  {/if}
-</Offcanvas>
 
 <style>
   h2 {

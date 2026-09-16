@@ -1,35 +1,20 @@
 <script lang="ts">
-  import { useTinyRouter } from 'svelte-tiny-router'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
+  import { useTinyRouter } from 'svelte-tiny-router'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import type { GoalDecorated } from '../types/models'
-  import type {
-    UserType,
-    ObservationType,
-    GoalType,
-    StatusType,
-    SubjectType,
-  } from '../generated/types.gen'
-  import { goalsDestroy, goalsUpdate, goalsCreate } from '../generated/sdk.gen'
+  import type { UserType, ObservationType, GoalType, SubjectType } from '../generated/types.gen'
+  import { goalsUpdate } from '../generated/sdk.gen'
 
   import { dataStore } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
-  import {
-    getPreferredStatusCategory,
-    getPreferredSubjectId,
-  } from '../stores/localStorageFunctions'
   import { fetchGoalsForSubjectAndStudent, urlStringFrom, getSubjectName } from '../utils/functions'
-  import { hasUserAccessToFeature } from '../stores/access'
-  import { addAlert } from '../stores/alerts'
-  import { trackEvent } from '../stores/analytics'
 
   import Link from './Link.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import MasteryBarChart from './MasteryBarChart.svelte'
-  import StatusEdit from './edit/StatusEdit.svelte'
   import ButtonMini from './ButtonMini.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
-  import Offcanvas from './Offcanvas.svelte'
   import Statuses from '../components/Statuses.svelte'
   import AuthorInfo from './AuthorInfo.svelte'
   import StudentSubjectChart from './StudentSubjectChart.svelte'
@@ -37,6 +22,7 @@
   import ObservationVisibilityMarker from './ObservationVisibilityMarker.svelte'
   import ObservationWidgets from './edit/ObservationWidgets.svelte'
   import GoalWidgets from './edit/GoalWidgets.svelte'
+  import StatusWidgets from './edit/StatusWidgets.svelte'
 
   const { student, subject } = $props<{
     student: UserType
@@ -46,9 +32,7 @@
   const router = useTinyRouter()
 
   let goalsForSubject = $state<GoalDecorated[]>([])
-  let statusWip = $state<Partial<StatusType> | null>(null)
   let goalsListElement = $state<HTMLElement | null>(null)
-  let isStatusEditorOpen = $state<boolean>(false)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
   let chartKey = $state<number>(0) // key used to force re-render of StudentSubjectChart component when goals are updated
 
@@ -58,8 +42,6 @@
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
-  const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
-  const today = new Date()
 
   const getMasterySchmemaForGoal = (goal: GoalType) => {
     return $dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId)
@@ -73,29 +55,6 @@
       $dataStore.currentUser.allGroups
     )
     chartKey++
-  }
-
-  const handleEditStatus = async (status: Partial<StatusType> | null) => {
-    if (status?.id) {
-      statusWip = {
-        ...status,
-      }
-    } else {
-      statusWip = {
-        subjectId: subject.id,
-        studentId: student.id,
-        schoolId: $dataStore.currentSchool.id,
-        categoryId: getPreferredStatusCategory(),
-        beginAt: sixtyDaysAgo.toISOString().split('T')[0],
-        endAt: today.toISOString().split('T')[0],
-      }
-    }
-    isStatusEditorOpen = true
-  }
-
-  const handleStatusDone = async () => {
-    isStatusEditorOpen = false
-    statusesKey++
   }
 
   const handleToggleGoal = (goalId: string) => {
@@ -185,16 +144,7 @@
     widgets={['create']}
   />
 
-  {#if $hasUserAccessToFeature( 'status', 'create', { subjectId: subject.id, studentGroupIds: student.groupIds } )}
-    <ButtonIcon
-      options={{
-        iconName: 'achievement',
-        classes: 'bordered ms-1',
-        title: 'Legg til ny status',
-        onClick: () => handleEditStatus(null),
-      }}
-    />
-  {/if}
+  <StatusWidgets {student} {subject} onRefreshRequired={() => statusesKey++} widgets={['create']} />
 
   {#key statusesKey}
     <Statuses {student} {subject} />
@@ -368,19 +318,6 @@
     {/each}
   </div>
 {/if}
-
-<!-- offcanvas for creating/editing status -->
-<Offcanvas
-  bind:isOpen={isStatusEditorOpen}
-  ariaLabel="Rediger status"
-  onClosed={() => {
-    statusWip = null
-  }}
->
-  {#if statusWip}
-    <StatusEdit status={statusWip} onDone={handleStatusDone} />
-  {/if}
-</Offcanvas>
 
 <style>
   .chart-wrapper {
