@@ -104,6 +104,17 @@
     return masterySchema?.config?.isMasteryValueVisible
   }
 
+  const handDrawnBorderStyle = (): string => {
+    const randomSquiggle = () => Math.random() - 0.5
+    return [
+      `--hand-squiggle-1: ${randomSquiggle()}`,
+      `--hand-squiggle-2: ${randomSquiggle()}`,
+      `--hand-squiggle-3: ${randomSquiggle()}`,
+      `--hand-squiggle-4: ${randomSquiggle()}`,
+      `--hand-squiggle-5: ${randomSquiggle()}`,
+    ].join('; ')
+  }
+
   $effect(() => {
     if (currentSchool) {
       fetchObservations()
@@ -119,7 +130,12 @@
   {:else}
     <div class="card shadow-sm mt-4">
       {#each observations as observation, i}
-        <div class="observation-row" class:border-top={i > 0}>
+        <div
+          class="observation-row"
+          class:border-top={i > 0}
+          class:border-top-by-hand={i > 0}
+          style={i > 0 ? handDrawnBorderStyle() : undefined}
+        >
           <div class="observation-meta-panel">
             <div class="observation-header-row">
               {#if viewMode !== 'student'}
@@ -221,7 +237,7 @@
 
 <style>
   .observation-row {
-    padding: 1.5rem 1rem;
+    padding: 1rem 1rem;
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
@@ -233,6 +249,37 @@
     display: flex;
     flex-direction: column;
     gap: 0.5em;
+  }
+
+  .border-top {
+    border-top-style: dashed !important;
+    border-top-width: 2px !important;
+  }
+
+  .TEST-border-top-by-hand {
+    --hand-width: 3px;
+    --hand-color: rgba(0, 0, 0, 0.2);
+    --hand-wobble: 6px;
+    position: relative;
+    border-top: none !important;
+  }
+
+  .TEST-border-top-by-hand::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--hand-width);
+    background: var(--hand-color);
+    clip-path: polygon(
+      -5% calc(50% + (var(--hand-wobble) * var(--hand-squiggle-1, 0))),
+      25% calc(50% + (var(--hand-wobble) * var(--hand-squiggle-2, 0))),
+      50% calc(50% + (var(--hand-wobble) * var(--hand-squiggle-3, 0))),
+      75% calc(50% + (var(--hand-wobble) * var(--hand-squiggle-4, 0))),
+      105% calc(50% + (var(--hand-wobble) * var(--hand-squiggle-5, 0)))
+    );
+    pointer-events: none;
   }
 
   @media (min-width: 768px) {
