@@ -83,6 +83,10 @@
         path: { orgNumber: school.orgNumber },
       })
 
+      if (!result.response) {
+        throw new Error('No response from server')
+      }
+
       if (result.response.status === 200 && result.data) {
         const data = result.data as SchoolImportStatus
         const { groups, users, memberships, lastImportAt, lastCleanupAt } = data
@@ -306,6 +310,9 @@
       const result = await updateDataIntegrity({
         path: { orgNumber: orgNumber },
       })
+      if (!result.response) {
+        throw new Error('No response from server')
+      }
 
       if (result.response.status === 201) {
         addAlert({
@@ -347,6 +354,10 @@
         query: { anonymize: !!options.anonymize },
       })
 
+      if (!result.response) {
+        throw new Error('No response from server')
+      }
+
       if (result.response.status === 201) {
         addAlert({
           type: 'success',
@@ -380,6 +391,10 @@
       const result = await importGroupsAndUsers({
         path: { orgNumber: orgNumber },
       })
+
+      if (!result.response) {
+        throw new Error('No response from server')
+      }
 
       if (result.response.status === 201) {
         addAlert({
@@ -420,6 +435,10 @@
         path: { schoolId: school.id },
         body: { types },
       })
+      if (!result.response) {
+        throw new Error('No response from server')
+      }
+
       if (result.response.status === 200 && result.data) {
         const deleted = (result.data as any).deleted
         const summary = Object.entries(deleted)
