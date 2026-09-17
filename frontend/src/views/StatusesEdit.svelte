@@ -187,10 +187,6 @@
     }
   }
 
-  const handleChangeStatus = async (status: Partial<StatusType>, rowIndex: number) => {
-    await createOrUpdateStatus(status, rowIndex)
-  }
-
   $effect(() => {
     if (group && statusCategory) {
       fetchData()
@@ -263,7 +259,9 @@
                     </div>
                   </div>
                   <div
-                    onchange={() => handleChangeStatus(status, rowIndex)}
+                    onchange={() => {
+                      createOrUpdateStatus(status, rowIndex)
+                    }}
                     class="mastery-input-container"
                   >
                     <MasteryValueInput
