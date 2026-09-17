@@ -14,7 +14,7 @@
     getCurrentSchoolYear,
     isEntityFromSchoolYear,
   } from '../utils/schoolYear'
-  import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
+  import { getPreferredCreatedParams, preferredSchoolYear } from '../stores/localStorageFunctions'
   import { dataStore } from '../stores/data'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
@@ -268,7 +268,7 @@
                       {masterySchema}
                       bind:value={status.masteryValue}
                       isInputEnabled={isAdminEditEnabled ||
-                        isEntityFromSchoolYear(status, getCurrentSchoolYear())}
+                        getCurrentSchoolYear() === $preferredSchoolYear}
                     />
                   </div>
                   {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
