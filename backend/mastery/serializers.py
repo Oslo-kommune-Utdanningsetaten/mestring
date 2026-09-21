@@ -1,7 +1,17 @@
 from rest_framework import serializers
 from mastery import models
 from django.db.models import ForeignKey, ManyToManyField
+from drf_spectacular.utils import extend_schema_field
 from mastery.access_policies.observation import ObservationAccessPolicy
+
+
+@extend_schema_field({
+    'type': 'object',
+    'additionalProperties': True,
+    'description': 'Generic JSON object',
+})
+class JSONField(serializers.JSONField):
+    pass
 
 
 class BaseModelSerializer(serializers.ModelSerializer):
@@ -230,12 +240,16 @@ class StatusCategorySerializer(BaseModelSerializer):
 
 
 class SchoolSerializer(BaseModelSerializer):
+    ui_translations = JSONField(required=False, allow_null=True)
+
     class Meta:
         model = models.School
         fields = '__all__'
 
 
 class MasterySchemaSerializer(BaseModelSerializer):
+    config = JSONField(required=False, allow_null=True)
+
     class Meta:
         model = models.MasterySchema
         fields = '__all__'

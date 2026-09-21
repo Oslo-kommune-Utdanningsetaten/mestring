@@ -54,6 +54,7 @@ class School(BaseModel):
     is_status_enabled = models.BooleanField(default=False)  # is status feature enabled
     # which subjects can be used: 'only-custom' (owned by school), 'only-feide', 'all'
     subjects_allowed = models.CharField(max_length=50, null=False, default='all')
+    ui_translations = models.JSONField(null=True)  # school-specific translations for the UI
 
     def ensure_short_name(self, short_name):
         """Update short_name (used by import)"""

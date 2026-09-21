@@ -70,13 +70,18 @@ export type GroupType = {
 
 export type MasterySchemaType = {
     readonly id: string;
+    /**
+     * Generic JSON object
+     */
+    config?: {
+        [key: string]: unknown;
+    } | null;
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
     deletedAt?: string | null;
     title?: string;
     description?: string | null;
-    config?: unknown;
     isDefault?: boolean;
     isEnabled?: boolean;
     readonly createdById: string;
@@ -195,13 +200,18 @@ export type PatchedGroupType = {
 
 export type PatchedMasterySchemaType = {
     readonly id?: string;
+    /**
+     * Generic JSON object
+     */
+    config?: {
+        [key: string]: unknown;
+    } | null;
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
     deletedAt?: string | null;
     title?: string;
     description?: string | null;
-    config?: unknown;
     isDefault?: boolean;
     isEnabled?: boolean;
     readonly createdById?: string;
@@ -241,6 +251,12 @@ export type PatchedRoleType = {
 
 export type PatchedSchoolType = {
     readonly id?: string;
+    /**
+     * Generic JSON object
+     */
+    uiTranslations?: {
+        [key: string]: unknown;
+    } | null;
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
@@ -371,6 +387,12 @@ export type RoleType = {
 
 export type SchoolType = {
     readonly id: string;
+    /**
+     * Generic JSON object
+     */
+    uiTranslations?: {
+        [key: string]: unknown;
+    } | null;
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
@@ -541,10 +563,15 @@ export type GroupCreateType = {
 };
 
 export type MasterySchemaCreateType = {
+    /**
+     * Generic JSON object
+     */
+    config?: {
+        [key: string]: unknown;
+    } | null;
     deletedAt?: string | null;
     title?: string;
     description?: string | null;
-    config?: unknown;
     isDefault?: boolean;
     isEnabled?: boolean;
     schoolId: string;
@@ -616,10 +643,15 @@ export type PatchedGroupCreateType = {
 };
 
 export type PatchedMasterySchemaCreateType = {
+    /**
+     * Generic JSON object
+     */
+    config?: {
+        [key: string]: unknown;
+    } | null;
     deletedAt?: string | null;
     title?: string;
     description?: string | null;
-    config?: unknown;
     isDefault?: boolean;
     isEnabled?: boolean;
     schoolId?: string;
@@ -644,6 +676,12 @@ export type PatchedRoleCreateType = {
 };
 
 export type PatchedSchoolCreateType = {
+    /**
+     * Generic JSON object
+     */
+    uiTranslations?: {
+        [key: string]: unknown;
+    } | null;
     deletedAt?: string | null;
     feideId?: string;
     displayName?: string;
@@ -724,6 +762,12 @@ export type RoleCreateType = {
 };
 
 export type SchoolCreateType = {
+    /**
+     * Generic JSON object
+     */
+    uiTranslations?: {
+        [key: string]: unknown;
+    } | null;
     deletedAt?: string | null;
     feideId: string;
     displayName: string;
