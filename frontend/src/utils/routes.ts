@@ -19,6 +19,7 @@ import DataMaintenanceTask from '../views/admin/DataMaintenanceTask.svelte'
 import Schools from '../views/admin/Schools.svelte'
 import School from '../views/admin/School.svelte'
 import SchoolStats from '../views/admin/SchoolStats.svelte'
+import Translations from '../views/admin/Translations.svelte'
 import UsersByRole from '../views/UsersByRole.svelte'
 import StatusCategories from '../views/admin/StatusCategories.svelte'
 import StatusesEdit from '../views/StatusesEdit.svelte'
@@ -183,6 +184,12 @@ export const ROUTES = [
   {
     path: '/admin/mastery-schemas',
     component: MasterySchemas,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.SUPERADMIN],
+  },
+  {
+    path: '/admin/translations',
+    component: Translations,
     isPublic: false,
     accessibleBy: [USER_ROLES.SUPERADMIN],
   },

@@ -223,6 +223,13 @@
                     </Link>
                   </li>
                 {/if}
+
+                {#if $hasUserAccessToPath('/admin/translations')}
+                  <li>
+                    <Link to="/admin/translations" className="dropdown-item">Oversettelser</Link>
+                  </li>
+                {/if}
+
                 {#if $hasUserAccessToPath('/admin/data-maintenance-tasks')}
                   <li>
                     <Link to="/admin/data-maintenance-tasks" className="dropdown-item">
