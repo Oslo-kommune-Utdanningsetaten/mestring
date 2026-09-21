@@ -10,6 +10,7 @@
   import { dataStore, currentUser } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
   import { hasUserAccessToPath } from '../stores/access'
+  import { t } from '../stores/translations'
   import { USER_ROLES, MASTERY_BADGE_VARIANTS, GROUP_VALIDITY_OPTIONS } from '../utils/constants'
   import { fetchUserData } from '../utils/functions'
   import { getCurrentSchoolYear } from '../utils/schoolYear'
@@ -220,7 +221,7 @@
           </div>
 
           <div class="mb-4">
-            <strong>Observasjoner har lenke til elevarbeid</strong>
+            <strong>{t('observations', { capitalize: true })} har lenke til elevarbeid</strong>
             <pkt-checkbox
               label={$isObservationUrlEnabled ? 'Vises' : 'Skjules'}
               labelPosition="right"

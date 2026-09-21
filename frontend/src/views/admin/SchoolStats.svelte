@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { GroupType } from '../../generated/types.gen'
   import { dataStore } from '../../stores/data'
-  import { getSubjectName } from '../../utils/functions'
+  import { t } from '../../stores/translations'
   import { preferredSchoolYear } from '../../stores/localStorageFunctions'
   import { calculateSchoolYearMilestones, getCurrentSchoolYear } from '../../utils/schoolYear'
 
@@ -32,7 +32,7 @@
 
 {#if currentSchool}
   <section class="pt-3">
-    <h2 class="mb-4">Observasjoner opprettet per uke</h2>
+    <h2 class="mb-4">{t('observations', { capitalize: true })} opprettet per uke</h2>
     <p class="text-muted">{fromDate} ➡ {toDate}</p>
     <div class="border border-3 mb-4 p-3">
       <h3 class="mb-2">Hele skolen</h3>

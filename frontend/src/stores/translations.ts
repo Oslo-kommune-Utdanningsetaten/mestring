@@ -1,4 +1,4 @@
-import { derived } from 'svelte/store'
+import { derived, get } from 'svelte/store'
 import { currentSchool } from './data'
 
 const defaultTranslations: Record<string, string> = {
@@ -12,21 +12,21 @@ const defaultTranslations: Record<string, string> = {
   'the observations': 'observasjonene',
 }
 
-const schoolTranslations: any = derived(currentSchool, $currentSchool => {
-  return {
-    ...$currentSchool.uiTranslations,
-  }
-})
+const schoolUITranslations = derived(
+  currentSchool,
+  $currentSchool => $currentSchool?.uiTranslations ?? {}
+)
 
 const capitalizeString = (item: string): string => {
   return item.charAt(0).toUpperCase() + item.slice(1)
 }
 
-export const t = (key: string, options: Record<string, any>) => {
+export const t = (key: string, options: Record<string, any> | undefined = {}) => {
   if (!key) throw new Error('Translation key is required')
 
   let result: string
-
+  const schoolTranslations = get(schoolUITranslations)
+  console.log('Translating...', { key, options, schoolTranslations, defaultTranslations })
   // prioritize school-specific translations
   if (schoolTranslations[key]) {
     result = schoolTranslations[key]
