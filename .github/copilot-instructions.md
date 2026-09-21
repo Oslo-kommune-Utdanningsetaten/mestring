@@ -118,3 +118,8 @@ State what you're missing, then propose targeted files to open. Do not guess sil
 
 - When responding, reference only files actually consulted or explicitly requested.
 - Do not refactor or restructure code unless explicitly asked.
+
+## Simplicity First
+
+- Start with the simplest solution that satisfies the request. Avoid generalization, extra abstractions, or future-proofing unless explicitly asked.
+- Present the minimal version first. Only offer more elaborate alternatives if the user asks for them, or you deem it is extremely important.
