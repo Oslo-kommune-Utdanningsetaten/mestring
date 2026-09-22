@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { MasteryData, MasterySchemaWithConfig } from '../../types/models'
   import { useMasteryCalculations, calculateTrendFraction } from '../../utils/masteryHelpers'
+  import { t } from '../../stores/translations'
 
   const {
     masteryData,
@@ -102,7 +103,7 @@
       <path class="mouth" d={mouthPath} />
     {:else if isBadgeEmpty}
       <!-- just a blank face-->
-      <title>Observasjoner mangler</title>
+      <title>{t('observations', { capitalize: true })} mangler</title>
     {:else if isBadgeVoid}
       <!-- hatched pattern-->
       <title>Mål mangler</title>

@@ -8,6 +8,7 @@
   import { localStorage } from '../../stores/localStorage'
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
+  import { t } from '../../stores/translations'
 
   import ButtonMini from '../ButtonMini.svelte'
   import MasteryValueInput from '../MasteryValueInput.svelte'
@@ -75,14 +76,14 @@
       }
       addAlert({
         type: 'success',
-        message: `${action} observasjon for ${student.name}.`,
+        message: `${action} ${t('observation')} for ${student.name}.`,
       })
       onDone()
     } catch (error) {
       console.error('Error saving Observation:', error)
       addAlert({
         type: 'danger',
-        message: `Noe gikk galt ved lagring av observasjon for ${student.name}.`,
+        message: `Noe gikk galt ved lagring av ${t('observation')} for ${student.name}.`,
       })
     }
   }
@@ -91,7 +92,8 @@
 <div class="observation-edit p-4" bind:this={formContainer}>
   {#if localObservation}
     <h3>
-      {localObservation.id ? 'Redigerer' : 'Ny'} observasjon
+      {localObservation.id ? 'Redigerer' : 'Ny'}
+      {t('observation')}
     </h3>
 
     {#if masterySchema?.config?.isMasteryValueInputEnabled}

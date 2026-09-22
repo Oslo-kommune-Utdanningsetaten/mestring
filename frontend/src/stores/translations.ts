@@ -21,17 +21,17 @@ const capitalizeString = (item: string): string => {
   return item.charAt(0).toUpperCase() + item.slice(1)
 }
 
+// Accepts a key and options, returns a school-specific or default translated string, or the key itself if no translation is found
 export const t = (key: string, options: Record<string, any> | undefined = {}) => {
   if (!key) throw new Error('Translation key is required')
-
-  let result: string
   const schoolTranslations = get(schoolUITranslations)
-  console.log('Translating...', { key, options, schoolTranslations, defaultTranslations })
-  // prioritize school-specific translations
+  let result: string
+
+  // try school-specific translations
   if (schoolTranslations[key]) {
     result = schoolTranslations[key]
   } else if (defaultTranslations[key]) {
-    // defer to default translations
+    // fall back to default translations
     result = defaultTranslations[key]
   } else {
     // if no translation is found, use key itself

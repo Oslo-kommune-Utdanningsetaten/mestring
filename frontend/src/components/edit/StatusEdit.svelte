@@ -23,6 +23,7 @@
   import { localStorage } from '../../stores/localStorage'
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
+  import { t } from '../../stores/translations'
 
   import ButtonMini from '../ButtonMini.svelte'
   import ButtonIcon from '../ButtonIcon.svelte'
@@ -283,7 +284,7 @@
                         />
                       {/if}
                     {:else}
-                      Ingen observasjoner i dette målet
+                      Ingen {t('observations', { capitalize: true })} for dette målet
                     {/if}
                   </span>
                 </div>

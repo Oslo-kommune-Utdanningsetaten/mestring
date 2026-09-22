@@ -4,6 +4,7 @@
   import { dataStore } from '../stores/data'
   import { getSubjectName } from '../utils/functions'
   import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
+  import { t } from '../stores/translations'
 
   import MasterySchemaLevel from './MasterySchemaLevel.svelte'
   import UserNameLink from './UserNameLink.svelte'
@@ -113,7 +114,7 @@
     <button
       class="item header header-row sortable"
       onclick={() => handleHeaderClick(subject.id)}
-      title="Sorter etter antall observasjoner i {getSubjectName(subject, 'displayName')}"
+      title="Sorter etter antall {t('observations')} i {getSubjectName(subject, 'displayName')}"
     >
       <span class="column-header">
         {#if subject.ownedBySchoolId}

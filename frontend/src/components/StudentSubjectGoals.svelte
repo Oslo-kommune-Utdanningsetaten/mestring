@@ -9,6 +9,7 @@
   import { dataStore } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
   import { fetchGoalsForSubjectAndStudent, urlStringFrom, getSubjectName } from '../utils/functions'
+  import { t } from '../stores/translations'
 
   import Link from './Link.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
@@ -238,7 +239,7 @@
           options={{
             iconName: `chevron-thin-${isExpanded ? 'up' : 'down'}`,
             disabled: !goal.isRelevant,
-            title: `${isExpanded ? 'Skjul' : 'Vis'} observasjoner`,
+            title: `${isExpanded ? 'Skjul' : 'Vis'} ${t('observations')}`,
             onClick: () => handleToggleGoal(goal.id),
           }}
         />
@@ -277,7 +278,7 @@
             </div>
           {/each}
         {:else}
-          <p>Ingen observasjoner for dette målet.</p>
+          <p>Ingen {t('observations')} for dette målet.</p>
         {/if}
       </div>
       <div class="my-3">

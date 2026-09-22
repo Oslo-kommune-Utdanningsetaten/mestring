@@ -1,16 +1,18 @@
 <script lang="ts">
   import type { MasteryData, MasterySchemaWithConfig } from '../types/models'
-  import { localStorage } from '../stores/localStorage'
-  import { currentUser } from '../stores/data'
-  import Beehive from './masteryBadges/Beehive.svelte'
-  import Circle from './masteryBadges/Circle.svelte'
-  import Triangle from './masteryBadges/Triangle.svelte'
-  import Smiley from './masteryBadges/Smiley.svelte'
   import {
     MISSING_REASON_NO_OBSERVATIONS,
     MISSING_REASON_NO_GOALS,
     MASTERY_BADGE_VARIANTS,
   } from '../utils/constants'
+  import { localStorage } from '../stores/localStorage'
+  import { currentUser } from '../stores/data'
+  import { t } from '../stores/translations'
+
+  import Beehive from './masteryBadges/Beehive.svelte'
+  import Circle from './masteryBadges/Circle.svelte'
+  import Triangle from './masteryBadges/Triangle.svelte'
+  import Smiley from './masteryBadges/Smiley.svelte'
 
   const {
     masteryData,
@@ -52,10 +54,10 @@
     const lastValueTitle = isAggregated && isMasteryValueVisible ? `Siste verdi: ${mastery}` : ''
     const observationsTitle =
       !isAggregated && isMasteryValueVisible && observationValues.length > 0
-        ? `Observasjoner: [${observationValues.join(', ')}]`
+        ? t('observations', { capitalize: true }) + ': ' + [observationValues.join(', ')]
         : ''
     const aggregatedTitle = isAggregated
-      ? `Aggregert: ${observationValues.length} observasjon${observationValues.length === 1 ? '' : 'er'} fordelt på ${masteryData?.goalsCount ?? 0} mål`
+      ? `Aggregert: ${observationValues.length} ${observationValues.length === 1 ? t('observation') : t('observations')} fordelt på ${masteryData?.goalsCount ?? 0} mål`
       : ''
     const trendTitle = `Trend: ${trend}`
 

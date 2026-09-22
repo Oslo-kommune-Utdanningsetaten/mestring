@@ -4,6 +4,7 @@
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { dataStore } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
+  import { t } from '../stores/translations'
 
   import ButtonMini from './ButtonMini.svelte'
   import MasteryValueInput from './MasteryValueInput.svelte'
@@ -42,7 +43,7 @@
 
 <div class="observation-edit p-4">
   {#if observation}
-    <h3 class="pb-2">Observasjon</h3>
+    <h3 class="pb-2">{t('a observation', { capitalize: true })}</h3>
     <div class="text-muted">
       <AuthorInfo item={observation} />
     </div>

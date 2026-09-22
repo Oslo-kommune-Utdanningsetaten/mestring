@@ -11,6 +11,7 @@
   import { dataStore } from '../stores/data'
   import { MISSING_REASON_NO_OBSERVATIONS } from '../utils/constants'
   import { localStorage } from '../stores/localStorage'
+  import { t } from '../stores/translations'
 
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import MasteryBarChart from './MasteryBarChart.svelte'
@@ -180,7 +181,7 @@
         class="column-header-button sortable {goal.isRelevant
           ? ''
           : 'hatched-background text-muted'}"
-        title="Sorter etter antall observasjoner for dette målet"
+        title="Sorter etter antall {t('observations')} for dette målet"
       >
         {goal.title || goal.sortOrder}{getSortIndicator(goal.id)}
       </button>

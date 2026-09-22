@@ -2,6 +2,8 @@
   import { goalsList } from '../generated/sdk.gen'
   import type { UserType, SubjectType, GroupType } from '../generated/types.gen'
   import type { MasteryState } from '../types/models'
+  import { MISSING_REASON_NO_OBSERVATIONS, MISSING_REASON_NO_GOALS } from '../utils/constants'
+
   import { dataStore } from '../stores/data'
   import {
     goalsWithCalculatedMasteryBySubjectId,
@@ -11,7 +13,7 @@
   } from '../utils/functions'
   import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import { localStorage } from '../stores/localStorage'
-  import { MISSING_REASON_NO_OBSERVATIONS, MISSING_REASON_NO_GOALS } from '../utils/constants'
+  import { t } from '../stores/translations'
 
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import UserNameLink from './UserNameLink.svelte'
@@ -221,7 +223,7 @@
       <button
         class="column-header-button sortable"
         onclick={() => handleHeaderClick(subject.id)}
-        title="Sorter etter antall observasjoner i {subject.grepCode}"
+        title="Sorter etter antall {t('observations')} i {subject.grepCode}"
       >
         {getSubjectName(subject, 'grepCode')}{getSortIndicator(subject.id)}
       </button>

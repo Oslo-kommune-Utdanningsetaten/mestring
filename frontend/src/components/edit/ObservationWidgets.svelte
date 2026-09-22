@@ -7,6 +7,7 @@
   import { hasUserAccessToFeature } from '../../stores/access'
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
+  import { t } from '../../stores/translations'
 
   import Link from '../Link.svelte'
   import ObservationEdit from './ObservationEdit.svelte'
@@ -52,7 +53,7 @@
     } else {
       addAlert({
         type: 'danger',
-        message: 'Kunne ikke finne observasjon. Hvis du mener dette er en feil, kontakt support.',
+        message: `Kunne ikke finne ${t('observation')}. Hvis du mener dette er en feil, kontakt support.`,
       })
     }
   }
@@ -62,7 +63,7 @@
       await observationsDestroy({ path: { id: observationId } })
       addAlert({
         type: 'success',
-        message: `Slettet observasjon`,
+        message: `Slettet ${t('observation')}`,
       })
       trackEvent('Observations', 'Delete')
       onRefreshRequired()
@@ -70,7 +71,7 @@
       console.error('Error deleting observation:', error)
       addAlert({
         type: 'danger',
-        message: `Kunne ikke slette observasjon. Hvis du mener dette er en feil, kontakt support.`,
+        message: `Kunne ikke slette ${t('observation')}. Hvis du mener dette er en feil, kontakt support.`,
       })
     }
   }
@@ -82,7 +83,7 @@
     <ButtonIcon
       options={{
         iconName: 'document-text',
-        title: 'Se observasjon',
+        title: `Se ${t('observation')}`,
         classes: 'bordered',
         onClick: () => handleViewObservation(observation, goal),
       }}
@@ -94,7 +95,7 @@
     <ButtonIcon
       options={{
         iconName: 'bullseye',
-        title: 'Ny observasjon',
+        title: `Ny ${t('observation')}`,
         classes: 'bordered',
         disabled: !goal.isRelevant,
         onClick: () => handleCreateObservation(goal),
@@ -107,7 +108,7 @@
     <ButtonIcon
       options={{
         iconName: 'document-edit',
-        title: 'Rediger observasjon',
+        title: `Rediger ${t('observation')}`,
         classes: 'bordered',
         onClick: () => handleEditObservation(observation, goal),
       }}
@@ -120,7 +121,7 @@
       <ButtonIcon
         options={{
           iconName: 'trash-can',
-          title: 'Slett observasjon',
+          title: `Slett ${t('observation')}`,
           classes: 'bordered',
           onClick: () => handleDeleteObservation(observation.id),
           delayActionFor: 3,
@@ -143,7 +144,7 @@
 <!-- offcanvas for creating/editing observations -->
 <Offcanvas
   bind:isOpen={isObservationEditorOpen}
-  ariaLabel="Rediger observasjon"
+  ariaLabel="Rediger {t('observation')}"
   onClosed={() => {
     observationWip = null
     onRefreshRequired()
@@ -166,7 +167,7 @@
 <!-- offcanvas for viewing observations -->
 <Offcanvas
   bind:isOpen={isObservationViewerOpen}
-  ariaLabel="Se observasjon"
+  ariaLabel="Se {t('observation')}"
   onClosed={() => {
     observationWip = null
   }}

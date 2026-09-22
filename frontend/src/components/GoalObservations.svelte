@@ -2,6 +2,7 @@
   import type { ObservationType, UserType, GoalType, SubjectType } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
+  import { t } from '../stores/translations'
 
   import AuthorInfo from './AuthorInfo.svelte'
   import MasteryLevelTitle from './MasteryLevelTitle.svelte'
@@ -52,7 +53,7 @@
       </div>
     {/each}
   {:else}
-    <p>Ingen observasjoner for dette målet.</p>
+    <p>Ingen {t('observations', { capitalize: true })} for dette målet.</p>
   {/if}
 </div>
 

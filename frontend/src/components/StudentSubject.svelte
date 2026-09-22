@@ -6,6 +6,7 @@
   import { urlStringFrom, getSubjectName } from '../utils/functions'
   import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
   import { localStorage } from '../stores/localStorage'
+  import { t } from '../stores/translations'
 
   import StudentSubjectChart from './StudentSubjectChart.svelte'
   import ButtonIcon from './ButtonIcon.svelte'
@@ -131,7 +132,8 @@
                 class="badge rounded-pill bg-secondary"
                 class:highlighted={hoveredGoalId === goal.id}
               >
-                {goal.observations.length} observasjon{goal.observations.length === 1 ? '' : 'er'}
+                {goal.observations.length}
+                {goal.observations.length === 1 ? t('observation') : t('observations')}
               </span>
 
               <!-- Mastery Badge -->
@@ -154,7 +156,7 @@
               <ButtonIcon
                 options={{
                   iconName: `chevron-thin-${expandedGoalIds.includes(goal.id) ? 'up' : 'down'}`,
-                  title: `${expandedGoalIds.includes(goal.id) ? 'Skjul' : 'Vis'} observasjoner`,
+                  title: `${expandedGoalIds.includes(goal.id) ? 'Skjul' : 'Vis'} ${t('observations')}`,
                   onClick: () => handleToggleGoal(goal.id),
                 }}
               />

@@ -6,6 +6,7 @@
   import { USER_ROLES } from '../utils/constants'
   import { isNumber } from '../utils/functions'
   import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
+  import { t } from '../stores/translations'
 
   import AuthorInfo from './AuthorInfo.svelte'
   import UserTag from './UserTag.svelte'
@@ -123,7 +124,7 @@
 </script>
 
 <section class="py-4">
-  <h2 title="{viewMode} mode">Siste observasjoner</h2>
+  <h2 title="{viewMode} mode">Siste {t('observations')}</h2>
 
   {#if observations.length < 1}
     <div class="mt-3">🫤 Her var det lite, gitt.</div>

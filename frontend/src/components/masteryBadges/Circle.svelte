@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { MasteryData, MasterySchemaWithConfig } from '../../types/models'
   import { useMasteryCalculations, calculateTrendFraction } from '../../utils/masteryHelpers'
+  import { t } from '../../stores/translations'
 
   const {
     masteryData,
@@ -68,7 +69,7 @@
     <span
       class="trend-box missing-mastery"
       style="width: {trendBoxSizeX}px; height: {trendBoxSizeY}px;"
-      title="Observasjoner mangler"
+      title="{t('observations', { capitalize: true })} mangler"
     ></span>
   {:else if isBadgeVoid}
     <span
