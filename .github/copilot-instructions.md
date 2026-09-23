@@ -114,12 +114,16 @@ State what you're missing, then propose targeted files to open. Do not guess sil
 - Introduce business logic directly into frontend view components if it belongs server-side.
 - Add dependencies without checking existing tooling.
 
-## Minimal Output Preference
-
-- When responding, reference only files actually consulted or explicitly requested.
-- Do not refactor or restructure code unless explicitly asked.
-
 ## Simplicity First
 
 - Start with the simplest solution that satisfies the request. Avoid generalization, extra abstractions, or future-proofing unless explicitly asked.
-- Present the minimal version first. Only offer more elaborate alternatives if the user asks for them, or you deem it is extremely important.
+- Present the minimal version first. Only offer more elaborate alternatives if the user asks for them.
+- Do not invent hypothetical failure modes, edge cases, or scalability concerns that are not backed by the current codebase or the user's stated problem.
+- When the user asks for the "best" fix, interpret that as the most pragmatic fix for this codebase right now — not the most theoretically robust one.
+
+## Response Style
+
+- Default to one clear recommendation. Do not lay out multiple options unless asked.
+- Keep explanations short. State the change, not the philosophy behind it.
+- If the user pushes back against complexity, switch to the simpler path immediately. Do not defend the elaborate option.
+- Ask clarifying questions only when the answer would change which files or approach to use.
