@@ -24,6 +24,7 @@
   } from '../../utils/constants'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import { addAlert } from '../../stores/alerts'
+  import { t } from '../../stores/translations'
   import Offcanvas from '../../components/Offcanvas.svelte'
   import ImportEstimate from '../../components/ImportEstimate.svelte'
   import CleanerbotEstimate from '../../components/CleanerbotEstimate.svelte'
@@ -530,10 +531,10 @@
 
       <!-- Status -->
       <section class="border border-3 p-3 my-4">
-        <h3 class="mb-3">Status</h3>
+        <h3 class="mb-3">{t('status', { form: 'sin-indef', capitalize: true })}</h3>
         <pkt-checkbox
           id={'status-' + school.id}
-          label={`Status ${school.isStatusEnabled ? '' : 'IKKE'} tilgjengelig`}
+          label={`${t('status', { form: 'sin-indef', capitalize: true })} ${school.isStatusEnabled ? '' : 'IKKE'} tilgjengelig`}
           labelPosition="right"
           isSwitch="true"
           aria-checked={school.isStatusEnabled}

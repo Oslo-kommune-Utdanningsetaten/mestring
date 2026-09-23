@@ -5,6 +5,7 @@
   import { hasUserAccessToFeature } from '../../stores/access'
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
+  import { t } from '../../stores/translations'
   import { dataStore } from '../../stores/data'
   import { getPreferredStatusCategory } from '../../stores/localStorageFunctions'
   import { calculateSchoolYearMilestones } from '../../utils/schoolYear'
@@ -40,13 +41,13 @@
   const getTitleForWidget = (widget: 'create' | 'update' | 'delete' | 'view') => {
     switch (widget) {
       case 'create':
-        return 'Legg til ny status'
+        return 'Legg til ny ' + t('status', { form: 'sin-indef' })
       case 'update':
-        return 'Rediger status'
+        return 'Rediger ' + t('status', { form: 'sin-indef' })
       case 'delete':
-        return 'Slett status'
+        return 'Slett ' + t('status', { form: 'sin-indef' })
       case 'view':
-        return 'Vis status'
+        return 'Vis ' + t('status', { form: 'sin-indef' })
       default:
         return 'unknown widget: ' + widget
     }
@@ -79,7 +80,7 @@
       await statusDestroy({ path: { id: status.id } })
       addAlert({
         type: 'success',
-        message: `Slettet status`,
+        message: 'Slettet ' + t('status', { form: 'sin-indef' }),
       })
       trackEvent('Status', 'Delete')
       if (!location.pathname.includes('/statuses/risk')) {
@@ -90,7 +91,10 @@
       console.error('Error deleting status:', error)
       addAlert({
         type: 'danger',
-        message: `Kunne ikke slette status. Hvis du mener dette er en feil, kontakt support.`,
+        message:
+          'Kunne ikke slette ' +
+          t('status', { form: 'sin-indef' }) +
+          '. Hvis du mener dette er en feil, kontakt support.',
       })
     }
   }
@@ -189,7 +193,7 @@
 <!-- offcanvas for creating/editing status -->
 <Offcanvas
   bind:isOpen={isStatusEditorOpen}
-  ariaLabel="Rediger status"
+  ariaLabel={'Rediger ' + t('status', { form: 'sin-indef' })}
   onClosed={() => {
     statusWip = null
     onRefreshRequired()

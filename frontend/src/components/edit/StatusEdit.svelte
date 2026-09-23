@@ -167,14 +167,14 @@
       }
       addAlert({
         type: 'success',
-        message: `${action} status for ${localStudent?.name}.`,
+        message: `${action} ${t('status', { form: 'sin-indef' })} for ${localStudent?.name}.`,
       })
       onDone()
     } catch (error) {
       console.error('Error saving status:', error)
       addAlert({
         type: 'danger',
-        message: `Noe gikk galt ved lagring av status for ${localStudent?.name}.`,
+        message: `Noe gikk galt ved lagring av ${t('status', { form: 'sin-indef' })} for ${localStudent?.name}.`,
       })
     }
   }

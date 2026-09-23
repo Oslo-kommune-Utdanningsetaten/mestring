@@ -230,10 +230,10 @@
     </div>
 
     <div class="icon">
-      <span class="svg-container" title="Status">
+      <span class="svg-container" title={t('status', { form: 'sin-indef', capitalize: true })}>
         <pkt-icon name="achievement"></pkt-icon>
       </span>
-      <span class="icon-label">Status</span>
+      <span class="icon-label">{t('status', { form: 'sin-indef', capitalize: true })}</span>
     </div>
 
     <div class="icon">

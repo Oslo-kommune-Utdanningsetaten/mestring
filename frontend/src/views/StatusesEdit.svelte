@@ -18,6 +18,7 @@
   import { dataStore } from '../stores/data'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
+  import { t } from '../stores/translations'
 
   import MasteryValueInput from '../components/MasteryValueInput.svelte'
   import AuthorInfo from '../components/AuthorInfo.svelte'
@@ -180,7 +181,7 @@
       console.error('Error saving status:', error)
       addAlert({
         type: 'danger',
-        message: `Noe gikk galt ved lagring av status ${statusCategory?.name} for elev ${status.studentId}.`,
+        message: `Noe gikk galt ved lagring av ${t('status', { form: 'sin-indef' })} ${statusCategory?.name} for elev ${status.studentId}.`,
       })
     } finally {
       row.isSaving = false

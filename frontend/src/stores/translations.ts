@@ -21,6 +21,12 @@ const defaultTranslations: Record<string, any> = {
     'plu-indef': 'observasjoner',
     'plu-def': 'observasjonene',
   },
+  status: {
+    'sin-indef': 'status',
+    'sin-def': 'statusen',
+    'plu-indef': 'statuser',
+    'plu-def': 'statusene',
+  },
 }
 
 const schoolUITranslations = derived(

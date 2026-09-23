@@ -21,6 +21,7 @@
   import { dataStore } from '../stores/data'
   import { getGroupLabel, goalsWithCalculatedMastery } from '../utils/functions'
   import { hasUserAccessToFeature } from '../stores/access'
+  import { t } from '../stores/translations'
 
   import GroupSVG from '../assets/group.svg.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
@@ -233,7 +234,7 @@
     {#if availableStatusCategories.length && $hasUserAccessToFeature( 'status', 'create', { groupId, createdById: $dataStore.currentUser.id, subjectId: group.subjectId || undefined } )}
       <!-- Group goals Section -->
       <section>
-        <h3 class="mb-3">Opprett statuser for hele gruppa</h3>
+        <h3 class="mb-3">Opprett {t('status', { form: 'plu-indef' })} for hele gruppa</h3>
         <ul>
           {#each availableStatusCategories as category}
             <li>
