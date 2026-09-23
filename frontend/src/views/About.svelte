@@ -50,7 +50,10 @@
   <h2>Hva er mestring.osloskolen.no?</h2>
   <p class="mb-4">
     Webapplikasjonen er utviklet av UDA for å gi lærere og skoleledelse bedre oversikt over elevenes
-    faglige utvikling. Løsningen gjør underveisvurdering i en travel hverdag enklere ved å samle mål
+    faglige utvikling. Løsningen gjør underveisvurdering i en travel hverdag enklere ved å samle {t(
+      'goal',
+      { form: 'plu-indef' }
+    )}
     og {t('observation', { form: 'plu-indef' })} på ett sted. Samtidig får ledelsen oversikt over hvilke
     elever som trenger ekstra innsats.
   </p>
@@ -65,8 +68,11 @@
     </li>
     <li>
       <span class="fw-bold">Målsetting:</span>
-      Læreren kan sette individuelle mål for hver enkelt elev, eller felles mål for en hel gruppe (for
-      eksempel faglige temaer eller kompetansemål).
+      Læreren kan sette individuelle {t('goal', { form: 'plu-indef' })} for hver enkelt elev, eller felles
+      {t('goal', { form: 'plu-indef' })} for en hel gruppe (for eksempel faglige temaer eller kompetanse{t(
+        'goal',
+        { form: 'plu-indef' }
+      )}).
     </li>
     <li>
       <span class="fw-bold">Metodefrihet:</span>
@@ -132,35 +138,36 @@
   <ul>
     <li>
       <span class="fw-bold">Lærer i undervisningsgruppe</span>
-      kan opprette mål og {t('observation', { form: 'plu-indef' })} for elevene gruppa, i faget som undervises.
+      kan opprette {t('goal', { form: 'plu-indef' })} og {t('observation', { form: 'plu-indef' })} for
+      elevene gruppa, i faget som undervises.
       {@render rolesCount(USER_ROLES.TEACHER, GROUP_TYPE_TEACHING)}
     </li>
     <li>
       <span class="fw-bold">Lærer i basisgruppe</span>
-      kan se mål og {t('observation', { form: 'plu-indef' })} for sine elever, i alle fag. Kan opprette
-      individuelle mål (og
+      kan se {t('goal', { form: 'plu-indef' })} og {t('observation', { form: 'plu-indef' })} for sine
+      elever, i alle fag. Kan opprette individuelle {t('goal', { form: 'plu-indef' })} (og
       {t('observation', { form: 'plu-indef' })}
       på disse) for sine elever i alle fag.
       {@render rolesCount(USER_ROLES.TEACHER, GROUP_TYPE_BASIS)}
     </li>
     <li>
       <span class="fw-bold">Skoleinspektør</span>
-      kan se mål og {t('observation', { form: 'plu-indef' })} for alle elever ved {currentSchool
-        ? currentSchool.displayName
-        : 'sin skole'}.
+      kan se {t('goal', { form: 'plu-indef' })} og {t('observation', { form: 'plu-indef' })} for alle
+      elever ved {currentSchool ? currentSchool.displayName : 'sin skole'}.
       {@render rolesCount(USER_ROLES.INSPECTOR)}
     </li>
     <li>
       <span class="fw-bold">Skoleadmin</span>
-      kan se og redigere mål og {t('observation', { form: 'plu-indef' })} for alle elever ved {currentSchool
-        ? currentSchool.displayName
-        : 'sin skole'}.
+      kan se og redigere {t('goal', { form: 'plu-indef' })} og {t('observation', {
+        form: 'plu-indef',
+      })} for alle elever ved {currentSchool ? currentSchool.displayName : 'sin skole'}.
       {@render rolesCount(USER_ROLES.ADMIN)}
     </li>
     <li>
       <span class="fw-bold">Superadmin</span>
-      kan se og redigere mål og {t('observation', { form: 'plu-indef' })} for alle elever ved alle skoler.
-      Kan også endre globale innstillinger for skolene.
+      kan se og redigere {t('goal', { form: 'plu-indef' })} og {t('observation', {
+        form: 'plu-indef',
+      })} for alle elever ved alle skoler. Kan også endre globale innstillinger for skolene.
       {@render rolesCount(USER_ROLES.SUPERADMIN)}
     </li>
   </ul>
@@ -216,10 +223,10 @@
     </div>
 
     <div class="icon">
-      <span class="svg-container" title="Mål">
+      <span class="svg-container" title={t('goal', { form: 'sin-indef', capitalize: true })}>
         <pkt-icon name="goal"></pkt-icon>
       </span>
-      <span class="icon-label">Mål</span>
+      <span class="icon-label">{t('goal', { form: 'sin-indef', capitalize: true })}</span>
     </div>
 
     <div class="icon">

@@ -9,6 +9,7 @@
   import { urlStringFrom } from '../utils/functions'
   import { preferredSchoolYear } from '../stores/localStorageFunctions'
   import { getAllSchoolYears, getCurrentSchoolYear } from '../utils/schoolYear'
+  import { t } from '../stores/translations'
 
   import Link from './Link.svelte'
   import GoalIconCelebration from './GoalIconCelebration.svelte'
@@ -161,7 +162,9 @@
                 {/if}
                 {#if $hasUserAccessToPath('/goals')}
                   <li class="nav-item">
-                    <Link to="/goals" className="dropdown-item">Mål</Link>
+                    <Link to="/goals" className="dropdown-item">
+                      {t('goal', { form: 'plu-indef', capitalize: true })}
+                    </Link>
                   </li>
                 {/if}
                 {#if $hasUserAccessToPath('/stats')}

@@ -249,7 +249,7 @@
     {#if currentSchool?.isGroupGoalEnabled && group.subjectId && !isCurrentUserOnlyStudent}
       <section>
         <div class="d-flex align-items-center gap-2">
-          <h3>Mål</h3>
+          <h3>{t('goal', { form: 'plu-indef', capitalize: true })}</h3>
           <GoalWidgets
             {group}
             {subject}
@@ -262,7 +262,7 @@
 
         <div bind:this={goalsListElement} class="list-group mt-3">
           {#if groupGoals.length === 0}
-            Det er visst ikke noen mål for denne gruppa
+            Det er visst ikke noen {t('goal', { form: 'plu-indef' })} for denne gruppa
           {:else}
             {#each groupGoals as goal, index (goal.id)}
               <div class="list-group-item goal-row {goal.isRelevant ? '' : 'hatched-background'}">
@@ -294,7 +294,7 @@
                     <pkt-icon
                       name="lock-locked"
                       size="small"
-                      title="Målet er i bruk av en eller flere elever"
+                      title="{t('goal', { form: 'sin-def', capitalize: true })} er i bruk av en eller flere elever"
                     ></pkt-icon>
                   {:else}
                     <GoalWidgets
@@ -324,7 +324,7 @@
 
   {#if isCurrentUserOnlyStudent && subject}
     <section>
-      <h3 class="mb-3">Mine mål</h3>
+      <h3 class="mb-3">Mine {t('goal', { form: 'plu-indef' })}</h3>
       <div class="card shadow-sm mt-4 list-group">
         <div class="list-group-item">
           <StudentSubject student={$dataStore.currentUser} {subject} isTitleEnabled={false} />

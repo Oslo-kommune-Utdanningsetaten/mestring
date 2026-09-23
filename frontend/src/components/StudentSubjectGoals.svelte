@@ -168,7 +168,7 @@
     class="list-group-item goal-item {isExpanded
       ? 'shadow border-2 expanded'
       : ''}  {goal.isRelevant ? '' : 'hatched-background'}"
-    title={goal.isRelevant ? '' : 'Målet er ikke lenger relevant for eleven'}
+    title={goal.isRelevant ? '' : t('goal', { form: 'sin-def', capitalize: true }) + ' er ikke lenger relevant for eleven'}
   >
     <div class="goal-primary-row">
       <!-- Drag handle -->
@@ -192,11 +192,11 @@
 
       <!-- Goal type icon -->
       {#if goal.isIndividual}
-        <span class="item" title="Individuelt mål">
+        <span class="item" title="Individuelt {t('goal', { form: 'sin-indef' })}">
           <pkt-icon name="person" aria-hidden="true"></pkt-icon>
         </span>
       {:else}
-        <span class="item" title="Gruppemål">
+        <span class="item" title="Gruppe{t('goal', { form: 'sin-indef' })}">
           <pkt-icon name="group" aria-hidden="true"></pkt-icon>
         </span>
       {/if}
@@ -278,7 +278,7 @@
             </div>
           {/each}
         {:else}
-          <p>Ingen {t('observation', { form: 'plu-indef' })} for dette målet.</p>
+          <p>Ingen {t('observation', { form: 'plu-indef' })} for dette {t('goal', { form: 'sin-def' })}.</p>
         {/if}
       </div>
       <div class="my-3">
@@ -297,7 +297,7 @@
           />
         {:else}
           <p>
-            Dette målet er ikke individuelt, men gitt for <Link to={`/groups/${goal.groupId}/`}>
+            Dette {t('goal', { form: 'sin-def' })} er ikke individuelt, men gitt for <Link to={`/groups/${goal.groupId}/`}>
               hele gruppa
             </Link>.
           </p>

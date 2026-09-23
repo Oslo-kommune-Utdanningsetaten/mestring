@@ -106,7 +106,7 @@
       <title>{t('observation', { form: 'plu-indef', capitalize: true })} mangler</title>
     {:else if isBadgeVoid}
       <!-- hatched pattern-->
-      <title>Mål mangler</title>
+      <title>{t('goal', { form: 'sin-indef', capitalize: true })} mangler</title>
       <defs>
         <pattern
           id="void-hatch"

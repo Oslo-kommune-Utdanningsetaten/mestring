@@ -12,6 +12,7 @@
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
   import { dataStore, currentSchool } from '../../stores/data'
+  import { t } from '../../stores/translations'
 
   import GoalEdit from './GoalEdit.svelte'
   import Offcanvas from '../Offcanvas.svelte'
@@ -52,7 +53,7 @@
   const getTitleForWidget = (widget: 'create' | 'update' | 'delete' | 'view') => {
     const goalText =
       (isIndividual ? 'individuelt ' : 'gruppe') +
-      'mål' +
+      t('goal', { form: 'sin-indef' }) +
       (subject?.displayName ? ' i ' + subject?.displayName.toLowerCase() : '')
     switch (widget) {
       case 'create':
@@ -113,7 +114,7 @@
       await goalsDestroy({ path: { id: goal.id } })
       addAlert({
         type: 'success',
-        message: `Slettet mål`,
+        message: `Slettet ${t('goal', { form: 'sin-indef' })}`,
       })
       trackEvent('Goals', 'Delete')
       onRefreshRequired()
@@ -121,7 +122,7 @@
       console.error('Error deleting goal:', error)
       addAlert({
         type: 'danger',
-        message: `Kunne ikke slette mål. Hvis du mener dette er en feil, kontakt support.`,
+        message: `Kunne ikke slette ${t('goal', { form: 'sin-indef' })}. Hvis du mener dette er en feil, kontakt support.`,
       })
     }
   }
@@ -220,7 +221,7 @@
 <!-- offcanvas for creating/editing goals -->
 <Offcanvas
   bind:isOpen={isGoalEditorOpen}
-  ariaLabel="Rediger mål"
+  ariaLabel={`Rediger ${t('goal', { form: 'sin-indef' })}`}
   onClosed={() => {
     goalWip = null
     onRefreshRequired()

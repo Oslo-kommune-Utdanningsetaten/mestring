@@ -9,6 +9,7 @@
   import { getPreferredCreatedParams } from '../../stores/localStorageFunctions'
   import { GROUP_DELETED_OPTIONS } from '../../utils/constants'
   import Link from '../../components/Link.svelte'
+  import { t } from '../../stores/translations'
 
   const router = useTinyRouter()
   let goals = $state<GoalType[]>([])
@@ -25,10 +26,19 @@
 
   // Options for filtering by deleted
   const deletedOptions = [
-    { value: GROUP_DELETED_OPTIONS.INCLUDE, label: 'Alle mål, uansett slettet-status' },
-    { value: GROUP_DELETED_OPTIONS.ONLY, label: 'Kun slettete mål' },
-    { value: GROUP_DELETED_OPTIONS.EXCLUDE, label: 'Kun IKKE slettete mål' },
-  ] as const
+    {
+      value: GROUP_DELETED_OPTIONS.INCLUDE,
+      label: `Alle ${t('goal', { form: 'plu-indef' })}, uansett slettet-status`,
+    },
+    {
+      value: GROUP_DELETED_OPTIONS.ONLY,
+      label: `Kun slettete ${t('goal', { form: 'plu-indef' })}`,
+    },
+    {
+      value: GROUP_DELETED_OPTIONS.EXCLUDE,
+      label: `Kun IKKE slettete ${t('goal', { form: 'plu-indef' })}`,
+    },
+  ]
 
   let queryOptions = $derived({
     school: $currentSchool.id,
@@ -53,7 +63,7 @@
     } catch (error) {
       addAlert({
         type: 'danger',
-        message: 'Feil ved henting av mål',
+        message: `Feil ved henting av ${t('goal', { form: 'plu-indef' })}`,
       })
       goals = []
     }
@@ -79,7 +89,7 @@
     } catch (error) {
       addAlert({
         type: 'danger',
-        message: 'Feil ved henting av målskaper-informasjon',
+        message: `Feil ved henting av ${t('goal', { form: 'sin-indef' })}skaper-informasjon`,
       })
     }
   }
@@ -158,7 +168,7 @@
 </script>
 
 <section class="py-3">
-  <h2>Alle mål ved skolen</h2>
+  <h2>Alle {t('goal', { form: 'plu-indef' })} ved skolen</h2>
 
   <div class="d-flex flex-wrap gap-3 mt-3">
     <!-- Only superadmins need be bothered with deleted status -->
@@ -182,7 +192,8 @@
 
   {#if goals.length > 0}
     <div class="mt-4 mb-2 fw-bold">
-      Viser {sortedGoals.length} mål
+      Viser {sortedGoals.length}
+      {t('goal', { form: 'plu-indef' })}
     </div>
 
     <!-- Header -->
@@ -249,9 +260,17 @@
       {#each sortedGoals as goal}
         <div>
           {#if goal.isIndividual}
-            <pkt-icon name="person" size="20" aria-label="Individuelt mål"></pkt-icon>
+            <pkt-icon
+              name="person"
+              size="20"
+              aria-label={`Individuelt ${t('goal', { form: 'sin-indef' })}`}
+            ></pkt-icon>
           {:else}
-            <pkt-icon name="group" size="20" aria-label="Gruppemål"></pkt-icon>
+            <pkt-icon
+              name="group"
+              size="20"
+              aria-label={`Gruppe${t('goal', { form: 'sin-indef' })}`}
+            ></pkt-icon>
           {/if}
         </div>
         <div>
@@ -274,7 +293,7 @@
       {/each}
     </div>
   {:else}
-    <div class="alert alert-info mt-4">Ingen mål funnet</div>
+    <div class="alert alert-info mt-4">Ingen {t('goal', { form: 'plu-indef' })} funnet</div>
   {/if}
 </section>
 

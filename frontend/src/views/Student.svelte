@@ -15,6 +15,7 @@
   import { SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
   import { dataStore } from '../stores/data'
   import { trackEvent } from '../stores/analytics'
+  import { t } from '../stores/translations'
   import type { AppData } from '../types/models'
 
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
@@ -145,19 +146,19 @@
     <!-- Goals and mastery -->
     <div class="card shadow-sm">
       <div class="d-flex align-items-center gap-2 card-header">
-        <h2>Mål</h2>
+        <h2>{t('goal', { form: 'plu-indef', capitalize: true })}</h2>
         {#if individualStudentGoalsCount === 0 && currentSchool.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM}
           <ButtonMini
             options={{
               iconName: 'goal',
               classes: 'm-2',
-              title: `Opprett ${individualGoalcount} individuelle mål for hvert fag`,
+              title: `Opprett ${individualGoalcount} individuelle ${t('goal', { form: 'plu-indef' })} for hvert fag`,
               onClick: () => handleCreateAllIndividualGoals(),
               variant: 'icon-left',
               skin: 'primary',
             }}
           >
-            Opprett {individualGoalcount} individuelle mål for hvert fag
+            Opprett {individualGoalcount} individuelle {t('goal', { form: 'plu-indef' })} for hvert fag
           </ButtonMini>
         {:else}
           <GoalWidgets
@@ -180,7 +181,9 @@
           {/each}
         </ul>
       {:else}
-        <div class="alert alert-info m-2">Ingen mål for denne eleven</div>
+        <div class="alert alert-info m-2">
+          Ingen {t('goal', { form: 'plu-indef' })} for denne eleven
+        </div>
       {/if}
     </div>
   {:else}

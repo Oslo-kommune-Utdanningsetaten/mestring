@@ -509,7 +509,7 @@
         <h3 class="mb-3">Grupper</h3>
         <pkt-checkbox
           id={'group-goal-' + school.id}
-          label={`Gruppemål ${school.isGroupGoalEnabled ? '' : 'IKKE'} tilgjengelig`}
+          label={`Gruppe${t('goal', { form: 'plu-indef' })} ${school.isGroupGoalEnabled ? '' : 'IKKE'} tilgjengelig`}
           labelPosition="right"
           isSwitch="true"
           aria-checked={school.isGroupGoalEnabled}
@@ -520,7 +520,7 @@
         <pkt-checkbox
           id={'goal-title' + school.id}
           class="ms-1"
-          label={`Fritekst-tittel på mål ${school.isGoalTitleEnabled ? '' : 'IKKE'} tilgjengelig`}
+          label={`Fritekst-tittel på ${t('goal', { form: 'plu-indef' })} ${school.isGoalTitleEnabled ? '' : 'IKKE'} tilgjengelig`}
           labelPosition="right"
           isSwitch="true"
           aria-checked={school.isGoalTitleEnabled}

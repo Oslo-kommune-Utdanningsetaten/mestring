@@ -59,7 +59,7 @@
           [observationValues.join(', ')]
         : ''
     const aggregatedTitle = isAggregated
-      ? `Aggregert: ${observationValues.length} ${observationValues.length === 1 ? t('observation', { form: 'sin-indef' }) : t('observation', { form: 'plu-indef' })} fordelt på ${masteryData?.goalsCount ?? 0} mål`
+        ? `Aggregert: ${observationValues.length} ${observationValues.length === 1 ? t('observation', { form: 'sin-indef' }) : t('observation', { form: 'plu-indef' })} fordelt på ${masteryData?.goalsCount ?? 0} ${t('goal', { form: 'plu-indef' })}`
       : ''
     const trendTitle = `Trend: ${trend}`
 

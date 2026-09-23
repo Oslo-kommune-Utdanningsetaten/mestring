@@ -101,7 +101,7 @@
       <div
         class="list-group-item goal-item {isExpanded ? 'shadow expanded' : ''}"
         class:hatched-background={!goal.isRelevant}
-        title={goal.isRelevant ? '' : 'Målet er ikke lenger relevant for eleven'}
+        title={goal.isRelevant ? '' : t('goal', { form: 'sin-def', capitalize: true }) + ' er ikke lenger relevant for eleven'}
         role="listitem"
         onmouseenter={() => {
           hoveredGoalId = goal.id
@@ -115,11 +115,11 @@
             {goal.title || goal.sortOrder}
             {#if isExpanded}
               {#if goal.isIndividual}
-                <span title="Individuelt mål">
+                <span title="Individuelt {t('goal', { form: 'sin-indef' })}">
                   <pkt-icon class="goal-type-icon" name="person" aria-hidden="true"></pkt-icon>
                 </span>
               {:else}
-                <span title="Gruppemål">
+                <span title="Gruppe{t('goal', { form: 'sin-indef' })}">
                   <pkt-icon class="goal-type-icon" name="group" aria-hidden="true"></pkt-icon>
                 </span>
               {/if}

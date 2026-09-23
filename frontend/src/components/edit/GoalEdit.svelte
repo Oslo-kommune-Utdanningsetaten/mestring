@@ -13,6 +13,7 @@
   import { NONE_FIELD_VALUE } from '../../utils/constants'
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
+  import { t } from '../../stores/translations'
 
   import ButtonMini from '../ButtonMini.svelte'
 
@@ -58,7 +59,7 @@
   const getTitle = () => {
     const action = localGoal.id ? 'Redigerer' : 'Nytt'
     const goalType = isGoalIndividual ? 'individuelt ' : 'gruppe'
-    return `${action} ${goalType}mål for ${target}`
+    return `${action} ${goalType}${t('goal', { form: 'sin-indef' })} for ${target}`
   }
 
   const handleChangeMasterySchema = (masterySchemaId: string) => {
@@ -97,7 +98,7 @@
       }
       addAlert({
         type: 'success',
-        message: `${action} mål for ${target}.`,
+        message: `${action} ${t('goal', { form: 'sin-indef' })} for ${target}.`,
       })
       if (onDone) {
         await onDone()
@@ -106,7 +107,7 @@
       console.error('Error saving goal:', error)
       addAlert({
         type: 'danger',
-        message: `Noe gikk galt ved lagring av mål for ${target}.`,
+        message: `Noe gikk galt ved lagring av ${t('goal', { form: 'sin-indef' })} for ${target}.`,
       })
     }
   }
@@ -177,7 +178,7 @@
         bind:value={localGoal.title}
         bind:this={titleInput}
         disabled={!localGoal.isRelevant}
-        placeholder="Tittel på målet"
+        placeholder={`Tittel på ${t('goal', { form: 'sin-def' })}`}
       />
     </div>
   {/if}
@@ -236,7 +237,9 @@
   <div>
     <pkt-checkbox
       class="mb-1"
-      label={localGoal.isRelevant ? 'Målet er i bruk' : 'Målet er ikke lenger relevant'}
+      label={localGoal.isRelevant
+        ? `${t('goal', { form: 'sin-def', capitalize: true })} er i bruk`
+        : `${t('goal', { form: 'sin-def', capitalize: true })} er ikke lenger relevant`}
       labelPosition="right"
       isSwitch="true"
       aria-checked={localGoal.isRelevant ? 'true' : 'false'}

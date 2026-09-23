@@ -53,7 +53,7 @@
       </div>
     {/each}
   {:else}
-    <p>Ingen {t('observation', { form: 'plu-indef', capitalize: true })} for dette målet.</p>
+    <p>Ingen {t('observation', { form: 'plu-indef', capitalize: true })} for dette {t('goal', { form: 'sin-def' })}.</p>
   {/if}
 </div>
 

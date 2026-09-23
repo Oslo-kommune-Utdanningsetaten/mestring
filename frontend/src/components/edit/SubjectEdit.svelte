@@ -2,6 +2,7 @@
   import { subjectsCreate, subjectsUpdate } from '../../generated/sdk.gen'
   import type { SubjectType, SchoolType } from '../../generated/types.gen'
   import ButtonMini from '../ButtonMini.svelte'
+  import { t } from '../../stores/translations'
 
   const { subject, school, onDone } = $props<{
     subject: SubjectType | null
@@ -46,7 +47,10 @@
 </script>
 
 <div class="subject-edit p-4">
-  <h3 class="pb-2">{subject?.id ? 'Redigerer' : 'Nytt'} mål for {school?.displayName}</h3>
+  <h3 class="pb-2">
+    {subject?.id ? 'Redigerer' : 'Nytt'}
+    {t('goal', { form: 'sin-indef' })} for {school?.displayName}
+  </h3>
   <hr />
 
   <div class="form-group mb-3">

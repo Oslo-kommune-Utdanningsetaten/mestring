@@ -27,7 +27,8 @@
   )
   const calculations = $derived(useMasteryCalculations(masterySchema))
   const masteryValueTitle = $derived(
-    masteryTitle || `Hvor godt mestrer ${student.name} ${goal.title || 'dette målet'}?`
+    masteryTitle ||
+      `Hvor godt mestrer ${student.name} ${goal.title || 'dette ' + t('goal', { form: 'sin-def' })}?`
   )
 
   let localObservation = $state<Partial<ObservationType> & { masteryValue?: number }>({})
@@ -55,7 +56,7 @@
       </span>
     </div>
     <div>
-      <span class="text-muted">Mål:</span>
+      <span class="text-muted">{t('goal', { form: 'sin-indef', capitalize: true })}:</span>
       <span>
         {goal?.title || goal.sortOrder}
       </span>

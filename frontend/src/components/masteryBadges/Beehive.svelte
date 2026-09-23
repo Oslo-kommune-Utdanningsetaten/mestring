@@ -73,7 +73,7 @@
     <span
       class="trend-box missing-mastery void-badge"
       style="width: {trendBoxSizeX + masteryIndicatorOutcrop * 2}px; height: {trendBoxSizeY}px;"
-      title="Mål mangler"
+      title="{t('goal', { form: 'sin-indef', capitalize: true })} mangler"
     ></span>{/if}
 </span>
 

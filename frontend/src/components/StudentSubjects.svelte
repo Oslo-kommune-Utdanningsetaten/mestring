@@ -7,6 +7,7 @@
     getPreferredGroupValidity,
   } from '../stores/localStorageFunctions'
   import StudentSubject from './StudentSubject.svelte'
+  import { t } from '../stores/translations'
 
   const { student } = $props<{
     student: UserType
@@ -47,7 +48,7 @@
 </script>
 
 <section class="py-4">
-  <h2>Mine faglige mål</h2>
+  <h2>Mine faglige {t('goal', { form: 'plu-indef' })}</h2>
   {#if isLoading}
     <div class="spinner-border spinner-border-sm" role="status">
       <span class="visually-hidden">Henter data...</span>

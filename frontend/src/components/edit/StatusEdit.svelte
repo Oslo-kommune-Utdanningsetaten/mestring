@@ -63,7 +63,7 @@
   const goalSectionToggleOptions = $derived.by(() => {
     return {
       iconName: `chevron-thin-${isGoalSectionExpanded ? 'up' : 'down'}`,
-      title: `${isGoalSectionExpanded ? 'Skjul' : 'Vis'} mål`,
+      title: `${isGoalSectionExpanded ? 'Skjul' : 'Vis'} ${t('goal', { form: 'plu-indef' })}`,
       onClick: () => toggleGoalsExpansion(),
     }
   })
@@ -243,11 +243,11 @@
       {#if subject}
         <div class="goals-section bg-light p-3">
           <h3>
-            Mål i <mark>{subject?.shortName || subject?.displayName}</mark>
+            {t('goal', { form: 'plu-indef', capitalize: true })} i <mark>{subject?.shortName || subject?.displayName}</mark>
             <ButtonIcon options={goalSectionToggleOptions} />
           </h3>
           {#if !localGoals}
-            <p><em>Eleven har ingen mål i dette faget</em></p>
+            <p><em>Eleven har ingen {t('goal', { form: 'plu-indef' })} i dette faget</em></p>
           {/if}
 
           {#if localGoals && isGoalSectionExpanded}
@@ -256,11 +256,11 @@
                 <div class="goal-row">
                   <span>{goal.sortOrder}</span>
                   {#if goal.isIndividual}
-                    <span title="Individuelt mål">
+                    <span title="Individuelt {t('goal', { form: 'sin-indef' })}">
                       <pkt-icon name="person"></pkt-icon>
                     </span>
                   {:else}
-                    <span title="Gruppemål">
+                    <span title="Gruppe{t('goal', { form: 'sin-indef' })}">
                       <pkt-icon name="group"></pkt-icon>
                     </span>
                   {/if}
@@ -284,7 +284,7 @@
                         />
                       {/if}
                     {:else}
-                      Ingen {t('observation', { form: 'plu-indef' })} for dette målet
+                      Ingen {t('observation', { form: 'plu-indef' })} for dette {t('goal', { form: 'sin-def' })}
                     {/if}
                   </span>
                 </div>
