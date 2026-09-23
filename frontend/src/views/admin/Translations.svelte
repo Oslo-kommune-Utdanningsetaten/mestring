@@ -14,19 +14,16 @@
   const router = useTinyRouter()
   let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
-
   let schoolWip = $state<SchoolType | null>(null)
   let isEditorOpen = $state<boolean>(false)
-
-  let selectedSchool = $derived.by(() => {
-    const schoolIdFromUrl = router.getQueryParam('school')
-    return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
-  })
+  let selectedSchool = $state<SchoolType | null>(null)
 
   const fetchSchools = async () => {
     try {
       const result = await schoolsList({})
       schools = result.data || []
+      const wantedSchoolId = router.getQueryParam('school') || $dataStore.currentSchool?.id
+      selectedSchool = schools.find(s => s.id === wantedSchoolId) || null
     } catch (error) {
       console.error('Error fetching schools:', error)
       schools = []
@@ -41,6 +38,7 @@
     } else {
       router.navigate('/admin/translations')
     }
+    fetchSchools()
   }
 
   const handleDone = () => {
@@ -50,8 +48,10 @@
   }
 
   const handleEditTranslations = () => {
-    schoolWip = { ...selectedSchool }
-    isEditorOpen = true
+    if (selectedSchool) {
+      schoolWip = { ...selectedSchool }
+      isEditorOpen = true
+    }
   }
 
   $effect(() => {
@@ -90,22 +90,22 @@
 
 <section class="py-4">
   {#if selectedSchool}
-    <h3>Oversettelser for {selectedSchool.displayName}</h3>
-    <pre>{JSON.stringify(selectedSchool.uiTranslations, null, 2)}</pre>
-  {/if}
+    <h3 class="mb-3">Oversettelser for {selectedSchool.displayName}</h3>
 
-  <ButtonMini
-    options={{
-      title: 'Rediger oversettelser',
-      iconName: 'document-edit',
-      skin: 'primary',
-      variant: 'label-only',
-      classes: '',
-      onClick: () => handleEditTranslations(),
-    }}
-  >
-    Rediger oversettelser
-  </ButtonMini>
+    <ButtonMini
+      options={{
+        title: 'Rediger oversettelser',
+        iconName: 'document-edit',
+        skin: 'primary',
+        variant: 'label-only',
+        onClick: () => handleEditTranslations(),
+      }}
+    >
+      Rediger oversettelser
+    </ButtonMini>
+
+    <pre class="mt-4">{JSON.stringify(selectedSchool.uiTranslations, null, 2)}</pre>
+  {/if}
 </section>
 
 <!-- Offcanvas for creating/editing mastery schemas -->
