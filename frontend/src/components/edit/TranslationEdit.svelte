@@ -4,6 +4,8 @@
   import type { SchoolType } from '../../generated/types.gen'
   import { schoolsUpdate } from '../../generated/sdk.gen'
 
+  import { defaultTranslations } from '../../stores/translations'
+
   import ButtonMini from '../ButtonMini.svelte'
 
   const { school, onDone } = $props<{
@@ -40,7 +42,9 @@
 
 <div class="p-4 translations-edit">
   <h3 class="pb-2">Rediger oversettelser</h3>
-
+  <div class="text-muted">
+    <pre>{JSON.stringify(defaultTranslations, null, 2)}</pre>
+  </div>
   <div style="height: 40vh;">
     <JSONEditor bind:content={editorContent} mode={Mode.text} />
   </div>

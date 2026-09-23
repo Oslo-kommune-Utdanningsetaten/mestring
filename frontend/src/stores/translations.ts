@@ -8,7 +8,7 @@ type TranslationOptions = {
   capitalize?: boolean
 }
 
-const defaultTranslations: Record<string, any> = {
+export const defaultTranslations: Record<string, any> = {
   goal: {
     'sin-indef': 'mål',
     'sin-def': 'målet',

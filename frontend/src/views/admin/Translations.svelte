@@ -94,17 +94,22 @@
 
     <ButtonMini
       options={{
-        title: 'Rediger oversettelser',
+        title: selectedSchool.uiTranslations ? 'Rediger oversettelser' : 'Legg til oversettelser',
         iconName: 'document-edit',
         skin: 'primary',
         variant: 'label-only',
         onClick: () => handleEditTranslations(),
       }}
     >
-      Rediger oversettelser
+      {selectedSchool.uiTranslations ? 'Rediger oversettelser' : 'Legg til oversettelser'}
     </ButtonMini>
-
-    <pre class="mt-4">{JSON.stringify(selectedSchool.uiTranslations, null, 2)}</pre>
+    <div class="mt-4">
+      {#if selectedSchool.uiTranslations}
+        <pre>{JSON.stringify(selectedSchool.uiTranslations, null, 2)}</pre>
+      {:else}
+        <p class="text-muted">ingen oversettelser for denne skolen</p>
+      {/if}
+    </div>
   {/if}
 </section>
 
