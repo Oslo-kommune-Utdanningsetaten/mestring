@@ -1,6 +1,6 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
-  import { JSONEditor, type Content } from 'svelte-jsoneditor'
+  import { JSONEditor, type Content, Mode } from 'svelte-jsoneditor'
   import type { SchoolType } from '../../generated/types.gen'
   import { schoolsUpdate } from '../../generated/sdk.gen'
 
@@ -11,7 +11,9 @@
     onDone: () => void
   }>()
   let localSchool = $state<SchoolType>({ ...school })
-  let editorContent = $derived({ json: localSchool?.uiTranslations || {} })
+  let editorContent = $state<Content>({
+    json: localSchool?.uiTranslations || {},
+  })
 
   const handleSave = async () => {
     try {
@@ -40,7 +42,7 @@
   <h3 class="pb-2">Rediger oversettelser</h3>
 
   <div style="height: 40vh;">
-    <JSONEditor bind:content={editorContent} mode="text" />
+    <JSONEditor bind:content={editorContent} mode={Mode.text} />
   </div>
 
   <div class="d-flex gap-2 justify-content-start">
