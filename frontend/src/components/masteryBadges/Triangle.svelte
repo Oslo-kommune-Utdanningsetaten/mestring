@@ -73,7 +73,7 @@
     <span
       class="trend-box missing-mastery"
       style="width: {trendBoxSizeX}px; height: {trendBoxSizeY}px;"
-      title="{t('observations', { capitalize: true })} mangler"
+      title="{t('observation', { form: 'plu-indef', capitalize: true })} mangler"
     ></span>
   {:else if isBadgeVoid}
     <span

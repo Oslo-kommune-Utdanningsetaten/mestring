@@ -76,14 +76,14 @@
       }
       addAlert({
         type: 'success',
-        message: `${action} ${t('observation')} for ${student.name}.`,
+        message: `${action} ${t('observation', { form: 'sin-indef' })} for ${student.name}.`,
       })
       onDone()
     } catch (error) {
       console.error('Error saving Observation:', error)
       addAlert({
         type: 'danger',
-        message: `Noe gikk galt ved lagring av ${t('observation')} for ${student.name}.`,
+        message: `Noe gikk galt ved lagring av ${t('observation', { form: 'sin-indef' })} for ${student.name}.`,
       })
     }
   }
@@ -93,7 +93,7 @@
   {#if localObservation}
     <h3>
       {localObservation.id ? 'Redigerer' : 'Ny'}
-      {t('observation')}
+      {t('observation', { form: 'sin-indef' })}
     </h3>
 
     {#if masterySchema?.config?.isMasteryValueInputEnabled}

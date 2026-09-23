@@ -133,7 +133,9 @@
                 class:highlighted={hoveredGoalId === goal.id}
               >
                 {goal.observations.length}
-                {goal.observations.length === 1 ? t('observation') : t('observations')}
+                {goal.observations.length === 1
+                  ? t('observation', { form: 'sin-indef' })
+                  : t('observation', { form: 'plu-indef' })}
               </span>
 
               <!-- Mastery Badge -->
@@ -156,7 +158,7 @@
               <ButtonIcon
                 options={{
                   iconName: `chevron-thin-${expandedGoalIds.includes(goal.id) ? 'up' : 'down'}`,
-                  title: `${expandedGoalIds.includes(goal.id) ? 'Skjul' : 'Vis'} ${t('observations')}`,
+                  title: `${expandedGoalIds.includes(goal.id) ? 'Skjul' : 'Vis'} ${t('observation', { form: 'plu-indef' })}`,
                   onClick: () => handleToggleGoal(goal.id),
                 }}
               />

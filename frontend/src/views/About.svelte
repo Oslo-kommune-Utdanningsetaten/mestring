@@ -51,15 +51,17 @@
   <p class="mb-4">
     Webapplikasjonen er utviklet av UDA for å gi lærere og skoleledelse bedre oversikt over elevenes
     faglige utvikling. Løsningen gjør underveisvurdering i en travel hverdag enklere ved å samle mål
-    og {t('observations')} på ett sted. Samtidig får ledelsen oversikt over hvilke elever som trenger
-    ekstra innsats.
+    og {t('observation', { form: 'plu-indef' })} på ett sted. Samtidig får ledelsen oversikt over hvilke
+    elever som trenger ekstra innsats.
   </p>
 
   <h3>Hovedfunksjoner</h3>
   <ul>
     <li>
       <span class="fw-bold">Enkelt:</span>
-      Det krever få klikk for læreren å registrere løpende {t('observations')}.
+      Det krever få klikk for læreren å registrere løpende {t('observation', {
+        form: 'plu-indef',
+      })}.
     </li>
     <li>
       <span class="fw-bold">Målsetting:</span>
@@ -130,34 +132,35 @@
   <ul>
     <li>
       <span class="fw-bold">Lærer i undervisningsgruppe</span>
-      kan opprette mål og {t('observations')} for elevene gruppa, i faget som undervises.
+      kan opprette mål og {t('observation', { form: 'plu-indef' })} for elevene gruppa, i faget som undervises.
       {@render rolesCount(USER_ROLES.TEACHER, GROUP_TYPE_TEACHING)}
     </li>
     <li>
       <span class="fw-bold">Lærer i basisgruppe</span>
-      kan se mål og {t('observations')} for sine elever, i alle fag. Kan opprette individuelle mål (og
-      {t('observations')}
+      kan se mål og {t('observation', { form: 'plu-indef' })} for sine elever, i alle fag. Kan opprette
+      individuelle mål (og
+      {t('observation', { form: 'plu-indef' })}
       på disse) for sine elever i alle fag.
       {@render rolesCount(USER_ROLES.TEACHER, GROUP_TYPE_BASIS)}
     </li>
     <li>
       <span class="fw-bold">Skoleinspektør</span>
-      kan se mål og {t('observations')} for alle elever ved {currentSchool
+      kan se mål og {t('observation', { form: 'plu-indef' })} for alle elever ved {currentSchool
         ? currentSchool.displayName
         : 'sin skole'}.
       {@render rolesCount(USER_ROLES.INSPECTOR)}
     </li>
     <li>
       <span class="fw-bold">Skoleadmin</span>
-      kan se og redigere mål og {t('observations')} for alle elever ved {currentSchool
+      kan se og redigere mål og {t('observation', { form: 'plu-indef' })} for alle elever ved {currentSchool
         ? currentSchool.displayName
         : 'sin skole'}.
       {@render rolesCount(USER_ROLES.ADMIN)}
     </li>
     <li>
       <span class="fw-bold">Superadmin</span>
-      kan se og redigere mål og {t('observations')} for alle elever ved alle skoler. Kan også endre globale
-      innstillinger for skolene.
+      kan se og redigere mål og {t('observation', { form: 'plu-indef' })} for alle elever ved alle skoler.
+      Kan også endre globale innstillinger for skolene.
       {@render rolesCount(USER_ROLES.SUPERADMIN)}
     </li>
   </ul>
@@ -220,10 +223,10 @@
     </div>
 
     <div class="icon">
-      <span class="svg-container" title={t('an observation', { capitalize: true })}>
+      <span class="svg-container" title={t('observation', { form: 'sin-indef', capitalize: true })}>
         <pkt-icon name="bullseye"></pkt-icon>
       </span>
-      <span class="icon-label">{t('an observation', { capitalize: true })}</span>
+      <span class="icon-label">{t('observation', { form: 'sin-indef', capitalize: true })}</span>
     </div>
 
     <div class="icon">

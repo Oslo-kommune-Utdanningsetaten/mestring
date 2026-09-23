@@ -103,7 +103,7 @@
       <path class="mouth" d={mouthPath} />
     {:else if isBadgeEmpty}
       <!-- just a blank face-->
-      <title>{t('observations', { capitalize: true })} mangler</title>
+      <title>{t('observation', { form: 'plu-indef', capitalize: true })} mangler</title>
     {:else if isBadgeVoid}
       <!-- hatched pattern-->
       <title>Mål mangler</title>

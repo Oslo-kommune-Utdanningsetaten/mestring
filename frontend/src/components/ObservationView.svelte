@@ -43,7 +43,7 @@
 
 <div class="observation-edit p-4">
   {#if observation}
-    <h3 class="pb-2">{t('a observation', { capitalize: true })}</h3>
+    <h3 class="pb-2">{t('observation', { form: 'sin-indef', capitalize: true })}</h3>
     <div class="text-muted">
       <AuthorInfo item={observation} />
     </div>

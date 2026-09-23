@@ -124,7 +124,7 @@
 </script>
 
 <section class="py-4">
-  <h2 title="{viewMode} mode">Siste {t('observations')}</h2>
+  <h2 title="{viewMode} mode">Siste {t('observation', { form: 'plu-indef' })}</h2>
 
   {#if observations.length < 1}
     <div class="mt-3">🫤 Her var det lite, gitt.</div>

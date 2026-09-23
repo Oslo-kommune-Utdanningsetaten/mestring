@@ -53,7 +53,7 @@
     } else {
       addAlert({
         type: 'danger',
-        message: `Kunne ikke finne ${t('observation')}. Hvis du mener dette er en feil, kontakt support.`,
+        message: `Kunne ikke finne ${t('observation', { form: 'sin-indef' })}. Hvis du mener dette er en feil, kontakt support.`,
       })
     }
   }
@@ -63,7 +63,7 @@
       await observationsDestroy({ path: { id: observationId } })
       addAlert({
         type: 'success',
-        message: `Slettet ${t('observation')}`,
+        message: `Slettet ${t('observation', { form: 'sin-indef' })}`,
       })
       trackEvent('Observations', 'Delete')
       onRefreshRequired()
@@ -71,7 +71,7 @@
       console.error('Error deleting observation:', error)
       addAlert({
         type: 'danger',
-        message: `Kunne ikke slette ${t('observation')}. Hvis du mener dette er en feil, kontakt support.`,
+        message: `Kunne ikke slette ${t('observation', { form: 'sin-indef' })}. Hvis du mener dette er en feil, kontakt support.`,
       })
     }
   }
@@ -83,7 +83,7 @@
     <ButtonIcon
       options={{
         iconName: 'document-text',
-        title: `Se ${t('observation')}`,
+        title: `Se ${t('observation', { form: 'sin-indef' })}`,
         classes: 'bordered',
         onClick: () => handleViewObservation(observation, goal),
       }}
@@ -95,7 +95,7 @@
     <ButtonIcon
       options={{
         iconName: 'bullseye',
-        title: `Ny ${t('observation')}`,
+        title: `Ny ${t('observation', { form: 'sin-indef' })}`,
         classes: 'bordered',
         disabled: !goal.isRelevant,
         onClick: () => handleCreateObservation(goal),
@@ -108,7 +108,7 @@
     <ButtonIcon
       options={{
         iconName: 'document-edit',
-        title: `Rediger ${t('observation')}`,
+        title: `Rediger ${t('observation', { form: 'sin-indef' })}`,
         classes: 'bordered',
         onClick: () => handleEditObservation(observation, goal),
       }}
@@ -121,7 +121,7 @@
       <ButtonIcon
         options={{
           iconName: 'trash-can',
-          title: `Slett ${t('observation')}`,
+          title: `Slett ${t('observation', { form: 'sin-indef' })}`,
           classes: 'bordered',
           onClick: () => handleDeleteObservation(observation.id),
           delayActionFor: 3,
@@ -144,7 +144,7 @@
 <!-- offcanvas for creating/editing observations -->
 <Offcanvas
   bind:isOpen={isObservationEditorOpen}
-  ariaLabel="Rediger {t('observation')}"
+  ariaLabel="Rediger {t('observation', { form: 'sin-indef' })}"
   onClosed={() => {
     observationWip = null
     onRefreshRequired()
@@ -167,7 +167,7 @@
 <!-- offcanvas for viewing observations -->
 <Offcanvas
   bind:isOpen={isObservationViewerOpen}
-  ariaLabel="Se {t('observation')}"
+  ariaLabel="Se {t('observation', { form: 'sin-indef' })}"
   onClosed={() => {
     observationWip = null
   }}

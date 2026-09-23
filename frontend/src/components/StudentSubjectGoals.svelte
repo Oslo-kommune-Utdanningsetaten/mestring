@@ -239,7 +239,7 @@
           options={{
             iconName: `chevron-thin-${isExpanded ? 'up' : 'down'}`,
             disabled: !goal.isRelevant,
-            title: `${isExpanded ? 'Skjul' : 'Vis'} ${t('observations')}`,
+            title: `${isExpanded ? 'Skjul' : 'Vis'} ${t('observation', { form: 'plu-indef' })}`,
             onClick: () => handleToggleGoal(goal.id),
           }}
         />
@@ -278,7 +278,7 @@
             </div>
           {/each}
         {:else}
-          <p>Ingen {t('observations')} for dette målet.</p>
+          <p>Ingen {t('observation', { form: 'plu-indef' })} for dette målet.</p>
         {/if}
       </div>
       <div class="my-3">

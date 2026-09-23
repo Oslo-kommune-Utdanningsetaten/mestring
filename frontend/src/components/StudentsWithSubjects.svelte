@@ -223,7 +223,7 @@
       <button
         class="column-header-button sortable"
         onclick={() => handleHeaderClick(subject.id)}
-        title="Sorter etter antall {t('observations')} i {subject.grepCode}"
+        title="Sorter etter antall {t('observation', { form: 'plu-indef' })} i {subject.grepCode}"
       >
         {getSubjectName(subject, 'grepCode')}{getSortIndicator(subject.id)}
       </button>

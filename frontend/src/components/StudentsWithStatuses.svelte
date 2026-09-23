@@ -114,7 +114,10 @@
     <button
       class="item header header-row sortable"
       onclick={() => handleHeaderClick(subject.id)}
-      title="Sorter etter antall {t('observations')} i {getSubjectName(subject, 'displayName')}"
+      title="Sorter etter antall {t('observation', { form: 'plu-indef' })} i {getSubjectName(
+        subject,
+        'displayName'
+      )}"
     >
       <span class="column-header">
         {#if subject.ownedBySchoolId}

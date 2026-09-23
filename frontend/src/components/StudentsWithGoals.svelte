@@ -181,7 +181,7 @@
         class="column-header-button sortable {goal.isRelevant
           ? ''
           : 'hatched-background text-muted'}"
-        title="Sorter etter antall {t('observations')} for dette målet"
+        title="Sorter etter antall {t('observation', { form: 'plu-indef' })} for dette målet"
       >
         {goal.title || goal.sortOrder}{getSortIndicator(goal.id)}
       </button>

@@ -54,10 +54,12 @@
     const lastValueTitle = isAggregated && isMasteryValueVisible ? `Siste verdi: ${mastery}` : ''
     const observationsTitle =
       !isAggregated && isMasteryValueVisible && observationValues.length > 0
-        ? t('observations', { capitalize: true }) + ': ' + [observationValues.join(', ')]
+        ? t('observation', { form: 'plu-indef', capitalize: true }) +
+          ': ' +
+          [observationValues.join(', ')]
         : ''
     const aggregatedTitle = isAggregated
-      ? `Aggregert: ${observationValues.length} ${observationValues.length === 1 ? t('observation') : t('observations')} fordelt på ${masteryData?.goalsCount ?? 0} mål`
+      ? `Aggregert: ${observationValues.length} ${observationValues.length === 1 ? t('observation', { form: 'sin-indef' }) : t('observation', { form: 'plu-indef' })} fordelt på ${masteryData?.goalsCount ?? 0} mål`
       : ''
     const trendTitle = `Trend: ${trend}`
 

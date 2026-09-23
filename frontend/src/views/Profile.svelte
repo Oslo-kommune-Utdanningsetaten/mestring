@@ -221,7 +221,9 @@
           </div>
 
           <div class="mb-4">
-            <strong>{t('observations', { capitalize: true })} har lenke til elevarbeid</strong>
+            <strong>
+              {t('observation', { form: 'plu-indef', capitalize: true })} har lenke til elevarbeid
+            </strong>
             <pkt-checkbox
               label={$isObservationUrlEnabled ? 'Vises' : 'Skjules'}
               labelPosition="right"
