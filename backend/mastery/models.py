@@ -2,6 +2,7 @@ from django.utils import timezone
 from django.db import models
 from django.db.models import Q
 from nanoid import generate
+from .fields import PlainJSONField
 from .querysets import GroupQuerySet
 
 ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
@@ -54,7 +55,7 @@ class School(BaseModel):
     is_status_enabled = models.BooleanField(default=False)  # is status feature enabled
     # which subjects can be used: 'only-custom' (owned by school), 'only-feide', 'all'
     subjects_allowed = models.CharField(max_length=50, null=False, default='all')
-    ui_translations = models.JSONField(null=True)  # school-specific translations for the UI
+    ui_translations = PlainJSONField(null=True)  # school-specific translations for the UI
 
     def ensure_short_name(self, short_name):
         """Update short_name (used by import)"""
@@ -311,7 +312,7 @@ class MasterySchema(BaseModel):
     """
     title = models.CharField(max_length=200, null=False, default="Navnløst mestringsskjema")
     description = models.TextField(null=True)
-    config = models.JSONField(null=True)
+    config = PlainJSONField(null=True)
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='mastery_schemas')
     is_default = models.BooleanField(default=False)  # is this the default schema for the school
     is_enabled = models.BooleanField(default=False)  # is the schema available for use for the school
