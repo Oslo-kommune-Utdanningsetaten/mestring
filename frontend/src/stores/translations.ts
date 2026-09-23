@@ -1,17 +1,6 @@
 import { derived, get } from 'svelte/store'
 import { currentSchool } from './data'
 
-const defaultTranslationsOld: Record<string, string> = {
-  'a goal': 'mål',
-  'the goal': 'målet',
-  goals: 'mål',
-  'the goals': 'målene',
-  'an observation': 'observasjon',
-  'the observation': 'observasjonen',
-  observations: 'observasjoner',
-  'the observations': 'observasjonene',
-}
-
 type FormOptions = 'sin-indef' | 'sin-def' | 'plu-indef' | 'plu-def'
 
 type TranslationOptions = {

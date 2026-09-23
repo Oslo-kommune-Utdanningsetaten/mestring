@@ -284,7 +284,7 @@
                         />
                       {/if}
                     {:else}
-                      Ingen {t('observation', { form: 'plu-indef', capitalize: true })} for dette målet
+                      Ingen {t('observation', { form: 'plu-indef' })} for dette målet
                     {/if}
                   </span>
                 </div>
