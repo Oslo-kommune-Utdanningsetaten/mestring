@@ -40,7 +40,7 @@
   <h3 class="pb-2">Rediger oversettelser</h3>
 
   <div style="height: 40vh;">
-    <JSONEditor bind:content={editorContent} />
+    <JSONEditor bind:content={editorContent} mode="text" />
   </div>
 
   <div class="d-flex gap-2 justify-content-start">
