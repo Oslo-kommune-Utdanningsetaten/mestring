@@ -3,10 +3,12 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import { type SchoolType } from '../../generated/types.gen'
   import { feideImportSchool, schoolsList, schoolsPartialUpdate } from '../../generated/sdk.gen'
+
   import { formatDateTime } from '../../utils/functions'
-  import ButtonMini from '../../components/ButtonMini.svelte'
   import { addAlert } from '../../stores/alerts'
   import { dataStore } from '../../stores/data'
+
+  import ButtonMini from '../../components/ButtonMini.svelte'
   import Link from '../../components/Link.svelte'
 
   const router = useTinyRouter()
@@ -44,7 +46,7 @@
       const result = await feideImportSchool({
         path: { orgNumber },
       })
-      if (result.response.status === 201) {
+      if (result?.response?.status === 201) {
         addAlert({
           type: 'success',
           message: `Skole med org nr ${orgNumber} importert fra Feide`,
