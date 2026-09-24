@@ -10,7 +10,6 @@
       disabled?: boolean
       onClick?: () => void
       delayActionFor?: number
-      delayActionTitle?: string
     }
     children?: any
   }

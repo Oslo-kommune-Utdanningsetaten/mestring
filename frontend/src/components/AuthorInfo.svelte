@@ -5,7 +5,7 @@
   import { onMount } from 'svelte'
 
   const { item } = $props<{ item: ObservationType | StatusType }>()
-  const { createdById, updatedById, createdAt, updatedAt } = item
+  const { createdById, updatedById, createdAt, updatedAt } = $derived(item)
   let creator = $state<(Partial<UserType> & { name: string }) | null>(null)
   let updator = $state<(Partial<UserType> & { name: string }) | null>(null)
 

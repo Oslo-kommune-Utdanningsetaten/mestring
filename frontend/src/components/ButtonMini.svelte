@@ -1,5 +1,6 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-button.js'
+  import type { Snippet } from 'svelte'
   import DelayedAction from './DelayedAction.svelte'
 
   interface Props {
@@ -9,32 +10,31 @@
       title?: string
       variant?: string
       skin?: string
-      color?: string
+      color?: string | null
       disabled?: boolean
       onClick?: () => void
       delayActionFor?: number
-      delayActionTitle?: string
       size?: 'tiny' | 'small' | 'medium' | 'large'
     }
-    children?: any
+    children?: Snippet
   }
 
   const { options, children }: Props = $props()
-  const size = options.size || 'small'
-  const isTiny = size === 'tiny'
-  const iconName = options.iconName || 'plus-sign'
-  const classes = options.classes || 'me-2'
-  const title = options.title || 'TITTEL MANGLER'
-  const variant = options.variant || 'icon-only'
-  const skin = options.skin || 'tertiary'
-  const color = options.color || null // allowed colors defined here https://punkt.oslo.kommune.no/latest/komponenter-og-maler/komponenter/button/#props
-  const disabled = $derived<boolean>(options.disabled || false)
-  const onClick =
-    options.onClick ||
-    (() => {
-      console.warn('No onClick function provided')
-    })
-  const delayActionFor = options.delayActionFor
+
+  const {
+    size = 'small',
+    iconName = 'plus-sign',
+    classes = 'me-2',
+    title = 'TITTEL MANGLER',
+    variant = 'icon-only',
+    skin = 'tertiary',
+    color = null,
+    delayActionFor,
+  } = $derived(options)
+
+  const isTiny = $derived(size === 'tiny')
+  const disabled = $derived(options.disabled ?? false)
+  const onClick = $derived(options.onClick ?? (() => console.warn('No onClick function provided')))
 
   let hasBeenClicked = $state(false)
 
