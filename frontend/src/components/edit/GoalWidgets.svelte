@@ -230,8 +230,9 @@
   {#if goalWip}
     <GoalEdit
       goal={goalWip}
+      {group}
       {student}
-      isGoalIndividual={true}
+      isGoalIndividual={isIndividual}
       onDone={() => {
         goalWip = null
         isGoalEditorOpen = false

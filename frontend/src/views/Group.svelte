@@ -294,7 +294,10 @@
                     <pkt-icon
                       name="lock-locked"
                       size="small"
-                      title="{t('goal', { form: 'sin-def', capitalize: true })} er i bruk av en eller flere elever"
+                      title="{t('goal', {
+                        form: 'sin-def',
+                        capitalize: true,
+                      })} er i bruk av en eller flere elever"
                     ></pkt-icon>
                   {:else}
                     <GoalWidgets

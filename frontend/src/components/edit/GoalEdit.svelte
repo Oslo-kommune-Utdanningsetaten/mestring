@@ -6,7 +6,7 @@
     SubjectType,
     GoalCreateType,
   } from '../../generated/types.gen'
-  import { goalsCreate, goalsUpdate } from '../../generated/sdk.gen'
+  import { goalsCreate, goalsUpdate, subjectsList } from '../../generated/sdk.gen'
 
   import { dataStore } from '../../stores/data'
   import { localStorage } from '../../stores/localStorage'
@@ -38,28 +38,44 @@
   }>()
 
   let localGoal = $state<Partial<GoalType>>({})
+  let availableSubjects = $state<SubjectType[]>()
+  let titleInput = $state<HTMLInputElement | null>(null)
+
+  let { currentSchool } = $derived($dataStore)
+  let masterySchemas = $derived($dataStore.masterySchemas.filter(schema => schema.isEnabled))
+  const target = $derived(isGoalIndividual ? student?.name : group?.displayName)
+  let selectedMasterySchemaId = $derived(
+    localGoal.masterySchemaId || $dataStore.defaultMasterySchema.id
+  )
   let subjectViaGroup = $derived(
     group
       ? (subjects || $dataStore.subjects).find((s: SubjectType) => s.id === group?.subjectId)
       : null
   )
-  let masterySchemas = $derived($dataStore.masterySchemas.filter(schema => schema.isEnabled))
-  let selectedMasterySchemaId = $derived(
-    localGoal.masterySchemaId || $dataStore.defaultMasterySchema.id
-  )
-  let { currentSchool } = $derived($dataStore)
-
   // What determines if we can edit the goal?
   let isFormValid = $derived(
     !!localGoal.masterySchemaId && (isGoalIndividual ? !!localGoal.subjectId : !!subjectViaGroup)
   )
-  let titleInput = $state<HTMLInputElement | null>(null)
-  const target = $derived(isGoalIndividual ? student?.name : group?.displayName)
 
   const getTitle = () => {
     const action = localGoal.id ? 'Redigerer' : 'Nytt'
     const goalType = isGoalIndividual ? 'individuelt ' : 'gruppe'
     return `${action} ${goalType}${t('goal', { form: 'sin-indef' })} for ${target}`
+  }
+
+  const fetchStudentSubjects = async () => {
+    try {
+      const subjectsResult = await subjectsList({
+        query: { school: currentSchool.id, students: student.id },
+      })
+      availableSubjects = subjectsResult.data || []
+    } catch (error) {
+      console.error('Error fetching student subjects:', error)
+    } finally {
+      if (!availableSubjects?.length) {
+        availableSubjects = $dataStore.subjects
+      }
+    }
   }
 
   const handleChangeMasterySchema = (masterySchemaId: string) => {
@@ -127,6 +143,14 @@
       schoolId: currentSchool?.id,
     }
   })
+
+  $effect(() => {
+    if (subjects?.length) {
+      availableSubjects = subjects
+    } else if (student?.id) {
+      fetchStudentSubjects()
+    }
+  })
 </script>
 
 <div class="goal-edit p-4">
@@ -151,7 +175,7 @@
           }}
         >
           <option disabled value={NONE_FIELD_VALUE}>Velg fag</option>
-          {#each subjects || $dataStore.subjects as aSubject}
+          {#each availableSubjects as aSubject}
             <option value={aSubject.id}>
               {aSubject.displayName}
             </option>
@@ -289,8 +313,7 @@
   .input-field {
     height: 48px;
   }
-  input,
-  select {
+  input {
     width: 100% !important;
   }
 </style>
