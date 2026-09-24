@@ -257,32 +257,6 @@
     border-top-width: 2px !important;
   }
 
-  .TEST-border-top-by-hand {
-    --hand-width: 3px;
-    --hand-color: rgba(0, 0, 0, 0.2);
-    --hand-wobble: 6px;
-    position: relative;
-    border-top: none !important;
-  }
-
-  .TEST-border-top-by-hand::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: var(--hand-width);
-    background: var(--hand-color);
-    clip-path: polygon(
-      -5% calc(50% + (var(--hand-wobble) * var(--hand-squiggle-1, 0))),
-      25% calc(50% + (var(--hand-wobble) * var(--hand-squiggle-2, 0))),
-      50% calc(50% + (var(--hand-wobble) * var(--hand-squiggle-3, 0))),
-      75% calc(50% + (var(--hand-wobble) * var(--hand-squiggle-4, 0))),
-      105% calc(50% + (var(--hand-wobble) * var(--hand-squiggle-5, 0)))
-    );
-    pointer-events: none;
-  }
-
   @media (min-width: 768px) {
     .observation-meta-panel {
       flex: 1;
