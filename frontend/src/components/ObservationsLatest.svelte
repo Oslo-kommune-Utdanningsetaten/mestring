@@ -105,17 +105,6 @@
     return masterySchema?.config?.isMasteryValueVisible
   }
 
-  const handDrawnBorderStyle = (): string => {
-    const randomSquiggle = () => Math.random() - 0.5
-    return [
-      `--hand-squiggle-1: ${randomSquiggle()}`,
-      `--hand-squiggle-2: ${randomSquiggle()}`,
-      `--hand-squiggle-3: ${randomSquiggle()}`,
-      `--hand-squiggle-4: ${randomSquiggle()}`,
-      `--hand-squiggle-5: ${randomSquiggle()}`,
-    ].join('; ')
-  }
-
   $effect(() => {
     if (currentSchool) {
       fetchObservations()
@@ -129,110 +118,103 @@
   {#if observations.length < 1}
     <div class="mt-3">🫤 Her var det lite, gitt.</div>
   {:else}
-    <div class="card shadow-sm mt-4">
-      {#each observations as observation, i}
-        <div
-          class="observation-row"
-          class:border-top={i > 0}
-          class:border-top-by-hand={i > 0}
-          style={i > 0 ? handDrawnBorderStyle() : undefined}
-        >
-          <div class="observation-meta-panel">
-            <div class="observation-header-row">
-              {#if viewMode !== 'student'}
-                <UserTag
-                  userId={observation.studentId}
-                  role={USER_ROLES.STUDENT}
-                  href="/students/{observation.studentId}"
-                />
-              {/if}
-              <SubjectTag subjectId={observation.subjectId} />
-              {#if cachedGoals[observation.goalId]}
-                <span class="observation-goal">
-                  <Link to={`/students/${observation.studentId}/?expanded=${observation.goalId}`}>
-                    {cachedGoals[observation.goalId].title ||
-                      cachedGoals[observation.goalId].sortOrder}
-                  </Link>
-                </span>
-              {:else}
-                {void lookUpGoal(observation.goalId)}
-                <span
-                  class="spinner-border spinner-border-sm"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
-              {/if}
-            </div>
-            <div>
-              <ObservationVisibilityMarker {observation} />
-              <span class="observation-author">
-                <AuthorInfo item={observation} />
-              </span>
-            </div>
-          </div>
-          {#if studentsById[observation.studentId] && cachedGoals[observation.goalId]}
-            <div class="observation-widgets-panel">
-              <ObservationWidgets
-                {observation}
-                goal={cachedGoals[observation.goalId]}
-                student={studentsById[observation.studentId]}
-                subject={subjects.find(s => s.id === observation.subjectId)}
-                onRefreshRequired={() => fetchObservations()}
-                widgets={['view', 'delete', 'update', 'productUrl']}
+    {#each observations as observation, i}
+      <div class="observation-row card shadow-sm mt-4">
+        <div class="observation-meta-panel">
+          <div class="observation-header-row">
+            {#if viewMode !== 'student'}
+              <UserTag
+                userId={observation.studentId}
+                role={USER_ROLES.STUDENT}
+                href="/students/{observation.studentId}"
               />
-            </div>
-          {/if}
-          <div
-            class="mastery-panel"
-            style={getMasteryLevelColor(observation)
-              ? `--mastery-color: ${getMasteryLevelColor(observation)}`
-              : undefined}
-          >
-            {#if observation.masteryDescription || observation.feedforward}
-              <!-- Description and/or feedforward -->
-              {#if observation.masteryDescription}
-                <span class="mastery-text">
-                  <span class="mastery-icon">←</span>
-                  {observation.masteryDescription}
-                </span>
-              {/if}
-              {#if observation.masteryDescription && observation.feedforward}
-                <hr class="mastery-divider" />
-              {/if}
-              {#if observation.feedforward}
-                <div class="mastery-text">
-                  <span class="mastery-icon">→</span>
-                  {observation.feedforward}
-                </div>
-              {/if}
-              {#if isNumber(observation.masteryValue)}
-                <span class="mastery-value-corner">
-                  <span class="mastery-level-title-corner">
-                    {getMasteryLevelTitle(observation)}
-                    {#if isMasteryValueAvailable(observation)}
-                      ({observation.masteryValue})
-                    {/if}
-                  </span>
-                </span>
-              {/if}
-            {:else if isNumber(observation.masteryValue)}
-              <!-- Only value -->
-              <div class="mastery-only">
-                <span class="mastery-level-title-only">
-                  {getMasteryLevelTitle(observation)}
-                </span>
-                {#if isMasteryValueAvailable(observation)}
-                  <span class="mastery-value-only">{observation.masteryValue}</span>
-                {/if}
-              </div>
+            {/if}
+            <SubjectTag subjectId={observation.subjectId} />
+            {#if cachedGoals[observation.goalId]}
+              <span class="observation-goal">
+                <Link to={`/students/${observation.studentId}/?expanded=${observation.goalId}`}>
+                  {cachedGoals[observation.goalId].title ||
+                    cachedGoals[observation.goalId].sortOrder}
+                </Link>
+              </span>
             {:else}
-              <!-- Nothing much to see here -->
-              <span class="mastery-empty">–</span>
+              {void lookUpGoal(observation.goalId)}
+              <span
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
             {/if}
           </div>
+          <div>
+            <ObservationVisibilityMarker {observation} />
+            <span class="observation-author">
+              <AuthorInfo item={observation} />
+            </span>
+          </div>
         </div>
-      {/each}
-    </div>
+        {#if studentsById[observation.studentId] && cachedGoals[observation.goalId]}
+          <div class="observation-widgets-panel">
+            <ObservationWidgets
+              {observation}
+              goal={cachedGoals[observation.goalId]}
+              student={studentsById[observation.studentId]}
+              subject={subjects.find(s => s.id === observation.subjectId)}
+              onRefreshRequired={() => fetchObservations()}
+              widgets={['view', 'delete', 'update', 'productUrl']}
+            />
+          </div>
+        {/if}
+        <div
+          class="observation-mastery-panel"
+          style={getMasteryLevelColor(observation)
+            ? `--mastery-color: ${getMasteryLevelColor(observation)}`
+            : undefined}
+        >
+          {#if observation.masteryDescription || observation.feedforward}
+            <!-- Description and/or feedforward -->
+            {#if observation.masteryDescription}
+              <span class="mastery-text">
+                <span class="mastery-icon">←</span>
+                {observation.masteryDescription}
+              </span>
+            {/if}
+            {#if observation.masteryDescription && observation.feedforward}
+              <hr class="mastery-divider" />
+            {/if}
+            {#if observation.feedforward}
+              <div class="mastery-text">
+                <span class="mastery-icon">→</span>
+                {observation.feedforward}
+              </div>
+            {/if}
+            {#if isNumber(observation.masteryValue)}
+              <span class="mastery-value-corner">
+                <span class="mastery-level-title-corner">
+                  {getMasteryLevelTitle(observation)}
+                  {#if isMasteryValueAvailable(observation)}
+                    ({observation.masteryValue})
+                  {/if}
+                </span>
+              </span>
+            {/if}
+          {:else if isNumber(observation.masteryValue)}
+            <!-- Only value -->
+            <div class="mastery-only">
+              <span class="mastery-level-title-only">
+                {getMasteryLevelTitle(observation)}
+              </span>
+              {#if isMasteryValueAvailable(observation)}
+                <span class="mastery-value-only">{observation.masteryValue}</span>
+              {/if}
+            </div>
+          {:else}
+            <!-- Nothing much to see here -->
+            <span class="mastery-empty">–</span>
+          {/if}
+        </div>
+      </div>
+    {/each}
   {/if}
 </section>
 
@@ -240,6 +222,7 @@
   .observation-row {
     padding: 1rem 1rem;
     display: flex;
+    flex-direction: row;
     flex-wrap: wrap;
     gap: 0.75rem;
   }
@@ -252,17 +235,6 @@
     gap: 0.5em;
   }
 
-  .border-top {
-    border-top-style: dashed !important;
-    border-top-width: 2px !important;
-  }
-
-  @media (min-width: 768px) {
-    .observation-meta-panel {
-      flex: 1;
-    }
-  }
-
   .observation-widgets-panel {
     display: flex;
     align-items: flex-start;
@@ -270,13 +242,6 @@
     flex-shrink: 0;
     width: 100%;
     padding: 0;
-  }
-
-  @media (min-width: 768px) {
-    .observation-widgets-panel {
-      width: 12rem;
-      padding: 0 0.75rem;
-    }
   }
 
   .observation-header-row {
@@ -301,7 +266,7 @@
     color: #999;
   }
 
-  .mastery-panel {
+  .observation-mastery-panel {
     container-type: inline-size;
     position: relative;
     flex-shrink: 0;
@@ -321,7 +286,16 @@
   }
 
   @media (min-width: 768px) {
-    .mastery-panel {
+    .observation-widgets-panel {
+      width: 12rem;
+      padding: 0 0.75rem;
+    }
+
+    .observation-meta-panel {
+      flex: 1;
+    }
+
+    .observation-mastery-panel {
       width: 40%;
     }
   }
@@ -344,7 +318,7 @@
     transition: opacity 0.3s ease;
   }
 
-  .mastery-panel:hover .mastery-value-corner {
+  .observation-mastery-panel:hover .mastery-value-corner {
     opacity: 0.95;
   }
 
