@@ -101,7 +101,8 @@
         <MasteryValueInput
           {masterySchema}
           bind:value={localObservation.masteryValue}
-          title="Hvor godt mestrer {student?.name} {goal?.title || 'dette ' + t('goal', { form: 'sin-def' })}?"
+          title="Hvor godt mestrer {student?.name} {goal?.title ||
+            'dette ' + t('goal', { form: 'sin-def' })}?"
         />
       </div>
     {/if}

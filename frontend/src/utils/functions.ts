@@ -457,6 +457,16 @@ export const getGroupLabel = (
     .join(' - ')
 }
 
+export const getDictationShortcut = () => {
+  const osInfo =
+    navigator.userAgentData?.platform?.toLowerCase() || navigator.userAgent.toLowerCase()
+  if (osInfo.includes('win')) return 'Win + H'
+  if (osInfo.includes('mac')) return 'Fn eller ctrl to ganger'
+  if (osInfo.includes('linux')) return 'Super + H (distro-avhengig)'
+  if (/android|iphone|ipad|ipod/.test(osInfo)) return 'Mic ikon'
+  return "Your system's dictation shortcut"
+}
+
 export const formatDateTime = (isoDate?: string | number | undefined) => {
   if (!isoDate) return null
   return format(new Date(isoDate), 'yyyy-MM-dd HH:mm')
