@@ -230,141 +230,151 @@
     </div>
   </section>
 
-  {#if group.isEnabled}
-    {#if availableStatusCategories.length && $hasUserAccessToFeature( 'status', 'create', { groupId, createdById: $dataStore.currentUser.id, subjectId: group.subjectId || undefined } )}
-      <!-- Group goals Section -->
-      <section>
-        <h3 class="mb-3">Opprett {t('status', { form: 'plu-indef' })} for hele gruppa</h3>
-        <ul>
-          {#each availableStatusCategories as category}
-            <li>
-              <Link to="/groups/{group.id}/statuses/{category.name}">{category.title}</Link>
-            </li>
-          {/each}
-        </ul>
-      </section>
-    {/if}
-
-    <!-- Group goals Section -->
-    {#if currentSchool?.isGroupGoalEnabled && group.subjectId && !isCurrentUserOnlyStudent}
-      <section>
-        <div class="d-flex align-items-center gap-2">
-          <h3>{t('goal', { form: 'plu-indef', capitalize: true })}</h3>
-          <GoalWidgets
-            {group}
-            {subject}
-            sortOrder={groupGoals.length + 1}
-            masterySchema={$dataStore.defaultMasterySchema?.id}
-            onRefreshRequired={() => fetchGroupData()}
-            widgets={['create']}
-          />
-        </div>
-
-        <div bind:this={goalsListElement} class="list-group mt-3">
-          {#if groupGoals.length === 0}
-            Det er visst ikke noen {t('goal', { form: 'plu-indef' })} for denne gruppa
-          {:else}
-            {#each groupGoals as goal, index (goal.id)}
-              <div class="list-group-item goal-row {goal.isRelevant ? '' : 'hatched-background'}">
-                <!-- Drag handle -->
-                <span>
-                  {#if $hasUserAccessToFeature('goal', 'update', { groupId: group.id })}
-                    <pkt-icon
-                      title="Endre rekkefølge"
-                      class="me-2 row-handle-draggable"
-                      name="drag"
-                      role="button"
-                      tabindex="0"
-                    ></pkt-icon>
-                  {/if}
-                </span>
-                <!-- Numbering -->
-                <span>
-                  {goal.sortOrder || index + 1}
-                </span>
-                <!-- Goal type icon -->
-                <span class="goal-type-icon"><GroupSVG /></span>
-                <!-- Goal title -->
-                <span>
-                  {$dataStore.currentSchool.isGoalTitleEnabled ? goal.title : ''}
-                </span>
-                <!-- Actions -->
-                <span>
-                  {#if isGoalInUse(goal.id)}
-                    <pkt-icon
-                      name="lock-locked"
-                      size="small"
-                      title="{t('goal', {
-                        form: 'sin-def',
-                        capitalize: true,
-                      })} er i bruk av en eller flere elever"
-                    ></pkt-icon>
-                  {:else}
-                    <GoalWidgets
-                      {goal}
-                      {group}
-                      {subject}
-                      masterySchema={$dataStore.defaultMasterySchema?.id}
-                      isIndividual={goal.isIndividual}
-                      isRelevant={goal.isRelevant}
-                      onRefreshRequired={() => fetchGroupData()}
-                      widgets={['update', 'delete']}
-                      disabledWidgets={!goal.isRelevant || isGoalInUse(goal.id) ? ['delete'] : []}
-                    />
-                  {/if}
-                </span>
-              </div>
-            {/each}
-          {/if}
-        </div>
-      </section>
-    {/if}
+  {#if group.schoolId !== currentSchool?.id}
+    <!-- Group belongs to another school -->
+    <div class="alert alert-warning" role="alert">
+      Hm, denne gruppa hører til en annen skole [id: {currentSchool?.id}]
+    </div>
   {:else}
-    <h3 class="my-5">
-      ⚠️ Denne gruppa er deaktivert! Kontakt en admin dersom du mener den burde være aktivert.
-    </h3>
-  {/if}
+    {#if group.isEnabled}
+      {#if group.schoolId !== currentSchool?.id}
+        <div class="alert alert-warning" role="alert">Denne gruppa tilhører en annen skole.</div>
+      {/if}
+      {#if availableStatusCategories.length && $hasUserAccessToFeature( 'status', 'create', { groupId, createdById: $dataStore.currentUser.id, subjectId: group.subjectId || undefined } )}
+        <!-- Status create if there are available status categories -->
+        <section>
+          <h3 class="mb-3">Opprett {t('status', { form: 'plu-indef' })} for hele gruppa</h3>
+          <ul>
+            {#each availableStatusCategories as category}
+              <li>
+                <Link to="/groups/{group.id}/statuses/{category.name}">{category.title}</Link>
+              </li>
+            {/each}
+          </ul>
+        </section>
+      {/if}
 
-  {#if isCurrentUserOnlyStudent && subject}
-    <section>
-      <h3 class="mb-3">Mine {t('goal', { form: 'plu-indef' })}</h3>
-      <div class="card shadow-sm mt-4 list-group">
-        <div class="list-group-item">
-          <StudentSubject student={$dataStore.currentUser} {subject} isTitleEnabled={false} />
+      <!-- Group goals Section -->
+      {#if currentSchool?.isGroupGoalEnabled && group.subjectId && !isCurrentUserOnlyStudent}
+        <section>
+          <div class="d-flex align-items-center gap-2">
+            <h3>{t('goal', { form: 'plu-indef', capitalize: true })}</h3>
+            <GoalWidgets
+              {group}
+              {subject}
+              sortOrder={groupGoals.length + 1}
+              masterySchema={$dataStore.defaultMasterySchema?.id}
+              onRefreshRequired={() => fetchGroupData()}
+              widgets={['create']}
+            />
+          </div>
+
+          <div bind:this={goalsListElement} class="list-group mt-3">
+            {#if groupGoals.length === 0}
+              Det er visst ikke noen {t('goal', { form: 'plu-indef' })} for denne gruppa
+            {:else}
+              {#each groupGoals as goal, index (goal.id)}
+                <div class="list-group-item goal-row {goal.isRelevant ? '' : 'hatched-background'}">
+                  <!-- Drag handle -->
+                  <span>
+                    {#if $hasUserAccessToFeature('goal', 'update', { groupId: group.id })}
+                      <pkt-icon
+                        title="Endre rekkefølge"
+                        class="me-2 row-handle-draggable"
+                        name="drag"
+                        role="button"
+                        tabindex="0"
+                      ></pkt-icon>
+                    {/if}
+                  </span>
+                  <!-- Numbering -->
+                  <span>
+                    {goal.sortOrder || index + 1}
+                  </span>
+                  <!-- Goal type icon -->
+                  <span class="goal-type-icon"><GroupSVG /></span>
+                  <!-- Goal title -->
+                  <span>
+                    {$dataStore.currentSchool.isGoalTitleEnabled ? goal.title : ''}
+                  </span>
+                  <!-- Actions -->
+                  <span>
+                    {#if isGoalInUse(goal.id)}
+                      <pkt-icon
+                        name="lock-locked"
+                        size="small"
+                        title="{t('goal', {
+                          form: 'sin-def',
+                          capitalize: true,
+                        })} er i bruk av en eller flere elever"
+                      ></pkt-icon>
+                    {:else}
+                      <GoalWidgets
+                        {goal}
+                        {group}
+                        {subject}
+                        masterySchema={$dataStore.defaultMasterySchema?.id}
+                        isIndividual={goal.isIndividual}
+                        isRelevant={goal.isRelevant}
+                        onRefreshRequired={() => fetchGroupData()}
+                        widgets={['update', 'delete']}
+                        disabledWidgets={!goal.isRelevant || isGoalInUse(goal.id) ? ['delete'] : []}
+                      />
+                    {/if}
+                  </span>
+                </div>
+              {/each}
+            {/if}
+          </div>
+        </section>
+      {/if}
+    {:else}
+      <h3 class="my-5">
+        ⚠️ Denne gruppa er deaktivert! Kontakt en admin dersom du mener den burde være aktivert.
+      </h3>
+    {/if}
+
+    {#if isCurrentUserOnlyStudent && subject}
+      <section>
+        <h3 class="mb-3">Mine {t('goal', { form: 'plu-indef' })}</h3>
+        <div class="card shadow-sm mt-4 list-group">
+          <div class="list-group-item">
+            <StudentSubject student={$dataStore.currentUser} {subject} isTitleEnabled={false} />
+          </div>
         </div>
-      </div>
+      </section>
+    {/if}
+
+    <!-- Students Section -->
+    <section>
+      <h3 class="mb-3">Elevene i denne gruppa</h3>
+
+      {#if isCurrentUserOnlyStudent}
+        <div class="card shadow-sm mt-4 list-group">
+          <div class="list-group-item">
+            {students.map(student => student.name).join(', ')}
+          </div>
+        </div>
+      {:else if group.type === GROUP_TYPE_BASIS}
+        <StudentsWithSubjects {students} {subjects} {group} />
+      {:else if group.type === GROUP_TYPE_TEACHING && subject}
+        <StudentsWithGoals
+          {group}
+          {students}
+          goals={groupGoals}
+          goalsWithMasteryByStudentId={goalsWithCalculatedMasteryByStudentId}
+          {subject}
+          {statusesKey}
+          onRefreshRequired={() => fetchGroupData()}
+        />
+      {:else}
+        <div class="alert alert-warning">
+          <div>Hm, denne gruppa har en uventet type</div>
+          <pre>{JSON.stringify(group, null, 2)}</pre>
+        </div>
+      {/if}
     </section>
   {/if}
-
-  <!-- Students Section -->
-  <section>
-    <h3 class="mb-3">Elevene i denne gruppa</h3>
-
-    {#if isCurrentUserOnlyStudent}
-      <div class="card shadow-sm mt-4 list-group">
-        <div class="list-group-item">
-          {students.map(student => student.name).join(', ')}
-        </div>
-      </div>
-    {:else if group.type === GROUP_TYPE_BASIS}
-      <StudentsWithSubjects {students} {subjects} {group} />
-    {:else if group.type === GROUP_TYPE_TEACHING && subject}
-      <StudentsWithGoals
-        {group}
-        {students}
-        goals={groupGoals}
-        goalsWithMasteryByStudentId={goalsWithCalculatedMasteryByStudentId}
-        {subject}
-        {statusesKey}
-        onRefreshRequired={() => fetchGroupData()}
-      />
-    {:else}
-      <div class="alert alert-warning">
-        <div>Hm, denne gruppa har en uventet datastruktur</div>
-        <pre>{JSON.stringify(group, null, 2)}</pre>
-      </div>
-    {/if}
-  </section>
 {:else}
   <div class="alert alert-warning">
     <h4>Fant ikke noen gruppe med ID "{groupId}"</h4>
