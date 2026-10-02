@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ObservationType, GoalType, UserType } from '../../generated/types.gen'
   import type { MasterySchemaWithConfig } from '../../types/models'
-  import { observationsCreate, observationsUpdate } from '../../generated/sdk.gen'
+  import { observationsCreate, observationsUpdate, observationsList } from '../../generated/sdk.gen'
 
   import { useMasteryCalculations } from '../../utils/masteryHelpers'
   import { dataStore, currentUser } from '../../stores/data'
@@ -21,6 +21,7 @@
   }>()
 
   const isObservationUrlEnabled = localStorage<boolean>('isObservationUrlEnabled')
+  const isPreviousObservationsEnabled = true
 
   const masterySchema: MasterySchemaWithConfig = $derived(
     $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
@@ -28,8 +29,26 @@
   const calculations = $derived(useMasteryCalculations(masterySchema))
   let localObservation = $state<Partial<ObservationType> & { masteryValue?: number }>({})
   let formContainer = $state<HTMLElement | null>(null)
+  let observations = $state<ObservationType[]>([])
 
   const studentFirstName = $derived(student?.name.split(' ')[0] || 'eleven')
+
+  const fetchObservations = async () => {
+    try {
+      const observationsResult = await observationsList({
+        query: { student: student?.id, goal: goal?.id },
+      })
+      observations = observationsResult.data || []
+    } catch (error) {
+      console.error('Error fetching observations:', error)
+    }
+  }
+
+  $effect(() => {
+    if (isPreviousObservationsEnabled) {
+      fetchObservations()
+    }
+  })
 
   // Update localObservation when observation prop changes
   $effect(() => {
@@ -100,6 +119,7 @@
       <div class="my-4">
         <MasteryValueInput
           {masterySchema}
+          {observations}
           bind:value={localObservation.masteryValue}
           title="Hvor godt mestrer {student?.name} {goal?.title ||
             'dette ' + t('goal', { form: 'sin-def' })}?"

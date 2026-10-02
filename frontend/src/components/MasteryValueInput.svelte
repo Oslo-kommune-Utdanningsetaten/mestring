@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { MasterySchemaType } from '../generated'
+  import type { ObservationType, MasterySchemaType } from '../generated/types.gen'
+
   import SliderVertical from './inputs/SliderVertical.svelte'
   import SliderHorizontal from './inputs/SliderHorizontal.svelte'
   import StarsHorizontal from './inputs/StarsHorizontal.svelte'
@@ -13,11 +14,13 @@
     value = $bindable(),
     title,
     isInputEnabled = true,
+    observations = [],
   } = $props<{
     masterySchema: MasterySchemaType
     value?: number | undefined | null
     title?: string
     isInputEnabled?: boolean
+    observations?: ObservationType[]
   }>()
 </script>
 
@@ -52,6 +55,7 @@
   <SliderArrowHorizontal
     {masterySchema}
     {isInputEnabled}
+    {observations}
     bind:masteryValue={value}
     label={title || ''}
   />
@@ -64,5 +68,4 @@
   </div>
 {/if}
 
-<style>
-</style>
+<style></style>

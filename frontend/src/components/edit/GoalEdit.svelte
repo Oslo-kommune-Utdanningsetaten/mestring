@@ -43,7 +43,7 @@
 
   let { currentSchool } = $derived($dataStore)
   let masterySchemas = $derived($dataStore.masterySchemas.filter(schema => schema.isEnabled))
-  const target = $derived(isGoalIndividual ? student?.name : group?.displayName)
+  const target = $derived(isGoalIndividual ? 'for ' + student?.name : 'i ' + group?.displayName)
   let selectedMasterySchemaId = $derived(
     localGoal.masterySchemaId || $dataStore.defaultMasterySchema.id
   )
@@ -60,7 +60,7 @@
   const getTitle = () => {
     const action = localGoal.id ? 'Redigerer' : 'Nytt'
     const goalType = isGoalIndividual ? 'individuelt ' : 'gruppe'
-    return `${action} ${goalType}${t('goal', { form: 'sin-indef' })} for ${target}`
+    return `${action} ${goalType}${t('goal', { form: 'sin-indef' })} ${target}`
   }
 
   const fetchStudentSubjects = async () => {

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { ObservationType } from '../../generated/types.gen'
+
   import { useMasteryCalculations } from '../../utils/masteryHelpers'
   import { getContrastFriendlyTextColor } from '../../utils/functions'
   import type { MasterySchemaWithConfig } from '../../types/models'
@@ -8,11 +10,13 @@
     masteryValue = $bindable(),
     label = 'Mastery Value',
     isInputEnabled = true,
+    observations = [],
   }: {
     masterySchema: MasterySchemaWithConfig
     masteryValue: number
     label?: string
     isInputEnabled?: boolean
+    observations?: ObservationType[]
   } = $props()
 
   const {
@@ -103,7 +107,7 @@
         : index === masteryLevels.length - 1
           ? 'justify-content-end text-end'
           : 'justify-content-center text-center'}"
-      style="width: {calculateRungWidth(index)}%; height:100%; background-color: {rungColor};"
+      style="width: {calculateRungWidth(index)}%; height:100%; background-color: white;"
     >
       <span class="pb-1 mx-2 lh-sm" style="color: {getContrastFriendlyTextColor(rungColor)};">
         {masteryLevel.title}
@@ -113,10 +117,18 @@
   {#if masterySchema?.config?.isIncrementIndicatorEnabled}
     <!-- horizontal arrow visualizing mastery position -->
     <div
-      id="incrementIndicator"
+      id="increment-indicator"
       title={`${safeMasteryValue}`}
-      style="width: clamp(0px, calc({thumbXPosition}% - 40px), calc(100%));"
-    ></div>
+      style="width: clamp(0px, calc({thumbXPosition}% - 40px), calc(100%));  background-color: {rungColor};"
+    >
+      <div id="increment-indicator-arrow" style="border-left-color: {rungColor};"></div>
+    </div>
+    {#each observations as observation}
+      <div
+        class="previous-observation-marker"
+        style="left: clamp(0px, {observation.masteryValue}%, calc(100%));"
+      ></div>
+    {/each}
   {/if}
 </div>
 
@@ -166,7 +178,7 @@
     width: 100%;
   }
 
-  #incrementIndicator {
+  #increment-indicator {
     position: absolute;
     left: 0px;
     top: 50%;
@@ -176,8 +188,7 @@
     pointer-events: none;
   }
 
-  #incrementIndicator::after {
-    content: '';
+  #increment-indicator-arrow {
     position: absolute;
     right: -40px;
     top: 50%;
@@ -195,6 +206,13 @@
     left: 0;
     text-align: center;
     width: auto;
+  }
+
+  .previous-observation-marker {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    border-left: 2px solid rgba(100, 100, 100, 0.2);
   }
 
   .rung {
