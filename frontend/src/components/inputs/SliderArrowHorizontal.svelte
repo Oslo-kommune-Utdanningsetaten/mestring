@@ -6,6 +6,8 @@
   import type { MasterySchemaWithConfig } from '../../types/models'
 
   const arrowHeadWidth = 40
+  const minObservationMarkerWidth = 1
+  const maxObservationMarkerWidth = 5
 
   let {
     masterySchema,
@@ -54,16 +56,12 @@
     return (valuesCountCurrentLevel / valuesCountTotal) * 100
   }
 
-  // Later observations get more opaque color
-  const calculateHistoricObservationMarkerColor = (
-    observations: ObservationType[],
-    index: number
-  ) => {
-    const num = observations.length
-    const current = index + 1
-    if (num === 0) return 'rgba(20, 20, 20, 0)'
-    return 'rgba(20, 20, 20, ' + current / (num * 3) + ')'
-  }
+  const calculateHistoricObservationMarkerWidth = (index: number) =>
+    observations.length <= 1
+      ? minObservationMarkerWidth
+      : minObservationMarkerWidth +
+        (index / (observations.length - 1)) *
+          (maxObservationMarkerWidth - minObservationMarkerWidth)
 
   const parseColor = (color: string) => {
     const rgb = color.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/)
@@ -155,26 +153,19 @@
         {@render incrementIndicatorShape(false)}
       </div>
     </div>
-    <div class="previous-observation-lines">
+    <div class="previous-observation-markers">
       {#each observations as observation, index}
         {#if observation.masteryValue !== null && observation.masteryValue !== undefined}
           {@const markerPosition = calculateThumbCenter(observation.masteryValue)}
           <div
             class="previous-observation-marker"
-            style="left: {markerPosition}px; background-color: {calculateHistoricObservationMarkerColor(
-              observations,
+            style="--marker-width: {calculateHistoricObservationMarkerWidth(
               index
-            )}"
+            )}px; left: {markerPosition}px;"
           ></div>
         {/if}
       {/each}
     </div>
-    {#each observations as observation, index}
-      {#if observation.masteryValue !== null && observation.masteryValue !== undefined}
-        {@const markerPosition = calculateThumbCenter(observation.masteryValue)}
-        <div class="previous-observation-label" style="left: {markerPosition + 4}px;"></div>
-      {/if}
-    {/each}
   {/if}
 </div>
 
@@ -281,7 +272,7 @@
     transform: translateX(-50%);
   }
 
-  .previous-observation-lines {
+  .previous-observation-markers {
     position: absolute;
     inset: 0 -1px;
     overflow: hidden;
@@ -292,13 +283,9 @@
     position: absolute;
     top: 0;
     height: 100%;
-    width: 4px;
+    width: var(--marker-width);
     transform: translateX(-50%);
-  }
-
-  .previous-observation-label {
-    position: absolute;
-    top: 0;
+    background-color: rgba(20, 20, 20, 0.3);
   }
 
   .rung {
