@@ -30,6 +30,7 @@
   <SliderHorizontal
     {masterySchema}
     {isInputEnabled}
+    {observations}
     bind:masteryValue={value}
     label={title || ''}
   />

@@ -55,7 +55,7 @@
   }
 
   $effect(() => {
-    if (isHistoryVisibleOnMasteryInput) {
+    if ($isHistoryVisibleOnMasteryInput) {
       fetchObservations()
     }
   })

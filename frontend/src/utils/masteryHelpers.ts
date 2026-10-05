@@ -93,6 +93,18 @@ export function useMasteryCalculations(masterySchema: MasterySchemaWithConfig | 
   const deltaValue = maxValue - minValue
   const flatTrendThreshold = masterySchema?.config?.flatTrendThreshold || 1
 
+  const calculateValuePosition = (value: number): number =>
+    maxValue === minValue
+      ? 0
+      : Math.max(0, Math.min(1, (value - minValue) / (maxValue - minValue))) * 100
+
+  const calculateRungWidth = (index: number): number => {
+    const currentLevel = masteryLevels[index]
+    const valuesCountTotal = maxValue - minValue + 1
+    const valuesCountCurrentLevel = currentLevel.maxValue - currentLevel.minValue + 1
+    return (valuesCountCurrentLevel / valuesCountTotal) * 100
+  }
+
   const calculateSafeMasteryValue = (value: number | null | undefined): number => {
     let result: number = defaultValue
     if (value !== null && value !== undefined && isNumber(value)) {
@@ -108,6 +120,8 @@ export function useMasteryCalculations(masterySchema: MasterySchemaWithConfig | 
     deltaValue,
     inputValueIncrement,
     defaultValue,
+    calculateValuePosition,
+    calculateRungWidth,
     calculateSafeMasteryValue,
     flatTrendThreshold,
     hasLevels,

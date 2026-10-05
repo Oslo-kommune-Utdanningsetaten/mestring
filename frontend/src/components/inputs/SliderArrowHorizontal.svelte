@@ -4,10 +4,9 @@
   import { useMasteryCalculations } from '../../utils/masteryHelpers'
   import { getContrastFriendlyTextColor } from '../../utils/functions'
   import type { MasterySchemaWithConfig } from '../../types/models'
+  import ObservationMarkers from './ObservationMarkers.svelte'
 
   const arrowHeadWidth = 40
-  const observationMarkerWidth = 4
-  const maxObservationMarkerBlur = 6
 
   let {
     masterySchema,
@@ -30,16 +29,13 @@
     masteryLevels,
     hasLevels,
     defaultValue,
+    calculateValuePosition,
+    calculateRungWidth,
     calculateSafeMasteryValue,
   } = $derived(useMasteryCalculations(masterySchema))
 
   const thumbWidth = 50
   let inputContainerWidth = $state(0)
-
-  const calculateValuePosition = (value: number) =>
-    maxValue === minValue
-      ? 0
-      : Math.max(0, Math.min(1, (value - minValue) / (maxValue - minValue))) * 100
 
   const calculateThumbCenter = (value: number) =>
     (inputContainerWidth * calculateValuePosition(value)) / 100
@@ -48,18 +44,6 @@
   const thumbCenterX = $derived(calculateThumbCenter(masteryValue))
 
   const safeMasteryValue = $derived(calculateSafeMasteryValue(masteryValue))
-
-  const calculateRungWidth = (index: number) => {
-    const currentLevel = masteryLevels[index]
-    const valuesCountTotal = maxValue - minValue + 1
-    const valuesCountCurrentLevel = currentLevel.maxValue - currentLevel.minValue + 1
-    return (valuesCountCurrentLevel / valuesCountTotal) * 100
-  }
-
-  const calculateHistoricObservationMarkerBlur = (index: number) =>
-    observations.length <= 1
-      ? 0
-      : maxObservationMarkerBlur * (1 - index / (observations.length - 1))
 
   const parseColor = (color: string) => {
     const rgb = color.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/)
@@ -151,19 +135,7 @@
         {@render incrementIndicatorShape(false)}
       </div>
     </div>
-    <div class="previous-observation-markers">
-      {#each observations as observation, index}
-        {#if observation.masteryValue !== null && observation.masteryValue !== undefined}
-          {@const markerPosition = calculateThumbCenter(observation.masteryValue)}
-          <div
-            class="previous-observation-marker"
-            style="--marker-width: {observationMarkerWidth}px; --marker-blur: {calculateHistoricObservationMarkerBlur(
-              index
-            )}px; left: {markerPosition}px;"
-          ></div>
-        {/if}
-      {/each}
-    </div>
+    <ObservationMarkers {observations} calculatePosition={calculateThumbCenter} inset="0 -1px" />
   {/if}
 </div>
 
@@ -268,23 +240,6 @@
     text-align: center;
     width: auto;
     transform: translateX(-50%);
-  }
-
-  .previous-observation-markers {
-    position: absolute;
-    inset: 0 -1px;
-    overflow: hidden;
-    pointer-events: none;
-  }
-
-  .previous-observation-marker {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    width: var(--marker-width);
-    transform: translateX(-50%);
-    background-color: rgba(20, 20, 20, 0.3);
-    filter: blur(var(--marker-blur));
   }
 
   .rung {
