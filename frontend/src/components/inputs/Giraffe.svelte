@@ -7,8 +7,9 @@
 
   let { min, max, value }: Props = $props()
 
-  const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
   const uid = Math.random().toString(36).slice(2, 8)
+
+  const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
 
   // Normalized value (0-100) for easier calculations and rendering
   const normalizedValue = $derived(clamp(value, min, max))
@@ -54,12 +55,12 @@
   ]
 
   // Neck (variable length)
-  const NECK_X = 190,
-    NECK_BASE_Y = 260
-  const NECK_W_BASE = 34,
-    NECK_W_TOP = 24
-  const MIN_NECK = 35,
-    MAX_NECK = 230
+  const NECK_X = 190
+  const NECK_BASE_Y = 260
+  const NECK_W_BASE = 34
+  const NECK_W_TOP = 24
+  const MIN_NECK = 35
+  const MAX_NECK = 230
 
   const neckLen = $derived(MIN_NECK + (normalizedValue / max) * (MAX_NECK - MIN_NECK))
   const neckTopX = $derived(NECK_X + sinTilt * neckLen)
@@ -70,8 +71,8 @@
   )
 
   // Head
-  const HEAD_RX = 28,
-    HEAD_RY = 18
+  const HEAD_RX = 28
+  const HEAD_RY = 18
   const headX = $derived(neckTopX + 12)
   const headY = $derived(neckTopY - HEAD_RY + 8)
 
