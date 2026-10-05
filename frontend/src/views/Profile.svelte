@@ -25,6 +25,8 @@
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
   const isObservationUrlEnabled = localStorage<boolean>('isObservationUrlEnabled')
+  const isHistoryVisibleOnMasteryInput = localStorage<boolean>('isHistoryVisibleOnMasteryInput')
+
   let selectedGroupValidity = $state<GROUP_VALIDITY_OPTIONS>(getPreferredGroupValidity())
 
   // Options for mastery badge variant selection
@@ -122,6 +124,9 @@
 
   const handleToggleObservationUrl = () =>
     isObservationUrlEnabled.set(!isObservationUrlEnabled.get())
+
+  const handleToggleHistoryVisibleOnMasteryInput = () =>
+    isHistoryVisibleOnMasteryInput.set(!isHistoryVisibleOnMasteryInput.get())
 
   const handleSelectBadgeVariant = (variant: MASTERY_BADGE_VARIANTS) =>
     localStorage('preferredMasteryBadgeVariant').set(variant)
@@ -231,6 +236,20 @@
               aria-checked={$isObservationUrlEnabled}
               checked={$isObservationUrlEnabled}
               onchange={() => handleToggleObservationUrl()}
+            ></pkt-checkbox>
+          </div>
+
+          <div class="mb-4">
+            <strong>
+              Tidligere {t('observation', { form: 'plu-indef' })} vises ved input
+            </strong>
+            <pkt-checkbox
+              label={$isHistoryVisibleOnMasteryInput ? 'Vises' : 'Skjules'}
+              labelPosition="right"
+              isSwitch="true"
+              aria-checked={$isHistoryVisibleOnMasteryInput}
+              checked={$isHistoryVisibleOnMasteryInput}
+              onchange={() => handleToggleHistoryVisibleOnMasteryInput()}
             ></pkt-checkbox>
           </div>
 
