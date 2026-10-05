@@ -5,6 +5,8 @@
   import { getContrastFriendlyTextColor } from '../../utils/functions'
   import type { MasterySchemaWithConfig } from '../../types/models'
 
+  const arrowHeadWidth = 40
+
   let {
     masterySchema,
     masteryValue = $bindable(),
@@ -29,10 +31,19 @@
     calculateSafeMasteryValue,
   } = $derived(useMasteryCalculations(masterySchema))
 
-  let thumbXPosition = $derived(
-    Math.round(((masteryValue - minValue) / (maxValue - minValue)) * 100)
-  )
-  let xOffset = $derived(thumbXPosition > 40 ? -((thumbXPosition - 40) / 40) * 1.1 : 0)
+  const thumbWidth = 50
+  let inputContainerWidth = $state(0)
+
+  const calculateValuePosition = (value: number) =>
+    maxValue === minValue
+      ? 0
+      : Math.max(0, Math.min(1, (value - minValue) / (maxValue - minValue))) * 100
+
+  const calculateThumbCenter = (value: number) =>
+    (inputContainerWidth * calculateValuePosition(value)) / 100
+
+  let thumbXPosition = $derived(calculateValuePosition(masteryValue))
+  let thumbCenterX = $derived(calculateThumbCenter(masteryValue))
 
   const safeMasteryValue = $derived(calculateSafeMasteryValue(masteryValue))
 
@@ -41,6 +52,17 @@
     const valuesCountTotal = maxValue - minValue + 1
     const valuesCountCurrentLevel = currentLevel.maxValue - currentLevel.minValue + 1
     return (valuesCountCurrentLevel / valuesCountTotal) * 100
+  }
+
+  // Later observations get more opaque color
+  const calculateHistoricObservationMarkerColor = (
+    observations: ObservationType[],
+    index: number
+  ) => {
+    const num = observations.length
+    const current = index + 1
+    if (num === 0) return 'rgba(20, 20, 20, 0)'
+    return 'rgba(20, 20, 20, ' + current / (num * 3) + ')'
   }
 
   const parseColor = (color: string) => {
@@ -93,6 +115,13 @@
   })
 </script>
 
+{#snippet incrementIndicatorShape(faded: boolean)}
+  <div class="increment-indicator-shape" class:increment-indicator-faded={faded}>
+    <div class="increment-indicator-bar"></div>
+    <div class="increment-indicator-arrow"></div>
+  </div>
+{/snippet}
+
 {#if label}
   <label class="form-label" for="mastery-slider">
     {label}
@@ -107,7 +136,7 @@
         : index === masteryLevels.length - 1
           ? 'justify-content-end text-end'
           : 'justify-content-center text-center'}"
-      style="width: {calculateRungWidth(index)}%; height:100%; background-color: white;"
+      style="width: {calculateRungWidth(index)}%;"
     >
       <span class="pb-1 mx-2 lh-sm" style="color: {getContrastFriendlyTextColor(rungColor)};">
         {masteryLevel.title}
@@ -119,15 +148,32 @@
     <div
       id="increment-indicator"
       title={`${safeMasteryValue}`}
-      style="width: clamp(0px, calc({thumbXPosition}% - 40px), calc(100%));  background-color: {rungColor};"
+      style="--thumb-position: {thumbCenterX}px; --arrow-head-width: {arrowHeadWidth}px; --indicator-color: {rungColor};"
     >
-      <div id="increment-indicator-arrow" style="border-left-color: {rungColor};"></div>
+      {@render incrementIndicatorShape(true)}
+      <div class="increment-indicator-clip">
+        {@render incrementIndicatorShape(false)}
+      </div>
     </div>
-    {#each observations as observation}
-      <div
-        class="previous-observation-marker"
-        style="left: clamp(0px, {observation.masteryValue}%, calc(100%));"
-      ></div>
+    <div class="previous-observation-lines">
+      {#each observations as observation, index}
+        {#if observation.masteryValue !== null && observation.masteryValue !== undefined}
+          {@const markerPosition = calculateThumbCenter(observation.masteryValue)}
+          <div
+            class="previous-observation-marker"
+            style="left: {markerPosition}px; background-color: {calculateHistoricObservationMarkerColor(
+              observations,
+              index
+            )}"
+          ></div>
+        {/if}
+      {/each}
+    </div>
+    {#each observations as observation, index}
+      {#if observation.masteryValue !== null && observation.masteryValue !== undefined}
+        {@const markerPosition = calculateThumbCenter(observation.masteryValue)}
+        <div class="previous-observation-label" style="left: {markerPosition + 4}px;"></div>
+      {/if}
     {/each}
   {/if}
 </div>
@@ -136,13 +182,11 @@
   class="input-container d-flex align-items-end mt-{masterySchema?.config?.isMasteryValueVisible
     ? '5'
     : '3'} mb-4"
+  bind:clientWidth={inputContainerWidth}
 >
   {#if masterySchema?.config?.isMasteryValueVisible}
     <!-- mastery value number -->
-    <div
-      id="valueIndicator"
-      style="left: clamp(0%, calc({thumbXPosition + xOffset}% - 0.5rem), calc(100%));"
-    >
+    <div id="value-indicator" style="left: {thumbCenterX}px;">
       {safeMasteryValue}
     </div>
   {/if}
@@ -155,6 +199,7 @@
       max={maxValue}
       step={inputValueIncrement}
       class="slider"
+      style="--thumb-width: {thumbWidth}px; --thumb-overhang: {thumbWidth / 2}px;"
       bind:value={masteryValue}
     />
   {/if}
@@ -183,40 +228,83 @@
     left: 0px;
     top: 50%;
     transform: translateY(-50%);
-    height: 20px;
-    background-color: rgba(0, 0, 0, 0.4);
+    width: 100%;
+    height: 40px;
     pointer-events: none;
   }
 
-  #increment-indicator-arrow {
+  .increment-indicator-shape {
     position: absolute;
-    right: -40px;
+    left: 0;
+    top: 0;
+    width: clamp(0px, var(--thumb-position), 100%);
+    height: 40px;
+  }
+
+  .increment-indicator-clip {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .increment-indicator-faded {
+    opacity: 0.5;
+  }
+
+  .increment-indicator-bar {
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: clamp(0px, calc(100% - var(--arrow-head-width)), 100%);
+    height: 20px;
+    background-color: var(--indicator-color);
+  }
+
+  .increment-indicator-arrow {
+    position: absolute;
+    right: 0;
     top: 50%;
     transform: translateY(-50%);
     width: 0;
     height: 0;
-    border-left: 40px solid rgba(0, 0, 0, 0.4);
+    border-left: var(--arrow-head-width) solid var(--indicator-color);
     border-top: 20px solid transparent;
     border-bottom: 20px solid transparent;
   }
 
-  #valueIndicator {
+  #value-indicator {
     position: absolute;
     bottom: 2em;
     left: 0;
     text-align: center;
     width: auto;
+    transform: translateX(-50%);
+  }
+
+  .previous-observation-lines {
+    position: absolute;
+    inset: 0 -1px;
+    overflow: hidden;
+    pointer-events: none;
   }
 
   .previous-observation-marker {
     position: absolute;
     top: 0;
     height: 100%;
-    border-left: 2px solid rgba(100, 100, 100, 0.2);
+    width: 4px;
+    transform: translateX(-50%);
+  }
+
+  .previous-observation-label {
+    position: absolute;
+    top: 0;
   }
 
   .rung {
     font-size: medium;
+    height: 100%;
+    background-color: white;
   }
 
   .rung span {
@@ -225,22 +313,42 @@
   }
 
   .slider {
-    width: 100%;
+    width: calc(100% + var(--thumb-width));
+    margin-left: calc(0px - var(--thumb-overhang));
+    flex-shrink: 0;
     height: 10px;
-    padding-top: 0px;
-    background-color: var(--bs-gray);
+    padding: 0;
+    background: linear-gradient(
+      to right,
+      transparent var(--thumb-overhang),
+      var(--bs-gray) var(--thumb-overhang),
+      var(--bs-gray) calc(100% - var(--thumb-overhang)),
+      transparent calc(100% - var(--thumb-overhang))
+    );
+    box-sizing: border-box;
     -webkit-appearance: none;
     appearance: none;
     outline: none;
   }
 
+  .slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 10px;
+  }
+
+  .slider::-moz-range-track {
+    width: 100%;
+    height: 10px;
+  }
+
   .slider::-webkit-slider-thumb {
     /* Override default look */
     -webkit-appearance: none;
-    appearance: none;
-    width: 50px;
+    width: var(--thumb-width);
     height: 40px;
     border-radius: 3px;
+    appearance: none;
+    box-sizing: border-box;
     border: 1px solid var(--pkt-color-grays-gray-500);
     cursor: pointer;
     background-color: var(--pkt-color-grays-gray-100);
@@ -248,9 +356,10 @@
   }
 
   .slider::-moz-range-thumb {
-    width: 50px;
+    width: var(--thumb-width);
     height: 40px;
     border-radius: 3px;
+    box-sizing: border-box;
     border: 1px solid var(--pkt-color-grays-gray-500);
     cursor: pointer;
     background-color: var(--pkt-color-grays-gray-100);
