@@ -6,8 +6,8 @@
   import type { MasterySchemaWithConfig } from '../../types/models'
 
   const arrowHeadWidth = 40
-  const minObservationMarkerWidth = 1
-  const maxObservationMarkerWidth = 5
+  const observationMarkerWidth = 4
+  const maxObservationMarkerBlur = 6
 
   let {
     masterySchema,
@@ -44,8 +44,8 @@
   const calculateThumbCenter = (value: number) =>
     (inputContainerWidth * calculateValuePosition(value)) / 100
 
-  let thumbXPosition = $derived(calculateValuePosition(masteryValue))
-  let thumbCenterX = $derived(calculateThumbCenter(masteryValue))
+  const thumbXPosition = $derived(calculateValuePosition(masteryValue))
+  const thumbCenterX = $derived(calculateThumbCenter(masteryValue))
 
   const safeMasteryValue = $derived(calculateSafeMasteryValue(masteryValue))
 
@@ -56,12 +56,10 @@
     return (valuesCountCurrentLevel / valuesCountTotal) * 100
   }
 
-  const calculateHistoricObservationMarkerWidth = (index: number) =>
+  const calculateHistoricObservationMarkerBlur = (index: number) =>
     observations.length <= 1
-      ? minObservationMarkerWidth
-      : minObservationMarkerWidth +
-        (index / (observations.length - 1)) *
-          (maxObservationMarkerWidth - minObservationMarkerWidth)
+      ? 0
+      : maxObservationMarkerBlur * (1 - index / (observations.length - 1))
 
   const parseColor = (color: string) => {
     const rgb = color.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/)
@@ -159,7 +157,7 @@
           {@const markerPosition = calculateThumbCenter(observation.masteryValue)}
           <div
             class="previous-observation-marker"
-            style="--marker-width: {calculateHistoricObservationMarkerWidth(
+            style="--marker-width: {observationMarkerWidth}px; --marker-blur: {calculateHistoricObservationMarkerBlur(
               index
             )}px; left: {markerPosition}px;"
           ></div>
@@ -286,6 +284,7 @@
     width: var(--marker-width);
     transform: translateX(-50%);
     background-color: rgba(20, 20, 20, 0.3);
+    filter: blur(var(--marker-blur));
   }
 
   .rung {
