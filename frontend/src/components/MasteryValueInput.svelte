@@ -25,7 +25,13 @@
 </script>
 
 {#if masterySchema?.config?.valueInput === 'sliderVertical'}
-  <SliderVertical {masterySchema} {isInputEnabled} bind:masteryValue={value} label={title || ''} />
+  <SliderVertical
+    {masterySchema}
+    {isInputEnabled}
+    {observations}
+    bind:masteryValue={value}
+    label={title || ''}
+  />
 {:else if masterySchema?.config?.valueInput === 'sliderHorizontal'}
   <SliderHorizontal
     {masterySchema}

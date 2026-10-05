@@ -1,24 +1,33 @@
 <script lang="ts">
+  import type { ObservationType } from '../../generated/types.gen'
   import { useMasteryCalculations } from '../../utils/masteryHelpers'
   import { getContrastFriendlyTextColor } from '../../utils/functions'
   import type { MasterySchemaWithConfig } from '../../types/models'
+  import ObservationMarkers from './ObservationMarkers.svelte'
 
   let {
     masterySchema,
     masteryValue = $bindable(),
     label = 'Mastery Value',
     isInputEnabled = true,
+    observations = [],
   }: {
     masterySchema: MasterySchemaWithConfig
     masteryValue: number
     label?: string
     isInputEnabled?: boolean
+    observations?: ObservationType[]
   } = $props()
 
-  let thumbYPosition = $state(0)
-  let yOffset = $state(0)
+  const thumbHeight = 50
+  let inputContainerHeight = $state(0)
 
   const calculations = $derived(useMasteryCalculations(masterySchema))
+
+  const calculateThumbCenter = (value: number) =>
+    inputContainerHeight * (1 - calculations.calculateValuePosition(value) / 100)
+
+  const thumbCenterY = $derived(calculateThumbCenter(masteryValue))
 
   const sortedMasteryLevels = $derived(
     [...calculations.masteryLevels].sort((a, b) => b.minValue - a.minValue)
@@ -28,26 +37,11 @@
   )
   const safeMasteryValue = $derived(calculations.calculateSafeMasteryValue(masteryValue))
 
-  const calculateRungHeight = (index: number) => {
-    const { minValue, maxValue, masteryLevels } = calculations
-    const currentLevel = masteryLevels[index]
-    const valuesCountTotal = maxValue - minValue + 1
-    const valuesCountCurrentLevel = currentLevel.maxValue - currentLevel.minValue + 1
-    return (valuesCountCurrentLevel / valuesCountTotal) * 100
-  }
-
   // Set default value when masteryValue is null/undefined and schema is available
   $effect(() => {
     if ((masteryValue === null || masteryValue === undefined) && calculations.hasLevels) {
       masteryValue = calculations.defaultValue
     }
-  })
-
-  $effect(() => {
-    const min = Number(calculations.minValue ?? 0)
-    const max = Number(calculations.maxValue ?? 100)
-    thumbYPosition = Math.round(((masteryValue - min) / (max - min)) * 100)
-    yOffset = -Math.round((thumbYPosition / 100) * 5)
   })
 </script>
 
@@ -66,6 +60,8 @@
         max={calculations.maxValue}
         step={calculations.inputValueIncrement}
         class="slider"
+        style="--track-height: {inputContainerHeight}px; --thumb-height: {thumbHeight}px; --thumb-overhang: {thumbHeight /
+          2}px;"
         bind:value={masteryValue}
       />
     {/if}
@@ -73,31 +69,19 @@
     {#if masterySchema?.config?.isMasteryValueVisible}
       <!-- mastery value number -->
       <div id="valueIndicatorContainer">
-        <div
-          id="valueIndicator"
-          style="bottom: clamp(0%, calc({thumbYPosition + yOffset}% - 0.75em), calc(100% - 1.5em));"
-        >
+        <div id="valueIndicator" style="top: {thumbCenterY}px;">
           {safeMasteryValue}
         </div>
       </div>
     {/if}
 
-    <div class="stairs-container">
-      {#if masterySchema?.config?.isIncrementIndicatorEnabled}
-        <!-- bar visualizing mastery position -->
-        <div
-          id="incrementIndicator"
-          title={`${safeMasteryValue}`}
-          style="bottom: clamp(0%, {thumbYPosition + yOffset}%, calc(100% - 10px));"
-        ></div>
-      {/if}
-
+    <div class="stairs-container" bind:clientHeight={inputContainerHeight}>
       {#each sortedMasteryLevels as masteryLevel, index}
         <!-- levels -->
         <span
           class="rung px-2"
-          style="width: {(index + 1) * widthMultiplier}%; height: {calculateRungHeight(
-            index
+          style="width: {(index + 1) * widthMultiplier}%; height: {calculations.calculateRungWidth(
+            calculations.masteryLevels.indexOf(masteryLevel)
           )}%; background-color: {masteryLevel.color}; color: {getContrastFriendlyTextColor(
             masteryLevel.color
           )};"
@@ -105,6 +89,19 @@
           {masteryLevel.title}
         </span>
       {/each}
+      {#if masterySchema?.config?.isIncrementIndicatorEnabled}
+        <!-- bar visualizing mastery position -->
+        <div
+          id="incrementIndicator"
+          title={`${safeMasteryValue}`}
+          style="top: {thumbCenterY}px;"
+        ></div>
+        <ObservationMarkers
+          {observations}
+          calculatePosition={calculateThumbCenter}
+          orientation="horizontal"
+        />
+      {/if}
     </div>
   </div>
 </div>
@@ -112,11 +109,12 @@
 <style>
   #incrementIndicator {
     position: absolute;
-    bottom: 0%;
+    top: 0;
     left: 0%;
     width: 100%;
-    height: 10px;
-    background-color: rgba(0, 0, 0, 0.25);
+    height: 4px;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
     z-index: 1;
   }
 
@@ -128,14 +126,14 @@
 
   #valueIndicator {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     width: 3em;
     height: 1.5em;
     line-height: 1.5em;
     z-index: 2;
     text-align: center;
-    transition: left 0.2s ease-out;
+    transform: translateY(-50%);
   }
 
   .stairs-container {
@@ -156,25 +154,45 @@
   }
 
   .slider {
-    margin: 0px 20px 0px 20px;
-    padding-top: 0px;
-    padding-bottom: 0px;
+    margin: calc(0px - var(--thumb-overhang)) 20px;
+    padding: 0;
     width: 10px;
+    height: calc(var(--track-height) + var(--thumb-height));
+    flex-shrink: 0;
+    align-self: flex-start;
     z-index: 2;
     writing-mode: vertical-lr;
     direction: rtl;
-    background-color: var(--bs-gray);
+    background: linear-gradient(
+      to bottom,
+      transparent var(--thumb-overhang),
+      var(--bs-gray) var(--thumb-overhang),
+      var(--bs-gray) calc(100% - var(--thumb-overhang)),
+      transparent calc(100% - var(--thumb-overhang))
+    );
+    box-sizing: border-box;
     -webkit-appearance: none;
     appearance: none;
     outline: none;
+  }
+
+  .slider::-webkit-slider-runnable-track {
+    width: 10px;
+    height: 100%;
+  }
+
+  .slider::-moz-range-track {
+    width: 10px;
+    height: 100%;
   }
 
   .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 40px;
-    height: 50px;
+    height: var(--thumb-height);
     border-radius: 3px;
+    box-sizing: border-box;
     border: 1px solid var(--pkt-color-grays-gray-500);
     cursor: pointer;
     background-color: var(--pkt-color-grays-gray-100);
@@ -183,8 +201,9 @@
 
   .slider::-moz-range-thumb {
     width: 40px;
-    height: 50px;
+    height: var(--thumb-height);
     border-radius: 3px;
+    box-sizing: border-box;
     border: 1px solid var(--pkt-color-grays-gray-500);
     cursor: pointer;
     background-color: var(--pkt-color-grays-gray-100);
