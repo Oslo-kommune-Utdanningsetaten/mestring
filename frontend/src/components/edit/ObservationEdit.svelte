@@ -16,21 +16,21 @@
   const { student, goal, observation, onDone } = $props<{
     student: UserType | null
     goal: GoalType | null
-    observation: ObservationType | {} | null
+    observation: ObservationType | null
     onDone: () => void
   }>()
 
   const isObservationUrlEnabled = localStorage<boolean>('isObservationUrlEnabled')
-  const isPreviousObservationsEnabled = true
+  const isHistoryVisibleOnMasteryInput = localStorage<boolean>('isHistoryVisibleOnMasteryInput')
+
+  let localObservation = $state<Partial<ObservationType> & { masteryValue?: number }>({})
+  let formContainer = $state<HTMLElement | null>(null)
+  let observations = $state<ObservationType[]>([])
 
   const masterySchema: MasterySchemaWithConfig = $derived(
     $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
   )
   const calculations = $derived(useMasteryCalculations(masterySchema))
-  let localObservation = $state<Partial<ObservationType> & { masteryValue?: number }>({})
-  let formContainer = $state<HTMLElement | null>(null)
-  let observations = $state<ObservationType[]>([])
-
   const studentFirstName = $derived(student?.name.split(' ')[0] || 'eleven')
 
   const fetchObservations = async () => {
@@ -39,13 +39,23 @@
         query: { student: student?.id, goal: goal?.id },
       })
       observations = observationsResult.data || []
+      // filter out observations from a later date than the current observation, if the current observation has an id
+      if (observation?.id) {
+        observations = observations.filter(
+          o => new Date(o.createdAt) <= new Date(observation.createdAt)
+        )
+      }
+      // sort by createdAt in ascending order
+      observations = observations.sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      )
     } catch (error) {
       console.error('Error fetching observations:', error)
     }
   }
 
   $effect(() => {
-    if (isPreviousObservationsEnabled) {
+    if (isHistoryVisibleOnMasteryInput) {
       fetchObservations()
     }
   })
