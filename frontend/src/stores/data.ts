@@ -13,7 +13,7 @@ import {
   getPreferredGroupValidity,
   getPreferredMasterySchemaId,
   getPreferredCreatedParams,
-  preferredSchoolYear,
+  getPreferredSchoolYear,
 } from '../stores/localStorageFunctions'
 import { fetchUserData } from '../utils/functions'
 import { SUBJECTS_ALLOWED_ALL, SUBJECTS_ALLOWED_CUSTOM, USER_ROLES } from '../utils/constants'
@@ -73,7 +73,7 @@ export const registerUserStatus = async (school?: SchoolType) => {
   }
 
   const [userData, allGroupsResult] = await Promise.all([
-    fetchUserData(user.id, school.id, get(preferredSchoolYear)),
+    fetchUserData(user.id, school.id, getPreferredSchoolYear()),
     groupsList({
       query: {
         school: school.id,
@@ -183,6 +183,7 @@ const registerSubjects = async (school: SchoolType): Promise<void> => {
     const result = await subjectsList({
       query: {
         school: school.id,
+        schoolYear: getPreferredSchoolYear(),
       },
     })
     const subjects = (result.data || []).filter(subject => {

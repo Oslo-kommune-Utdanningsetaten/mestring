@@ -46,6 +46,15 @@ def get_current_school_year() -> str:
     return f"{start_year}-{end_year}"
 
 
+def calculate_milestones_for_school_year(school_year: str) -> SchoolYearMilestones:
+    start_year, _ = map(int, school_year.split("-"))
+    return {
+        "start_at": date(start_year, START_MONTH, START_DAY),
+        "midyear_at": date(start_year + 1, MIDYEAR_MONTH, MIDYEAR_DAY),
+        "end_at": date(start_year + 1, END_MONTH, END_DAY),
+    }
+
+
 # Check if the entity belongs to the specified school year based on its created_at
 # For groups, use group.is_valid (which checks validFrom and validTo) instead of created_at
 def is_entity_from_school_year(entity, school_year: str) -> bool:

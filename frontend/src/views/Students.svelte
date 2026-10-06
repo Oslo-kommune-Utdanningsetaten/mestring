@@ -3,15 +3,17 @@
   import '@oslokommune/punkt-elements/dist/pkt-textinput.js'
   import '@oslokommune/punkt-elements/dist/pkt-tabs.js'
   import { useTinyRouter } from 'svelte-tiny-router'
+  import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
+  import { subjectsList, usersList } from '../generated/sdk.gen'
+  import { USER_ROLES } from '../utils/constants'
   import { dataStore } from '../stores/data'
   import { hasUserAccessToPath } from '../stores/access'
   import { urlStringFrom } from '../utils/functions'
+  import { preferredSchoolYear } from '../stores/localStorageFunctions'
+
   import Link from '../components/Link.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithStatuses from '../components/StudentsWithStatuses.svelte'
-  import { USER_ROLES } from '../utils/constants'
-  import { subjectsList, usersList } from '../generated/sdk.gen'
-  import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
 
   const router = useTinyRouter()
 
@@ -66,8 +68,13 @@
         query: studentQueryOptions,
       })
       students = studentsResult.data || []
+
       const subjectsResult = await subjectsList({
-        query: { school: currentSchool.id, students: students.map(s => s.id).join(',') },
+        query: {
+          school: currentSchool.id,
+          students: students.map(s => s.id).join(','),
+          schoolYear: $preferredSchoolYear,
+        },
       })
       subjects = (subjectsResult.data || []).sort((a, b) =>
         a.displayName.localeCompare(b.displayName)

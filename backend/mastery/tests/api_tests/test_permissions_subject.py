@@ -1,4 +1,6 @@
 import pytest
+from datetime import datetime
+from django.utils import timezone
 from rest_framework.test import APIClient
 from mastery.models import User, Group, Subject, Goal
 
@@ -31,21 +33,23 @@ def test_superadmin_subject_access(
     assert resp.status_code == 400
 
     # Superadmin can list both kinds of subjects in one go
-    resp = client.get('/api/subjects/', {'school': school.id})
+    resp = client.get('/api/subjects/', {'school': school.id, 'school_year': 'all'})
     assert resp.status_code == 200
     received_ids = {s['id'] for s in resp.json()}
     expected_ids = {subject_with_group.id, subject_owned_by_school.id}
     assert received_ids == expected_ids
 
     # Superadmin can list subjects specifically owned by school
-    resp = client.get(f'/api/subjects/', {'school': school.id, 'is_owned_by_school': True})
+    resp = client.get(f'/api/subjects/', {
+        'school': school.id, 'school_year': 'all', 'is_owned_by_school': True})
     assert resp.status_code == 200
     received_ids = {s['id'] for s in resp.json()}
     expected_ids = {subject_owned_by_school.id}
     assert received_ids == expected_ids
 
     # Superadmin can list subjects not specifically owned by school
-    resp = client.get(f'/api/subjects/', {'school': school.id, 'is_owned_by_school': False})
+    resp = client.get(f'/api/subjects/', {
+        'school': school.id, 'school_year': 'all', 'is_owned_by_school': False})
     assert resp.status_code == 200
     received_ids = {s['id'] for s in resp.json()}
     expected_ids = {subject_with_group.id}
@@ -89,28 +93,30 @@ def test_authenticated_subject_access(
         assert resp.status_code == 400
 
         # Can list all subjects in school
-        resp = client.get(f'/api/subjects/', {'school': school.id})
+        resp = client.get(f'/api/subjects/', {'school': school.id, 'school_year': 'all'})
         assert resp.status_code == 200
         expected_ids = {subject_with_group.id, subject_owned_by_school.id}
         received_ids = {subject['id'] for subject in resp.json()}
         assert received_ids == expected_ids
 
         # Can list subjects via groups in school
-        resp = client.get(f'/api/subjects/', {'school': school.id, 'is_owned_by_school': False})
+        resp = client.get(f'/api/subjects/', {
+            'school': school.id, 'school_year': 'all', 'is_owned_by_school': False})
         assert resp.status_code == 200
         expected_ids = {subject_with_group.id}
         received_ids = {subject['id'] for subject in resp.json()}
         assert received_ids == expected_ids
 
         # Can list subjects owned by school
-        resp = client.get(f'/api/subjects/', {'school': school.id, 'is_owned_by_school': True})
+        resp = client.get(f'/api/subjects/', {
+            'school': school.id, 'school_year': 'all', 'is_owned_by_school': True})
         assert resp.status_code == 200
         expected_ids = {subject_owned_by_school.id}
         received_ids = {subject['id'] for subject in resp.json()}
         assert received_ids == expected_ids
 
         # Cannot list subjects owned by other schools
-        resp = client.get(f'/api/subjects/', {'school': other_school.id})
+        resp = client.get(f'/api/subjects/', {'school': other_school.id, 'school_year': 'all'})
         assert resp.status_code == 200
         assert resp.json() == []
 
@@ -134,7 +140,7 @@ def test_authenticated_subject_access(
             subject=other_school_group_subject,
             is_enabled=True
         )
-        resp = client.get(f'/api/subjects/', {'school': other_school.id})
+        resp = client.get(f'/api/subjects/', {'school': other_school.id, 'school_year': 'all'})
         assert resp.status_code == 200
         assert resp.json() == []
         resp = client.get(f'/api/subjects/{other_school_group_subject.id}/')
@@ -151,7 +157,7 @@ def test_school_admin_subject_access(school_admin, school, other_school, client,
     assert resp.status_code == 400
 
     # Can list subjects for their school
-    resp = client.get(f'/api/subjects/', {'school': school.id})
+    resp = client.get(f'/api/subjects/', {'school': school.id, 'school_year': 'all'})
     assert resp.status_code == 200
 
     # Create a subject owned by the admin's school
@@ -253,14 +259,16 @@ def test_subject_filter_by_users(
     client.force_authenticate(user=teacher)
 
     # Test filtering by single user, returns both subjects: one via group membership, one via individual goal
-    resp = client.get('/api/subjects/', {'school': school.id, 'students': student.id})
+    resp = client.get('/api/subjects/', {
+        'school': school.id, 'school_year': 'all', 'students': student.id})
     assert resp.status_code == 200
     received_ids = {s['id'] for s in resp.json()}
     expected_ids = {subject_with_group.id, subject_with_individual_goal.id}
     assert received_ids == expected_ids
 
     # Test filtering by unrelated user, returns no subjects
-    resp = client.get('/api/subjects/', {'school': school.id, 'students': other_student.id})
+    resp = client.get('/api/subjects/', {
+        'school': school.id, 'school_year': 'all', 'students': other_student.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
@@ -274,24 +282,72 @@ def test_subject_filter_by_users(
     )
 
     # Test filtering by multiple users, returns subjects connected to either user
-    resp = client.get('/api/subjects/', {'school': school.id, 'students': f'{student.id},{other_student.id}'})
+    resp = client.get('/api/subjects/', {
+        'school': school.id, 'school_year': 'all', 'students': f'{student.id},{other_student.id}'})
     assert resp.status_code == 200
     received_ids = {s['id'] for s in resp.json()}
     expected_ids = {subject_with_group.id, subject_with_individual_goal.id, subject_unrelated.id}
     assert received_ids == expected_ids
 
     # Test that teacher can see subjects they're connected to via group
-    resp = client.get('/api/subjects/', {'school': school.id, 'students': teacher.id})
+    resp = client.get('/api/subjects/', {
+        'school': school.id, 'school_year': 'all', 'students': teacher.id})
     assert resp.status_code == 200
     received_ids = {s['id'] for s in resp.json()}
     expected_ids = {subject_with_group.id}
     assert received_ids == expected_ids
 
-    # Test school admin filtering by multiple users, returns subjects connected to either user
+    # Test school admin filtering by multiple users
     client.force_authenticate(user=school_admin)
-    resp = client.get('/api/subjects/', {'school': school.id,
-                      'students': f'{student.id},{other_student.id}'})
+    resp = client.get('/api/subjects/', {
+        'school': school.id, 'school_year': 'all', 'students': f'{student.id},{other_student.id}'})
     assert resp.status_code == 200
     received_ids = {s['id'] for s in resp.json()}
     expected_ids = {subject_with_group.id, subject_with_individual_goal.id, subject_unrelated.id}
     assert received_ids == expected_ids
+
+
+@pytest.mark.django_db
+def test_subject_school_year_filter_scopes_groups_and_goals_to_school(
+        school, other_school, superadmin, student):
+    subject_with_other_school_group = Subject.objects.create(
+        display_name="Other-school group subject",
+        short_name="Other group",
+        owned_by_school=school,
+    )
+    subject_with_other_school_goal = Subject.objects.create(
+        display_name="Other-school goal subject",
+        short_name="Other goal",
+        owned_by_school=school,
+    )
+
+    Group.objects.create(
+        feide_id="fc:group:other-school-year-group",
+        display_name="Other-school year group",
+        type="teaching",
+        school=other_school,
+        subject=subject_with_other_school_group,
+        valid_from=timezone.make_aware(datetime(2024, 9, 1)),
+        valid_to=timezone.make_aware(datetime(2025, 6, 1)),
+        is_enabled=True,
+    )
+
+    goal = Goal.objects.create(
+        title="Other-school year goal",
+        student=student,
+        subject=subject_with_other_school_goal,
+        school=other_school,
+    )
+    Goal.objects.filter(id=goal.id).update(
+        created_at=timezone.make_aware(datetime(2024, 9, 1))
+    )
+
+    client = APIClient()
+    client.force_authenticate(user=superadmin)
+    response = client.get('/api/subjects/', {
+        'school': school.id,
+        'school_year': '2024-2025',
+    })
+
+    assert response.status_code == 200
+    assert response.json() == []

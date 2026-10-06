@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { GoalCreateType, UserType, SubjectType, GroupType } from '../generated/types.gen'
+  import type { AppData } from '../types/models'
   import {
     usersRetrieve,
     goalsCreate,
@@ -11,12 +12,12 @@
   import {
     getPreferredCreatedParams,
     getPreferredGroupValidity,
+    getPreferredSchoolYear,
   } from '../stores/localStorageFunctions'
   import { SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
   import { dataStore } from '../stores/data'
   import { trackEvent } from '../stores/analytics'
   import { t } from '../stores/translations'
-  import type { AppData } from '../types/models'
 
   import StudentSubjectGoals from '../components/StudentSubjectGoals.svelte'
   import GoalWidgets from '../components/edit/GoalWidgets.svelte'
@@ -50,7 +51,11 @@
   const fetchSubjects = async () => {
     try {
       const subjectsResult = await subjectsList({
-        query: { school: currentSchool.id, students: studentId },
+        query: {
+          school: currentSchool.id,
+          students: studentId,
+          schoolYear: getPreferredSchoolYear(),
+        },
       })
       subjects = subjectsResult.data || []
       if (subjects.length === 0 && currentSchool.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM) {

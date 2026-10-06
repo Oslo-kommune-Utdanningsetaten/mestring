@@ -1,6 +1,7 @@
 from .. import models, serializers
 from django.db.models import Q, Prefetch, Exists, OuterRef, Count
-from datetime import datetime
+from datetime import datetime, timedelta
+from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.filters import OrderingFilter
 from rest_framework.exceptions import ValidationError
@@ -8,6 +9,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema
 from rest_access_policy import AccessViewSetMixin
 from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy, StatusAccessPolicy, StatusCategoryAccessPolicy
 from .api_functions import get_request_param
+from .school_year_functions import calculate_milestones_for_school_year
 import logging
 
 logger = logging.getLogger(__name__)
@@ -608,6 +610,13 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
                 type={'type': 'boolean'},
                 location=OpenApiParameter.QUERY
             ),
+            OpenApiParameter(
+                name='school_year',
+                description='Filter subjects by groups valid for, or goals created in, the given school year. Use "all" for all school years',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
             DELETED_FILTER_PARAMETER,
             *CREATED_RANGE_PARAMETERS,
         ]
@@ -626,6 +635,7 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
             student_ids_param, _ = get_request_param(self.request.query_params, 'students')
+            school_year_param, _ = get_request_param(self.request.query_params, 'school_year')
 
             is_owned_by_school_param, is_owned_set = get_request_param(
                 self.request.query_params, 'is_owned_by_school')
@@ -634,6 +644,12 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
             if not school_param:
                 raise ValidationError(
                     {'error': 'missing-parameter', 'message': 'The "school" query parameter is required.'})
+
+            # Require school_year
+            if not school_year_param:
+                raise ValidationError(
+                    {'error': 'missing-parameter',
+                     'message': 'The "school_year" query parameter is required.'})
 
             qs = qs.filter(
                 Q(owned_by_school_id=school_param) |
@@ -662,6 +678,26 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
                             )
                         )
                     )
+
+            if school_year_param != 'all':
+                milestones = calculate_milestones_for_school_year(school_year_param)
+                valid_from = timezone.make_aware(
+                    datetime.combine(milestones["start_at"], datetime.min.time()))
+                valid_to = timezone.make_aware(
+                    datetime.combine(milestones["end_at"] + timedelta(days=1), datetime.min.time()))
+                # Filter subjects by groups valid for, or goals created in, the given school year
+                qs = qs.filter(
+                    Q(
+                        groups__school_id=school_param,
+                        groups__valid_from__lt=valid_to,
+                        groups__valid_to__gte=valid_from
+                    ) |
+                    Q(
+                        goals__school_id=school_param,
+                        goals__created_at__gte=valid_from,
+                        goals__created_at__lt=valid_to
+                    )
+                )
 
             if is_owned_set:
                 if is_owned_by_school_param:

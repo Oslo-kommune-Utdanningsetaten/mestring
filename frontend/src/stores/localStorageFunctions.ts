@@ -45,6 +45,11 @@ export const getPreferredMasterySchemaId = () => {
   return preferredMasterySchemaId || null
 }
 
+export const getPreferredSchoolYear = () => {
+  const preferredSchoolYear = localStorage<string>('preferredSchoolYear').get()
+  return preferredSchoolYear || getCurrentSchoolYear()
+}
+
 export const isObservationUrlEnabled = () => {
   const isObservationUrlEnabled = localStorage<string>('isObservationUrlEnabled').get()
   return Boolean(isObservationUrlEnabled)

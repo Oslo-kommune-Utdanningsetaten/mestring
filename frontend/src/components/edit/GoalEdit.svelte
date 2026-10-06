@@ -8,9 +8,10 @@
   } from '../../generated/types.gen'
   import { goalsCreate, goalsUpdate, subjectsList } from '../../generated/sdk.gen'
 
+  import { NONE_FIELD_VALUE } from '../../utils/constants'
   import { dataStore } from '../../stores/data'
   import { localStorage } from '../../stores/localStorage'
-  import { NONE_FIELD_VALUE } from '../../utils/constants'
+  import { preferredSchoolYear } from '../../stores/localStorageFunctions'
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
   import { t } from '../../stores/translations'
@@ -66,7 +67,7 @@
   const fetchStudentSubjects = async () => {
     try {
       const subjectsResult = await subjectsList({
-        query: { school: currentSchool.id, students: student.id },
+        query: { school: currentSchool.id, students: student.id, schoolYear: $preferredSchoolYear },
       })
       availableSubjects = subjectsResult.data || []
     } catch (error) {

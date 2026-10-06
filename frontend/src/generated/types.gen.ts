@@ -2281,6 +2281,10 @@ export type SubjectsListData = {
          */
         school: string;
         /**
+         * Filter subjects by groups valid for, or goals created in, the given school year. Use "all" for all school years
+         */
+        schoolYear: string;
+        /**
          * Filter subjects by student participation. Comma-separated list of user IDs
          */
         students?: string;

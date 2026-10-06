@@ -15,6 +15,8 @@ class PlainJSONField(models.JSONField):
     # Bypass automatic JSON decoding Django performs on JSONField data
     # psycopg2 already decodes json columns into Python objects
     def from_db_value(self, value, expression, connection):
+        if connection.vendor == "sqlite" and isinstance(value, str):
+            return json.loads(value, cls=self.decoder)
         return value
 
     def get_db_prep_value(self, value, connection, prepared=False):

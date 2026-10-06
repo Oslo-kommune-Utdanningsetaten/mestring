@@ -20,6 +20,7 @@
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
   import { dataStore } from '../stores/data'
   import { getGroupLabel, goalsWithCalculatedMastery } from '../utils/functions'
+  import { preferredSchoolYear } from '../stores/localStorageFunctions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { t } from '../stores/translations'
 
@@ -125,7 +126,11 @@
       })
       // Fetch subjects for students
       const subjectsResult = await subjectsList({
-        query: { school: currentSchool.id, students: students.map(s => s.id).join(',') },
+        query: {
+          school: currentSchool.id,
+          students: students.map(s => s.id).join(','),
+          schoolYear: $preferredSchoolYear,
+        },
       })
       subjects = subjectsResult.data || []
     } catch (error) {
