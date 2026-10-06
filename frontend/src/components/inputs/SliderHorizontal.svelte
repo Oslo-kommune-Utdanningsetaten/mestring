@@ -20,7 +20,7 @@
   } = $props()
 
   const calculations = $derived(useMasteryCalculations(masterySchema))
-  const thumbWidth = 50
+  const thumbWidth = 40
   let inputContainerWidth = $state(0)
 
   const calculateThumbCenter = (value: number) =>
@@ -68,7 +68,7 @@
   {#if masterySchema?.config?.isIncrementIndicatorEnabled}
     <!-- bar visualizing mastery position -->
     <div
-      id="incrementIndicator"
+      id="increment-indicator"
       title={`${safeMasteryValue}`}
       style="left: {thumbCenterX}px;"
     ></div>
@@ -84,7 +84,7 @@
 >
   {#if masterySchema?.config?.isMasteryValueVisible}
     <!-- mastery value number -->
-    <div id="valueIndicator" style="left: {thumbCenterX}px;">
+    <div id="value-indicator" style="left: {thumbCenterX}px;">
       {safeMasteryValue}
     </div>
   {/if}
@@ -121,7 +121,7 @@
     width: 100%;
   }
 
-  #incrementIndicator {
+  #increment-indicator {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -131,7 +131,7 @@
     background-color: rgba(0, 0, 0, 0.8);
   }
 
-  #valueIndicator {
+  #value-indicator {
     position: absolute;
     bottom: 2em;
     left: 0;
@@ -178,7 +178,7 @@
     -webkit-appearance: none;
     appearance: none;
     width: var(--thumb-width);
-    height: 40px;
+    height: 50px;
     border-radius: 3px;
     box-sizing: border-box;
     border: 1px solid var(--pkt-color-grays-gray-500);
@@ -189,7 +189,7 @@
 
   .slider::-moz-range-thumb {
     width: var(--thumb-width);
-    height: 40px;
+    height: 50px;
     border-radius: 3px;
     box-sizing: border-box;
     border: 1px solid var(--pkt-color-grays-gray-500);

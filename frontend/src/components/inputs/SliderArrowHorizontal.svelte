@@ -34,7 +34,7 @@
     calculateSafeMasteryValue,
   } = $derived(useMasteryCalculations(masterySchema))
 
-  const thumbWidth = 50
+  const thumbWidth = 40
   let inputContainerWidth = $state(0)
 
   const calculateThumbCenter = (value: number) =>
@@ -286,7 +286,7 @@
     /* Override default look */
     -webkit-appearance: none;
     width: var(--thumb-width);
-    height: 40px;
+    height: 50px;
     border-radius: 3px;
     appearance: none;
     box-sizing: border-box;
@@ -298,7 +298,7 @@
 
   .slider::-moz-range-thumb {
     width: var(--thumb-width);
-    height: 40px;
+    height: 50px;
     border-radius: 3px;
     box-sizing: border-box;
     border: 1px solid var(--pkt-color-grays-gray-500);

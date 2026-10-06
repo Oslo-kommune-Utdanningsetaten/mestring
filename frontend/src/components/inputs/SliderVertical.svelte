@@ -50,7 +50,7 @@
     {label}
   </label>
 
-  <div class="d-flex gap-1 position-relative">
+  <div class="d-flex gap-1 position-relative mt-4">
     {#if masterySchema?.config?.isMasteryValueInputEnabled && isInputEnabled}
       <!-- Slider input -->
       <input
@@ -68,8 +68,8 @@
 
     {#if masterySchema?.config?.isMasteryValueVisible}
       <!-- mastery value number -->
-      <div id="valueIndicatorContainer">
-        <div id="valueIndicator" style="top: {thumbCenterY}px;">
+      <div id="value-indicator-container">
+        <div id="value-indicator" style="top: {thumbCenterY}px;">
           {safeMasteryValue}
         </div>
       </div>
@@ -92,7 +92,7 @@
       {#if masterySchema?.config?.isIncrementIndicatorEnabled}
         <!-- bar visualizing mastery position -->
         <div
-          id="incrementIndicator"
+          id="increment-indicator"
           title={`${safeMasteryValue}`}
           style="top: {thumbCenterY}px;"
         ></div>
@@ -107,7 +107,7 @@
 </div>
 
 <style>
-  #incrementIndicator {
+  #increment-indicator {
     position: absolute;
     top: 0;
     left: 0%;
@@ -118,13 +118,12 @@
     z-index: 1;
   }
 
-  #valueIndicatorContainer {
+  #value-indicator-container {
     position: relative;
     width: 3em;
-    border: 1px solid var(--bs-gray-300);
   }
 
-  #valueIndicator {
+  #value-indicator {
     position: absolute;
     top: 0;
     left: 0;
