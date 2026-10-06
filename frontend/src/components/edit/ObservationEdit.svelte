@@ -4,7 +4,7 @@
   import { observationsCreate, observationsUpdate, observationsList } from '../../generated/sdk.gen'
 
   import { useMasteryCalculations } from '../../utils/masteryHelpers'
-  import { dataStore, currentUser } from '../../stores/data'
+  import { dataStore, currentUser, currentSchool } from '../../stores/data'
   import { localStorage } from '../../stores/localStorage'
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
@@ -137,7 +137,7 @@
       </div>
     {/if}
 
-    {#if !$currentUser.isStudent}
+    {#if $currentSchool.isServiceEnabledForStudents && !$currentUser.isStudent}
       <pkt-checkbox
         class="ms-auto"
         label={localObservation.isVisibleToStudent ? 'Synlig for eleven' : 'IKKE synlig for eleven'}
