@@ -240,7 +240,7 @@
       {#if group.schoolId !== currentSchool?.id}
         <div class="alert alert-warning" role="alert">Denne gruppa tilhører en annen skole.</div>
       {/if}
-      {#if availableStatusCategories.length && $hasUserAccessToFeature( 'status', 'create', { groupId, createdById: $dataStore.currentUser.id, subjectId: group.subjectId || undefined } )}
+      {#if group.type === 'teaching' && availableStatusCategories.length && $hasUserAccessToFeature( 'status', 'create', { groupId, createdById: $dataStore.currentUser.id, subjectId: group.subjectId || undefined } )}
         <!-- Status create if there are available status categories -->
         <section>
           <h3 class="mb-3">Opprett {t('status', { form: 'plu-indef' })} for hele gruppa</h3>
