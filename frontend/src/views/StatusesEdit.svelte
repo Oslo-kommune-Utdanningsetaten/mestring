@@ -133,7 +133,6 @@
   }
 
   const refetchDataForStudent = async (studentId: string) => {
-    console.log('Refetching data for student:', studentId)
     if (!group || !subject || !studentId) return
     const statusResult = await statusList({
       query: {
