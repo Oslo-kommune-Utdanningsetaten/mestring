@@ -7,6 +7,7 @@
     UserType,
     ObservationType,
     SubjectType,
+    StatusType,
   } from '../generated/types.gen'
   import type { GoalDecorated } from '../types/models'
   import {
@@ -15,6 +16,7 @@
     goalsList,
     goalsUpdate,
     subjectsList,
+    statusList,
   } from '../generated/sdk.gen'
 
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
@@ -44,6 +46,7 @@
   let goalsWithCalculatedMasteryByStudentId = $state<Record<string, GoalDecorated[]>>({})
   let subjects = $state<SubjectType[]>([])
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
+  let statusesByCategoryID = $state<Record<string, StatusType[]>>({})
 
   let currentSchool = $derived($dataStore.currentSchool)
   let subject = $derived<SubjectType | undefined>(
@@ -83,29 +86,46 @@
     try {
       isLoading = true
 
-      const [groupResult, teachersResult, studentsResult, goalsResult] = await Promise.all([
-        await groupsRetrieve({
-          path: { id: groupId },
-        }),
-        await usersList({
-          query: { groups: groupId, school: currentSchool.id, roles: USER_ROLES.TEACHER },
-        }),
-        await usersList({
-          query: { groups: groupId, school: currentSchool.id, roles: USER_ROLES.STUDENT },
-        }),
-        await goalsList({
-          query: {
-            group: groupId,
-            includeObservations: true,
-            school: currentSchool.id,
-          },
-        }),
-      ])
+      const [groupResult, teachersResult, studentsResult, goalsResult, statusesResult] =
+        await Promise.all([
+          await groupsRetrieve({
+            path: { id: groupId },
+          }),
+          await usersList({
+            query: { groups: groupId, school: currentSchool.id, roles: USER_ROLES.TEACHER },
+          }),
+          await usersList({
+            query: { groups: groupId, school: currentSchool.id, roles: USER_ROLES.STUDENT },
+          }),
+          await goalsList({
+            query: {
+              group: groupId,
+              includeObservations: true,
+              school: currentSchool.id,
+            },
+          }),
+          await statusList({
+            query: {
+              school: $dataStore.currentSchool?.id,
+              group: groupId,
+            },
+          }),
+        ])
 
       group = groupResult.data || null
       teachers = teachersResult.data || []
       students = studentsResult.data || []
       groupGoals = goalsResult.data || []
+      const statuses = statusesResult.data || []
+
+      statuses.forEach(status => {
+        if (status.categoryId) {
+          if (!statusesByCategoryID[status.categoryId]) {
+            statusesByCategoryID[status.categoryId] = []
+          }
+          statusesByCategoryID[status.categoryId].push(status)
+        }
+      })
 
       // For each student, calculate their goals with mastery
       students.forEach(student => {
@@ -134,7 +154,7 @@
       })
       subjects = subjectsResult.data || []
     } catch (error) {
-      console.error('Error fetching group:', error)
+      console.error('Error while fetching group data:', error)
     } finally {
       isLoading = false
     }
@@ -246,17 +266,22 @@
         <div class="alert alert-warning" role="alert">Denne gruppa tilhører en annen skole.</div>
       {/if}
       {#if group.type === 'teaching' && availableStatusCategories.length && $hasUserAccessToFeature( 'status', 'create', { groupId, createdById: $dataStore.currentUser.id, subjectId: group.subjectId || undefined } )}
-        <!-- Status create if there are available status categories -->
-        <section>
-          <h3 class="mb-3">Opprett {t('status', { form: 'plu-indef' })} for hele gruppa</h3>
-          <ul>
-            {#each availableStatusCategories as category}
-              <li>
-                <Link to="/groups/{group.id}/statuses/{category.name}">{category.title}</Link>
-              </li>
-            {/each}
-          </ul>
-        </section>
+        <div class="card my-4 p-3">
+          <h3 class="mb-2">Det er tid for...</h3>
+          {#each availableStatusCategories as category}
+            <p class="my-1">
+              <Link to="/groups/{group.id}/statuses/{category.name}">
+                {category.title}!
+              </Link>
+              {#if statusesByCategoryID[category.id]?.length === students.length}
+                Men det er helt chill for du er ferdig💪
+              {:else}
+                Du har unnagjort
+              {/if}
+              <mark>{statusesByCategoryID[category.id]?.length || 0} av {students.length}</mark>
+            </p>
+          {/each}
+        </div>
       {/if}
 
       <!-- Group goals Section -->
