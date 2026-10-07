@@ -1,18 +1,21 @@
-from datetime import date, datetime
+from datetime import date, datetime, time, timedelta, timezone as datetime_timezone
 from typing import Optional, TypedDict
 
 from django.utils import timezone
 
 
-# school year start
+# school year start, aka "first day of the school year"
 START_MONTH = 8  # august
 START_DAY = 1  # first day of august
+
 # school year midyear
 MIDYEAR_MONTH = 1  # january
 MIDYEAR_DAY = 15  # fifteenth day of january
-# school year end
+
+# school year end, aka "last day of the school year"
 END_MONTH = 7  # july
 END_DAY = 31  # thirty-first day of july
+SCHOOL_YEAR_BOUNDARY_HOUR_UTC = 22  # Feide's Norwegian school-year boundary is 22:00 UTC
 
 
 class SchoolYearMilestones(TypedDict):
@@ -53,6 +56,19 @@ def calculate_milestones_for_school_year(school_year: str) -> SchoolYearMileston
         "midyear_at": date(start_year + 1, MIDYEAR_MONTH, MIDYEAR_DAY),
         "end_at": date(start_year + 1, END_MONTH, END_DAY),
     }
+
+
+def calculate_school_year_utc_range(school_year: str) -> tuple[datetime, datetime]:
+    milestones = calculate_milestones_for_school_year(school_year)
+    start_date = milestones["start_at"] - timedelta(days=1)
+    end_date = milestones["end_at"]
+    boundary_time = time(SCHOOL_YEAR_BOUNDARY_HOUR_UTC)
+
+    # Keep the range in UTC and align it to the instants used in Feide group validity dates.
+    return (
+        datetime.combine(start_date, boundary_time, tzinfo=datetime_timezone.utc),
+        datetime.combine(end_date, boundary_time, tzinfo=datetime_timezone.utc),
+    )
 
 
 # Check if the entity belongs to the specified school year based on its created_at

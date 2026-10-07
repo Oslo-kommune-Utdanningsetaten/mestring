@@ -1,9 +1,19 @@
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone as datetime_timezone
 from django.utils import timezone
 
-from mastery.api.school_year_functions import is_entity_from_school_year
+from mastery.api.school_year_functions import (
+    calculate_school_year_utc_range,
+    is_entity_from_school_year,
+)
 from mastery.models import Group
+
+
+def test_calculate_school_year_utc_range_uses_feide_boundary_instants():
+    start_at, end_at = calculate_school_year_utc_range("2026-2027")
+
+    assert start_at == datetime(2026, 7, 31, 22, tzinfo=datetime_timezone.utc)
+    assert end_at == datetime(2027, 7, 31, 22, tzinfo=datetime_timezone.utc)
 
 
 @pytest.mark.django_db

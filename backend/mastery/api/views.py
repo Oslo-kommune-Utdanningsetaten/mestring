@@ -1,7 +1,6 @@
 from .. import models, serializers
 from django.db.models import Q, Prefetch, Exists, OuterRef, Count
-from datetime import datetime, timedelta
-from django.utils import timezone
+from datetime import datetime
 from rest_framework import viewsets
 from rest_framework.filters import OrderingFilter
 from rest_framework.exceptions import ValidationError
@@ -9,7 +8,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema
 from rest_access_policy import AccessViewSetMixin
 from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy, StatusAccessPolicy, StatusCategoryAccessPolicy
 from .api_functions import get_request_param
-from .school_year_functions import calculate_milestones_for_school_year
+from .school_year_functions import calculate_school_year_utc_range
 import logging
 
 logger = logging.getLogger(__name__)
@@ -651,6 +650,9 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
                     {'error': 'missing-parameter',
                      'message': 'The "school_year" query parameter is required.'})
 
+            if school_year_param != 'all':
+                valid_from, valid_to = calculate_school_year_utc_range(school_year_param)
+
             qs = qs.filter(
                 Q(owned_by_school_id=school_param) |
                 Exists(models.Group.objects.filter(subject_id=OuterRef('pk'), school_id=school_param)) |
@@ -661,36 +663,43 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
                 student_ids = [student_id.strip()
                                for student_id in student_ids_param.split(',') if student_id]
                 if student_ids:
+                    user_groups = models.UserGroup.objects.filter(
+                        group__subject_id=OuterRef('pk'),
+                        user_id__in=student_ids,
+                        deleted_at__isnull=True,
+                        group__is_enabled=True
+                    )
+                    if school_year_param != 'all':
+                        user_groups = user_groups.filter(
+                            group__school_id=school_param,
+                            group__valid_from__lt=valid_to,
+                            group__valid_to__gt=valid_from
+                        )
+
+                    student_goals = models.Goal.objects.filter(
+                        subject_id=OuterRef('pk'),
+                        student_id__in=student_ids
+                    )
+                    if school_year_param != 'all':
+                        student_goals = student_goals.filter(
+                            school_id=school_param,
+                            created_at__gte=valid_from,
+                            created_at__lt=valid_to
+                        )
+
                     qs = qs.filter(
                         # when querying by student_ids, include only subjects where the groups are enabled
-                        Exists(
-                            models.UserGroup.objects.filter(
-                                group__subject_id=OuterRef('pk'),
-                                user_id__in=student_ids,
-                                deleted_at__isnull=True,
-                                group__is_enabled=True
-                            )
-                        ) |
-                        Exists(
-                            models.Goal.objects.filter(
-                                subject_id=OuterRef('pk'),
-                                student_id__in=student_ids
-                            )
-                        )
+                        Exists(user_groups) |
+                        Exists(student_goals)
                     )
 
             if school_year_param != 'all':
-                milestones = calculate_milestones_for_school_year(school_year_param)
-                valid_from = timezone.make_aware(
-                    datetime.combine(milestones["start_at"], datetime.min.time()))
-                valid_to = timezone.make_aware(
-                    datetime.combine(milestones["end_at"] + timedelta(days=1), datetime.min.time()))
                 # Filter subjects by groups valid for, or goals created in, the given school year
                 qs = qs.filter(
                     Q(
                         groups__school_id=school_param,
                         groups__valid_from__lt=valid_to,
-                        groups__valid_to__gte=valid_from
+                        groups__valid_to__gt=valid_from
                     ) |
                     Q(
                         goals__school_id=school_param,

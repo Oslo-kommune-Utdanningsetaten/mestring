@@ -351,3 +351,262 @@ def test_subject_school_year_filter_scopes_groups_and_goals_to_school(
 
     assert response.status_code == 200
     assert response.json() == []
+
+
+@pytest.mark.django_db
+def test_subject_student_filter_scopes_group_membership_to_school_year(
+        school, superadmin, student, student_role):
+    subject_with_old_membership = Subject.objects.create(
+        display_name="Old membership subject",
+        short_name="Old membership",
+    )
+    old_group = Group.objects.create(
+        feide_id="fc:group:old-membership-group",
+        display_name="Old membership group",
+        type="teaching",
+        school=school,
+        subject=subject_with_old_membership,
+        valid_from=timezone.make_aware(datetime(2023, 9, 1)),
+        valid_to=timezone.make_aware(datetime(2024, 6, 1)),
+        is_enabled=True,
+    )
+    old_group.add_member(student, student_role)
+    Group.objects.create(
+        feide_id="fc:group:current-year-unrelated-group",
+        display_name="Current-year group without student",
+        type="teaching",
+        school=school,
+        subject=subject_with_old_membership,
+        valid_from=timezone.make_aware(datetime(2024, 9, 1)),
+        valid_to=timezone.make_aware(datetime(2025, 6, 1)),
+        is_enabled=True,
+    )
+
+    subject_with_current_membership = Subject.objects.create(
+        display_name="Current membership subject",
+        short_name="Current membership",
+    )
+    current_group = Group.objects.create(
+        feide_id="fc:group:current-membership-group",
+        display_name="Current membership group",
+        type="teaching",
+        school=school,
+        subject=subject_with_current_membership,
+        valid_from=timezone.make_aware(datetime(2024, 9, 1)),
+        valid_to=timezone.make_aware(datetime(2025, 6, 1)),
+        is_enabled=True,
+    )
+    current_group.add_member(student, student_role)
+
+    client = APIClient()
+    client.force_authenticate(user=superadmin)
+    response = client.get('/api/subjects/', {
+        'school': school.id,
+        'school_year': '2024-2025',
+        'students': student.id,
+    })
+
+    assert response.status_code == 200
+    assert {subject['id'] for subject in response.json()} == {subject_with_current_membership.id}
+
+
+@pytest.mark.django_db
+def test_subject_student_filter_ignores_goals_outside_school_year(school, superadmin, student):
+    subject = Subject.objects.create(
+        display_name="Goal from another year",
+        short_name="Other year goal",
+    )
+    Group.objects.create(
+        feide_id="fc:group:goal-subject-previous-year-group",
+        display_name="Previous-year group without student",
+        type="teaching",
+        school=school,
+        subject=subject,
+        valid_from=timezone.make_aware(datetime(2024, 9, 1)),
+        valid_to=timezone.make_aware(datetime(2025, 6, 1)),
+        is_enabled=True,
+    )
+    goal = Goal.objects.create(
+        title="Student goal from following year",
+        student=student,
+        subject=subject,
+        school=school,
+    )
+    Goal.objects.filter(id=goal.id).update(
+        created_at=timezone.make_aware(datetime(2025, 9, 1))
+    )
+
+    client = APIClient()
+    client.force_authenticate(user=superadmin)
+    response = client.get('/api/subjects/', {
+        'school': school.id,
+        'school_year': '2024-2025',
+        'students': student.id,
+    })
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+@pytest.mark.django_db
+def test_subject_student_filter_uses_feide_utc_school_year_boundaries(
+        school, superadmin, student, student_role):
+    subject = Subject.objects.create(
+        display_name="School year boundary subject",
+        short_name="Boundary",
+    )
+    group = Group.objects.create(
+        feide_id="fc:group:school-year-boundary",
+        display_name="School year boundary group",
+        type="teaching",
+        school=school,
+        subject=subject,
+        valid_from=datetime.fromisoformat("2026-07-31T22:00:00+00:00"),
+        valid_to=datetime.fromisoformat("2027-07-31T22:00:00+00:00"),
+        is_enabled=True,
+    )
+    group.add_member(student, student_role)
+    Group.objects.create(
+        feide_id="fc:group:school-year-boundary-previous-bridge",
+        display_name="Previous-year group for current subject",
+        type="teaching",
+        school=school,
+        subject=subject,
+        valid_from=datetime.fromisoformat("2025-07-31T22:00:00+00:00"),
+        valid_to=datetime.fromisoformat("2026-07-31T22:00:00+00:00"),
+        is_enabled=True,
+    )
+
+    previous_subject = Subject.objects.create(
+        display_name="Previous school year subject",
+        short_name="Previous year",
+    )
+    previous_group = Group.objects.create(
+        feide_id="fc:group:previous-school-year-boundary",
+        display_name="Previous school year group",
+        type="teaching",
+        school=school,
+        subject=previous_subject,
+        valid_from=datetime.fromisoformat("2025-07-31T22:00:00+00:00"),
+        valid_to=datetime.fromisoformat("2026-07-31T22:00:00+00:00"),
+        is_enabled=True,
+    )
+    previous_group.add_member(student, student_role)
+    Group.objects.create(
+        feide_id="fc:group:previous-school-year-boundary-current-bridge",
+        display_name="Current-year group for previous subject",
+        type="teaching",
+        school=school,
+        subject=previous_subject,
+        valid_from=datetime.fromisoformat("2026-07-31T22:00:00+00:00"),
+        valid_to=datetime.fromisoformat("2027-07-31T22:00:00+00:00"),
+        is_enabled=True,
+    )
+
+    client = APIClient()
+    client.force_authenticate(user=superadmin)
+    previous_year_response = client.get('/api/subjects/', {
+        'school': school.id,
+        'school_year': '2025-2026',
+        'students': student.id,
+    })
+    current_year_response = client.get('/api/subjects/', {
+        'school': school.id,
+        'school_year': '2026-2027',
+        'students': student.id,
+    })
+
+    assert previous_year_response.status_code == 200
+    assert {item['id'] for item in previous_year_response.json()} == {previous_subject.id}
+    assert current_year_response.status_code == 200
+    assert {item['id'] for item in current_year_response.json()} == {subject.id}
+
+
+@pytest.mark.django_db
+def test_subject_school_year_filter_uses_half_open_utc_ranges(
+    school, superadmin, student, student_role):
+    year_start = datetime.fromisoformat("2026-07-31T22:00:00+00:00")
+    year_end = datetime.fromisoformat("2027-07-31T22:00:00+00:00")
+    included_group_subject = Subject.objects.create(
+        display_name="Group valid in school year",
+        short_name="Group in range",
+    )
+    included_group = Group.objects.create(
+        feide_id="fc:group:half-open-included",
+        display_name="Group spanning school year",
+        type="teaching",
+        school=school,
+        subject=included_group_subject,
+        valid_from=year_start,
+        valid_to=year_end,
+        is_enabled=True,
+    )
+    included_group.add_member(student, student_role)
+
+    group_ending_at_start_subject = Subject.objects.create(
+        display_name="Group ending at school year start",
+        short_name="Ends at start",
+    )
+    Group.objects.create(
+        feide_id="fc:group:half-open-ends-at-start",
+        display_name="Group ending at boundary",
+        type="teaching",
+        school=school,
+        subject=group_ending_at_start_subject,
+        valid_from=datetime.fromisoformat("2025-07-31T22:00:00+00:00"),
+        valid_to=year_start,
+        is_enabled=True,
+    )
+
+    group_starting_at_end_subject = Subject.objects.create(
+        display_name="Group starting at school year end",
+        short_name="Starts at end",
+    )
+    Group.objects.create(
+        feide_id="fc:group:half-open-starts-at-end",
+        display_name="Group starting at boundary",
+        type="teaching",
+        school=school,
+        subject=group_starting_at_end_subject,
+        valid_from=year_end,
+        valid_to=datetime.fromisoformat("2028-07-31T22:00:00+00:00"),
+        is_enabled=True,
+    )
+
+    goal_at_start_subject = Subject.objects.create(
+        display_name="Goal created at school year start",
+        short_name="Goal at start",
+    )
+    goal_at_start = Goal.objects.create(
+        title="Goal at school-year start",
+        student=student,
+        subject=goal_at_start_subject,
+        school=school,
+    )
+    Goal.objects.filter(id=goal_at_start.id).update(created_at=year_start)
+
+    goal_at_end_subject = Subject.objects.create(
+        display_name="Goal created at school year end",
+        short_name="Goal at end",
+    )
+    goal_at_end = Goal.objects.create(
+        title="Goal at school-year end",
+        student=student,
+        subject=goal_at_end_subject,
+        school=school,
+    )
+    Goal.objects.filter(id=goal_at_end.id).update(created_at=year_end)
+
+    client = APIClient()
+    client.force_authenticate(user=superadmin)
+    response = client.get('/api/subjects/', {
+        'school': school.id,
+        'school_year': '2026-2027',
+        'students': student.id,
+    })
+
+    assert response.status_code == 200
+    assert {item['id'] for item in response.json()} == {
+        included_group_subject.id,
+        goal_at_start_subject.id,
+    }
