@@ -1,10 +1,15 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
+  import { useTinyRouter } from 'svelte-tiny-router'
+
   import { preferredSchoolYear } from '../stores/localStorageFunctions'
   import { currentUser, currentSchool } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
   import { GROUP_VALIDITY_OPTIONS } from '../utils/constants'
   import { getAllSchoolYears, getCurrentSchoolYear } from '../utils/schoolYear'
+  import { urlStringFrom } from '../utils/functions'
+
+  const router = useTinyRouter()
 
   const allYears = $derived(
     $currentSchool ? getAllSchoolYears(new Date($currentSchool.createdAt)).reverse() : []
@@ -36,6 +41,9 @@
       // Past year selected --> only include invalid groups
       localStorage('preferredGroupValidity').set(GROUP_VALIDITY_OPTIONS.EXCLUDE)
     }
+    // remove options from url (they're very likely wrong after changing the school year)
+    router.navigate(urlStringFrom({}, { path: window.location.pathname, mode: 'replace' }))
+    // reload location to trigger refetch of all relevant data
     window.location.reload()
   }
 </script>
