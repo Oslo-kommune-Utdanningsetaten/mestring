@@ -524,7 +524,7 @@ def test_subject_student_filter_uses_feide_utc_school_year_boundaries(
 
 @pytest.mark.django_db
 def test_subject_school_year_filter_uses_half_open_utc_ranges(
-    school, superadmin, student, student_role):
+        school, superadmin, student, student_role):
     year_start = datetime.fromisoformat("2026-07-31T22:00:00+00:00")
     year_end = datetime.fromisoformat("2027-07-31T22:00:00+00:00")
     included_group_subject = Subject.objects.create(
