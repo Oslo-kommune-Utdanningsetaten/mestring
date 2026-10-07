@@ -320,10 +320,10 @@ export const getDateSpanForStatusCategory = (categoryName: string) => {
       endAt: endAt,
     }
   } else if (categoryName === 'risk') {
-    // IVF/G
+    // Midtveisrapportering
     return {
       beginAt: startAt,
-      endAt: endAt,
+      endAt: new Date().toISOString().split('T')[0], // current date
     }
   } else {
     console.error('Unknown category', { categoryName })

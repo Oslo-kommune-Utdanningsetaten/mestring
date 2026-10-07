@@ -6,19 +6,16 @@
     UserType,
     SubjectType,
   } from '../generated/types.gen'
-  import { usersList, statusList, statusCreate, statusUpdate } from '../generated/sdk.gen'
-  import { generateStatusTitle } from '../utils/functions'
   import type { StatusTitleInput } from '../types/models'
-  import {
-    calculateSchoolYearMilestones,
-    getCurrentSchoolYear,
-    isEntityFromSchoolYear,
-  } from '../utils/schoolYear'
+  import { usersList, statusList, statusCreate, statusUpdate } from '../generated/sdk.gen'
+
+  import { calculateSchoolYearMilestones, getCurrentSchoolYear } from '../utils/schoolYear'
   import { getPreferredCreatedParams, preferredSchoolYear } from '../stores/localStorageFunctions'
   import { dataStore } from '../stores/data'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
   import { t } from '../stores/translations'
+  import { generateStatusTitle } from '../utils/functions'
 
   import MasteryValueInput from '../components/MasteryValueInput.svelte'
   import AuthorInfo from '../components/AuthorInfo.svelte'
@@ -136,6 +133,7 @@
   }
 
   const refetchDataForStudent = async (studentId: string) => {
+    console.log('Refetching data for student:', studentId)
     if (!group || !subject || !studentId) return
     const statusResult = await statusList({
       query: {
@@ -197,7 +195,7 @@
 
 {#if group && statusCategory && subject}
   <h2 class="my-4">
-    <Link to="/groups/{group?.id}">{group?.displayName}</Link> - {statusCategory?.title}
+    {statusCategory?.title} for <Link to="/groups/{group?.id}">{group?.displayName}</Link>
   </h2>
   <section class="shadow-sm">
     {#if group.subjectId}

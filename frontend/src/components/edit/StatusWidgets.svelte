@@ -83,8 +83,10 @@
         message: 'Slettet ' + t('status', { form: 'sin-indef' }),
       })
       trackEvent('Status', 'Delete')
-      if (!location.pathname.includes('/statuses/risk')) {
-        // If not on the /statuses/risk paage, navigate back
+      if (location.pathname.includes('/statuses/risk')) {
+        onRefreshRequired()
+      } else {
+        // If not on the /statuses/risk page, navigate back
         window.history.back()
       }
     } catch (error) {
@@ -182,7 +184,7 @@
             classes: 'bordered',
             disabled: disabledWidgets?.includes('delete'),
             onClick: () => handleDeleteStatus(),
-            delayActionFor: 3,
+            delayActionFor: 2,
           }}
         />
       {/if}

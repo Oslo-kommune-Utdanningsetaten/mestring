@@ -30,6 +30,7 @@
   import MasteryValueInput from '../MasteryValueInput.svelte'
   import MasteryLevelBadge from '../MasteryLevelBadge.svelte'
   import MasteryBarChart from '../MasteryBarChart.svelte'
+  import AuthorInfo from '../AuthorInfo.svelte'
 
   let { status, onDone } = $props<{
     status: Partial<StatusType>
@@ -52,11 +53,13 @@
   )
 
   let selectableStatusCategories = $derived(
-    $dataStore.statusCategories.filter(
-      // If status has a subjectId, only show subject-specific categories
-      // If it doesn't, only show non-subject-specific categories
-      (cat: StatusCategoryType) => !!localStatus.subjectId === cat.isSubjectSpecific
-    )
+    $dataStore.statusCategories
+      .filter(
+        // If status has a subjectId, only show subject-specific categories
+        // If it doesn't, only show non-subject-specific categories
+        (cat: StatusCategoryType) => !!localStatus.subjectId === cat.isSubjectSpecific
+      )
+      .filter((cat: StatusCategoryType) => !!cat.isEnabled)
   )
   const studentFirstName = $derived(localStudent?.name.split(' ')[0] || 'eleven')
 
@@ -69,7 +72,7 @@
   })
 
   let currentStatusCategory = $derived(
-    selectableStatusCategories.find(cat => cat.id === localStatus.categoryId)
+    $dataStore.statusCategories.find(cat => cat.id === localStatus.categoryId)
   )
 
   let currentMasterySchema: MasterySchemaWithConfig = $derived.by(() => {
@@ -225,8 +228,16 @@
   <!-- Header -->
   <div class="p-4 pb-3 border-bottom border-3 border-primary">
     <h2 class="fs-5 fw-semibold mb-0">
-      {localStatus.id ? 'Redigerer' : 'Ny'} status for
+      {#if currentStatusCategory}
+        {currentStatusCategory.title}
+      {:else}
+        {localStatus.id ? 'Redigerer' : 'Ny'} status
+      {/if}
+      for
       <mark>{localStudent?.name}</mark>
+      {#if localStatus.subjectId}
+        i faget <mark>{subject?.shortName || subject?.displayName}</mark>
+      {/if}
     </h2>
     {#if localStatus.beginAt || localStatus.endAt}
       <p class="small text-muted mt-1 mb-0">
@@ -235,6 +246,9 @@
         ) || '?'}]
       </p>
     {/if}
+    <p class="small text-muted mt-1 mb-0">
+      <AuthorInfo item={localStatus as StatusType} />
+    </p>
   </div>
 
   {#if localStatus && localStudent}
@@ -243,7 +257,8 @@
       {#if subject}
         <div class="goals-section bg-light p-3">
           <h3>
-            {t('goal', { form: 'plu-indef', capitalize: true })} i <mark>{subject?.shortName || subject?.displayName}</mark>
+            {t('goal', { form: 'plu-indef', capitalize: true })} i
+            <mark>{subject?.shortName || subject?.displayName}</mark>
             <ButtonIcon options={goalSectionToggleOptions} />
           </h3>
           {#if !localGoals}
@@ -284,7 +299,9 @@
                         />
                       {/if}
                     {:else}
-                      Ingen {t('observation', { form: 'plu-indef' })} for dette {t('goal', { form: 'sin-def' })}
+                      Ingen {t('observation', { form: 'plu-indef' })} for dette {t('goal', {
+                        form: 'sin-def',
+                      })}
                     {/if}
                   </span>
                 </div>
@@ -296,91 +313,106 @@
 
       <!-- Form fields -->
       <div class="mt-3">
-        <!-- Kategori -->
-        <div class="field-group">
-          <label for="categorySelect" class="field-label">Kategori</label>
-          <select
-            class="form-control rounded-0 border-2 border-primary pkt-input"
-            id="categorySelect"
-            bind:value={localStatus.categoryId}
-            onchange={handleCategoryChange}
-          >
-            <option value={null} selected={!localStatus.categoryId}>Ingen</option>
-            {#each selectableStatusCategories as statusCategory}
-              <option
-                value={statusCategory.id}
-                selected={statusCategory.id === localStatus.categoryId}
-              >
-                {statusCategory.title}
-              </option>
-            {/each}
-          </select>
-        </div>
+        <!-- Kategori select, if there are multiple selectable status categories -->
+        {#if selectableStatusCategories.length > 1}
+          <div class="field-group">
+            <label for="categorySelect" class="field-label">Kategori</label>
+            <select
+              class="form-control rounded-0 border-2 border-primary pkt-input"
+              id="categorySelect"
+              bind:value={localStatus.categoryId}
+              onchange={handleCategoryChange}
+            >
+              <option value={null} selected={!localStatus.categoryId}>Ingen</option>
+              {#each selectableStatusCategories as statusCategory}
+                <option
+                  value={statusCategory.id}
+                  selected={statusCategory.id === localStatus.categoryId}
+                >
+                  {statusCategory.title}
+                </option>
+              {/each}
+            </select>
+          </div>
+        {/if}
 
         <!-- Periode -->
-        <div class="field-group">
-          <span class="field-label">Periode</span>
-          <div class="d-flex align-items-end gap-2 flex-wrap">
-            <div class="flex-fill" style="min-width: 140px">
-              <label for="beginAt" class="form-label small text-muted mb-1">Fra</label>
-              <input
-                id="beginAt"
-                type="date"
-                class="form-control rounded-0 border-2 border-primary"
-                class:is-invalid={validationErrors.beginAt}
-                bind:value={localStatus.beginAt}
-                disabled={!!currentStatusCategory}
-                required
-              />
-              {#if validationErrors.beginAt}
-                <div class="text-danger small mt-1">{validationErrors.beginAt}</div>
-              {/if}
-            </div>
-            <span class="text-muted pb-2">–</span>
-            <div class="flex-fill" style="min-width: 140px">
-              <label for="endAt" class="form-label small text-muted mb-1">Til</label>
-              <input
-                id="endAt"
-                type="date"
-                class="form-control rounded-0 border-2 border-primary"
-                class:is-invalid={validationErrors.endAt}
-                bind:value={localStatus.endAt}
-                disabled={!!currentStatusCategory}
-                required
-              />
-              {#if validationErrors.endAt}
-                <div class="text-danger small mt-1">{validationErrors.endAt}</div>
-              {/if}
+        {#if !currentStatusCategory}
+          <div class="field-group">
+            <span class="field-label">Periode</span>
+            <div class="d-flex align-items-end gap-2 flex-wrap">
+              <!-- Periode fra -->
+              <div class="flex-fill" style="min-width: 140px">
+                <label for="beginAt" class="form-label small text-muted mb-1">Fra</label>
+                <input
+                  id="beginAt"
+                  type="date"
+                  class="form-control rounded-0 border-2 border-primary"
+                  class:is-invalid={validationErrors.beginAt}
+                  bind:value={localStatus.beginAt}
+                  disabled={!!currentStatusCategory}
+                  required
+                />
+                {#if validationErrors.beginAt}
+                  <div class="text-danger small mt-1">{validationErrors.beginAt}</div>
+                {/if}
+              </div>
+              <span class="text-muted pb-2">–</span>
+
+              <!-- Periode til -->
+              <div class="flex-fill" style="min-width: 140px">
+                <label for="endAt" class="form-label small text-muted mb-1">Til</label>
+                <input
+                  id="endAt"
+                  type="date"
+                  class="form-control rounded-0 border-2 border-primary"
+                  class:is-invalid={validationErrors.endAt}
+                  bind:value={localStatus.endAt}
+                  disabled={!!currentStatusCategory}
+                  required
+                />
+                {#if validationErrors.endAt}
+                  <div class="text-danger small mt-1">{validationErrors.endAt}</div>
+                {/if}
+              </div>
             </div>
           </div>
-        </div>
+        {/if}
 
         <!-- Tittel -->
-        <div class="field-group">
-          <label for="title" class="field-label">Tittel</label>
-          <div class="input-with-icon position-relative">
-            <input
-              id="title"
-              type="text"
-              class="form-control rounded-0 border-2 border-primary"
-              bind:value={localStatus.title}
-              placeholder="Angi en tittel"
-              disabled={!!currentStatusCategory}
-            />
-            <ButtonIcon
-              options={{
-                iconName: 'arrow-circle',
-                title: 'Foreslå tittel basert på datoer',
-                onClick: () => handleGenerateTitle(),
-              }}
-            />
+        {#if !currentStatusCategory}
+          <div class="field-group">
+            <label for="title" class="field-label">Tittel</label>
+            <div class="input-with-icon position-relative">
+              <input
+                id="title"
+                type="text"
+                class="form-control rounded-0 border-2 border-primary"
+                bind:value={localStatus.title}
+                placeholder="Angi en tittel"
+                disabled={!!currentStatusCategory}
+              />
+              <ButtonIcon
+                options={{
+                  iconName: 'arrow-circle',
+                  title: 'Foreslå tittel basert på datoer',
+                  onClick: () => handleGenerateTitle(),
+                }}
+              />
+            </div>
           </div>
-        </div>
+        {/if}
 
         <!-- Mestring -->
         {#if currentMasterySchema?.config?.isMasteryValueInputEnabled}
           <div class="field-group">
-            <span class="field-label">Mestring</span>
+            <span class="field-label">
+              {#if currentStatusCategory.name === 'risk'}
+                Status
+              {:else}
+                Mestring
+              {/if}
+            </span>
             <MasteryValueInput
               masterySchema={currentMasterySchema}
               bind:value={localStatus.masteryValue}
@@ -396,7 +428,7 @@
               id="description"
               class="form-control rounded-0 border-2 border-primary"
               bind:value={localStatus.masteryDescription}
-              placeholder="Kort beskrivelse av hva {studentFirstName} får til"
+              placeholder="Beskrivelse, ved behov"
               rows="4"
             ></textarea>
           </div>
