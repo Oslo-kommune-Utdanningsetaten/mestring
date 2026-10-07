@@ -407,7 +407,7 @@
         {#if currentMasterySchema?.config?.isMasteryValueInputEnabled}
           <div class="field-group">
             <span class="field-label">
-              {#if currentStatusCategory.name === 'risk'}
+              {#if currentStatusCategory?.name === 'risk'}
                 Status
               {:else}
                 Mestring
@@ -428,7 +428,9 @@
               id="description"
               class="form-control rounded-0 border-2 border-primary"
               bind:value={localStatus.masteryDescription}
-              placeholder="Beskrivelse, ved behov"
+              placeholder={currentStatusCategory?.name === 'risk'
+                ? 'Beskrivelse, ved behov'
+                : 'Konkret, hva mestrer ' + studentFirstName + '?'}
               rows="4"
             ></textarea>
           </div>
