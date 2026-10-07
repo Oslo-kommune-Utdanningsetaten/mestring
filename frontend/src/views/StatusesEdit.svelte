@@ -14,8 +14,8 @@
   import { dataStore } from '../stores/data'
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
+  import { generateStatusTitle, getGroupLabel } from '../utils/functions'
   import { t } from '../stores/translations'
-  import { generateStatusTitle } from '../utils/functions'
 
   import MasteryValueInput from '../components/MasteryValueInput.svelte'
   import AuthorInfo from '../components/AuthorInfo.svelte'
@@ -195,7 +195,13 @@
 
 {#if group && statusCategory && subject}
   <h2 class="my-4">
-    {statusCategory?.title} for <Link to="/groups/{group?.id}">{group?.displayName}</Link>
+    {statusCategory?.title} for <Link to="/groups/{group?.id}">
+      {getGroupLabel(group, {
+        isGroupNameEnabled: true,
+        isGroupTypeNameEnabled: false,
+        includeEarlierYear: true,
+      })}
+    </Link>
   </h2>
   <section class="shadow-sm">
     {#if group.subjectId}
