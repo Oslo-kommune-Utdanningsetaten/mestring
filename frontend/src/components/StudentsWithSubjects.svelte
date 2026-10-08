@@ -250,8 +250,6 @@
     align-items: start;
     gap: 0;
     overflow-x: auto;
-    overflow-y: auto;
-    max-height: 80vh;
   }
 
   .students-grid .item {

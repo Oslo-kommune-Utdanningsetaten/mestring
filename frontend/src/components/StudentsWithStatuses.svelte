@@ -233,8 +233,6 @@
     grid-template-columns: 1.2fr repeat(var(--columns-count, 8), 1fr);
     align-items: start;
     gap: 0;
-    overflow-y: auto;
-    max-height: 80vh;
   }
 
   .students-grid :global(.item) {
