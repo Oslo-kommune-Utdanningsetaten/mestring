@@ -22,7 +22,7 @@
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
   import { dataStore } from '../stores/data'
   import { getGroupLabel, goalsWithCalculatedMastery } from '../utils/functions'
-  import { preferredSchoolYear } from '../stores/localStorageFunctions'
+  import { preferredSchoolYear, getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { t } from '../stores/translations'
 
@@ -38,7 +38,7 @@
 
   let isLoading = $state(true)
   let goalsListElement = $state<HTMLElement | null>(null)
-  let group = $state<GroupType | null>(null)
+  let group = $state<GroupType | undefined>(undefined)
   let sortableInstance: Sortable | null = null
   let teachers = $state<UserType[]>([])
   let students = $state<UserType[]>([])
@@ -48,10 +48,8 @@
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
   let statusesByCategoryID = $state<Record<string, StatusType[]>>({})
 
+  let subject = $state<SubjectType | undefined>(undefined)
   let currentSchool = $derived($dataStore.currentSchool)
-  let subject = $derived<SubjectType | undefined>(
-    subjects.find(s => s.id === group?.subjectId) || undefined
-  )
 
   const groupSubtitle = $derived.by(() => {
     if (!group) return
@@ -86,46 +84,33 @@
     try {
       isLoading = true
 
-      const [groupResult, teachersResult, studentsResult, goalsResult, statusesResult] =
-        await Promise.all([
-          await groupsRetrieve({
-            path: { id: groupId },
-          }),
-          await usersList({
-            query: { groups: groupId, school: currentSchool.id, roles: USER_ROLES.TEACHER },
-          }),
-          await usersList({
-            query: { groups: groupId, school: currentSchool.id, roles: USER_ROLES.STUDENT },
-          }),
-          await goalsList({
-            query: {
-              group: groupId,
-              includeObservations: true,
-              school: currentSchool.id,
-            },
-          }),
-          await statusList({
-            query: {
-              school: $dataStore.currentSchool?.id,
-              group: groupId,
-            },
-          }),
-        ])
+      const groupResult = await groupsRetrieve({
+        path: { id: groupId },
+      })
+      group = groupResult.data || undefined
 
-      group = groupResult.data || null
+      if (!group) return
+
+      const [teachersResult, studentsResult, goalsResult] = await Promise.all([
+        await usersList({
+          query: { groups: groupId, school: currentSchool.id, roles: USER_ROLES.TEACHER },
+        }),
+        await usersList({
+          query: { groups: groupId, school: currentSchool.id, roles: USER_ROLES.STUDENT },
+        }),
+        await goalsList({
+          query: {
+            group: groupId,
+            includeObservations: true,
+            school: currentSchool.id,
+          },
+        }),
+      ])
+
       teachers = teachersResult.data || []
       students = studentsResult.data || []
       groupGoals = goalsResult.data || []
-      const statuses = statusesResult.data || []
-
-      statuses.forEach(status => {
-        if (status.categoryId) {
-          if (!statusesByCategoryID[status.categoryId]) {
-            statusesByCategoryID[status.categoryId] = []
-          }
-          statusesByCategoryID[status.categoryId].push(status)
-        }
-      })
+      subject = $dataStore.subjects.find(s => s.id === (group as GroupType).subjectId)
 
       // For each student, calculate their goals with mastery
       students.forEach(student => {
@@ -144,15 +129,38 @@
           groupGoalsWithOnlyStudentObservations
         )
       })
-      // Fetch subjects for students
-      const subjectsResult = await subjectsList({
-        query: {
-          school: currentSchool.id,
-          students: students.map(s => s.id).join(','),
-          schoolYear: $preferredSchoolYear,
-        },
-      })
-      subjects = subjectsResult.data || []
+
+      if (group && group.type === GROUP_TYPE_TEACHING) {
+        const statusesResult = await statusList({
+          query: {
+            school: $dataStore.currentSchool?.id,
+            subject: subject ? subject.id : '',
+            group: groupId,
+            ...getPreferredCreatedParams(),
+          },
+        })
+
+        const statuses = statusesResult.data || []
+
+        statuses.forEach(status => {
+          if (status.categoryId) {
+            if (!statusesByCategoryID[status.categoryId]) {
+              statusesByCategoryID[status.categoryId] = []
+            }
+            statusesByCategoryID[status.categoryId].push(status)
+          }
+        })
+      } else if (group && group.type === GROUP_TYPE_BASIS) {
+        // Fetch subjects for students
+        const subjectsResult = await subjectsList({
+          query: {
+            school: currentSchool.id,
+            students: students.map(s => s.id).join(','),
+            schoolYear: $preferredSchoolYear,
+          },
+        })
+        subjects = subjectsResult.data || []
+      }
     } catch (error) {
       console.error('Error while fetching group data:', error)
     } finally {
