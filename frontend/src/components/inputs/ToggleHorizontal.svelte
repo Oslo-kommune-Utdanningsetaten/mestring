@@ -83,7 +83,7 @@
   }
 
   .radio-buttons .radio input:checked + .name {
-    background-color: #fff;
+    background-color: color-mix(in srgb, var(--effect-color) 50%);
     font-weight: 600;
   }
 
