@@ -1,5 +1,7 @@
 <script lang="ts">
+  import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
   import type { UserType, SubjectType, StatusType } from '../generated/types.gen'
+  import type { MasteryConfigLevel } from '../types/models.d.ts'
   import { statusList } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
   import { getSubjectName } from '../utils/functions'
@@ -12,11 +14,11 @@
   let {
     students,
     subjects,
-    category,
+    categoryName,
   }: {
     students: UserType[]
     subjects: SubjectType[]
-    category: string
+    categoryName: string
   } = $props()
 
   // Sort state
@@ -26,11 +28,31 @@
 
   // Data per student per subject: flat map keyed by `studentId:subjectId`
   let statusesByStudentIdAndSubjectId = $state<Record<string, StatusType[]>>({})
+  let studentCountsByLevel = $state<number[]>([])
+
+  let selectedLevels = $state<number[]>([])
+
+  const category = $derived($dataStore.statusCategories.find(cat => cat.name === categoryName))
+  const masterySchema = $derived(
+    $dataStore.masterySchemas.find(schema => schema.id === category?.masterySchemaId)
+  )
 
   // Sorted students list
   let sortedStudents = $derived.by(() => {
-    const sorted = [...students]
-    sorted.sort((a, b) => {
+    let sortedstudents = [...students]
+    if (selectedLevels.length > 0) {
+      sortedstudents = sortedstudents.filter(student =>
+        subjects.some(subject => {
+          const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`]
+          return statuses?.some(status => {
+            return selectedLevels.some(
+              levelIndex => getValueForIndex(levelIndex) === status?.masteryValue
+            )
+          })
+        })
+      )
+    }
+    sortedstudents.sort((a, b) => {
       let comparison: number
       if (sortBy === 'name') {
         comparison = a.name.localeCompare(b.name, 'no')
@@ -46,8 +68,12 @@
       }
       return sortDirection === 'asc' ? comparison : -comparison
     })
-    return sorted
+    return sortedstudents
   })
+
+  const getValueForIndex = (levelIndex: number): number => {
+    return masterySchema.config.levels[levelIndex]?.maxValue
+  }
 
   const fetchAllStudentData = async () => {
     const newData: Record<string, StatusType[]> = {}
@@ -61,12 +87,13 @@
     const query = {
       students: students.map(s => s.id).join(','),
       school: $dataStore.currentSchool?.id,
-      categoryName: category,
+      categoryName: categoryName,
       ...getPreferredCreatedParams(),
     }
     const result = await statusList({ query })
     const statuses = result.data || []
 
+    // Build data stucture for lookup of statuses by student and subject
     statuses.forEach(status => {
       const { studentId, subjectId } = status
       if (studentId && subjectId) {
@@ -74,6 +101,26 @@
         statusesByStudentIdAndSubjectId = newData
       }
     })
+
+    // Build student counts by mastery level
+    studentCountsByLevel = masterySchema.config.levels.map(
+      (level: MasteryConfigLevel) =>
+        students.filter(student =>
+          subjects.some(subject =>
+            newData[`${student.id}:${subject.id}`].some(
+              status => status.masteryValue === level.maxValue
+            )
+          )
+        ).length
+    )
+  }
+
+  const handleToggleLevel = (levelIndex: number) => {
+    if (selectedLevels.includes(levelIndex)) {
+      selectedLevels = selectedLevels.filter(index => index !== levelIndex)
+    } else {
+      selectedLevels = [...selectedLevels, levelIndex]
+    }
   }
 
   const handleHeaderClick = (key: SortKey) => {
@@ -100,6 +147,33 @@
   })
 </script>
 
+<!-- Filtering by mastery level -->
+{#if category && masterySchema}
+  {@const levels =
+    category.name === 'risk'
+      ? masterySchema.config.levels.slice(0, -1)
+      : masterySchema.config.levels}
+  <div>
+    <fieldset class="mb-3 d-flex flex-wrap align-items-center gap-3">
+      <legend class="w-auto mb-0 fs-6 fw-semibold">Filtrer på status</legend>
+      <div class="d-flex flex-wrap gap-3">
+        {#each levels as level, levelIndex}
+          <pkt-checkbox
+            label={level.title + ' (' + (studentCountsByLevel[levelIndex] ?? 0) + ')'}
+            labelPosition="right"
+            layout="horizontal"
+            checked={selectedLevels.includes(levelIndex)}
+            onchange={() => handleToggleLevel(levelIndex)}
+          ></pkt-checkbox>
+        {/each}
+      </div>
+    </fieldset>
+  </div>
+{/if}
+
+<p>Viser {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}</p>
+
+<!-- Students grid -->
 <div class="students-grid" aria-label="Elevliste" style="--columns-count: {subjects.length}">
   <button
     class="item header header-row sortable"
