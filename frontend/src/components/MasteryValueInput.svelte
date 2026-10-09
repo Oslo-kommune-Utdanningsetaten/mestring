@@ -1,13 +1,16 @@
 <script lang="ts">
   import type { ObservationType, MasterySchemaType } from '../generated/types.gen'
+  import { VALUE_INPUT_VARIANT } from '../utils/constants'
 
+  import SliderGiraffe from './inputs/SliderGiraffe.svelte'
   import SliderVertical from './inputs/SliderVertical.svelte'
+  import SliderVerticalStairs from './inputs/SliderVerticalStairs.svelte'
   import SliderHorizontal from './inputs/SliderHorizontal.svelte'
+  import SliderHorizontalArrow from './inputs/SliderHorizontalArrow.svelte'
+  import SliderHorizontalStairs from './inputs/SliderHorizontalStairs.svelte'
   import StarsHorizontal from './inputs/StarsHorizontal.svelte'
   import ToggleHorizontal from './inputs/ToggleHorizontal.svelte'
-  import SliderGiraffe from './inputs/SliderGiraffe.svelte'
-  import ToggleComicHorizontal from './inputs/ToggleComicHorizontal.svelte'
-  import SliderArrowHorizontal from './inputs/SliderArrowHorizontal.svelte'
+  import ToggleHorizontalComic from './inputs/ToggleHorizontalComic.svelte'
 
   let {
     masterySchema,
@@ -24,7 +27,7 @@
   }>()
 </script>
 
-{#if masterySchema?.config?.valueInput === 'sliderVertical'}
+{#if masterySchema?.config?.valueInput === VALUE_INPUT_VARIANT.SLIDER_VERTICAL}
   <SliderVertical
     {masterySchema}
     {isInputEnabled}
@@ -32,7 +35,15 @@
     bind:masteryValue={value}
     label={title || ''}
   />
-{:else if masterySchema?.config?.valueInput === 'sliderHorizontal'}
+{:else if masterySchema?.config?.valueInput === VALUE_INPUT_VARIANT.SLIDER_VERTICAL_STAIRS}
+  <SliderVerticalStairs
+    {masterySchema}
+    {isInputEnabled}
+    {observations}
+    bind:masteryValue={value}
+    label={title || ''}
+  />
+{:else if masterySchema?.config?.valueInput === VALUE_INPUT_VARIANT.SLIDER_HORIZONTAL}
   <SliderHorizontal
     {masterySchema}
     {isInputEnabled}
@@ -40,26 +51,34 @@
     bind:masteryValue={value}
     label={title || ''}
   />
-{:else if masterySchema?.config?.valueInput === 'starsHorizontal'}
+{:else if masterySchema?.config?.valueInput === VALUE_INPUT_VARIANT.SLIDER_HORIZONTAL_STAIRS}
+  <SliderHorizontalStairs
+    {masterySchema}
+    {isInputEnabled}
+    {observations}
+    bind:masteryValue={value}
+    label={title || ''}
+  />
+{:else if masterySchema?.config?.valueInput === VALUE_INPUT_VARIANT.STARS_HORIZONTAL}
   <StarsHorizontal {masterySchema} {isInputEnabled} bind:masteryValue={value} label={title || ''} />
-{:else if masterySchema?.config?.valueInput === 'toggleHorizontal'}
+{:else if masterySchema?.config?.valueInput === VALUE_INPUT_VARIANT.TOGGLE_HORIZONTAL}
   <ToggleHorizontal
     {masterySchema}
     {isInputEnabled}
     bind:masteryValue={value}
     label={title || ''}
   />
-{:else if masterySchema?.config?.valueInput === 'sliderGiraffe'}
+{:else if masterySchema?.config?.valueInput === VALUE_INPUT_VARIANT.SLIDER_GIRAFFE}
   <SliderGiraffe {masterySchema} {isInputEnabled} bind:masteryValue={value} label={title || ''} />
-{:else if masterySchema?.config?.valueInput === 'toggleComicHorizontal'}
-  <ToggleComicHorizontal
+{:else if masterySchema?.config?.valueInput === VALUE_INPUT_VARIANT.TOGGLE_HORIZONTAL_COMIC}
+  <ToggleHorizontalComic
     {masterySchema}
     {isInputEnabled}
     bind:masteryValue={value}
     label={title || ''}
   />
-{:else if masterySchema?.config?.valueInput === 'sliderArrowHorizontal'}
-  <SliderArrowHorizontal
+{:else if masterySchema?.config?.valueInput === VALUE_INPUT_VARIANT.SLIDER_HORIZONTAL_ARROW}
+  <SliderHorizontalArrow
     {masterySchema}
     {isInputEnabled}
     {observations}

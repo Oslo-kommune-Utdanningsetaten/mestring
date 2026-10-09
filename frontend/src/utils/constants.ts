@@ -87,12 +87,16 @@ export const STATUS_CATEGORY_NAMES: Record<string, string> = {
   risk: 'IVG/F',
 }
 
-export const VALUE_INPUT_VARIANTS = [
-  'sliderHorizontal',
-  'sliderVertical',
-  'sliderArrowHorizontal',
-  'sliderGiraffe',
-  'starsHorizontal',
-  'toggleHorizontal',
-  'toggleComicHorizontal',
-] as const
+export enum VALUE_INPUT_VARIANT {
+  SLIDER_HORIZONTAL = 'sliderHorizontal',
+  SLIDER_HORIZONTAL_ARROW = 'sliderHorizontalArrow',
+  SLIDER_HORIZONTAL_STAIRS = 'sliderHorizontalStairs',
+  SLIDER_VERTICAL = 'sliderVertical',
+  SLIDER_VERTICAL_STAIRS = 'sliderVerticalStairs',
+  SLIDER_GIRAFFE = 'sliderGiraffe',
+  STARS_HORIZONTAL = 'starsHorizontal',
+  TOGGLE_HORIZONTAL = 'toggleHorizontal',
+  TOGGLE_HORIZONTAL_COMIC = 'toggleHorizontalComic',
+}
+
+export const VALUE_INPUT_VARIANTS = Object.values(VALUE_INPUT_VARIANT)
