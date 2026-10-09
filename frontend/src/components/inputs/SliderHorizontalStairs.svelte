@@ -128,7 +128,7 @@
     width: 4px;
     height: 100%;
     transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.8);
+    background: repeating-linear-gradient(45deg, #00000044 0px 5px, #ffffff44 5px 10px);
   }
 
   #value-indicator {

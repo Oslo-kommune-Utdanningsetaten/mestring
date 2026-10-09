@@ -114,7 +114,7 @@
     width: 100%;
     height: 4px;
     transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0.8);
+    background: repeating-linear-gradient(45deg, #00000044 0px 5px, #ffffff44 5px 10px);
     z-index: 1;
   }
 

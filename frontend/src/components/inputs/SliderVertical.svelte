@@ -80,7 +80,7 @@
         <!-- levels -->
         <span
           class="rung px-2"
-          style="width: {(index + 1) * widthMultiplier}%; height: {calculations.calculateRungWidth(
+          style="height: {calculations.calculateRungWidth(
             calculations.masteryLevels.indexOf(masteryLevel)
           )}%; background-color: {masteryLevel.color}; color: {getContrastFriendlyTextColor(
             masteryLevel.color
@@ -114,7 +114,7 @@
     width: 100%;
     height: 4px;
     transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0.8);
+    background: repeating-linear-gradient(45deg, #00000044 0px 5px, #ffffff44 5px 10px);
     z-index: 1;
   }
 
@@ -149,7 +149,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: medium;
+    font-size: 1.1rem;
+    width: 100%;
   }
 
   .slider {

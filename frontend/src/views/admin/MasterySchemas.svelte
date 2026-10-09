@@ -244,7 +244,10 @@
         Ingen av mestringsskjemaene for denne skolen er satt til default.
       </div>
     {/if}
-    <p class="my-3">Input variants: {VALUE_INPUT_VARIANTS.join(', ')}</p>
+    <div class="my-3">
+      Input variants:
+      <pre>{VALUE_INPUT_VARIANTS.join(', ')}</pre>
+    </div>
 
     <div class="pkt-input-check mt-3">
       <div class="pkt-input-check__input">
@@ -388,6 +391,9 @@
 </Offcanvas>
 
 <style>
+  pre {
+    white-space: pre-wrap;
+  }
   .filters-container {
     display: flex;
     gap: 1rem;
