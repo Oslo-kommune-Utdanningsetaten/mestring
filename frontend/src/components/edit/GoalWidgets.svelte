@@ -143,7 +143,7 @@
   {/if}
 
   <!-- Create goal widget -->
-  {#if widgets.includes('create') && $hasUserAccessToFeature( 'goal', 'create', { studentGroupIds: student?.groupIds, studentId: student?.id } )}
+  {#if widgets.includes('create') && $hasUserAccessToFeature( 'goal', 'create', { groupId: group?.id || goal?.groupId, studentGroupIds: student?.groupIds, studentId: student?.id } )}
     <ButtonIcon
       options={{
         iconName: 'goal',
@@ -156,7 +156,7 @@
   {/if}
 
   <!-- Update goal widget -->
-  {#if widgets.includes('update') && $hasUserAccessToFeature( 'goal', 'update', { createdById: goal.createdById, studentId: student?.id, studentGroupIds: student?.groupIds } )}
+  {#if widgets.includes('update') && $hasUserAccessToFeature( 'goal', 'update', { groupId: group?.id || goal?.groupId, createdById: goal.createdById, studentId: student?.id, studentGroupIds: student?.groupIds } )}
     {#if buttonSize === 'large'}
       <ButtonMini
         options={{
@@ -185,7 +185,7 @@
   {/if}
 
   <!-- Delete goal widget -->
-  {#if widgets.includes('delete') && $hasUserAccessToFeature( 'goal', 'delete', { groupId: goal.groupId, createdById: goal.createdById, studentId: student?.id } )}
+  {#if widgets.includes('delete') && $hasUserAccessToFeature( 'goal', 'delete', { groupId: group?.id || goal?.groupId, createdById: goal.createdById, studentId: student?.id } )}
     {#key goal.id}
       {#if buttonSize === 'large'}
         <ButtonMini
