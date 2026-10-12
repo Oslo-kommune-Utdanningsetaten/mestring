@@ -21,6 +21,8 @@
   import GroupTag from '../../components/GroupTag.svelte'
   import ButtonIcon from '../../components/ButtonIcon.svelte'
   import Link from '../../components/Link.svelte'
+  import ButtonMini from '../../components/ButtonMini.svelte'
+  import { addAlert } from '../../stores/alerts'
 
   const router = useTinyRouter()
   let groups = $state<GroupType[]>([])
@@ -223,7 +225,7 @@
         body: { ...group, isEnabled: !group.isEnabled } as GroupType,
       })
     } catch (error) {
-      console.error('Error toggling group endabled status:', error)
+      console.error('Error toggling group enabled status:', error)
     } finally {
       fetchGroups()
     }
@@ -249,6 +251,25 @@
   const handleInfoToggle = (groupId: string) => {
     openRows[groupId] = !openRows[groupId]
     openRows = { ...openRows }
+  }
+
+  const handleEnableAllGroups = async () => {
+    const disabledGroups = filteredGroups.filter(g => !g.isEnabled)
+    try {
+      await Promise.all(
+        disabledGroups.map(group =>
+          groupsUpdate({
+            path: { id: group.id },
+            body: { ...group, isEnabled: true } as GroupType,
+          })
+        )
+      )
+      addAlert({ message: 'Enabled ' + disabledGroups.length + ' groups', type: 'success' })
+    } catch (error) {
+      console.error('Error toggling group enabled status:', error)
+    } finally {
+      fetchGroups()
+    }
   }
 
   $effect(() => {
@@ -419,6 +440,25 @@
           <span>Enabled</span>
           <span>JSON</span>
         </div>
+        {#if filteredGroups.filter(g => !g.isEnabled).length > 0}
+          <div class="group-grid-row">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span>
+              <ButtonMini
+                options={{
+                  title: 'Enable' + filteredGroups.filter(g => !g.isEnabled).length + '!',
+                  iconName: 'active-person',
+                  skin: 'secondary',
+                  variant: 'icon-left',
+                  onClick: () => handleEnableAllGroups(),
+                }}
+              />
+            </span>
+            <span></span>
+          </div>
+        {/if}
         <!-- Data rows -->
         {#each filteredGroups as group (group.id)}
           <div class="group-grid-row">
