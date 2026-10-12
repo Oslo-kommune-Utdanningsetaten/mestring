@@ -168,7 +168,9 @@
     class="list-group-item goal-item {isExpanded
       ? 'shadow border-2 expanded'
       : ''}  {goal.isRelevant ? '' : 'hatched-background'}"
-    title={goal.isRelevant ? '' : t('goal', { form: 'sin-def', capitalize: true }) + ' er ikke lenger relevant for eleven'}
+    title={goal.isRelevant
+      ? ''
+      : t('goal', { form: 'sin-def', capitalize: true }) + ' er ikke lenger relevant for eleven'}
   >
     <div class="goal-primary-row">
       <!-- Drag handle -->
@@ -278,7 +280,11 @@
             </div>
           {/each}
         {:else}
-          <p>Ingen {t('observation', { form: 'plu-indef' })} for dette {t('goal', { form: 'sin-def' })}.</p>
+          <p>
+            Ingen {t('observation', { form: 'plu-indef' })} for dette {t('goal', {
+              form: 'sin-def',
+            })}.
+          </p>
         {/if}
       </div>
       <div class="my-3">
@@ -297,7 +303,9 @@
           />
         {:else}
           <p>
-            Dette {t('goal', { form: 'sin-def' })} er ikke individuelt, men gitt for <Link to={`/groups/${goal.groupId}/`}>
+            Dette {t('goal', { form: 'sin-def' })} er ikke individuelt, men gitt for <Link
+              to={`/groups/${goal.groupId}/`}
+            >
               hele gruppa
             </Link>.
           </p>
