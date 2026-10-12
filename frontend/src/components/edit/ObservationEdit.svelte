@@ -86,7 +86,6 @@
   const handleSave = async () => {
     localObservation.studentId = student?.id
     localObservation.goalId = goal?.id
-    localObservation.observedAt = new Date().toISOString()
     let action = undefined
     try {
       if (localObservation.id) {
@@ -97,6 +96,7 @@
         trackEvent('Observations', 'Update')
         action = 'Oppdaterte'
       } else {
+        localObservation.observedAt = new Date().toISOString() // only set when creating a new observation
         await observationsCreate({
           body: localObservation as any,
         })
