@@ -30,8 +30,6 @@
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingGroups = $state<boolean>(false)
 
-  let selectedSchool = $derived(schools.find(s => s.id === selectedSchoolId))
-
   let selectedSchoolId = $state<string>(
     router.getQueryParam('school') || $dataStore.currentSchool?.id
   )
@@ -87,6 +85,8 @@
     { value: 'any', label: 'Whatever' },
   ] as const
 
+  let selectedSchool = $derived(schools.find(s => s.id === selectedSchoolId))
+
   // Options for filtering by groups by date validity
   const createdOptions = $derived.by(() => {
     if (!$dataStore.currentSchool) return []
@@ -109,6 +109,8 @@
         )
       : groups
   )
+
+  const disabledGroups = $derived(filteredGroups.filter(g => !g.isEnabled))
 
   let groupFetchOptions = $derived.by(() => {
     const options: Record<string, any> & { school: string } = {
@@ -254,7 +256,6 @@
   }
 
   const handleEnableAllGroups = async () => {
-    const disabledGroups = filteredGroups.filter(g => !g.isEnabled)
     try {
       await Promise.all(
         disabledGroups.map(group =>
@@ -440,7 +441,7 @@
           <span>Enabled</span>
           <span>JSON</span>
         </div>
-        {#if filteredGroups.filter(g => !g.isEnabled).length > 0}
+        {#if disabledGroups.length > 0}
           <div class="group-grid-row">
             <span></span>
             <span></span>
@@ -448,7 +449,7 @@
             <span>
               <ButtonMini
                 options={{
-                  title: 'Enable' + filteredGroups.filter(g => !g.isEnabled).length + '!',
+                  title: 'Enable[' + disabledGroups.length + ']',
                   iconName: 'active-person',
                   skin: 'secondary',
                   variant: 'icon-left',
