@@ -21,14 +21,14 @@
   import GroupTag from '../../components/GroupTag.svelte'
   import ButtonIcon from '../../components/ButtonIcon.svelte'
   import Link from '../../components/Link.svelte'
+  import ButtonMini from '../../components/ButtonMini.svelte'
+  import { addAlert } from '../../stores/alerts'
 
   const router = useTinyRouter()
   let groups = $state<GroupType[]>([])
   let schools = $state<SchoolType[]>([])
   let isLoadingSchools = $state<boolean>(false)
   let isLoadingGroups = $state<boolean>(false)
-
-  let selectedSchool = $derived(schools.find(s => s.id === selectedSchoolId))
 
   let selectedSchoolId = $state<string>(
     router.getQueryParam('school') || $dataStore.currentSchool?.id
@@ -85,6 +85,8 @@
     { value: 'any', label: 'Whatever' },
   ] as const
 
+  let selectedSchool = $derived(schools.find(s => s.id === selectedSchoolId))
+
   // Options for filtering by groups by date validity
   const createdOptions = $derived.by(() => {
     if (!$dataStore.currentSchool) return []
@@ -107,6 +109,8 @@
         )
       : groups
   )
+
+  const disabledGroups = $derived(filteredGroups.filter(g => !g.isEnabled))
 
   let groupFetchOptions = $derived.by(() => {
     const options: Record<string, any> & { school: string } = {
@@ -223,7 +227,7 @@
         body: { ...group, isEnabled: !group.isEnabled } as GroupType,
       })
     } catch (error) {
-      console.error('Error toggling group endabled status:', error)
+      console.error('Error toggling group enabled status:', error)
     } finally {
       fetchGroups()
     }
@@ -249,6 +253,24 @@
   const handleInfoToggle = (groupId: string) => {
     openRows[groupId] = !openRows[groupId]
     openRows = { ...openRows }
+  }
+
+  const handleEnableAllGroups = async () => {
+    try {
+      await Promise.all(
+        disabledGroups.map(group =>
+          groupsUpdate({
+            path: { id: group.id },
+            body: { ...group, isEnabled: true } as GroupType,
+          })
+        )
+      )
+      addAlert({ message: 'Enabled ' + disabledGroups.length + ' groups', type: 'success' })
+    } catch (error) {
+      console.error('Error toggling group enabled status:', error)
+    } finally {
+      fetchGroups()
+    }
   }
 
   $effect(() => {
@@ -419,6 +441,25 @@
           <span>Enabled</span>
           <span>JSON</span>
         </div>
+        {#if disabledGroups.length > 0}
+          <div class="group-grid-row">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span>
+              <ButtonMini
+                options={{
+                  title: 'Enable[' + disabledGroups.length + ']',
+                  iconName: 'active-person',
+                  skin: 'secondary',
+                  variant: 'icon-left',
+                  onClick: () => handleEnableAllGroups(),
+                }}
+              />
+            </span>
+            <span></span>
+          </div>
+        {/if}
         <!-- Data rows -->
         {#each filteredGroups as group (group.id)}
           <div class="group-grid-row">

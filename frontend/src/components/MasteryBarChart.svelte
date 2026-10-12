@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { MasteryConfigLevel, MasterySchemaWithConfig } from '../types/models'
+  import type { MasterySchemaWithConfig } from '../types/models'
   import { useMasteryCalculations, getMasteryLevelColorByValue } from '../utils/masteryHelpers'
+
   import BarChart from './BarChart.svelte'
 
   interface Props {
