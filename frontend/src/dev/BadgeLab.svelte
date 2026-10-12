@@ -25,7 +25,9 @@
   const calculations = $derived(useMasteryCalculations(masterySchema))
 
   // Turn an list of mastery values into an observation sequence,
-  // spacing them one day apart so inferMastery can calculate a trend
+  // spacing them one day apart so inferMastery can calculate a trend.
+  // Since inferMastery discards self-observations, the createdById/updatedById fields
+  // must differ from studentId or the observation is filtered out
   const observationsFromValues = (values: number[]): ObservationType[] => {
     const base = new Date('2025-01-01').getTime()
     return values.map(
@@ -33,6 +35,9 @@
         ({
           masteryValue: value,
           createdAt: new Date(base + i * millisecondsInDay).toISOString(),
+          studentId: 'some-student',
+          createdById: 'some-teacher',
+          updatedById: 'some-teacher',
         }) as unknown as ObservationType
     )
   }
