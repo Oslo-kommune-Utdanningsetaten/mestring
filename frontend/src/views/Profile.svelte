@@ -363,7 +363,7 @@
         {/if}
 
         <!-- Other groups -->
-        <h4 class="mt-4 mb-2">Øvirge tilganger</h4>
+        <h4 class="mt-4 mb-2">Øvrige tilganger</h4>
         {#if otherGroups?.length > 0}
           <div class="d-flex flex-wrap gap-2">
             {#each otherGroups as group}
