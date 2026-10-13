@@ -8,7 +8,7 @@
   import { USER_ROLES } from '../utils/constants'
   import { dataStore } from '../stores/data'
   import { hasUserAccessToPath } from '../stores/access'
-  import { urlStringFrom } from '../utils/functions'
+  import { urlStringFrom, getGroupLabel } from '../utils/functions'
   import { preferredSchoolYear } from '../stores/localStorageFunctions'
 
   import Link from '../components/Link.svelte'
@@ -53,7 +53,13 @@
     allGroups.find(group => group.id === selectedGroupId)
   )
   let headerText = $derived.by(() => {
-    const text = selectedGroup ? `Elever i gruppe: ${selectedGroup.displayName}` : 'Alle elever'
+    const text = selectedGroup
+      ? `Elever i gruppe: ${getGroupLabel(selectedGroup, {
+          isGroupNameEnabled: true,
+          isGroupTypeNameEnabled: false,
+          includeEarlierYear: true,
+        })}`
+      : 'Alle elever'
     return nameFilter ? `${text} med navn som inneholder "${nameFilter}"` : text
   })
 
