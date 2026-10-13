@@ -44,7 +44,6 @@ const checkUserAccessToPath = (
   if (!currentUser) return false
   if (!currentSchool) return false
   if (currentUser.isSuperadmin) return true
-  console.log('Current user:', currentUser)
   // check for overlapping roles and accessibleBy
   if (accessibleBy) {
     const hasUserRoleAccess = currentUser.roles?.some((role: UserRoleType) =>
