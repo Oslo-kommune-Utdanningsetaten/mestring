@@ -3,7 +3,7 @@
   import '@oslokommune/punkt-elements/dist/pkt-select.js'
   import { useTinyRouter } from 'svelte-tiny-router'
   import type { GroupType, SchoolType, SubjectType } from '../../generated/types.gen'
-  import { groupsList, schoolsList, groupsUpdate } from '../../generated/sdk.gen'
+  import { groupsList, schoolsList, groupsUpdate, groupsRetrieve } from '../../generated/sdk.gen'
   import { urlStringFrom } from '../../utils/functions'
   import {
     NONE_FIELD_VALUE,
@@ -190,6 +190,19 @@
     }
   }
 
+  const refetchGroupById = async (groupId: string) => {
+    if (!selectedSchool) return
+    try {
+      const result = await groupsRetrieve({ path: { id: groupId } })
+      const updatedGroup = result.data || null
+      if (updatedGroup) {
+        groups = groups.map(group => (group.id === groupId ? updatedGroup : group))
+      }
+    } catch (error) {
+      console.error(`Error refetching group with id ${groupId}:`, error)
+    }
+  }
+
   const handleSchoolSelect = (schoolId: string): void => {
     selectedSchoolId = schoolId
   }
@@ -226,9 +239,9 @@
         path: { id: group.id },
         body: { ...group, isEnabled: !group.isEnabled } as GroupType,
       })
+      refetchGroupById(group.id)
     } catch (error) {
       console.error('Error toggling group enabled status:', error)
-    } finally {
       fetchGroups()
     }
   }
