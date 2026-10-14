@@ -32,6 +32,15 @@
 
   let selectedLevels = $state<number[]>([])
 
+  // Top scrollbar mirror
+  let gridElement = $state<HTMLDivElement | null>(null)
+  let topScrollElement = $state<HTMLDivElement | null>(null)
+  let gridScrollWidth = $state(0)
+
+  const gridTemplateColumns = $derived(
+    ['minmax(12rem, 1.2fr)', ...subjects.map(() => 'minmax(8rem, 1fr)')].join(' ')
+  )
+
   const category = $derived($dataStore.statusCategories.find(cat => cat.name === categoryName))
   const masterySchema = $derived(
     $dataStore.masterySchemas.find(schema => schema.id === category?.masterySchemaId)
@@ -139,6 +148,23 @@
     return sortDirection === 'asc' ? ' ▲' : ' ▼'
   }
 
+  const syncFromGrid = () => {
+    if (topScrollElement && gridElement) topScrollElement.scrollLeft = gridElement.scrollLeft
+  }
+
+  const syncFromTop = () => {
+    if (gridElement && topScrollElement) gridElement.scrollLeft = topScrollElement.scrollLeft
+  }
+
+  $effect(() => {
+    if (!gridElement) return
+    const obs = new ResizeObserver(() => {
+      gridScrollWidth = gridElement!.scrollWidth
+    })
+    obs.observe(gridElement)
+    return () => obs.disconnect()
+  })
+
   // Fetch data for all students
   $effect(() => {
     if (students.length > 0) {
@@ -174,7 +200,16 @@
 <p>Viser {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}</p>
 
 <!-- Students grid -->
-<div class="students-grid" aria-label="Elevliste" style="--columns-count: {subjects.length}">
+<div class="scroll-mirror" bind:this={topScrollElement} onscroll={syncFromTop}>
+  <div style="width: {gridScrollWidth}px; height: 1px;"></div>
+</div>
+<div
+  class="students-grid"
+  bind:this={gridElement}
+  onscroll={syncFromGrid}
+  aria-label="Elevliste"
+  style="grid-template-columns: {gridTemplateColumns}"
+>
   <button
     class="item header header-row sortable"
     onclick={() => handleHeaderClick('name')}
@@ -228,9 +263,14 @@
 </div>
 
 <style>
+  .scroll-mirror {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
   .students-grid {
     display: grid;
-    grid-template-columns: 1.2fr repeat(var(--columns-count, 8), 1fr);
+    overflow-x: auto;
     align-items: start;
     gap: 0;
   }

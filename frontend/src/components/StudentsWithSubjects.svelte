@@ -53,13 +53,9 @@
   let dataByStudentId = $state<Record<string, StudentData>>({})
 
   // Compute grid template columns
-  const gridTemplateColumns = $derived.by(() => {
-    const nameCol = '1.2fr'
-    const normalCol = '1fr'
-    const cols: string[] = [nameCol]
-    subjects.forEach(() => cols.push(normalCol)) // one column per subject
-    return cols.join(' ')
-  })
+  const gridTemplateColumns = $derived(
+    ['minmax(12rem, 1.2fr)', ...subjects.map(() => 'minmax(8rem, 1fr)')].join(' ')
+  )
 
   // Sorted students list
   let sortedStudents = $derived.by(() => {
