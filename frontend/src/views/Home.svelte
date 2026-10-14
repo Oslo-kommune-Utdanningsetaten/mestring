@@ -20,7 +20,10 @@
 {:else}
   <h2 class="mb-4">Hei på deg!</h2>
   {#if errorFromUrl === 'login_failed'}
-    <p>Humf, login mislyktes</p>
+    <p>
+      Humf, login mislyktes. Sannsynligvis fordi skolen din ikke er aktivert. Eller fordi du ikke er
+      tilknyttet skolen.
+    </p>
   {:else}
     <p>Du er visst ikke logget inn.</p>
     <p>{errorFromUrl}</p>
