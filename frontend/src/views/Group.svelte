@@ -337,28 +337,17 @@
                   </span>
                   <!-- Actions -->
                   <span>
-                    {#if isGoalInUse(goal.id)}
-                      <pkt-icon
-                        name="lock-locked"
-                        size="small"
-                        title="{t('goal', {
-                          form: 'sin-def',
-                          capitalize: true,
-                        })} er i bruk av en eller flere elever"
-                      ></pkt-icon>
-                    {:else}
-                      <GoalWidgets
-                        {goal}
-                        {group}
-                        {subject}
-                        masterySchema={$dataStore.defaultMasterySchema?.id}
-                        isIndividual={goal.isIndividual}
-                        isRelevant={goal.isRelevant}
-                        onRefreshRequired={() => fetchGroupData()}
-                        widgets={['update', 'delete']}
-                        disabledWidgets={!goal.isRelevant || isGoalInUse(goal.id) ? ['delete'] : []}
-                      />
-                    {/if}
+                    <GoalWidgets
+                      {goal}
+                      {group}
+                      {subject}
+                      masterySchema={$dataStore.defaultMasterySchema?.id}
+                      isIndividual={goal.isIndividual}
+                      isRelevant={goal.isRelevant}
+                      onRefreshRequired={() => fetchGroupData()}
+                      widgets={['update', 'delete']}
+                      disabledWidgets={!goal.isRelevant || isGoalInUse(goal.id) ? ['delete'] : []}
+                    />
                   </span>
                 </div>
               {/each}
