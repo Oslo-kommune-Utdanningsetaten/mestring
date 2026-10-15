@@ -106,22 +106,25 @@
     const allGoals = await fetchGoals()
     const goalsByStudentId: Record<string, GoalType[]> = {}
     allGoals.forEach(goal => {
-      const goalObservationsByStudentId: Record<string, ObservationType[]> = {}
       const goalObservations: ObservationType[] = goal.observations || []
 
-      // For each goal, disentangle observations by studentId
-      goalObservations.forEach((observation: ObservationType) => {
-        const { studentId } = observation
-        const goalObservationsOnStudent = goalObservationsByStudentId[studentId] || []
-        goalObservationsOnStudent.push(observation)
-        goalObservationsByStudentId[studentId] = goalObservationsOnStudent
-      })
+      // A goal applies to a student via group membership (group goals)
+      // or directly (individual goals)
+      let studentIdsForGoal: string[] = []
+      if (goal.groupId) {
+        studentIdsForGoal = students
+          .filter(student => student.groupIds.includes(goal.groupId!))
+          .map(student => student.id)
+      } else if (goal.studentId) {
+        studentIdsForGoal = [goal.studentId]
+      }
+
       // For each student, build their list of goals with only their observations
-      Object.keys(goalObservationsByStudentId).forEach(studentId => {
+      studentIdsForGoal.forEach(studentId => {
         goalsByStudentId[studentId] = goalsByStudentId[studentId] || []
         const studentGoal = {
           ...goal,
-          observations: goalObservationsByStudentId[studentId] || [],
+          observations: goalObservations.filter(obs => obs.studentId === studentId),
         }
         goalsByStudentId[studentId].push(studentGoal)
       })
