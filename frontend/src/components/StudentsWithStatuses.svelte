@@ -1,6 +1,6 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
-  import type { UserType, SubjectType, StatusType } from '../generated/types.gen'
+  import type { UserType, SubjectType, StatusType, GroupType } from '../generated/types.gen'
   import type { MasteryConfigLevel } from '../types/models.d.ts'
   import { statusList } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
@@ -15,10 +15,12 @@
     students,
     subjects,
     categoryName,
+    group,
   }: {
     students: UserType[]
     subjects: SubjectType[]
     categoryName: string
+    group?: GroupType | undefined
   } = $props()
 
   // Sort state
@@ -94,7 +96,7 @@
     })
 
     const query = {
-      students: students.map(s => s.id).join(','),
+      group: group ? group.id : undefined,
       school: $dataStore.currentSchool?.id,
       categoryName: categoryName,
       ...getPreferredCreatedParams(),

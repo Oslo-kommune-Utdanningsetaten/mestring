@@ -1,7 +1,13 @@
 <script lang="ts">
   import { goalsList } from '../generated/sdk.gen'
-  import type { UserType, SubjectType, GroupType } from '../generated/types.gen'
-  import type { MasteryState } from '../types/models'
+  import type {
+    UserType,
+    SubjectType,
+    GroupType,
+    GoalType,
+    ObservationType,
+  } from '../generated/types.gen'
+  import type { MasteryState, GoalWithObservations } from '../types/models'
   import { MISSING_REASON_NO_OBSERVATIONS, MISSING_REASON_NO_GOALS } from '../utils/constants'
 
   import { dataStore } from '../stores/data'
@@ -76,46 +82,83 @@
     return sorted
   })
 
+  const fetchGoals = async () => {
+    let goals: GoalWithObservations[] = []
+    try {
+      const result = await goalsList({
+        query: {
+          includeObservations: true,
+          school: $dataStore.currentSchool?.id,
+          ...getPreferredCreatedParams(),
+        },
+      })
+      goals = result.data || []
+    } catch (error) {
+      console.error('Failed to fetch goals:', error)
+      goals = []
+    } finally {
+      return goals
+    }
+  }
+
   const fetchAllStudentData = async () => {
     const newData: Record<string, StudentData> = {}
+    const allGoals = await fetchGoals()
+    const goalsByStudentId: Record<string, GoalType[]> = {}
+    allGoals.forEach(goal => {
+      const goalObservationsByStudentId: Record<string, ObservationType[]> = {}
+      const goalObservations: ObservationType[] = goal.observations || []
 
-    await Promise.all(
-      students.map(async student => {
-        const result = await goalsList({
-          query: {
-            student: student.id,
-            includeObservations: true,
-            school: $dataStore.currentSchool?.id,
-            ...getPreferredCreatedParams(),
-          },
-        })
-        const studentGoals = result.data || []
-
-        const goalsBySubjectId = goalsWithCalculatedMasteryBySubjectId(studentGoals, allGroups)
-        const masteryBySubjectId: Record<string, MasteryState> = {}
-        subjects.forEach(subject => {
-          const goals = goalsBySubjectId[subject.id] || []
-          if (goals.length > 0) {
-            const masteryAggregate = aggregateMasterys(goals)
-            if (masteryAggregate) {
-              masteryBySubjectId[subject.id] = { mastery: masteryAggregate }
-            } else {
-              masteryBySubjectId[subject.id] = { missingReason: MISSING_REASON_NO_OBSERVATIONS }
-            }
-          } else {
-            masteryBySubjectId[subject.id] = { missingReason: MISSING_REASON_NO_GOALS }
-          }
-        })
-
-        const observationCountBySubjectId = countObservationsBySubjectId(goalsBySubjectId)
-
-        newData[student.id] = {
-          masteryBySubjectId,
-          observationCountBySubjectId,
-        }
-        dataByStudentId = newData
+      // For each goal, disentangle observations by studentId
+      goalObservations.forEach((observation: ObservationType) => {
+        const { studentId } = observation
+        const goalObservationsOnStudent = goalObservationsByStudentId[studentId] || []
+        goalObservationsOnStudent.push(observation)
+        goalObservationsByStudentId[studentId] = goalObservationsOnStudent
       })
-    )
+      // For each student, build their list of goals with only their observations
+      Object.keys(goalObservationsByStudentId).forEach(studentId => {
+        goalsByStudentId[studentId] = goalsByStudentId[studentId] || []
+        const studentGoal = {
+          ...goal,
+          observations: goalObservationsByStudentId[studentId] || [],
+        }
+        goalsByStudentId[studentId].push(studentGoal)
+      })
+    })
+
+    // Iterate over all students so every row gets an entry, even without observations
+    students.forEach(student => {
+      const studentGoals = goalsByStudentId[student.id] || []
+      const studentGoalsWithMasteryBySubjectId = goalsWithCalculatedMasteryBySubjectId(
+        studentGoals,
+        allGroups
+      )
+      const masteryBySubjectId: Record<string, MasteryState> = {}
+      subjects.forEach(subject => {
+        const goals = studentGoalsWithMasteryBySubjectId[subject.id] || []
+        if (goals.length > 0) {
+          const masteryAggregate = aggregateMasterys(goals)
+          if (masteryAggregate) {
+            masteryBySubjectId[subject.id] = { mastery: masteryAggregate }
+          } else {
+            masteryBySubjectId[subject.id] = { missingReason: MISSING_REASON_NO_OBSERVATIONS }
+          }
+        } else {
+          masteryBySubjectId[subject.id] = { missingReason: MISSING_REASON_NO_GOALS }
+        }
+      })
+
+      const observationCountBySubjectId = countObservationsBySubjectId(
+        studentGoalsWithMasteryBySubjectId
+      )
+
+      newData[student.id] = {
+        masteryBySubjectId,
+        observationCountBySubjectId,
+      }
+    })
+    dataByStudentId = newData
   }
 
   const handleHeaderClick = (key: SortKey) => {

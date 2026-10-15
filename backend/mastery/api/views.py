@@ -819,7 +819,7 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                     Q(group__subject_id=subject_param)
                 )
 
-            if include_observations_param and (student_param or group_param):
+            if include_observations_param:
                 # Prefetch observations with access-policy scoping applied
                 self.serializer_class = serializers.GoalWithObservationsSerializer
                 from mastery.access_policies.observation import ObservationAccessPolicy
@@ -943,7 +943,7 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
             OpenApiParameter(
                 name='school',
                 description='Filter observations by goal.school_id',
-                required=False,
+                required=True,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
@@ -1076,6 +1076,13 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
     list=extend_schema(
         parameters=[
             OpenApiParameter(
+                name='school',
+                description='Filter statuses by school.',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='students',
                 description='Filter statuses by students.',
                 required=False,
@@ -1090,17 +1097,10 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='school',
-                description='Filter statuses by school.',
-                required=False,
-                type={'type': 'string'},
-                location=OpenApiParameter.QUERY
-            ),
-            OpenApiParameter(
                 name='group',
                 description='Filter statuses by students in group.',
                 required=False,
-                type={'type': 'string', 'enum': ['exclude', 'include', 'only']},
+                type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(

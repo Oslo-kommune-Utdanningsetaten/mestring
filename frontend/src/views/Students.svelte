@@ -187,7 +187,12 @@
   {:else if selectedFocus === focusOptions[0].value}
     <StudentsWithSubjects students={filteredStudents} {subjects} group={selectedGroup} />
   {:else if focusOptions.some(opt => opt.value === selectedFocus)}
-    <StudentsWithStatuses students={filteredStudents} {subjects} categoryName={selectedFocus} />
+    <StudentsWithStatuses
+      students={filteredStudents}
+      {subjects}
+      categoryName={selectedFocus}
+      group={selectedGroup}
+    />
   {:else}
     <div class="mt-3">Ukjent fokusvalg: {selectedFocus}</div>
   {/if}

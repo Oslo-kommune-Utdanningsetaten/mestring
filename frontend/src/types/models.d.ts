@@ -43,6 +43,8 @@ export type GoalDecorated = GoalType & {
   observations?: ObservationType[]
 }
 
+export type GoalWithObservations = GoalType & { observations?: ObservationType[] }
+
 export type UserDecorated = UserType & {
   allGroups?: GroupType[]
   teacherGroups?: GroupType[]

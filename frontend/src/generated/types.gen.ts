@@ -1619,7 +1619,7 @@ export type FetchMetadataResponses = {
 export type ObservationsListData = {
     body?: never;
     path?: never;
-    query?: {
+    query: {
         /**
          * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
          */
@@ -1655,7 +1655,7 @@ export type ObservationsListData = {
         /**
          * Filter observations by goal.school_id
          */
-        school?: string;
+        school: string;
         /**
          * Filter observations by the observed student.
          */
@@ -2003,7 +2003,7 @@ export type SchoolsUpdateResponse = SchoolsUpdateResponses[keyof SchoolsUpdateRe
 export type StatusListData = {
     body?: never;
     path?: never;
-    query?: {
+    query: {
         /**
          * Filter statuses by status_category.name.
          */
@@ -2023,11 +2023,11 @@ export type StatusListData = {
         /**
          * Filter statuses by students in group.
          */
-        group?: 'exclude' | 'include' | 'only';
+        group?: string;
         /**
          * Filter statuses by school.
          */
-        school?: string;
+        school: string;
         /**
          * Filter statuses by students.
          */

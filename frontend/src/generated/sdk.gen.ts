@@ -248,7 +248,7 @@ export const masterySchemasUpdate = <ThrowOnError extends boolean = false>(optio
  */
 export const fetchMetadata = <ThrowOnError extends boolean = false>(options?: Options<FetchMetadataData, ThrowOnError>): RequestResult<FetchMetadataResponses, unknown, ThrowOnError> => (options?.client ?? client).get<FetchMetadataResponses, unknown, ThrowOnError>({ url: '/api/metadata/', ...options });
 
-export const observationsList = <ThrowOnError extends boolean = false>(options?: Options<ObservationsListData, ThrowOnError>): RequestResult<ObservationsListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ObservationsListResponses, unknown, ThrowOnError>({ url: '/api/observations/', ...options });
+export const observationsList = <ThrowOnError extends boolean = false>(options: Options<ObservationsListData, ThrowOnError>): RequestResult<ObservationsListResponses, unknown, ThrowOnError> => (options.client ?? client).get<ObservationsListResponses, unknown, ThrowOnError>({ url: '/api/observations/', ...options });
 
 export const observationsCreate = <ThrowOnError extends boolean = false>(options: Options<ObservationsCreateData, ThrowOnError>): RequestResult<ObservationsCreateResponses, unknown, ThrowOnError> => (options.client ?? client).post<ObservationsCreateResponses, unknown, ThrowOnError>({
     url: '/api/observations/',
@@ -349,7 +349,7 @@ export const schoolsUpdate = <ThrowOnError extends boolean = false>(options: Opt
     }
 });
 
-export const statusList = <ThrowOnError extends boolean = false>(options?: Options<StatusListData, ThrowOnError>): RequestResult<StatusListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<StatusListResponses, unknown, ThrowOnError>({ url: '/api/status/', ...options });
+export const statusList = <ThrowOnError extends boolean = false>(options: Options<StatusListData, ThrowOnError>): RequestResult<StatusListResponses, unknown, ThrowOnError> => (options.client ?? client).get<StatusListResponses, unknown, ThrowOnError>({ url: '/api/status/', ...options });
 
 export const statusCreate = <ThrowOnError extends boolean = false>(options: Options<StatusCreateData, ThrowOnError>): RequestResult<StatusCreateResponses, unknown, ThrowOnError> => (options.client ?? client).post<StatusCreateResponses, unknown, ThrowOnError>({
     url: '/api/status/',
