@@ -7,11 +7,9 @@
   import { subjectsList, usersList } from '../generated/sdk.gen'
   import { USER_ROLES } from '../utils/constants'
   import { dataStore } from '../stores/data'
-  import { hasUserAccessToPath } from '../stores/access'
   import { urlStringFrom, getGroupLabel } from '../utils/functions'
   import { preferredSchoolYear } from '../stores/localStorageFunctions'
 
-  import Link from '../components/Link.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithStatuses from '../components/StudentsWithStatuses.svelte'
 
@@ -54,14 +52,20 @@
   )
 
   const headerText = $derived.by(() => {
-    const text = selectedGroup
-      ? `Elever i gruppe: ${getGroupLabel(selectedGroup, {
+    const result = ['Elever på skolen']
+    if (selectedGroup) {
+      result.push(
+        `i ${getGroupLabel(selectedGroup, {
           isGroupNameEnabled: true,
           isGroupTypeNameEnabled: false,
           includeEarlierYear: true,
         })}`
-      : 'Alle elever'
-    return nameFilter ? `${text} med navn som inneholder "${nameFilter}"` : text
+      )
+    }
+    if (nameFilter) {
+      result.push(`med navn som matcher "${nameFilter}"`)
+    }
+    return result.join(' ')
   })
 
   const fetchStudents = async () => {
@@ -119,7 +123,7 @@
 </script>
 
 <section class="my-4">
-  <h2>Elever ved skolen</h2>
+  <h2>{headerText}</h2>
 
   <!-- Focus / view-mode switch if more than one option -->
   {#if focusOptions.length > 1}
