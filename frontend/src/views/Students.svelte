@@ -22,8 +22,8 @@
   let nameFilter = $state<string>('')
   let subjects = $state<SubjectType[]>([])
 
-  let currentSchool = $derived($dataStore.currentSchool)
-  let allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
+  const currentSchool = $derived($dataStore.currentSchool)
+  const allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
 
   const focusOptions = $derived.by(() => {
     if (!$dataStore.statusCategories) return []
@@ -36,10 +36,10 @@
     return options
   })
 
-  let selectedGroupId = $derived(router.getQueryParam('group'))
-  let selectedFocus = $derived(router.getQueryParam('focus') || focusOptions[0].value)
+  const selectedGroupId = $derived(router.getQueryParam('group'))
+  const selectedFocus = $derived(router.getQueryParam('focus') || focusOptions[0].value)
 
-  let filteredStudents = $derived(
+  const filteredStudents = $derived(
     nameFilter
       ? students.filter(
           student =>
@@ -49,10 +49,11 @@
       : students
   )
 
-  let selectedGroup = $derived<GroupType | undefined>(
+  const selectedGroup = $derived<GroupType | undefined>(
     allGroups.find(group => group.id === selectedGroupId)
   )
-  let headerText = $derived.by(() => {
+
+  const headerText = $derived.by(() => {
     const text = selectedGroup
       ? `Elever i gruppe: ${getGroupLabel(selectedGroup, {
           isGroupNameEnabled: true,
@@ -78,7 +79,7 @@
       const subjectsResult = await subjectsList({
         query: {
           school: currentSchool.id,
-          students: students.map(s => s.id).join(','),
+          students: selectedGroupId ? students.map(s => s.id).join(',') : undefined,
           schoolYear: $preferredSchoolYear,
         },
       })
@@ -118,7 +119,26 @@
 </script>
 
 <section class="my-4">
-  <h2 class="py-3">{headerText}</h2>
+  <h2>Elever ved skolen</h2>
+
+  <!-- Focus / view-mode switch if more than one option -->
+  {#if focusOptions.length > 1}
+    <div class="focus-row mt-3 mb-4">
+      {#if focusOptions.length > 1}
+        <pkt-tabs
+          ontab-selected={(event: CustomEvent) =>
+            handleFocusSelect(focusOptions[event.detail.index].value)}
+        >
+          {#each focusOptions as option, index (option.value)}
+            <pkt-tab-item {index} active={selectedFocus === option.value}>
+              {option.label}
+            </pkt-tab-item>
+          {/each}
+        </pkt-tabs>
+      {/if}
+    </div>
+  {/if}
+
   <!-- Filter groups -->
   <div class="filters-container">
     <div class="filter-item">
@@ -150,31 +170,6 @@
       />
     </div>
   </div>
-
-  <!-- Focus / view-mode switch if more than one option -->
-  {#if focusOptions.length > 1}
-    <div class="focus-row mt-3">
-      {#if focusOptions.length > 1}
-        <pkt-tabs
-          ontab-selected={(event: CustomEvent) =>
-            handleFocusSelect(focusOptions[event.detail.index].value)}
-        >
-          {#each focusOptions as option, index (option.value)}
-            <pkt-tab-item {index} active={selectedFocus === option.value}>
-              {option.label}
-            </pkt-tab-item>
-          {/each}
-        </pkt-tabs>
-      {/if}
-
-      <!-- Shortcut to manage status categories, for users who may -->
-      {#if $hasUserAccessToPath('/admin/status-categories')}
-        <Link to="/admin/status-categories" className="status-categories-link">
-          Administrer kategorier
-        </Link>
-      {/if}
-    </div>
-  {/if}
 </section>
 
 <section class="my-4">
@@ -221,12 +216,8 @@
     padding-left: 15px;
   }
 
-  .focus-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+  .focus-row :global(.pkt-tabs__list) {
+    padding: 0;
   }
 
   .focus-row :global(.status-categories-link) {

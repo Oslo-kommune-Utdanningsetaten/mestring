@@ -123,7 +123,7 @@ export const fetchGoalsForSubjectAndStudent = async (
 
     const groupIds = goals.map(goal => goal.groupId).filter(Boolean) as string[]
     const groups = studentGroups.filter((group: GroupType) => groupIds.includes(group.id))
-    const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(studentId, goals, groups)
+    const goalsBySubjectId = goalsWithCalculatedMasteryBySubjectId(goals, groups)
     return goalsBySubjectId[subjectId]
   } catch (error) {
     console.error('Error fetching goals:', error)
@@ -148,32 +148,34 @@ export const goalsWithCalculatedMastery = (
   })
 }
 
-// For a single student, output goals grouped by subjectId, with mastery data calculated
-// If a goal does not have a subjectId, look up via the groupId
+// Chunk goals by subjectId, with mastery data calculated
+// Find subject via goal.groupId or goal.subjectId
 // Goals are sorted by sortOrder, then individual goals first
-// We assume goals passed in are decorated with observations (via includeObservations=true)
-export const goalsWithCalculatedMasteryBySubjectId = async (
-  studentId: string,
+// Assume goals passed in are decorated with observations (via includeObservations=true)
+export const goalsWithCalculatedMasteryBySubjectId = (
   studentGoals: GoalType[],
   groups: GroupType[]
 ) => {
   const decoratedGoals = goalsWithCalculatedMastery(studentGoals)
   const goalsBySubjectId: Record<string, GoalDecorated[]> = {}
   decoratedGoals.forEach((goal: GoalDecorated) => {
-    let subjectId = goal.subjectId
-    if (!subjectId) {
-      // goal is not individual, look up subject via group
-      if (goal.groupId) {
-        const group = groups.find(g => g.id === goal.groupId)
-        if (group?.subjectId) {
-          subjectId = group.subjectId
-        } else {
-          return
-        }
+    let subjectId = undefined
+    if (goal.groupId) {
+      // group goal, look up subject via group
+      const group = groups.find(g => g.id === goal.groupId)
+      if (group?.subjectId) {
+        subjectId = group.subjectId
+      } else {
+        return
       }
+    } else {
+      // probably an individual goal, use the subjectId from the goal itself
+      subjectId = goal.subjectId
     }
-    goalsBySubjectId[subjectId] = goalsBySubjectId[subjectId] || []
-    goalsBySubjectId[subjectId].push(goal)
+    if (subjectId) {
+      goalsBySubjectId[subjectId] = goalsBySubjectId[subjectId] || []
+      goalsBySubjectId[subjectId].push(goal)
+    }
   })
   Object.keys(goalsBySubjectId).forEach(subjectId => {
     goalsBySubjectId[subjectId]

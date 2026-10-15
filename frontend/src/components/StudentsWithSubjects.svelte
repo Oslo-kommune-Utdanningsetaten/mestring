@@ -91,11 +91,7 @@
         })
         const studentGoals = result.data || []
 
-        const goalsBySubjectId = await goalsWithCalculatedMasteryBySubjectId(
-          student.id,
-          studentGoals,
-          allGroups
-        )
+        const goalsBySubjectId = goalsWithCalculatedMasteryBySubjectId(studentGoals, allGroups)
         const masteryBySubjectId: Record<string, MasteryState> = {}
         subjects.forEach(subject => {
           const goals = goalsBySubjectId[subject.id] || []
