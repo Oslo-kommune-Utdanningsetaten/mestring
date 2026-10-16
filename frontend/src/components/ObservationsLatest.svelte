@@ -33,9 +33,9 @@
 
   const fetchObservations = async () => {
     try {
-      const query: Record<string, any> = {
+      const query: { school: string } & Record<string, any> = {
         limit,
-        school: currentSchool?.id,
+        school: currentSchool.id,
         ...getPreferredCreatedParams(),
       }
       if (viewMode === 'teacher') {

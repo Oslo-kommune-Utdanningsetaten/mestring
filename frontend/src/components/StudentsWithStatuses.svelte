@@ -4,8 +4,9 @@
   import type { MasteryConfigLevel } from '../types/models.d.ts'
   import { statusList } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
-  import { getSubjectName } from '../utils/functions'
+  import { getGroupLabel, getSubjectName } from '../utils/functions'
   import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
+  import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { t } from '../stores/translations'
 
   import MasterySchemaLevel from './MasterySchemaLevel.svelte'
@@ -49,6 +50,7 @@
   const masterySchema = $derived(
     $dataStore.masterySchemas.find(schema => schema.id === category?.masterySchemaId)
   )
+  const { maxValue } = $derived(useMasteryCalculations(masterySchema))
 
   // Sorted students list
   let sortedStudents = $derived.by(() => {
@@ -82,6 +84,21 @@
       return sortDirection === 'asc' ? comparison : -comparison
     })
     return result
+  })
+
+  const studentsWithouRiskyStatuses = $derived.by(() => {
+    return students.filter(student =>
+      subjects.every(subject => {
+        const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`] || []
+        return (
+          statuses.filter(status => status.masteryValue === maxValue).length === statuses.length
+        )
+      })
+    )
+  })
+
+  const groupsMissingStatuses = $derived.by(() => {
+    return []
   })
 
   const getValueForIndex = (levelIndex: number): number => {
@@ -136,6 +153,10 @@
     }
   }
 
+  const handleToggleDetails = () => {
+    isDetailsEnabled = !isDetailsEnabled
+  }
+
   const handleHeaderClick = (key: SortKey) => {
     if (sortBy === key) {
       // Toggle direction
@@ -178,46 +199,74 @@
 </script>
 
 <!-- Filtering by mastery level -->
-{#if category && masterySchema}
+{#if masterySchema && category}
   {@const levels =
     category.name === 'risk'
       ? masterySchema.config.levels.slice(0, -1)
       : masterySchema.config.levels}
-  <div>
-    <fieldset class="mb-3 d-flex flex-wrap align-items-center gap-3">
-      <legend class="w-auto mb-0 fs-6 fw-semibold">Filtrer på status</legend>
-      <div class="d-flex flex-wrap gap-3">
-        {#each levels as level, levelIndex}
-          <pkt-checkbox
-            label={level.title + ' (' + (studentCountsByLevel[levelIndex] ?? 0) + ')'}
-            labelPosition="right"
-            layout="horizontal"
-            checked={selectedLevels.includes(levelIndex)}
-            onchange={() => handleToggleLevel(levelIndex)}
-          ></pkt-checkbox>
-        {/each}
-      </div>
-    </fieldset>
-  </div>
+  <table class="my-2 table">
+    <tbody>
+      {#each levels as level, levelIndex}
+        <tr>
+          <th>Elever med én eller flere {level.title}</th>
+          <td>{studentCountsByLevel[levelIndex] ?? 0}</td>
+          <td>
+            <pkt-checkbox
+              label={level.title}
+              labelPosition="right"
+              layout="horizontal"
+              checked={selectedLevels.includes(levelIndex)}
+              onchange={() => handleToggleLevel(levelIndex)}
+            ></pkt-checkbox>
+          </td>
+        </tr>
+      {/each}
+
+      {#if category.name === 'risk'}
+        <tr>
+          <th>Elever utenfor fare</th>
+          <td>
+            {studentsWithouRiskyStatuses.length} [{Math.round(
+              (100 * studentsWithouRiskyStatuses.length) / sortedStudents.length
+            )}%]
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <th>Grupper som ikke har rapportert alle elever</th>
+          <td>
+            {groupsMissingStatuses
+              .map(group =>
+                getGroupLabel(group, {
+                  isGroupNameEnabled: true,
+                  isGroupTypeNameEnabled: false,
+                  includeEarlierYear: true,
+                })
+              )
+              .join(', ')}
+          </td>
+          <td></td>
+        </tr>
+      {/if}
+    </tbody>
+  </table>
 {/if}
 
-<p>
+<div class="mt-3">
   <ButtonMini
     options={{
-      title: 'Lukk',
+      title: `${isDetailsEnabled ? 'Skjul' : 'Vis'}`,
       skin: 'secondary',
       variant: 'label-only',
       onClick: () => handleToggleDetails(),
     }}
   >
     {isDetailsEnabled ? 'Skjul' : 'Vis'}
+    {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}
   </ButtonMini>
-  {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}
-</p>
+</div>
 
 {#if isDetailsEnabled}
-  <p>Detaljer er aktivert</p>
-
   <!-- Students grid -->
   <div class="scroll-mirror" bind:this={topScrollElement} onscroll={syncFromTop}>
     <div style="width: {gridScrollWidth}px; height: 1px;"></div>

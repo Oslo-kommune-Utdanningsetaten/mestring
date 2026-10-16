@@ -156,7 +156,11 @@
         <option value="0" selected={!selectedGroupId}>Velg gruppe</option>
         {#each allGroups as group}
           <option value={group.id} selected={group.id === selectedGroupId}>
-            {group.displayName}
+            {getGroupLabel(group, {
+              isGroupNameEnabled: true,
+              isGroupTypeNameEnabled: false,
+              includeEarlierYear: true,
+            })}
           </option>
         {/each}
       </select>
