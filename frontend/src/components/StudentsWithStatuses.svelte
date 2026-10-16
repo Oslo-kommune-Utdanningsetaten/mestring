@@ -50,9 +50,9 @@
 
   // Sorted students list
   let sortedStudents = $derived.by(() => {
-    let sortedstudents = [...students]
+    let result = [...students]
     if (selectedLevels.length > 0) {
-      sortedstudents = sortedstudents.filter(student =>
+      result = result.filter(student =>
         subjects.some(subject => {
           const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`]
           return statuses?.some(status => {
@@ -63,7 +63,7 @@
         })
       )
     }
-    sortedstudents.sort((a, b) => {
+    result.sort((a, b) => {
       let comparison: number
       if (sortBy === 'name') {
         comparison = a.name.localeCompare(b.name, 'no')
@@ -79,7 +79,7 @@
       }
       return sortDirection === 'asc' ? comparison : -comparison
     })
-    return sortedstudents
+    return result
   })
 
   const getValueForIndex = (levelIndex: number): number => {
