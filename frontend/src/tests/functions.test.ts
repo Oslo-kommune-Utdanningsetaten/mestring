@@ -325,8 +325,8 @@ describe('generateStatusTitle', () => {
         beginAt: '2024-03-01T00:00:00Z',
         endAt: '2024-05-15T00:00:00Z',
       }
-      const category = { name: 'risk', title: 'IVG/F' } as StatusCategoryType
-      expect(generateStatusTitle(status, category)).toBe('IVG/F - v24')
+      const category = { name: 'risk', title: 'Midtveisrapportering' } as StatusCategoryType
+      expect(generateStatusTitle(status, category)).toBe('Midtveisrapportering - v24')
     })
 
     it('uses semester h and the begin year in the fall semester', () => {
@@ -334,8 +334,8 @@ describe('generateStatusTitle', () => {
         beginAt: '2023-08-01T00:00:00Z',
         endAt: '2024-01-15T00:00:00Z',
       }
-      const category = { name: 'risk', title: 'IVG/F' } as StatusCategoryType
-      expect(generateStatusTitle(status, category)).toBe('IVG/F - h23')
+      const category = { name: 'risk', title: 'Midtveisrapportering' } as StatusCategoryType
+      expect(generateStatusTitle(status, category)).toBe('Midtveisrapportering - h23')
     })
   })
 })

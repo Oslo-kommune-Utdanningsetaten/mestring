@@ -84,7 +84,7 @@ export enum SUBJECT_OWNERSHIP_OPTIONS {
 export const STATUS_CATEGORY_NAMES: Record<string, string> = {
   midyear: 'Halvtår',
   endyear: 'Standpunkt',
-  risk: 'IVG/F',
+  risk: 'Midtveisrapportering',
 }
 
 export enum VALUE_INPUT_VARIANT {
