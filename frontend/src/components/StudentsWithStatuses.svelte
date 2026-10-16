@@ -10,6 +10,7 @@
 
   import MasterySchemaLevel from './MasterySchemaLevel.svelte'
   import UserNameLink from './UserNameLink.svelte'
+  import ButtonMini from './ButtonMini.svelte'
 
   let {
     students,
@@ -33,6 +34,7 @@
   let studentCountsByLevel = $state<number[]>([])
 
   let selectedLevels = $state<number[]>([])
+  let isDetailsEnabled = $state<boolean>(false)
 
   // Top scrollbar mirror
   let gridElement = $state<HTMLDivElement | null>(null)
@@ -199,70 +201,86 @@
   </div>
 {/if}
 
-<p>Viser {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}</p>
-
-<!-- Students grid -->
-<div class="scroll-mirror" bind:this={topScrollElement} onscroll={syncFromTop}>
-  <div style="width: {gridScrollWidth}px; height: 1px;"></div>
-</div>
-<div
-  class="students-grid"
-  bind:this={gridElement}
-  onscroll={syncFromGrid}
-  aria-label="Elevliste"
-  style="grid-template-columns: {gridTemplateColumns}"
->
-  <button
-    class="item header header-row sortable"
-    onclick={() => handleHeaderClick('name')}
-    title="Sorter etter elevnavn"
+<p>
+  <ButtonMini
+    options={{
+      title: 'Lukk',
+      skin: 'secondary',
+      variant: 'label-only',
+      onClick: () => handleToggleDetails(),
+    }}
   >
-    <span class="column-header">
-      Navn{getSortIndicator('name')}
-    </span>
-  </button>
-  {#each subjects as subject (subject.id)}
+    {isDetailsEnabled ? 'Skjul' : 'Vis'}
+  </ButtonMini>
+  {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}
+</p>
+
+{#if isDetailsEnabled}
+  <p>Detaljer er aktivert</p>
+
+  <!-- Students grid -->
+  <div class="scroll-mirror" bind:this={topScrollElement} onscroll={syncFromTop}>
+    <div style="width: {gridScrollWidth}px; height: 1px;"></div>
+  </div>
+  <div
+    class="students-grid"
+    bind:this={gridElement}
+    onscroll={syncFromGrid}
+    aria-label="Elevliste"
+    style="grid-template-columns: {gridTemplateColumns}"
+  >
     <button
       class="item header header-row sortable"
-      onclick={() => handleHeaderClick(subject.id)}
-      title="Sorter etter antall {t('observation', { form: 'plu-indef' })} i {getSubjectName(
-        subject,
-        'displayName'
-      )}"
+      onclick={() => handleHeaderClick('name')}
+      title="Sorter etter elevnavn"
     >
       <span class="column-header">
-        {#if subject.ownedBySchoolId}
-          {getSubjectName(subject)}{getSortIndicator(subject.id)}
-        {:else}
-          {subject.grepCode}{getSortIndicator(subject.id)}
-        {/if}
+        Navn{getSortIndicator('name')}
       </span>
     </button>
-  {/each}
-  {#each sortedStudents as student (student.id)}
-    <span class="item student-name">
-      <UserNameLink user={student} />
-    </span>
-
-    {#each subjects as subject}
-      {@const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`]}
-      {#if statuses?.length}
-        <span class="item">
-          {#each statuses as status}
-            <span class="me-1" title={status.title + ' i ' + subject.grepCode}>
-              <MasterySchemaLevel
-                masteryValue={status.masteryValue}
-                masterySchemaId={status.masterySchemaId}
-              />
-            </span>
-          {/each}
+    {#each subjects as subject (subject.id)}
+      <button
+        class="item header header-row sortable"
+        onclick={() => handleHeaderClick(subject.id)}
+        title="Sorter etter antall {t('observation', { form: 'plu-indef' })} i {getSubjectName(
+          subject,
+          'displayName'
+        )}"
+      >
+        <span class="column-header">
+          {#if subject.ownedBySchoolId}
+            {getSubjectName(subject)}{getSortIndicator(subject.id)}
+          {:else}
+            {subject.grepCode}{getSortIndicator(subject.id)}
+          {/if}
         </span>
-      {:else}
-        <span class="item">-</span>
-      {/if}
+      </button>
     {/each}
-  {/each}
-</div>
+    {#each sortedStudents as student (student.id)}
+      <span class="item student-name">
+        <UserNameLink user={student} />
+      </span>
+
+      {#each subjects as subject}
+        {@const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`]}
+        {#if statuses?.length}
+          <span class="item">
+            {#each statuses as status}
+              <span class="me-1" title={status.title + ' i ' + subject.grepCode}>
+                <MasterySchemaLevel
+                  masteryValue={status.masteryValue}
+                  masterySchemaId={status.masterySchemaId}
+                />
+              </span>
+            {/each}
+          </span>
+        {:else}
+          <span class="item">-</span>
+        {/if}
+      {/each}
+    {/each}
+  </div>
+{/if}
 
 <style>
   .scroll-mirror {
