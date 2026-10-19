@@ -94,7 +94,7 @@
 
   let headerText = $derived.by(() => {
     let text = selectedSchool ? `Fag ved ${selectedSchool.displayName}` : 'Alle fag'
-    text = nameFilter ? `${text} som inneholder "${nameFilter}"` : text
+    text = nameFilter ? `${text} som matcher "${nameFilter}"` : text
     return text
   })
 

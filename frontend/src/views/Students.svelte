@@ -153,7 +153,7 @@
         id="groupSelect"
         onchange={(e: Event) => handleGroupSelect((e.target as HTMLSelectElement).value)}
       >
-        <option value="0" selected={!selectedGroupId}>Velg gruppe</option>
+        <option value="0" selected={!selectedGroupId}>Hele skolen</option>
         {#each allGroups as group}
           <option value={group.id} selected={group.id === selectedGroupId}>
             {getGroupLabel(group, {

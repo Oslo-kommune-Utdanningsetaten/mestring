@@ -12,6 +12,7 @@
     isTypeWarningEnabled,
     isGroupNameEnabled,
     isGroupTypeNameEnabled,
+    isIconEnabled = true,
     onclick,
     href,
     classes,
@@ -21,6 +22,7 @@
     isTypeWarningEnabled?: boolean
     isGroupNameEnabled?: boolean
     isGroupTypeNameEnabled?: boolean
+    isIconEnabled?: boolean
     onclick?: () => void
     href?: string
     classes?: string
@@ -58,7 +60,7 @@
         {onclick}
         aria-label={accessibleLabel}
       >
-        <pkt-tag iconName="group" {skin} class={classes}>
+        <pkt-tag iconName={isIconEnabled ? 'group' : undefined} {skin} class={classes}>
           <span>
             {label}
             {#if earlierYear}
@@ -78,7 +80,7 @@
       </button>
     </span>
   {:else if href}
-    <pkt-tag iconName="group" {skin} class={classes}>
+    <pkt-tag iconName={isIconEnabled ? 'group' : undefined} {skin} class={classes}>
       <Link to={href}>
         <span class:disabled={!group.isEnabled} title={group.isEnabled ? '' : 'Disabled'}>
           {label}
@@ -89,7 +91,7 @@
       </Link>
     </pkt-tag>
   {:else}
-    <pkt-tag iconName="group" {skin} class={classes}>
+    <pkt-tag iconName={isIconEnabled ? 'group' : undefined} {skin} class={classes}>
       <span class:disabled={!group.isEnabled} title={group.isEnabled ? '' : 'Disabled'}>
         {label}
       </span>

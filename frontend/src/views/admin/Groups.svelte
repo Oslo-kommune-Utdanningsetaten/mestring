@@ -100,19 +100,7 @@
     ].filter(Boolean) as { value: string; label: string }[]
   })
 
-  let filteredGroups = $derived(
-    nameFilter
-      ? groups.filter(
-          group =>
-            group.id === nameFilter ||
-            group.displayName.toLowerCase().includes(nameFilter.toLowerCase())
-        )
-      : groups
-  )
-
-  const disabledGroups = $derived(filteredGroups.filter(g => !g.isEnabled))
-
-  let groupFetchOptions = $derived.by(() => {
+  const groupFetchOptions = $derived.by(() => {
     const options: Record<string, any> & { school: string } = {
       school: selectedSchoolId as string,
       enabled: selectedEnabledOption,
@@ -152,9 +140,31 @@
     })()
   )
 
+  const filteredSubjects = $derived(
+    subjectsForSelectedSchool.filter(
+      subject =>
+        subject.displayName.toLowerCase().includes(nameFilter.toLowerCase()) ||
+        subject.shortName.toLowerCase().includes(nameFilter.toLowerCase()) ||
+        subject.grepCode.toLowerCase().includes(nameFilter.toLowerCase())
+    )
+  )
+
+  const filteredGroups = $derived(
+    nameFilter
+      ? groups.filter(
+          group =>
+            group.id === nameFilter ||
+            group.displayName.toLowerCase().includes(nameFilter.toLowerCase()) ||
+            filteredSubjects.some(subject => subject.id === group.subjectId)
+        )
+      : groups
+  )
+
+  const disabledGroups = $derived(filteredGroups.filter(g => !g.isEnabled))
+
   let headerText = $derived.by(() => {
     let text = selectedSchool ? `Grupper ved ${selectedSchool.displayName}` : 'Alle grupper'
-    text = nameFilter ? `${text} som inneholder "${nameFilter}"` : text
+    text = nameFilter ? `${text} som matcher "${nameFilter}"` : text
     return text
   })
 

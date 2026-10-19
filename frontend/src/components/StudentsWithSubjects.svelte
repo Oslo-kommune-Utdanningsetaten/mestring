@@ -263,7 +263,7 @@
         onclick={() => handleHeaderClick(subject.id)}
         title="Sorter etter antall {t('observation', { form: 'plu-indef' })} i {subject.grepCode}"
       >
-        {getSubjectName(subject, 'grepCode')}{getSortIndicator(subject.id)}
+        {getSubjectName(subject)}{getSortIndicator(subject.id)}
       </button>
     </span>
   {/each}
@@ -294,7 +294,8 @@
     padding: 0.3rem;
     min-height: 4rem;
     display: flex;
-    align-items: center;
+    align-self: stretch;
+    align-items: stretch;
     justify-content: center;
     overflow-y: hidden;
     gap: 0.5rem;

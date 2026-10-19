@@ -82,7 +82,7 @@ export const getSubjectName = (
   subject: SubjectType,
   preferredField?: 'shortName' | 'displayName' | 'grepCode' | undefined
 ) => {
-  if (!!preferredField && subject[preferredField]) {
+  if (preferredField && subject[preferredField]) {
     return subject[preferredField] as string
   }
   return subject.shortName || subject.displayName || subject.grepCode || 'ukjent fag'

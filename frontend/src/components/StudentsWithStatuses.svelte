@@ -3,7 +3,7 @@
   import type { UserType, SubjectType, StatusType, GroupType } from '../generated/types.gen'
   import type { MasteryConfigLevel } from '../types/models.d.ts'
   import { statusList } from '../generated/sdk.gen'
-  import { dataStore } from '../stores/data'
+  import { dataStore, currentUser } from '../stores/data'
   import { getGroupLabel, getSubjectName } from '../utils/functions'
   import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
@@ -12,6 +12,7 @@
   import MasterySchemaLevel from './MasterySchemaLevel.svelte'
   import UserNameLink from './UserNameLink.svelte'
   import ButtonMini from './ButtonMini.svelte'
+  import GroupTag from './GroupTag.svelte'
 
   let {
     students,
@@ -25,6 +26,11 @@
     group?: GroupType | undefined
   } = $props()
 
+  type DecoratedGroup = GroupType & {
+    studentCount: number
+    statusCount: number
+  }
+
   // Sort state
   type SortKey = 'name' | string // 'name' or subjectId
   let sortBy = $state<SortKey>('name')
@@ -35,7 +41,7 @@
   let studentCountsByLevel = $state<number[]>([])
 
   let selectedLevels = $state<number[]>([])
-  let isDetailsEnabled = $state<boolean>(false)
+  let isDetailsEnabled = $derived<boolean>(!!group || selectedLevels.length > 0)
 
   // Top scrollbar mirror
   let gridElement = $state<HTMLDivElement | null>(null)
@@ -97,9 +103,39 @@
     )
   })
 
-  const groupsMissingStatuses = $derived.by(() => {
-    return []
+  const decoratedGroups: DecoratedGroup[] = $derived.by(() => {
+    const subjectIds = subjects.map(aSubject => aSubject.id)
+    return $currentUser.allGroups
+      .filter((aGroup: GroupType) => aGroup.subjectId && aGroup.type === 'teaching')
+      .filter((aGroup: GroupType) => subjectIds.includes(aGroup.subjectId as string))
+      .map((aGroup: GroupType) => {
+        const studentsInGroup = students.filter(student => student.groupIds.includes(aGroup.id))
+        return {
+          ...aGroup,
+          studentCount: studentsInGroup.length,
+          // Group only counts statuses in its own subject
+          statusCount: studentsInGroup.reduce(
+            (count, student) =>
+              count +
+              (statusesByStudentIdAndSubjectId[`${student.id}:${aGroup.subjectId}`]?.length ?? 0),
+            0
+          ),
+        }
+      })
   })
+
+  const groupsMissingStatuses = $derived(
+    decoratedGroups.filter((aGroup: DecoratedGroup) => aGroup.statusCount < aGroup.studentCount)
+  )
+
+  const groupsWithCompleteStatuses = $derived(
+    decoratedGroups.filter((aGroup: DecoratedGroup) => aGroup.statusCount >= aGroup.studentCount)
+  )
+
+  const getStudentCountWithoutRiskyStatuses = (): number => {
+    if (selectedLevels.length > 0) return 0
+    return studentsWithouRiskyStatuses.length
+  }
 
   const getValueForIndex = (levelIndex: number): number => {
     return masterySchema.config.levels[levelIndex]?.maxValue
@@ -153,10 +189,6 @@
     }
   }
 
-  const handleToggleDetails = () => {
-    isDetailsEnabled = !isDetailsEnabled
-  }
-
   const handleHeaderClick = (key: SortKey) => {
     if (sortBy === key) {
       // Toggle direction
@@ -198,6 +230,8 @@
   })
 </script>
 
+<div>👉 Velg gruppe og/eller filter for å se detaljer</div>
+
 <!-- Filtering by mastery level -->
 {#if masterySchema && category}
   {@const levels =
@@ -205,14 +239,38 @@
       ? masterySchema.config.levels.slice(0, -1)
       : masterySchema.config.levels}
   <table class="my-2 table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Antall</th>
+        <th>Filter</th>
+      </tr>
+    </thead>
     <tbody>
+      <tr>
+        <th>Elever {group ? `i dette utvalget` : 'på hele skolen'}</th>
+        <td>{sortedStudents.length}</td>
+        <td></td>
+      </tr>
+      {#if category.name === 'risk'}
+        <tr>
+          <th>Elever {group ? `i dette utvalget` : 'på hele skolen'} utenfor fare</th>
+          <td>
+            {getStudentCountWithoutRiskyStatuses()} [{Math.round(
+              (getStudentCountWithoutRiskyStatuses() / sortedStudents.length) * 100
+            )}%]
+          </td>
+          <td></td>
+        </tr>
+      {/if}
       {#each levels as level, levelIndex}
         <tr>
           <th>Elever med én eller flere {level.title}</th>
           <td>{studentCountsByLevel[levelIndex] ?? 0}</td>
           <td>
             <pkt-checkbox
-              label={level.title}
+              label={''}
+              aria-label="Filter for level {level.title}"
               labelPosition="right"
               layout="horizontal"
               checked={selectedLevels.includes(levelIndex)}
@@ -222,28 +280,36 @@
         </tr>
       {/each}
 
-      {#if category.name === 'risk'}
+      {#if !group}
         <tr>
-          <th>Elever utenfor fare</th>
+          <th>Grupper som har rapportert alle elever</th>
           <td>
-            {studentsWithouRiskyStatuses.length} [{Math.round(
-              (100 * studentsWithouRiskyStatuses.length) / sortedStudents.length
-            )}%]
+            <div class="d-flex flex-wrap gap-1">
+              {#each groupsWithCompleteStatuses as group}
+                <GroupTag
+                  href="/groups/{group.id}"
+                  {group}
+                  isGroupNameEnabled={true}
+                  isIconEnabled={false}
+                />
+              {/each}
+            </div>
           </td>
           <td></td>
         </tr>
         <tr>
           <th>Grupper som ikke har rapportert alle elever</th>
           <td>
-            {groupsMissingStatuses
-              .map(group =>
-                getGroupLabel(group, {
-                  isGroupNameEnabled: true,
-                  isGroupTypeNameEnabled: false,
-                  includeEarlierYear: true,
-                })
-              )
-              .join(', ')}
+            <div class="d-flex flex-wrap gap-1">
+              {#each groupsMissingStatuses as group}
+                <GroupTag
+                  href="/groups/{group.id}"
+                  {group}
+                  isGroupNameEnabled={true}
+                  isIconEnabled={false}
+                />
+              {/each}
+            </div>
           </td>
           <td></td>
         </tr>
@@ -253,83 +319,67 @@
 {/if}
 
 <div class="mt-3">
-  <ButtonMini
-    options={{
-      title: `${isDetailsEnabled ? 'Skjul' : 'Vis'}`,
-      skin: 'secondary',
-      variant: 'label-only',
-      onClick: () => handleToggleDetails(),
-    }}
-  >
-    {isDetailsEnabled ? 'Skjul' : 'Vis'}
-    {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}
-  </ButtonMini>
-</div>
-
-{#if isDetailsEnabled}
-  <!-- Students grid -->
-  <div class="scroll-mirror" bind:this={topScrollElement} onscroll={syncFromTop}>
-    <div style="width: {gridScrollWidth}px; height: 1px;"></div>
-  </div>
-  <div
-    class="students-grid"
-    bind:this={gridElement}
-    onscroll={syncFromGrid}
-    aria-label="Elevliste"
-    style="grid-template-columns: {gridTemplateColumns}"
-  >
-    <button
-      class="item header header-row sortable"
-      onclick={() => handleHeaderClick('name')}
-      title="Sorter etter elevnavn"
+  {#if isDetailsEnabled}
+    <!-- Students grid -->
+    <p>Viser {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}</p>
+    <div class="scroll-mirror" bind:this={topScrollElement} onscroll={syncFromTop}>
+      <div style="width: {gridScrollWidth}px; height: 1px;"></div>
+    </div>
+    <div
+      class="students-grid"
+      bind:this={gridElement}
+      onscroll={syncFromGrid}
+      aria-label="Elevliste"
+      style="grid-template-columns: {gridTemplateColumns}"
     >
-      <span class="column-header">
-        Navn{getSortIndicator('name')}
-      </span>
-    </button>
-    {#each subjects as subject (subject.id)}
       <button
         class="item header header-row sortable"
-        onclick={() => handleHeaderClick(subject.id)}
-        title="Sorter etter antall {t('observation', { form: 'plu-indef' })} i {getSubjectName(
-          subject,
-          'displayName'
-        )}"
+        onclick={() => handleHeaderClick('name')}
+        title="Sorter etter elevnavn"
       >
         <span class="column-header">
-          {#if subject.ownedBySchoolId}
-            {getSubjectName(subject)}{getSortIndicator(subject.id)}
-          {:else}
-            {subject.grepCode}{getSortIndicator(subject.id)}
-          {/if}
+          Navn{getSortIndicator('name')}
         </span>
       </button>
-    {/each}
-    {#each sortedStudents as student (student.id)}
-      <span class="item student-name">
-        <UserNameLink user={student} />
-      </span>
-
-      {#each subjects as subject}
-        {@const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`]}
-        {#if statuses?.length}
-          <span class="item">
-            {#each statuses as status}
-              <span class="me-1" title={status.title + ' i ' + subject.grepCode}>
-                <MasterySchemaLevel
-                  masteryValue={status.masteryValue}
-                  masterySchemaId={status.masterySchemaId}
-                />
-              </span>
-            {/each}
+      {#each subjects as subject (subject.id)}
+        <button
+          class="item header header-row sortable"
+          onclick={() => handleHeaderClick(subject.id)}
+          title="Sorter etter antall {t('status', { form: 'plu-indef' })} i {getSubjectName(
+            subject
+          )}"
+        >
+          <span class="column-header">
+            {getSubjectName(subject)}{getSortIndicator(subject.id)}
           </span>
-        {:else}
-          <span class="item">-</span>
-        {/if}
+        </button>
       {/each}
-    {/each}
-  </div>
-{/if}
+      {#each sortedStudents as student (student.id)}
+        <span class="item student-name">
+          <UserNameLink user={student} />
+        </span>
+
+        {#each subjects as subject}
+          {@const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`]}
+          {#if statuses?.length}
+            <span class="item">
+              {#each statuses as status}
+                <span class="me-1" title={status.title + ' i ' + subject.grepCode}>
+                  <MasterySchemaLevel
+                    masteryValue={status.masteryValue}
+                    masterySchemaId={status.masterySchemaId}
+                  />
+                </span>
+              {/each}
+            </span>
+          {:else}
+            <span class="item">-</span>
+          {/if}
+        {/each}
+      {/each}
+    </div>
+  {/if}
+</div>
 
 <style>
   .scroll-mirror {
@@ -354,9 +404,11 @@
   }
 
   .students-grid .item.header-row {
+    padding: 0.3rem;
     background-color: var(--bs-light);
     font-weight: 800;
-    max-height: 3rem;
+    align-self: stretch;
+    align-items: stretch;
     min-height: 2.5rem;
     position: sticky;
     top: 0;
@@ -383,6 +435,9 @@
     overflow-wrap: break-word;
     width: 100%;
     font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0.1rem 0.5rem 0.1rem 0.5rem;
     background-color: color-mix(
       in srgb,

@@ -44,7 +44,7 @@
   let headerText = $derived.by(() => {
     if (!selectedSchool) return null
     let text = `Brukere ved ${selectedSchool.displayName}`
-    text = nameFilter ? `${text} som inneholder "${nameFilter}"` : text
+    text = nameFilter ? `${text} som matcher "${nameFilter}"` : text
     return text
   })
 
