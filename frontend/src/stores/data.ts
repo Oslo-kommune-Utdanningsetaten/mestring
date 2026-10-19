@@ -183,7 +183,7 @@ const registerSubjects = async (school: SchoolType): Promise<void> => {
     const result = await subjectsList({
       query: {
         school: school.id,
-        schoolYear: getPreferredSchoolYear(),
+        schoolYear: 'all',
       },
     })
     const subjects = (result.data || []).filter(subject => {
