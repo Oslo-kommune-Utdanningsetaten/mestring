@@ -236,6 +236,8 @@
   {/each}
 {/snippet}
 
+<p>Viser {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}</p>
+
 <div class="scroll-mirror" bind:this={topScrollElement} onscroll={syncFromTop}>
   <div style="width: {gridScrollWidth}px; height: 1px;"></div>
 </div>

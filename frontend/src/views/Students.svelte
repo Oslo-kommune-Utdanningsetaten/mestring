@@ -5,7 +5,7 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
   import { subjectsList, usersList } from '../generated/sdk.gen'
-  import { USER_ROLES } from '../utils/constants'
+  import { USER_ROLES, SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
   import { dataStore } from '../stores/data'
   import { urlStringFrom, getGroupLabel } from '../utils/functions'
   import { preferredSchoolYear } from '../stores/localStorageFunctions'
@@ -25,13 +25,13 @@
 
   const focusOptions = $derived.by(() => {
     if (!$dataStore.statusCategories) return []
-    const options = [{ value: 'mastery', label: 'Mestring i fag' }]
-    $dataStore.statusCategories
+    const statusCategories: Record<string, any>[] = $dataStore.statusCategories
       .filter(cat => cat.isEnabled)
-      .forEach(statusCategory => {
-        options.push({ value: statusCategory.name, label: statusCategory.title })
-      })
-    return options
+      .map(statusCategory => ({
+        value: statusCategory.name,
+        label: statusCategory.title,
+      }))
+    return statusCategories.concat([{ value: 'mastery', label: 'Mestring i fag' }])
   })
 
   const selectedGroupId = $derived(router.getQueryParam('group'))
@@ -68,7 +68,7 @@
     return result.join(' ')
   })
 
-  const fetchStudents = async () => {
+  const fetchData = async () => {
     if (!currentSchool) return
     try {
       isLoadingStudents = true
@@ -80,16 +80,22 @@
       })
       students = studentsResult.data || []
 
-      const subjectsResult = await subjectsList({
-        query: {
-          school: currentSchool.id,
-          students: selectedGroupId ? students.map(s => s.id).join(',') : undefined,
-          schoolYear: $preferredSchoolYear,
-        },
-      })
-      subjects = (subjectsResult.data || []).sort((a, b) =>
-        a.displayName.localeCompare(b.displayName)
-      )
+      let localSubjects: SubjectType[] = []
+
+      if (currentSchool.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM) {
+        localSubjects = $dataStore.subjects
+      } else {
+        const subjectsResult = await subjectsList({
+          query: {
+            school: currentSchool.id,
+            students: selectedGroupId ? students.map(s => s.id).join(',') : undefined,
+            schoolYear: $preferredSchoolYear,
+          },
+        })
+        localSubjects = subjectsResult.data || []
+      }
+
+      subjects = localSubjects.sort((a, b) => a.displayName.localeCompare(b.displayName))
     } catch (error) {
       console.error('Error fetching members', { selectedGroupId, error })
       students = []
@@ -115,9 +121,20 @@
     router.navigate(urlStringFrom(params, { path: '/students', mode: 'replace' }))
   }
 
+  // Redirect to the first focus option if none is selected
+  $effect(() => {
+    if (focusOptions.length > 1 && !router.getQueryParam('focus')) {
+      const params: Record<string, string> = { focus: focusOptions[0].value }
+      if (selectedGroupId) {
+        params['group'] = selectedGroupId
+      }
+      router.navigate(urlStringFrom(params, { path: '/students', mode: 'replace' }))
+    }
+  })
+
   $effect(() => {
     if (currentSchool && currentSchool.id) {
-      fetchStudents()
+      fetchData()
     }
   })
 </script>
@@ -144,7 +161,7 @@
   {/if}
 
   <!-- Filter groups -->
-  <div class="filters-container">
+  <div class="filters-container mt-3">
     <div class="filter-item">
       <!-- Filter by group membership -->
       <label for="groupSelect" class="mb-1 visually-hidden">Filtrer på gruppe:</label>
@@ -153,7 +170,7 @@
         id="groupSelect"
         onchange={(e: Event) => handleGroupSelect((e.target as HTMLSelectElement).value)}
       >
-        <option value="0" selected={!selectedGroupId}>Hele skolen</option>
+        <option value="0" selected={!selectedGroupId}>Hele skolen - ⚠️ kan ta lang tid</option>
         {#each allGroups as group}
           <option value={group.id} selected={group.id === selectedGroupId}>
             {getGroupLabel(group, {
@@ -192,7 +209,7 @@
     </div>
   {:else if students.length === 0}
     <div class="mt-3">Her var det tomt</div>
-  {:else if selectedFocus === focusOptions[0].value}
+  {:else if selectedFocus === 'mastery'}
     <StudentsWithSubjects students={filteredStudents} {subjects} group={selectedGroup} />
   {:else if focusOptions.some(opt => opt.value === selectedFocus)}
     <StudentsWithStatuses

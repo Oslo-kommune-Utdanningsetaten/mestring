@@ -76,6 +76,7 @@
     const options: any = {
       school: selectedSchool.id,
       deleted: selectedDeletedOption,
+      schoolYear: 'all',
       ...inferCreatedParams(selectedYearOption),
     }
     if (selectedSubjectsFetchOption !== 'any') {

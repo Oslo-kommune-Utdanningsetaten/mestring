@@ -4,14 +4,13 @@
   import type { MasteryConfigLevel } from '../types/models.d.ts'
   import { statusList } from '../generated/sdk.gen'
   import { dataStore, currentUser } from '../stores/data'
-  import { getGroupLabel, getSubjectName } from '../utils/functions'
+  import { getSubjectName } from '../utils/functions'
   import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { t } from '../stores/translations'
 
   import MasterySchemaLevel from './MasterySchemaLevel.svelte'
   import UserNameLink from './UserNameLink.svelte'
-  import ButtonMini from './ButtonMini.svelte'
   import GroupTag from './GroupTag.svelte'
 
   let {
@@ -320,7 +319,6 @@
 
 <div class="mt-3">
   {#if isDetailsEnabled}
-    <!-- Students grid -->
     <p>Viser {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}</p>
     <div class="scroll-mirror" bind:this={topScrollElement} onscroll={syncFromTop}>
       <div style="width: {gridScrollWidth}px; height: 1px;"></div>
