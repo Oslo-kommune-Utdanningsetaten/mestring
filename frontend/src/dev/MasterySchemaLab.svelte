@@ -1,13 +1,24 @@
 <script lang="ts">
+  import ColorPicker from 'svelte-awesome-color-picker'
   import type { GoalType, UserType } from '../generated/types.gen'
   import type { MasterySchemaConfig, MasterySchemaWithConfig } from '../types/models'
   import { VALUE_INPUT_VARIANT, VALUE_INPUT_VARIANTS } from '../utils/constants'
 
   import ObservationEdit from '../components/edit/ObservationEdit.svelte'
 
+  type Rgb = { r: number; g: number; b: number; a: number }
+
+  const parseRgbString = (color: string): Rgb => {
+    const match = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/)
+    if (!match) return { r: 0, g: 0, b: 0, a: 1 }
+    return { r: Number(match[1]), g: Number(match[2]), b: Number(match[3]), a: 1 }
+  }
+
+  const toRgbString = (rgb: Rgb): string => `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`
+
   let config = $state<MasterySchemaConfig>({
     levels: [
-      { title: 'Gjengi', color: 'rgb(229, 50, 43)', minValue: 1, maxValue: 33 },
+      { title: 'Gjengi', color: 'rgb(235, 101, 97)', minValue: 1, maxValue: 33 },
       { title: 'Forklare', color: 'rgb(255, 204, 0)', minValue: 34, maxValue: 66 },
       { title: 'Se sammenhenger', color: 'rgb(23, 231, 21)', minValue: 67, maxValue: 100 },
     ],
@@ -72,14 +83,18 @@
       <h3 class="my-4">Konfigurasjon</h3>
 
       <div class="form-group mb-3">
-        <div class="form-label fw-bold">Nivåer</div>
+        <div class="form-label fw-bold">
+          Nivåer <button type="button" class="btn btn-outline-primary btn-sm" onclick={addLevel}>
+            Legg til nivå
+          </button>
+        </div>
         {#each config.levels as level, index}
           <div class="d-flex gap-2 align-items-center mb-2">
-            <span
-              class="level-swatch"
-              style="background-color: {level.color};"
-              title={level.color}
-            ></span>
+            <ColorPicker
+              bind:rgb={() => parseRgbString(level.color), rgb => (level.color = toRgbString(rgb))}
+              position="responsive"
+              label=""
+            />
             <input
               type="text"
               class="form-control rounded-0 border-2 border-primary"
@@ -99,13 +114,6 @@
               bind:value={level.maxValue}
               aria-label="Maks verdi"
             />
-            <input
-              type="text"
-              class="form-control rounded-0 border-2 border-primary"
-              bind:value={level.color}
-              placeholder="Farge"
-              aria-label="Farge"
-            />
             <button
               type="button"
               class="btn btn-outline-danger btn-sm"
@@ -116,9 +124,6 @@
             </button>
           </div>
         {/each}
-        <button type="button" class="btn btn-outline-primary btn-sm" onclick={addLevel}>
-          Legg til nivå
-        </button>
       </div>
 
       <div class="form-group mb-3">
