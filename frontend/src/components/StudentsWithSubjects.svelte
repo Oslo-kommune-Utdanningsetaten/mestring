@@ -60,7 +60,7 @@
 
   // Compute grid template columns
   const gridTemplateColumns = $derived(
-    ['minmax(12rem, 1.2fr)', ...subjects.map(() => 'minmax(8rem, 1fr)')].join(' ')
+    ['minmax(10rem, 16rem)', ...subjects.map(() => 'minmax(8rem, auto)')].join(' ')
   )
 
   // Sorted students list

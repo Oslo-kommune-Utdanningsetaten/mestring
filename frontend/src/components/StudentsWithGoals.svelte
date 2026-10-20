@@ -52,15 +52,15 @@
 
   // Compute grid template columns based on which features are enabled
   const gridTemplateColumns = $derived.by(() => {
-    const nameCol = 'minmax(10rem, auto)'
-    const normalCol = '7rem'
+    const nameCol = 'minmax(10rem, 16rem)'
+    const normalCol = 'minmax(7rem, auto)'
     const statusCol = '13rem'
     const cols: string[] = [nameCol]
     if ($dataStore.currentSchool?.isStatusEnabled && subject) {
       cols.push(statusCol) // status column needs more space
     }
     if ($isSubjectPolarChartVisible) {
-      cols.push(normalCol) // polar chart column
+      cols.push('7rem') // polar chart column stays fixed
     }
     goals.forEach(() => cols.push(normalCol)) // one column per goal
     return cols.join(' ')
@@ -181,7 +181,9 @@
         class="column-header-button sortable {goal.isRelevant
           ? ''
           : 'hatched-background text-muted'}"
-        title="Sorter etter antall {t('observation', { form: 'plu-indef' })} for dette {t('goal', { form: 'sin-def' })}"
+        title="Sorter etter antall {t('observation', { form: 'plu-indef' })} for dette {t('goal', {
+          form: 'sin-def',
+        })}"
       >
         {goal.title || goal.sortOrder}{getSortIndicator(goal.id)}
       </button>
