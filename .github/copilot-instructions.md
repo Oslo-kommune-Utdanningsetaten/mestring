@@ -121,6 +121,12 @@ State what you're missing, then propose targeted files to open. Do not guess sil
 - Do not invent hypothetical failure modes, edge cases, or scalability concerns that are not backed by the current codebase or the user's stated problem.
 - When the user asks for the "best" fix, interpret that as the most pragmatic fix for this codebase right now — not the most theoretically robust one.
 
+## Root Cause, Not Symptom
+
+- Before fixing a bug or layout issue, state the underlying cause in one sentence. If you can't, keep investigating — don't edit yet.
+- A fix that compensates for a problem is a red flag: offsets, magic numbers, `calc()` against framework values, extra wrapper elements. Prefer removing the cause over adding a counterweight.
+- Never hardcode values owned by a framework (Bootstrap spacing, breakpoints, z-index) into custom code. Use the framework's own mechanism or change the approach.
+
 ## Response Style
 
 - Default to one clear recommendation. Do not lay out multiple options unless asked.
