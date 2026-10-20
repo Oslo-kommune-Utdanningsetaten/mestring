@@ -12,6 +12,7 @@
   import MasterySchemaLevel from './MasterySchemaLevel.svelte'
   import UserNameLink from './UserNameLink.svelte'
   import GroupTag from './GroupTag.svelte'
+  import ButtonMini from './ButtonMini.svelte'
 
   let {
     students,
@@ -38,6 +39,8 @@
   // Data per student per subject: flat map keyed by `studentId:subjectId`
   let statusesByStudentIdAndSubjectId = $state<Record<string, StatusType[]>>({})
   let studentCountsByLevel = $state<number[]>([])
+  let isCompleteGroupsDetailsEnabled = $state<boolean>(false)
+  let isIncompleteGroupsDetailsEnabled = $state<boolean>(false)
 
   let selectedLevels = $state<number[]>([])
   let isDetailsEnabled = $derived<boolean>(!!group || selectedLevels.length > 0)
@@ -235,7 +238,12 @@
     category.name === 'risk'
       ? masterySchema.config.levels.slice(0, -1)
       : masterySchema.config.levels}
-  <table class="my-2 table">
+  <table class="my-2 table fixed-layout">
+    <colgroup>
+      <col class="col-checkbox" />
+      <col class="col-label" />
+      <col />
+    </colgroup>
     <thead>
       <tr>
         <th></th>
@@ -285,14 +293,29 @@
           <th class="table-header">Grupper som har rapportert alle elever</th>
           <td>
             <div class="d-flex flex-wrap gap-1">
-              {#each groupsWithCompleteStatuses as group}
-                <GroupTag
-                  href="/groups/{group.id}"
-                  {group}
-                  isGroupNameEnabled={true}
-                  isIconEnabled={false}
-                />
-              {/each}
+              <span class="group-count">
+                {groupsWithCompleteStatuses.length}
+              </span>
+              <ButtonMini
+                options={{
+                  title: isCompleteGroupsDetailsEnabled ? 'Skjul grupper' : 'Vis grupper',
+                  skin: 'secondary',
+                  variant: 'label-only',
+                  onClick: () => (isCompleteGroupsDetailsEnabled = !isCompleteGroupsDetailsEnabled),
+                }}
+              >
+                {isCompleteGroupsDetailsEnabled ? 'Skjul grupper' : 'Vis grupper'}
+              </ButtonMini>
+              {#if isCompleteGroupsDetailsEnabled}
+                {#each groupsWithCompleteStatuses as group}
+                  <GroupTag
+                    href="/groups/{group.id}"
+                    {group}
+                    isGroupNameEnabled={true}
+                    isIconEnabled={false}
+                  />
+                {/each}
+              {/if}
             </div>
           </td>
         </tr>
@@ -301,14 +324,30 @@
           <th class="table-header">Grupper som ikke har rapportert alle elever</th>
           <td>
             <div class="d-flex flex-wrap gap-1">
-              {#each groupsMissingStatuses as group}
-                <GroupTag
-                  href="/groups/{group.id}"
-                  {group}
-                  isGroupNameEnabled={true}
-                  isIconEnabled={false}
-                />
-              {/each}
+              <span class="group-count">
+                {groupsMissingStatuses.length}
+              </span>
+              <ButtonMini
+                options={{
+                  title: isIncompleteGroupsDetailsEnabled ? 'Skjul grupper' : 'Vis grupper',
+                  skin: 'secondary',
+                  variant: 'label-only',
+                  onClick: () =>
+                    (isIncompleteGroupsDetailsEnabled = !isIncompleteGroupsDetailsEnabled),
+                }}
+              >
+                {isIncompleteGroupsDetailsEnabled ? 'Skjul grupper' : 'Vis grupper'}
+              </ButtonMini>
+              {#if isIncompleteGroupsDetailsEnabled}
+                {#each groupsMissingStatuses as group}
+                  <GroupTag
+                    href="/groups/{group.id}"
+                    {group}
+                    isGroupNameEnabled={true}
+                    isIconEnabled={false}
+                  />
+                {/each}
+              {/if}
             </div>
           </td>
         </tr>
@@ -446,7 +485,23 @@
     z-index: 2;
   }
 
+  .group-count {
+    width: 3rem;
+  }
+
+  .fixed-layout {
+    table-layout: fixed;
+  }
+
+  .col-checkbox {
+    width: 2.5rem;
+  }
+
+  .col-label {
+    width: 40%;
+  }
+
   .table-header {
-    min-width: 18vw;
+    text-align: left;
   }
 </style>
