@@ -326,19 +326,19 @@ def mastery_schema(db, school):
         config={
             "levels": [
                 {
-                    "text": "Gjengi",
+                    "title": "Gjengi",
                     "color": "rgb(229, 50, 43)",
                     "max_value": 33,
                     "min_value": 1
                 },
                 {
-                    "text": "Forklare",
+                    "title": "Forklare",
                     "color": "rgb(255, 204, 0)",
                     "max_value": 66,
                     "min_value": 34
                 },
                 {
-                    "text": "Se sammenhenger",
+                    "title": "Se sammenhenger",
                     "color": "rgb(23, 231, 21)",
                     "max_value": 100,
                     "min_value": 67
@@ -359,26 +359,26 @@ def mastery_schema_other_school(db, other_school):
         config={
             "levels": [
                 {
-                    "text": "Gjengi",
+                    "title": "Gjengi",
                     "color": "rgb(229, 50, 43)",
-                    "maxValue": 33,
-                    "minValue": 1
+                    "max_value": 33,
+                    "min_value": 1
                 },
                 {
-                    "text": "Forklare",
+                    "title": "Forklare",
                     "color": "rgb(255, 204, 0)",
-                    "maxValue": 66,
-                    "minValue": 34
+                    "max_value": 66,
+                    "min_value": 34
                 },
                 {
-                    "text": "Se sammenhenger",
+                    "title": "Se sammenhenger",
                     "color": "rgb(23, 231, 21)",
-                    "maxValue": 100,
-                    "minValue": 67
+                    "max_value": 100,
+                    "min_value": 67
                 },
             ],
-            "inputIncrement": 1,
-            "valueInput": "sliderHorizontal",
+            "input_increment": 1,
+            "value_input": "sliderHorizontal",
         },
     )
 

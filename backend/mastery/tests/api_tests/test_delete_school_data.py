@@ -57,10 +57,10 @@ def setup_school_data(db, school, other_school, teacher_role, student_role, admi
     # MasterySchema
     mastery_schema = MasterySchema.objects.create(
         title="Test Schema", school=school,
-        config={"levels": [{"text": "L1", "min_value": 1, "max_value": 50}]})
+        config={"levels": [{"title": "L1", "min_value": 1, "max_value": 50}]})
     other_mastery_schema = MasterySchema.objects.create(
         title="Other Schema", school=other_school,
-        config={"levels": [{"text": "L1", "min_value": 1, "max_value": 50}]})
+        config={"levels": [{"title": "L1", "min_value": 1, "max_value": 50}]})
 
     # StatusCategory
     status_category = StatusCategory.objects.create(
