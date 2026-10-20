@@ -82,7 +82,6 @@ const checkUserAccessToFeature = (
   if (resource === 'status' && !currentSchool.isStatusEnabled) {
     return false
   }
-
   // Disallow create/update/delete actions if the user has selected a different school year than the current one
   // Prevents modifying data in past (or future) school years
   if (
@@ -103,6 +102,10 @@ const checkUserAccessToFeature = (
   if (resource === 'status') {
     if (['create', 'update', 'delete'].includes(action)) {
       return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
+        // Teacher is teacher in this teaching group
+        if (teacherGroup.type === GROUP_TYPE_TEACHING && groupId && teacherGroup.id === groupId) {
+          return true
+        }
         // Teacher teaches the subject to this student
         if (
           [GROUP_TYPE_TEACHING, GROUP_TYPE_BASIS].includes(teacherGroup.type) &&
