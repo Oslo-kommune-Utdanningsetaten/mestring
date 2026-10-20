@@ -6,6 +6,7 @@
   import { useMasteryCalculations } from '../../utils/masteryHelpers'
   import { dataStore, currentUser, currentSchool } from '../../stores/data'
   import { localStorage } from '../../stores/localStorage'
+  import { getPreferredCreatedParams } from '../../stores/localStorageFunctions'
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
   import { t } from '../../stores/translations'
@@ -13,10 +14,19 @@
   import ButtonMini from '../ButtonMini.svelte'
   import MasteryValueInput from '../MasteryValueInput.svelte'
 
-  const { student, goal, observation, onDone } = $props<{
+  const {
+    student,
+    goal,
+    observation,
+    masterySchema: masterySchemaProp,
+    isPersistenceControlEnabled = true,
+    onDone,
+  } = $props<{
     student: UserType | null
     goal: GoalType | null
     observation: ObservationType | null
+    masterySchema?: MasterySchemaWithConfig | null
+    isPersistenceControlEnabled?: boolean
     onDone: () => void
   }>()
 
@@ -28,7 +38,7 @@
   let observations = $state<ObservationType[]>([])
 
   const masterySchema: MasterySchemaWithConfig = $derived(
-    $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
+    masterySchemaProp ?? $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
   )
   const calculations = $derived(useMasteryCalculations(masterySchema))
   const studentFirstName = $derived(student?.name.split(' ')[0] || 'eleven')
@@ -36,10 +46,15 @@
   const fetchObservations = async () => {
     try {
       const observationsResult = await observationsList({
-        query: { student: student?.id, goal: goal?.id },
+        query: {
+          school: $currentSchool.id,
+          student: student?.id,
+          goal: goal?.id,
+          ...getPreferredCreatedParams(),
+        },
       })
       observations = observationsResult.data || []
-      // filter out observations from a later date than the current observation, if the current observation has an id
+      // If the current observation has an id (is being edited) filter out observations from a later date than the current observation,
       if (observation?.id) {
         observations = observations.filter(
           o => new Date(o.createdAt) <= new Date(observation.createdAt)
@@ -171,7 +186,7 @@
           id="feedforward"
           class="form-control rounded-0 border-2 border-primary"
           bind:value={localObservation.feedforward}
-          placeholder="Konkret, hva kan {studentFirstName} gjøre for å forbedre seg?"
+          placeholder="Konkret, hva trenger {studentFirstName} nå?"
           rows="4"
         ></textarea>
       </div>
@@ -190,33 +205,35 @@
       </div>
     {/if}
 
-    <div class="d-flex gap-2 justify-content-start mt-4">
-      <ButtonMini
-        options={{
-          title: 'Lagre',
-          iconName: 'check',
-          skin: 'primary',
-          variant: 'label-only',
-          classes: 'me-2 mt-2',
-          onClick: () => handleSave(),
-        }}
-      >
-        Lagre
-      </ButtonMini>
+    {#if isPersistenceControlEnabled}
+      <div class="d-flex gap-2 justify-content-start mt-4">
+        <ButtonMini
+          options={{
+            title: 'Lagre',
+            iconName: 'check',
+            skin: 'primary',
+            variant: 'label-only',
+            classes: 'me-2 mt-2',
+            onClick: () => handleSave(),
+          }}
+        >
+          Lagre
+        </ButtonMini>
 
-      <ButtonMini
-        options={{
-          title: 'Avbryt',
-          iconName: 'close',
-          skin: 'secondary',
-          variant: 'label-only',
-          classes: 'm-2',
-          onClick: () => onDone(),
-        }}
-      >
-        Avbryt
-      </ButtonMini>
-    </div>
+        <ButtonMini
+          options={{
+            title: 'Avbryt',
+            iconName: 'close',
+            skin: 'secondary',
+            variant: 'label-only',
+            classes: 'm-2',
+            onClick: () => onDone(),
+          }}
+        >
+          Avbryt
+        </ButtonMini>
+      </div>
+    {/if}
   {:else}
     No observation...
   {/if}

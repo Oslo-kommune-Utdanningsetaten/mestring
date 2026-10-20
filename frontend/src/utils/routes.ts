@@ -26,6 +26,7 @@ import StatusesEdit from '../views/StatusesEdit.svelte'
 
 // Dev views
 import BadgeLab from '../dev/BadgeLab.svelte'
+import MasterySchemaLab from '../dev/MasterySchemaLab.svelte'
 
 import { USER_ROLES } from './constants'
 
@@ -220,6 +221,12 @@ export const ROUTES = [
   {
     path: '/dev/badge-lab',
     component: BadgeLab,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+  },
+  {
+    path: '/dev/mastery-schema-lab',
+    component: MasterySchemaLab,
     isPublic: false,
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
