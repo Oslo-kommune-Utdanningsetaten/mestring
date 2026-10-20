@@ -229,8 +229,6 @@
   })
 </script>
 
-<div>👉 Velg gruppe og/eller filter for å se detaljer</div>
-
 <!-- Filtering by mastery level -->
 {#if masterySchema && category}
   {@const levels =
@@ -241,31 +239,31 @@
     <thead>
       <tr>
         <th></th>
-        <th>Antall</th>
-        <th>Filter</th>
+        <th></th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <th>Elever {group ? `i dette utvalget` : 'på hele skolen'}</th>
-        <td>{sortedStudents.length}</td>
         <td></td>
+        <th class="table-header">Elever {group ? `i dette utvalget` : 'på hele skolen'}</th>
+        <td>{sortedStudents.length}</td>
       </tr>
       {#if category.name === 'risk'}
         <tr>
-          <th>Elever {group ? `i dette utvalget` : 'på hele skolen'} utenfor fare</th>
+          <td></td>
+          <th class="table-header">
+            Elever {group ? `i dette utvalget` : 'på hele skolen'} utenfor fare
+          </th>
           <td>
             {getStudentCountWithoutRiskyStatuses()} [{Math.round(
               (getStudentCountWithoutRiskyStatuses() / sortedStudents.length) * 100
             )}%]
           </td>
-          <td></td>
         </tr>
       {/if}
       {#each levels as level, levelIndex}
         <tr>
-          <th>Elever med én eller flere {level.title}</th>
-          <td>{studentCountsByLevel[levelIndex] ?? 0}</td>
           <td>
             <pkt-checkbox
               label={''}
@@ -276,12 +274,15 @@
               onchange={() => handleToggleLevel(levelIndex)}
             ></pkt-checkbox>
           </td>
+          <th class="table-header">Elever med én eller flere {level.title}</th>
+          <td>{studentCountsByLevel[levelIndex] ?? 0}</td>
         </tr>
       {/each}
 
       {#if !group}
         <tr>
-          <th>Grupper som har rapportert alle elever</th>
+          <td></td>
+          <th class="table-header">Grupper som har rapportert alle elever</th>
           <td>
             <div class="d-flex flex-wrap gap-1">
               {#each groupsWithCompleteStatuses as group}
@@ -294,10 +295,10 @@
               {/each}
             </div>
           </td>
-          <td></td>
         </tr>
         <tr>
-          <th>Grupper som ikke har rapportert alle elever</th>
+          <td></td>
+          <th class="table-header">Grupper som ikke har rapportert alle elever</th>
           <td>
             <div class="d-flex flex-wrap gap-1">
               {#each groupsMissingStatuses as group}
@@ -310,7 +311,6 @@
               {/each}
             </div>
           </td>
-          <td></td>
         </tr>
       {/if}
     </tbody>
@@ -444,5 +444,9 @@
     );
     border: 1px solid var(--pkt-color-grays-gray-100);
     z-index: 2;
+  }
+
+  .table-header {
+    min-width: 18vw;
   }
 </style>
