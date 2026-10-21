@@ -92,6 +92,7 @@ export function useMasteryCalculations(masterySchema: MasterySchemaWithConfig | 
   const defaultValue = Math.floor((minValue + maxValue) / 2)
   const deltaValue = maxValue - minValue
   const flatTrendThreshold = masterySchema?.config?.flatTrendThreshold || 1
+  const isMasteryValueVisible = masterySchema?.config?.isMasteryValueVisible ?? false
 
   const calculateValuePosition = (value: number): number =>
     maxValue === minValue
@@ -125,5 +126,6 @@ export function useMasteryCalculations(masterySchema: MasterySchemaWithConfig | 
     calculateSafeMasteryValue,
     flatTrendThreshold,
     hasLevels,
+    isMasteryValueVisible,
   }
 }

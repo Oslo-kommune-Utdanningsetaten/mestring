@@ -51,6 +51,11 @@ export const getPreferredSchoolYear = () => {
 }
 
 export const isObservationUrlEnabled = () => {
-  const isObservationUrlEnabled = localStorage<string>('isObservationUrlEnabled').get()
-  return Boolean(isObservationUrlEnabled)
+  const result = localStorage<string>('isObservationUrlEnabled').get()
+  return Boolean(result)
+}
+
+export const isMasteryBarChartVisible = () => {
+  const result = localStorage<string>('isMasteryBarChartVisible').get()
+  return Boolean(result)
 }

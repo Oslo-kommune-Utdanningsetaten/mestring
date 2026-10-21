@@ -26,8 +26,15 @@
   const hasSufficientData = $derived(
     Array.isArray(data) && data.length > 0 && data.every(n => Number.isFinite(n))
   )
+
   const calculations = $derived(useMasteryCalculations(masterySchema))
-  const title = $derived(providedTitle ?? (hasSufficientData ? data.join(', ') : 'Mangler data'))
+
+  const title = $derived.by(() => {
+    if (providedTitle) return providedTitle
+    if (!calculations.isMasteryValueVisible) return ''
+    if (hasSufficientData) return data.join(', ')
+    return 'Mangler data'
+  })
 
   const colorLookup = (value: number, index: number) =>
     Number.isFinite(value) ? getMasteryLevelColorByValue(value, masterySchema) : lineColor
