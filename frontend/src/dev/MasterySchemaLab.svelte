@@ -26,7 +26,7 @@
     flatTrendThreshold: 6,
     valueInput: VALUE_INPUT_VARIANT.SLIDER_HORIZONTAL_STAIRS,
     isIncrementIndicatorEnabled: true,
-    isMasteryValueVisible: true,
+    isMasteryValueVisible: false,
     isMasteryValueInputEnabled: true,
     isMasteryDescriptionInputEnabled: true,
     isFeedforwardInputEnabled: true,
@@ -51,19 +51,29 @@
     { key: 'isFeedforwardInputEnabled', label: 'Fremovermelding' },
   ]
 
+  // Draft copy of levels: edits live here and are committed to config on blur,
+  // so the {#key configJson} preview only re-mounts when editing is done
+  let draftLevels = $state(config.levels.map(level => ({ ...level })))
+
+  const syncLevels = () => {
+    config.levels = draftLevels.map(level => ({ ...level }))
+  }
+
   const addLevel = () => {
-    const lastLevel = config.levels[config.levels.length - 1]
+    const lastLevel = draftLevels[draftLevels.length - 1]
     const minValue = lastLevel ? lastLevel.maxValue + 1 : 1
-    config.levels.push({
-      title: 'Nivå ' + (config.levels.length + 1),
+    draftLevels.push({
+      title: 'Nivå ' + (draftLevels.length + 1),
       color: 'rgb(100, 100, 100)',
       minValue,
       maxValue: minValue + 10,
     })
+    syncLevels()
   }
 
   const removeLevel = (index: number) => {
-    config.levels.splice(index, 1)
+    draftLevels.splice(index, 1)
+    syncLevels()
   }
 
   const handleCopyJson = async () => {
@@ -88,7 +98,7 @@
             Legg til nivå
           </button>
         </div>
-        {#each config.levels as level, index}
+        {#each draftLevels as level, index}
           <div class="d-flex gap-2 align-items-center mb-2">
             <ColorPicker
               bind:rgb={() => parseRgbString(level.color), rgb => (level.color = toRgbString(rgb))}
@@ -99,6 +109,7 @@
               type="text"
               class="form-control rounded-0 border-2 border-primary"
               bind:value={level.title}
+              onblur={syncLevels}
               placeholder="Tittel"
               aria-label="Nivåtittel"
             />
@@ -106,12 +117,14 @@
               type="number"
               class="form-control rounded-0 border-2 border-primary lab-number"
               bind:value={level.minValue}
+              onblur={syncLevels}
               aria-label="Min verdi"
             />
             <input
               type="number"
               class="form-control rounded-0 border-2 border-primary lab-number"
               bind:value={level.maxValue}
+              onblur={syncLevels}
               aria-label="Maks verdi"
             />
             <button
@@ -211,13 +224,7 @@
   }
 
   .lab-number {
-    max-width: 5.5rem;
-  }
-
-  .level-swatch {
-    flex: 0 0 1.5rem;
-    height: 1.5rem;
-    border: 1px solid #999;
+    max-width: 5rem;
   }
 
   .lab-json {
