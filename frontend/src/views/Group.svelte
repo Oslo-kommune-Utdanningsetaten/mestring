@@ -142,6 +142,7 @@
 
         const statuses = statusesResult.data || []
 
+        statusesByCategoryID = {}
         statuses.forEach(status => {
           if (status.categoryId) {
             if (!statusesByCategoryID[status.categoryId]) {
