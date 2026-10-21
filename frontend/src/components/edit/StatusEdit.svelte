@@ -11,7 +11,7 @@
   import { statusCreate, statusUpdate, usersRetrieve } from '../../generated/sdk.gen'
 
   import { areSchemaValuesConsistent } from '../../utils/masteryHelpers'
-  import { dataStore } from '../../stores/data'
+  import { dataStore, currentUser } from '../../stores/data'
   import {
     fetchGoalsForSubjectAndStudent,
     formatDateHumanly,
@@ -38,8 +38,12 @@
   }>()
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
+
   let localStudent = $state<UserType | null>(null)
-  let localStatus = $state<Partial<StatusType> & { masteryValue?: number | null }>({ ...status })
+  let localStatus = $state<Partial<StatusType> & { masteryValue?: number | null }>({
+    ...status,
+    createdById: status.createdById || $currentUser.id,
+  })
   let localGoals = $state<GoalDecorated[] | null>([])
   let isGoalSectionExpanded = $state<boolean>(false)
   let validationErrors = $state<{ beginAt?: string; endAt?: string }>({})

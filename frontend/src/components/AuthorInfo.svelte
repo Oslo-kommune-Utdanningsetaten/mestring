@@ -5,14 +5,20 @@
   import { onMount } from 'svelte'
 
   const { item } = $props<{ item: ObservationType | StatusType }>()
-  const { createdById, updatedById, createdAt, updatedAt } = $derived(item)
+  const {
+    createdById,
+    updatedById,
+    createdAt = new Date().toISOString(),
+    updatedAt,
+  } = $derived(item)
   let creator = $state<(Partial<UserType> & { name: string }) | null>(null)
   let updator = $state<(Partial<UserType> & { name: string }) | null>(null)
 
-  const hasBeenEdited: boolean = $derived(
+  const hasBeenEdited: boolean = $derived.by(() => {
+    if (!updatedAt) return false
     // is createdAt and updatedAt are within half second of each other
-    Boolean(Math.abs(new Date(createdAt).getTime() - new Date(updatedAt).getTime()) > 500)
-  )
+    return Boolean(Math.abs(new Date(createdAt).getTime() - new Date(updatedAt).getTime()) > 500)
+  })
 
   let titleData = $derived.by(() => {
     if (creator && updator) {
