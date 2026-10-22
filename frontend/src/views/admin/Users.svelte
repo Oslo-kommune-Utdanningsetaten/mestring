@@ -48,9 +48,7 @@
     return text
   })
 
-  let selectedYearOption = $state<string>(
-    (router.getQueryParam('year') as string) || getCurrentSchoolYear()
-  )
+  let selectedYearOption = $state<string>((router.getQueryParam('year') as string) || 'all')
 
   // Array of fetched users
   let users = $state<UserType[]>([])
@@ -149,11 +147,11 @@
     if (!$dataStore.currentSchool) return []
     const allYears = getAllSchoolYears(new Date($dataStore.currentSchool.createdAt)).reverse()
     return [
+      allYears.length > 1 ? { value: 'all', label: 'Alle år' } : null,
       ...allYears.map(year => ({
         value: year,
         label: year,
       })),
-      allYears.length > 1 ? { value: 'all', label: 'Alle år' } : null,
     ].filter(Boolean) as { value: string; label: string }[]
   })
 
