@@ -137,6 +137,10 @@
   <h2 class="mb-4">Mestringsskjemaer</h2>
 
   {#if $currentSchool}
+    <div class="alert alert-danger my-3">
+      ⚠️ Husk at å endre mestringsskjemaer kan ha konsekvenser for datakvalitet og visninger - som
+      kanskje ikke kan reverseres. Er du usikker, spør før du gjør endringer.
+    </div>
     {#if masterySchemas.length > 0 && !areSchemasConsistent}
       <div class="alert alert-warning my-3">
         Mestringsskjemaene for denne skolen har ulik range. Dette kan føre til inkonsistente
