@@ -285,7 +285,7 @@
           {masterySchemasById[goal.masterySchemaId || '']?.title || '–'}
         </div>
         <div>
-          <Link to="/admin/users/{goal.createdById}">
+          <Link to="/users/{goal.createdById}">
             {creatorsById[goal.createdById] || goal.createdById}
           </Link>
         </div>
