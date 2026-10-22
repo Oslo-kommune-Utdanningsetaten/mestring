@@ -8,10 +8,9 @@
   } from '../../generated/types.gen'
   import type { MasterySchemaConfig, MasterySchemaWithConfig } from '../../types/models'
   import { masterySchemasUpdate, masterySchemasCreate, schoolsList } from '../../generated/sdk.gen'
-  import { useMasteryCalculations } from '../../utils/masteryHelpers'
 
   import ButtonMini from '../ButtonMini.svelte'
-  import MasteryValueInput from '../MasteryValueInput.svelte'
+  import MasterySchemaConfigEdit from './MasterySchemaConfigEdit.svelte'
 
   const { masterySchema, onDone } = $props<{
     masterySchema: Partial<MasterySchemaType>
@@ -22,8 +21,6 @@
   let schools = $state<SchoolType[]>([])
 
   let editorContent = $derived<Content>({ json: localMasterySchema.config })
-  let calculations = $derived(useMasteryCalculations(localMasterySchema))
-  let placeholderMasteryValue = $derived(calculations.defaultValue)
 
   const fetchSchools = async () => {
     try {
@@ -73,7 +70,7 @@
 
 <div class="p-4 mastery-schema-edit">
   <h3 class="pb-2">{localMasterySchema.id ? 'Redigerer mestringskjema' : 'Nytt mestringskjema'}</h3>
-  <div class="form-group mb-3">
+  <div class="form-group mb-1">
     <div class="d-flex gap-3">
       <div class="flex-fill">
         <label for="masterySchemaTitle" class="form-label">Tittel</label>
@@ -116,16 +113,8 @@
     />
   </div>
 
-  <div class="my-4">
-    <MasteryValueInput
-      masterySchema={localMasterySchema as MasterySchemaType}
-      bind:value={placeholderMasteryValue}
-      title="Forhåndsvisning av input"
-    />
-  </div>
-
-  <div style="height: 50vh;">
-    <JSONEditor bind:content={editorContent} mode={Mode.text} />
+  <div class="mt-4">
+    <MasterySchemaConfigEdit masterySchema={localMasterySchema} />
   </div>
 
   <div class="d-flex gap-2 justify-content-start">
@@ -155,6 +144,8 @@
       Avbryt
     </ButtonMini>
   </div>
+
+  <pre class="json-preview mt-5">{JSON.stringify(localMasterySchema, null, 2)}</pre>
 </div>
 
 <style>
@@ -165,5 +156,14 @@
 
   input {
     height: 47px;
+  }
+
+  .json-preview {
+    background-color: #f6f8fa;
+    border: 1px solid #ddd;
+    padding: 1rem;
+    max-height: 20rem;
+    overflow: auto;
+    font-size: 0.85rem;
   }
 </style>

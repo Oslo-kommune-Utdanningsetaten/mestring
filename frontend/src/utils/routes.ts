@@ -26,7 +26,6 @@ import StatusesEdit from '../views/StatusesEdit.svelte'
 
 // Dev views
 import BadgeLab from '../dev/BadgeLab.svelte'
-import MasterySchemaLab from '../dev/MasterySchemaLab.svelte'
 
 import { USER_ROLES } from './constants'
 
@@ -153,6 +152,12 @@ export const ROUTES = [
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
   {
+    path: '/mastery-schemas',
+    component: MasterySchemas,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+  },
+  {
     path: '/admin',
     component: undefined, // placeholder, as we just check for access to the admin menu
     isPublic: false,
@@ -181,12 +186,6 @@ export const ROUTES = [
     component: StatusCategories,
     isPublic: false,
     accessibleBy: [USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
-  },
-  {
-    path: '/admin/mastery-schemas',
-    component: MasterySchemas,
-    isPublic: false,
-    accessibleBy: [USER_ROLES.SUPERADMIN],
   },
   {
     path: '/admin/translations',
@@ -221,12 +220,6 @@ export const ROUTES = [
   {
     path: '/dev/badge-lab',
     component: BadgeLab,
-    isPublic: false,
-    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
-  },
-  {
-    path: '/dev/mastery-schema-lab',
-    component: MasterySchemaLab,
     isPublic: false,
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },

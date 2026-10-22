@@ -167,6 +167,11 @@
                     </Link>
                   </li>
                 {/if}
+                {#if $hasUserAccessToPath('/mastery-schemas')}
+                  <li>
+                    <Link to="/mastery-schemas" className="dropdown-item">Mestringsskjemaer</Link>
+                  </li>
+                {/if}
                 {#if $hasUserAccessToPath('/stats')}
                   <li>
                     <Link to="/stats" className="dropdown-item">Statistikk</Link>
@@ -215,14 +220,6 @@
                   <li>
                     <Link to="/admin/status-categories" className="dropdown-item">
                       Statuskategorier
-                    </Link>
-                  </li>
-                {/if}
-
-                {#if $hasUserAccessToPath('/admin/mastery-schemas')}
-                  <li>
-                    <Link to="/admin/mastery-schemas" className="dropdown-item">
-                      Mestringsskjemaer
                     </Link>
                   </li>
                 {/if}

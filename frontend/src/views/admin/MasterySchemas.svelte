@@ -1,17 +1,14 @@
 <script lang="ts">
-  import { useTinyRouter } from 'svelte-tiny-router'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
-  import type { MasterySchemaType, SchoolType } from '../../generated/types.gen'
+  import type { MasterySchemaType } from '../../generated/types.gen'
   import type { MasterySchemaWithConfig } from '../../types/models'
   import {
     masterySchemasDestroy,
     masterySchemasList,
-    schoolsList,
     masterySchemasPartialUpdate,
   } from '../../generated/sdk.gen'
-  import { urlStringFrom } from '../../utils/functions'
-  import { VALUE_INPUT_VARIANTS } from '../../utils/constants'
-  import { dataStore } from '../../stores/data'
+  import { VALUE_INPUT_VARIANT } from '../../utils/constants'
+  import { currentSchool } from '../../stores/data'
   import { useMasteryCalculations, areSchemaValuesConsistent } from '../../utils/masteryHelpers'
 
   import ButtonMini from '../../components/ButtonMini.svelte'
@@ -19,75 +16,32 @@
   import Offcanvas from '../../components/Offcanvas.svelte'
   import MasterySchemaEdit from '../../components/edit/MasterySchemaEdit.svelte'
 
-  const router = useTinyRouter()
   let masterySchemaWip = $state<Partial<MasterySchemaWithConfig> | null>(null)
   let isJsonVisible = $state<boolean>(false)
   let isEditorOpen = $state<boolean>(false)
-  let schools = $state<SchoolType[]>([])
-  let isLoadingSchools = $state<boolean>(false)
   let masterySchemas = $state<MasterySchemaWithConfig[]>([])
 
   const areSchemasConsistent = $derived(areSchemaValuesConsistent(masterySchemas))
-  let selectedSchool = $derived.by(() => {
-    const schoolIdFromUrl = router.getQueryParam('school')
-    return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
-  })
 
   const defaultConfig = {
     levels: [
-      {
-        title: 'Gjengi',
-        minValue: 1,
-        maxValue: 33,
-        color: '#ff8274',
-      },
-      {
-        title: 'Forklare',
-        minValue: 34,
-        maxValue: 66,
-        color: '#f9c66b',
-      },
-      {
-        title: 'Se sammenhenger',
-        minValue: 67,
-        maxValue: 100,
-        color: '#38a87f',
-      },
+      { title: 'Gjengi', color: 'rgb(235, 101, 97)', minValue: 1, maxValue: 33 },
+      { title: 'Forklare', color: 'rgb(255, 204, 0)', minValue: 34, maxValue: 66 },
+      { title: 'Se sammenhenger', color: 'rgb(23, 231, 21)', minValue: 67, maxValue: 100 },
     ],
-    valueInput: 'sliderHorizontal',
     inputIncrement: 1,
     flatTrendThreshold: 6,
+    valueInput: VALUE_INPUT_VARIANT.SLIDER_HORIZONTAL_STAIRS,
     isIncrementIndicatorEnabled: true,
-    isMasteryValueVisible: true,
+    isMasteryValueVisible: false,
     isMasteryValueInputEnabled: true,
     isMasteryDescriptionInputEnabled: true,
     isFeedforwardInputEnabled: true,
   }
 
-  const fetchSchools = async () => {
-    try {
-      const result = await schoolsList({})
-      schools = result.data || []
-    } catch (error) {
-      console.error('Error fetching schools:', error)
-      schools = []
-    }
-  }
-
   const fetchMasterySchemas = async () => {
-    const query = selectedSchool ? { school: selectedSchool.id } : {}
-    const result = await masterySchemasList({ query })
+    const result = await masterySchemasList({ query: { school: $currentSchool.id } })
     masterySchemas = result.data || []
-  }
-
-  const handleSchoolSelect = (schoolId: string): void => {
-    if (schoolId && schoolId !== '0') {
-      router.navigate(
-        urlStringFrom({ school: schoolId }, { path: '/admin/mastery-schemas', mode: 'merge' })
-      )
-    } else {
-      router.navigate('/admin/mastery-schemas')
-    }
   }
 
   const handleDone = () => {
@@ -96,7 +50,7 @@
   }
 
   const handleNewMasterySchema = () => {
-    masterySchemaWip = { schoolId: selectedSchool?.id, config: defaultConfig }
+    masterySchemaWip = { schoolId: $currentSchool.id, config: defaultConfig }
     isEditorOpen = true
   }
 
@@ -133,7 +87,7 @@
         body: { isDefault: !current },
       })
       const otherSchemasForSchool = masterySchemas.filter(
-        schema => schema.schoolId === selectedSchool?.id && schema.id !== masterySchema.id
+        schema => schema.schoolId === $currentSchool?.id && schema.id !== masterySchema.id
       )
       // If setting this schema to default, unset others
       if (result.data?.isDefault) {
@@ -173,62 +127,18 @@
   }
 
   $effect(() => {
-    fetchSchools()
-  })
-
-  $effect(() => {
-    if (selectedSchool && selectedSchool.id) {
+    if ($currentSchool?.id) {
       fetchMasterySchemas()
     }
   })
 </script>
 
-<section class="pt-3">
-  <h2 class="mb-4">Mastery Schemas</h2>
-
-  <!-- Filter groups -->
-  {#if isLoadingSchools}
-    <div class="m-4">
-      <div class="spinner-border text-primary" role="status"></div>
-      <span>Henter skoler...</span>
-    </div>
-  {:else}
-    <div class="filters-container">
-      <div class="filter-item">
-        <label for="schoolSelect" class="mb-1 visually-hidden">Filtrer på skole:</label>
-        <select
-          class="pkt-input"
-          id="schoolSelect"
-          onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
-        >
-          {#each schools as school}
-            <option value={school.id} selected={school.id === selectedSchool?.id}>
-              {school.displayName}
-            </option>
-          {/each}
-        </select>
-      </div>
-    </div>
-  {/if}
-</section>
-
 <section class="py-4">
-  {#if selectedSchool}
-    <ButtonMini
-      options={{
-        title: 'Nytt mestringsskjema',
-        iconName: 'plus-sign',
-        skin: 'primary',
-        variant: 'label-only',
-        classes: '',
-        onClick: () => handleNewMasterySchema(),
-      }}
-    >
-      Nytt mestringsskjema
-    </ButtonMini>
+  <h2 class="mb-4">Mestringsskjemaer</h2>
 
+  {#if $currentSchool}
     {#if masterySchemas.length > 0 && !areSchemasConsistent}
-      <div class="alert alert-warning mt-3">
+      <div class="alert alert-warning my-3">
         Mestringsskjemaene for denne skolen har ulik range. Dette kan føre til inkonsistente
         visninger og problemer med datakvalitet. Vurder å justere range i skjemaene slik at de er
         like.
@@ -244,132 +154,126 @@
         Ingen av mestringsskjemaene for denne skolen er satt til default.
       </div>
     {/if}
-    <div class="my-3">
-      Input variants:
-      <pre>{VALUE_INPUT_VARIANTS.join(', ')}</pre>
-    </div>
 
-    <div class="pkt-input-check mt-3">
-      <div class="pkt-input-check__input">
-        <input
-          class="pkt-input-check__input-checkbox"
-          type="checkbox"
-          role="switch"
-          id="groupTypeSwitch"
-          bind:checked={isJsonVisible}
-        />
-        <label class="pkt-input-check__input-label" for="groupTypeSwitch">Vis JSON config</label>
-      </div>
-    </div>
+    <ButtonMini
+      options={{
+        title: 'Nytt mestringsskjema',
+        iconName: 'plus-sign',
+        skin: 'primary',
+        variant: 'label-only',
+        classes: '',
+        onClick: () => handleNewMasterySchema(),
+      }}
+    >
+      Nytt mestringsskjema
+    </ButtonMini>
 
-    <div class="mt-4">
-      {#if masterySchemas.length > 0}
-        {#each masterySchemas as masterySchema}
-          <div class="card shadow-sm">
-            <div class="card-body">
-              <h3 class="card-title">
-                {masterySchema.title}
-              </h3>
-              <div>
-                {masterySchema.description || 'Ingen beskrivelse'}
-              </div>
-              <div class="text-muted my-3">
-                <div>
-                  Range: {getMasteryLevelsSummary(masterySchema)}
-                </div>
-                <div>
-                  Input: {masterySchema.config.valueInput}
-                </div>
-                <div>
-                  ID: {masterySchema.id}
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <pkt-checkbox
-                  label={masterySchema.isDefault ? 'Default schema for school' : 'Not default'}
-                  labelPosition="right"
-                  isSwitch="true"
-                  aria-checked={masterySchema.isDefault}
-                  checked={masterySchema.isDefault}
-                  onchange={() => toggleIsDefault(masterySchema)}
-                ></pkt-checkbox>
-              </div>
-
-              <div class="mb-4">
-                <pkt-checkbox
-                  label={masterySchema.isEnabled ? 'Currently enabled' : 'Currently disabled'}
-                  labelPosition="right"
-                  isSwitch="true"
-                  aria-checked={masterySchema.isEnabled}
-                  checked={masterySchema.isEnabled}
-                  onchange={() => toggleIsEnabled(masterySchema)}
-                ></pkt-checkbox>
-              </div>
-
-              <div class="mb-4 d-flex gap-2">
-                {#each masterySchema?.config?.levels || [] as level}
-                  <div class="d-flex flex-column align-items-center">
-                    <MasterySchemaLevel masteryValue={level.minValue} {masterySchema} />
-                    <span class="small text-muted py-1 bg-light w-100 text-center">
-                      {level.minValue}&nbsp;➡&nbsp;{level.maxValue}
-                    </span>
-                  </div>
-                {/each}
-              </div>
-
-              {#if isJsonVisible}
-                <div class="json-viewer">
-                  <pre>{JSON.stringify(masterySchema, null, 2)}</pre>
-                </div>
-              {/if}
-
-              <ButtonMini
-                options={{
-                  title: 'Rediger',
-                  iconName: 'edit',
-                  skin: 'secondary',
-                  variant: 'icon-left',
-                  classes: 'my-2 me-2',
-                  onClick: () => handleEditMasterySchema(masterySchema),
-                }}
-              >
-                Rediger
-              </ButtonMini>
-
-              <ButtonMini
-                options={{
-                  title: 'Kopier',
-                  iconName: 'copy',
-                  skin: 'secondary',
-                  variant: 'icon-left',
-                  classes: 'my-2 me-2',
-                  onClick: () => handleCopyMasterySchema(masterySchema),
-                }}
-              >
-                Kopier
-              </ButtonMini>
-
-              <ButtonMini
-                options={{
-                  title: 'Slett',
-                  iconName: 'trash-can',
-                  skin: 'secondary',
-                  variant: 'icon-left',
-                  classes: 'my-2',
-                  onClick: () => handleDeleteMasterySchema(masterySchema.id),
-                  delayActionFor: 4,
-                }}
-              >
-                Slett
-              </ButtonMini>
+    {#if masterySchemas.length > 0}
+      {#each masterySchemas as masterySchema}
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h3 class="card-title">
+              {masterySchema.title}
+            </h3>
+            <div>
+              {masterySchema.description || 'Ingen beskrivelse'}
             </div>
+            <div class="text-muted my-3">
+              <div>
+                Range: {getMasteryLevelsSummary(masterySchema)}
+              </div>
+              <div>
+                Input: {masterySchema.config.valueInput}
+              </div>
+              <div>
+                ID: {masterySchema.id}
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <pkt-checkbox
+                label={masterySchema.isDefault ? 'Default schema for school' : 'Not default'}
+                labelPosition="right"
+                isSwitch="true"
+                aria-checked={masterySchema.isDefault}
+                checked={masterySchema.isDefault}
+                onchange={() => toggleIsDefault(masterySchema)}
+              ></pkt-checkbox>
+            </div>
+
+            <div class="mb-4">
+              <pkt-checkbox
+                label={masterySchema.isEnabled ? 'Currently enabled' : 'Currently disabled'}
+                labelPosition="right"
+                isSwitch="true"
+                aria-checked={masterySchema.isEnabled}
+                checked={masterySchema.isEnabled}
+                onchange={() => toggleIsEnabled(masterySchema)}
+              ></pkt-checkbox>
+            </div>
+
+            <div class="mb-4 d-flex gap-2">
+              {#each masterySchema?.config?.levels || [] as level}
+                <div class="d-flex flex-column align-items-center">
+                  <MasterySchemaLevel masteryValue={level.minValue} {masterySchema} />
+                  <span class="small text-muted py-1 bg-light w-100 text-center">
+                    {level.minValue}&nbsp;➡&nbsp;{level.maxValue}
+                  </span>
+                </div>
+              {/each}
+            </div>
+
+            {#if isJsonVisible}
+              <div class="json-viewer">
+                <pre>{JSON.stringify(masterySchema, null, 2)}</pre>
+              </div>
+            {/if}
+
+            <ButtonMini
+              options={{
+                title: 'Rediger',
+                iconName: 'edit',
+                skin: 'secondary',
+                variant: 'icon-left',
+                classes: 'my-2 me-2',
+                onClick: () => handleEditMasterySchema(masterySchema),
+              }}
+            >
+              Rediger
+            </ButtonMini>
+
+            <ButtonMini
+              options={{
+                title: 'Kopier',
+                iconName: 'copy',
+                skin: 'secondary',
+                variant: 'icon-left',
+                classes: 'my-2 me-2',
+                onClick: () => handleCopyMasterySchema(masterySchema),
+              }}
+            >
+              Kopier
+            </ButtonMini>
+
+            <ButtonMini
+              options={{
+                title: 'Slett',
+                iconName: 'trash-can',
+                skin: 'secondary',
+                variant: 'icon-left',
+                classes: 'my-2',
+                onClick: () => handleDeleteMasterySchema(masterySchema.id),
+                delayActionFor: 4,
+              }}
+            >
+              Slett
+            </ButtonMini>
           </div>
-        {/each}
-      {:else}
-        <div class="alert alert-info">Ingen mestringsskjemaer for denne skolen</div>
-      {/if}
-    </div>
+        </div>
+      {/each}
+    {:else}
+      <div class="alert alert-info">Ingen mestringsskjemaer for denne skolen</div>
+    {/if}
   {:else}
     <div class="alert alert-info">Velg en skole</div>
   {/if}
@@ -378,7 +282,7 @@
 <!-- Offcanvas for creating/editing mastery schemas -->
 <Offcanvas
   bind:isOpen={isEditorOpen}
-  width="80vw"
+  width="90vw"
   ariaLabel="Rediger mestringsskjema"
   onClosed={() => {
     masterySchemaWip = null
