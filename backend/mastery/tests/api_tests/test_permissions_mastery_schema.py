@@ -49,3 +49,79 @@ def test_user_mastery_schema_access(
         assert resp.status_code == 200
         resp = client.get(f'/api/mastery-schemas/{mastery_schema_other_school.id}/')
         assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_school_admin_or_inspector_mastery_schema_access(
+        school, other_school, school_admin, school_inspector,
+        mastery_schema, mastery_schema_other_school):
+    """
+    School admins and inspectors have full CRUD on mastery schemas belonging to their school.
+    They cannot create or modify mastery schemas at other schools.
+    """
+    client = APIClient()
+    for user in [school_admin, school_inspector]:
+        client.force_authenticate(user=user)
+
+        # Can create a mastery schema at their school
+        resp = client.post("/api/mastery-schemas/", {
+            "title": "Nytt skjema",
+            "school_id": school.id,
+        }, format='json')
+        assert resp.status_code == 201
+        created_id = resp.json()["id"]
+
+        # Can update a mastery schema at their school
+        resp = client.patch(f"/api/mastery-schemas/{created_id}/", {
+            "title": "Oppdatert skjema",
+        }, format='json')
+        assert resp.status_code == 200
+
+        # Can delete a mastery schema at their school
+        resp = client.delete(f"/api/mastery-schemas/{created_id}/")
+        assert resp.status_code == 204
+
+        # Cannot create a mastery schema at another school
+        resp = client.post("/api/mastery-schemas/", {
+            "title": "Uautorisert skjema",
+            "school_id": other_school.id,
+        }, format='json')
+        assert resp.status_code == 403
+
+        # Cannot update a mastery schema at another school
+        resp = client.patch(
+            f"/api/mastery-schemas/{mastery_schema_other_school.id}/",
+            {"title": "Hacked"},
+            format='json',
+        )
+        assert resp.status_code == 403
+
+        # Cannot delete a mastery schema at another school
+        resp = client.delete(f"/api/mastery-schemas/{mastery_schema_other_school.id}/")
+        assert resp.status_code == 403
+
+
+@pytest.mark.django_db
+def test_user_mastery_schema_write_access_denied(teacher, mastery_schema):
+    """Teachers and students cannot create, update or delete mastery schemas."""
+    client = APIClient()
+    client.force_authenticate(user=teacher)
+
+    # Cannot create a mastery schema
+    resp = client.post("/api/mastery-schemas/", {
+        "title": "Nytt skjema",
+        "school_id": mastery_schema.school_id,
+    }, format='json')
+    assert resp.status_code == 403
+
+    # Cannot update a mastery schema
+    resp = client.patch(
+        f"/api/mastery-schemas/{mastery_schema.id}/",
+        {"title": "Hacked"},
+        format='json',
+    )
+    assert resp.status_code == 403
+
+    # Cannot delete a mastery schema
+    resp = client.delete(f"/api/mastery-schemas/{mastery_schema.id}/")
+    assert resp.status_code == 403
