@@ -881,10 +881,12 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('title')
         qs = apply_created_filter(self.request.query_params, qs)
+
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
             if school_param:
                 qs = qs.filter(school_id=school_param)
+
         return qs
 
 
