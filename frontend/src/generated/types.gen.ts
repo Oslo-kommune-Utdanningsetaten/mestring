@@ -68,6 +68,12 @@ export type GroupType = {
     readonly isValid: boolean;
 };
 
+/**
+ * * `observation` - Observation
+ * * `status` - Status
+ */
+export type IntendedConsumersEnumType = 'observation' | 'status';
+
 export type MasterySchemaType = {
     readonly id: string;
     /**
@@ -76,6 +82,7 @@ export type MasterySchemaType = {
     config?: {
         [key: string]: unknown;
     } | null;
+    intendedConsumers: Array<IntendedConsumersEnumType>;
     readonly createdAt: string;
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
@@ -206,6 +213,7 @@ export type PatchedMasterySchemaType = {
     config?: {
         [key: string]: unknown;
     } | null;
+    intendedConsumers?: Array<IntendedConsumersEnumType>;
     readonly createdAt?: string;
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
@@ -569,6 +577,7 @@ export type MasterySchemaCreateType = {
     config?: {
         [key: string]: unknown;
     } | null;
+    intendedConsumers: Array<IntendedConsumersEnumType>;
     deletedAt?: string | null;
     title?: string;
     description?: string | null;
@@ -649,6 +658,7 @@ export type PatchedMasterySchemaCreateType = {
     config?: {
         [key: string]: unknown;
     } | null;
+    intendedConsumers?: Array<IntendedConsumersEnumType>;
     deletedAt?: string | null;
     title?: string;
     description?: string | null;
