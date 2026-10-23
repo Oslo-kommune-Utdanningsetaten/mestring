@@ -249,9 +249,6 @@ class SchoolSerializer(BaseModelSerializer):
 
 class MasterySchemaSerializer(BaseModelSerializer):
     config = JSONField(required=False, allow_null=True)
-    intended_consumers = serializers.ListField(
-        child=serializers.ChoiceField(choices=models.MasterySchema.ConsumerTypes.choices)
-    )
 
     class Meta:
         model = models.MasterySchema

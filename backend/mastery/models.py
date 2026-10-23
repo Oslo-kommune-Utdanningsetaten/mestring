@@ -1,6 +1,5 @@
 from django.utils import timezone
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
 from django.db.models import Q
 from nanoid import generate
 from .fields import PlainJSONField
@@ -311,16 +310,10 @@ class MasterySchema(BaseModel):
     """
     A MasterySchema models how student mastery, with regards to a specific Goal, is considered.
     """
-    class ConsumerTypes(models.TextChoices):
-        OBSERVATION = "observation"
-        STATUS = "status"
-
     title = models.CharField(max_length=200, null=False, default="Navnløst mestringsskjema")
     description = models.TextField(null=True)
     config = PlainJSONField(null=True)
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='mastery_schemas')
-    intended_consumers = ArrayField(models.CharField(
-        max_length=30, choices=ConsumerTypes.choices), default=list)  # who is this intended for?
     is_default = models.BooleanField(default=False)  # is this the default schema for the school
     is_enabled = models.BooleanField(default=False)  # is the schema available for use for the school
 
