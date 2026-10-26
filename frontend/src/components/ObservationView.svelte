@@ -21,7 +21,7 @@
   }: {
     student: UserType
     goal: GoalType
-    observation: ObservationType | {} | null
+    observation: ObservationType
     masteryTitle?: string
     onDone: () => void
   } = $props()

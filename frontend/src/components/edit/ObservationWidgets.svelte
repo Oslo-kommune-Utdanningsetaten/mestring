@@ -15,7 +15,14 @@
   import Offcanvas from '../Offcanvas.svelte'
   import ObservationView from '../ObservationView.svelte'
 
-  const { observation, goal, student, subject, onRefreshRequired, widgets } : {
+  const {
+    observation,
+    goal,
+    student,
+    subject,
+    onRefreshRequired = () => {},
+    widgets,
+  }: {
     observation?: ObservationType
     goal: GoalType
     student: UserType
@@ -79,7 +86,7 @@
 
 <span class="observation-widgets">
   <!-- View observation widget -->
-  {#if widgets.includes('view')}
+  {#if observation && widgets.includes('view')}
     <ButtonIcon
       options={{
         iconName: 'document-text',
@@ -104,7 +111,7 @@
   {/if}
 
   <!-- Edit observation widget -->
-  {#if widgets.includes('update') && $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById, studentId: student.id } )}
+  {#if observation && widgets.includes('update') && $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById, studentId: student.id } )}
     <ButtonIcon
       options={{
         iconName: 'document-edit',
@@ -116,7 +123,7 @@
   {/if}
 
   <!-- Delete observation widget -->
-  {#if widgets.includes('delete') && $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById, studentId: student.id } )}
+  {#if observation && widgets.includes('delete') && $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById, studentId: student.id } )}
     {#key observation.id}
       <ButtonIcon
         options={{
@@ -131,7 +138,7 @@
   {/if}
 
   <!-- Product URL observation widget -->
-  {#if widgets.includes('productUrl') && observation.productUrl}
+  {#if widgets.includes('productUrl') && observation?.productUrl}
     <Link
       to={observation.productUrl}
       iconName="link"
@@ -153,7 +160,10 @@
   {#if observationWip}
     <ObservationEdit
       {student}
-      observation={observationWip}
+      observation={{
+        ...observationWip,
+        masteryValue: (observationWip as ObservationType).masteryValue ?? undefined,
+      }}
       goal={goalForObservation}
       onDone={() => {
         observationWip = null
@@ -175,7 +185,7 @@
   {#if observationWip}
     <ObservationView
       {student}
-      observation={observationWip}
+      observation={observationWip as ObservationType}
       goal={goalForObservation}
       onDone={() => {
         observationWip = null

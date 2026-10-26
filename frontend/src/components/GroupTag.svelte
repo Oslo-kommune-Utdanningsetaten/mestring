@@ -16,7 +16,7 @@
     onclick,
     href,
     classes,
-  } : {
+  }: {
     group: GroupType | null
     title?: string
     isTypeWarningEnabled?: boolean
@@ -28,18 +28,22 @@
     classes?: string
   } = $props()
 
-  const earlierYear = $derived(
-    getCurrentSchoolYear() !== getSchoolYearForGroup(group) ? getSchoolYearForGroup(group) : null
-  )
+  const earlierYear = $derived.by(() => {
+    if (!group) return null
+    const groupYear = getSchoolYearForGroup(group)
+    return getCurrentSchoolYear() !== groupYear ? groupYear : null
+  })
 
-  const label: string = $derived(
-    getGroupLabel(group, { isGroupNameEnabled, isGroupTypeNameEnabled })
-  )
+  const label: string = $derived.by(() => {
+    if (!group) return 'ukjent gruppe'
+    return getGroupLabel(group, { isGroupNameEnabled, isGroupTypeNameEnabled })
+  })
 
   const skin: string = $derived('beige')
 
   const isGroupTypeChanged = $derived.by(() => {
     // Inspect feideId to determine original group type
+    if (!group) return false
     const originalType =
       group.feideId.split(':')[3] === 'u' ? GROUP_TYPE_TEACHING : GROUP_TYPE_BASIS
     return originalType !== group.type

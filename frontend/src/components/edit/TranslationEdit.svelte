@@ -8,7 +8,10 @@
 
   import ButtonMini from '../ButtonMini.svelte'
 
-  const { school, onDone } : {
+  const {
+    school,
+    onDone,
+  }: {
     school: SchoolType
     onDone: () => void
   } = $props()

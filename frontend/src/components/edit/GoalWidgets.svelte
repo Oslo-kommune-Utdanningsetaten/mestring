@@ -25,21 +25,21 @@
     subject,
     group,
     masterySchema,
-    isIndividual,
+    isIndividual = false,
     isRelevant,
     sortOrder,
     onRefreshRequired,
     widgets,
     disabledWidgets,
     buttonSize,
-  } : {
+  }: {
     goal?: GoalType
     student?: UserType
     subject?: SubjectType
     group?: GroupType
     masterySchema?: MasterySchemaType
-    isIndividual?: Boolean
-    isRelevant?: Boolean
+    isIndividual?: boolean
+    isRelevant?: boolean
     sortOrder?: number
     onRefreshRequired: Function
     widgets: Array<'create' | 'update' | 'delete' | 'view'>
@@ -89,7 +89,7 @@
     const createInstantly =
       !$dataStore.currentSchool.isGoalTitleEnabled &&
       !!$dataStore.defaultMasterySchema?.id &&
-      !!subject.id
+      !!subject?.id
 
     if (createInstantly) {
       await goalsCreate({
@@ -110,6 +110,7 @@
   }
 
   const handleDeleteGoal = async () => {
+    if (!goal) return
     try {
       await goalsDestroy({ path: { id: goal.id } })
       addAlert({
@@ -156,7 +157,7 @@
   {/if}
 
   <!-- Update goal widget -->
-  {#if widgets.includes('update') && $hasUserAccessToFeature( 'goal', 'update', { groupId: group?.id || goal?.groupId, createdById: goal.createdById, studentId: student?.id, studentGroupIds: student?.groupIds } )}
+  {#if goal && widgets.includes('update') && $hasUserAccessToFeature( 'goal', 'update', { groupId: group?.id || goal?.groupId, createdById: goal.createdById, studentId: student?.id, studentGroupIds: student?.groupIds } )}
     {#if buttonSize === 'large'}
       <ButtonMini
         options={{
@@ -185,7 +186,7 @@
   {/if}
 
   <!-- Delete goal widget -->
-  {#if widgets.includes('delete') && $hasUserAccessToFeature( 'goal', 'delete', { groupId: group?.id || goal?.groupId, createdById: goal.createdById, studentId: student?.id } )}
+  {#if goal && widgets.includes('delete') && $hasUserAccessToFeature( 'goal', 'delete', { groupId: group?.id || goal?.groupId, createdById: goal.createdById, studentId: student?.id } )}
     {#key goal.id}
       {#if buttonSize === 'large'}
         <ButtonMini

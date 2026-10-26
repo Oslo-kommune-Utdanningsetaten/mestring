@@ -21,10 +21,10 @@
     masterySchema: masterySchemaProp,
     isPersistenceControlEnabled = true,
     onDone,
-  } : {
-    student: UserType | null
+  }: {
+    student: UserType
     goal: GoalType | null
-    observation: ObservationType | null
+    observation: Partial<ObservationType> & { masteryValue?: number }
     masterySchema?: MasterySchemaWithConfig | null
     isPersistenceControlEnabled?: boolean
     onDone: () => void
@@ -57,7 +57,7 @@
       // If the current observation has an id (is being edited) filter out observations from a later date than the current observation,
       if (observation?.id) {
         observations = observations.filter(
-          o => new Date(o.createdAt) <= new Date(observation.createdAt)
+          o => observation.createdAt && new Date(o.createdAt) <= new Date(observation.createdAt)
         )
       }
       // sort by createdAt in ascending order
@@ -174,8 +174,7 @@
           class="form-control rounded-0 border-2 border-primary"
           bind:value={localObservation.masteryDescription}
           placeholder="Kort beskrivelse av hva {studentFirstName} får til"
-          rows="4"
-        ></textarea>
+          rows="4"></textarea>
       </div>
     {/if}
 
@@ -187,8 +186,7 @@
           class="form-control rounded-0 border-2 border-primary"
           bind:value={localObservation.feedforward}
           placeholder="Konkret, hva trenger {studentFirstName} nå?"
-          rows="4"
-        ></textarea>
+          rows="4"></textarea>
       </div>
     {/if}
 
