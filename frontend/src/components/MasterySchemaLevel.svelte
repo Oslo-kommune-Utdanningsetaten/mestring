@@ -9,11 +9,11 @@
     masteryValue,
     masterySchemaId = null,
     masterySchema = null,
-  } = $props<{
+  } : {
     masteryValue: number | null | undefined
     masterySchemaId?: string | null | undefined
     masterySchema?: MasterySchemaWithConfig | null
-  }>()
+  } = $props()
 
   const resolvedSchema = $derived(
     masterySchema ||

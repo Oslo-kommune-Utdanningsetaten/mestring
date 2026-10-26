@@ -32,10 +32,10 @@
   import MasteryBarChart from '../MasteryBarChart.svelte'
   import AuthorInfo from '../AuthorInfo.svelte'
 
-  let { status, onDone } = $props<{
+  let { status, onDone } : {
     status: Partial<StatusType>
     onDone: () => void
-  }>()
+  } = $props()
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
 

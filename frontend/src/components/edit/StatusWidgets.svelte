@@ -15,8 +15,7 @@
   import ButtonIcon from '../ButtonIcon.svelte'
   import ButtonMini from '../ButtonMini.svelte'
 
-  const { status, student, subject, onRefreshRequired, widgets, disabledWidgets, buttonSize } =
-    $props<{
+  const { status, student, subject, onRefreshRequired, widgets, disabledWidgets, buttonSize } : {
       status?: StatusType
       student?: UserType
       subject?: SubjectType
@@ -24,7 +23,7 @@
       widgets: Array<'create' | 'update' | 'delete' | 'view'>
       disabledWidgets?: Array<'create' | 'update' | 'delete' | 'view'>
       buttonSize?: 'small' | 'large'
-    }>()
+    } = $props()
 
   let statusWip = $state<StatusType | {} | null>(null)
   let isStatusEditorOpen = $state<boolean>(false)

@@ -22,10 +22,10 @@
   import Link from '../components/Link.svelte'
   import StatusWidgets from '../components/edit/StatusWidgets.svelte'
 
-  let { groupId, statusCategoryName } = $props<{
+  let { groupId, statusCategoryName } : {
     groupId: string
     statusCategoryName: string
-  }>()
+  } = $props()
 
   type RowType = {
     isSaving: boolean

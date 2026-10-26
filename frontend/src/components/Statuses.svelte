@@ -5,10 +5,10 @@
   import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import Link from './Link.svelte'
 
-  let { student, subject } = $props<{
+  let { student, subject } : {
     student: UserType
     subject: SubjectType | null
-  }>()
+  } = $props()
 
   let statuses = $state<StatusType[]>([])
   let isLoading = $state(true)

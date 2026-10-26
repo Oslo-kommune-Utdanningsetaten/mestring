@@ -12,13 +12,19 @@
   import MasterySchemaLevels from './MasterySchemaLevels.svelte'
   import Link from './Link.svelte'
 
-  const { student, goal, observation, masteryTitle, onDone } = $props<{
-    student: UserType | null
-    goal: GoalType | null
+  const {
+    student,
+    goal,
+    observation,
+    masteryTitle,
+    onDone,
+  }: {
+    student: UserType
+    goal: GoalType
     observation: ObservationType | {} | null
     masteryTitle?: string
     onDone: () => void
-  }>()
+  } = $props()
 
   const isObservationUrlEnabled = localStorage<boolean>('isObservationUrlEnabled')
 

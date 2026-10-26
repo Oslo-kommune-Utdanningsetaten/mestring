@@ -10,14 +10,14 @@
     isLastValueVisible,
     isBadgeEmpty = false,
     isBadgeVoid = false,
-  } = $props<{
+  } : {
     masteryData?: MasteryData
     masterySchema?: MasterySchemaWithConfig | null
     title: string
     isLastValueVisible: boolean
     isBadgeEmpty?: boolean
     isBadgeVoid?: boolean
-  }>()
+  } = $props()
 
   const trend = $derived(masteryData?.trend ?? 0)
   const calculations = $derived(useMasteryCalculations(masterySchema))

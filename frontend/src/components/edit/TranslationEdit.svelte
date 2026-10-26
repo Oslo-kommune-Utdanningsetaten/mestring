@@ -8,10 +8,10 @@
 
   import ButtonMini from '../ButtonMini.svelte'
 
-  const { school, onDone } = $props<{
+  const { school, onDone } : {
     school: SchoolType
     onDone: () => void
-  }>()
+  } = $props()
   let localSchool = $state<SchoolType>({ ...school })
   let editorContent = $state<Content>({
     json: localSchool?.uiTranslations || {},

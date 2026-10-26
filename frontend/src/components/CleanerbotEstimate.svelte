@@ -51,10 +51,10 @@
     errors: string[]
   }
 
-  const { data, onDone } = $props<{
+  const { data, onDone } : {
     data: CleanerbotData
     onDone: () => void
-  }>()
+  } = $props()
 
   const hasChanges = $derived.by(() => {
     const changes = data.changes

@@ -25,10 +25,10 @@
   import GoalWidgets from './edit/GoalWidgets.svelte'
   import StatusWidgets from './edit/StatusWidgets.svelte'
 
-  const { student, subject } = $props<{
+  const { student, subject } : {
     student: UserType
     subject: SubjectType
-  }>()
+  } = $props()
 
   const router = useTinyRouter()
 

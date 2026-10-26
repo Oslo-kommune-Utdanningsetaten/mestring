@@ -19,7 +19,7 @@
   import Link from '../components/Link.svelte'
   import SchoolSelector from '../components/SchoolSelector.svelte'
 
-  const { userId } = $props<{ userId?: string }>()
+  const { userId } : { userId?: string } = $props()
   const isProfileMode = $derived($currentUser.id && !userId)
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')

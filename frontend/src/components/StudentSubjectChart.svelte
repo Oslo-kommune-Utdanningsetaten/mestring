@@ -15,12 +15,12 @@
     student,
     isLabelEnabled = false,
     highlightedGoalId = null,
-  } = $props<{
+  } : {
     subject: SubjectType
     student: UserType
     isLabelEnabled?: boolean
     highlightedGoalId?: string | null
-  }>()
+  } = $props()
 
   let { masterySchemas, currentSchool, currentUser } = $derived($dataStore)
   let goalsForSubjectDecorated = $state<GoalDecorated[]>([])

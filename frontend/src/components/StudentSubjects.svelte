@@ -9,9 +9,9 @@
   import StudentSubject from './StudentSubject.svelte'
   import { t } from '../stores/translations'
 
-  const { student } = $props<{
+  const { student } : {
     student: UserType
-  }>()
+  } = $props()
 
   let groups = $state<GroupType[]>([])
   let isLoading = $state(false)

@@ -45,7 +45,7 @@
 
   const router = useTinyRouter()
 
-  const { schoolId } = $props<{ schoolId: string }>()
+  const { schoolId } : { schoolId: string } = $props()
 
   let school = $state<SchoolType>()
   let importDataEstimate = $state<Record<string, any> | null>(null)

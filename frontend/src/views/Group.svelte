@@ -34,7 +34,7 @@
   import Link from '../components/Link.svelte'
   import GoalWidgets from '../components/edit/GoalWidgets.svelte'
 
-  const { groupId } = $props<{ groupId: string }>()
+  const { groupId } : { groupId: string } = $props()
 
   let isLoading = $state(true)
   let goalsListElement = $state<HTMLElement | null>(null)

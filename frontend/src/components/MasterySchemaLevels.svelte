@@ -3,10 +3,10 @@
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import MasterySchemaLevel from './MasterySchemaLevel.svelte'
 
-  let { masteryValue, masterySchema } = $props<{
+  let { masteryValue, masterySchema } : {
     masteryValue?: number | null | undefined
     masterySchema: MasterySchemaWithConfig
-  }>()
+  } = $props()
 
   const calculations = $derived(useMasteryCalculations(masterySchema))
   const isMasteryValueDefined = $derived(masteryValue != null) // Check if masteryValue is not null or undefined

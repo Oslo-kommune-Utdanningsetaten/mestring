@@ -4,12 +4,12 @@
   import { getSubjectName } from '../utils/functions'
   import Link from './Link.svelte'
 
-  const { subjectId, href, classes } = $props<{
+  const { subjectId, href, classes } : {
     subjectId: string | null | undefined
     onclick?: () => void
     href?: string
     classes?: string
-  }>()
+  } = $props()
 
   const skin: string = $derived('beige')
   const subject = $derived($dataStore.subjects.find((sub: SubjectType) => sub.id === subjectId))

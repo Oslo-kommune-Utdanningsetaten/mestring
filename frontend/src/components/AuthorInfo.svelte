@@ -4,7 +4,7 @@
   import { formatDateTime, formatDateTimeWithToday, abbreviateName } from '../utils/functions'
   import { onMount } from 'svelte'
 
-  const { item } = $props<{ item: ObservationType | StatusType }>()
+  const { item } : { item: ObservationType | StatusType } = $props()
   const {
     createdById,
     updatedById,

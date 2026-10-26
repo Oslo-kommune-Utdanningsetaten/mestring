@@ -4,10 +4,10 @@
   import { getMasteryLevelColorByValue, getMasteryTitleByValue } from '../utils/masteryHelpers'
   import { isNumber, getContrastFriendlyTextColor } from '../utils/functions'
 
-  const { observation, masterySchema } = $props<{
+  const { observation, masterySchema } : {
     observation: ObservationType
     masterySchema: MasterySchemaWithConfig
-  }>()
+  } = $props()
 
   const bgColor = $derived.by(() => {
     if (!masterySchema || !isNumber(observation.masteryValue)) {

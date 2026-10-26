@@ -28,11 +28,11 @@
 
   import ButtonMini from '../ButtonMini.svelte'
 
-  const { user, school, onDone } = $props<{
+  const { user, school, onDone } : {
     user: Partial<UserDecorated>
     school: SchoolType
     onDone?: () => void | Promise<void>
-  }>()
+  } = $props()
 
   const userSchoolRoleNames = [USER_ROLES.STAFF, USER_ROLES.INSPECTOR, USER_ROLES.ADMIN]
   const userGroupRoleNames = [USER_ROLES.TEACHER, USER_ROLES.STUDENT]

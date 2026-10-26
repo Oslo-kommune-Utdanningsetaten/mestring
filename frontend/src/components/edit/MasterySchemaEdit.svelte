@@ -12,10 +12,10 @@
   import ButtonMini from '../ButtonMini.svelte'
   import MasterySchemaConfigEdit from './MasterySchemaConfigEdit.svelte'
 
-  const { masterySchema, onDone } = $props<{
+  const { masterySchema, onDone } : {
     masterySchema: Partial<MasterySchemaType>
     onDone: () => void
-  }>()
+  } = $props()
 
   let localMasterySchema = $state<Partial<MasterySchemaWithConfig>>({ ...masterySchema })
   let schools = $state<SchoolType[]>([])

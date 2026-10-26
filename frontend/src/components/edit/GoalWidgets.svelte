@@ -32,7 +32,7 @@
     widgets,
     disabledWidgets,
     buttonSize,
-  } = $props<{
+  } : {
     goal?: GoalType
     student?: UserType
     subject?: SubjectType
@@ -45,7 +45,7 @@
     widgets: Array<'create' | 'update' | 'delete' | 'view'>
     disabledWidgets?: Array<'create' | 'update' | 'delete' | 'view'>
     buttonSize?: 'small' | 'large'
-  }>()
+  } = $props()
 
   let goalWip = $state<GoalType | {} | null>(null)
   let isGoalEditorOpen = $state<boolean>(false)

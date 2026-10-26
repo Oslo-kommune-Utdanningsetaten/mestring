@@ -6,9 +6,9 @@
   import VisibleSVG from '../assets/eye-visible.svg.svelte'
   import InvisibleSVG from '../assets/eye-invisible.svg.svelte'
 
-  const { observation } = $props<{
+  const { observation } : {
     observation: ObservationType
-  }>()
+  } = $props()
 </script>
 
 {#if $currentSchool.isServiceEnabledForStudents}

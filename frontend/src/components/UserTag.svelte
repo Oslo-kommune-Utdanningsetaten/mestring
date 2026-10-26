@@ -12,13 +12,13 @@
     allUsers = [],
     role,
     href,
-  } = $props<{
+  } : {
     user?: UserType | null | undefined
     userId?: string | undefined
     allUsers?: UserType[]
     role?: UserRoleType
     href?: string
-  }>()
+  } = $props()
 
   const skin: string = $derived('beige')
 

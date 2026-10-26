@@ -6,9 +6,9 @@
 
   import ObservationEdit from './ObservationEdit.svelte'
 
-  const { masterySchema } = $props<{
+  const { masterySchema } : {
     masterySchema: Partial<MasterySchemaWithConfig>
-  }>()
+  } = $props()
 
   type Rgb = { r: number; g: number; b: number; a: number }
 

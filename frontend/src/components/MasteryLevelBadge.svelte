@@ -19,7 +19,7 @@
     masterySchema,
     variant,
     dataMissingReason = undefined,
-  } = $props<{
+  } : {
     masteryData?: MasteryData
     masterySchema?: MasterySchemaWithConfig | null
     variant?:
@@ -28,7 +28,7 @@
       | MASTERY_BADGE_VARIANTS.TRIANGLE
       | MASTERY_BADGE_VARIANTS.SMILEY
     dataMissingReason?: typeof MISSING_REASON_NO_OBSERVATIONS | typeof MISSING_REASON_NO_GOALS
-  }>()
+  } = $props()
 
   const preferredMasteryBadgeVariant = localStorage<MASTERY_BADGE_VARIANTS>(
     'preferredMasteryBadgeVariant'

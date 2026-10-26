@@ -19,12 +19,12 @@
     subject,
     isTitleEnabled = true,
     goals: goalsProp,
-  } = $props<{
+  } : {
     student: UserType
     subject: SubjectType
     isTitleEnabled?: boolean
     goals?: GoalDecorated[]
-  }>()
+  } = $props()
 
   const router = useTinyRouter()
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')

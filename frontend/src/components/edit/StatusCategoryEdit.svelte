@@ -9,10 +9,10 @@
 
   import ButtonMini from '../ButtonMini.svelte'
 
-  const { statusCategory, onDone } = $props<{
+  const { statusCategory, onDone } : {
     statusCategory: Partial<StatusCategoryType> | null
     onDone: () => void
-  }>()
+  } = $props()
   let localStatusCategory = $state<Partial<StatusCategoryType>>({ ...statusCategory })
 
   let masterySchemas = $derived($dataStore.masterySchemas.filter(schema => schema.isEnabled))

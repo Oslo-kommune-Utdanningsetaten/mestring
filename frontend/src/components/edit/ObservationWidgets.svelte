@@ -15,14 +15,14 @@
   import Offcanvas from '../Offcanvas.svelte'
   import ObservationView from '../ObservationView.svelte'
 
-  const { observation, goal, student, subject, onRefreshRequired, widgets } = $props<{
+  const { observation, goal, student, subject, onRefreshRequired, widgets } : {
     observation?: ObservationType
     goal: GoalType
     student: UserType
     subject: SubjectType
     onRefreshRequired?: Function
     widgets: Array<'create' | 'update' | 'delete' | 'view' | 'productUrl'>
-  }>()
+  } = $props()
 
   let observationWip = $state<ObservationType | {} | null>(null)
   let isObservationEditorOpen = $state<boolean>(false)

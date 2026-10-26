@@ -21,14 +21,14 @@
     masterySchema: masterySchemaProp,
     isPersistenceControlEnabled = true,
     onDone,
-  } = $props<{
+  } : {
     student: UserType | null
     goal: GoalType | null
     observation: ObservationType | null
     masterySchema?: MasterySchemaWithConfig | null
     isPersistenceControlEnabled?: boolean
     onDone: () => void
-  }>()
+  } = $props()
 
   const isObservationUrlEnabled = localStorage<boolean>('isObservationUrlEnabled')
   const isHistoryVisibleOnMasteryInput = localStorage<boolean>('isHistoryVisibleOnMasteryInput')

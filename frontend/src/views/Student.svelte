@@ -25,7 +25,7 @@
   import GroupTag from '../components/GroupTag.svelte'
   import StudentSVG from '../assets/education.svg.svelte'
 
-  const { studentId } = $props<{ studentId: string }>()
+  const { studentId } : { studentId: string } = $props()
   const individualGoalcount = 3
 
   let student = $state<UserType | undefined>(undefined)

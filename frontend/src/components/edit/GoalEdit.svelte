@@ -29,14 +29,14 @@
     subjects = null,
     onDone,
     isGoalIndividual,
-  } = $props<{
+  } : {
     student?: UserType | null
     group?: GroupType | null
     goal?: Partial<GoalType> | null
     subjects?: SubjectType[] | null
     isGoalIndividual: boolean
     onDone?: () => void | Promise<void>
-  }>()
+  } = $props()
 
   let localGoal = $state<Partial<GoalType>>({})
   let availableSubjects = $state<SubjectType[]>()

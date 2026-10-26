@@ -18,13 +18,13 @@
     title,
     isInputEnabled = true,
     observations = [],
-  } = $props<{
+  } : {
     masterySchema: MasterySchemaType
     value?: number | undefined | null
     title?: string
     isInputEnabled?: boolean
     observations?: ObservationType[]
-  }>()
+  } = $props()
 </script>
 
 {#if masterySchema?.config?.valueInput === VALUE_INPUT_VARIANT.SLIDER_VERTICAL}

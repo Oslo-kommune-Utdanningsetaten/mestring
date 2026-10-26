@@ -16,7 +16,7 @@
     onclick,
     href,
     classes,
-  } = $props<{
+  } : {
     group: GroupType | null
     title?: string
     isTypeWarningEnabled?: boolean
@@ -26,7 +26,7 @@
     onclick?: () => void
     href?: string
     classes?: string
-  }>()
+  } = $props()
 
   const earlierYear = $derived(
     getCurrentSchoolYear() !== getSchoolYearForGroup(group) ? getSchoolYearForGroup(group) : null

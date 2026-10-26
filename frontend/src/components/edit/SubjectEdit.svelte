@@ -4,11 +4,11 @@
   import ButtonMini from '../ButtonMini.svelte'
   import { t } from '../../stores/translations'
 
-  const { subject, school, onDone } = $props<{
+  const { subject, school, onDone } : {
     subject: SubjectType | null
     school: SchoolType | null
     onDone: () => void
-  }>()
+  } = $props()
   let displayName = $state<string | null>(null)
   let shortName = $state<string | null>(null)
   let isFormValid = $derived(!!displayName?.trim() && !!shortName?.trim())
