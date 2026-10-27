@@ -5,16 +5,6 @@
 
   import BarChart from './BarChart.svelte'
 
-  interface Props {
-    groupId?: string
-    schoolId?: string
-    width?: number
-    height?: number
-    title?: string
-    fromDate: string
-    toDate: string
-  }
-
   // Props with sane defaults
   const {
     groupId,
@@ -24,7 +14,15 @@
     title: providedTitle,
     fromDate,
     toDate,
-  }: Props = $props()
+  }: {
+    groupId?: string
+    schoolId?: string
+    width?: number
+    height?: number
+    title?: string
+    fromDate: string
+    toDate: string
+  } = $props()
 
   let observations = $state<ObservationType[]>([])
   let data = $state<number[]>([])
