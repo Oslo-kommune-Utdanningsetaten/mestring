@@ -183,7 +183,7 @@ const registerSubjects = async (school: SchoolType): Promise<void> => {
     const result = await subjectsList({
       query: {
         school: school.id,
-        schoolYear: 'all',
+        schoolYear: 'all', // subjects are used accross schools and years
       },
     })
     const subjects = (result.data || []).filter(subject => {

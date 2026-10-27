@@ -27,9 +27,9 @@
     group = null,
     goal = null,
     subjects = null,
-    onDone,
+    onDone = () => {},
     isGoalIndividual,
-  } : {
+  }: {
     student?: UserType | null
     group?: GroupType | null
     goal?: Partial<GoalType> | null
@@ -65,11 +65,31 @@
   }
 
   const fetchStudentSubjects = async () => {
+    if (!student || !currentSchool) return
+
+    // school allows only custom subjects so we don't know which subjects the student has, thus we provide all subjects from the data store
+    if (currentSchool.subjectsAllowed === 'only-custom') {
+      availableSubjects = $dataStore.subjects
+      return
+    }
     try {
       const subjectsResult = await subjectsList({
-        query: { school: currentSchool.id, students: student.id, schoolYear: $preferredSchoolYear },
+        query: { school: currentSchool.id, students: student.id, schoolYear: 'all' },
       })
-      availableSubjects = subjectsResult.data || []
+      const studentSubjects: SubjectType[] = subjectsResult.data || []
+
+      // school allows only feide subjects, so we only use the subjects fetched for the student, lest the list become way too long
+      if (currentSchool.subjectsAllowed === 'only-feide') {
+        availableSubjects = studentSubjects
+        return
+      }
+      // subjectsAllowed === 'all'
+      // combine subjectsResult and dataStore.subjects, remove dupes
+      const subjectsById: Record<string, SubjectType> = {}
+      for (const aSubject of [...studentSubjects, ...$dataStore.subjects]) {
+        subjectsById[aSubject.id] = aSubject
+      }
+      availableSubjects = Object.values(subjectsById)
     } catch (error) {
       console.error('Error fetching student subjects:', error)
     } finally {
