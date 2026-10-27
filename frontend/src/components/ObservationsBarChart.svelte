@@ -4,6 +4,7 @@
   import { observationsList } from '../generated/sdk.gen'
 
   import BarChart from './BarChart.svelte'
+  import { currentSchool } from '../stores/data'
 
   // Props with sane defaults
   const {
@@ -60,12 +61,10 @@
     const query: any = {
       from: fromDate,
       to: toDate,
+      school: schoolId || $currentSchool.id,
     }
     if (groupId) {
       query['group'] = groupId
-    }
-    if (schoolId) {
-      query['school'] = schoolId
     }
     const obsResults = await observationsList({ query })
     observations = obsResults.data || []
