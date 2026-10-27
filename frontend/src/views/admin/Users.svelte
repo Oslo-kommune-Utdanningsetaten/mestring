@@ -147,12 +147,12 @@
     if (!$dataStore.currentSchool) return []
     const allYears = getAllSchoolYears(new Date($dataStore.currentSchool.createdAt)).reverse()
     return [
-      allYears.length > 1 ? { value: 'all', label: 'Alle år' } : null,
+      { value: 'all', label: 'Alle år' },
       ...allYears.map(year => ({
         value: year,
         label: year,
       })),
-    ].filter(Boolean) as { value: string; label: string }[]
+    ]
   })
 
   const usersOptions = $derived.by(() => {
