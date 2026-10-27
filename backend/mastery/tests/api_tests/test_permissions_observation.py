@@ -15,7 +15,7 @@ def test_non_user_observation_access(observation_on_individual_goal):
 
 @pytest.mark.django_db
 def test_superadmin_observation_access(
-    superadmin, teacher, observation_on_individual_goal, observation_on_group_goal
+    superadmin, teacher, school, observation_on_individual_goal, observation_on_group_goal
 ):
     client = APIClient()
     client.force_authenticate(user=superadmin)
@@ -26,7 +26,8 @@ def test_superadmin_observation_access(
 
     # Can list observations by student
     resp = client.get(
-        "/api/observations/", {"student": observation_on_individual_goal.student.id}
+        "/api/observations/",
+        {"school": school.id, "student": observation_on_individual_goal.student.id},
     )
     assert resp.status_code == 200
     data = resp.json()
@@ -40,7 +41,8 @@ def test_superadmin_observation_access(
     observation_on_individual_goal.created_by = teacher
     observation_on_individual_goal.save()
     resp = client.get(
-        "/api/observations/", {"created_by": observation_on_individual_goal.created_by.id}
+        "/api/observations/",
+        {"school": school.id, "created_by": observation_on_individual_goal.created_by.id},
     )
     assert resp.status_code == 200
     data = resp.json()
@@ -50,7 +52,8 @@ def test_superadmin_observation_access(
 
     # Can list observations by goal
     resp = client.get(
-        "/api/observations/", {"goal": observation_on_individual_goal.goal.id}
+        "/api/observations/",
+        {"school": school.id, "goal": observation_on_individual_goal.goal.id},
     )
     assert resp.status_code == 200
     data = resp.json()
@@ -65,7 +68,7 @@ def test_superadmin_observation_access(
 
 @pytest.mark.django_db
 def test_school_inspector_observation_access(
-    school, school_inspector, student, other_school_student, observation_on_group_goal,
+    school, other_school, school_inspector, student, other_school_student, observation_on_group_goal,
     observation_on_individual_goal, goal_individual, other_school_group_goal,
         other_school_individual_goal, subject_owned_by_school):
     """
@@ -98,30 +101,34 @@ def test_school_inspector_observation_access(
     ################### List ###################
 
     # School inspector can list observations for students at their school
-    resp = client.get("/api/observations/", {"student": student.id})
+    resp = client.get("/api/observations/", {"school": school.id, "student": student.id})
     assert resp.status_code == 200
     received_ids = {obs["id"] for obs in resp.json()}
     expected_ids = {observation_on_group_goal.id, observation_on_individual_goal.id}
     assert received_ids == expected_ids
 
     # School inspector cannot list observations for students at other schools
-    resp = client.get("/api/observations/", {"student": other_school_student.id})
+    resp = client.get(
+        "/api/observations/", {"school": other_school.id, "student": other_school_student.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
     # School inspector can list observations by goal at their school
-    resp = client.get("/api/observations/", {"goal": observation_on_group_goal.goal.id})
+    resp = client.get(
+        "/api/observations/", {"school": school.id, "goal": observation_on_group_goal.goal.id})
     assert resp.status_code == 200
     received_ids = {obs["id"] for obs in resp.json()}
     assert observation_on_group_goal.id in received_ids
 
-    resp = client.get("/api/observations/", {"goal": goal_individual.id})
+    resp = client.get(
+        "/api/observations/", {"school": school.id, "goal": goal_individual.id})
     assert resp.status_code == 200
     received_ids = {obs["id"] for obs in resp.json()}
     assert observation_on_individual_goal.id in received_ids
 
     # School inspector cannot list observations by goal at other schools
-    resp = client.get("/api/observations/", {"goal": other_school_group_goal.id})
+    resp = client.get(
+        "/api/observations/", {"school": other_school.id, "goal": other_school_group_goal.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
@@ -250,7 +257,8 @@ def test_teaching_group_teacher_observation_access(
     )
 
     # Teacher can list observations for students in groups they teach
-    resp = client.get("/api/observations/", {"student": observation_on_group_goal.student.id})
+    resp = client.get(
+        "/api/observations/", {"school": school.id, "student": observation_on_group_goal.student.id})
     assert resp.status_code == 200
     data = resp.json()
     received_ids = {obs["id"] for obs in data}
@@ -641,7 +649,7 @@ def test_student_observation_access(
 
 @pytest.mark.django_db
 def test_school_admin_observation_access(
-    school_admin, student, other_school_student, observation_on_group_goal,
+    school, school_admin, student, other_school_student, observation_on_group_goal,
         observation_on_individual_goal, observation_on_individual_goal_other_student,
         other_school_group_goal, other_school_individual_goal):
     """
@@ -668,7 +676,7 @@ def test_school_admin_observation_access(
     assert resp.status_code == 400
 
     # List observations for a student at the admin's school
-    resp = client.get("/api/observations/", {"student": student.id})
+    resp = client.get("/api/observations/", {"school": school.id, "student": student.id})
     assert resp.status_code == 200
     received_ids = {obs["id"] for obs in resp.json()}
     excepted_ids = {observation_on_group_goal.id, observation_on_individual_goal.id}
@@ -784,7 +792,7 @@ def test_teacher_retains_creator_access_to_observations_after_leaving_school(
     resp = client.get(f"/api/observations/{observation.id}/")
     assert resp.status_code == 200
 
-    resp = client.get("/api/observations/", {"student": student.id})
+    resp = client.get("/api/observations/", {"school": school.id, "student": student.id})
     assert resp.status_code == 200
     received_ids = {obs["id"] for obs in resp.json()}
     assert observation.id in received_ids
@@ -811,7 +819,7 @@ def test_teacher_retains_creator_access_to_observations_after_leaving_school(
     resp = client.get(f"/api/observations/{observation.id}/")
     assert resp.status_code == 200
 
-    resp = client.get("/api/observations/", {"student": student.id})
+    resp = client.get("/api/observations/", {"school": school.id, "student": student.id})
     assert resp.status_code == 200
     received_ids = {obs["id"] for obs in resp.json()}
     assert observation.id in received_ids
@@ -838,7 +846,8 @@ def test_teacher_retains_creator_access_to_observations_after_leaving_school(
     resp = client.get(f"/api/observations/{school_b_observation.id}/")
     assert resp.status_code == 200
 
-    resp = client.get("/api/observations/", {"student": school_b_student.id})
+    resp = client.get(
+        "/api/observations/", {"school": other_school.id, "student": school_b_student.id})
     assert resp.status_code == 200
     received_ids = {obs["id"] for obs in resp.json()}
     assert school_b_observation.id in received_ids

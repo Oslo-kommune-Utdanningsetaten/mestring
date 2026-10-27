@@ -981,6 +981,11 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
             from_param, _ = get_request_param(self.request.query_params, 'from')
             to_param, _ = get_request_param(self.request.query_params, 'to')
 
+            if not school_param:
+                raise ValidationError(
+                    {'error': 'missing-parameter',
+                     'message': 'The "school" parameter is required.'})
+
             if (not student_param) and (not creator_param) and (not goal_param) and (not group_param) and (not school_param):
                 raise ValidationError(
                     {'error': 'missing-parameter',
