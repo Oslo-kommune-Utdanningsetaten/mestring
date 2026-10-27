@@ -1015,10 +1015,10 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
                     )
                 elif group and group.type == 'teaching':
                     # For teaching group, include observations which belong to the groups subject (either via goal->group or directly on the observation)
-                    qs = qs.filter(
-                        Q(goal__group__id=group_param) |
-                        Q(subject_id=group.subject_id)
-                    )
+                    group_filter = Q(goal__group__id=group_param)
+                    if group.subject_id:
+                        group_filter |= Q(subject_id=group.subject_id)
+                    qs = qs.filter(group_filter)
             if from_param:
                 try:
                     from_date = datetime.fromisoformat(from_param).date()

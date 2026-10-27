@@ -842,3 +842,41 @@ def test_teacher_retains_creator_access_to_observations_after_leaving_school(
     assert resp.status_code == 200
     received_ids = {obs["id"] for obs in resp.json()}
     assert school_b_observation.id in received_ids
+
+
+@pytest.mark.django_db
+def test_teaching_group_without_subject_does_not_match_observations_without_subject(
+    superadmin,
+    school,
+    teaching_group_with_members,
+    other_teaching_group_with_members,
+    other_student,
+    observation_on_group_goal,
+):
+    # Neither group has a subject, so observations on both groups' goals have subject None
+    assert teaching_group_with_members.subject_id is None
+    assert other_teaching_group_with_members.subject_id is None
+
+    other_group_goal = Goal.objects.create(
+        title="Skrive en tekst",
+        group=other_teaching_group_with_members,
+        school=school,
+    )
+    other_group_observation = Observation.objects.create(
+        student=other_student,
+        goal=other_group_goal,
+        is_visible_to_student=True,
+    )
+    assert other_group_observation.subject_id is None
+
+    client = APIClient()
+    client.force_authenticate(user=superadmin)
+
+    resp = client.get(
+        "/api/observations/",
+        {"group": teaching_group_with_members.id, "school": school.id},
+    )
+    assert resp.status_code == 200
+    received_ids = {obs["id"] for obs in resp.json()}
+    assert observation_on_group_goal.id in received_ids
+    assert other_group_observation.id not in received_ids
