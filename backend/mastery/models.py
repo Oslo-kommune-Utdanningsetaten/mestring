@@ -4,6 +4,7 @@ from django.db.models import Q
 from nanoid import generate
 from .fields import PlainJSONField
 from .querysets import GroupQuerySet
+from .constants import GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, ROLE_NAME_TEACHER, ROLE_NAME_STUDENT
 
 ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
@@ -84,7 +85,7 @@ class School(BaseModel):
         """
         return User.objects.filter(
             user_groups__group__school=self,
-            user_groups__role__name='teacher'
+            user_groups__role__name=ROLE_NAME_TEACHER
         ).distinct()
 
     def set_employed_user(self, user, role):
@@ -178,22 +179,22 @@ class User(BaseModel):
     @property
     def student_groups(self):
         """Get all groups where user is a student"""
-        return self._get_groups_with_role('student')
+        return self._get_groups_with_role(ROLE_NAME_STUDENT)
 
     @property
     def teacher_groups(self):
         """Get all groups where user is a teacher"""
-        return self._get_groups_with_role('teacher')
+        return self._get_groups_with_role(ROLE_NAME_TEACHER)
 
     @property
     def basis_groups(self):
         """Get all basis groups where user is a member"""
-        return self._get_groups_of_type('basis')
+        return self._get_groups_of_type(GROUP_TYPE_BASIS)
 
     @property
     def teaching_groups(self):
         """Get all teaching groups where user is a member"""
-        return self._get_groups_of_type('teaching')
+        return self._get_groups_of_type(GROUP_TYPE_TEACHING)
 
     # Needed for DRF permissions
 
@@ -259,11 +260,11 @@ class Group(BaseModel):
 
     def get_students(self):
         """Get all students in this group"""
-        return self.get_members(role='student')
+        return self.get_members(role=ROLE_NAME_STUDENT)
 
     def get_teachers(self):
         """Get all teachers in this group"""
-        return self.get_members(role='teacher')
+        return self.get_members(role=ROLE_NAME_TEACHER)
 
     def add_member(self, user, role):
         """

@@ -9,6 +9,7 @@ from rest_access_policy import AccessViewSetMixin
 from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy, StatusAccessPolicy, StatusCategoryAccessPolicy
 from .api_functions import get_request_param
 from .school_year_functions import calculate_school_year_utc_range
+from ..constants import GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING
 import logging
 
 logger = logging.getLogger(__name__)
@@ -991,6 +992,8 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
                     {'error': 'missing-parameter',
                      'message': 'At least one of "student", "created_by", "group" or "goal" parameters are required.'})
 
+            qs = qs.filter(goal__school_id=school_param)
+
             if student_param:
                 qs = qs.filter(
                     Q(student_id=student_param)
@@ -1001,12 +1004,10 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
                 qs = qs.filter(goal_id=goal_param)
             if subject_param:
                 qs = qs.filter(subject_id=subject_param)
-            if school_param:
-                qs = qs.filter(goal__school_id=school_param)
             if group_param:
                 group = models.Group.objects.filter(
                     id=group_param, deleted_at__isnull=True, is_enabled=True).first()
-                if group and group.type == 'basis':
+                if group and group.type == GROUP_TYPE_BASIS:
                     # For basis groups, include observations for student members of the group
                     user_groups = models.UserGroup.objects.filter(
                         group_id=group_param,
@@ -1018,7 +1019,7 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
                     qs = qs.filter(
                         Q(student_id__in=user_groups.values_list('user_id', flat=True))
                     )
-                elif group and group.type == 'teaching':
+                elif group and group.type == GROUP_TYPE_TEACHING:
                     # For teaching group, include observations which belong to the groups subject (either via goal->group or directly on the observation)
                     group_filter = Q(goal__group__id=group_param)
                     if group.subject_id:

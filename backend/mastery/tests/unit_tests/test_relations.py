@@ -1,4 +1,5 @@
 import pytest
+from mastery.constants import ROLE_NAME_TEACHER, ROLE_NAME_STUDENT
 
 
 @pytest.mark.django_db
@@ -8,8 +9,8 @@ def test_group_membership(teaching_group_with_members):
     assert teaching_group_with_members.get_members().count() == 2
     assert teaching_group_with_members.get_students().count() == 1
     assert teaching_group_with_members.get_teachers().count() == 1
-    assert teaching_group_with_members.get_members(role='student').count() == 1
-    assert teaching_group_with_members.get_members(role='teacher').count() == 1
+    assert teaching_group_with_members.get_members(role=ROLE_NAME_STUDENT).count() == 1
+    assert teaching_group_with_members.get_members(role=ROLE_NAME_TEACHER).count() == 1
 
 
 @pytest.mark.django_db
