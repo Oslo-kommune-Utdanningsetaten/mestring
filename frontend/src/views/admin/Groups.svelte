@@ -143,9 +143,9 @@
   const filteredSubjects = $derived(
     subjectsForSelectedSchool.filter(
       subject =>
-        subject.displayName.toLowerCase().includes(nameFilter.toLowerCase()) ||
-        subject.shortName.toLowerCase().includes(nameFilter.toLowerCase()) ||
-        subject.grepCode.toLowerCase().includes(nameFilter.toLowerCase())
+        subject.displayName?.toLowerCase().includes(nameFilter.toLowerCase()) ||
+        subject.shortName?.toLowerCase().includes(nameFilter.toLowerCase()) ||
+        subject.grepCode?.toLowerCase().includes(nameFilter.toLowerCase())
     )
   )
 
