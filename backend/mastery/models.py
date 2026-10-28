@@ -361,8 +361,9 @@ class Goal(BaseModel):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                condition=models.Q(group__isnull=False) | models.Q(student__isnull=False),
-                name='goal_group_or_student'),]
+                condition=(models.Q(group__isnull=False, student__isnull=True) |
+                           models.Q(group__isnull=True, student__isnull=False)),
+                name='goal_group_xor_student'),]
 
     @property
     def is_individual(self):
