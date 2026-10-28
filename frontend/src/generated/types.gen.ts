@@ -1159,6 +1159,10 @@ export type GoalsListData = {
          */
         includeObservations?: boolean;
         /**
+         * Filter goals by whether they are individual: "only" (only individual goals), "exclude" (only group goals), "include" (default, both individual and group goals)
+         */
+        individual?: 'only' | 'exclude' | 'include';
+        /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
