@@ -20,13 +20,17 @@ def test_superadmin_goal_access(school, superadmin, goal_with_group, goal_indivi
     client = APIClient()
     client.force_authenticate(user=superadmin)
 
-    # Even superadmin needs school param to list all goals
+    # Even superadmin needs school param to list goals
     resp = client.get(f'/api/goals/')
     assert resp.status_code == 400
 
-    # Superadmin can list all goals at school
+    # Superadmin cannot list goals without a school
+    resp = client.get(f'/api/goals/', {'group': goal_with_group.group.id})
+    assert resp.status_code == 400
+
+    # School alone is not enough, one of group, student or subject is also required
     resp = client.get(f'/api/goals/', {'school': school.id})
-    assert resp.status_code == 200
+    assert resp.status_code == 400
 
     # Superadmin can list goals by group
     resp = client.get(f'/api/goals/', {'group': goal_with_group.group.id, 'school': school.id})
@@ -427,9 +431,9 @@ def test_teaching_group_teacher_goal_access(
     resp = client.get('/api/goals/')
     assert resp.status_code == 400
 
-    # Endpoint is usable with school param
+    # School alone is not enough
     resp = client.get('/api/goals/', {'school': school.id})
-    assert resp.status_code == 200
+    assert resp.status_code == 400
 
     # Can list goals in groups they teach
     resp = client.get('/api/goals/', {'group': teaching_group_with_members.id, 'school': school.id})
@@ -687,9 +691,9 @@ def test_basis_group_teacher_goal_access(
     resp = client.get('/api/goals/')
     assert resp.status_code == 400
 
-    # Endpoint is usable with school param
+    # School alone is not enough
     resp = client.get('/api/goals/', {'school': school.id})
-    assert resp.status_code == 200
+    assert resp.status_code == 400
 
     # Basis teacher can see all goals (individual and group) for students in their basis group
     resp = client.get('/api/goals/', {'student': student.id, 'school': school.id})
@@ -848,9 +852,9 @@ def test_school_admin_goal_access(
     resp = client.get('/api/goals/')
     assert resp.status_code == 400
 
-    # Endpoint is usable with school param
+    # School alone is not enough
     resp = client.get('/api/goals/', {'school': school.id})
-    assert resp.status_code == 200
+    assert resp.status_code == 400
 
     # Can list group goals for groups at their school
     resp = client.get('/api/goals/', {'group': teaching_group_with_members.id, 'school': school.id})
@@ -927,8 +931,12 @@ def test_school_admin_goal_access(
     resp = client.delete(f'/api/goals/{created_individual_goal_id}/')
     assert resp.status_code == 204
 
-    # Cannot list goals from other schools
+    # School param is required
     resp = client.get('/api/goals/', {'group': other_school_teaching_group.id})
+    assert resp.status_code == 400
+
+    # Cannot list goals from other schools
+    resp = client.get('/api/goals/', {'group': other_school_teaching_group.id, 'school': school.id})
     assert resp.status_code == 200
     assert resp.json() == []
 
