@@ -54,7 +54,7 @@
     const goalText =
       (isIndividual ? 'individuelt ' : 'gruppe') +
       t('goal', { form: 'sin-indef' }) +
-      (subject?.displayName ? ' i ' + subject?.displayName.toLowerCase() : '')
+      (subject?.shortName ? ' i ' + subject?.shortName.toLowerCase() : '')
     switch (widget) {
       case 'create':
         return 'Legg til nytt ' + goalText

@@ -35,13 +35,16 @@
 
   const router = useTinyRouter()
 
-  let goalsForSubject = $state<GoalDecorated[]>([])
+  let goalsIndividual = $state<GoalDecorated[]>([])
+  let goalsGroup = $state<GoalDecorated[]>([])
   let goalsListElement = $state<HTMLElement | null>(null)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
   let chartKey = $state<number>(0) // key used to force re-render of StudentSubjectChart component when goals are updated
 
   let subjectName = $derived(subject ? getSubjectName(subject) : 'ukjent fag')
   let expandedGoalIds = $derived(router.getQueryParam('expanded')?.split(',') || [])
+  const hasAnyGoals = $derived(goalsIndividual.length + goalsGroup.length > 0)
+
   let sortableInstance: Sortable | null = null
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
@@ -52,12 +55,19 @@
   }
 
   const fetchGoals = async () => {
-    goalsForSubject = await fetchGoalsForSubjectAndStudent(
+    goalsIndividual = await fetchGoalsForSubjectAndStudent(
       subject.id,
       student.id,
       $dataStore.currentSchool?.id!,
       $dataStore.currentUser.allGroups,
-      { areOldIndividualGoalsIncluded: true }
+      { areOldGoalsIncluded: true, individual: 'only' }
+    )
+    goalsGroup = await fetchGoalsForSubjectAndStudent(
+      subject.id,
+      student.id,
+      $dataStore.currentSchool?.id!,
+      $dataStore.currentUser.allGroups,
+      { areOldGoalsIncluded: false, individual: 'exclude' }
     )
     chartKey++
   }
@@ -83,7 +93,8 @@
     const { oldIndex, newIndex } = event
     if (oldIndex === undefined || newIndex === undefined) return
 
-    const localGoals = [...goalsForSubject.filter(g => g.isIndividual)] // only individual goals are draggable
+    // only individual goals are draggable
+    const localGoals = [...goalsIndividual]
     // Remove moved goal and capture it
     const [movedGoal] = localGoals.splice(oldIndex, 1)
     // Insert moved goal at new index
@@ -179,7 +190,7 @@
     <div class="goal-primary-row">
       <!-- Drag handle -->
       <span class="item">
-        {#if goal.isIndividual && goalsForSubject.filter(g => g.isIndividual).length > 1}
+        {#if goal.isIndividual && goalsIndividual.length > 1}
           <ButtonMini
             options={{
               size: 'tiny',
@@ -319,14 +330,14 @@
   </div>
 {/snippet}
 
-{#if goalsForSubject?.length}
+{#if hasAnyGoals}
   <div bind:this={goalsListElement} class="list-group mt-2">
-    {#each goalsForSubject.filter(goal => goal.isIndividual) as goal, index (`${goal.id}-${expandedGoalIds.includes(goal.id)}`)}
+    {#each goalsIndividual as goal, index (`${goal.id}-${expandedGoalIds.includes(goal.id)}`)}
       {@render goalInList(goal, index)}
     {/each}
   </div>
   <div class="list-group mt-2">
-    {#each goalsForSubject.filter(goal => !goal.isIndividual) as goal, index (`${goal.id}-${expandedGoalIds.includes(goal.id)}`)}
+    {#each goalsGroup as goal, index (`${goal.id}-${expandedGoalIds.includes(goal.id)}`)}
       {@render goalInList(goal, index)}
     {/each}
   </div>
