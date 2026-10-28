@@ -148,6 +148,17 @@ class GoalSerializer(BaseModelSerializer):
         fields['is_individual'] = serializers.BooleanField(read_only=True)
         return fields
 
+    def validate(self, attrs):
+        # Fall back to the existing instance for partial updates
+        group = attrs['group'] if 'group' in attrs else getattr(self.instance, 'group', None)
+        student = attrs['student'] if 'student' in attrs else getattr(self.instance, 'student', None)
+
+        if group is not None and student is not None:
+            raise serializers.ValidationError('A goal must have either a group or a student, not both.')
+        if group is None and student is None:
+            raise serializers.ValidationError('A goal must have either a group or a student.')
+        return attrs
+
 
 class ObservationSerializer(BaseModelSerializer):
     class Meta:
