@@ -25,7 +25,10 @@
   import GoalWidgets from './edit/GoalWidgets.svelte'
   import StatusWidgets from './edit/StatusWidgets.svelte'
 
-  const { student, subject } : {
+  const {
+    student,
+    subject,
+  }: {
     student: UserType
     subject: SubjectType
   } = $props()
@@ -53,7 +56,8 @@
       subject.id,
       student.id,
       $dataStore.currentSchool?.id!,
-      $dataStore.currentUser.allGroups
+      $dataStore.currentUser.allGroups,
+      { areOldIndividualGoalsIncluded: true }
     )
     chartKey++
   }

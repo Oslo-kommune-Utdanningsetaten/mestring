@@ -106,23 +106,29 @@ export const fetchGoalsForSubjectAndStudent = async (
   subjectId: string,
   studentId: string,
   schoolId: string,
-  studentGroups: GroupType[]
+  studentGroups: GroupType[],
+  options: { areOldIndividualGoalsIncluded: boolean }
 ): Promise<GoalDecorated[]> => {
+  const { areOldIndividualGoalsIncluded } = options
   try {
-    const goalsResult = await goalsList({
-      query: {
-        student: studentId,
-        subject: subjectId,
-        includeObservations: true,
-        school: schoolId,
-        ...getPreferredCreatedParams(),
-      },
-    })
+    let query = {
+      school: schoolId,
+      student: studentId,
+      subject: subjectId,
+      group: undefined,
+      includeObservations: true,
+    }
+    if (!areOldIndividualGoalsIncluded) {
+      query = { ...query, ...getPreferredCreatedParams() }
+    }
+    const goalsResult = await goalsList({ query })
     const goals = goalsResult.data || []
     if (goals.length === 0) return []
 
+    // find the groups represented in the goals
     const groupIds = goals.map(goal => goal.groupId).filter(Boolean) as string[]
     const groups = studentGroups.filter((group: GroupType) => groupIds.includes(group.id))
+    // calculate mastery for each goal and group them by subjectId, which is only one in this case
     const goalsBySubjectId = goalsWithCalculatedMasteryBySubjectId(goals, groups)
     return goalsBySubjectId[subjectId]
   } catch (error) {
