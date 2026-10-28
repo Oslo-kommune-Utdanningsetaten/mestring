@@ -791,10 +791,15 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
             include_observations_param, _ = get_request_param(
                 self.request.query_params, 'include_observations')
 
-            if (not school_param) and (not student_param) and (not subject_param) and (not group_param):
+            if (not school_param):
                 raise ValidationError(
                     {'error': 'missing-parameter',
-                     'message': 'At least one of "school", "subject", "group" or "student" parameters are required.'})
+                     'message': 'The "school" parameter is required.'})
+
+            if (not student_param) and (not subject_param) and (not group_param):
+                raise ValidationError(
+                    {'error': 'missing-parameter',
+                     'message': 'At least one of "subject", "group" or "student" parameters are required.'})
 
             qs = qs.filter(school_id=school_param)
 
