@@ -431,11 +431,6 @@ def test_teaching_group_teacher_goal_access(
     resp = client.get('/api/goals/', {'school': school.id})
     assert resp.status_code == 200
 
-    # Endpoint is unusable with both group and subject params
-    resp = client.get(
-        '/api/goals/', {'group': teaching_group_with_members.id, 'subject': subject_owned_by_school.id})
-    assert resp.status_code == 400
-
     # Can list goals in groups they teach
     resp = client.get('/api/goals/', {'group': teaching_group_with_members.id, 'school': school.id})
     assert resp.status_code == 200

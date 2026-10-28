@@ -751,6 +751,13 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
+                name='individual',
+                description='Filter goals by whether they are individual: "only" (only individual goals), "exclude" (only group goals), "include" (default, both individual and group goals)',
+                required=False,
+                type={'type': 'string', 'enum': ['only', 'exclude', 'include']},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='include_observations',
                 description='Include related observations in the response',
                 required=False,
@@ -780,6 +787,7 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
             group_param, _ = get_request_param(self.request.query_params, 'group')
             student_param, _ = get_request_param(self.request.query_params, 'student')
             subject_param, _ = get_request_param(self.request.query_params, 'subject')
+            individual_param, _ = get_request_param(self.request.query_params, 'individual')
             include_observations_param, _ = get_request_param(
                 self.request.query_params, 'include_observations')
 
@@ -788,13 +796,14 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                     {'error': 'missing-parameter',
                      'message': 'At least one of "school", "subject", "group" or "student" parameters are required.'})
 
-            if (group_param and subject_param):
-                raise ValidationError(
-                    {'error': 'wrong-parameter',
-                     'message':
-                     'group and subject parameters cannot be used together (goals are either individual or group).'})
-
             qs = qs.filter(school_id=school_param)
+
+            if individual_param == 'only':
+                # only individual goals
+                qs = qs.filter(student_id__isnull=False, group_id__isnull=True)
+            elif individual_param == 'exclude':
+                # only group goals
+                qs = qs.filter(student_id__isnull=True, group_id__isnull=False)
 
             if group_param:
                 qs = qs.filter(group_id=group_param)
