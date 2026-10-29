@@ -424,7 +424,6 @@ export const fetchUserData = async (userId: string, schoolId: string, schoolYear
   const userGroups = (userGroupsResult.data || []).filter(ug =>
     schoolYear ? isEntityFromSchoolYear(ug, schoolYear) : true
   )
-
   const teacherGroups = userGroups
     .filter(ug => ug.role.name === USER_ROLES.TEACHER)
     .map(ug => ug.group)
