@@ -796,11 +796,6 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                     {'error': 'missing-parameter',
                      'message': 'The "school" parameter is required.'})
 
-            if (not student_param) and (not subject_param) and (not group_param):
-                raise ValidationError(
-                    {'error': 'missing-parameter',
-                     'message': 'At least one of "subject", "group" or "student" parameters are required.'})
-
             qs = qs.filter(school_id=school_param)
 
             if individual_param == 'only':
