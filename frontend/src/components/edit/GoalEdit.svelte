@@ -176,6 +176,7 @@
 
 <div class="goal-edit p-4">
   <h3 class="pb-2">{getTitle()}</h3>
+  <p class="text-muted">Rekkefølge: {goal?.sortOrder}</p>
   <hr />
   <!-- Subject -->
   <div class="form-group mb-3">
