@@ -8,11 +8,7 @@
   import { dataStore } from '../../stores/data'
   import { preferredSchoolYear } from '../../stores/localStorageFunctions'
   import { USER_ROLES } from '../../utils/constants'
-  import {
-    getAllSchoolYears,
-    getCurrentSchoolYear,
-    inferCreatedParams,
-  } from '../../utils/schoolYear'
+  import { getAllSchoolYears, inferCreatedParams } from '../../utils/schoolYear'
 
   import User from '../../components/User.svelte'
   import ButtonMini from '../../components/ButtonMini.svelte'
@@ -58,7 +54,8 @@
       ? users.filter(
           user =>
             user.name.toLowerCase().includes(nameFilter.toLowerCase()) ||
-            user.feideId.toLowerCase().includes(nameFilter.toLowerCase())
+            user.feideId.toLowerCase().includes(nameFilter.toLowerCase()) ||
+            user.id === nameFilter
         )
       : users
   )
