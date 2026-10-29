@@ -1,7 +1,7 @@
 <script lang="ts">
   import { useTinyRouter } from 'svelte-tiny-router'
-  import type { SubjectType, UserType, GoalType } from '../generated/types.gen'
-  import type { GoalDecorated } from '../types/models'
+  import type { SubjectType, GoalType } from '../generated/types.gen'
+  import type { GoalDecorated, UserDecorated } from '../types/models'
   import { dataStore } from '../stores/data'
   import { urlStringFrom, getSubjectName } from '../utils/functions'
   import { fetchGoalsForSubjectAndStudent } from '../utils/functions'
@@ -18,12 +18,10 @@
     student,
     subject,
     isTitleEnabled = true,
-    goals: goalsProp,
-  } : {
-    student: UserType
+  }: {
+    student: UserDecorated
     subject: SubjectType
     isTitleEnabled?: boolean
-    goals?: GoalDecorated[]
   } = $props()
 
   const router = useTinyRouter()
@@ -67,12 +65,23 @@
 
   const fetchData = async () => {
     try {
-      goals = await fetchGoalsForSubjectAndStudent(
-        subject.id,
-        student.id,
-        currentSchool?.id!,
-        student.allGroups
-      )
+      const [goalsIndividual, goalsGroup] = await Promise.all([
+        fetchGoalsForSubjectAndStudent(
+          subject.id,
+          student.id,
+          currentSchool?.id!,
+          student.allGroups,
+          { areOldGoalsIncluded: true, individual: 'only' }
+        ),
+        fetchGoalsForSubjectAndStudent(
+          subject.id,
+          student.id,
+          currentSchool?.id!,
+          student.allGroups,
+          { areOldGoalsIncluded: false, individual: 'exclude' }
+        ),
+      ])
+      goals = [...goalsIndividual, ...goalsGroup]
     } catch (error) {
       console.error(`Could not load goals for ${student.id} and ${subject.id}`, error)
       goals = []
@@ -101,7 +110,10 @@
       <div
         class="list-group-item goal-item {isExpanded ? 'shadow expanded' : ''}"
         class:hatched-background={!goal.isRelevant}
-        title={goal.isRelevant ? '' : t('goal', { form: 'sin-def', capitalize: true }) + ' er ikke lenger relevant for eleven'}
+        title={goal.isRelevant
+          ? ''
+          : t('goal', { form: 'sin-def', capitalize: true }) +
+            ' er ikke lenger relevant for eleven'}
         role="listitem"
         onmouseenter={() => {
           hoveredGoalId = goal.id

@@ -11,7 +11,12 @@
   import Link from './Link.svelte'
   import ButtonMini from './ButtonMini.svelte'
 
-  const { user, decoratedUser, onDeleteUser, onEditUser } : {
+  const {
+    user,
+    decoratedUser,
+    onDeleteUser,
+    onEditUser = () => {},
+  }: {
     user: UserType
     decoratedUser: UserDecorated
     onDeleteUser: () => Promise<void>

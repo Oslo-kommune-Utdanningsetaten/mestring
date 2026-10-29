@@ -26,15 +26,15 @@
   import { hasUserAccessToFeature } from '../stores/access'
   import { t } from '../stores/translations'
 
-  import GroupSVG from '../assets/group.svg.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
-  import UserTag from '../components/UserTag.svelte'
   import StudentSubject from '../components/StudentSubject.svelte'
-  import Link from '../components/Link.svelte'
   import GoalWidgets from '../components/edit/GoalWidgets.svelte'
+  import GroupSVG from '../assets/group.svg.svelte'
+  import UserTag from '../components/UserTag.svelte'
+  import Link from '../components/Link.svelte'
 
-  const { groupId } : { groupId: string } = $props()
+  const { groupId }: { groupId: string } = $props()
 
   let isLoading = $state(true)
   let goalsListElement = $state<HTMLElement | null>(null)

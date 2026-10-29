@@ -1,16 +1,20 @@
 <script lang="ts">
-  import type { UserType, GroupType, SubjectType } from '../generated/types.gen'
+  import type { GroupType, SubjectType } from '../generated/types.gen'
+  import type { UserDecorated } from '../types/models.d.ts'
   import { groupsList } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
   import {
     getPreferredCreatedParams,
     getPreferredGroupValidity,
   } from '../stores/localStorageFunctions'
-  import StudentSubject from './StudentSubject.svelte'
   import { t } from '../stores/translations'
 
-  const { student } : {
-    student: UserType
+  import StudentSubject from './StudentSubject.svelte'
+
+  const {
+    student,
+  }: {
+    student: UserDecorated
   } = $props()
 
   let groups = $state<GroupType[]>([])

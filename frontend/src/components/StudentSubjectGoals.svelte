@@ -55,20 +55,22 @@
   }
 
   const fetchGoals = async () => {
-    goalsIndividual = await fetchGoalsForSubjectAndStudent(
-      subject.id,
-      student.id,
-      $dataStore.currentSchool?.id!,
-      $dataStore.currentUser.allGroups,
-      { areOldGoalsIncluded: true, individual: 'only' }
-    )
-    goalsGroup = await fetchGoalsForSubjectAndStudent(
-      subject.id,
-      student.id,
-      $dataStore.currentSchool?.id!,
-      $dataStore.currentUser.allGroups,
-      { areOldGoalsIncluded: false, individual: 'exclude' }
-    )
+    ;[goalsIndividual, goalsGroup] = await Promise.all([
+      fetchGoalsForSubjectAndStudent(
+        subject.id,
+        student.id,
+        $dataStore.currentSchool?.id!,
+        $dataStore.currentUser.allGroups,
+        { areOldGoalsIncluded: true, individual: 'only' }
+      ),
+      fetchGoalsForSubjectAndStudent(
+        subject.id,
+        student.id,
+        $dataStore.currentSchool?.id!,
+        $dataStore.currentUser.allGroups,
+        { areOldGoalsIncluded: false, individual: 'exclude' }
+      ),
+    ])
     chartKey++
   }
 

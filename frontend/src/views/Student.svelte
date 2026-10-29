@@ -25,7 +25,7 @@
   import GroupTag from '../components/GroupTag.svelte'
   import StudentSVG from '../assets/education.svg.svelte'
 
-  const { studentId } : { studentId: string } = $props()
+  const { studentId }: { studentId: string } = $props()
   const individualGoalcount = 3
 
   let student = $state<UserType | undefined>(undefined)
@@ -83,10 +83,15 @@
   }
 
   const countStudentGoals = async () => {
-    const result = await goalsList({
-      query: { student: studentId, school: currentSchool.id, ...getPreferredCreatedParams() },
+    // fetch all individual goals for the student, any year
+    const goalsResult = await goalsList({
+      query: {
+        school: currentSchool.id,
+        student: studentId,
+        individual: 'only',
+      },
     })
-    individualStudentGoalsCount = (result.data || []).filter(g => g.isIndividual).length
+    individualStudentGoalsCount = (goalsResult.data || []).length
   }
 
   // Creates a hard coded number of individual goals for each custom subjects in the school
