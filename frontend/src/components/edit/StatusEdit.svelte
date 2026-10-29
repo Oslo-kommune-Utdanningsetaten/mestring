@@ -32,7 +32,10 @@
   import MasteryBarChart from '../MasteryBarChart.svelte'
   import AuthorInfo from '../AuthorInfo.svelte'
 
-  let { status, onDone } : {
+  let {
+    status,
+    onDone,
+  }: {
     status: Partial<StatusType>
     onDone: () => void
   } = $props()
@@ -44,7 +47,7 @@
     ...status,
     createdById: status.createdById || $currentUser.id,
   })
-  let localGoals = $state<GoalDecorated[] | null>([])
+  let studentGoals = $state<GoalDecorated[] | null>([])
   let isGoalSectionExpanded = $state<boolean>(false)
   let validationErrors = $state<{ beginAt?: string; endAt?: string }>({})
 
@@ -52,9 +55,12 @@
     subjectsInCommon($dataStore.currentUser, localStudent!, $dataStore.subjects)
   )
 
-  let subject = $derived(
-    status.subjectId && selectableSubjects?.find((s: SubjectType) => s.id === status.subjectId)
-  )
+  let subject: SubjectType | undefined = $derived.by(() => {
+    if (status.subjectId && selectableSubjects?.length) {
+      return selectableSubjects.find((s: SubjectType) => s.id === status.subjectId)
+    }
+    return undefined
+  })
 
   let selectableStatusCategories = $derived(
     $dataStore.statusCategories
@@ -91,16 +97,29 @@
   }
 
   const fetchStudentData = async () => {
-    const userResult = await usersRetrieve({ path: { id: status.studentId } })
+    const { studentId } = status
+    if (!studentId) return
+    const userResult = await usersRetrieve({ path: { id: studentId } })
     const currentSchoolId = $dataStore.currentSchool?.id
     localStudent = userResult.data!
     if (!localStudent || !subject) return
-    localGoals = await fetchGoalsForSubjectAndStudent(
-      subject.id,
-      localStudent.id,
-      currentSchoolId,
-      $dataStore.currentUser.allGroups
-    )
+    const [goalsIndividual, goalsGroup] = await Promise.all([
+      fetchGoalsForSubjectAndStudent(
+        subject.id,
+        studentId,
+        currentSchoolId,
+        $dataStore.currentUser.allGroups,
+        { areOldGoalsIncluded: true, individual: 'only' }
+      ),
+      fetchGoalsForSubjectAndStudent(
+        subject.id,
+        studentId,
+        currentSchoolId,
+        $dataStore.currentUser.allGroups,
+        { areOldGoalsIncluded: false, individual: 'exclude' }
+      ),
+    ])
+    studentGoals = [...goalsIndividual, ...goalsGroup]
     localStatus = getUpdatedStatus()
   }
 
@@ -265,13 +284,13 @@
             <mark>{subject?.shortName || subject?.displayName}</mark>
             <ButtonIcon options={goalSectionToggleOptions} />
           </h3>
-          {#if !localGoals}
+          {#if !studentGoals}
             <p><em>Eleven har ingen {t('goal', { form: 'plu-indef' })} i dette faget</em></p>
           {/if}
 
-          {#if localGoals && isGoalSectionExpanded}
+          {#if studentGoals && isGoalSectionExpanded}
             <div class="d-flex flex-column gap-2 mt-2">
-              {#each localGoals as goal}
+              {#each studentGoals as goal}
                 <div class="goal-row">
                   <span>{goal.sortOrder}</span>
                   {#if goal.isIndividual}
@@ -435,8 +454,7 @@
               placeholder={currentStatusCategory?.name === 'risk'
                 ? 'Beskrivelse, ved behov'
                 : 'Konkret, hva mestrer ' + studentFirstName + '?'}
-              rows="4"
-            ></textarea>
+              rows="4"></textarea>
           </div>
         {/if}
 
@@ -449,8 +467,7 @@
               class="form-control rounded-0 border-2 border-primary"
               bind:value={localStatus.feedforward}
               placeholder="Konkret, hva kan {studentFirstName} gjøre for å forbedre seg?"
-              rows="4"
-            ></textarea>
+              rows="4"></textarea>
           </div>
         {/if}
       </div>

@@ -15,7 +15,7 @@
     student,
     isLabelEnabled = false,
     highlightedGoalId = null,
-  } : {
+  }: {
     subject: SubjectType
     student: UserType
     isLabelEnabled?: boolean
@@ -68,12 +68,23 @@
   })
 
   const fetchGoals = async () => {
-    goalsForSubjectDecorated = await fetchGoalsForSubjectAndStudent(
-      subject.id,
-      student.id,
-      currentSchool?.id!,
-      currentUser.allGroups
-    )
+    const [goalsIndividual, goalsGroup] = await Promise.all([
+      fetchGoalsForSubjectAndStudent(
+        subject.id,
+        student.id,
+        currentSchool?.id!,
+        currentUser.allGroups,
+        { areOldGoalsIncluded: true, individual: 'only' }
+      ),
+      fetchGoalsForSubjectAndStudent(
+        subject.id,
+        student.id,
+        currentSchool?.id!,
+        currentUser.allGroups,
+        { areOldGoalsIncluded: false, individual: 'exclude' }
+      ),
+    ])
+    goalsForSubjectDecorated = [...goalsIndividual, ...goalsGroup]
     if (goalsForSubjectDecorated?.length) {
       assembleChartData()
     }
