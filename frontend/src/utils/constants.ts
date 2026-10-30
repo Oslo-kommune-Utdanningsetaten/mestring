@@ -48,10 +48,11 @@ export enum USER_ROLES {
 }
 
 export enum MASTERY_BADGE_VARIANTS {
-  SMILEY = 'smiley',
-  CIRCLE = 'circle',
-  TRIANGLE = 'triangle',
+  NONE = 'none',
   BEEHIVE = 'beehive',
+  TRIANGLE = 'triangle',
+  CIRCLE = 'circle',
+  SMILEY = 'smiley',
 }
 
 // Options for filtering groups by date validity

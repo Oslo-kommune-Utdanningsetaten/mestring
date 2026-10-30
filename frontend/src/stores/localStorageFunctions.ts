@@ -22,14 +22,6 @@ export const preferredSchoolYear = derived(
   $preferredSchoolYear => $preferredSchoolYear || getCurrentSchoolYear()
 )
 
-export const getPreferredMasteryBadgeVariant = () => {
-  const preferredMasteryBadgeVariant = localStorage<MASTERY_BADGE_VARIANTS>(
-    'preferredMasteryBadgeVariant'
-  ).get()
-  const defaultMasteryBadgeVariant = MASTERY_BADGE_VARIANTS.BEEHIVE
-  return preferredMasteryBadgeVariant || defaultMasteryBadgeVariant
-}
-
 export const getPreferredSubjectId = () => {
   const preferredSubjectId = localStorage<string>('preferredSubjectId').get()
   return preferredSubjectId || null

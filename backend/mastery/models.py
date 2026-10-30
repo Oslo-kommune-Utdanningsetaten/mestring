@@ -57,6 +57,8 @@ class School(BaseModel):
     # which subjects can be used: 'only-custom' (owned by school), 'only-feide', 'all'
     subjects_allowed = models.CharField(max_length=50, null=False, default='all')
     ui_translations = PlainJSONField(null=True)  # school-specific translations for the UI
+    # Which mastery badge variant is used for this school, 'none', 'smiley', 'circle', 'triangle', 'beehive'
+    mastery_badge_variant = models.CharField(max_length=50, null=False, default='beehive')
 
     def ensure_short_name(self, short_name):
         """Update short_name (used by import)"""

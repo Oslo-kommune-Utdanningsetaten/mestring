@@ -6,7 +6,7 @@
     MASTERY_BADGE_VARIANTS,
   } from '../utils/constants'
   import { localStorage } from '../stores/localStorage'
-  import { currentUser } from '../stores/data'
+  import { currentUser, currentSchool } from '../stores/data'
   import { t } from '../stores/translations'
 
   import Beehive from './masteryBadges/Beehive.svelte'
@@ -19,7 +19,7 @@
     masterySchema,
     variant,
     dataMissingReason = undefined,
-  } : {
+  }: {
     masteryData?: MasteryData
     masterySchema?: MasterySchemaWithConfig | null
     variant?:
@@ -27,22 +27,19 @@
       | MASTERY_BADGE_VARIANTS.CIRCLE
       | MASTERY_BADGE_VARIANTS.TRIANGLE
       | MASTERY_BADGE_VARIANTS.SMILEY
+      | MASTERY_BADGE_VARIANTS.NONE
     dataMissingReason?: typeof MISSING_REASON_NO_OBSERVATIONS | typeof MISSING_REASON_NO_GOALS
   } = $props()
 
-  const preferredMasteryBadgeVariant = localStorage<MASTERY_BADGE_VARIANTS>(
-    'preferredMasteryBadgeVariant'
-  )
-  const currentBadgeVariant = $derived(
-    variant || $preferredMasteryBadgeVariant || MASTERY_BADGE_VARIANTS.BEEHIVE
-  )
+  const masteryBadgeVariant = $derived(variant || $currentSchool.masteryBadgeVariant)
+
   const isMasteryValueVisible = $derived(masterySchema?.config?.isMasteryValueVisible ?? false)
 
   // Students should not see mastery values if the schema is configured to hide them
   const isLastValueVisible = $derived(!$currentUser.isStudent || isMasteryValueVisible)
 
   // multiple goals means aggregated data
-  const isAggregated = $derived(masteryData?.goalsCount > 1)
+  const isAggregated = $derived(masteryData?.goalsCount && masteryData.goalsCount > 1)
   const isBadgeEmpty = $derived(dataMissingReason === MISSING_REASON_NO_OBSERVATIONS)
   const isBadgeVoid = $derived(dataMissingReason === MISSING_REASON_NO_GOALS)
 
@@ -59,7 +56,7 @@
           [observationValues.join(', ')]
         : ''
     const aggregatedTitle = isAggregated
-        ? `Aggregert: ${observationValues.length} ${observationValues.length === 1 ? t('observation', { form: 'sin-indef' }) : t('observation', { form: 'plu-indef' })} fordelt på ${masteryData?.goalsCount ?? 0} ${t('goal', { form: 'plu-indef' })}`
+      ? `Aggregert: ${observationValues.length} ${observationValues.length === 1 ? t('observation', { form: 'sin-indef' }) : t('observation', { form: 'plu-indef' })} fordelt på ${masteryData?.goalsCount ?? 0} ${t('goal', { form: 'plu-indef' })}`
       : ''
     const trendTitle = `Trend: ${trend}`
 
@@ -69,7 +66,7 @@
   })
 </script>
 
-{#if currentBadgeVariant === MASTERY_BADGE_VARIANTS.BEEHIVE}
+{#if masteryBadgeVariant === MASTERY_BADGE_VARIANTS.BEEHIVE}
   <Beehive
     {masteryData}
     {masterySchema}
@@ -78,9 +75,9 @@
     {isBadgeVoid}
     {isLastValueVisible}
   />
-{:else if currentBadgeVariant === MASTERY_BADGE_VARIANTS.CIRCLE}
+{:else if masteryBadgeVariant === MASTERY_BADGE_VARIANTS.CIRCLE}
   <Circle {masteryData} {masterySchema} {title} {isBadgeEmpty} {isBadgeVoid} {isLastValueVisible} />
-{:else if currentBadgeVariant === MASTERY_BADGE_VARIANTS.TRIANGLE}
+{:else if masteryBadgeVariant === MASTERY_BADGE_VARIANTS.TRIANGLE}
   <Triangle
     {masteryData}
     {masterySchema}
@@ -89,11 +86,13 @@
     {isBadgeVoid}
     {isLastValueVisible}
   />
-{:else if currentBadgeVariant === MASTERY_BADGE_VARIANTS.SMILEY}
+{:else if masteryBadgeVariant === MASTERY_BADGE_VARIANTS.SMILEY}
   <Smiley {masteryData} {masterySchema} {title} {isBadgeEmpty} {isBadgeVoid} {isLastValueVisible} />
+{:else if masteryBadgeVariant === MASTERY_BADGE_VARIANTS.NONE}
+  <span></span>
 {:else}
   <span class="border border-danger">
-    Unknown badge variant {variant}
+    Unknown badge variant {masteryBadgeVariant}
   </span>
 {/if}
 

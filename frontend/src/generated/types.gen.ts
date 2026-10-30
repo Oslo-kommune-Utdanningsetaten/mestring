@@ -274,6 +274,7 @@ export type PatchedSchoolType = {
     isGoalTitleEnabled?: boolean;
     isStatusEnabled?: boolean;
     subjectsAllowed?: string;
+    masteryBadgeVariant?: string;
     readonly createdById?: string;
     readonly updatedById?: string;
 };
@@ -410,6 +411,7 @@ export type SchoolType = {
     isGoalTitleEnabled?: boolean;
     isStatusEnabled?: boolean;
     subjectsAllowed?: string;
+    masteryBadgeVariant?: string;
     readonly createdById: string;
     readonly updatedById: string;
 };
@@ -696,6 +698,7 @@ export type PatchedSchoolCreateType = {
     isGoalTitleEnabled?: boolean;
     isStatusEnabled?: boolean;
     subjectsAllowed?: string;
+    masteryBadgeVariant?: string;
 };
 
 export type PatchedStatusCreateType = {
@@ -782,6 +785,7 @@ export type SchoolCreateType = {
     isGoalTitleEnabled?: boolean;
     isStatusEnabled?: boolean;
     subjectsAllowed?: string;
+    masteryBadgeVariant?: string;
 };
 
 export type StatusCreateType = {

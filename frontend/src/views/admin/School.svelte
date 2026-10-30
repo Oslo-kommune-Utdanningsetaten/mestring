@@ -21,13 +21,17 @@
     SUBJECTS_ALLOWED_ALL,
     SUBJECTS_ALLOWED_CUSTOM,
     SUBJECTS_ALLOWED_FEIDE,
+    MASTERY_BADGE_VARIANTS,
   } from '../../utils/constants'
-  import ButtonMini from '../../components/ButtonMini.svelte'
   import { addAlert } from '../../stores/alerts'
   import { t } from '../../stores/translations'
+  import { hasUserAccessToPath } from '../../stores/access'
+
+  import ButtonMini from '../../components/ButtonMini.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
   import ImportEstimate from '../../components/ImportEstimate.svelte'
   import CleanerbotEstimate from '../../components/CleanerbotEstimate.svelte'
+  import Link from '../../components/Link.svelte'
 
   type SubjectsAllowed = 'only-custom' | 'only-feide' | 'all'
 
@@ -45,7 +49,7 @@
 
   const router = useTinyRouter()
 
-  const { schoolId } : { schoolId: string } = $props()
+  const { schoolId }: { schoolId: string } = $props()
 
   let school = $state<SchoolType>()
   let importDataEstimate = $state<Record<string, any> | null>(null)
@@ -58,6 +62,14 @@
     { value: SUBJECTS_ALLOWED_ALL, label: 'Alle fag' },
     { value: SUBJECTS_ALLOWED_FEIDE, label: 'Kun fag via Feide-grupper' },
     { value: SUBJECTS_ALLOWED_CUSTOM, label: 'Kun egendefinerte fag' },
+  ] as const
+
+  const masteryBadgeOptions = [
+    { value: MASTERY_BADGE_VARIANTS.NONE, label: 'Ingen' },
+    { value: MASTERY_BADGE_VARIANTS.BEEHIVE, label: 'Bikube' },
+    { value: MASTERY_BADGE_VARIANTS.TRIANGLE, label: 'Trekant' },
+    { value: MASTERY_BADGE_VARIANTS.SMILEY, label: 'Smiley' },
+    { value: MASTERY_BADGE_VARIANTS.CIRCLE, label: 'Sirkel' },
   ] as const
 
   const deletableDataTypes = [
@@ -177,6 +189,22 @@
     isEstimateContainerOpen = true
     const result = await estimateCleanup({ path: { orgNumber: school.orgNumber } })
     cleanerbotDataEstimate = (result?.data as CleanerbotData) ?? null
+  }
+
+  const handleUpdateMasteryBadgeVariant = async (variant: string) => {
+    if (!school) return
+    try {
+      await schoolsPartialUpdate({
+        path: { id: school.id },
+        body: { masteryBadgeVariant: variant },
+      })
+      await fetchSchool()
+    } catch (error) {
+      addAlert({
+        type: 'danger',
+        message: `Feil ved oppdatering av mestringsmerke ${variant} for skole ${school.displayName}`,
+      })
+    }
   }
 
   const toggleServiceEnabled = async () => {
@@ -541,6 +569,32 @@
           checked={school.isStatusEnabled}
           onchange={() => toggleStatusEnabled()}
         ></pkt-checkbox>
+      </section>
+
+      <!-- Mastery Badge -->
+      <section class="border border-3 p-3 my-4">
+        <h3 class="mb-3">Mestringsmerke</h3>
+        <p class="mb-3">
+          Hvilket mestringsmerke skal brukes på skolen?
+          {#if $hasUserAccessToPath('/dev/badge-lab')}
+            <span class="text-muted">
+              - [<Link to="/dev/badge-lab">kan testes her</Link>]
+            </span>
+          {/if}
+        </p>
+
+        <fieldset class="d-flex flex-wrap gap-4">
+          <legend class="visually-hidden">Velg hvilket mestringsmerke som skal brukes</legend>
+          {#each masteryBadgeOptions as option}
+            <pkt-radiobutton
+              name={'masteryBadgeVariant-' + school.id}
+              value={option.value}
+              label={option.label}
+              checked={school.masteryBadgeVariant === option.value}
+              onchange={() => handleUpdateMasteryBadgeVariant(option.value)}
+            ></pkt-radiobutton>
+          {/each}
+        </fieldset>
       </section>
 
       <!-- Teacher navigation -->

@@ -3,6 +3,7 @@ from mastery import models
 from django.db.models import ForeignKey, ManyToManyField
 from drf_spectacular.utils import extend_schema_field
 from mastery.access_policies.observation import ObservationAccessPolicy
+from mastery import constants
 
 
 @extend_schema_field({
@@ -252,6 +253,15 @@ class StatusCategorySerializer(BaseModelSerializer):
 
 class SchoolSerializer(BaseModelSerializer):
     ui_translations = JSONField(required=False, allow_null=True)
+
+    # validate mastery_badge_variant is one of the allowed constants
+    def validate(self, attrs):
+        mastery_badge_variant = attrs.get('mastery_badge_variant')
+        if mastery_badge_variant not in constants.ALLOWED_MASTERY_BADGE_VARIANTS:
+            raise serializers.ValidationError(
+                {'mastery_badge_variant': f'Must be one of {constants.ALLOWED_MASTERY_BADGE_VARIANTS}'}
+            )
+        return attrs
 
     class Meta:
         model = models.School

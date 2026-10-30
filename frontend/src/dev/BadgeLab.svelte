@@ -2,11 +2,13 @@
   import '@oslokommune/punkt-elements/dist/pkt-select.js'
   import type { ObservationType } from '../generated/types.gen'
   import type { MasteryData } from '../types/models'
+
   import { dataStore } from '../stores/data'
   import { useMasteryCalculations } from '../utils/masteryHelpers'
   import { inferMastery } from '../utils/functions'
-  import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
   import { MASTERY_BADGE_VARIANTS } from '../utils/constants'
+
+  import MasteryLevelBadge from '../components/MasteryLevelBadge.svelte'
 
   const millisecondsInDay = 24 * 60 * 60 * 1000
   const variants = [
