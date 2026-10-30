@@ -296,7 +296,9 @@
                     isSwitch="true"
                     checked={isAdminEditEnabled}
                     onchange={() => handleAdminEditToggle()}
-                    title="Toggle admin edit mode"
+                    title="{isAdminEditEnabled
+                      ? 'Disable'
+                      : 'Enable'} edit despite mismatch between selected and current year"
                   ></pkt-checkbox>
                 </li>
                 <li>
