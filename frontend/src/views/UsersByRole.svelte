@@ -4,33 +4,24 @@
   import Link from '../components/Link.svelte'
   import { dataStore } from '../stores/data'
   import { useTinyRouter } from 'svelte-tiny-router'
+  import { USER_ROLES } from '../utils/constants'
+
+  import RoleDescription from '../components/RoleDescription.svelte'
 
   const router = useTinyRouter()
 
   const roleName = $derived(router.getQueryParam('role'))
   const teacherType = $derived(router.getQueryParam('teacherType'))
   const currentSchool = $derived($dataStore.currentSchool)
-  const rolesLookup = {
-    teacher: 'lærer',
-    student: 'elev',
-    inspector: 'inspektør',
-    admin: 'administrator',
-    teaching: 'undervisnings',
-    basis: 'basis',
-  }
-
-  const heading = $derived.by(() => {
-    let result = 'Brukere med rolle: '
-    if (teacherType) {
-      result += `${rolesLookup[teacherType as keyof typeof rolesLookup] || teacherType}`
-    }
-    if (roleName) {
-      result += `${rolesLookup[roleName as keyof typeof rolesLookup] || roleName}`
-    }
-    return result
-  })
 
   let users = $state<UserType[]>([])
+
+  const acceptedToRoles = [
+    USER_ROLES.ADMIN,
+    USER_ROLES.TEACHER,
+    USER_ROLES.INSPECTOR,
+    USER_ROLES.SUPERADMIN,
+  ]
 
   const fetchUsers = async () => {
     if (!roleName || !currentSchool) return null
@@ -47,14 +38,27 @@
   })
 </script>
 
-<h3 class="my-3">{heading}</h3>
-<ul>
-  {#each users as user}
-    <li>
-      <Link to={`/admin/users/${user.id}`}>{user.name}</Link>
-    </li>
-  {/each}
-</ul>
+{#if roleName && acceptedToRoles.includes(roleName as USER_ROLES)}
+  <h3 class="my-3">Brukere med rolle: {roleName}{teacherType ? `, ${teacherType}` : ''}</h3>
+  {#if roleName === USER_ROLES.TEACHER}
+    <div>
+      <RoleDescription roleNames={[roleName]} options={{ teacherType }} />
+    </div>
+  {:else}
+    <div>
+      <RoleDescription roleNames={[roleName]} />
+    </div>
+  {/if}
+  <ul class="mt-3">
+    {#each users as user}
+      <li>
+        <Link to={`/admin/users/${user.id}`}>{user.name}</Link>
+      </li>
+    {/each}
+  </ul>
+{:else}
+  Hmm.
+{/if}
 
 <style>
 </style>
