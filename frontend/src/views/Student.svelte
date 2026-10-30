@@ -11,10 +11,10 @@
 
   import {
     getPreferredCreatedParams,
-    getPreferredGroupValidity,
     getPreferredSchoolYear,
   } from '../stores/localStorageFunctions'
   import { SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
+  import { inferGroupValidityParams } from '../utils/schoolYear'
   import { dataStore } from '../stores/data'
   import { trackEvent } from '../stores/analytics'
   import { t } from '../stores/translations'
@@ -73,7 +73,11 @@
   const fetchGroups = async () => {
     try {
       const groupsResult = await groupsList({
-        query: { user: studentId, school: currentSchool.id, valid: getPreferredGroupValidity() },
+        query: {
+          user: studentId,
+          school: currentSchool.id,
+          ...inferGroupValidityParams(getPreferredSchoolYear()),
+        },
       })
       groups = groupsResult.data || []
     } catch (error) {

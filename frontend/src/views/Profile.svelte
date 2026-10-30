@@ -1,13 +1,11 @@
 <script lang="ts">
-  import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
   import { usersRetrieve } from '../generated/sdk.gen'
   import type { GroupType } from '../generated/types.gen'
   import type { UserRoleType, UserDecorated } from '../types/models'
-  import { getPreferredGroupValidity } from '../stores/localStorageFunctions'
   import { dataStore, currentUser } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
   import { t } from '../stores/translations'
-  import { USER_ROLES, MASTERY_BADGE_VARIANTS, GROUP_VALIDITY_OPTIONS } from '../utils/constants'
+  import { USER_ROLES } from '../utils/constants'
   import { fetchUserData } from '../utils/functions'
   import { getCurrentSchoolYear } from '../utils/schoolYear'
 
@@ -21,23 +19,6 @@
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
   const isObservationUrlEnabled = localStorage<boolean>('isObservationUrlEnabled')
   const isHistoryVisibleOnMasteryInput = localStorage<boolean>('isHistoryVisibleOnMasteryInput')
-
-  let selectedGroupValidity = $state<GROUP_VALIDITY_OPTIONS>(getPreferredGroupValidity())
-
-  // Options for mastery badge variant selection
-  const badgeOptions = [
-    { value: MASTERY_BADGE_VARIANTS.BEEHIVE, label: 'Bikube' },
-    { value: MASTERY_BADGE_VARIANTS.CIRCLE, label: 'Sirkel' },
-    { value: MASTERY_BADGE_VARIANTS.TRIANGLE, label: 'Trekant' },
-    { value: MASTERY_BADGE_VARIANTS.SMILEY, label: 'Smiley' },
-  ] as const
-
-  // Options for filtering by groups by date validity
-  const groupValidityOptions = [
-    { value: GROUP_VALIDITY_OPTIONS.INCLUDE, label: 'Alle grupper' },
-    { value: GROUP_VALIDITY_OPTIONS.ONLY, label: 'Kun gyldige grupper' },
-    { value: GROUP_VALIDITY_OPTIONS.EXCLUDE, label: 'Kun ugyldige grupper' },
-  ] as const
 
   // For admin viewing another user's profile
   let otherUser = $state<UserDecorated | undefined>(undefined)
@@ -116,11 +97,6 @@
 
   const handleToggleHistoryVisibleOnMasteryInput = () =>
     isHistoryVisibleOnMasteryInput.set(!isHistoryVisibleOnMasteryInput.get())
-
-  const handleSelectGroupValidity = (validity: GROUP_VALIDITY_OPTIONS) => {
-    localStorage('preferredGroupValidity').set(validity)
-    selectedGroupValidity = getPreferredGroupValidity()
-  }
 
   $effect(() => {
     // Only load data when viewing another user's profile (admin mode)
@@ -220,26 +196,6 @@
               checked={$isHistoryVisibleOnMasteryInput}
               onchange={() => handleToggleHistoryVisibleOnMasteryInput()}
             ></pkt-checkbox>
-          </div>
-
-          <div class="mb-2">
-            <strong>Gruppers gyldighet (på dato fra Feide)</strong>
-            <fieldset class="d-flex flex-wrap gap-4 mt-2">
-              <legend class="visually-hidden">Velg hvilke grupper som vises</legend>
-              {#each groupValidityOptions as option}
-                {#key selectedGroupValidity + option.value}
-                  <pkt-radiobutton
-                    name="preferredGroupValidity"
-                    value={option.value}
-                    label={option.label}
-                    checked={selectedGroupValidity === option.value}
-                    onchange={() => handleSelectGroupValidity(option.value)}
-                    disabled={!$currentUser?.isSuperadmin}
-                    id={'preferredGroupValidity-' + option.value}
-                  ></pkt-radiobutton>
-                {/key}
-              {/each}
-            </fieldset>
           </div>
         </div>
       </div>

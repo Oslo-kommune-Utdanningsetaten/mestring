@@ -1,19 +1,11 @@
 import { derived } from 'svelte/store'
 import { localStorage } from './localStorage'
-import { GROUP_VALIDITY_OPTIONS, MASTERY_BADGE_VARIANTS } from '../utils/constants'
 import { getCurrentSchoolYear, inferCreatedParams } from '../utils/schoolYear'
 
 export const getPreferredCreatedParams = () => {
   const preferredSchoolYear =
     localStorage<string>('preferredSchoolYear').get() || getCurrentSchoolYear()
   return inferCreatedParams(preferredSchoolYear)
-}
-
-export const getPreferredGroupValidity = () => {
-  const preferredGroupValidity =
-    localStorage<GROUP_VALIDITY_OPTIONS>('preferredGroupValidity').get()
-  const defaultGroupValidity = GROUP_VALIDITY_OPTIONS.ONLY
-  return preferredGroupValidity || defaultGroupValidity
 }
 
 // Reactive store, subscribe with $preferredSchoolYear

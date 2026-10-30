@@ -10,12 +10,12 @@ import {
 import type { SchoolType, MasterySchemaType } from '../generated/types.gen'
 import { localStorage } from '../stores/localStorage'
 import {
-  getPreferredGroupValidity,
   getPreferredMasterySchemaId,
   getPreferredCreatedParams,
   getPreferredSchoolYear,
 } from '../stores/localStorageFunctions'
 import { fetchUserData } from '../utils/functions'
+import { inferGroupValidityParams } from '../utils/schoolYear'
 import { SUBJECTS_ALLOWED_ALL, SUBJECTS_ALLOWED_CUSTOM, USER_ROLES } from '../utils/constants'
 import type { AppData, UserDecorated } from '../types/models'
 
@@ -77,8 +77,8 @@ export const registerUserStatus = async (school?: SchoolType) => {
     groupsList({
       query: {
         school: school.id,
-        valid: getPreferredGroupValidity(),
         ...getPreferredCreatedParams(),
+        ...inferGroupValidityParams(getPreferredSchoolYear()),
       },
     }),
   ])

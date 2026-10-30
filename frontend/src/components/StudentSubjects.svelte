@@ -5,8 +5,9 @@
   import { dataStore } from '../stores/data'
   import {
     getPreferredCreatedParams,
-    getPreferredGroupValidity,
+    getPreferredSchoolYear,
   } from '../stores/localStorageFunctions'
+  import { inferGroupValidityParams } from '../utils/schoolYear'
   import { t } from '../stores/translations'
 
   import StudentSubject from './StudentSubject.svelte'
@@ -31,8 +32,8 @@
         query: {
           school: currentSchool.id,
           user: student.id,
-          valid: getPreferredGroupValidity(),
           ...getPreferredCreatedParams(),
+          ...inferGroupValidityParams(getPreferredSchoolYear()),
         },
       })
       groups = (groupsResult.data || []).filter(group => group.type === 'teaching')

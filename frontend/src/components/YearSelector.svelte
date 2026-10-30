@@ -5,8 +5,7 @@
   import { preferredSchoolYear } from '../stores/localStorageFunctions'
   import { currentUser, currentSchool } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
-  import { GROUP_VALIDITY_OPTIONS } from '../utils/constants'
-  import { getAllSchoolYears, getCurrentSchoolYear } from '../utils/schoolYear'
+  import { getAllSchoolYears } from '../utils/schoolYear'
   import { urlStringFrom } from '../utils/functions'
 
   const router = useTinyRouter()
@@ -28,19 +27,9 @@
     ].filter(Boolean) as { value: string; label: string }[]
   })
 
-  // When school year is changed by user, also update the group validity (not the other way)
+  // Selected school year is changed by user
   const handleSelectSchoolYear = (schoolYear: string) => {
     localStorage('preferredSchoolYear').set(schoolYear)
-    if (schoolYear === 'all') {
-      // All years selected --> include all groups regardless of validity
-      localStorage('preferredGroupValidity').set(GROUP_VALIDITY_OPTIONS.INCLUDE)
-    } else if (schoolYear === getCurrentSchoolYear()) {
-      // Current year selected --> only include valid groups
-      localStorage('preferredGroupValidity').set(GROUP_VALIDITY_OPTIONS.ONLY)
-    } else {
-      // Past year selected --> only include invalid groups
-      localStorage('preferredGroupValidity').set(GROUP_VALIDITY_OPTIONS.EXCLUDE)
-    }
     // remove options from url (they're very likely wrong after changing the school year)
     router.navigate(urlStringFrom({}, { path: window.location.pathname, mode: 'replace' }))
     // reload location to trigger refetch of all relevant data

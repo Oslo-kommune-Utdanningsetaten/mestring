@@ -23,12 +23,17 @@
   import { USER_ROLES } from '../../utils/constants'
   import {
     getPreferredCreatedParams,
-    getPreferredGroupValidity,
+    getPreferredSchoolYear,
   } from '../../stores/localStorageFunctions'
+  import { inferGroupValidityParams } from '../../utils/schoolYear'
 
   import ButtonMini from '../ButtonMini.svelte'
 
-  const { user, school, onDone } : {
+  const {
+    user,
+    school,
+    onDone,
+  }: {
     user: Partial<UserDecorated>
     school: SchoolType
     onDone?: () => void | Promise<void>
@@ -79,8 +84,8 @@
         query: {
           school: school.id,
           enabled: 'only',
-          valid: getPreferredGroupValidity(),
           ...getPreferredCreatedParams(),
+          ...inferGroupValidityParams(getPreferredSchoolYear()),
         },
       })
       schoolGroups = result.data || []
