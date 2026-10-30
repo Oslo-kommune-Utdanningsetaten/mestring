@@ -52,7 +52,7 @@
   <ul class="mt-3">
     {#each users as user}
       <li>
-        <Link to={`/admin/users/${user.id}`}>{user.name}</Link>
+        <Link to={`/users/${user.id}`}>{user.name}</Link>
       </li>
     {/each}
   </ul>
