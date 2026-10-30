@@ -10,7 +10,7 @@
     isLastValueVisible,
     isBadgeEmpty = false,
     isBadgeVoid = false,
-  } : {
+  }: {
     masteryData?: MasteryData
     masterySchema?: MasterySchemaWithConfig | null
     title: string
@@ -24,8 +24,9 @@
   const calculations = $derived(useMasteryCalculations(masterySchema))
 
   // Trend
-  const isFlat = $derived(Math.abs(trend) < calculations.flatTrendThreshold)
-  const isDecreasing = $derived(trend < 0 && !isFlat)
+  const isFlat = $derived(Math.abs(trend) <= calculations.flatTrendThreshold)
+  const isIncreasing = $derived(trend > calculations.flatTrendThreshold)
+  const isDecreasing = $derived(trend < calculations.flatTrendThreshold)
 
   // Dimensions
   const trendBoxSizeX = 30
@@ -33,7 +34,7 @@
   const masteryIndicatorHeight = 2
   const masteryIndicatorWidth = trendBoxSizeX
 
-  const minTriangleSize = 4
+  const minTriangleSize = 8
   const maxTriangleSize = trendBoxSizeX
 
   // Triangle size scales with the magnitude of the trend.
@@ -41,6 +42,9 @@
   const triangleWidth = $derived(
     Math.round(minTriangleSize + triangleFraction * (maxTriangleSize - minTriangleSize))
   )
+
+  // Flat trend is drawn as a fixed-size square
+  const flatSquareSize = minTriangleSize
 
   // Equilateral triangle: height = width * sqrt(3) / 2
   const triangleHeight = $derived(Math.round((triangleWidth * Math.sqrt(3)) / 2))
@@ -57,10 +61,19 @@
 <span class="badge-container d-inline-flex align-items-center" {title}>
   {#if masteryData}
     <span class="trend-box" style="width: {trendBoxSizeX}px; height: {trendBoxSizeY}px;"></span>
-    <span
-      class="trend-triangle {isDecreasing ? 'down' : 'up'}"
-      style={`--triangle-width: ${triangleWidth}px; --triangle-height: ${triangleHeight}px;`}
-    ></span>
+    {#if isFlat}
+      <span class="trend-square" style={`--square-size: ${flatSquareSize}px;`}></span>
+    {:else if isIncreasing}
+      <span
+        class="trend-triangle up"
+        style={`--triangle-width: ${triangleWidth}px; --triangle-height: ${triangleHeight}px;`}
+      ></span>
+    {:else if isDecreasing}
+      <span
+        class="trend-triangle down"
+        style={`--triangle-width: ${triangleWidth}px; --triangle-height: ${triangleHeight}px;`}
+      ></span>
+    {/if}
     {#if isLastValueVisible}
       <span
         class="mastery-indicator"
@@ -108,6 +121,16 @@
     height: 0;
     border-left: calc(var(--triangle-width) / 2) solid transparent;
     border-right: calc(var(--triangle-width) / 2) solid transparent;
+  }
+
+  .trend-square {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: var(--square-size);
+    height: var(--square-size);
+    background-color: var(--bs-secondary);
   }
 
   .trend-triangle.up {

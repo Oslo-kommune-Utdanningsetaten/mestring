@@ -10,7 +10,7 @@
     isLastValueVisible,
     isBadgeEmpty = false,
     isBadgeVoid = false,
-  } : {
+  }: {
     masteryData?: MasteryData
     masterySchema?: MasterySchemaWithConfig | null
     title: string
@@ -24,8 +24,9 @@
   const calculations = $derived(useMasteryCalculations(masterySchema))
 
   // Trend
-  const isFlat = $derived(Math.abs(trend) < calculations.flatTrendThreshold)
-  const isDecreasing = $derived(trend < 0 && !isFlat)
+  const isFlat = $derived(Math.abs(trend) <= calculations.flatTrendThreshold)
+  const isIncreasing = $derived(trend > calculations.flatTrendThreshold)
+  const isDecreasing = $derived(trend < calculations.flatTrendThreshold)
 
   // Dimensions
   const trendBoxSizeX = 30
