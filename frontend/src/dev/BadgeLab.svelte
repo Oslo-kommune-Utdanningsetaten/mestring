@@ -127,10 +127,11 @@
       <code>{calculations.maxValue}</code>
       , deltaValue
       <code>{calculations.deltaValue}</code>
-      . Trends come from
-      <code>inferMastery</code>
-      over an observation sequence rising from the bottom of the scale to each end value, so they reflect
-      real linear-regression output.
+      . Input value increment is
+      <code>{calculations.inputValueIncrement}</code>
+      and an absolute value for trend of
+      <code>{calculations.flatTrendThreshold}</code>
+      or lower is considered flat.
     </p>
 
     <div class="my-3">
