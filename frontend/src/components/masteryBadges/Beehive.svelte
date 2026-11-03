@@ -26,13 +26,17 @@
   // Trend
   const isFlat = $derived(Math.abs(trend) <= calculations.flatTrendThreshold)
   const isIncreasing = $derived(trend > calculations.flatTrendThreshold)
-  const isDecreasing = $derived(trend < calculations.flatTrendThreshold)
+  const isDecreasing = $derived(trend < -calculations.flatTrendThreshold)
 
   // Colors
   const increasingColor = 'var(--bs-success)'
   const flatColor = 'var(--bs-warning)'
   const decreasingColor = 'var(--bs-danger)'
-  const trendColor = $derived(isDecreasing ? decreasingColor : isFlat ? flatColor : increasingColor)
+  const trendColor = $derived.by(() => {
+    if (isDecreasing) return decreasingColor
+    if (isIncreasing) return increasingColor
+    return flatColor
+  })
 
   // Dimensions
   const trendBoxSizeX = 26

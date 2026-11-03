@@ -25,7 +25,7 @@
   // Trend
   const isFlat = $derived(Math.abs(trend) <= calculations.flatTrendThreshold)
   const isIncreasing = $derived(trend > calculations.flatTrendThreshold)
-  const isDecreasing = $derived(trend < calculations.flatTrendThreshold)
+  const isDecreasing = $derived(trend < -calculations.flatTrendThreshold)
 
   // Dimensions
   const size = 30
