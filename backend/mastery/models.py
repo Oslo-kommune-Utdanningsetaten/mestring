@@ -1,6 +1,7 @@
 from django.utils import timezone
 from django.db import models
 from django.db.models import Q
+from django.contrib.postgres.fields import ArrayField
 from nanoid import generate
 from .fields import PlainJSONField
 from .querysets import GroupQuerySet
@@ -389,6 +390,7 @@ class Observation(BaseModel):
     is_visible_to_student = models.BooleanField(default=True)
     # URL to the observed product (e.g., a document or project if any)
     product_url = models.URLField(max_length=2048, null=True)
+    tags = models.JSONField(null=True, blank=False)
 
     def save(self, **kwargs):
         # Auto-derive subject from goal if not explicitly set
@@ -399,6 +401,16 @@ class Observation(BaseModel):
 
     class Meta:
         ordering = ["observed_at"]
+
+
+class TagCollection(BaseModel):
+    """
+    A TagCollection represents a collection of tags that are associated with a school and a subject.
+    """
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='tag_collections')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE,
+                                null=False, related_name='tag_collections')
+    tags = models.JSONField(null=True, blank=False)
 
 
 class StatusCategory(BaseModel):

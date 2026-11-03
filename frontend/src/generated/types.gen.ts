@@ -127,6 +127,7 @@ export type ObservationType = {
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
     productUrl?: string | null;
+    tags?: unknown;
     readonly createdById: string;
     readonly updatedById: string;
     goalId: string;
@@ -231,6 +232,7 @@ export type PatchedObservationType = {
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
     productUrl?: string | null;
+    tags?: unknown;
     readonly createdById?: string;
     readonly updatedById?: string;
     goalId?: string;
@@ -329,6 +331,19 @@ export type PatchedSubjectType = {
     readonly createdById?: string;
     readonly updatedById?: string;
     ownedBySchoolId?: string | null;
+};
+
+export type PatchedTagCollectionType = {
+    readonly id?: string;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    readonly maintainedAt?: string | null;
+    deletedAt?: string | null;
+    tags?: unknown;
+    readonly createdById?: string;
+    readonly updatedById?: string;
+    schoolId?: string;
+    subjectId?: string;
 };
 
 export type PatchedUserType = {
@@ -476,6 +491,19 @@ export type SubjectType = {
     ownedBySchoolId?: string | null;
 };
 
+export type TagCollectionType = {
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    readonly maintainedAt: string | null;
+    deletedAt?: string | null;
+    tags?: unknown;
+    readonly createdById: string;
+    readonly updatedById: string;
+    schoolId: string;
+    subjectId: string;
+};
+
 export type UserType = {
     readonly id: string;
     readonly createdAt: string;
@@ -595,6 +623,7 @@ export type ObservationCreateType = {
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
     productUrl?: string | null;
+    tags?: unknown;
     goalId: string;
     studentId: string;
     subjectId?: string | null;
@@ -667,6 +696,7 @@ export type PatchedObservationCreateType = {
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
     productUrl?: string | null;
+    tags?: unknown;
     goalId?: string;
     studentId?: string;
     subjectId?: string | null;
@@ -733,6 +763,13 @@ export type PatchedSubjectCreateType = {
     grepCode?: string | null;
     grepGroupCode?: string | null;
     ownedBySchoolId?: string | null;
+};
+
+export type PatchedTagCollectionCreateType = {
+    deletedAt?: string | null;
+    tags?: unknown;
+    schoolId?: string;
+    subjectId?: string;
 };
 
 export type PatchedUserCreateType = {
@@ -820,6 +857,13 @@ export type SubjectCreateType = {
     grepCode?: string | null;
     grepGroupCode?: string | null;
     ownedBySchoolId?: string | null;
+};
+
+export type TagCollectionCreateType = {
+    deletedAt?: string | null;
+    tags?: unknown;
+    schoolId: string;
+    subjectId: string;
 };
 
 export type UserCreateType = {
@@ -2393,6 +2437,128 @@ export type SubjectsUpdateResponses = {
 };
 
 export type SubjectsUpdateResponse = SubjectsUpdateResponses[keyof SubjectsUpdateResponses];
+
+export type TagCollectionsListData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
+        /**
+         * Filter by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
+         */
+        deleted?: 'exclude' | 'include' | 'only';
+        /**
+         * Filter tag_collections by school.
+         */
+        school: string;
+        /**
+         * Filter tag_collections by subject.
+         */
+        subject?: string;
+    };
+    url: '/api/tag-collections/';
+};
+
+export type TagCollectionsListResponses = {
+    200: Array<TagCollectionType>;
+};
+
+export type TagCollectionsListResponse = TagCollectionsListResponses[keyof TagCollectionsListResponses];
+
+export type TagCollectionsCreateData = {
+    body: TagCollectionCreateType;
+    path?: never;
+    query?: never;
+    url: '/api/tag-collections/';
+};
+
+export type TagCollectionsCreateResponses = {
+    201: TagCollectionType;
+};
+
+export type TagCollectionsCreateResponse = TagCollectionsCreateResponses[keyof TagCollectionsCreateResponses];
+
+export type TagCollectionsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this tag collection.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/tag-collections/{id}/';
+};
+
+export type TagCollectionsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type TagCollectionsDestroyResponse = TagCollectionsDestroyResponses[keyof TagCollectionsDestroyResponses];
+
+export type TagCollectionsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this tag collection.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/tag-collections/{id}/';
+};
+
+export type TagCollectionsRetrieveResponses = {
+    200: TagCollectionType;
+};
+
+export type TagCollectionsRetrieveResponse = TagCollectionsRetrieveResponses[keyof TagCollectionsRetrieveResponses];
+
+export type TagCollectionsPartialUpdateData = {
+    body?: PatchedTagCollectionCreateType;
+    path: {
+        /**
+         * A unique value identifying this tag collection.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/tag-collections/{id}/';
+};
+
+export type TagCollectionsPartialUpdateResponses = {
+    200: TagCollectionType;
+};
+
+export type TagCollectionsPartialUpdateResponse = TagCollectionsPartialUpdateResponses[keyof TagCollectionsPartialUpdateResponses];
+
+export type TagCollectionsUpdateData = {
+    body: TagCollectionCreateType;
+    path: {
+        /**
+         * A unique value identifying this tag collection.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/tag-collections/{id}/';
+};
+
+export type TagCollectionsUpdateResponses = {
+    200: TagCollectionType;
+};
+
+export type TagCollectionsUpdateResponse = TagCollectionsUpdateResponses[keyof TagCollectionsUpdateResponses];
 
 export type UserGroupsListData = {
     body?: never;

@@ -15,6 +15,7 @@ router.register(r'observations', views.ObservationViewSet, basename="observation
 router.register(r'status', views.StatusViewSet, basename="status")
 router.register(r'status-categories', views.StatusCategoryViewSet, basename="status-category")
 router.register(r'mastery-schemas', views.MasterySchemaViewSet, basename="mastery-schema")
+router.register(r'tag-collections', views.TagCollectionViewSet, basename="tag-collection")
 router.register(r'data-maintenance-tasks', views.DataMaintenanceTaskViewSet, basename="data-maintenance-task")
 
 urlpatterns = [

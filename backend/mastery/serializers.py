@@ -126,6 +126,12 @@ class UserSerializer(BaseModelSerializer):
         fields = '__all__'
 
 
+class TagCollectionSerializer(BaseModelSerializer):
+    class Meta:
+        model = models.TagCollection
+        fields = '__all__'
+
+
 class GroupSerializer(BaseModelSerializer):
     class Meta:
         model = models.Group
