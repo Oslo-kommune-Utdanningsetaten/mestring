@@ -13,14 +13,14 @@ class TagCollectionAccessPolicy(BaseAccessPolicy):
             "principal": ["role:superadmin"],
             "effect": "allow",
         },
-        # School admins and inspectorshave full access to tag_collections belonging to their school
+        # School admins and inspectors have full access to tag_collections belonging to their school
         {
             "action": ["create", "update", "partial_update", "destroy"],
             "principal": ["role:admin", "role:inspector"],
             "effect": "allow",
             "condition": "is_admin_or_inspector_at_school",
         },
-        # Users with the teacher role in a user_group, attached to a group witht the subject in question, can CRUD tags the tag_collections for that subject and school
+        # Users with the teacher role in a user_group, attached to a group with the subject in question, can CRUD the tag_collections for that subject and school
         {
             "action": ["create", "update", "partial_update", "destroy"],
             "principal": ["role:teacher"],
@@ -101,7 +101,7 @@ class TagCollectionAccessPolicy(BaseAccessPolicy):
 
             group_ids = UserGroup.objects.filter(
                 user_id=request.user.id, role__name="teacher", group__subject_id=subject_id,
-                group__school_id=school_id,).values_list(
+                group__school_id=school_id).values_list(
                 "group_id", flat=True).distinct()
 
             return bool(group_ids)
