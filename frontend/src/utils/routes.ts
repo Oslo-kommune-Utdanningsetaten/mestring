@@ -8,6 +8,7 @@ import GroupsCompare from '../views/GroupsCompare.svelte'
 import Students from '../views/Students.svelte'
 import Status from '../views/Status.svelte'
 import Profile from '../views/Profile.svelte'
+import Subject from '../views/Subject.svelte'
 
 // Admin views
 import Users from '../views/admin/Users.svelte'
@@ -59,6 +60,12 @@ export const ROUTES = [
   {
     path: '/groups/:groupId',
     component: Group,
+    isPublic: false,
+    accessibleBy: allRoles,
+  },
+  {
+    path: '/subjects/:subjectId',
+    component: Subject,
     isPublic: false,
     accessibleBy: allRoles,
   },
