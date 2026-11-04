@@ -4,11 +4,16 @@
   import ButtonMini from '../ButtonMini.svelte'
   import { t } from '../../stores/translations'
 
-  const { subject, school, onDone } : {
+  const {
+    subject,
+    school,
+    onDone,
+  }: {
     subject: SubjectType | null
     school: SchoolType | null
     onDone: () => void
   } = $props()
+
   let displayName = $state<string | null>(null)
   let shortName = $state<string | null>(null)
   let isFormValid = $derived(!!displayName?.trim() && !!shortName?.trim())
@@ -49,7 +54,7 @@
 <div class="subject-edit p-4">
   <h3 class="pb-2">
     {subject?.id ? 'Redigerer' : 'Nytt'}
-    {t('goal', { form: 'sin-indef' })} for {school?.displayName}
+    fag for {school?.displayName}
   </h3>
   <hr />
 
