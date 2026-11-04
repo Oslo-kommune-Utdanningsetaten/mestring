@@ -78,7 +78,7 @@
 
           <div class="subject-name">
             {#if group.subjectId}
-              <SubjectTag subjectId={group.subjectId} />
+              <SubjectTag subjectId={group.subjectId} href="/subjects/{group.subjectId}" />
             {/if}
           </div>
 

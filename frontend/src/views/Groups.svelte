@@ -1,12 +1,13 @@
 <script lang="ts">
   import type { GroupType, UserType } from '../generated/types.gen'
   import { dataStore } from '../stores/data'
-  import { urlStringFrom, getSubjectName } from '../utils/functions'
+  import { urlStringFrom } from '../utils/functions'
   import { hasUserAccessToPath } from '../stores/access'
   import { USER_ROLES } from '../utils/constants'
   import { usersList } from '../generated/sdk.gen'
   import GroupTag from '../components/GroupTag.svelte'
   import UserTag from '../components/UserTag.svelte'
+  import SubjectTag from '../components/SubjectTag.svelte'
   import Link from '../components/Link.svelte'
 
   let currentSchool = $derived($dataStore.currentSchool)
@@ -30,11 +31,6 @@
         groupMembers = { ...groupMembers, [group.id]: { teachers: [], students: [] } }
       }
     })
-  }
-
-  const getSubjectNameBySubjectId = (subjectId: string) => {
-    const subject = $dataStore.subjects.find(subj => subj.id === subjectId)
-    return subject ? getSubjectName(subject) : 'Ukjent fag'
   }
 
   $effect(() => {
@@ -62,7 +58,12 @@
 
         <div class="d-flex align-items-center gap-2">
           <GroupTag {group} isGroupTypeNameEnabled={true} />
+          {#if group.subjectId}
+            <SubjectTag subjectId={group.subjectId} href="/subjects/{group.subjectId}" />
+          {/if}
+        </div>
 
+        <div class="mt-3 d-flex align-items-center gap-2">
           <!-- teachers -->
           {#if groupMembers && Object.hasOwn(groupMembers, group.id)}
             {#each groupMembers[group.id].teachers as teacher}
@@ -75,12 +76,6 @@
             {/each}
           {/if}
         </div>
-
-        {#if group.subjectId}
-          <div class="mt-3">
-            {getSubjectNameBySubjectId(group.subjectId)}
-          </div>
-        {/if}
 
         <!-- students -->
         <div class="mt-3 mb-1">

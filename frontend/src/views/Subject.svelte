@@ -188,7 +188,7 @@
             {#key tag}
               <div class="list-group-item tag-row">
                 <span>
-                  {#if $hasUserAccessToFeature('subject', 'update', { subjectId: subject.id })}
+                  {#if $hasUserAccessToFeature( 'tagCollection', 'update', { subjectId: subject.id } )}
                     <pkt-icon
                       title="Endre rekkefølge"
                       class="me-2 row-handle-draggable"
@@ -202,43 +202,52 @@
                   {tag}
                 </span>
                 <span class="pt-2">
-                  <ButtonMini
-                    options={{
-                      title: 'Slett tag',
-                      iconName: 'trash-can',
-                      skin: 'tertiary',
-                      variant: 'icon-only',
-                      size: 'tiny',
-                      onClick: () => handleTagDelete(index),
-                    }}
-                  />
+                  {#if $hasUserAccessToFeature( 'tagCollection', 'update', { subjectId: subject.id } )}
+                    <ButtonMini
+                      options={{
+                        title: 'Slett tag',
+                        iconName: 'trash-can',
+                        skin: 'tertiary',
+                        variant: 'icon-only',
+                        size: 'tiny',
+                        onClick: () => handleTagDelete(index),
+                      }}
+                    />
+                  {/if}
                 </span>
               </div>
             {/key}
           {/each}
         </div>
       {:else}
-        Ingen tags tilgjengelig på dette faget. Men kanskje du vil legge til noen?
+        <p class="text-muted">
+          Ingen tags tilgjengelig på dette faget.
+          {#if $hasUserAccessToFeature('tagCollection', 'create', { subjectId: subject.id })}
+            Men kanskje du vil legge til noen?
+          {/if}
+        </p>
       {/if}
       <div class="mt-3">
-        <pkt-textinput
-          label="Legg til ny tag"
-          placeholder="ny tag"
-          autocomplete="off"
-          class="mb-2"
-          bind:this={tagInputElement}
-        ></pkt-textinput>
-        <ButtonMini
-          options={{
-            title: 'Legg til ny tag',
-            iconName: 'plus-sign',
-            skin: 'primary',
-            variant: 'icon-left',
-            onClick: () => handleAddTag(tagInputElement?.value ?? ''),
-          }}
-        >
-          Legg til
-        </ButtonMini>
+        {#if $hasUserAccessToFeature('tagCollection', 'update', { subjectId: subject.id })}
+          <pkt-textinput
+            label="Legg til ny tag"
+            placeholder="Ny tag"
+            autocomplete="off"
+            class="mb-2"
+            bind:this={tagInputElement}
+          ></pkt-textinput>
+          <ButtonMini
+            options={{
+              title: 'Legg til ny tag',
+              iconName: 'plus-sign',
+              skin: 'primary',
+              variant: 'icon-left',
+              onClick: () => handleAddTag(tagInputElement?.value ?? ''),
+            }}
+          >
+            Legg til
+          </ButtonMini>
+        {/if}
       </div>
     </div>
   {:else}

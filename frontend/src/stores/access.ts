@@ -210,6 +210,14 @@ const checkUserAccessToFeature = (
     if (['compare'].includes(action)) {
       return currentUser.isSchoolAdmin || currentUser.isSchoolInspector
     }
+  } else if (resource === 'tagCollection') {
+    if (['create', 'update', 'delete'].includes(action)) {
+      if (currentUser.isSchoolAdmin || currentUser.isSchoolInspector) return true
+      const subjectIds = currentUser.teacherGroups.map(
+        (teacherGroup: GroupType) => teacherGroup.subjectId
+      )
+      if (subjectId && subjectIds.includes(subjectId)) return true
+    }
   }
   return false
 }

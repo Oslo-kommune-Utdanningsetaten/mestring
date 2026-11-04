@@ -32,6 +32,8 @@
   import GoalWidgets from '../components/edit/GoalWidgets.svelte'
   import GroupSVG from '../assets/group.svg.svelte'
   import UserTag from '../components/UserTag.svelte'
+  import SubjectTag from '../components/SubjectTag.svelte'
+  import GroupTag from '../components/GroupTag.svelte'
   import Link from '../components/Link.svelte'
 
   const { groupId }: { groupId: string } = $props()
@@ -50,27 +52,6 @@
 
   let subject = $state<SubjectType | undefined>(undefined)
   let currentSchool = $derived($dataStore.currentSchool)
-
-  const groupSubtitle = $derived.by(() => {
-    if (!group) return
-    let result = ''
-    if (subject) {
-      result += subject.displayName
-      if (group.type == GROUP_TYPE_BASIS) {
-        result += ', basisgruppe'
-      } else {
-        result += ', undervisningsgruppe'
-      }
-    } else {
-      if (group.type == GROUP_TYPE_BASIS) {
-        result += 'Basisgruppe'
-      } else {
-        result += 'Undervisningsgruppe'
-        result += ' [mangler fag]'
-      }
-    }
-    return result
-  })
 
   let isCurrentUserOnlyStudent = $derived(
     $dataStore.currentUser?.isStudent && !$dataStore.currentUser?.isTeacher
@@ -247,8 +228,11 @@
         <h2 title="Gruppe">
           {getGroupLabel(group, { isGroupNameEnabled: true, includeEarlierYear: true })}
         </h2>
-        <h3 class="text-secondary group-subtitle" title={subject?.grepCode}>
-          {groupSubtitle}
+        <h3 class="text-secondary group-subtitle">
+          <GroupTag {group} isGroupTypeNameEnabled={true} />
+          {#if group.subjectId}
+            <SubjectTag subjectId={group.subjectId} href="/subjects/{group.subjectId}" />
+          {/if}
         </h3>
       </div>
     </div>
