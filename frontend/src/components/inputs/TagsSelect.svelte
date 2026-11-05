@@ -12,7 +12,7 @@
     onChange: (tags: string[]) => void
   } = $props()
 
-  const handleTagClick = (tag: string) => {
+  const handleTagToggle = (tag: string) => {
     const newSelectedTags = selectedTags.includes(tag)
       ? selectedTags.filter(t => t !== tag)
       : [...selectedTags, tag]
@@ -31,7 +31,7 @@
       class:selected={isSelected}
       class:unselected={!isSelected}
       aria-pressed={isSelected}
-      onclick={() => handleTagClick(tag)}
+      onclick={() => handleTagToggle(tag)}
     >
       {#if isSelected}
         <CircleCheckSVG />
