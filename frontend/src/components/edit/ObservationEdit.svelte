@@ -1,7 +1,18 @@
 <script lang="ts">
-  import type { ObservationType, GoalType, UserType } from '../../generated/types.gen'
+  import type {
+    ObservationType,
+    GoalType,
+    UserType,
+    GroupType,
+    TagCollectionType,
+  } from '../../generated/types.gen'
   import type { MasterySchemaWithConfig } from '../../types/models'
-  import { observationsCreate, observationsUpdate, observationsList } from '../../generated/sdk.gen'
+  import {
+    observationsCreate,
+    observationsUpdate,
+    observationsList,
+    tagCollectionsList,
+  } from '../../generated/sdk.gen'
 
   import { useMasteryCalculations } from '../../utils/masteryHelpers'
   import { dataStore, currentUser, currentSchool } from '../../stores/data'
@@ -13,6 +24,7 @@
 
   import ButtonMini from '../ButtonMini.svelte'
   import MasteryValueInput from '../MasteryValueInput.svelte'
+  import TagsSelect from '../inputs/TagsSelect.svelte'
 
   const {
     student,
@@ -36,12 +48,27 @@
   let localObservation = $state<Partial<ObservationType> & { masteryValue?: number }>({})
   let formContainer = $state<HTMLElement | null>(null)
   let observations = $state<ObservationType[]>([])
+  let tagCollection = $state<TagCollectionType | undefined>(undefined)
 
   const masterySchema: MasterySchemaWithConfig = $derived(
     masterySchemaProp ?? $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
   )
   const calculations = $derived(useMasteryCalculations(masterySchema))
   const studentFirstName = $derived(student?.name.split(' ')[0] || 'eleven')
+
+  const subject = $derived.by(() => {
+    if (!goal) return undefined
+    let subjectId = undefined
+    if (goal.groupId) {
+      // Subject via group
+      const group = $currentUser.allGroups.find((g: GroupType) => g.id === goal.groupId)
+      subjectId = group?.subjectId
+    } else {
+      // Subject directly from subjectId
+      subjectId = goal.subjectId
+    }
+    return subjectId && $dataStore.subjects.find(s => s.id === goal.subjectId)
+  })
 
   const fetchObservations = async () => {
     try {
@@ -69,6 +96,28 @@
     }
   }
 
+  const fetchTags = async () => {
+    try {
+      const tagCollectionResult = await tagCollectionsList({
+        query: { subject: subject.id, school: $currentSchool.id },
+      })
+      tagCollection = (tagCollectionResult.data || [])[0] as TagCollectionType | undefined
+    } catch (error) {
+      console.error(`Could not fetch tags for subject ${subject.id}`, error)
+    }
+  }
+
+  const handleTagsChange = (selectedTags: string[]) => {
+    localObservation.tags = selectedTags
+    localObservation = { ...localObservation } // Trigger reactivity
+  }
+
+  $effect(() => {
+    if (subject) {
+      fetchTags()
+    }
+  })
+
   $effect(() => {
     if ($isHistoryVisibleOnMasteryInput) {
       fetchObservations()
@@ -79,6 +128,7 @@
   $effect(() => {
     localObservation = {
       ...observation,
+      tags: observation?.tags ?? [],
       masteryValue: observation?.masteryValue ?? calculations.defaultValue,
     }
   })
@@ -135,7 +185,7 @@
 
 <div class="observation-edit p-4" bind:this={formContainer}>
   {#if localObservation}
-    <h3>
+    <h3 title={masterySchema.title}>
       {localObservation.id ? 'Redigerer' : 'Ny'}
       {t('observation', { form: 'sin-indef' })}
     </h3>
@@ -162,6 +212,16 @@
         checked={localObservation.isVisibleToStudent}
         onchange={() => handleToggleVisibility()}
       ></pkt-checkbox>
+    {/if}
+
+    {#if masterySchema?.config?.isSubjectTagsEnabled}
+      <div class="mt-5 mb-3">
+        <TagsSelect
+          allTags={(tagCollection?.tags || []) as string[]}
+          selectedTags={(localObservation?.tags || []) as string[]}
+          onChange={handleTagsChange}
+        />
+      </div>
     {/if}
 
     {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}

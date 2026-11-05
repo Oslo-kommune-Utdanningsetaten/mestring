@@ -6,7 +6,9 @@
 
   import ObservationEdit from './ObservationEdit.svelte'
 
-  const { masterySchema } : {
+  const {
+    masterySchema,
+  }: {
     masterySchema: Partial<MasterySchemaWithConfig>
   } = $props()
 
@@ -39,6 +41,7 @@
     { key: 'isMasteryValueInputEnabled', label: 'Mestringsverdi input' },
     { key: 'isMasteryValueVisible', label: 'Mestringsverdi synlig' },
     { key: 'isIncrementIndicatorEnabled', label: 'Verdi-indikator' },
+    { key: 'isSubjectTagsEnabled', label: 'Tags for fag' },
     { key: 'isMasteryDescriptionInputEnabled', label: 'Tilbakemelding' },
     { key: 'isFeedforwardInputEnabled', label: 'Fremovermelding' },
   ]
@@ -164,7 +167,7 @@
     <ObservationEdit
       student={aStudent}
       goal={aGoal}
-      observation={null}
+      observation={{}}
       {masterySchema}
       isPersistenceControlEnabled={false}
       onDone={() => {}}

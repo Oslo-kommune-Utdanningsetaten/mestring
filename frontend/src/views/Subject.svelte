@@ -16,6 +16,7 @@
 
   const { subjectId }: { subjectId: string } = $props()
 
+  const maxTagLength = 50
   let subject = $state<SubjectType | undefined>(undefined)
   let groups = $state<GroupType[]>([])
   let tagCollection = $state<TagCollectionType | undefined>(undefined)
@@ -23,6 +24,13 @@
   let sortableInstance: Sortable | null = null
   let tagInputElement = $state<HTMLInputElement | null>(null)
   let tagsListElement = $state<HTMLElement | null>(null)
+  let newTagValue = $state<string | undefined>(undefined)
+  let isNewTagDuplicate = $derived.by(() => {
+    return (tagCollection?.tags as string[])?.includes(newTagValue ?? '') ?? false
+  })
+  let isNewTagTooLong = $derived.by(() => {
+    return (newTagValue?.length ?? 0) > maxTagLength
+  })
 
   const fetchSubjectData = async () => {
     try {
@@ -53,7 +61,7 @@
     }
   }
 
-  const handleAddTag = async (tag: string) => {
+  const handleAddTag = async (tag: string | undefined) => {
     if (!tag || tag.trim() === '' || !tagInputElement) return
     if (tagCollection) {
       // update existing tag collection with new tag
@@ -65,7 +73,7 @@
           body: { tags: updatedTags },
         })
         tagCollection = result.data!
-        tagInputElement.value = ''
+        newTagValue = undefined
       } catch (error) {
         console.error(`Could not add tag ${tag}`, error)
       }
@@ -80,7 +88,7 @@
           },
         })
         tagCollection = result.data!
-        tagInputElement.value = ''
+        newTagValue = undefined
       } catch (error) {
         console.error(`Could not create tag collection with tag ${tag}`, error)
       }
@@ -125,6 +133,12 @@
 
   $effect(() => {
     fetchSubjectData()
+  })
+
+  $effect(() => {
+    if (tagInputElement) {
+      tagInputElement.focus()
+    }
   })
 
   $effect(() => {
@@ -229,20 +243,38 @@
       {/if}
       <div class="mt-3">
         {#if $hasUserAccessToFeature('tagCollection', 'update', { subjectId: subject.id })}
-          <pkt-textinput
-            label="Legg til ny tag"
-            placeholder="Ny tag"
-            autocomplete="off"
-            class="mb-2"
+          <label for="newTagInput" class="form-label visually-hidden">Ny tag</label>
+          <input
+            id="newTagInput"
+            type="text"
+            class="form-control rounded-0 border-2 border-primary input-field mb-2"
+            name="displayName"
             bind:this={tagInputElement}
-          ></pkt-textinput>
+            bind:value={newTagValue}
+            placeholder="Ny tag"
+            onkeydown={(event: KeyboardEvent) => {
+              if (event.key === 'Enter' && !isNewTagDuplicate && !isNewTagTooLong)
+                handleAddTag(newTagValue)
+            }}
+          />
+          {#if isNewTagDuplicate}
+            <p class="text-danger">Denne taggen finnes allerede</p>
+          {/if}
+          <p class="text-muted">
+            {newTagValue?.length ?? 0}/{maxTagLength}
+            {#if isNewTagTooLong}<span class="text-danger">
+                For lang, for lang, den tag er for lang. Hilsen Det Kongelige Norske Tagdepartement.
+              </span>{/if}
+          </p>
+
           <ButtonMini
             options={{
               title: 'Legg til ny tag',
               iconName: 'plus-sign',
               skin: 'primary',
               variant: 'icon-left',
-              onClick: () => handleAddTag(tagInputElement?.value ?? ''),
+              disabled: !newTagValue?.trim() || isNewTagDuplicate || isNewTagTooLong,
+              onClick: () => handleAddTag(newTagValue),
             }}
           >
             Legg til
