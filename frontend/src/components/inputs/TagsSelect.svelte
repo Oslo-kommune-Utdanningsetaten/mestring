@@ -13,26 +13,27 @@
   } = $props()
 
   const handleTagClick = (tag: string) => {
-    const next = selectedTags.includes(tag)
+    const newSelectedTags = selectedTags.includes(tag)
       ? selectedTags.filter(t => t !== tag)
       : [...selectedTags, tag]
 
-    selectedTags = next
-    onChange(next)
+    selectedTags = newSelectedTags
+    onChange(newSelectedTags)
   }
 </script>
 
 <div class="tags-list">
   {#each allTags as tag}
+    {@const isSelected = selectedTags.includes(tag)}
     <button
       type="button"
       class="tag"
-      class:selected={selectedTags.includes(tag)}
-      class:unselected={!selectedTags.includes(tag)}
-      aria-pressed={selectedTags.includes(tag)}
+      class:selected={isSelected}
+      class:unselected={!isSelected}
+      aria-pressed={isSelected}
       onclick={() => handleTagClick(tag)}
     >
-      {#if selectedTags.includes(tag)}
+      {#if isSelected}
         <CircleCheckSVG />
       {:else}
         <CircleSVG />
@@ -50,7 +51,6 @@
   }
 
   .tag {
-    appearance: none;
     border: 2px solid #d8e0ea;
     border-radius: 3px;
     background: #fff;
