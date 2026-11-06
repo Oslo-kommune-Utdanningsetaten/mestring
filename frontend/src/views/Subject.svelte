@@ -196,6 +196,10 @@
     <!-- Tags-->
     <div>
       <h3 class="mb-3">Tags som tilhører faget</h3>
+      <p>
+        Dersom mestringsskjemaet har skrudd på "Tags for fag", vil disse taggene når en observasjon
+        opprettes i dette faget.
+      </p>
       {#if tagCollection}
         <div bind:this={tagsListElement} class="list-tag">
           {#each (tagCollection?.tags ?? []) as string[] as tag, index}
@@ -205,7 +209,7 @@
                   {#if $hasUserAccessToFeature( 'tagCollection', 'update', { subjectId: subject.id } )}
                     <pkt-icon
                       title="Endre rekkefølge"
-                      class="me-2 row-handle-draggable"
+                      class="me-2 mt-1 ms-1 row-handle-draggable"
                       name="drag"
                       role="button"
                       tabindex="0"
@@ -260,10 +264,11 @@
           {#if isNewTagDuplicate}
             <p class="text-danger">Denne taggen finnes allerede</p>
           {/if}
+
           <p class="text-muted">
             {newTagValue?.length ?? 0}/{maxTagLength}
             {#if isNewTagTooLong}<span class="text-danger">
-                For lang, for lang, den tag er for lang. Hilsen Det Kongelige Norske Tagdepartement.
+                For lang, for lang, den tag er for lang. Det Kongelige Norske Tagdepartement.
               </span>{/if}
           </p>
 
@@ -288,11 +293,17 @@
 </section>
 
 <style>
+  #newTagInput {
+    width: 50%;
+    min-width: 20rem;
+  }
+
   .list-tag {
     width: fit-content;
     min-width: 25%;
     max-width: 100%;
   }
+
   .tag-row {
     display: grid;
     grid-template-columns: auto 1fr auto;
@@ -302,10 +313,12 @@
     align-items: center;
     border: 1px solid var(--bs-border-color);
   }
+
   .tag-row:first-child {
     border-top-left-radius: var(--bs-border-radius);
     border-top-right-radius: var(--bs-border-radius);
   }
+
   .tag-row:last-child {
     border-bottom-left-radius: var(--bs-border-radius);
     border-bottom-right-radius: var(--bs-border-radius);
