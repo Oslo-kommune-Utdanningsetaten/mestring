@@ -12,6 +12,7 @@
   import { t } from '../stores/translations'
 
   import Link from './Link.svelte'
+  import TagsView from './TagsView.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import MasteryBarChart from './MasteryBarChart.svelte'
   import ButtonMini from './ButtonMini.svelte'
@@ -266,25 +267,27 @@
     </div>
 
     {#if isExpanded}
-      <div class="goal-secondary-row">
+      <div class="goal-secondary-row pt-3">
         {#if goal.observations?.length}
-          <div class="student-observations-row mb-2">
-            <span>Når</span>
-            <span>Verdi</span>
-            <span>Handlinger</span>
-          </div>
+          {@const hasTags = goal.observations.some(
+            (obs: ObservationType) => ((obs?.tags || []) as string[]).length > 0
+          )}
+
           {#each goal?.observations as observation, index}
-            <div class="student-observations-row observation-item">
-              <span>
-                <span class="bordered">
-                  <ObservationVisibilityMarker {observation} />
-                  <AuthorInfo item={observation} />
-                </span>
+            <div class="student-observations-row observation-item mb-3" class:with-tags={hasTags}>
+              <span class="bordered">
+                <ObservationVisibilityMarker {observation} />
+                <AuthorInfo item={observation} />
               </span>
               <span class="bordered">
                 <MasteryLevelTitle {observation} masterySchema={getMasterySchmemaForGoal(goal)} />
               </span>
-              <span>
+              {#if hasTags}
+                <span>
+                  <TagsView tags={(observation?.tags || []) as string[]} />
+                </span>
+              {/if}
+              <span class="observation-widgets">
                 <ObservationWidgets
                   {observation}
                   {goal}
@@ -352,9 +355,6 @@
   }
 
   div.observation-item > span {
-    font-family: 'Courier New', Courier, monospace !important;
-    font-size: 0.95rem;
-    letter-spacing: -0.07em;
     padding-left: 0.1rem;
   }
 
@@ -404,8 +404,17 @@
 
   .student-observations-row {
     display: grid;
-    grid-template-columns: 5fr 3fr 5fr;
+    grid-template-columns: 6fr 2fr 4fr;
     column-gap: 5px;
     align-items: center;
+  }
+
+  .observation-widgets {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .student-observations-row.with-tags {
+    grid-template-columns: 6fr 2fr 6fr 4fr;
   }
 </style>
