@@ -14,6 +14,7 @@
   import Link from './Link.svelte'
   import ObservationWidgets from './edit/ObservationWidgets.svelte'
   import ObservationVisibilityMarker from './ObservationVisibilityMarker.svelte'
+  import TagsView from './TagsView.svelte'
 
   const limit = 10
   let { masterySchemas, currentSchool, currentUser, subjects } = $derived($dataStore)
@@ -165,52 +166,57 @@
             />
           </div>
         {/if}
-        <div
-          class="observation-mastery-panel"
-          style={getMasteryLevelColor(observation)
-            ? `--mastery-color: ${getMasteryLevelColor(observation)}`
-            : undefined}
-        >
-          {#if observation.masteryDescription || observation.feedforward}
-            <!-- Description and/or feedforward -->
-            {#if observation.masteryDescription}
-              <span class="mastery-text">
-                <span class="mastery-icon">←</span>
-                {observation.masteryDescription}
-              </span>
-            {/if}
-            {#if observation.masteryDescription && observation.feedforward}
-              <hr class="mastery-divider" />
-            {/if}
-            {#if observation.feedforward}
-              <div class="mastery-text">
-                <span class="mastery-icon">→</span>
-                {observation.feedforward}
-              </div>
-            {/if}
-            {#if isNumber(observation.masteryValue)}
-              <span class="mastery-value-corner">
-                <span class="mastery-level-title-corner">
-                  {getMasteryLevelTitle(observation)}
-                  {#if isMasteryValueAvailable(observation)}
-                    ({observation.masteryValue})
-                  {/if}
+        <div class="observation-right-panel">
+          <div
+            class="observation-mastery-panel"
+            style={getMasteryLevelColor(observation)
+              ? `--mastery-color: ${getMasteryLevelColor(observation)}`
+              : undefined}
+          >
+            {#if observation.masteryDescription || observation.feedforward}
+              <!-- Description and/or feedforward -->
+              {#if observation.masteryDescription}
+                <span class="mastery-text">
+                  <span class="mastery-icon">←</span>
+                  {observation.masteryDescription}
                 </span>
-              </span>
-            {/if}
-          {:else if isNumber(observation.masteryValue)}
-            <!-- Only value -->
-            <div class="mastery-only">
-              <span class="mastery-level-title-only">
-                {getMasteryLevelTitle(observation)}
-              </span>
-              {#if isMasteryValueAvailable(observation)}
-                <span class="mastery-value-only">{observation.masteryValue}</span>
               {/if}
-            </div>
-          {:else}
-            <!-- Nothing much to see here -->
-            <span class="mastery-empty">–</span>
+              {#if observation.masteryDescription && observation.feedforward}
+                <hr class="mastery-divider" />
+              {/if}
+              {#if observation.feedforward}
+                <div class="mastery-text">
+                  <span class="mastery-icon">→</span>
+                  {observation.feedforward}
+                </div>
+              {/if}
+              {#if isNumber(observation.masteryValue)}
+                <span class="mastery-value-corner">
+                  <span class="mastery-level-title-corner">
+                    {getMasteryLevelTitle(observation)}
+                    {#if isMasteryValueAvailable(observation)}
+                      ({observation.masteryValue})
+                    {/if}
+                  </span>
+                </span>
+              {/if}
+            {:else if isNumber(observation.masteryValue)}
+              <!-- Only value -->
+              <div class="mastery-only">
+                <span class="mastery-level-title-only">
+                  {getMasteryLevelTitle(observation)}
+                </span>
+                {#if isMasteryValueAvailable(observation)}
+                  <span class="mastery-value-only">{observation.masteryValue}</span>
+                {/if}
+              </div>
+            {:else}
+              <!-- Nothing much to see here -->
+              <span class="mastery-empty">–</span>
+            {/if}
+          </div>
+          {#if observation.tags}
+            <TagsView tags={(observation?.tags || []) as string[]} />
           {/if}
         </div>
       </div>
@@ -225,6 +231,10 @@
     flex-direction: row;
     flex-wrap: wrap;
     gap: 0.75rem;
+  }
+
+  .observation-tags {
+    flex: 1 1 100%;
   }
 
   .observation-meta-panel {
@@ -266,6 +276,14 @@
     color: #999;
   }
 
+  .observation-right-panel {
+    flex-shrink: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
   .observation-mastery-panel {
     container-type: inline-size;
     position: relative;
@@ -295,7 +313,7 @@
       flex: 1;
     }
 
-    .observation-mastery-panel {
+    .observation-right-panel {
       width: 40%;
     }
   }
