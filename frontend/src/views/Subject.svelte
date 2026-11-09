@@ -176,7 +176,7 @@
 
     <!-- Groups-->
     <div class="mb-5">
-      <h3 class="mb-3">Grupper som tilhører faget</h3>
+      <h3 class="mb-3">Undervises i grupper</h3>
       {#if groups.length > 0}
         <div class="d-flex align-items-center gap-3">
           {#each groups as group}
