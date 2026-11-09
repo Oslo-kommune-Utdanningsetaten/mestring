@@ -12,7 +12,7 @@
     allUsers = [],
     role,
     href,
-  } : {
+  }: {
     user?: UserType | null | undefined
     userId?: string | undefined
     allUsers?: UserType[]
@@ -20,7 +20,7 @@
     href?: string
   } = $props()
 
-  const skin: string = $derived('beige')
+  const skin: string = $derived('beige-light')
 
   const iconName = $derived<string>(
     role === USER_ROLES.TEACHER ? 'lecture' : role === USER_ROLES.STUDENT ? 'education' : 'person'

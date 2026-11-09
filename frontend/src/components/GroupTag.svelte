@@ -39,7 +39,7 @@
     return getGroupLabel(group, { isGroupNameEnabled, isGroupTypeNameEnabled })
   })
 
-  const skin: string = $derived('beige')
+  const skin: string = $derived('beige-light')
 
   const isGroupTypeChanged = $derived.by(() => {
     // Inspect feideId to determine original group type
