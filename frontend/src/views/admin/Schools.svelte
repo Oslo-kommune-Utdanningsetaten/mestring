@@ -100,6 +100,7 @@
       placeholder="Organisasjonsnummer"
       autocomplete="off"
       class="mb-2"
+      input-size="medium"
       bind:this={feideOrgInput}
     ></pkt-textinput>
     <ButtonMini
