@@ -188,7 +188,7 @@
           fullwidth={true}
           value={localGoal.subjectId || NONE_FIELD_VALUE}
           hasError={!localGoal.subjectId || localGoal.subjectId === NONE_FIELD_VALUE}
-          requiredText="Velg et fag"
+          strings={{ forms: { required: 'Velg et fag' } }}
           disabled={!localGoal.isRelevant}
           onchange={(e: Event) => {
             const target = e.target as HTMLSelectElement | null
@@ -258,7 +258,7 @@
           fullwidth={true}
           value={localGoal.masterySchemaId || NONE_FIELD_VALUE}
           hasError={!localGoal.masterySchemaId || localGoal.masterySchemaId === NONE_FIELD_VALUE}
-          requiredText="Velg et mestringsskjema"
+          strings={{ forms: { required: 'Velg et mestringsskjema' } }}
           disabled={!localGoal.isRelevant}
           onchange={(e: Event) => {
             const target = e.target as HTMLSelectElement | null
