@@ -28,9 +28,9 @@
   },
   "dependencies": {
     "@hey-api/openapi-ts": "^0.99.0",
-    "@oslokommune/punkt-assets": "^18.9.1",
-    "@oslokommune/punkt-css": "^18.9.6",
-    "@oslokommune/punkt-elements": "^18.9.7",
+    "@oslokommune/punkt-assets": "^20.0.5",
+    "@oslokommune/punkt-css": "^20.0.5",
+    "@oslokommune/punkt-elements": "^20.0.5",
     "bootstrap": "^5.3.3",
     "chart.js": "^4.5.1",
     "date-fns": "^4.1.0",
