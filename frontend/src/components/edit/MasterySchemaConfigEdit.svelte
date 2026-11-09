@@ -169,7 +169,7 @@
       goal={aGoal}
       observation={{}}
       {masterySchema}
-      isPersistenceControlEnabled={false}
+      isPreviewModeEnabled={true}
       onDone={() => {}}
     />
   </div>

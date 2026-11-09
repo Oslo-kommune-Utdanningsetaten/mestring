@@ -31,16 +31,20 @@
     goal,
     observation,
     masterySchema: masterySchemaProp,
-    isPersistenceControlEnabled = true,
+    isPreviewModeEnabled = false,
     onDone,
   }: {
     student: UserType
     goal: GoalType | null
     observation: Partial<ObservationType> & { masteryValue?: number }
     masterySchema?: MasterySchemaWithConfig | null
-    isPersistenceControlEnabled?: boolean
+    isPreviewModeEnabled?: boolean
     onDone: () => void
   } = $props()
+
+  // Sample tags for preview mode
+  const allTagsPreview = ['Reflektert', 'Grundig', 'Nøyaktig', 'Velformulert']
+  const selectedTagsPreview = ['Velformulert']
 
   const isObservationUrlEnabled = localStorage<boolean>('isObservationUrlEnabled')
   const isHistoryVisibleOnMasteryInput = localStorage<boolean>('isHistoryVisibleOnMasteryInput')
@@ -215,12 +219,14 @@
     {/if}
 
     {#if masterySchema?.config?.isSubjectTagsEnabled}
+      {@const allTags = isPreviewModeEnabled
+        ? allTagsPreview
+        : ((tagCollection?.tags || []) as string[])}
+      {@const selectedTags = isPreviewModeEnabled
+        ? selectedTagsPreview
+        : ((localObservation?.tags || []) as string[])}
       <div class="mt-5 mb-3">
-        <TagsSelect
-          allTags={(tagCollection?.tags || []) as string[]}
-          selectedTags={(localObservation?.tags || []) as string[]}
-          onChange={handleTagsChange}
-        />
+        <TagsSelect {allTags} {selectedTags} onChange={handleTagsChange} />
       </div>
     {/if}
 
@@ -263,7 +269,7 @@
       </div>
     {/if}
 
-    {#if isPersistenceControlEnabled}
+    {#if !isPreviewModeEnabled}
       <div class="d-flex gap-2 justify-content-start mt-4">
         <ButtonMini
           options={{
