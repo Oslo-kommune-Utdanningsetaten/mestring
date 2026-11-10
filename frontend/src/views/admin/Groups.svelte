@@ -408,7 +408,7 @@
       {/each}
     </fieldset>
 
-    <!-- Radio buttons for created in year -->
+    <!-- Radio buttons for created year -->
     <fieldset class="border p-3 rounded">
       <legend class="w-auto fs-6">Year created?</legend>
       {#each createdOptions as option}

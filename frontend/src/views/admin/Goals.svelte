@@ -2,14 +2,20 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import type { GoalType } from '../../generated/types.gen'
+
   import { goalsList, usersList } from '../../generated/sdk.gen'
   import { formatDateTime, urlStringFrom } from '../../utils/functions'
   import { addAlert } from '../../stores/alerts'
   import { dataStore, currentSchool } from '../../stores/data'
-  import { getPreferredCreatedParams } from '../../stores/localStorageFunctions'
   import { GROUP_DELETED_OPTIONS } from '../../utils/constants'
-  import Link from '../../components/Link.svelte'
+  import {
+    getAllSchoolYears,
+    getCurrentSchoolYear,
+    inferCreatedParams,
+  } from '../../utils/schoolYear'
   import { t } from '../../stores/translations'
+
+  import Link from '../../components/Link.svelte'
 
   const router = useTinyRouter()
   let goals = $state<GoalType[]>([])
@@ -23,6 +29,9 @@
   type SortKey = 'type' | 'title' | 'createdBy' | 'createdAt' | 'belongsTo' | 'masterySchema'
   let sortBy = $state<SortKey>('createdAt')
   let sortDirection = $state<'asc' | 'desc'>('desc')
+  let selectedYearOption = $state<string>(
+    (router.getQueryParam('year') as string) || getCurrentSchoolYear()
+  )
 
   // Options for filtering by deleted
   const deletedOptions = [
@@ -43,7 +52,20 @@
   let queryOptions = $derived({
     school: $currentSchool.id,
     deleted: selectedDeletedOption,
-    ...getPreferredCreatedParams(),
+    ...inferCreatedParams(selectedYearOption),
+  })
+
+  // Options for filtering by groups by date validity
+  const createdOptions = $derived.by(() => {
+    if (!$dataStore.currentSchool) return []
+    const allYears = getAllSchoolYears(new Date($dataStore.currentSchool.createdAt)).reverse()
+    return [
+      ...allYears.map(year => ({
+        value: year,
+        label: year,
+      })),
+      allYears.length > 1 ? { value: 'all', label: 'Alle år' } : null,
+    ].filter(Boolean) as { value: string; label: string }[]
   })
 
   const masterySchemasById = $derived.by(() => {
@@ -160,6 +182,7 @@
     const url = urlStringFrom(
       {
         deleted: selectedDeletedOption || null,
+        year: selectedYearOption || null,
       },
       { path: '/goals', mode: 'merge' }
     )
@@ -188,6 +211,22 @@
         {/each}
       </fieldset>
     {/if}
+
+    <!-- Radio buttons for created year -->
+    <fieldset class="border p-3 rounded">
+      <legend class="w-auto fs-6">Year created</legend>
+      {#each createdOptions as option}
+        <label class="my-2 ms-1 d-block">
+          <input
+            type="radio"
+            name="createdOptions"
+            value={option.value}
+            bind:group={selectedYearOption}
+          />
+          <span class="ms-2">{option.label}</span>
+        </label>
+      {/each}
+    </fieldset>
   </div>
 
   {#if goals.length > 0}
