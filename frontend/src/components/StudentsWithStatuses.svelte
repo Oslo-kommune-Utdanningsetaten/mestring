@@ -41,6 +41,7 @@
   let studentCountsByLevel = $state<number[]>([])
   let isCompleteGroupsDetailsEnabled = $state<boolean>(false)
   let isIncompleteGroupsDetailsEnabled = $state<boolean>(false)
+  let isOnlyRiskySubjectsEnabled = $state<boolean>(false)
 
   let selectedLevels = $state<number[]>([])
   let isDetailsEnabled = $derived<boolean>(!!group || selectedLevels.length > 0)
@@ -50,8 +51,21 @@
   let topScrollElement = $state<HTMLDivElement | null>(null)
   let gridScrollWidth = $state(0)
 
+  const filteredSubjects = $derived.by(() => {
+    if (isOnlyRiskySubjectsEnabled) {
+      // filter out subjects where there are no risky statuses
+      return subjects.filter(subject =>
+        students.some(student => {
+          const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`] || []
+          return statuses.some(status => status.masteryValue !== maxValue)
+        })
+      )
+    }
+    return subjects
+  })
+
   const gridTemplateColumns = $derived(
-    ['minmax(12rem, 1.2fr)', ...subjects.map(() => 'minmax(8rem, 1fr)')].join(' ')
+    ['minmax(12rem, 1.2fr)', ...filteredSubjects.map(() => 'minmax(8rem, 1fr)')].join(' ')
   )
 
   const category = $derived($dataStore.statusCategories.find(cat => cat.name === categoryName))
@@ -224,15 +238,15 @@
   }
 
   const downloadStudentData = () => {
-    if (subjects.length > 0 && sortedStudents.length > 0) {
+    if (filteredSubjects.length > 0 && sortedStudents.length > 0) {
       let resolvedSchema: MasterySchemaWithConfig | undefined = undefined
 
       // Wrangle all data into CSV format
-      const headerData = ['Navn', ...subjects.map(subject => getSubjectName(subject))]
+      const headerData = ['Navn', ...filteredSubjects.map(subject => getSubjectName(subject))]
       const csvContent = [headerData.join(';')]
       sortedStudents.forEach(student => {
         const rowData = [student.name]
-        subjects.forEach(subject => {
+        filteredSubjects.forEach(subject => {
           const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`]
           const status: StatusType | undefined = statuses?.length > 0 ? statuses[0] : undefined
           let value = ''
@@ -417,6 +431,17 @@
       Viser {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}
     </p>
 
+    <p>
+      <pkt-checkbox
+        label="Inkludér bare fag der minst én elev er i fare"
+        aria-label="Inkludér bare fag der minst én elev er i fare"
+        labelPosition="right"
+        layout="horizontal"
+        checked={isOnlyRiskySubjectsEnabled}
+        onchange={() => (isOnlyRiskySubjectsEnabled = !isOnlyRiskySubjectsEnabled)}
+      ></pkt-checkbox>
+    </p>
+
     {#if category.name === 'risk'}
       <ButtonMini
         options={{
@@ -428,7 +453,7 @@
           onClick: () => downloadStudentData(),
         }}
       >
-        Last ned CSV for dette utvalget av elever
+        Last ned CSV for dette utvalget
       </ButtonMini>
     {/if}
 
@@ -451,7 +476,8 @@
           Navn{getSortIndicator('name')}
         </span>
       </button>
-      {#each subjects as subject (subject.id)}
+
+      {#each filteredSubjects as subject (subject.id)}
         <button
           class="item header header-row sortable"
           onclick={() => handleHeaderClick(subject.id)}
@@ -469,7 +495,7 @@
           <UserNameLink user={student} />
         </span>
 
-        {#each subjects as subject}
+        {#each filteredSubjects as subject}
           {@const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`]}
           {#if statuses?.length}
             <span class="item">
