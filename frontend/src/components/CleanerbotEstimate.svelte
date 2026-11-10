@@ -1,6 +1,5 @@
 <script lang="ts">
   import ButtonMini from './ButtonMini.svelte'
-  import StudentSVG from '../assets/education.svg.svelte'
 
   interface DeletedGroup {
     id: string
@@ -34,6 +33,7 @@
   interface DeletedObservation {
     id: string
     student_Name: string
+    creator_Name: string
     goal_Title: string
   }
 
@@ -51,7 +51,10 @@
     errors: string[]
   }
 
-  const { data, onDone } : {
+  const {
+    data,
+    onDone,
+  }: {
     data: CleanerbotData
     onDone: () => void
   } = $props()
