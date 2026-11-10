@@ -35,9 +35,11 @@ export const getMasteryLevelColorByValue = (
 }
 
 export const getMasteryTitleByValue = (
-  value: number,
+  value: number | undefined,
   masterySchema: MasterySchemaWithConfig
-): string => {
+): string | undefined => {
+  if (!isNumber(value)) return undefined
+  if (!masterySchema) return undefined
   const masteryLevels = masterySchema.config?.levels || []
   const masteryLevel = masteryLevels.find(
     (ml: MasteryConfigLevel) => ml.minValue <= value && ml.maxValue >= value

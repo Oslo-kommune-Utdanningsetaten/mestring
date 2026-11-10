@@ -1,12 +1,12 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
   import type { UserType, SubjectType, StatusType, GroupType } from '../generated/types.gen'
-  import type { MasteryConfigLevel } from '../types/models.d.ts'
+  import type { MasteryConfigLevel, MasterySchemaWithConfig } from '../types/models.d.ts'
   import { statusList } from '../generated/sdk.gen'
   import { dataStore, currentUser } from '../stores/data'
   import { getSubjectName } from '../utils/functions'
   import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
-  import { useMasteryCalculations } from '../utils/masteryHelpers'
+  import { useMasteryCalculations, getMasteryTitleByValue } from '../utils/masteryHelpers'
   import { t } from '../stores/translations'
 
   import MasterySchemaLevel from './MasterySchemaLevel.svelte'
@@ -215,6 +215,60 @@
     if (gridElement && topScrollElement) gridElement.scrollLeft = topScrollElement.scrollLeft
   }
 
+  const generateFileName = () => {
+    // generate file name with resolution based on timestamp and 1 second resolution
+    const timestamp = new Date().toISOString()
+    const date = timestamp.split('T')[0]
+    const time = timestamp.split('T')[1].split('.')[0].replaceAll(':', '-')
+    return `student-data-${date}T${time}.csv`
+  }
+
+  const downloadStudentData = () => {
+    if (subjects.length > 0 && sortedStudents.length > 0) {
+      let resolvedSchema: MasterySchemaWithConfig | undefined = undefined
+
+      // Wrangle all data into CSV format
+      const headerData = ['Navn', ...subjects.map(subject => getSubjectName(subject))]
+      const csvContent = [headerData.join(';')]
+      sortedStudents.forEach(student => {
+        const rowData = [student.name]
+        subjects.forEach(subject => {
+          const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`]
+          const status: StatusType | undefined = statuses?.length > 0 ? statuses[0] : undefined
+          let value = ''
+          if (!resolvedSchema) {
+            resolvedSchema = status
+              ? $dataStore.masterySchemas.find(s => s.id === status.masterySchemaId)
+              : undefined
+          }
+          value = getMasteryTitleByValue(status?.masteryValue || undefined, resolvedSchema) || ''
+          rowData.push(value)
+        })
+        csvContent.push(rowData.join(';'))
+      })
+
+      // Add a UTF-8 BOM so Excel opens it with the correct encoding
+      const blob = new Blob(['\uFEFF' + csvContent.join('\n')], { type: 'text/csv;charset=utf-8;' })
+
+      // Create a temporary URL pointing to the data
+      const blobUrl = URL.createObjectURL(blob)
+
+      // Create a hidden anchor element to trigger the download
+      const link = document.createElement('a')
+      link.href = blobUrl
+      link.download = generateFileName()
+      link.style.display = 'none'
+
+      // Append link to the DOM, programmatically click it, clean up
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(blobUrl)
+    } else {
+      console.warn('No subjects or students available for download.')
+    }
+  }
+
   $effect(() => {
     if (!gridElement) return
     const obs = new ResizeObserver(() => {
@@ -238,6 +292,7 @@
     category.name === 'risk'
       ? masterySchema.config.levels.slice(0, -1)
       : masterySchema.config.levels}
+
   <table class="my-2 table fixed-layout">
     <colgroup>
       <col class="col-checkbox" />
@@ -358,7 +413,25 @@
 
 <div class="mt-3">
   {#if isDetailsEnabled}
-    <p>Viser {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}</p>
+    <p>
+      Viser {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}
+    </p>
+
+    {#if category.name === 'risk'}
+      <ButtonMini
+        options={{
+          title: 'Last ned CSV',
+          skin: 'primary',
+          iconName: 'download',
+          variant: 'icon-left',
+          classes: 'mb-3',
+          onClick: () => downloadStudentData(),
+        }}
+      >
+        Last ned CSV for dette utvalget av elever
+      </ButtonMini>
+    {/if}
+
     <div class="scroll-mirror" bind:this={topScrollElement} onscroll={syncFromTop}>
       <div style="width: {gridScrollWidth}px; height: 1px;"></div>
     </div>
