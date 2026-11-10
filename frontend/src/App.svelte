@@ -78,7 +78,7 @@
     <main id="main-content" class="container-md py-3 flex-grow-1">
       {#if $isLoggingInUser}
         {@render spinner('Logger inn...')}
-      {:else if $isLoadingAppData}
+      {:else if $currentUser && $isLoadingAppData}
         {@render spinner('Laster applikasjonsdata...')}
       {:else}
         {#each ROUTES as route}
