@@ -289,17 +289,19 @@
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownProfile">
                 <li class="profile-menu-item">
                   <Link to="/profile" className="dropdown-item">Min side</Link>
-                  <pkt-checkbox
-                    class="admin-edit-toggle"
-                    label={isAdminEditEnabled ? 'EON' : 'EOFF'}
-                    labelPosition="left"
-                    isSwitch="true"
-                    checked={isAdminEditEnabled}
-                    onchange={() => handleAdminEditToggle()}
-                    title="{isAdminEditEnabled
-                      ? 'Disable'
-                      : 'Enable'} edit despite mismatch between selected and current year"
-                  ></pkt-checkbox>
+                  {#if $currentUser.isSuperadmin}
+                    <pkt-checkbox
+                      class="admin-edit-toggle"
+                      label={isAdminEditEnabled ? 'EON' : 'EOFF'}
+                      labelPosition="left"
+                      isSwitch="true"
+                      checked={isAdminEditEnabled}
+                      onchange={() => handleAdminEditToggle()}
+                      title="{isAdminEditEnabled
+                        ? 'Disable'
+                        : 'Enable'} edit despite mismatch between selected and current year"
+                    ></pkt-checkbox>
+                  {/if}
                 </li>
                 <li>
                   <Link to="/" className="dropdown-item" onclick={logout}>Logg ut</Link>
