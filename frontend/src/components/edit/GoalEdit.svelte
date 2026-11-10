@@ -119,6 +119,8 @@
   const handleSave = async () => {
     let action = undefined
     try {
+      // Empty strings are not allowed and undefined values will be stripped before reaching the API. A null value will result in the field being cleared.
+      localGoal.title = localGoal.title?.trim() || null
       if (localGoal.id) {
         await goalsUpdate({
           path: { id: localGoal.id },
