@@ -2,7 +2,7 @@
   import { Router, Route } from 'svelte-tiny-router'
   import { onMount } from 'svelte'
   import { checkAuth, isLoggingInUser } from './stores/auth'
-  import { loadData, currentUser } from './stores/data'
+  import { loadData, currentUser, isLoadingAppData } from './stores/data'
   import { apiHealth } from './stores/apiHealth'
   import { addAlert } from './stores/alerts'
   import { ROUTES } from './utils/routes'
@@ -14,12 +14,11 @@
   import './styles/app.css'
 
   import NotFound from './views/NotFound.svelte'
-
-  // Conponents
   import Navigation from './components/Navigation.svelte'
   import AlertBar from './components/AlertBar.svelte'
   import Footer from './components/Footer.svelte'
   import Analytics from './components/Analytics.svelte'
+
   const API_CHECK_INTERVAL = 1000 * 60 * 10 // every 10 minutes
 
   const deploymentEnv = import.meta.env.VITE_SERVER_DEPLOYMENT || 'production'
@@ -54,6 +53,13 @@
   })
 </script>
 
+{#snippet spinner(message: string)}
+  <div class="d-flex align-items-center gap-2 text-secondary small py-2">
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    <span>{message}</span>
+  </div>
+{/snippet}
+
 <svelte:head>
   <title>{pageTitle}</title>
 </svelte:head>
@@ -71,10 +77,9 @@
 
     <main id="main-content" class="container-md py-3 flex-grow-1">
       {#if $isLoggingInUser}
-        <div class="d-flex align-items-center gap-2 text-secondary small py-2">
-          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-          <span>Logger inn...</span>
-        </div>
+        {@render spinner('Logger inn...')}
+      {:else if $isLoadingAppData}
+        {@render spinner('Laster applikasjonsdata...')}
       {:else}
         {#each ROUTES as route}
           {#if $hasUserAccessToPath(route.path)}

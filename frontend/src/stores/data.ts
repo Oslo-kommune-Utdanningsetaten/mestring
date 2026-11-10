@@ -19,6 +19,8 @@ import { inferGroupValidityParams } from '../utils/schoolYear'
 import { SUBJECTS_ALLOWED_ALL, SUBJECTS_ALLOWED_CUSTOM, USER_ROLES } from '../utils/constants'
 import type { AppData, UserDecorated } from '../types/models'
 
+export const isLoadingAppData = writable<boolean>(true)
+
 const setMasterySchemas = (schemas: MasterySchemaType[]) => {
   // Default mastery schema is either school default, or the user's preferred, or simply first in list
   const defaultSchema =
@@ -226,6 +228,7 @@ const registerRoles = async (): Promise<void> => {
 }
 
 export const loadData = async () => {
+  isLoadingAppData.set(true)
   try {
     const existingUser = get(dataStore).currentUser
     dataStore.update(data => {
@@ -235,5 +238,7 @@ export const loadData = async () => {
     await loadSchools()
   } catch (error) {
     console.error('Failed to load data:', error)
+  } finally {
+    isLoadingAppData.set(false)
   }
 }
