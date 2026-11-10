@@ -31,20 +31,22 @@
   let student = $state<UserType | undefined>(undefined)
   let subjects = $state<SubjectType[]>([])
   let groups = $state<GroupType[]>([])
-  let { currentSchool } = $derived($dataStore) satisfies AppData
   let individualStudentGoalsCount = $state<number | undefined>(undefined)
+  let isLoading = $state<boolean>(false)
+  let { currentSchool } = $derived($dataStore) satisfies AppData
 
   const fetchStudentData = async () => {
+    isLoading = true
     try {
       const userResult = await usersRetrieve({ path: { id: studentId } })
       student = userResult.data!
-
-      if (!student) return
-      await fetchSubjects()
-      await fetchGroups()
-      await countStudentGoals()
+      if (student) {
+        await Promise.all([fetchSubjects(), fetchGroups(), countStudentGoals()])
+      }
     } catch (error) {
       console.error(`Could not load data for student ${studentId}`, error)
+    } finally {
+      isLoading = false
     }
   }
 
@@ -130,7 +132,11 @@
 </script>
 
 <section class="py-3">
-  {#if student}
+  {#if isLoading}
+    <div class="spinner-border spinner-border-sm" role="status">
+      <span class="visually-hidden">Henter elevdata...</span>
+    </div>
+  {:else if student}
     <div class="d-flex align-items-center gap-3">
       <div class="student-svg" title="Elev" aria-hidden="true">
         <StudentSVG />
