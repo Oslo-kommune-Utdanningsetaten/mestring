@@ -1,4 +1,5 @@
 <script lang="ts">
+  import uniqBy from 'lodash/uniqBy'
   import type {
     GoalType,
     GroupType,
@@ -6,12 +7,11 @@
     SubjectType,
     GoalCreateType,
   } from '../../generated/types.gen'
-  import { goalsCreate, goalsUpdate, subjectsList } from '../../generated/sdk.gen'
+  import { goalsCreate, goalsUpdate, goalsList, subjectsList } from '../../generated/sdk.gen'
 
   import { NONE_FIELD_VALUE } from '../../utils/constants'
   import { dataStore } from '../../stores/data'
   import { localStorage } from '../../stores/localStorage'
-  import { preferredSchoolYear } from '../../stores/localStorageFunctions'
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
   import { t } from '../../stores/translations'
@@ -40,7 +40,6 @@
 
   let localGoal = $state<Partial<GoalType>>({})
   let availableSubjects = $state<SubjectType[]>()
-  let titleInput = $state<HTMLInputElement | null>(null)
 
   let { currentSchool } = $derived($dataStore)
   let masterySchemas = $derived($dataStore.masterySchemas.filter(schema => schema.isEnabled))
@@ -57,6 +56,8 @@
   let isFormValid = $derived(
     !!localGoal.masterySchemaId && (isGoalIndividual ? !!localGoal.subjectId : !!subjectViaGroup)
   )
+
+  let titlesAutocomplete = $state<{ label: string; value: string }[]>([])
 
   const getTitle = () => {
     const action = localGoal.id ? 'Redigerer' : 'Nytt'
@@ -96,6 +97,25 @@
       if (!availableSubjects?.length) {
         availableSubjects = $dataStore.subjects
       }
+    }
+  }
+
+  const fetchGoalTitles = async () => {
+    try {
+      const goalsResult = await goalsList({
+        query: { school: currentSchool?.id, returnFields: 'id,title' },
+      })
+      const goals: GoalType[] = (goalsResult.data || []).filter(goal => goal.title)
+
+      titlesAutocomplete = uniqBy(goals, 'title')
+        .map(goal => ({
+          value: goal.id,
+          label: goal.title as string,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label))
+    } catch (error) {
+      console.error('Error fetching goal titles:', error)
+      return []
     }
   }
 
@@ -152,11 +172,7 @@
   }
 
   $effect(() => {
-    if (titleInput) {
-      // so defer focus until Offcanvas is fully visible.
-      const id = setTimeout(() => titleInput?.focus(), 300)
-      return () => clearTimeout(id)
-    }
+    fetchGoalTitles()
   })
 
   // Update localGoal when goal prop changes
@@ -218,16 +234,19 @@
   <!-- Title -->
   {#if currentSchool.isGoalTitleEnabled}
     <div class="form-group mb-3">
-      <label for="goalTitle" class="form-label">Tittel</label>
-      <input
-        id="goalTitle"
-        type="text"
-        class="form-control rounded-0 border-2 border-primary input-field"
-        bind:value={localGoal.title}
-        bind:this={titleInput}
-        disabled={!localGoal.isRelevant}
+      <pkt-combobox
+        label="Tittel"
         placeholder={`Tittel på ${t('goal', { form: 'sin-def' })}`}
-      />
+        typeahead
+        allow-user-input
+        fullwidth={true}
+        value={localGoal.title}
+        onchange={(event: Event) => {
+          const target = event.target as HTMLInputElement
+          localGoal = { ...localGoal, title: target.value }
+        }}
+        options={titlesAutocomplete}
+      ></pkt-combobox>
     </div>
   {/if}
 

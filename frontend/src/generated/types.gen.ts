@@ -1203,7 +1203,7 @@ export type GoalsListData = {
          */
         group?: string;
         /**
-         * Include related observations in the response
+         * Include related observations in the response. Cannot be used together with return_fields.
          */
         includeObservations?: boolean;
         /**
@@ -1214,6 +1214,10 @@ export type GoalsListData = {
          * Which field to use when ordering the results.
          */
         ordering?: string;
+        /**
+         * Only return these fields from goal objects (comma-separated list of field names). Cannot be used together with include_observations.
+         */
+        returnFields?: string;
         /**
          * Filter goals by school
          */
