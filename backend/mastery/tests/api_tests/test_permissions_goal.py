@@ -1053,3 +1053,44 @@ def test_basis_group_only_teacher_goal_scope(
     # Teacher cannot retrieve StudentB's individual goal
     resp = client.get(f'/api/goals/{individual_goal_b.id}/')
     assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_goal_list_return_fields_only_returns_requested_fields(
+        school, superadmin, goal_with_group, goal_individual_other_student):
+    client = APIClient()
+    client.force_authenticate(user=superadmin)
+
+    resp = client.get('/api/goals/', {'school': school.id, 'return_fields': 'id,title'})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert {goal['id'] for goal in data} == {goal_with_group.id, goal_individual_other_student.id}
+    for goal in data:
+        assert set(goal.keys()) == {'id', 'title'}
+
+
+@pytest.mark.django_db
+def test_goal_list_return_fields_ignores_unknown_fields(school, superadmin, goal_with_group):
+    client = APIClient()
+    client.force_authenticate(user=superadmin)
+
+    # "student" is not a serializer field (it is exposed as "student_id"), so it is dropped
+    resp = client.get('/api/goals/', {'school': school.id, 'return_fields': 'title,student,does_not_exist'})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0] == {'title': goal_with_group.title}
+
+
+@pytest.mark.django_db
+def test_goal_list_return_fields_and_include_observations_are_mutually_exclusive(school, superadmin):
+    client = APIClient()
+    client.force_authenticate(user=superadmin)
+
+    resp = client.get('/api/goals/', {
+        'school': school.id,
+        'return_fields': 'id,title',
+        'include_observations': 'true',
+    })
+    assert resp.status_code == 400
+    assert resp.json()['error'] == 'invalid-parameter'

@@ -758,8 +758,15 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
+                name='return_fields',
+                description='Only return these fields from goal objects (comma-separated list of field names). Cannot be used together with include_observations.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='include_observations',
-                description='Include related observations in the response',
+                description='Include related observations in the response. Cannot be used together with return_fields.',
                 required=False,
                 type={'type': 'boolean'},
                 location=OpenApiParameter.QUERY
@@ -777,6 +784,15 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
     ordering = ['sort_order']
     access_policy = GoalAccessPolicy
 
+    # Override get_serializer to support dynamic return fields for list action
+    def get_serializer(self, *args, **kwargs):
+        return_fields_param, _ = get_request_param(self.request.query_params, 'return_fields')
+        if self.action == 'list' and return_fields_param:
+            kwargs['return_fields'] = [f.strip() for f in return_fields_param.split(',') if f.strip()]
+            kwargs.setdefault('context', self.get_serializer_context())
+            return serializers.DynamicGoalSerializer(*args, **kwargs)
+        return super().get_serializer(*args, **kwargs)
+
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('sort_order')
         qs = apply_deleted_filter(self.request.query_params, qs)
@@ -788,6 +804,7 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
             student_param, _ = get_request_param(self.request.query_params, 'student')
             subject_param, _ = get_request_param(self.request.query_params, 'subject')
             individual_param, _ = get_request_param(self.request.query_params, 'individual')
+            return_fields_param, _ = get_request_param(self.request.query_params, 'return_fields')
             include_observations_param, _ = get_request_param(
                 self.request.query_params, 'include_observations')
 
@@ -795,6 +812,11 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
                 raise ValidationError(
                     {'error': 'missing-parameter',
                      'message': 'The "school" parameter is required.'})
+
+            if (return_fields_param and include_observations_param):
+                raise ValidationError(
+                    {'error': 'invalid-parameter',
+                     'message': 'The "return_fields" and "include_observations" parameters are mutually exclusive.'})
 
             qs = qs.filter(school_id=school_param)
 

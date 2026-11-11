@@ -167,6 +167,17 @@ class GoalSerializer(BaseModelSerializer):
         return attrs
 
 
+class DynamicGoalSerializer(GoalSerializer):
+    def __init__(self, *args, **kwargs):
+        return_fields = kwargs.pop("return_fields", None)
+        super().__init__(*args, **kwargs)
+
+        if return_fields is not None:
+            for name in list(self.fields.keys()):
+                if name not in return_fields:
+                    self.fields.pop(name)
+
+
 class ObservationSerializer(BaseModelSerializer):
     class Meta:
         model = models.Observation
