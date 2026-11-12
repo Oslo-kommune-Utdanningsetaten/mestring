@@ -1,5 +1,12 @@
 import { derived, get } from 'svelte/store'
 import { currentSchool } from './data'
+import { setPktStrings } from '@oslokommune/punkt-elements'
+
+// Punkt component string overrides. Empty strings should hide the whole row.
+setPktStrings({
+  listbox: { addValue: 'Bruk tittel «{value}»', empty: '' },
+  combobox: { valueAdded: '' },
+})
 
 type FormOptions = 'sin-indef' | 'sin-def' | 'plu-indef' | 'plu-def'
 
