@@ -105,11 +105,11 @@
       const goalsResult = await goalsList({
         query: { school: currentSchool?.id, returnFields: 'id,title' },
       })
-      const goals: GoalType[] = (goalsResult.data || []).filter(goal => goal.title)
-
+      let goals = goalsResult.data || []
       titlesAutocomplete = uniqBy(goals, 'title')
+        .filter(goal => goal.title)
         .map(goal => ({
-          value: goal.id,
+          value: goal.title as string,
           label: goal.title as string,
         }))
         .sort((a, b) => a.label.localeCompare(b.label))
@@ -356,8 +356,12 @@
   }
 
   .input-field {
+    font-size: 1.125rem;
+    color: var(--pkt-color-text-body-default);
     height: 48px;
+    font-weight: 300;
   }
+
   input {
     width: 100% !important;
   }
