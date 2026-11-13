@@ -195,11 +195,19 @@ const checkUserAccessToFeature = (
         (groupId
           ? currentUser.studentGroups.some((studentGroup: GroupType) => studentGroup.id === groupId)
           : goalStudentId === studentId)
-      )
+      ) {
         return true
+      }
 
-      // Teacher check
       return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
+        // User is teacher in the basis group to which the student belongs and the subject is owned by the school
+        if (
+          teacherGroup.type === GROUP_TYPE_BASIS &&
+          studentGroupIds?.includes(teacherGroup.id) &&
+          subject?.ownedBySchoolId
+        ) {
+          return true
+        }
         // User is teacher in this group and the observation was created by the user
         if (groupId && groupId === teacherGroup.id && createdById === currentUser.id) {
           return true

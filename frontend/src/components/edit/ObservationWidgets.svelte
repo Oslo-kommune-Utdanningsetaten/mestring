@@ -111,7 +111,7 @@
   {/if}
 
   <!-- Edit observation widget -->
-  {#if observation && widgets.includes('update') && $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById, studentId: student.id } )}
+  {#if observation && widgets.includes('update') && $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, subjectId: subject.id, createdById: observation.createdById, studentId: student.id, studentGroupIds: student.groupIds } )}
     <ButtonIcon
       options={{
         iconName: 'document-edit',
@@ -123,7 +123,7 @@
   {/if}
 
   <!-- Delete observation widget -->
-  {#if observation && widgets.includes('delete') && $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, createdById: observation.createdById, studentId: student.id } )}
+  {#if observation && widgets.includes('delete') && $hasUserAccessToFeature( 'observation', 'update', { groupId: goal.groupId, subjectId: subject.id, createdById: observation.createdById, studentId: student.id, studentGroupIds: student.groupIds } )}
     {#key observation.id}
       <ButtonIcon
         options={{
