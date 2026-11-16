@@ -100,7 +100,7 @@
     const { oldIndex, newIndex } = event
     if (oldIndex === undefined || newIndex === undefined) return
 
-    const localTags = (tagCollection.tags || []) as string[]
+    const localTags = [...((tagCollection.tags || []) as string[])]
     // Remove moved tag and capture it
     const [movedTag] = localTags.splice(oldIndex, 1)
     // Insert moved tag at new index
@@ -118,7 +118,7 @@
 
   const handleTagDelete = async (index: number) => {
     if (!tagCollection) return
-    const updatedTags = (tagCollection.tags as string[] | undefined) ?? []
+    const updatedTags = [...((tagCollection.tags as string[] | undefined) ?? [])]
     updatedTags.splice(index, 1)
     try {
       const result = await tagCollectionsPartialUpdate({
