@@ -167,6 +167,13 @@
                     </Link>
                   </li>
                 {/if}
+                {#if $hasUserAccessToPath('/title-collections')}
+                  <li class="nav-item">
+                    <Link to="/title-collections" className="dropdown-item">
+                      {t('titleRepository', { form: 'sin-indef', capitalize: true })}
+                    </Link>
+                  </li>
+                {/if}
                 {#if $hasUserAccessToPath('/mastery-schemas')}
                   <li>
                     <Link to="/mastery-schemas" className="dropdown-item">Mestringsskjemaer</Link>

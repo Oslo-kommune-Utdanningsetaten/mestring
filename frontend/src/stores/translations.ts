@@ -34,6 +34,12 @@ export const defaultTranslations: Record<string, any> = {
     'plu-indef': 'statuser',
     'plu-def': 'statusene',
   },
+  titleRepository: {
+    'sin-indef': 'tittelbank',
+    'sin-def': 'tittelbanken',
+    'plu-indef': 'tittelbanker',
+    'plu-def': 'tittelbankene',
+  },
 }
 
 const schoolUITranslations = derived(

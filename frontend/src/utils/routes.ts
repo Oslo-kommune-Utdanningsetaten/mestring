@@ -24,6 +24,7 @@ import Translations from '../views/admin/Translations.svelte'
 import UsersByRole from '../views/UsersByRole.svelte'
 import StatusCategories from '../views/admin/StatusCategories.svelte'
 import StatusesEdit from '../views/StatusesEdit.svelte'
+import TitleCollection from '../views/TitleCollection.svelte'
 
 // Dev views
 import BadgeLab from '../dev/BadgeLab.svelte'
@@ -161,6 +162,12 @@ export const ROUTES = [
   {
     path: '/mastery-schemas',
     component: MasterySchemas,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+  },
+  {
+    path: '/title-collections',
+    component: TitleCollection,
     isPublic: false,
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
