@@ -405,12 +405,20 @@ class Observation(BaseModel):
 
 class TagCollection(BaseModel):
     """
-    A TagCollection represents a collection of tags that are associated with a school and a subject.
+    A TagCollection represents a collection of tags that may be applied to observations. Belongs to a school and a subject.
     """
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='tag_collections')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE,
                                 null=False, related_name='tag_collections')
     tags = models.JSONField(null=True, blank=False)
+
+
+class TitleCollection(BaseModel):
+    """
+    A TitleCollection represents a collection of strings that are used as autocomplete suggestions when entering titles (e.g. on goals). Belongs to a school. Later, possibly also with a subject or mastery schema.
+    """
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='title_collections')
+    titles = models.JSONField(null=True, blank=False)
 
 
 class StatusCategory(BaseModel):

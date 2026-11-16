@@ -132,6 +132,12 @@ class TagCollectionSerializer(BaseModelSerializer):
         fields = '__all__'
 
 
+class TitleCollectionSerializer(BaseModelSerializer):
+    class Meta:
+        model = models.TitleCollection
+        fields = '__all__'
+
+
 class GroupSerializer(BaseModelSerializer):
     class Meta:
         model = models.Group

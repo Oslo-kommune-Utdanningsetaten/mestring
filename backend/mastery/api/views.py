@@ -6,7 +6,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_access_policy import AccessViewSetMixin
-from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy, StatusAccessPolicy, StatusCategoryAccessPolicy, TagCollectionAccessPolicy
+from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy, StatusAccessPolicy, StatusCategoryAccessPolicy, TagCollectionAccessPolicy, TitleCollectionAccessPolicy
 from .api_functions import get_request_param
 from .school_year_functions import calculate_school_year_utc_range
 from ..constants import GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING
@@ -1305,6 +1305,44 @@ class TagCollectionViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
 
             if subject_param:
                 qs = qs.filter(subject_id=subject_param)
+
+        # non-list actions (retrieve, create, update, destroy) do not require parameters
+        return qs
+
+
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='school',
+                description='Filter title_collections by school.',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            DELETED_FILTER_PARAMETER,
+            *CREATED_RANGE_PARAMETERS,
+        ]
+    )
+)
+class TitleCollectionViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
+    queryset = models.TitleCollection.objects.all()
+    serializer_class = serializers.TitleCollectionSerializer
+    access_policy = TitleCollectionAccessPolicy
+
+    def get_queryset(self):
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = apply_deleted_filter(self.request.query_params, qs)
+        qs = apply_created_filter(self.request.query_params, qs)
+
+        if self.action == 'list':
+            school_param, _ = get_request_param(self.request.query_params, 'school')
+
+            if not school_param:
+                raise ValidationError({'error': 'missing-parameter',
+                                      'message': 'The "school" parameter is required.'})
+
+            qs = qs.filter(school_id=school_param)
 
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs

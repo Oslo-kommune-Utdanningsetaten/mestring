@@ -13,6 +13,7 @@ from .user_group import UserGroupAccessPolicy
 from .data_maintenance_task import DataMaintenanceTaskAccessPolicy
 from .feide_import import ImportAccessPolicy
 from .tag_collection import TagCollectionAccessPolicy
+from .title_collection import TitleCollectionAccessPolicy
 
 __all__ = [
     "GroupAccessPolicy",
@@ -30,4 +31,5 @@ __all__ = [
     "DataMaintenanceTaskAccessPolicy",
     "ImportAccessPolicy",
     "TagCollectionAccessPolicy",
+    "TitleCollectionAccessPolicy",
 ]

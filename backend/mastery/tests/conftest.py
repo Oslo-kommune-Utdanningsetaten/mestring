@@ -2,7 +2,7 @@ import pytest
 from datetime import timedelta
 from django.test import Client
 from django.utils import timezone
-from mastery.models import School, User, Group, Role, Subject, Goal, MasterySchema, Observation, Status, StatusCategory, TagCollection
+from mastery.models import School, User, Group, Role, Subject, Goal, MasterySchema, Observation, Status, StatusCategory, TagCollection, TitleCollection
 
 
 @pytest.fixture
@@ -528,4 +528,20 @@ def tag_collection_at_other_school(db, other_school, subject_owned_by_other_scho
         school=other_school,
         subject=subject_owned_by_other_school,
         tags=["Muntlig", "Skriftlig"],
+    )
+
+
+@pytest.fixture
+def title_collection_at_school(db, school):
+    return TitleCollection.objects.create(
+        school=school,
+        titles=["Muntlig", "Skriftlig"],
+    )
+
+
+@pytest.fixture
+def title_collection_at_other_school(db, other_school):
+    return TitleCollection.objects.create(
+        school=other_school,
+        titles=["Kunstnerisk", "Skriftlig"],
     )

@@ -13,6 +13,12 @@ class TagCollectionAccessPolicy(BaseAccessPolicy):
             "principal": ["role:superadmin"],
             "effect": "allow",
         },
+        # Users can list and retrieve tag_collections according to scope_queryset
+        {
+            "action": ["list", "retrieve"],
+            "principal": ["authenticated"],
+            "effect": "allow",
+        },
         # School admins and inspectors have full access to tag_collections belonging to their school
         {
             "action": ["create", "update", "partial_update", "destroy"],
@@ -26,12 +32,6 @@ class TagCollectionAccessPolicy(BaseAccessPolicy):
             "principal": ["role:teacher"],
             "effect": "allow",
             "condition": "is_teacher_in_user_group_for_subject",
-        },
-        # Authenticated users can list tag_collections according to scope_queryset (via school and group membership)
-        {
-            "action": ["list", "retrieve"],
-            "principal": ["authenticated"],
-            "effect": "allow",
         },
     ]
 

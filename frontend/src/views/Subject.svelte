@@ -197,8 +197,8 @@
     <div>
       <h3 class="mb-3">Tags som tilhører faget</h3>
       <p>
-        Dersom mestringsskjemaet har skrudd på "Tags for fag", vil disse taggene når en observasjon
-        opprettes i dette faget.
+        Dersom mestringsskjemaet har skrudd på "Tags for fag", vil disse taggene bli tilgjengelige
+        for observasjoner i dette faget.
       </p>
       {#if tagCollection}
         <div bind:this={tagsListElement} class="list-tag">
