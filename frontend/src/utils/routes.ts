@@ -165,8 +165,15 @@ export const ROUTES = [
     isPublic: false,
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
+  // these two routes end up the same place for now
   {
     path: '/title-collections',
+    component: TitleCollection,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+  },
+  {
+    path: '/title-collections/:titleCollectionId',
     component: TitleCollection,
     isPublic: false,
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],

@@ -40,8 +40,8 @@
         const listResult = await titleCollectionsList({ query: { school: $currentSchool.id } })
         titleCollection = listResult.data?.[0]
       }
-      if (!titleCollection) {
-        // if no collection, create one
+      if (!titleCollection && !titleCollectionId) {
+        // if no specific collection requested and there is none, create a new one
         const createResult = await titleCollectionsCreate({
           body: { schoolId: $currentSchool.id, titles: [] },
         })
@@ -174,113 +174,103 @@
         Her kan du vedlikeholde en liste av {t('goal', {
           form: 'sin-indef',
           capitalize: false,
-        })}-titler slik at det blir enklere for lærerne å opprette nye mål.
+        })}-titler slik at det blir enklere for lærerne å opprette mål.
       </p>
-      {#if titleCollection}
-        <div class="my-3">
-          {#if $hasUserAccessToFeature('titleCollection', 'update', {})}
-            <div class="d-flex align-items-start gap-2 mb-2">
-              <label for="newTitleInput" class="form-label visually-hidden">Nytt mål</label>
-              <input
-                id="newTitleInput"
-                type="text"
-                class="form-control rounded-0 border-2 border-primary input-field mb-2"
-                name="displayName"
-                bind:this={titleInputElement}
-                bind:value={newTitleValue}
-                placeholder="Ny tittel"
-                onkeydown={(event: KeyboardEvent) => {
-                  if (event.key === 'Enter' && !isNewTitleDuplicate && !isNewTitleTooLong)
-                    handleAddTitle(newTitleValue)
-                }}
-              />
-              <ButtonMini
-                options={{
-                  title: 'Legg til ny title',
-                  iconName: 'plus-sign',
-                  skin: 'primary',
-                  variant: 'icon-left',
-                  disabled: !newTitleValue?.trim() || isNewTitleDuplicate || isNewTitleTooLong,
-                  onClick: () => handleAddTitle(newTitleValue),
-                }}
-              >
-                Legg til
-              </ButtonMini>
-            </div>
+      <div class="my-3">
+        {#if $hasUserAccessToFeature('titleCollection', 'update', {})}
+          <div class="d-flex align-items-start gap-2 mb-2">
+            <label for="newTitleInput" class="form-label visually-hidden">Nytt mål</label>
+            <input
+              id="newTitleInput"
+              type="text"
+              class="form-control rounded-0 border-2 border-primary input-field mb-2"
+              name="displayName"
+              bind:this={titleInputElement}
+              bind:value={newTitleValue}
+              placeholder="Ny tittel"
+              onkeydown={(event: KeyboardEvent) => {
+                if (event.key === 'Enter' && !isNewTitleDuplicate && !isNewTitleTooLong)
+                  handleAddTitle(newTitleValue)
+              }}
+            />
+            <ButtonMini
+              options={{
+                title: 'Legg til ny title',
+                iconName: 'plus-sign',
+                skin: 'primary',
+                variant: 'icon-left',
+                disabled: !newTitleValue?.trim() || isNewTitleDuplicate || isNewTitleTooLong,
+                onClick: () => handleAddTitle(newTitleValue),
+              }}
+            >
+              Legg til
+            </ButtonMini>
+          </div>
 
-            {#if isNewTitleDuplicate}
-              <p class="text-danger">Denne tittelen finnes allerede</p>
+          {#if isNewTitleDuplicate}
+            <p class="text-danger">Denne tittelen finnes allerede</p>
+          {/if}
+
+          <p class="text-muted">
+            {newTitleValue?.length ?? 0}/{maxTitleLength}
+            {#if isNewTitleTooLong}
+              <span class="text-danger">
+                For lang, for lang, den tittel er for lang. Det Kongelige Norske Titteledepartement.
+              </span>
             {/if}
+          </p>
+        {/if}
+      </div>
 
-            <p class="text-muted">
-              {newTitleValue?.length ?? 0}/{maxTitleLength}
-              {#if isNewTitleTooLong}
-                <span class="text-danger">
-                  For lang, for lang, den tittel er for lang. Det Kongelige Norske
-                  Titteledepartement.
-                </span>
-              {/if}
-            </p>
-          {/if}
-        </div>
+      <ButtonMini
+        options={{
+          title: 'Sortér alfabetisk',
+          iconName: 'arrow-down-up',
+          skin: 'primary',
+          variant: 'icon-left',
+          classes: 'mb-2',
+          onClick: () => handleSortTitles(),
+        }}
+      >
+        Sortér alfabetisk
+      </ButtonMini>
 
-        <ButtonMini
-          options={{
-            title: 'Sortér alfabetisk',
-            iconName: 'arrow-down-up',
-            skin: 'primary',
-            variant: 'icon-left',
-            classes: 'mb-2',
-            onClick: () => handleSortTitles(),
-          }}
-        >
-          Sortér alfabetisk
-        </ButtonMini>
-
-        <div bind:this={titlesListElement} class="list-title">
-          {#each (titleCollection?.titles ?? []) as string[] as title, index}
-            {#key title}
-              <div class="list-group-item title-row">
-                <span>
-                  {#if $hasUserAccessToFeature('titleCollection', 'update', {})}
-                    <pkt-icon
-                      title="Endre rekkefølge"
-                      class="me-2 mt-1 ms-1 row-handle-draggable"
-                      name="drag"
-                      role="button"
-                      tabindex="0"
-                    ></pkt-icon>
-                  {/if}
-                </span>
-                <span>
-                  {title}
-                </span>
-                <span class="pt-2">
-                  {#if $hasUserAccessToFeature('titleCollection', 'update', {})}
-                    <ButtonMini
-                      options={{
-                        title: 'Slett title',
-                        iconName: 'trash-can',
-                        skin: 'tertiary',
-                        variant: 'icon-only',
-                        size: 'tiny',
-                        onClick: () => handleTitleDelete(index),
-                      }}
-                    />
-                  {/if}
-                </span>
-              </div>
-            {/key}
-          {/each}
-        </div>
-      {:else}
-        <p class="text-muted">
-          Ingen titles tilgjengelig på dette faget.
-          {#if $hasUserAccessToFeature('titleCollection', 'create', {})}
-            Men kanskje du vil legge til noen?
-          {/if}
-        </p>
-      {/if}
+      <div bind:this={titlesListElement} class="list-title">
+        {#each (titleCollection?.titles ?? []) as string[] as title, index}
+          {#key title}
+            <div class="list-group-item title-row">
+              <span>
+                {#if $hasUserAccessToFeature('titleCollection', 'update', {})}
+                  <pkt-icon
+                    title="Endre rekkefølge"
+                    class="me-2 mt-1 ms-1 row-handle-draggable"
+                    name="drag"
+                    role="button"
+                    tabindex="0"
+                  ></pkt-icon>
+                {/if}
+              </span>
+              <span>
+                {title}
+              </span>
+              <span class="pt-2">
+                {#if $hasUserAccessToFeature('titleCollection', 'update', {})}
+                  <ButtonMini
+                    options={{
+                      title: 'Slett title',
+                      iconName: 'trash-can',
+                      skin: 'tertiary',
+                      variant: 'icon-only',
+                      size: 'tiny',
+                      onClick: () => handleTitleDelete(index),
+                    }}
+                  />
+                {/if}
+              </span>
+            </div>
+          {/key}
+        {/each}
+      </div>
     </div>
   {:else}
     <div class="m-2">Fant ikke greia</div>

@@ -7,7 +7,13 @@
     SubjectType,
     GoalCreateType,
   } from '../../generated/types.gen'
-  import { goalsCreate, goalsUpdate, goalsList, subjectsList } from '../../generated/sdk.gen'
+  import {
+    goalsCreate,
+    goalsUpdate,
+    goalsList,
+    subjectsList,
+    titleCollectionsList,
+  } from '../../generated/sdk.gen'
 
   import { NONE_FIELD_VALUE } from '../../utils/constants'
   import { dataStore } from '../../stores/data'
@@ -102,10 +108,24 @@
 
   const fetchGoalTitles = async () => {
     try {
+      const titleCollectionsResult = await titleCollectionsList({
+        query: { school: currentSchool?.id },
+      })
+      const titleCollections = (titleCollectionsResult.data || [])[0] || undefined
+      const centralizedTitleItems = ((titleCollections?.titles || []) as string[]).map(
+        (title, index) => ({
+          id: index,
+          title: title,
+        })
+      )
+
       const goalsResult = await goalsList({
         query: { school: currentSchool?.id, returnFields: 'id,title' },
       })
-      let goals = goalsResult.data || []
+      let goals: { id: string | number; title?: string | null }[] = [
+        ...(goalsResult.data || []),
+        ...centralizedTitleItems,
+      ]
       titlesAutocomplete = uniqBy(goals, 'title')
         .filter(goal => goal.title)
         .map(goal => ({
