@@ -35,10 +35,10 @@ export const defaultTranslations: Record<string, any> = {
     'plu-def': 'statusene',
   },
   titleRepository: {
-    'sin-indef': 'tittelbank',
-    'sin-def': 'tittelbanken',
-    'plu-indef': 'tittelbanker',
-    'plu-def': 'tittelbankene',
+    'sin-indef': 'målbank',
+    'sin-def': 'målbanken',
+    'plu-indef': 'målbanker',
+    'plu-def': 'målbanker',
   },
 }
 

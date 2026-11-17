@@ -1,4 +1,5 @@
 <script lang="ts">
+  import uniq from 'lodash/uniq'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import type { TitleCollectionType } from '../generated/types.gen'
   import {
@@ -7,11 +8,12 @@
     titleCollectionsPartialUpdate,
     titleCollectionsCreate,
   } from '../generated/sdk.gen'
-  import { currentSchool } from '../stores/data'
+  import { dataStore } from '../stores/data'
   import { hasUserAccessToFeature } from '../stores/access'
   import { t } from '../stores/translations'
 
   import ButtonMini from '../components/ButtonMini.svelte'
+  import ButtonIcon from '../components/ButtonIcon.svelte'
 
   const { titleCollectionId }: { titleCollectionId: string } = $props()
 
@@ -19,69 +21,67 @@
   let titleCollection = $state<TitleCollectionType | undefined>(undefined)
 
   let sortableInstance: Sortable | null = null
-  let titleInputElement = $state<HTMLInputElement | null>(null)
+  let titleTextInputElement = $state<HTMLInputElement | null>(null)
+  let titleTextAreaElement = $state<HTMLTextAreaElement | null>(null)
   let titlesListElement = $state<HTMLElement | null>(null)
+  let isTextAreaInputEnabled = $state<boolean>(false)
   let newTitleValue = $state<string | undefined>(undefined)
+
+  const schoolId = $derived($dataStore.currentSchool?.id)
+
   let isNewTitleDuplicate = $derived.by(() => {
     return (titleCollection?.titles as string[])?.includes(newTitleValue ?? '') ?? false
   })
+
   let isNewTitleTooLong = $derived.by(() => {
     return (newTitleValue?.length ?? 0) > maxTitleLength
   })
 
   const fetchData = async () => {
+    let collection = undefined
     try {
       if (titleCollectionId) {
         // fetch by id
         const result = await titleCollectionsRetrieve({ path: { id: titleCollectionId } })
-        titleCollection = result.data!
+        collection = result.data!
       } else {
         // fetch first we find for this school
-        const listResult = await titleCollectionsList({ query: { school: $currentSchool.id } })
-        titleCollection = listResult.data?.[0]
+        const listResult = await titleCollectionsList({ query: { school: schoolId } })
+        collection = listResult.data?.[0]
       }
-      if (!titleCollection && !titleCollectionId) {
+      if (!collection && !titleCollectionId) {
         // if no specific collection requested and there is none, create a new one
         const createResult = await titleCollectionsCreate({
-          body: { schoolId: $currentSchool.id, titles: [] },
+          body: { schoolId: schoolId, titles: [] },
         })
-        titleCollection = createResult.data!
+        collection = createResult.data!
       }
     } catch (error) {
       console.error(`Could not fetch or create title collection`, error)
+    } finally {
+      titleCollection = collection
     }
   }
 
-  const handleAddTitle = async (title: string | undefined) => {
-    if (!title || title.trim() === '' || !titleInputElement) return
-    if (titleCollection) {
-      // update existing title collection with new title
-      const existingTitles = (titleCollection.titles as string[] | undefined) ?? []
-      const updatedTitles = [...existingTitles, title]
-      try {
-        const result = await titleCollectionsPartialUpdate({
-          path: { id: titleCollection.id },
-          body: { titles: updatedTitles },
-        })
-        titleCollection = result.data!
-        newTitleValue = undefined
-      } catch (error) {
-        console.error(`Could not add title ${title}`, error)
-      }
-    } else {
-      // create new title collection with the title
-      try {
-        const result = await titleCollectionsCreate({
-          body: {
-            schoolId: $currentSchool.id,
-            titles: [title],
-          },
-        })
-        titleCollection = result.data!
-        newTitleValue = undefined
-      } catch (error) {
-        console.error(`Could not create title collection with title ${title}`, error)
-      }
+  const handleAddTitle = async (input: string | undefined) => {
+    if (!titleCollection || !input || input.trim() === '') return
+
+    const existingTitles = (titleCollection.titles as string[] | undefined) ?? []
+    const newTitles = input
+      .split('\n')
+      .map(t => t.trim())
+      .filter(t => t !== '')
+    const titles = uniq([...existingTitles, ...newTitles])
+
+    try {
+      const result = await titleCollectionsPartialUpdate({
+        path: { id: titleCollection.id },
+        body: { titles },
+      })
+      titleCollection = result.data!
+      newTitleValue = undefined
+    } catch (error) {
+      console.error(`Could not add ${input}`, error)
     }
   }
 
@@ -136,12 +136,14 @@
   }
 
   $effect(() => {
-    fetchData()
+    if (schoolId) fetchData()
   })
 
   $effect(() => {
-    if (titleInputElement) {
-      titleInputElement.focus()
+    if (isTextAreaInputEnabled) {
+      titleTextAreaElement && titleTextAreaElement.focus()
+    } else {
+      titleTextInputElement && titleTextInputElement.focus()
     }
   })
 
@@ -179,46 +181,96 @@
       <div class="my-3">
         {#if $hasUserAccessToFeature('titleCollection', 'update', {})}
           <div class="d-flex align-items-start gap-2 mb-2">
-            <label for="newTitleInput" class="form-label visually-hidden">Nytt mål</label>
-            <input
-              id="newTitleInput"
-              type="text"
-              class="form-control rounded-0 border-2 border-primary input-field mb-2"
-              name="displayName"
-              bind:this={titleInputElement}
-              bind:value={newTitleValue}
-              placeholder="Ny tittel"
-              onkeydown={(event: KeyboardEvent) => {
-                if (event.key === 'Enter' && !isNewTitleDuplicate && !isNewTitleTooLong)
-                  handleAddTitle(newTitleValue)
-              }}
-            />
-            <ButtonMini
-              options={{
-                title: 'Legg til ny title',
-                iconName: 'plus-sign',
-                skin: 'primary',
-                variant: 'icon-left',
-                disabled: !newTitleValue?.trim() || isNewTitleDuplicate || isNewTitleTooLong,
-                onClick: () => handleAddTitle(newTitleValue),
-              }}
-            >
-              Legg til
-            </ButtonMini>
+            <!-- Text area input -->
+            {#if isTextAreaInputEnabled}
+              <label for="newTitlesInput" class="form-label visually-hidden">Nye mål</label>
+              <div class="input-wrapper">
+                <textarea
+                  id="newTitlesInput"
+                  class="form-control rounded-0 border-2 border-primary"
+                  bind:this={titleTextAreaElement}
+                  bind:value={newTitleValue}
+                  placeholder="Linjeskift-separert liste med titler"
+                  rows="5"></textarea>
+                <div class="input-corner-button">
+                  <ButtonIcon
+                    options={{
+                      title: 'Minimer område',
+                      iconName: 'minimize',
+                      onClick: () => (isTextAreaInputEnabled = false),
+                    }}
+                  ></ButtonIcon>
+                </div>
+              </div>
+              <ButtonMini
+                options={{
+                  title: 'Legg til nye titler',
+                  iconName: 'plus-sign',
+                  skin: 'primary',
+                  variant: 'icon-left',
+                  disabled: !newTitleValue?.trim(),
+                  onClick: () => handleAddTitle(newTitleValue),
+                }}
+              >
+                Legg til
+              </ButtonMini>
+            {:else}
+              <!-- Single line input -->
+              <label for="newTitleInput" class="form-label visually-hidden">Nytt mål</label>
+              <div class="input-wrapper">
+                <input
+                  id="newTitleInput"
+                  type="text"
+                  class="form-control rounded-0 border-2 border-primary mb-2"
+                  name="displayName"
+                  bind:this={titleTextInputElement}
+                  bind:value={newTitleValue}
+                  placeholder="Ny tittel"
+                  onkeydown={(event: KeyboardEvent) => {
+                    if (event.key === 'Enter' && !isNewTitleDuplicate && !isNewTitleTooLong)
+                      handleAddTitle(newTitleValue)
+                  }}
+                />
+                <div class="input-corner-button">
+                  <ButtonIcon
+                    options={{
+                      title: 'Utvid område',
+                      iconName: 'expand',
+                      onClick: () => (isTextAreaInputEnabled = true),
+                    }}
+                  ></ButtonIcon>
+                </div>
+              </div>
+              <ButtonMini
+                options={{
+                  title: 'Legg til ny tittel',
+                  iconName: 'plus-sign',
+                  skin: 'primary',
+                  variant: 'icon-left',
+                  disabled: !newTitleValue?.trim() || isNewTitleDuplicate || isNewTitleTooLong,
+                  onClick: () => handleAddTitle(newTitleValue),
+                }}
+              >
+                Legg til
+              </ButtonMini>
+            {/if}
           </div>
 
-          {#if isNewTitleDuplicate}
-            <p class="text-danger">Denne tittelen finnes allerede</p>
-          {/if}
-
-          <p class="text-muted">
-            {newTitleValue?.length ?? 0}/{maxTitleLength}
-            {#if isNewTitleTooLong}
-              <span class="text-danger">
-                For lang, for lang, den tittel er for lang. Det Kongelige Norske Titteledepartement.
-              </span>
+          {#if !isTextAreaInputEnabled}
+            {#if isNewTitleDuplicate}
+              <p class="text-danger">Denne tittelen finnes allerede</p>
             {/if}
-          </p>
+
+            <p class="text-muted">
+              {newTitleValue?.length ?? 0}/{maxTitleLength}
+              {#if isNewTitleTooLong}
+                <span class="text-danger">
+                  For lang, for lang, den tittel er for lang. Det Kongelige Norske
+                  Titteledepartement.
+                </span>
+              {/if}
+            </p>
+          {/if}
         {/if}
       </div>
 
@@ -278,9 +330,16 @@
 </section>
 
 <style>
-  #newTitleInput {
+  .input-wrapper {
+    position: relative;
     width: 50%;
     min-width: 20rem;
+  }
+
+  .input-corner-button {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
   }
 
   .list-title {

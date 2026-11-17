@@ -251,7 +251,7 @@
           <input
             id="newTagInput"
             type="text"
-            class="form-control rounded-0 border-2 border-primary input-field mb-2"
+            class="form-control rounded-0 border-2 border-primary mb-2"
             name="displayName"
             bind:this={tagInputElement}
             bind:value={newTagValue}
