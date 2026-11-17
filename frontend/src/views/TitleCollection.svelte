@@ -274,18 +274,20 @@
         {/if}
       </div>
 
-      <ButtonMini
-        options={{
-          title: 'Sortér alfabetisk',
-          iconName: 'arrow-down-up',
-          skin: 'primary',
-          variant: 'icon-left',
-          classes: 'mb-2',
-          onClick: () => handleSortTitles(),
-        }}
-      >
-        Sortér alfabetisk
-      </ButtonMini>
+      {#if ((titleCollection?.titles ?? []) as string[]).length > 1}
+        <ButtonMini
+          options={{
+            title: 'Sortér alfabetisk',
+            iconName: 'arrow-down-up',
+            skin: 'primary',
+            variant: 'icon-left',
+            classes: 'mb-2',
+            onClick: () => handleSortTitles(),
+          }}
+        >
+          Sortér alfabetisk
+        </ButtonMini>
+      {/if}
 
       <div bind:this={titlesListElement} class="list-title">
         {#each (titleCollection?.titles ?? []) as string[] as title, index}

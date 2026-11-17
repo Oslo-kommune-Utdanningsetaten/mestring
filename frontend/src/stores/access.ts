@@ -226,6 +226,11 @@ const checkUserAccessToFeature = (
       )
       if (subjectId && subjectIds.includes(subjectId)) return true
     }
+  } else if (resource === 'titleCollection') {
+    if (['create', 'update', 'delete'].includes(action)) {
+      if (currentUser.isSchoolAdmin || currentUser.isSchoolInspector || currentUser.isTeacher)
+        return true
+    }
   }
   return false
 }
