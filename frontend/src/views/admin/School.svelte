@@ -494,7 +494,11 @@
   {#if school}
     <div class="p-4" class:opacity-25={!school.isServiceEnabled}>
       <div class="d-flex align-items-center">
-        <h2>{school.displayName}</h2>
+        <h2>
+          <mark>
+            {school.displayName}
+          </mark>
+        </h2>
         <pkt-checkbox
           id={'service-' + school.id}
           class="ms-auto"
