@@ -3,7 +3,7 @@
   import '@oslokommune/punkt-elements/dist/pkt-select.js'
   import { useTinyRouter } from 'svelte-tiny-router'
   import type { GroupType, SchoolType, SubjectType } from '../../generated/types.gen'
-  import { groupsList, schoolsList, groupsUpdate, groupsRetrieve } from '../../generated/sdk.gen'
+  import { groupsList, groupsUpdate, groupsRetrieve } from '../../generated/sdk.gen'
   import { urlStringFrom } from '../../utils/functions'
   import {
     NONE_FIELD_VALUE,
