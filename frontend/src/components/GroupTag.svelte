@@ -119,7 +119,8 @@
       drop-shadow(0 4px 4px rgba(0, 0, 0, 0.12)) drop-shadow(0 8px 8px rgba(0, 0, 0, 0.12));
   }
 
-  .colored-icon pkt-icon {
+  /* Punkt's `.pkt-tag svg` sets --fg-color on the svg itself, so it must be overridden there */
+  .colored-icon :global(svg) {
     --fg-color: var(--pkt-color-brand-red-1000);
   }
 

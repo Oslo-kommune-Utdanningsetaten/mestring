@@ -17,7 +17,7 @@
     inferCreatedParams,
   } from '../../utils/schoolYear'
 
-  import { dataStore } from '../../stores/data'
+  import { dataStore, currentSchool } from '../../stores/data'
   import GroupTag from '../../components/GroupTag.svelte'
   import ButtonIcon from '../../components/ButtonIcon.svelte'
   import Link from '../../components/Link.svelte'
@@ -26,13 +26,7 @@
 
   const router = useTinyRouter()
   let groups = $state<GroupType[]>([])
-  let schools = $state<SchoolType[]>([])
-  let isLoadingSchools = $state<boolean>(false)
   let isLoadingGroups = $state<boolean>(false)
-
-  let selectedSchoolId = $state<string>(
-    router.getQueryParam('school') || $dataStore.currentSchool?.id
-  )
 
   let selectedEnabledOption = $state<GROUP_ENABLED_OPTIONS>(
     (router.getQueryParam('enabled') as GROUP_ENABLED_OPTIONS) || GROUP_ENABLED_OPTIONS.ONLY
@@ -85,7 +79,7 @@
     { value: 'any', label: 'Whatever' },
   ] as const
 
-  let selectedSchool = $derived(schools.find(s => s.id === selectedSchoolId))
+  let school = $derived<SchoolType>($currentSchool)
 
   // Options for filtering by groups by date validity
   const createdOptions = $derived.by(() => {
@@ -102,7 +96,7 @@
 
   const groupFetchOptions = $derived.by(() => {
     const options: Record<string, any> & { school: string } = {
-      school: selectedSchoolId as string,
+      school: school.id as string,
       enabled: selectedEnabledOption,
       deleted: selectedDeletedOption,
       valid: selectedValidOption,
@@ -127,9 +121,9 @@
   )
 
   // Subjects available for the currently selected school (if subjects are school scoped)
-  const subjectsForSelectedSchool = $derived(
+  const subjectsForSchool = $derived(
     (() => {
-      const currentSchoolId = selectedSchool?.id
+      const currentSchoolId = school.id
       if (!currentSchoolId) return []
       return $dataStore.subjects
         .filter(s => {
@@ -141,7 +135,7 @@
   )
 
   const filteredSubjects = $derived(
-    subjectsForSelectedSchool.filter(
+    subjectsForSchool.filter(
       subject =>
         subject.displayName?.toLowerCase().includes(nameFilter.toLowerCase()) ||
         subject.shortName?.toLowerCase().includes(nameFilter.toLowerCase()) ||
@@ -163,7 +157,7 @@
   const disabledGroups = $derived(filteredGroups.filter(g => !g.isEnabled))
 
   let headerText = $derived.by(() => {
-    let text = selectedSchool ? `Grupper ved ${selectedSchool.displayName}` : 'Alle grupper'
+    let text = `Grupper ved ${school.displayName}`
     text = nameFilter ? `${text} som matcher "${nameFilter}"` : text
     return text
   })
@@ -174,18 +168,8 @@
     return subject?.displayName || `skolen har ikke fag ${group.subjectId}`
   }
 
-  const fetchSchools = async () => {
-    try {
-      const result = await schoolsList({})
-      schools = result.data || []
-    } catch (error) {
-      console.error('Error fetching schools:', error)
-      schools = []
-    }
-  }
-
   const fetchGroups = async () => {
-    if (!selectedSchool) return
+    if (!school) return
     try {
       isLoadingGroups = true
       const result = await groupsList({ query: groupFetchOptions })
@@ -201,7 +185,7 @@
   }
 
   const refetchGroupById = async (groupId: string) => {
-    if (!selectedSchool) return
+    if (!school) return
     try {
       const result = await groupsRetrieve({ path: { id: groupId } })
       const updatedGroup = result.data || null
@@ -211,10 +195,6 @@
     } catch (error) {
       console.error(`Error refetching group with id ${groupId}:`, error)
     }
-  }
-
-  const handleSchoolSelect = (schoolId: string): void => {
-    selectedSchoolId = schoolId
   }
 
   const handleGroupTypeToggle = async (group: GroupType) => {
@@ -297,11 +277,7 @@
   }
 
   $effect(() => {
-    fetchSchools()
-  })
-
-  $effect(() => {
-    if (selectedSchool) {
+    if (school) {
       fetchGroups()
     }
   })
@@ -309,7 +285,6 @@
   $effect(() => {
     const url = urlStringFrom(
       {
-        school: selectedSchoolId || null,
         deleted: selectedDeletedOption || null,
         year: selectedYearOption || null,
         enabled: selectedEnabledOption || null,
@@ -325,27 +300,13 @@
 <section class="pt-3">
   <h2 class="py-3">{headerText}</h2>
   <!-- Filter groups -->
-  {#if isLoadingSchools}
+  {#if isLoadingGroups}
     <div class="m-4">
       <div class="spinner-border text-primary" role="status"></div>
-      <span>Henter skoler...</span>
+      <span>Henter grupper...</span>
     </div>
   {:else}
     <div class="filters-container">
-      <div class="filter-item">
-        <label for="schoolSelect" class="mb-1 visually-hidden">Filtrer på skole:</label>
-        <select
-          class="pkt-input"
-          id="schoolSelect"
-          onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
-        >
-          {#each schools as school}
-            <option value={school.id} selected={school.id === selectedSchool?.id}>
-              {school.displayName}
-            </option>
-          {/each}
-        </select>
-      </div>
       <div class="filter-item">
         <label for="groupFilterInput" class="mb-1 visually-hidden">Filtrer på navn:</label>
         <input
@@ -443,7 +404,7 @@
 </section>
 
 <section class="py-3">
-  {#if selectedSchool}
+  {#if school}
     <div class="my-4">
       Viser {filteredGroups.length} gruppe{filteredGroups.length == 1 ? '' : 'r'}
     </div>
@@ -516,7 +477,7 @@
                   }}
                 >
                   <option value={NONE_FIELD_VALUE} selected={!group.subjectId}>Ikke valgt</option>
-                  {#each subjectsForSelectedSchool as subject}
+                  {#each subjectsForSchool as subject}
                     <option value={subject.id} selected={subject.id === group.subjectId}>
                       {subject.displayName}
                     </option>
