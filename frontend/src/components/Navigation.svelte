@@ -85,9 +85,7 @@
     <div class="d-flex align-items-center">
       <Link
         className="navbar-brand d-flex align-items-center"
-        to={$hasUserAccessToPath('/admin/schools/:schoolId')
-          ? `/admin/schools/${$currentSchool?.id}`
-          : '/'}
+        to={$hasUserAccessToPath('/admin/school-settings') ? '/admin/school-settings' : '/'}
       >
         <!-- Mestring icon -->
         <span class="goal-icon-wrapper me-3">

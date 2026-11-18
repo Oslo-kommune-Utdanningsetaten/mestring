@@ -26,6 +26,7 @@
   import { addAlert } from '../../stores/alerts'
   import { t } from '../../stores/translations'
   import { hasUserAccessToPath } from '../../stores/access'
+  import { currentSchool } from '../../stores/data'
 
   import ButtonMini from '../../components/ButtonMini.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
@@ -49,9 +50,9 @@
 
   const router = useTinyRouter()
 
-  const { schoolId }: { schoolId: string } = $props()
+  const {}: {} = $props()
 
-  let school = $state<SchoolType>()
+  let school = $derived<SchoolType>($currentSchool)
   let importDataEstimate = $state<Record<string, any> | null>(null)
   let cleanerbotDataEstimate = $state<CleanerbotData | null>(null)
   let isEstimateContainerOpen = $state<boolean>(false)
@@ -157,11 +158,7 @@
 
   const fetchSchool = async () => {
     try {
-      const result = await schoolsRetrieve({ path: { id: schoolId } })
-      school = result.data
-      if (school) {
-        await loadImportStatusForSchool()
-      }
+      await loadImportStatusForSchool()
     } catch (error) {
       addAlert({
         type: 'danger',
@@ -348,7 +345,7 @@
           type: 'success',
           message: `Bakgrunnsjobb opprettet for sletting av snargh for ${orgNumber}`,
         })
-        router.navigate('/admin/data-maintenance-tasks/?back=/admin/schools/' + school.id)
+        router.navigate('/admin/data-maintenance-tasks/?back=/admin/school-settings')
       } else if (result.response.status === 400) {
         addAlert({
           type: 'warning',
@@ -430,7 +427,7 @@
           type: 'success',
           message: `Bakgrunnsjobb opprettet for import av grupper og brukere for ${orgNumber}`,
         })
-        router.navigate('/admin/data-maintenance-tasks/?back=/admin/schools/' + school.id)
+        router.navigate('/admin/data-maintenance-tasks/?back=/admin/school-settings')
       } else if (result.response.status === 409) {
         addAlert({
           type: 'warning',

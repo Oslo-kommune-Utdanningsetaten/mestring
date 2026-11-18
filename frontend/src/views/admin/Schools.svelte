@@ -1,6 +1,5 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
-  import { useTinyRouter } from 'svelte-tiny-router'
   import { type SchoolType } from '../../generated/types.gen'
   import { feideImportSchool, schoolsList, schoolsPartialUpdate } from '../../generated/sdk.gen'
 
@@ -9,9 +8,6 @@
   import { dataStore } from '../../stores/data'
 
   import ButtonMini from '../../components/ButtonMini.svelte'
-  import Link from '../../components/Link.svelte'
-
-  const router = useTinyRouter()
   let schools = $state<SchoolType[]>([])
   let feideOrgInput: HTMLInputElement
 
@@ -120,7 +116,7 @@
     <div class="border border-3 mb-4" class:opacity-25={!school.isServiceEnabled}>
       <div class="p-4">
         <div class="d-flex align-items-center">
-          <h3><Link to="/admin/schools/{school.id}">{school.displayName}</Link></h3>
+          <h3>{school.displayName}</h3>
           <pkt-checkbox
             id={'service-' + school.id}
             class="ms-auto"

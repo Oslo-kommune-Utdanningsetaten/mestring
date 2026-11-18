@@ -233,7 +233,7 @@ export const ROUTES = [
     accessibleBy: [USER_ROLES.SUPERADMIN],
   },
   {
-    path: '/admin/schools/:schoolId',
+    path: '/admin/school-settings',
     component: School,
     isPublic: false,
     accessibleBy: [USER_ROLES.SUPERADMIN],
