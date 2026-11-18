@@ -1229,6 +1229,20 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
+            OpenApiParameter(
+                name='open_from',
+                description='Filter by open_from timestamp. Only return rows open from this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='open_to',
+                description='Filter by open_to timestamp. Only return rows open to this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
             DELETED_FILTER_PARAMETER,
             *CREATED_RANGE_PARAMETERS,
         ]
@@ -1247,6 +1261,8 @@ class StatusCategoryViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewset
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
             name_param, _ = get_request_param(self.request.query_params, 'name')
+            open_from_param, _ = get_request_param(self.request.query_params, 'open_from')
+            open_to_param, _ = get_request_param(self.request.query_params, 'open_to')
 
             if not school_param:
                 raise ValidationError({'error': 'missing-parameter',
@@ -1256,6 +1272,12 @@ class StatusCategoryViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewset
 
             if name_param:
                 qs = qs.filter(name=name_param)
+
+            if open_from_param:
+                qs = qs.filter(open_from__gte=open_from_param)
+
+            if open_to_param:
+                qs = qs.filter(open_to__lte=open_to_param)
 
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs

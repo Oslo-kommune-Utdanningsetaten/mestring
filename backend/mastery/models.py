@@ -431,7 +431,10 @@ class StatusCategory(BaseModel):
     mastery_schema = models.ForeignKey(
         MasterySchema, on_delete=models.CASCADE, null=False, related_name='status_categories')
     is_subject_specific = models.BooleanField(default=True, null=False)  # status must be linked to a subject
+    # whether the status category appears for school admins
     is_enabled = models.BooleanField(default=False, null=False)
+    open_from = models.DateTimeField(null=True)  # when does this open for submitting connected statuses
+    open_to = models.DateTimeField(null=True)  # when does this close the submission of connected statuses
 
     class Meta:
         unique_together = ('name', 'school')

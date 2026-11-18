@@ -312,6 +312,8 @@ export type PatchedStatusCategoryType = {
     name?: string;
     isSubjectSpecific?: boolean;
     isEnabled?: boolean;
+    openFrom?: string | null;
+    openTo?: string | null;
     readonly createdById?: string;
     readonly updatedById?: string;
     schoolId?: string;
@@ -474,6 +476,8 @@ export type StatusCategoryType = {
     name: string;
     isSubjectSpecific?: boolean;
     isEnabled?: boolean;
+    openFrom?: string | null;
+    openTo?: string | null;
     readonly createdById: string;
     readonly updatedById: string;
     schoolId: string;
@@ -776,6 +780,8 @@ export type PatchedStatusCategoryCreateType = {
     name?: string;
     isSubjectSpecific?: boolean;
     isEnabled?: boolean;
+    openFrom?: string | null;
+    openTo?: string | null;
     schoolId?: string;
     masterySchemaId?: string;
 };
@@ -876,6 +882,8 @@ export type StatusCategoryCreateType = {
     name: string;
     isSubjectSpecific?: boolean;
     isEnabled?: boolean;
+    openFrom?: string | null;
+    openTo?: string | null;
     schoolId: string;
     masterySchemaId: string;
 };
@@ -2171,6 +2179,14 @@ export type StatusCategoriesListData = {
          * Filter statuses by name.
          */
         name?: string;
+        /**
+         * Filter by open_from timestamp. Only return rows open from this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        openFrom?: string;
+        /**
+         * Filter by open_to timestamp. Only return rows open to this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        openTo?: string;
         /**
          * Filter statuses by school.
          */
