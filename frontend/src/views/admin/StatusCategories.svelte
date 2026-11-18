@@ -1,46 +1,27 @@
 <script lang="ts">
-  import { useTinyRouter } from 'svelte-tiny-router'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
   import {
     statusCategoriesDestroy,
     statusCategoriesList,
     statusCategoriesPartialUpdate,
-    schoolsList,
     masterySchemasList,
   } from '../../generated/sdk.gen'
   import type { StatusCategoryType, SchoolType } from '../../generated/types.gen'
-  import { urlStringFrom } from '../../utils/functions'
-  import { dataStore } from '../../stores/data'
+  import { dataStore, currentSchool } from '../../stores/data'
   import { STATUS_CATEGORY_NAMES } from '../../utils/constants'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
   import StatusCategoryEdit from '../../components/edit/StatusCategoryEdit.svelte'
 
-  const router = useTinyRouter()
   let statusCategoryWip = $state<Partial<StatusCategoryType> | null>(null)
   let isEditorOpen = $state<boolean>(false)
-  let schools = $state<SchoolType[]>([])
-  let isLoadingSchools = $state<boolean>(false)
   let statusCategories = $state<StatusCategoryType[]>([])
   let masterySchemas = $state($dataStore.masterySchemas)
 
-  let selectedSchool = $derived.by(() => {
-    const schoolIdFromUrl = router.getQueryParam('school')
-    return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
-  })
-
-  const fetchSchools = async () => {
-    try {
-      const result = await schoolsList({})
-      schools = result.data || []
-    } catch (error) {
-      console.error('Error fetching schools:', error)
-      schools = []
-    }
-  }
+  let school = $derived<SchoolType>($currentSchool)
 
   const fetchData = async () => {
-    const query = { school: selectedSchool.id }
+    const query = { school: school.id }
     try {
       const statusResult = await statusCategoriesList({ query })
       statusCategories = statusResult.data || []
@@ -52,16 +33,6 @@
     }
   }
 
-  const handleSchoolSelect = (schoolId: string): void => {
-    if (schoolId && schoolId !== '0') {
-      router.navigate(
-        urlStringFrom({ school: schoolId }, { path: '/admin/status-categories', mode: 'merge' })
-      )
-    } else {
-      router.navigate('/admin/status-categories')
-    }
-  }
-
   const handleDone = () => {
     isEditorOpen = false
     fetchData()
@@ -69,7 +40,7 @@
 
   const handleNewStatusCategory = () => {
     statusCategoryWip = {
-      schoolId: selectedSchool?.id,
+      schoolId: school?.id,
       isEnabled: true,
     }
     isEditorOpen = true
@@ -101,20 +72,6 @@
     }
   }
 
-  const toggleIsSubjectSpecific = async (statusCategory: StatusCategoryType) => {
-    try {
-      const current = statusCategory.isSubjectSpecific ?? false
-      await statusCategoriesPartialUpdate({
-        path: { id: statusCategory.id },
-        body: { isSubjectSpecific: !current },
-      })
-    } catch (error) {
-      console.error('Error updating isSubjectSpecific:', error)
-    } finally {
-      await fetchData()
-    }
-  }
-
   const toggleIsEnabled = async (statusCategory: StatusCategoryType) => {
     try {
       const current = statusCategory.isEnabled ?? false
@@ -130,46 +87,15 @@
   }
 
   $effect(() => {
-    fetchSchools()
-  })
-
-  $effect(() => {
-    if (selectedSchool && selectedSchool.id) {
+    if (school?.id) {
       fetchData()
     }
   })
 </script>
 
-<section class="pt-3">
-  <h2 class="mb-4">Kategorier for status</h2>
-  <!-- Filter groups -->
-  {#if isLoadingSchools}
-    <div class="m-4">
-      <div class="spinner-border text-primary" role="status"></div>
-      <span>Henter skoler...</span>
-    </div>
-  {:else}
-    <div class="filters-container">
-      <div class="filter-item">
-        <label for="schoolSelect" class="mb-1 visually-hidden">Velg skole:</label>
-        <select
-          class="pkt-input"
-          id="schoolSelect"
-          onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
-        >
-          {#each schools as school}
-            <option value={school.id} selected={school.id === selectedSchool?.id}>
-              {school.displayName}
-            </option>
-          {/each}
-        </select>
-      </div>
-    </div>
-  {/if}
-</section>
-
 <section class="py-4">
-  {#if selectedSchool}
+  <h2 class="mb-4">Statuskategorier for {school?.displayName}</h2>
+  {#if school}
     <ButtonMini
       options={{
         title: 'Ny statuskategori',
@@ -221,21 +147,6 @@
                   checked={statusCategory.isEnabled}
                   onchange={() => toggleIsEnabled(statusCategory)}
                 ></pkt-checkbox>
-
-                <!-- 
-                <pkt-checkbox
-                  label={statusCategory.isSubjectSpecific
-                    ? 'Specific for subject'
-                    : 'Accross all subjects'}
-                  labelPosition="right"
-                  isSwitch="true"
-                  aria-checked={statusCategory.isSubjectSpecific}
-                  checked={statusCategory.isSubjectSpecific}
-                  onchange={() => toggleIsSubjectSpecific(statusCategory)}
-                  disabled={true}
-                  title="Not editable yet, needs a use case :)"
-                ></pkt-checkbox>
-                -->
 
                 <div class="status-buttons">
                   <ButtonMini
@@ -307,20 +218,6 @@
 </Offcanvas>
 
 <style>
-  .filters-container {
-    display: flex;
-    gap: 1rem;
-    align-items: flex-end;
-  }
-
-  .filter-item {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 20rem;
-    min-width: 3rem;
-    max-width: 25rem;
-  }
-
   .status-card {
     display: flex;
     flex-wrap: wrap;
