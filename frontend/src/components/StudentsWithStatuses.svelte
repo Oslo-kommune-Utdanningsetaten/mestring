@@ -69,9 +69,13 @@
   )
 
   const category = $derived($dataStore.statusCategories.find(cat => cat.name === categoryName))
+
+  const isCategoryOfRiskType = $derived(category?.name.startsWith('risk-'))
+
   const masterySchema = $derived(
     $dataStore.masterySchemas.find(schema => schema.id === category?.masterySchemaId)
   )
+
   const { maxValue } = $derived(useMasteryCalculations(masterySchema))
 
   // Sorted students list
@@ -166,12 +170,22 @@
       })
     })
 
-    const query = {
+    let query: Record<string, any> & { school: string } = {
       group: group ? group.id : undefined,
-      school: $dataStore.currentSchool?.id,
+      school: $dataStore.currentSchool?.id as string,
       categoryName: categoryName,
-      ...getPreferredCreatedParams(),
     }
+
+    if (category.openFrom && category.openTo) {
+      // if category has openFrom and openTo, use them to fetch only statues created withing that range
+      const createdAfter = category.openFrom.split('T')[0]
+      const createdBefore = category.openTo.split('T')[0]
+      query = { ...query, createdAfter, createdBefore }
+    } else {
+      // otherwise, use preferred created params
+      query = { ...query, ...getPreferredCreatedParams() }
+    }
+
     const result = await statusList({ query })
     const statuses = result.data || []
 
@@ -302,10 +316,9 @@
 
 <!-- Filtering by mastery level -->
 {#if masterySchema && category}
-  {@const levels =
-    category.name === 'risk'
-      ? masterySchema.config.levels.slice(0, -1)
-      : masterySchema.config.levels}
+  {@const levels = isCategoryOfRiskType
+    ? masterySchema.config.levels.slice(0, -1)
+    : masterySchema.config.levels}
 
   <table class="my-2 table fixed-layout">
     <colgroup>
@@ -326,7 +339,7 @@
         <th class="table-header">Elever {group ? `i dette utvalget` : 'på hele skolen'}</th>
         <td>{sortedStudents.length}</td>
       </tr>
-      {#if category.name === 'risk'}
+      {#if isCategoryOfRiskType}
         <tr>
           <td></td>
           <th class="table-header">
@@ -442,7 +455,7 @@
       ></pkt-checkbox>
     </p>
 
-    {#if category.name === 'risk'}
+    {#if isCategoryOfRiskType}
       <ButtonMini
         options={{
           title: 'Last ned CSV',

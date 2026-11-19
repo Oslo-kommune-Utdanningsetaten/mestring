@@ -426,7 +426,7 @@ class StatusCategory(BaseModel):
     A StatusCategory represents a category for a Status, e.g. 'halvtår', 'standpunt' etc. Let schools configure how they want to use Status.
     """
     title = models.CharField(max_length=200, null=False)
-    name = models.CharField(max_length=200, null=False)  # e.g. 'midyear', 'endyear', 'risk'
+    name = models.CharField(max_length=200, null=False)  # e.g. 'midyear', 'endyear', 'risk-1', 'risk-2'
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='status_categories')
     mastery_schema = models.ForeignKey(
         MasterySchema, on_delete=models.CASCADE, null=False, related_name='status_categories')

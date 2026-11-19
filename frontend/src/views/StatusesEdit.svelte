@@ -22,7 +22,10 @@
   import Link from '../components/Link.svelte'
   import StatusWidgets from '../components/edit/StatusWidgets.svelte'
 
-  let { groupId, statusCategoryName } : {
+  let {
+    groupId,
+    statusCategoryName,
+  }: {
     groupId: string
     statusCategoryName: string
   } = $props()
@@ -57,7 +60,7 @@
     if (statusCategory?.name === 'midyear') {
       return { beginAt: startAt, endAt: midyearAt }
     }
-    if (statusCategory?.name === 'risk') {
+    if (statusCategory?.name.startsWith('risk-')) {
       const currentSemester = now.getMonth() < 7 ? 'v' : 'h'
       if (currentSemester === 'h') {
         return { beginAt: startAt, endAt: midyearAt }

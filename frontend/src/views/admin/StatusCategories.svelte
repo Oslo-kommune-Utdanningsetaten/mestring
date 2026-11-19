@@ -8,7 +8,9 @@
   } from '../../generated/sdk.gen'
   import type { StatusCategoryType, SchoolType } from '../../generated/types.gen'
   import { dataStore, currentSchool } from '../../stores/data'
+  import { formatDateHumanly } from '../../utils/functions'
   import { STATUS_CATEGORY_NAMES } from '../../utils/constants'
+  import { isStatusCategoryOpen } from '../../utils/functions'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
   import StatusCategoryEdit from '../../components/edit/StatusCategoryEdit.svelte'
@@ -55,7 +57,6 @@
     statusCategoryWip = {
       ...statusCategory,
       id: undefined,
-      title: 'KOPI: ' + statusCategory?.title,
     }
     isEditorOpen = true
   }
@@ -122,18 +123,38 @@
             <div class="card-body status-card">
               <div class="status-info">
                 <h3 class="card-title mb-2">
-                  {statusCategory.title}
+                  {STATUS_CATEGORY_NAMES[statusCategory.name]}
                 </h3>
                 <dl class="status-meta mb-0">
+                  <dt>Is currently open?</dt>
+                  <dd>
+                    <span class="text-muted">
+                      {#if isStatusCategoryOpen(statusCategory)}
+                        <span class="text-success fw-bold">Yes</span>
+                      {:else}
+                        <span class="text-danger fw-bold">No</span>
+                      {/if}
+                    </span>
+                  </dd>
+
+                  <dt>Open period</dt>
+                  <dd>
+                    <span class="text-muted">
+                      {formatDateHumanly(statusCategory.openFrom ?? undefined) || '?'} - {formatDateHumanly(
+                        statusCategory.openTo ?? undefined
+                      ) || '?'}
+                    </span>
+                  </dd>
+
+                  <dt>Name</dt>
+                  <dd>
+                    {statusCategory.name}
+                  </dd>
+
                   <dt>Mastery schema</dt>
                   <dd>
                     {masterySchemas?.find(ms => ms.id === statusCategory.masterySchemaId)?.title ||
                       '?'}
-                  </dd>
-                  <dt>Name</dt>
-                  <dd>
-                    {STATUS_CATEGORY_NAMES[statusCategory.name]}
-                    <span class="text-muted">({statusCategory.name})</span>
                   </dd>
                 </dl>
               </div>

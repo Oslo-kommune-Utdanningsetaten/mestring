@@ -299,7 +299,7 @@ export const generateStatusTitle = (
     } else if (statusCategory.name === 'endyear') {
       semester = 'v'
       yearShort = endAt.split('-')[0].slice(-2)
-    } else if (statusCategory.name === 'risk') {
+    } else if (statusCategory.name.startsWith('risk-')) {
       semester = statusBeginDate.getMonth() < 7 ? 'v' : 'h'
       yearShort = statusBeginDate.getFullYear().toString().slice(-2)
     } else {
@@ -327,7 +327,7 @@ export const getDateSpanForStatusCategory = (categoryName: string) => {
       beginAt: startAt,
       endAt: endAt,
     }
-  } else if (categoryName === 'risk') {
+  } else if (categoryName.startsWith('risk-')) {
     // Midtveisrapportering
     return {
       beginAt: startAt,
@@ -472,6 +472,12 @@ export const getDictationShortcut = () => {
   if (osInfo.includes('linux')) return 'Super + H (distro-avhengig)'
   if (/android|iphone|ipad|ipod/.test(osInfo)) return 'Mic ikon'
   return "Your system's dictation shortcut"
+}
+
+export const isStatusCategoryOpen = (statusCategory: StatusCategoryType) => {
+  if (!statusCategory.openFrom || !statusCategory.openTo) return false
+  const now = new Date()
+  return new Date(statusCategory.openFrom) <= now && now <= new Date(statusCategory.openTo)
 }
 
 export const formatDateTime = (isoDate?: string | number | undefined) => {

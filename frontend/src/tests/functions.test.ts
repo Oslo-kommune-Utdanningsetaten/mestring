@@ -325,7 +325,7 @@ describe('generateStatusTitle', () => {
         beginAt: '2024-03-01T00:00:00Z',
         endAt: '2024-05-15T00:00:00Z',
       }
-      const category = { name: 'risk', title: 'Midtveisrapportering' } as StatusCategoryType
+      const category = { name: 'risk-2', title: 'Midtveisrapportering' } as StatusCategoryType
       expect(generateStatusTitle(status, category)).toBe('Midtveisrapportering - v24')
     })
 
@@ -334,7 +334,7 @@ describe('generateStatusTitle', () => {
         beginAt: '2023-08-01T00:00:00Z',
         endAt: '2024-01-15T00:00:00Z',
       }
-      const category = { name: 'risk', title: 'Midtveisrapportering' } as StatusCategoryType
+      const category = { name: 'risk-1', title: 'Midtveisrapportering' } as StatusCategoryType
       expect(generateStatusTitle(status, category)).toBe('Midtveisrapportering - h23')
     })
   })

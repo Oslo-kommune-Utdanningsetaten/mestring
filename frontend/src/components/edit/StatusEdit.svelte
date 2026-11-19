@@ -84,6 +84,7 @@
   let currentStatusCategory = $derived(
     $dataStore.statusCategories.find(cat => cat.id === localStatus.categoryId)
   )
+  const isCategoryOfRiskType = $derived(currentStatusCategory?.name.startsWith('risk-'))
 
   let currentMasterySchema: MasterySchemaWithConfig = $derived.by(() => {
     const schemaId = localStatus.masterySchemaId || currentStatusCategory?.masterySchemaId
@@ -430,7 +431,7 @@
         {#if currentMasterySchema?.config?.isMasteryValueInputEnabled}
           <div class="field-group">
             <span class="field-label">
-              {#if currentStatusCategory?.name === 'risk'}
+              {#if isCategoryOfRiskType}
                 Status
               {:else}
                 Mestring
@@ -451,7 +452,7 @@
               id="description"
               class="form-control rounded-0 border-2 border-primary"
               bind:value={localStatus.masteryDescription}
-              placeholder={currentStatusCategory?.name === 'risk'
+              placeholder={isCategoryOfRiskType
                 ? 'Beskrivelse, ved behov'
                 : 'Konkret, hva mestrer ' + studentFirstName + '?'}
               rows="4"></textarea>

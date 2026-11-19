@@ -21,7 +21,11 @@
 
   import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
   import { dataStore } from '../stores/data'
-  import { getGroupLabel, goalsWithCalculatedMastery } from '../utils/functions'
+  import {
+    getGroupLabel,
+    goalsWithCalculatedMastery,
+    isStatusCategoryOpen,
+  } from '../utils/functions'
   import { preferredSchoolYear, getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { t } from '../stores/translations'
@@ -58,7 +62,9 @@
   )
 
   const availableStatusCategories = $derived(
-    $dataStore.statusCategories.filter(cat => cat.isEnabled)
+    $dataStore.statusCategories
+      .filter(cat => cat.isEnabled)
+      .filter(cat => isStatusCategoryOpen(cat))
   )
 
   const fetchGroupData = async () => {
