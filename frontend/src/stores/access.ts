@@ -39,24 +39,26 @@ const checkUserAccessToPath = (
   pathString: string
 ): boolean => {
   const path = ROUTES.find(route => route.path === pathString)
-  const { isPublic, accessibleBy, schoolConfig } = path || {}
+  const { isPublic, accessibleBy, conditionalAccess } = path || {}
   if (isPublic) return true // public routes can render their components without a school
   if (!currentUser) return false
   if (!currentSchool) return false
   if (currentUser.isSuperadmin) return true
-  // check for overlapping roles and accessibleBy
+
   if (accessibleBy) {
+    // ordinary access path, check if users has one of the required roles
     const hasUserRoleAccess = currentUser.roles?.some((role: UserRoleType) =>
       accessibleBy.includes(role)
     )
-    const isUserAdminOrInspector =
-      currentUser.roles?.includes('admin') || currentUser.roles?.includes('inspector')
-    if (hasUserRoleAccess && currentSchool && schoolConfig && !isUserAdminOrInspector) {
-      // check if the school config is enabled, but only for users who are exclusively teachers
-      // this check assumes ann schooConfig is dependent on admin/inspector non-presence, which is wrong, but works for now
+    if (hasUserRoleAccess) return true
+  }
+  if (conditionalAccess) {
+    // conditional access path, check if user has one of the required roles and the given school config is enabled
+    const { roles, schoolConfig } = conditionalAccess || {}
+    const hasConditionalAccess =
+      roles && schoolConfig && currentUser.roles?.some((role: UserRoleType) => roles.includes(role))
+    if (hasConditionalAccess) {
       return Boolean(currentSchool[schoolConfig as keyof SchoolType])
-    } else {
-      return hasUserRoleAccess
     }
   }
   return false

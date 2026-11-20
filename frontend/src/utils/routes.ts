@@ -128,13 +128,11 @@ export const ROUTES = [
     path: '/students',
     component: Students,
     isPublic: false,
-    accessibleBy: [
-      USER_ROLES.TEACHER,
-      USER_ROLES.INSPECTOR,
-      USER_ROLES.ADMIN,
-      USER_ROLES.SUPERADMIN,
-    ],
-    schoolConfig: 'isStudentListEnabled', // grant teacher access to this path if school has student list enabled
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+    conditionalAccess: {
+      roles: [USER_ROLES.TEACHER],
+      schoolConfig: 'isStudentListEnabled',
+    },
   },
   {
     path: '/groups-compare',
@@ -182,7 +180,11 @@ export const ROUTES = [
     path: '/status-categories',
     component: StatusCategories,
     isPublic: false,
-    accessibleBy: [USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+    accessibleBy: [USER_ROLES.SUPERADMIN],
+    conditionalAccess: {
+      roles: [USER_ROLES.ADMIN],
+      schoolConfig: 'isStatusEnabled',
+    },
   },
   {
     path: '/admin',
