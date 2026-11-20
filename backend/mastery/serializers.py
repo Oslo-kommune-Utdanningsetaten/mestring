@@ -279,11 +279,11 @@ class SchoolSerializer(BaseModelSerializer):
 
     # validate mastery_badge_variant is one of the allowed constants
     def validate(self, attrs):
-        mastery_badge_variant = attrs.get('mastery_badge_variant')
-        if mastery_badge_variant not in constants.ALLOWED_MASTERY_BADGE_VARIANTS:
-            raise serializers.ValidationError(
-                {'mastery_badge_variant': f'Must be one of {constants.ALLOWED_MASTERY_BADGE_VARIANTS}'}
-            )
+        if 'mastery_badge_variant' in attrs:
+            if attrs['mastery_badge_variant'] not in constants.ALLOWED_MASTERY_BADGE_VARIANTS:
+                raise serializers.ValidationError(
+                    {'mastery_badge_variant': f'Must be one of {constants.ALLOWED_MASTERY_BADGE_VARIANTS}'}
+                )
         return attrs
 
     class Meta:
