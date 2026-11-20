@@ -8,6 +8,7 @@
     StatusCategoryType,
   } from '../../generated/types.gen'
   import type { MasterySchemaWithConfig, GoalDecorated } from '../../types/models'
+  import type { StatusTitleInput } from '../../types/models'
   import { statusCreate, statusUpdate, usersRetrieve } from '../../generated/sdk.gen'
 
   import { areSchemaValuesConsistent } from '../../utils/masteryHelpers'
@@ -19,7 +20,7 @@
     generateStatusTitle,
     getDateSpanForStatusCategory,
   } from '../../utils/functions'
-  import type { StatusTitleInput } from '../../types/models'
+  import { STATUS_CATEGORY_TITLE_BY_NAME } from '../../utils/constants'
   import { localStorage } from '../../stores/localStorage'
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
@@ -253,7 +254,7 @@
   <div class="p-4 pb-3 border-bottom border-3 border-primary">
     <h2 class="fs-5 fw-semibold mb-0">
       {#if currentStatusCategory}
-        {currentStatusCategory.title}
+        {STATUS_CATEGORY_TITLE_BY_NAME[currentStatusCategory.name]}
       {:else}
         {localStatus.id ? 'Redigerer' : 'Ny'} status
       {/if}
@@ -353,7 +354,7 @@
                   value={statusCategory.id}
                   selected={statusCategory.id === localStatus.categoryId}
                 >
-                  {statusCategory.title}
+                  {STATUS_CATEGORY_TITLE_BY_NAME[statusCategory.name]}
                 </option>
               {/each}
             </select>

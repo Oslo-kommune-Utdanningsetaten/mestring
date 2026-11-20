@@ -19,7 +19,12 @@
     statusList,
   } from '../generated/sdk.gen'
 
-  import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
+  import {
+    GROUP_TYPE_BASIS,
+    GROUP_TYPE_TEACHING,
+    USER_ROLES,
+    STATUS_CATEGORY_TITLE_BY_NAME,
+  } from '../utils/constants'
   import { dataStore } from '../stores/data'
   import {
     getGroupLabel,
@@ -270,7 +275,7 @@
           {#each availableStatusCategories as category}
             <p class="my-1">
               <Link to="/groups/{group.id}/statuses/{category.name}">
-                {category.title}!
+                {STATUS_CATEGORY_TITLE_BY_NAME[category.name]}!
               </Link>
               {#if statusesByCategoryID[category.id]?.length === students.length}
                 Men det er helt chill for du er ferdig💪

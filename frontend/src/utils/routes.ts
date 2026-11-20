@@ -179,6 +179,12 @@ export const ROUTES = [
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
   {
+    path: '/status-categories',
+    component: StatusCategories,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+  },
+  {
     path: '/admin',
     component: undefined, // placeholder, as we just check for access to the admin menu
     isPublic: false,
@@ -201,12 +207,6 @@ export const ROUTES = [
     component: Subjects,
     isPublic: false,
     accessibleBy: [USER_ROLES.SUPERADMIN],
-  },
-  {
-    path: '/admin/status-categories',
-    component: StatusCategories,
-    isPublic: false,
-    accessibleBy: [USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
   {
     path: '/admin/translations',

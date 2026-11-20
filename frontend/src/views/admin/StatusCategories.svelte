@@ -95,7 +95,7 @@
 </script>
 
 <section class="py-4">
-  <h2 class="mb-4">Statuskategorier for {school?.displayName}</h2>
+  <h2 class="mb-4">Statuskategorier</h2>
   {#if school}
     <ButtonMini
       options={{
@@ -126,18 +126,18 @@
                   {STATUS_CATEGORY_TITLE_BY_NAME[statusCategory.name]}
                 </h3>
                 <dl class="status-meta mb-0">
-                  <dt>Is currently open?</dt>
+                  <dt>Åpen for rapportering?</dt>
                   <dd>
                     <span class="text-muted">
                       {#if isStatusCategoryOpen(statusCategory)}
-                        <span class="text-success fw-bold">Yes</span>
+                        <span class="text-success fw-bold">Ja</span>
                       {:else}
-                        <span class="text-danger fw-bold">No</span>
+                        <span class="text-danger fw-bold">Nei</span>
                       {/if}
                     </span>
                   </dd>
 
-                  <dt>Open period</dt>
+                  <dt>Åpen i periode</dt>
                   <dd>
                     <span class="text-muted">
                       {formatDateHumanly(statusCategory.openFrom ?? undefined) || '?'} - {formatDateHumanly(
@@ -146,15 +146,15 @@
                     </span>
                   </dd>
 
-                  <dt>Name</dt>
-                  <dd>
-                    {statusCategory.name}
-                  </dd>
-
-                  <dt>Mastery schema</dt>
+                  <dt>Mestringsskjema</dt>
                   <dd>
                     {masterySchemas?.find(ms => ms.id === statusCategory.masterySchemaId)?.title ||
                       '?'}
+                  </dd>
+
+                  <dt>Navn</dt>
+                  <dd>
+                    {statusCategory.name}
                   </dd>
                 </dl>
               </div>
