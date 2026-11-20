@@ -5,7 +5,11 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
   import { subjectsList, usersList } from '../generated/sdk.gen'
-  import { USER_ROLES, SUBJECTS_ALLOWED_CUSTOM, STATUS_CATEGORY_NAMES } from '../utils/constants'
+  import {
+    USER_ROLES,
+    SUBJECTS_ALLOWED_CUSTOM,
+    STATUS_CATEGORY_TITLE_BY_NAME,
+  } from '../utils/constants'
   import { dataStore } from '../stores/data'
   import { urlStringFrom, getGroupLabel } from '../utils/functions'
   import { preferredSchoolYear } from '../stores/localStorageFunctions'
@@ -29,7 +33,7 @@
       .filter(cat => cat.isEnabled)
       .map(statusCategory => ({
         value: statusCategory.name,
-        label: STATUS_CATEGORY_NAMES[statusCategory.name],
+        label: STATUS_CATEGORY_TITLE_BY_NAME[statusCategory.name],
       }))
     return statusCategories.concat([{ value: 'mastery', label: 'Mestring i fag' }])
   })

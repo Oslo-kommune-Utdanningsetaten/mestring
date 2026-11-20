@@ -10,7 +10,7 @@ import type {
 import { goalsList, userGroupsList, userSchoolsList } from '../generated/sdk.gen'
 import { nb as noLocale } from 'date-fns/locale'
 import { format, formatDistance, formatDistanceToNow } from 'date-fns'
-import { USER_ROLES, GROUP_TYPE_BASIS } from './constants'
+import { USER_ROLES, GROUP_TYPE_BASIS, STATUS_CATEGORY_TITLE_BY_NAME } from './constants'
 import {
   calculateSchoolYearMilestones,
   isEntityFromSchoolYear,
@@ -296,16 +296,23 @@ export const generateStatusTitle = (
     if (statusCategory.name === 'midyear') {
       semester = 'h'
       yearShort = startAt.split('-')[0].slice(-2)
+      return [STATUS_CATEGORY_TITLE_BY_NAME[statusCategory.name], ' - ', semester, yearShort].join(
+        ''
+      )
     } else if (statusCategory.name === 'endyear') {
       semester = 'v'
       yearShort = endAt.split('-')[0].slice(-2)
+      return [STATUS_CATEGORY_TITLE_BY_NAME[statusCategory.name], ' - ', semester, yearShort].join(
+        ''
+      )
     } else if (statusCategory.name.startsWith('risk-')) {
       semester = statusBeginDate.getMonth() < 7 ? 'v' : 'h'
       yearShort = statusBeginDate.getFullYear().toString().slice(-2)
+      return [STATUS_CATEGORY_TITLE_BY_NAME[statusCategory.name], yearShort].join(' ')
     } else {
       console.error('Unknown category', { statusCategory })
+      return 'ukjent statuskategori ' + statusCategory.name
     }
-    return [statusCategory.title, ' - ', semester, yearShort].join('')
   }
   const beginMonth = formatMonthName(aStatus.beginAt)
   const endMonth = formatMonthName(aStatus.endAt)

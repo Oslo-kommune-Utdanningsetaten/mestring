@@ -64,9 +64,9 @@ def setup_school_data(db, school, other_school, teacher_role, student_role, admi
 
     # StatusCategory
     status_category = StatusCategory.objects.create(
-        title="Halvår", name="midyear", school=school, mastery_schema=mastery_schema)
+        name="midyear", school=school, mastery_schema=mastery_schema)
     other_status_category = StatusCategory.objects.create(
-        title="Halvår", name="midyear", school=other_school, mastery_schema=other_mastery_schema)
+        name="midyear", school=other_school, mastery_schema=other_mastery_schema)
 
     # Goal
     goal = Goal.objects.create(

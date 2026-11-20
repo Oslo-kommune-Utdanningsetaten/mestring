@@ -82,11 +82,11 @@ export enum SUBJECT_OWNERSHIP_OPTIONS {
   ONLY_SCHOOL_OWNED = 'only-school-owned',
 }
 
-export const STATUS_CATEGORY_NAMES: Record<string, string> = {
+export const STATUS_CATEGORY_TITLE_BY_NAME: Record<string, string> = {
   midyear: 'Halvtår',
   endyear: 'Standpunkt',
-  'risk-1': 'Midtveisrapportering, høst',
-  'risk-2': 'Midtveisrapportering, vår',
+  'risk-autumn': 'Midtveisrapportering, høst',
+  'risk-spring': 'Midtveisrapportering, vår',
 }
 
 export enum VALUE_INPUT_VARIANT {

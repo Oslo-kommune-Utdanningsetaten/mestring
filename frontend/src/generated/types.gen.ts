@@ -308,7 +308,6 @@ export type PatchedStatusCategoryType = {
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
     deletedAt?: string | null;
-    title?: string;
     name?: string;
     isSubjectSpecific?: boolean;
     isEnabled?: boolean;
@@ -472,7 +471,6 @@ export type StatusCategoryType = {
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
     deletedAt?: string | null;
-    title: string;
     name: string;
     isSubjectSpecific?: boolean;
     isEnabled?: boolean;
@@ -776,7 +774,6 @@ export type PatchedStatusCreateType = {
 
 export type PatchedStatusCategoryCreateType = {
     deletedAt?: string | null;
-    title?: string;
     name?: string;
     isSubjectSpecific?: boolean;
     isEnabled?: boolean;
@@ -878,7 +875,6 @@ export type StatusCreateType = {
 
 export type StatusCategoryCreateType = {
     deletedAt?: string | null;
-    title: string;
     name: string;
     isSubjectSpecific?: boolean;
     isEnabled?: boolean;

@@ -9,7 +9,7 @@
   import type { StatusCategoryType, SchoolType } from '../../generated/types.gen'
   import { dataStore, currentSchool } from '../../stores/data'
   import { formatDateHumanly } from '../../utils/functions'
-  import { STATUS_CATEGORY_NAMES } from '../../utils/constants'
+  import { STATUS_CATEGORY_TITLE_BY_NAME } from '../../utils/constants'
   import { isStatusCategoryOpen } from '../../utils/functions'
   import ButtonMini from '../../components/ButtonMini.svelte'
   import Offcanvas from '../../components/Offcanvas.svelte'
@@ -123,7 +123,7 @@
             <div class="card-body status-card">
               <div class="status-info">
                 <h3 class="card-title mb-2">
-                  {STATUS_CATEGORY_NAMES[statusCategory.name]}
+                  {STATUS_CATEGORY_TITLE_BY_NAME[statusCategory.name]}
                 </h3>
                 <dl class="status-meta mb-0">
                   <dt>Is currently open?</dt>

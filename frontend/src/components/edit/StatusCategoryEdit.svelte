@@ -3,7 +3,7 @@
   import { statusCategoriesUpdate, statusCategoriesCreate } from '../../generated/sdk.gen'
   import type { StatusCategoryType, StatusCategoryCreateType } from '../../generated/types.gen'
 
-  import { STATUS_CATEGORY_NAMES, NONE_FIELD_VALUE } from '../../utils/constants'
+  import { STATUS_CATEGORY_TITLE_BY_NAME, NONE_FIELD_VALUE } from '../../utils/constants'
   import { localStorage } from '../../stores/localStorage'
   import { dataStore } from '../../stores/data'
 
@@ -83,9 +83,9 @@
   <div class="form-group mb-4">
     <label for="nameSelect" class="mb-1 field-label">Navn</label>
     <select class="pkt-input" id="nameSelect" bind:value={localStatusCategory.name}>
-      {#each Object.keys(STATUS_CATEGORY_NAMES) as key}
+      {#each Object.keys(STATUS_CATEGORY_TITLE_BY_NAME) as key}
         <option value={key} selected={key === localStatusCategory.name}>
-          {STATUS_CATEGORY_NAMES[key]} [{key}]
+          {STATUS_CATEGORY_TITLE_BY_NAME[key]} [{key}]
         </option>
       {/each}
     </select>
