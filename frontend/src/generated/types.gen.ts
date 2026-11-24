@@ -2117,15 +2117,15 @@ export type StatusListData = {
          */
         editor?: string;
         /**
-         * Filter statuses by students in group.
+         * Filter statuses by students in groups. Comma-separated list of group IDs.
          */
-        group?: string;
+        groups?: string;
         /**
          * Filter statuses by school.
          */
         school: string;
         /**
-         * Filter statuses by students.
+         * Filter statuses by students. Comma-separated list of student IDs.
          */
         students?: string;
         /**

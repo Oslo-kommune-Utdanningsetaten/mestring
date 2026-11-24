@@ -1123,7 +1123,7 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
             ),
             OpenApiParameter(
                 name='students',
-                description='Filter statuses by students.',
+                description='Filter statuses by students. Comma-separated list of student IDs.',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
@@ -1136,8 +1136,8 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='group',
-                description='Filter statuses by students in group.',
+                name='groups',
+                description='Filter statuses by students in groups. Comma-separated list of group IDs.',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
@@ -1174,7 +1174,7 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
             students_param, _ = get_request_param(self.request.query_params, 'students')
             school_param, _ = get_request_param(self.request.query_params, 'school')
             subject_param, is_subject_set = get_request_param(self.request.query_params, 'subject')
-            group_param, _ = get_request_param(self.request.query_params, 'group')
+            groups_param, _ = get_request_param(self.request.query_params, 'groups')
             editor_param, _ = get_request_param(self.request.query_params, 'editor')
             category_name_param, _ = get_request_param(self.request.query_params, 'category_name')
 
@@ -1189,12 +1189,12 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
                 if student_ids:
                     qs = qs.filter(student_id__in=student_ids)
 
-            if group_param:
+            if groups_param:
+                group_ids = [group_id.strip() for group_id in groups_param.split(',') if group_id]
                 student_ids = models.UserGroup.objects.filter(
-                    group_id=group_param, role__name='student', deleted_at__isnull=True).values_list(
+                    group_id__in=group_ids, role__name='student', deleted_at__isnull=True).values_list(
                     'user_id', flat=True)
-                if student_ids:
-                    qs = qs.filter(student_id__in=student_ids)
+                qs = qs.filter(student_id__in=student_ids)
 
             if is_subject_set:
                 if subject_param:
