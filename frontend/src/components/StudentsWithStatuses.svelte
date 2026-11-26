@@ -31,6 +31,9 @@
     statusCount: number
   }
 
+  // Ignore responses from superseded requests (not $state, so the effect doesn't track it)
+  let latestRequestId = 0
+
   // Sort state
   type SortKey = 'name' | string // 'name' or subjectId
   let sortBy = $state<SortKey>('name')
@@ -162,6 +165,7 @@
   }
 
   const fetchAllStudentData = async () => {
+    const requestId = ++latestRequestId
     const newData: Record<string, StatusType[]> = {}
     // Initialize empty status arrays for all students + subjects
     students.forEach(student => {
@@ -187,6 +191,7 @@
     }
 
     const result = await statusList({ query })
+    if (requestId !== latestRequestId) return
     const statuses = result.data || []
 
     // Build data stucture for lookup of statuses by student and subject
@@ -194,9 +199,9 @@
       const { studentId, subjectId } = status
       if (studentId && subjectId) {
         newData[`${studentId}:${subjectId}`]?.push(status)
-        statusesByStudentIdAndSubjectId = newData
       }
     })
+    statusesByStudentIdAndSubjectId = newData
 
     // Build student counts by mastery level
     studentCountsByLevel = masterySchema.config.levels.map(

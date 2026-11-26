@@ -22,6 +22,9 @@
 
   const router = useTinyRouter()
 
+  // Ignore responses from superseded requests (not $state, so the effect doesn't track it)
+  let latestRequestId = 0
+
   // Punkt component string overrides. Empty strings should hide the whole row.
   setPktStrings({
     listbox: { addValue: '', empty: 'Ingen grupper matcher dette navnet' },
@@ -92,6 +95,7 @@
 
   const fetchData = async () => {
     if (!currentSchool) return
+    const requestId = ++latestRequestId
     try {
       isLoadingStudents = true
       let query: { school: any; roles: USER_ROLES; groups?: string } = {
@@ -102,7 +106,8 @@
         query.groups = selectedGroupIds.join(',')
       }
       const studentsResult = await usersList({ query })
-      students = studentsResult.data || []
+      if (requestId !== latestRequestId) return
+      const localStudents = studentsResult.data || []
 
       let localSubjects: SubjectType[] = []
 
@@ -112,20 +117,24 @@
         const subjectsResult = await subjectsList({
           query: {
             school: currentSchool.id,
-            students: selectedGroupIds.length > 0 ? students.map(s => s.id).join(',') : undefined,
+            students:
+              selectedGroupIds.length > 0 ? localStudents.map(s => s.id).join(',') : undefined,
             schoolYear: $preferredSchoolYear,
           },
         })
+        if (requestId !== latestRequestId) return
         localSubjects = subjectsResult.data || []
       }
 
+      students = localStudents
       subjects = localSubjects.sort((a, b) => a.displayName.localeCompare(b.displayName))
     } catch (error) {
+      if (requestId !== latestRequestId) return
       console.error('Error fetching members', { selectedGroupIds, error })
       students = []
       subjects = []
     } finally {
-      isLoadingStudents = false
+      if (requestId === latestRequestId) isLoadingStudents = false
     }
   }
 
