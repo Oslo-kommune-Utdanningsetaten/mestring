@@ -28,18 +28,18 @@
   let {
     students,
     subjects,
-    group,
+    groups = [],
   }: {
     students: UserType[]
     subjects: SubjectType[]
-    group?: GroupType
+    groups?: GroupType[]
   } = $props()
 
   const allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
 
   // Only display polar chart if students list is scoped -> avoids performance issues
   const polarChartStore = localStorage<boolean>('isSubjectPolarChartVisible')
-  const isSubjectPolarChartVisible = $derived(!!group && ($polarChartStore ?? false))
+  const isSubjectPolarChartVisible = $derived(groups?.length && ($polarChartStore ?? false))
 
   // Sort state
   type SortKey = 'name' | string // 'name' or subjectId

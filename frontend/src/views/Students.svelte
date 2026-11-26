@@ -37,6 +37,7 @@
 
   const groupComboboxOptions = $derived.by(() => {
     return allGroups.map(group => ({
+      tagSkinColor: 'blue',
       value: group.id,
       label: getGroupLabel(group, {
         isGroupNameEnabled: true,
@@ -207,7 +208,7 @@
       <pkt-combobox
         label=""
         placeholder={selectedGroupIds.length === 0
-          ? 'Hele skolen - ⚠️ kan ta lang tid'
+          ? 'Hele skolen - kan ta lang tid ⚠️'
           : selectedGroupIds.length +
             ' guppe' +
             (selectedGroupIds.length === 1 ? '' : 'r') +
@@ -224,6 +225,9 @@
         oninputcapture={(event: Event) => {
           const target = event.composedPath()[0] as HTMLInputElement
           handleSelectMatchingGroups(target.value)
+        }}
+        onsearch={(event: Event) => {
+          //console.log('hey')
         }}
         options={groupComboboxOptions}
       ></pkt-combobox>
@@ -259,11 +263,7 @@
   {:else if students.length === 0}
     <div class="mt-3">Her var det tomt</div>
   {:else if selectedFocus === 'mastery'}
-    <StudentsWithSubjects
-      students={filteredStudents}
-      {subjects}
-      group={selectedGroups[0] ?? undefined}
-    />
+    <StudentsWithSubjects students={filteredStudents} {subjects} groups={selectedGroups} />
   {:else if focusOptions.some(opt => opt.value === selectedFocus)}
     <StudentsWithStatuses
       students={filteredStudents}

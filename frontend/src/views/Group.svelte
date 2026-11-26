@@ -379,7 +379,7 @@
           </div>
         </div>
       {:else if group.type === GROUP_TYPE_BASIS}
-        <StudentsWithSubjects {students} {subjects} {group} />
+        <StudentsWithSubjects {students} {subjects} groups={[group]} />
       {:else if group.type === GROUP_TYPE_TEACHING && subject}
         <StudentsWithGoals
           {group}
