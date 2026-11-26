@@ -18,12 +18,12 @@
     students,
     subjects,
     categoryName,
-    group,
+    groups = [],
   }: {
     students: UserType[]
     subjects: SubjectType[]
     categoryName: string
-    group?: GroupType | undefined
+    groups: GroupType[]
   } = $props()
 
   type DecoratedGroup = GroupType & {
@@ -41,10 +41,10 @@
   let studentCountsByLevel = $state<number[]>([])
   let isCompleteGroupsDetailsEnabled = $state<boolean>(false)
   let isIncompleteGroupsDetailsEnabled = $state<boolean>(false)
-  let isOnlyRiskySubjectsEnabled = $state<boolean>(false)
+  let isOnlyRiskySubjectsEnabled = $state<boolean>(true)
 
   let selectedLevels = $state<number[]>([])
-  let isDetailsEnabled = $derived<boolean>(!!group || selectedLevels.length > 0)
+  let isDetailsEnabled = $derived<boolean>(groups.length > 0 || selectedLevels.length > 0)
 
   // Top scrollbar mirror
   let gridElement = $state<HTMLDivElement | null>(null)
@@ -171,7 +171,7 @@
     })
 
     let query: Record<string, any> & { school: string } = {
-      group: group ? group.id : undefined,
+      groups: groups ? groups.map(g => g.id).join(',') : undefined,
       school: $dataStore.currentSchool?.id as string,
       categoryName: categoryName,
     }
@@ -336,14 +336,16 @@
     <tbody>
       <tr>
         <td></td>
-        <th class="table-header">Elever {group ? `i dette utvalget` : 'på hele skolen'}</th>
+        <th class="table-header">
+          Elever {groups.length > 0 ? `i dette utvalget` : 'på hele skolen'}
+        </th>
         <td>{sortedStudents.length}</td>
       </tr>
       {#if isCategoryOfRiskType}
         <tr>
           <td></td>
           <th class="table-header">
-            Elever {group ? `i dette utvalget` : 'på hele skolen'} utenfor fare
+            Elever {groups.length > 0 ? `i dette utvalget` : 'på hele skolen'} utenfor fare
           </th>
           <td>
             {getStudentCountWithoutRiskyStatuses()} [{Math.round(
@@ -369,7 +371,7 @@
         </tr>
       {/each}
 
-      {#if !group}
+      {#if groups.length !== 1}
         <tr>
           <td></td>
           <th class="table-header">Grupper som har rapportert alle elever</th>

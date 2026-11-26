@@ -1,5 +1,6 @@
 <script lang="ts">
   import uniqBy from 'lodash/uniqBy'
+  import { setPktStrings } from '@oslokommune/punkt-elements'
   import type {
     GoalType,
     GroupType,
@@ -64,6 +65,12 @@
   )
 
   let titlesAutocomplete = $state<{ label: string; value: string }[]>([])
+
+  // Punkt component string overrides. Empty strings should hide the whole row.
+  setPktStrings({
+    listbox: { addValue: 'Bruk tittel «{value}»', empty: '' },
+    combobox: { valueAdded: '' },
+  })
 
   const getTitle = () => {
     const action = localGoal.id ? 'Redigerer' : 'Nytt'

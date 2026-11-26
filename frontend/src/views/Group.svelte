@@ -127,7 +127,7 @@
           query: {
             school: $dataStore.currentSchool?.id,
             subject: subject ? subject.id : '',
-            group: groupId,
+            groups: groupId,
             ...getPreferredCreatedParams(),
           },
         })

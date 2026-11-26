@@ -2,7 +2,9 @@
   import '@oslokommune/punkt-elements/dist/pkt-select.js'
   import '@oslokommune/punkt-elements/dist/pkt-textinput.js'
   import '@oslokommune/punkt-elements/dist/pkt-tabs.js'
+  import { setPktStrings } from '@oslokommune/punkt-elements'
   import { useTinyRouter } from 'svelte-tiny-router'
+
   import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
   import { subjectsList, usersList } from '../generated/sdk.gen'
   import {
@@ -19,13 +21,30 @@
 
   const router = useTinyRouter()
 
+  // Punkt component string overrides. Empty strings should hide the whole row.
+  setPktStrings({
+    listbox: { addValue: '', empty: 'Ingen grupper matcher dette navnet' },
+    combobox: { noResults: '' },
+  })
+
   let students = $state<UserType[]>([])
   let isLoadingStudents = $state<boolean>(false)
-  let nameFilter = $state<string>('')
+  let studentNameFilter = $state<string>('')
   let subjects = $state<SubjectType[]>([])
 
   const currentSchool = $derived($dataStore.currentSchool)
   const allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
+
+  const groupComboboxOptions = $derived.by(() => {
+    return allGroups.map(group => ({
+      value: group.id,
+      label: getGroupLabel(group, {
+        isGroupNameEnabled: true,
+        isGroupTypeNameEnabled: false,
+        includeEarlierYear: true,
+      }),
+    }))
+  })
 
   const focusOptions = $derived.by(() => {
     if (!$dataStore.statusCategories) return []
@@ -38,36 +57,34 @@
     return statusCategories.concat([{ value: 'mastery', label: 'Mestring i fag' }])
   })
 
-  const selectedGroupId = $derived(router.getQueryParam('group'))
+  //const selectedGroupIds = $derived(router.getQueryParam('groups')?.split(',') || [])
+  let selectedGroupIds = $state<string[]>([])
   const selectedFocus = $derived(router.getQueryParam('focus') || focusOptions[0].value)
 
   const filteredStudents = $derived(
-    nameFilter
+    studentNameFilter
       ? students.filter(
           student =>
-            student.id === nameFilter ||
-            student?.name?.toLowerCase().includes(nameFilter.toLowerCase())
+            student.id === studentNameFilter ||
+            student?.name?.toLowerCase().includes(studentNameFilter.toLowerCase())
         )
       : students
   )
 
-  const selectedGroup = $derived<GroupType | undefined>(
-    allGroups.find(group => group.id === selectedGroupId)
-  )
+  const selectedGroups = $derived.by(() => {
+    const groups = allGroups.filter(group => selectedGroupIds.includes(group.id))
+    return groups
+  })
 
   const headerText = $derived.by(() => {
-    const result = ['Elever på skolen']
-    if (selectedGroup) {
-      result.push(
-        `i ${getGroupLabel(selectedGroup, {
-          isGroupNameEnabled: true,
-          isGroupTypeNameEnabled: false,
-          includeEarlierYear: true,
-        })}`
-      )
+    const result = ['Elever']
+    if (selectedGroups.length > 0) {
+      result.push('i valgte grupper')
+    } else {
+      result.push('på skolen')
     }
-    if (nameFilter) {
-      result.push(`med navn som matcher "${nameFilter}"`)
+    if (studentNameFilter) {
+      result.push(`med navn som matcher "${studentNameFilter}"`)
     }
     return result.join(' ')
   })
@@ -76,12 +93,14 @@
     if (!currentSchool) return
     try {
       isLoadingStudents = true
-      const studentQueryOptions = selectedGroupId
-        ? { groups: selectedGroupId, school: currentSchool.id, roles: USER_ROLES.STUDENT }
-        : { school: currentSchool.id, roles: USER_ROLES.STUDENT }
-      const studentsResult = await usersList({
-        query: studentQueryOptions,
-      })
+      let query: { school: any; roles: USER_ROLES; groups?: string } = {
+        school: currentSchool.id,
+        roles: USER_ROLES.STUDENT,
+      }
+      if (selectedGroupIds.length > 0) {
+        query.groups = selectedGroupIds.join(',')
+      }
+      const studentsResult = await usersList({ query })
       students = studentsResult.data || []
 
       let localSubjects: SubjectType[] = []
@@ -92,7 +111,7 @@
         const subjectsResult = await subjectsList({
           query: {
             school: currentSchool.id,
-            students: selectedGroupId ? students.map(s => s.id).join(',') : undefined,
+            students: selectedGroupIds.length > 0 ? students.map(s => s.id).join(',') : undefined,
             schoolYear: $preferredSchoolYear,
           },
         })
@@ -101,7 +120,7 @@
 
       subjects = localSubjects.sort((a, b) => a.displayName.localeCompare(b.displayName))
     } catch (error) {
-      console.error('Error fetching members', { selectedGroupId, error })
+      console.error('Error fetching members', { selectedGroupIds, error })
       students = []
       subjects = []
     } finally {
@@ -109,19 +128,26 @@
     }
   }
 
-  const handleGroupSelect = (groupId: string): void => {
-    const params: Record<string, string> = groupId === '0' ? {} : { group: groupId }
-    if (selectedFocus) {
-      params['focus'] = selectedFocus
-    }
-    router.navigate(urlStringFrom(params, { path: '/students', mode: 'replace' }))
+  const handleSelectMatchingGroups = (matcher: string): void => {
+    if (!matcher) return
+    const localSelectedGroupIds = allGroups
+      .filter(
+        group =>
+          group.id === matcher ||
+          group.displayName.toLocaleLowerCase().includes(matcher.toLocaleLowerCase())
+      )
+      .map(group => group.id)
+
+    selectedGroupIds = localSelectedGroupIds
+  }
+
+  const handleUpdateSelectedGroups = (commaSeparatedGroupIds: string) => {
+    if (commaSeparatedGroupIds.trim() === '') return
+    selectedGroupIds = commaSeparatedGroupIds.split(',')
   }
 
   const handleFocusSelect = (focusValue: string): void => {
     const params: Record<string, string> = { focus: focusValue }
-    if (selectedGroupId) {
-      params['group'] = selectedGroupId
-    }
     router.navigate(urlStringFrom(params, { path: '/students', mode: 'replace' }))
   }
 
@@ -129,9 +155,6 @@
   $effect(() => {
     if (focusOptions.length > 1 && !router.getQueryParam('focus')) {
       const params: Record<string, string> = { focus: focusOptions[0].value }
-      if (selectedGroupId) {
-        params['group'] = selectedGroupId
-      }
       router.navigate(urlStringFrom(params, { path: '/students', mode: 'replace' }))
     }
   })
@@ -169,33 +192,40 @@
     <div class="filter-item">
       <!-- Filter by group membership -->
       <label for="groupSelect" class="mb-1 visually-hidden">Filtrer på gruppe:</label>
-      <select
-        class="pkt-input"
-        id="groupSelect"
-        onchange={(e: Event) => handleGroupSelect((e.target as HTMLSelectElement).value)}
-      >
-        <option value="0" selected={!selectedGroupId}>Hele skolen - ⚠️ kan ta lang tid</option>
-        {#each allGroups as group}
-          <option value={group.id} selected={group.id === selectedGroupId}>
-            {getGroupLabel(group, {
-              isGroupNameEnabled: true,
-              isGroupTypeNameEnabled: false,
-              includeEarlierYear: true,
-            })}
-          </option>
-        {/each}
-      </select>
+      <pkt-combobox
+        label=""
+        placeholder={selectedGroupIds.length === 0
+          ? 'Hele skolen - ⚠️ kan ta lang tid'
+          : selectedGroupIds.length +
+            ' guppe' +
+            (selectedGroupIds.length === 1 ? '' : 'r') +
+            ' valgt'}
+        typeahead
+        multiple
+        fullwidth={true}
+        tagPlacement="outside"
+        value={selectedGroupIds.join(',')}
+        onchange={(event: Event) => {
+          const target = event.target as HTMLSelectElement
+          handleUpdateSelectedGroups(target.value)
+        }}
+        onsearch={(event: CustomEvent) => handleSelectMatchingGroups(event.detail)}
+        options={groupComboboxOptions}
+      ></pkt-combobox>
     </div>
+  </div>
 
+  <!-- Filter students -->
+  <div class="filters-container mt-3">
     <div class="filter-item">
       <!-- Filter by student name -->
-      <label for="filterStudentsByName" class="mb-1 visually-hidden">Filtrer på navn:</label>
+      <label for="filterByName" class="mb-1 visually-hidden">Filtrer på elevnavn:</label>
       <input
         type="text"
-        id="filterStudentsByName"
-        class="filterStudentsByName"
-        placeholder="Navn"
-        bind:value={nameFilter}
+        id="filterByName"
+        class="filterByName"
+        placeholder="Elevnavn inneholder"
+        bind:value={studentNameFilter}
       />
     </div>
   </div>
@@ -214,13 +244,17 @@
   {:else if students.length === 0}
     <div class="mt-3">Her var det tomt</div>
   {:else if selectedFocus === 'mastery'}
-    <StudentsWithSubjects students={filteredStudents} {subjects} group={selectedGroup} />
+    <StudentsWithSubjects
+      students={filteredStudents}
+      {subjects}
+      group={selectedGroups[0] ?? undefined}
+    />
   {:else if focusOptions.some(opt => opt.value === selectedFocus)}
     <StudentsWithStatuses
       students={filteredStudents}
       {subjects}
       categoryName={selectedFocus}
-      group={selectedGroup}
+      groups={selectedGroups ?? []}
     />
   {:else}
     <div class="mt-3">Ukjent fokusvalg: {selectedFocus}</div>
@@ -242,7 +276,7 @@
     max-width: 25rem;
   }
 
-  .filterStudentsByName {
+  .filterByName {
     border: 2px solid var(--bs-primary);
     border-radius: 0;
     height: 48px;

@@ -93,7 +93,7 @@
 
       const statusResult = await statusList({
         query: {
-          group: groupId,
+          groups: groupId,
           subject: subject.id,
           school: schoolId,
           categoryName: statusCategoryName,
@@ -140,7 +140,7 @@
     if (!group || !subject || !studentId) return
     const statusResult = await statusList({
       query: {
-        group: groupId,
+        groups: groupId,
         students: studentId,
         subject: subject.id,
         school: $dataStore.currentSchool?.id,
