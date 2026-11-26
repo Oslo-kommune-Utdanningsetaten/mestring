@@ -18,6 +18,7 @@
 
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithStatuses from '../components/StudentsWithStatuses.svelte'
+  import ButtonMini from '../components/ButtonMini.svelte'
 
   const router = useTinyRouter()
 
@@ -201,12 +202,13 @@
   {/if}
 
   <!-- Filter groups -->
-  <div class="filters-container mt-3">
+  <div class="filters-container filters-container--top mt-3">
     <div class="filter-item filter-item-combobox">
       <!-- Filter by group membership -->
       <label for="groupSelect" class="mb-1 visually-hidden">Filtrer på gruppe:</label>
       <pkt-combobox
         label=""
+        useWrapper={false}
         placeholder={selectedGroupIds.length === 0
           ? 'Hele skolen - kan ta lang tid ⚠️'
           : selectedGroupIds.length +
@@ -232,6 +234,18 @@
         options={groupComboboxOptions}
       ></pkt-combobox>
     </div>
+    <ButtonMini
+      options={{
+        title: 'Nullstill grupper',
+        skin: 'tertiary',
+        variant: 'label-only',
+        size: 'medium',
+        disabled: selectedGroupIds.length === 0,
+        onClick: () => handleUpdateSelectedGroups(''),
+      }}
+    >
+      Nullstill grupper
+    </ButtonMini>
   </div>
 
   <!-- Filter students -->
@@ -281,6 +295,10 @@
     display: flex;
     gap: 1rem;
     align-items: flex-end;
+  }
+
+  .filters-container--top {
+    align-items: flex-start;
   }
 
   .filter-item-combobox {
