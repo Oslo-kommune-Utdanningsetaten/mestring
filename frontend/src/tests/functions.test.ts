@@ -1,9 +1,11 @@
 import { describe, it, expect, assert } from 'vitest'
-import { inferMastery, aggregateMasterys, generateStatusTitle } from '../utils/functions'
 import type { StatusTitleInput } from '../types/models'
-import { getAllSchoolYears, inferCreatedParams } from '../utils/schoolYear'
 import type { ObservationType, StatusCategoryType } from '../generated/types.gen'
 import type { GoalDecorated } from '../types/models'
+
+import { inferMastery, aggregateMasterys, generateStatusTitle } from '../utils/functions'
+import { getAllSchoolYears, inferCreatedParams } from '../utils/schoolYear'
+import { STATUS_CATEGORY_TITLE_BY_NAME } from '../utils/constants'
 
 // Minimal observation factory
 const createObservation = (
@@ -303,7 +305,7 @@ describe('generateStatusTitle', () => {
         beginAt: '2023-08-01T00:00:00Z',
         endAt: '2024-01-15T00:00:00Z',
       }
-      const category = { name: 'midyear', title: 'Halvtår' } as StatusCategoryType
+      const category = { name: 'midyear' } as StatusCategoryType
       expect(generateStatusTitle(status, category)).toBe('Halvtår - h23')
     })
   })
@@ -314,7 +316,7 @@ describe('generateStatusTitle', () => {
         beginAt: '2023-08-01T00:00:00Z',
         endAt: '2024-06-15T00:00:00Z',
       }
-      const category = { name: 'endyear', title: 'Standpunkt' } as StatusCategoryType
+      const category = { name: 'endyear' } as StatusCategoryType
       expect(generateStatusTitle(status, category)).toBe('Standpunkt - v24')
     })
   })
@@ -325,8 +327,8 @@ describe('generateStatusTitle', () => {
         beginAt: '2024-03-01T00:00:00Z',
         endAt: '2024-05-15T00:00:00Z',
       }
-      const category = { name: 'risk', title: 'Midtveisrapportering' } as StatusCategoryType
-      expect(generateStatusTitle(status, category)).toBe('Midtveisrapportering - v24')
+      const category = { name: 'risk-spring' } as StatusCategoryType
+      expect(generateStatusTitle(status, category)).toBe('Midtveisrapportering, vår 24')
     })
 
     it('uses semester h and the begin year in the fall semester', () => {
@@ -334,8 +336,8 @@ describe('generateStatusTitle', () => {
         beginAt: '2023-08-01T00:00:00Z',
         endAt: '2024-01-15T00:00:00Z',
       }
-      const category = { name: 'risk', title: 'Midtveisrapportering' } as StatusCategoryType
-      expect(generateStatusTitle(status, category)).toBe('Midtveisrapportering - h23')
+      const category = { name: 'risk-autumn' } as StatusCategoryType
+      expect(generateStatusTitle(status, category)).toBe('Midtveisrapportering, høst 23')
     })
   })
 })

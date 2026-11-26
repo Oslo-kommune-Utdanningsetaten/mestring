@@ -1,4 +1,6 @@
 <script lang="ts">
+  import uniqBy from 'lodash/uniqBy'
+  import { setPktStrings } from '@oslokommune/punkt-elements'
   import type {
     GoalType,
     GroupType,
@@ -6,12 +8,17 @@
     SubjectType,
     GoalCreateType,
   } from '../../generated/types.gen'
-  import { goalsCreate, goalsUpdate, subjectsList } from '../../generated/sdk.gen'
+  import {
+    goalsCreate,
+    goalsUpdate,
+    goalsList,
+    subjectsList,
+    titleCollectionsList,
+  } from '../../generated/sdk.gen'
 
   import { NONE_FIELD_VALUE } from '../../utils/constants'
   import { dataStore } from '../../stores/data'
   import { localStorage } from '../../stores/localStorage'
-  import { preferredSchoolYear } from '../../stores/localStorageFunctions'
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
   import { t } from '../../stores/translations'
@@ -27,20 +34,19 @@
     group = null,
     goal = null,
     subjects = null,
-    onDone,
+    onDone = () => {},
     isGoalIndividual,
-  } = $props<{
+  }: {
     student?: UserType | null
     group?: GroupType | null
     goal?: Partial<GoalType> | null
     subjects?: SubjectType[] | null
     isGoalIndividual: boolean
     onDone?: () => void | Promise<void>
-  }>()
+  } = $props()
 
   let localGoal = $state<Partial<GoalType>>({})
   let availableSubjects = $state<SubjectType[]>()
-  let titleInput = $state<HTMLInputElement | null>(null)
 
   let { currentSchool } = $derived($dataStore)
   let masterySchemas = $derived($dataStore.masterySchemas.filter(schema => schema.isEnabled))
@@ -58,6 +64,14 @@
     !!localGoal.masterySchemaId && (isGoalIndividual ? !!localGoal.subjectId : !!subjectViaGroup)
   )
 
+  let titlesAutocomplete = $state<{ label: string; value: string }[]>([])
+
+  // Punkt component string overrides. Empty strings should hide the whole row.
+  setPktStrings({
+    listbox: { addValue: 'Bruk tittel «{value}»', empty: '' },
+    combobox: { valueAdded: '' },
+  })
+
   const getTitle = () => {
     const action = localGoal.id ? 'Redigerer' : 'Nytt'
     const goalType = isGoalIndividual ? 'individuelt ' : 'gruppe'
@@ -65,17 +79,70 @@
   }
 
   const fetchStudentSubjects = async () => {
+    if (!student || !currentSchool) return
+
+    // school allows only custom subjects so we don't know which subjects the student has, thus we provide all subjects from the data store
+    if (currentSchool.subjectsAllowed === 'only-custom') {
+      availableSubjects = $dataStore.subjects
+      return
+    }
     try {
       const subjectsResult = await subjectsList({
-        query: { school: currentSchool.id, students: student.id, schoolYear: $preferredSchoolYear },
+        query: { school: currentSchool.id, students: student.id, schoolYear: 'all' },
       })
-      availableSubjects = subjectsResult.data || []
+      const studentSubjects: SubjectType[] = subjectsResult.data || []
+
+      // school allows only feide subjects, so we only use the subjects fetched for the student, lest the list become way too long
+      if (currentSchool.subjectsAllowed === 'only-feide') {
+        availableSubjects = studentSubjects
+        return
+      }
+      // subjectsAllowed === 'all'
+      // combine subjectsResult and dataStore.subjects, remove dupes
+      const subjectsById: Record<string, SubjectType> = {}
+      for (const aSubject of [...studentSubjects, ...$dataStore.subjects]) {
+        subjectsById[aSubject.id] = aSubject
+      }
+      availableSubjects = Object.values(subjectsById)
     } catch (error) {
       console.error('Error fetching student subjects:', error)
     } finally {
       if (!availableSubjects?.length) {
         availableSubjects = $dataStore.subjects
       }
+    }
+  }
+
+  const fetchGoalTitles = async () => {
+    try {
+      const titleCollectionsResult = await titleCollectionsList({
+        query: { school: currentSchool?.id },
+      })
+      const titleCollections = (titleCollectionsResult.data || [])[0] || undefined
+      const centralizedTitleItems = ((titleCollections?.titles || []) as string[]).map(
+        (title, index) => ({
+          id: index,
+          title: title,
+        })
+      )
+
+      const goalsResult = await goalsList({
+        query: { school: currentSchool?.id, returnFields: 'id,title' },
+      })
+      let goals: { id: string | number; title?: string | null }[] = [
+        ...(goalsResult.data || []),
+        ...centralizedTitleItems,
+      ]
+      titlesAutocomplete = uniqBy(goals, 'title')
+        .filter(goal => goal.title)
+        .map(goal => ({
+          value: goal.title as string,
+          label: goal.title as string,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label))
+    } catch (error) {
+      console.error('Error fetching goal titles:', error)
+      return []
     }
   }
 
@@ -99,6 +166,8 @@
   const handleSave = async () => {
     let action = undefined
     try {
+      // Empty strings are not allowed and undefined values will be stripped before reaching the API. A null value will result in the field being cleared.
+      localGoal.title = localGoal.title?.trim() || null
       if (localGoal.id) {
         await goalsUpdate({
           path: { id: localGoal.id },
@@ -130,11 +199,7 @@
   }
 
   $effect(() => {
-    if (titleInput) {
-      // so defer focus until Offcanvas is fully visible.
-      const id = setTimeout(() => titleInput?.focus(), 300)
-      return () => clearTimeout(id)
-    }
+    fetchGoalTitles()
   })
 
   // Update localGoal when goal prop changes
@@ -156,6 +221,7 @@
 
 <div class="goal-edit p-4">
   <h3 class="pb-2">{getTitle()}</h3>
+  <p class="text-muted">Rekkefølge: {goal?.sortOrder}</p>
   <hr />
   <!-- Subject -->
   <div class="form-group mb-3">
@@ -167,7 +233,7 @@
           fullwidth={true}
           value={localGoal.subjectId || NONE_FIELD_VALUE}
           hasError={!localGoal.subjectId || localGoal.subjectId === NONE_FIELD_VALUE}
-          requiredText="Velg et fag"
+          strings={{ forms: { required: 'Velg et fag' } }}
           disabled={!localGoal.isRelevant}
           onchange={(e: Event) => {
             const target = e.target as HTMLSelectElement | null
@@ -195,35 +261,40 @@
   <!-- Title -->
   {#if currentSchool.isGoalTitleEnabled}
     <div class="form-group mb-3">
-      <label for="goalTitle" class="form-label">Tittel</label>
-      <input
-        id="goalTitle"
-        type="text"
-        class="form-control rounded-0 border-2 border-primary input-field"
-        bind:value={localGoal.title}
-        bind:this={titleInput}
-        disabled={!localGoal.isRelevant}
+      <pkt-combobox
+        label="Tittel"
         placeholder={`Tittel på ${t('goal', { form: 'sin-def' })}`}
-      />
+        typeahead
+        allow-user-input
+        fullwidth={true}
+        value={localGoal.title}
+        onchange={(event: Event) => {
+          const target = event.target as HTMLInputElement
+          localGoal = { ...localGoal, title: target.value }
+        }}
+        options={titlesAutocomplete}
+      ></pkt-combobox>
     </div>
   {/if}
 
   <!-- Sort order -->
-  <div class="form-group mb-3">
-    <label for="goalSortOrder" class="form-label">Rekkefølge</label>
-    <input
-      id="goalSortOrder"
-      type="number"
-      class="form-control rounded-0 border-2 border-primary input-field"
-      class:border-warning={!localGoal.sortOrder || localGoal.sortOrder < 1}
-      bind:value={localGoal.sortOrder}
-      disabled={!localGoal.isRelevant}
-      placeholder="Rekkefølge (tall)"
-    />
-    {#if !localGoal.sortOrder || localGoal.sortOrder < 1}
-      <div class="small mt-1">Angi et tall større enn 0</div>
-    {/if}
-  </div>
+  {#if !currentSchool.isGoalTitleEnabled}
+    <div class="form-group mb-3">
+      <label for="goalSortOrder" class="form-label">Rekkefølge</label>
+      <input
+        id="goalSortOrder"
+        type="number"
+        class="form-control rounded-0 border-2 border-primary input-field"
+        class:border-warning={!localGoal.sortOrder || localGoal.sortOrder < 1}
+        bind:value={localGoal.sortOrder}
+        disabled={!localGoal.isRelevant}
+        placeholder="Rekkefølge (tall)"
+      />
+      {#if !localGoal.sortOrder || localGoal.sortOrder < 1}
+        <div class="small mt-1">Angi et tall større enn 0</div>
+      {/if}
+    </div>
+  {/if}
 
   <!-- Mastery schema -->
   {#if masterySchemas.length > 1}
@@ -235,7 +306,7 @@
           fullwidth={true}
           value={localGoal.masterySchemaId || NONE_FIELD_VALUE}
           hasError={!localGoal.masterySchemaId || localGoal.masterySchemaId === NONE_FIELD_VALUE}
-          requiredText="Velg et mestringsskjema"
+          strings={{ forms: { required: 'Velg et mestringsskjema' } }}
           disabled={!localGoal.isRelevant}
           onchange={(e: Event) => {
             const target = e.target as HTMLSelectElement | null
@@ -312,8 +383,12 @@
   }
 
   .input-field {
+    font-size: 1.125rem;
+    color: var(--pkt-color-text-body-default);
     height: 48px;
+    font-weight: 300;
   }
+
   input {
     width: 100% !important;
   }

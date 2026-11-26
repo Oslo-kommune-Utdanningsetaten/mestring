@@ -15,6 +15,7 @@
   import { addAlert } from '../stores/alerts'
   import { trackEvent } from '../stores/analytics'
   import { generateStatusTitle, getGroupLabel } from '../utils/functions'
+  import { STATUS_CATEGORY_TITLE_BY_NAME } from '../utils/constants'
   import { t } from '../stores/translations'
 
   import MasteryValueInput from '../components/MasteryValueInput.svelte'
@@ -22,10 +23,13 @@
   import Link from '../components/Link.svelte'
   import StatusWidgets from '../components/edit/StatusWidgets.svelte'
 
-  let { groupId, statusCategoryName } = $props<{
+  let {
+    groupId,
+    statusCategoryName,
+  }: {
     groupId: string
     statusCategoryName: string
-  }>()
+  } = $props()
 
   type RowType = {
     isSaving: boolean
@@ -57,7 +61,7 @@
     if (statusCategory?.name === 'midyear') {
       return { beginAt: startAt, endAt: midyearAt }
     }
-    if (statusCategory?.name === 'risk') {
+    if (statusCategory?.name.startsWith('risk-')) {
       const currentSemester = now.getMonth() < 7 ? 'v' : 'h'
       if (currentSemester === 'h') {
         return { beginAt: startAt, endAt: midyearAt }
@@ -89,7 +93,7 @@
 
       const statusResult = await statusList({
         query: {
-          group: groupId,
+          groups: groupId,
           subject: subject.id,
           school: schoolId,
           categoryName: statusCategoryName,
@@ -136,7 +140,7 @@
     if (!group || !subject || !studentId) return
     const statusResult = await statusList({
       query: {
-        group: groupId,
+        groups: groupId,
         students: studentId,
         subject: subject.id,
         school: $dataStore.currentSchool?.id,
@@ -194,7 +198,7 @@
 
 {#if group && statusCategory && subject}
   <h2 class="my-4">
-    {statusCategory?.title} for <Link to="/groups/{group?.id}">
+    {STATUS_CATEGORY_TITLE_BY_NAME[statusCategory.name]} for <Link to="/groups/{group?.id}">
       {getGroupLabel(group, {
         isGroupNameEnabled: true,
         isGroupTypeNameEnabled: false,

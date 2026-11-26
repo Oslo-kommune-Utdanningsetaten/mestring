@@ -1,17 +1,22 @@
 <script lang="ts">
-  import type { UserType, GroupType, SubjectType } from '../generated/types.gen'
+  import type { GroupType, SubjectType } from '../generated/types.gen'
+  import type { UserDecorated } from '../types/models.d.ts'
   import { groupsList } from '../generated/sdk.gen'
   import { dataStore } from '../stores/data'
   import {
     getPreferredCreatedParams,
-    getPreferredGroupValidity,
+    getPreferredSchoolYear,
   } from '../stores/localStorageFunctions'
-  import StudentSubject from './StudentSubject.svelte'
+  import { inferGroupValidityParams } from '../utils/schoolYear'
   import { t } from '../stores/translations'
 
-  const { student } = $props<{
-    student: UserType
-  }>()
+  import StudentSubject from './StudentSubject.svelte'
+
+  const {
+    student,
+  }: {
+    student: UserDecorated
+  } = $props()
 
   let groups = $state<GroupType[]>([])
   let isLoading = $state(false)
@@ -27,8 +32,8 @@
         query: {
           school: currentSchool.id,
           user: student.id,
-          valid: getPreferredGroupValidity(),
           ...getPreferredCreatedParams(),
+          ...inferGroupValidityParams(getPreferredSchoolYear()),
         },
       })
       groups = (groupsResult.data || []).filter(group => group.type === 'teaching')

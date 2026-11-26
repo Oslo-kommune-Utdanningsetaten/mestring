@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AuthStatusRetrieveData, AuthStatusRetrieveResponses, DataMaintenanceTasksCreateData, DataMaintenanceTasksCreateResponses, DataMaintenanceTasksDestroyData, DataMaintenanceTasksDestroyResponses, DataMaintenanceTasksListData, DataMaintenanceTasksListResponses, DataMaintenanceTasksPartialUpdateData, DataMaintenanceTasksPartialUpdateResponses, DataMaintenanceTasksRetrieveData, DataMaintenanceTasksRetrieveResponses, DataMaintenanceTasksUpdateData, DataMaintenanceTasksUpdateResponses, DeleteSchoolDataData, DeleteSchoolDataResponses, EstimateCleanupData, EstimateCleanupResponses, EstimateGroupsImportData, EstimateGroupsImportResponses, EstimateMembershipsImportData, EstimateMembershipsImportResponses, EstimateUsersImportData, EstimateUsersImportResponses, FeideImportSchoolData, FeideImportSchoolResponses, FetchGroupsAndUsersData, FetchGroupsAndUsersResponses, FetchGroupsForSchoolData, FetchGroupsForSchoolResponses, FetchMembershipsForSchoolData, FetchMembershipsForSchoolResponses, FetchMetadataData, FetchMetadataResponses, FetchSchoolImportStatusData, FetchSchoolImportStatusResponses, GoalsCreateData, GoalsCreateResponses, GoalsDestroyData, GoalsDestroyResponses, GoalsListData, GoalsListResponses, GoalsPartialUpdateData, GoalsPartialUpdateResponses, GoalsRetrieveData, GoalsRetrieveResponses, GoalsUpdateData, GoalsUpdateResponses, GroupsCreateData, GroupsCreateResponses, GroupsDestroyData, GroupsDestroyResponses, GroupsListData, GroupsListResponses, GroupsPartialUpdateData, GroupsPartialUpdateResponses, GroupsRetrieveData, GroupsRetrieveResponses, GroupsUpdateData, GroupsUpdateResponses, ImportGroupsAndUsersData, ImportGroupsAndUsersResponses, MasterySchemasCreateData, MasterySchemasCreateResponses, MasterySchemasDestroyData, MasterySchemasDestroyResponses, MasterySchemasListData, MasterySchemasListResponses, MasterySchemasPartialUpdateData, MasterySchemasPartialUpdateResponses, MasterySchemasRetrieveData, MasterySchemasRetrieveResponses, MasterySchemasUpdateData, MasterySchemasUpdateResponses, ObservationsCreateData, ObservationsCreateResponses, ObservationsDestroyData, ObservationsDestroyResponses, ObservationsListData, ObservationsListResponses, ObservationsPartialUpdateData, ObservationsPartialUpdateResponses, ObservationsRetrieveData, ObservationsRetrieveResponses, ObservationsUpdateData, ObservationsUpdateResponses, PingRetrieveData, PingRetrieveResponses, RolesCreateData, RolesCreateResponses, RolesDestroyData, RolesDestroyResponses, RolesListData, RolesListResponses, RolesPartialUpdateData, RolesPartialUpdateResponses, RolesRetrieveData, RolesRetrieveResponses, RolesUpdateData, RolesUpdateResponses, SchoolsCreateData, SchoolsCreateResponses, SchoolsDestroyData, SchoolsDestroyResponses, SchoolsListData, SchoolsListResponses, SchoolsPartialUpdateData, SchoolsPartialUpdateResponses, SchoolsRetrieveData, SchoolsRetrieveResponses, SchoolsUpdateData, SchoolsUpdateResponses, StatusCategoriesCreateData, StatusCategoriesCreateResponses, StatusCategoriesDestroyData, StatusCategoriesDestroyResponses, StatusCategoriesListData, StatusCategoriesListResponses, StatusCategoriesPartialUpdateData, StatusCategoriesPartialUpdateResponses, StatusCategoriesRetrieveData, StatusCategoriesRetrieveResponses, StatusCategoriesUpdateData, StatusCategoriesUpdateResponses, StatusCreateData, StatusCreateResponses, StatusDestroyData, StatusDestroyResponses, StatusListData, StatusListResponses, StatusPartialUpdateData, StatusPartialUpdateResponses, StatusRetrieveData, StatusRetrieveResponses, StatusUpdateData, StatusUpdateResponses, SubjectsCreateData, SubjectsCreateResponses, SubjectsDestroyData, SubjectsDestroyResponses, SubjectsListData, SubjectsListResponses, SubjectsPartialUpdateData, SubjectsPartialUpdateResponses, SubjectsRetrieveData, SubjectsRetrieveResponses, SubjectsUpdateData, SubjectsUpdateResponses, UpdateDataIntegrityData, UpdateDataIntegrityResponses, UserGroupsCreateData, UserGroupsCreateResponses, UserGroupsDestroyData, UserGroupsDestroyResponses, UserGroupsListData, UserGroupsListResponses, UserGroupsPartialUpdateData, UserGroupsPartialUpdateResponses, UserGroupsRetrieveData, UserGroupsRetrieveResponses, UserGroupsUpdateData, UserGroupsUpdateResponses, UserSchoolsCreateData, UserSchoolsCreateResponses, UserSchoolsDestroyData, UserSchoolsDestroyResponses, UserSchoolsListData, UserSchoolsListResponses, UserSchoolsPartialUpdateData, UserSchoolsPartialUpdateResponses, UserSchoolsRetrieveData, UserSchoolsRetrieveResponses, UserSchoolsUpdateData, UserSchoolsUpdateResponses, UsersCreateData, UsersCreateResponses, UsersDestroyData, UsersDestroyResponses, UsersListData, UsersListResponses, UsersPartialUpdateData, UsersPartialUpdateResponses, UsersRetrieveData, UsersRetrieveResponses, UsersUpdateData, UsersUpdateResponses } from './types.gen';
+import type { AuthStatusRetrieveData, AuthStatusRetrieveResponses, DataMaintenanceTasksCreateData, DataMaintenanceTasksCreateResponses, DataMaintenanceTasksDestroyData, DataMaintenanceTasksDestroyResponses, DataMaintenanceTasksListData, DataMaintenanceTasksListResponses, DataMaintenanceTasksPartialUpdateData, DataMaintenanceTasksPartialUpdateResponses, DataMaintenanceTasksRetrieveData, DataMaintenanceTasksRetrieveResponses, DataMaintenanceTasksUpdateData, DataMaintenanceTasksUpdateResponses, DeleteSchoolDataData, DeleteSchoolDataResponses, EstimateCleanupData, EstimateCleanupResponses, EstimateGroupsImportData, EstimateGroupsImportResponses, EstimateMembershipsImportData, EstimateMembershipsImportResponses, EstimateUsersImportData, EstimateUsersImportResponses, FeideImportSchoolData, FeideImportSchoolResponses, FetchGroupsAndUsersData, FetchGroupsAndUsersResponses, FetchGroupsForSchoolData, FetchGroupsForSchoolResponses, FetchMembershipsForSchoolData, FetchMembershipsForSchoolResponses, FetchMetadataData, FetchMetadataResponses, FetchSchoolImportStatusData, FetchSchoolImportStatusResponses, GoalsCreateData, GoalsCreateResponses, GoalsDestroyData, GoalsDestroyResponses, GoalsListData, GoalsListResponses, GoalsPartialUpdateData, GoalsPartialUpdateResponses, GoalsRetrieveData, GoalsRetrieveResponses, GoalsUpdateData, GoalsUpdateResponses, GroupsCreateData, GroupsCreateResponses, GroupsDestroyData, GroupsDestroyResponses, GroupsListData, GroupsListResponses, GroupsPartialUpdateData, GroupsPartialUpdateResponses, GroupsRetrieveData, GroupsRetrieveResponses, GroupsUpdateData, GroupsUpdateResponses, ImportGroupsAndUsersData, ImportGroupsAndUsersResponses, MasterySchemasCreateData, MasterySchemasCreateResponses, MasterySchemasDestroyData, MasterySchemasDestroyResponses, MasterySchemasListData, MasterySchemasListResponses, MasterySchemasPartialUpdateData, MasterySchemasPartialUpdateResponses, MasterySchemasRetrieveData, MasterySchemasRetrieveResponses, MasterySchemasUpdateData, MasterySchemasUpdateResponses, ObservationsCreateData, ObservationsCreateResponses, ObservationsDestroyData, ObservationsDestroyResponses, ObservationsListData, ObservationsListResponses, ObservationsPartialUpdateData, ObservationsPartialUpdateResponses, ObservationsRetrieveData, ObservationsRetrieveResponses, ObservationsUpdateData, ObservationsUpdateResponses, PingRetrieveData, PingRetrieveResponses, RolesCreateData, RolesCreateResponses, RolesDestroyData, RolesDestroyResponses, RolesListData, RolesListResponses, RolesPartialUpdateData, RolesPartialUpdateResponses, RolesRetrieveData, RolesRetrieveResponses, RolesUpdateData, RolesUpdateResponses, SchoolsCreateData, SchoolsCreateResponses, SchoolsDestroyData, SchoolsDestroyResponses, SchoolsListData, SchoolsListResponses, SchoolsPartialUpdateData, SchoolsPartialUpdateResponses, SchoolsRetrieveData, SchoolsRetrieveResponses, SchoolsUpdateData, SchoolsUpdateResponses, StatusCategoriesCreateData, StatusCategoriesCreateResponses, StatusCategoriesDestroyData, StatusCategoriesDestroyResponses, StatusCategoriesListData, StatusCategoriesListResponses, StatusCategoriesPartialUpdateData, StatusCategoriesPartialUpdateResponses, StatusCategoriesRetrieveData, StatusCategoriesRetrieveResponses, StatusCategoriesUpdateData, StatusCategoriesUpdateResponses, StatusCreateData, StatusCreateResponses, StatusDestroyData, StatusDestroyResponses, StatusListData, StatusListResponses, StatusPartialUpdateData, StatusPartialUpdateResponses, StatusRetrieveData, StatusRetrieveResponses, StatusUpdateData, StatusUpdateResponses, SubjectsCreateData, SubjectsCreateResponses, SubjectsDestroyData, SubjectsDestroyResponses, SubjectsListData, SubjectsListResponses, SubjectsPartialUpdateData, SubjectsPartialUpdateResponses, SubjectsRetrieveData, SubjectsRetrieveResponses, SubjectsUpdateData, SubjectsUpdateResponses, TagCollectionsCreateData, TagCollectionsCreateResponses, TagCollectionsDestroyData, TagCollectionsDestroyResponses, TagCollectionsListData, TagCollectionsListResponses, TagCollectionsPartialUpdateData, TagCollectionsPartialUpdateResponses, TagCollectionsRetrieveData, TagCollectionsRetrieveResponses, TagCollectionsUpdateData, TagCollectionsUpdateResponses, TitleCollectionsCreateData, TitleCollectionsCreateResponses, TitleCollectionsDestroyData, TitleCollectionsDestroyResponses, TitleCollectionsListData, TitleCollectionsListResponses, TitleCollectionsPartialUpdateData, TitleCollectionsPartialUpdateResponses, TitleCollectionsRetrieveData, TitleCollectionsRetrieveResponses, TitleCollectionsUpdateData, TitleCollectionsUpdateResponses, UpdateDataIntegrityData, UpdateDataIntegrityResponses, UserGroupsCreateData, UserGroupsCreateResponses, UserGroupsDestroyData, UserGroupsDestroyResponses, UserGroupsListData, UserGroupsListResponses, UserGroupsPartialUpdateData, UserGroupsPartialUpdateResponses, UserGroupsRetrieveData, UserGroupsRetrieveResponses, UserGroupsUpdateData, UserGroupsUpdateResponses, UserSchoolsCreateData, UserSchoolsCreateResponses, UserSchoolsDestroyData, UserSchoolsDestroyResponses, UserSchoolsListData, UserSchoolsListResponses, UserSchoolsPartialUpdateData, UserSchoolsPartialUpdateResponses, UserSchoolsRetrieveData, UserSchoolsRetrieveResponses, UserSchoolsUpdateData, UserSchoolsUpdateResponses, UsersCreateData, UsersCreateResponses, UsersDestroyData, UsersDestroyResponses, UsersListData, UsersListResponses, UsersPartialUpdateData, UsersPartialUpdateResponses, UsersRetrieveData, UsersRetrieveResponses, UsersUpdateData, UsersUpdateResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -441,6 +441,72 @@ export const subjectsPartialUpdate = <ThrowOnError extends boolean = false>(opti
 
 export const subjectsUpdate = <ThrowOnError extends boolean = false>(options: Options<SubjectsUpdateData, ThrowOnError>): RequestResult<SubjectsUpdateResponses, unknown, ThrowOnError> => (options.client ?? client).put<SubjectsUpdateResponses, unknown, ThrowOnError>({
     url: '/api/subjects/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const tagCollectionsList = <ThrowOnError extends boolean = false>(options: Options<TagCollectionsListData, ThrowOnError>): RequestResult<TagCollectionsListResponses, unknown, ThrowOnError> => (options.client ?? client).get<TagCollectionsListResponses, unknown, ThrowOnError>({ url: '/api/tag-collections/', ...options });
+
+export const tagCollectionsCreate = <ThrowOnError extends boolean = false>(options: Options<TagCollectionsCreateData, ThrowOnError>): RequestResult<TagCollectionsCreateResponses, unknown, ThrowOnError> => (options.client ?? client).post<TagCollectionsCreateResponses, unknown, ThrowOnError>({
+    url: '/api/tag-collections/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const tagCollectionsDestroy = <ThrowOnError extends boolean = false>(options: Options<TagCollectionsDestroyData, ThrowOnError>): RequestResult<TagCollectionsDestroyResponses, unknown, ThrowOnError> => (options.client ?? client).delete<TagCollectionsDestroyResponses, unknown, ThrowOnError>({ url: '/api/tag-collections/{id}/', ...options });
+
+export const tagCollectionsRetrieve = <ThrowOnError extends boolean = false>(options: Options<TagCollectionsRetrieveData, ThrowOnError>): RequestResult<TagCollectionsRetrieveResponses, unknown, ThrowOnError> => (options.client ?? client).get<TagCollectionsRetrieveResponses, unknown, ThrowOnError>({ url: '/api/tag-collections/{id}/', ...options });
+
+export const tagCollectionsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<TagCollectionsPartialUpdateData, ThrowOnError>): RequestResult<TagCollectionsPartialUpdateResponses, unknown, ThrowOnError> => (options.client ?? client).patch<TagCollectionsPartialUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/tag-collections/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const tagCollectionsUpdate = <ThrowOnError extends boolean = false>(options: Options<TagCollectionsUpdateData, ThrowOnError>): RequestResult<TagCollectionsUpdateResponses, unknown, ThrowOnError> => (options.client ?? client).put<TagCollectionsUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/tag-collections/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const titleCollectionsList = <ThrowOnError extends boolean = false>(options: Options<TitleCollectionsListData, ThrowOnError>): RequestResult<TitleCollectionsListResponses, unknown, ThrowOnError> => (options.client ?? client).get<TitleCollectionsListResponses, unknown, ThrowOnError>({ url: '/api/title-collections/', ...options });
+
+export const titleCollectionsCreate = <ThrowOnError extends boolean = false>(options: Options<TitleCollectionsCreateData, ThrowOnError>): RequestResult<TitleCollectionsCreateResponses, unknown, ThrowOnError> => (options.client ?? client).post<TitleCollectionsCreateResponses, unknown, ThrowOnError>({
+    url: '/api/title-collections/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const titleCollectionsDestroy = <ThrowOnError extends boolean = false>(options: Options<TitleCollectionsDestroyData, ThrowOnError>): RequestResult<TitleCollectionsDestroyResponses, unknown, ThrowOnError> => (options.client ?? client).delete<TitleCollectionsDestroyResponses, unknown, ThrowOnError>({ url: '/api/title-collections/{id}/', ...options });
+
+export const titleCollectionsRetrieve = <ThrowOnError extends boolean = false>(options: Options<TitleCollectionsRetrieveData, ThrowOnError>): RequestResult<TitleCollectionsRetrieveResponses, unknown, ThrowOnError> => (options.client ?? client).get<TitleCollectionsRetrieveResponses, unknown, ThrowOnError>({ url: '/api/title-collections/{id}/', ...options });
+
+export const titleCollectionsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<TitleCollectionsPartialUpdateData, ThrowOnError>): RequestResult<TitleCollectionsPartialUpdateResponses, unknown, ThrowOnError> => (options.client ?? client).patch<TitleCollectionsPartialUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/title-collections/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const titleCollectionsUpdate = <ThrowOnError extends boolean = false>(options: Options<TitleCollectionsUpdateData, ThrowOnError>): RequestResult<TitleCollectionsUpdateResponses, unknown, ThrowOnError> => (options.client ?? client).put<TitleCollectionsUpdateResponses, unknown, ThrowOnError>({
+    url: '/api/title-collections/{id}/',
     ...options,
     headers: {
         'Content-Type': 'application/json',

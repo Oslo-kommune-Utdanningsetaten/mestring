@@ -18,30 +18,33 @@
   } from '../../generated/sdk.gen'
 
   import type { UserDecorated } from '../../types/models'
-  import { dataStore } from '../../stores/data'
+  import { dataStore, currentSchool } from '../../stores/data'
   import { addAlert } from '../../stores/alerts'
   import { USER_ROLES } from '../../utils/constants'
   import {
     getPreferredCreatedParams,
-    getPreferredGroupValidity,
+    getPreferredSchoolYear,
   } from '../../stores/localStorageFunctions'
+  import { inferGroupValidityParams } from '../../utils/schoolYear'
 
   import ButtonMini from '../ButtonMini.svelte'
 
-  const { user, school, onDone } = $props<{
+  const {
+    user,
+    onDone,
+  }: {
     user: Partial<UserDecorated>
-    school: SchoolType
     onDone?: () => void | Promise<void>
-  }>()
+  } = $props()
 
   const userSchoolRoleNames = [USER_ROLES.STAFF, USER_ROLES.INSPECTOR, USER_ROLES.ADMIN]
   const userGroupRoleNames = [USER_ROLES.TEACHER, USER_ROLES.STUDENT]
+  let localUser = $state<Partial<UserDecorated>>({ ...user })
 
   const userSchoolRoles = $derived(
     $dataStore.roles.filter(role => userSchoolRoleNames.includes(role.name as any))
   )
-
-  let localUser = $state<Partial<UserDecorated>>({ ...user })
+  const school = $derived($currentSchool)
 
   let updatedUserSchoolRoleIds = $state<string[]>(
     (user.userSchools ?? ([] as NestedUserSchoolType[]))
@@ -79,8 +82,8 @@
         query: {
           school: school.id,
           enabled: 'only',
-          valid: getPreferredGroupValidity(),
           ...getPreferredCreatedParams(),
+          ...inferGroupValidityParams(getPreferredSchoolYear()),
         },
       })
       schoolGroups = result.data || []

@@ -39,24 +39,26 @@ const checkUserAccessToPath = (
   pathString: string
 ): boolean => {
   const path = ROUTES.find(route => route.path === pathString)
-  const { isPublic, accessibleBy, schoolConfig } = path || {}
+  const { isPublic, accessibleBy, conditionalAccess } = path || {}
   if (isPublic) return true // public routes can render their components without a school
   if (!currentUser) return false
   if (!currentSchool) return false
   if (currentUser.isSuperadmin) return true
-  // check for overlapping roles and accessibleBy
+
   if (accessibleBy) {
+    // ordinary access path, check if users has one of the required roles
     const hasUserRoleAccess = currentUser.roles?.some((role: UserRoleType) =>
       accessibleBy.includes(role)
     )
-    const isUserAdminOrInspector =
-      currentUser.roles?.includes('admin') || currentUser.roles?.includes('inspector')
-    if (hasUserRoleAccess && currentSchool && schoolConfig && !isUserAdminOrInspector) {
-      // check if the school config is enabled, but only for users who are exclusively teachers
-      // this check assumes ann schooConfig is dependent on admin/inspector non-presence, which is wrong, but works for now
+    if (hasUserRoleAccess) return true
+  }
+  if (conditionalAccess) {
+    // conditional access path, check if user has one of the required roles and the given school config is enabled
+    const { roles, schoolConfig } = conditionalAccess || {}
+    const hasConditionalAccess =
+      roles && schoolConfig && currentUser.roles?.some((role: UserRoleType) => roles.includes(role))
+    if (hasConditionalAccess) {
       return Boolean(currentSchool[schoolConfig as keyof SchoolType])
-    } else {
-      return hasUserRoleAccess
     }
   }
   return false
@@ -195,11 +197,19 @@ const checkUserAccessToFeature = (
         (groupId
           ? currentUser.studentGroups.some((studentGroup: GroupType) => studentGroup.id === groupId)
           : goalStudentId === studentId)
-      )
+      ) {
         return true
+      }
 
-      // Teacher check
       return currentUser.teacherGroups.some((teacherGroup: GroupType) => {
+        // User is teacher in the basis group to which the student belongs and the subject is owned by the school
+        if (
+          teacherGroup.type === GROUP_TYPE_BASIS &&
+          studentGroupIds?.includes(teacherGroup.id) &&
+          subject?.ownedBySchoolId
+        ) {
+          return true
+        }
         // User is teacher in this group and the observation was created by the user
         if (groupId && groupId === teacherGroup.id && createdById === currentUser.id) {
           return true
@@ -209,6 +219,19 @@ const checkUserAccessToFeature = (
   } else if (resource === 'group') {
     if (['compare'].includes(action)) {
       return currentUser.isSchoolAdmin || currentUser.isSchoolInspector
+    }
+  } else if (resource === 'tagCollection') {
+    if (['create', 'update', 'delete'].includes(action)) {
+      if (currentUser.isSchoolAdmin || currentUser.isSchoolInspector) return true
+      const subjectIds = currentUser.teacherGroups.map(
+        (teacherGroup: GroupType) => teacherGroup.subjectId
+      )
+      if (subjectId && subjectIds.includes(subjectId)) return true
+    }
+  } else if (resource === 'titleCollection') {
+    if (['create', 'update', 'delete'].includes(action)) {
+      if (currentUser.isSchoolAdmin || currentUser.isSchoolInspector || currentUser.isTeacher)
+        return true
     }
   }
   return false

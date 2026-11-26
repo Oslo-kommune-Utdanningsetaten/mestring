@@ -51,7 +51,6 @@ def test_superadmin_status_category_access(
 
     # Can create status categories at any school
     resp = client.post("/api/status-categories/", {
-        "title": "Standpunkt",
         "name": "endyear",
         "school_id": school.id,
         "mastery_schema_id": mastery_schema.id,
@@ -62,7 +61,7 @@ def test_superadmin_status_category_access(
 
     # Can update any status category
     resp = client.patch(f"/api/status-categories/{created_id}/", {
-        "title": "Standpunkt oppdatert",
+        "open_from": "2025-06-01",
     }, format='json')
     assert resp.status_code == 200
 
@@ -112,7 +111,6 @@ def test_authenticated_status_category_access(
 
         # Cannot create status categories
         resp = client.post("/api/status-categories/", {
-            "title": "Halvårsvurdering",
             "name": "midyear-new",
             "school_id": school.id,
             "is_enabled": True,
@@ -122,7 +120,7 @@ def test_authenticated_status_category_access(
         # Cannot update status categories
         resp = client.patch(
             f"/api/status-categories/{status_category_at_school.id}/",
-            {"title": "Endret tittel"},
+            {"open_from": "2025-06-01"},
             format='json',
         )
         assert resp.status_code == 403
@@ -171,7 +169,6 @@ def test_school_admin_status_category_access(
 
     # Can create a status category at their school
     resp = client.post("/api/status-categories/", {
-        "title": "Standpunkt",
         "name": "endyear",
         "school_id": school.id,
         "mastery_schema_id": mastery_schema.id,
@@ -186,7 +183,7 @@ def test_school_admin_status_category_access(
 
     # Can update a status category at their school
     resp = client.patch(f"/api/status-categories/{created_id}/", {
-        "title": "Standpunkt oppdatert",
+        "open_from": "2025-06-01",
     }, format='json')
     assert resp.status_code == 200
 
@@ -196,8 +193,7 @@ def test_school_admin_status_category_access(
 
     # Cannot create a status category at another school
     resp = client.post("/api/status-categories/", {
-        "title": "Halvtårsvurdering",
-        "name": "mideyear-new",
+        "name": "mideyear",
         "school_id": other_school.id,
         "is_enabled": True,
     }, format='json')
@@ -206,7 +202,7 @@ def test_school_admin_status_category_access(
     # Cannot update a status category at another school
     resp = client.patch(
         f"/api/status-categories/{status_category_at_other_school.id}/",
-        {"title": "Hacked"},
+        {"open_from": "2025-06-01"},
         format='json',
     )
     assert resp.status_code == 403

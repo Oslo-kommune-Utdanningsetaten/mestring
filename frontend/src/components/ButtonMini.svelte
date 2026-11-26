@@ -21,6 +21,8 @@
 
   const { options, children }: Props = $props()
 
+  const sizes = ['xsmall', 'small', 'medium', 'large']
+
   const {
     size = 'small',
     iconName = 'plus-sign',
@@ -74,7 +76,7 @@
   ></pkt-icon>
 {:else}
   <pkt-button
-    size={size === 'medium' || size === 'large' ? size : 'small'}
+    size={sizes.includes(size) ? size : 'small'}
     {skin}
     type="button"
     {variant}

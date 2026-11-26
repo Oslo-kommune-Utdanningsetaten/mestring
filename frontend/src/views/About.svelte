@@ -6,6 +6,8 @@
   import { hasUserAccessToPath } from '../stores/access'
   import { t } from '../stores/translations'
 
+  import RoleDescription from '../components/RoleDescription.svelte'
+
   let metadata = $state<Record<string, any>>({})
   const { currentSchool, currentUser } = $derived($dataStore)
 
@@ -137,37 +139,23 @@
   <h3 id="access">Hvem har tilgang til hva?</h3>
   <ul>
     <li>
-      <span class="fw-bold">Lærer i undervisningsgruppe</span>
-      kan opprette {t('goal', { form: 'plu-indef' })} og {t('observation', { form: 'plu-indef' })} for
-      elevene gruppa, i faget som undervises.
+      <RoleDescription roleNames={[USER_ROLES.TEACHER]} options={{ teacherType: 'teaching' }} />
       {@render rolesCount(USER_ROLES.TEACHER, GROUP_TYPE_TEACHING)}
     </li>
     <li>
-      <span class="fw-bold">Lærer i basisgruppe</span>
-      kan se {t('goal', { form: 'plu-indef' })} og {t('observation', { form: 'plu-indef' })} for sine
-      elever, i alle fag. Kan opprette individuelle {t('goal', { form: 'plu-indef' })} (og
-      {t('observation', { form: 'plu-indef' })}
-      på disse) for sine elever i alle fag.
+      <RoleDescription roleNames={[USER_ROLES.TEACHER]} options={{ teacherType: 'basis' }} />
       {@render rolesCount(USER_ROLES.TEACHER, GROUP_TYPE_BASIS)}
     </li>
     <li>
-      <span class="fw-bold">Skoleinspektør</span>
-      kan se {t('goal', { form: 'plu-indef' })} og {t('observation', { form: 'plu-indef' })} for alle
-      elever ved {currentSchool ? currentSchool.displayName : 'sin skole'}.
+      <RoleDescription roleNames={[USER_ROLES.INSPECTOR]} />
       {@render rolesCount(USER_ROLES.INSPECTOR)}
     </li>
     <li>
-      <span class="fw-bold">Skoleadmin</span>
-      kan se og redigere {t('goal', { form: 'plu-indef' })} og {t('observation', {
-        form: 'plu-indef',
-      })} for alle elever ved {currentSchool ? currentSchool.displayName : 'sin skole'}.
+      <RoleDescription roleNames={[USER_ROLES.ADMIN]} />
       {@render rolesCount(USER_ROLES.ADMIN)}
     </li>
     <li>
-      <span class="fw-bold">Superadmin</span>
-      kan se og redigere {t('goal', { form: 'plu-indef' })} og {t('observation', {
-        form: 'plu-indef',
-      })} for alle elever ved alle skoler. Kan også endre globale innstillinger for skolene.
+      <RoleDescription roleNames={[USER_ROLES.SUPERADMIN]} />
       {@render rolesCount(USER_ROLES.SUPERADMIN)}
     </li>
   </ul>

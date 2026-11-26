@@ -27,28 +27,28 @@ class GoalAccessPolicy(BaseAccessPolicy):
             "action": ["create"],
             "principal": ["role:student"],
             "effect": "allow",
-            "condition": ["can_student_create_goal", "is_goal_from_current_school_year"]
+            "condition": ["can_student_create_goal"]
         },
         # Teachers can create goals
         {
             "action": ["create"],
             "principal": ["role:teacher"],
             "effect": "allow",
-            "condition": ["can_teacher_create_goal", "is_goal_from_current_school_year"]
+            "condition": ["can_teacher_create_goal"]
         },
         # Students can only modify their own individual goals
         {
             "action": ["update", "partial_update", "destroy"],
             "principal": ["role:student"],
             "effect": "allow",
-            "condition": ["can_student_modify_goal", "is_goal_from_current_school_year"]
+            "condition": ["can_student_modify_goal"]
         },
         # Teachers can modify goals they have created and according to students and groups they teach
         {
             "action": ["update", "partial_update", "destroy"],
             "principal": ["role:teacher"],
             "effect": "allow",
-            "condition": ["can_teacher_modify_goal", "is_goal_from_current_school_year"]
+            "condition": ["can_teacher_modify_goal"]
         },
         # School admins have write access to goals belonging to their school
         {
@@ -277,14 +277,3 @@ class GoalAccessPolicy(BaseAccessPolicy):
         except Exception:
             logger.exception("SubjectAccessPolicy.belongs_to_group")
             return False
-
-    def is_goal_from_current_school_year(self, request, view, action):
-        if action == 'create':
-            return True
-        else:
-            try:
-                goal = view.get_object()
-                return is_entity_from_current_school_year(goal)
-            except Exception:
-                logger.exception("GoalAccessPolicy.is_goal_from_current_school_year")
-                return False

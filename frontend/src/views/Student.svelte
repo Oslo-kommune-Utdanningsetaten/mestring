@@ -11,10 +11,10 @@
 
   import {
     getPreferredCreatedParams,
-    getPreferredGroupValidity,
     getPreferredSchoolYear,
   } from '../stores/localStorageFunctions'
   import { SUBJECTS_ALLOWED_CUSTOM } from '../utils/constants'
+  import { inferGroupValidityParams } from '../utils/schoolYear'
   import { dataStore } from '../stores/data'
   import { trackEvent } from '../stores/analytics'
   import { t } from '../stores/translations'
@@ -25,26 +25,28 @@
   import GroupTag from '../components/GroupTag.svelte'
   import StudentSVG from '../assets/education.svg.svelte'
 
-  const { studentId } = $props<{ studentId: string }>()
+  const { studentId }: { studentId: string } = $props()
   const individualGoalcount = 3
 
   let student = $state<UserType | undefined>(undefined)
   let subjects = $state<SubjectType[]>([])
   let groups = $state<GroupType[]>([])
-  let { currentSchool } = $derived($dataStore) satisfies AppData
   let individualStudentGoalsCount = $state<number | undefined>(undefined)
+  let isLoading = $state<boolean>(false)
+  let { currentSchool } = $derived($dataStore) satisfies AppData
 
   const fetchStudentData = async () => {
+    isLoading = true
     try {
       const userResult = await usersRetrieve({ path: { id: studentId } })
       student = userResult.data!
-
-      if (!student) return
-      await fetchSubjects()
-      await fetchGroups()
-      await countStudentGoals()
+      if (student) {
+        await Promise.all([fetchSubjects(), fetchGroups(), countStudentGoals()])
+      }
     } catch (error) {
       console.error(`Could not load data for student ${studentId}`, error)
+    } finally {
+      isLoading = false
     }
   }
 
@@ -73,7 +75,11 @@
   const fetchGroups = async () => {
     try {
       const groupsResult = await groupsList({
-        query: { user: studentId, school: currentSchool.id, valid: getPreferredGroupValidity() },
+        query: {
+          user: studentId,
+          school: currentSchool.id,
+          ...inferGroupValidityParams(getPreferredSchoolYear()),
+        },
       })
       groups = groupsResult.data || []
     } catch (error) {
@@ -83,10 +89,15 @@
   }
 
   const countStudentGoals = async () => {
-    const result = await goalsList({
-      query: { student: studentId, school: currentSchool.id, ...getPreferredCreatedParams() },
+    // fetch all individual goals for the student, any year
+    const goalsResult = await goalsList({
+      query: {
+        school: currentSchool.id,
+        student: studentId,
+        individual: 'only',
+      },
     })
-    individualStudentGoalsCount = (result.data || []).filter(g => g.isIndividual).length
+    individualStudentGoalsCount = (goalsResult.data || []).length
   }
 
   // Creates a hard coded number of individual goals for each custom subjects in the school
@@ -121,7 +132,11 @@
 </script>
 
 <section class="py-3">
-  {#if student}
+  {#if isLoading}
+    <div class="spinner-border spinner-border-sm" role="status">
+      <span class="visually-hidden">Henter elevdata...</span>
+    </div>
+  {:else if student}
     <div class="d-flex align-items-center gap-3">
       <div class="student-svg" title="Elev" aria-hidden="true">
         <StudentSVG />

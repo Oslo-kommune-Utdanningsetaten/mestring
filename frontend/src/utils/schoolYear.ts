@@ -63,17 +63,14 @@ export const inferCreatedParams = (yearRange: string) => {
   return { createdAfter, createdBefore }
 }
 
-export const inferGroupValidityParams = (schoolYear: string) => {
-  const params: Record<'valid', string> = { valid: '' }
+export const inferGroupValidityParams = (schoolYear: string): { valid: GROUP_VALIDITY_OPTIONS } => {
   if (schoolYear === 'all') {
     // All years selected --> include all groups regardless of validity
-    params.valid = GROUP_VALIDITY_OPTIONS.INCLUDE
+    return { valid: GROUP_VALIDITY_OPTIONS.INCLUDE }
   } else if (schoolYear === getCurrentSchoolYear()) {
     // Current year selected --> only include valid groups
-    params.valid = GROUP_VALIDITY_OPTIONS.ONLY
-  } else {
-    // Past year selected --> only include invalid groups
-    params.valid = GROUP_VALIDITY_OPTIONS.EXCLUDE
+    return { valid: GROUP_VALIDITY_OPTIONS.ONLY }
   }
-  return params
+  // Past year selected --> only include invalid groups
+  return { valid: GROUP_VALIDITY_OPTIONS.EXCLUDE }
 }

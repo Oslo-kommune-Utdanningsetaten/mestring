@@ -11,9 +11,9 @@
   import Link from '../components/Link.svelte'
   import StatusWidgets from '../components/edit/StatusWidgets.svelte'
 
-  let { statusId } = $props<{
+  let { statusId } : {
     statusId: string
-  }>()
+  } = $props()
 
   let status = $state<StatusType | undefined>(undefined)
   let student = $state<UserType | undefined>(undefined)

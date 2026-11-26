@@ -4,16 +4,7 @@
   import { observationsList } from '../generated/sdk.gen'
 
   import BarChart from './BarChart.svelte'
-
-  interface Props {
-    groupId?: string
-    schoolId?: string
-    width?: number
-    height?: number
-    title?: string
-    fromDate: string
-    toDate: string
-  }
+  import { currentSchool } from '../stores/data'
 
   // Props with sane defaults
   const {
@@ -24,7 +15,15 @@
     title: providedTitle,
     fromDate,
     toDate,
-  }: Props = $props()
+  }: {
+    groupId?: string
+    schoolId?: string
+    width?: number
+    height?: number
+    title?: string
+    fromDate: string
+    toDate: string
+  } = $props()
 
   let observations = $state<ObservationType[]>([])
   let data = $state<number[]>([])
@@ -62,12 +61,10 @@
     const query: any = {
       from: fromDate,
       to: toDate,
+      school: schoolId || $currentSchool.id,
     }
     if (groupId) {
       query['group'] = groupId
-    }
-    if (schoolId) {
-      query['school'] = schoolId
     }
     const obsResults = await observationsList({ query })
     observations = obsResults.data || []

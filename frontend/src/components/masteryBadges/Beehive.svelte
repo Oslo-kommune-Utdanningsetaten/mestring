@@ -10,28 +10,33 @@
     isLastValueVisible,
     isBadgeEmpty = false,
     isBadgeVoid = false,
-  } = $props<{
+  }: {
     masteryData?: MasteryData
     masterySchema?: MasterySchemaWithConfig | null
     title: string
     isLastValueVisible: boolean
     isBadgeEmpty?: boolean
     isBadgeVoid?: boolean
-  }>()
+  } = $props()
 
   const mastery = $derived(masteryData?.mastery ?? 0)
   const trend = $derived(masteryData?.trend ?? 0)
   const calculations = $derived(useMasteryCalculations(masterySchema))
 
   // Trend
-  const isFlat = $derived(Math.abs(trend) < calculations.flatTrendThreshold)
-  const isDecreasing = $derived(trend < 0 && !isFlat)
+  const isFlat = $derived(Math.abs(trend) <= calculations.flatTrendThreshold)
+  const isIncreasing = $derived(trend > calculations.flatTrendThreshold)
+  const isDecreasing = $derived(trend < -calculations.flatTrendThreshold)
 
   // Colors
   const increasingColor = 'var(--bs-success)'
   const flatColor = 'var(--bs-warning)'
   const decreasingColor = 'var(--bs-danger)'
-  const trendColor = $derived(isDecreasing ? decreasingColor : isFlat ? flatColor : increasingColor)
+  const trendColor = $derived.by(() => {
+    if (isDecreasing) return decreasingColor
+    if (isIncreasing) return increasingColor
+    return flatColor
+  })
 
   // Dimensions
   const trendBoxSizeX = 26

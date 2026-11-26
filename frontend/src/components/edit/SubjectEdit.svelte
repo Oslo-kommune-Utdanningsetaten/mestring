@@ -2,18 +2,27 @@
   import { subjectsCreate, subjectsUpdate } from '../../generated/sdk.gen'
   import type { SubjectType, SchoolType } from '../../generated/types.gen'
   import ButtonMini from '../ButtonMini.svelte'
-  import { t } from '../../stores/translations'
+  import { currentSchool } from '../../stores/data'
 
-  const { subject, school, onDone } = $props<{
+  const {
+    subject,
+    onDone,
+  }: {
     subject: SubjectType | null
-    school: SchoolType | null
     onDone: () => void
-  }>()
+  } = $props()
+
   let displayName = $state<string | null>(null)
   let shortName = $state<string | null>(null)
   let isFormValid = $derived(!!displayName?.trim() && !!shortName?.trim())
+  let school = $derived<SchoolType>($currentSchool)
 
   const handleSave = async () => {
+    if (!school) return
+    if (!displayName?.trim() || !shortName?.trim() || school === null) {
+      console.error('Missing required fields to create subject')
+      return
+    }
     try {
       if (subject?.id) {
         await subjectsUpdate({
@@ -21,10 +30,6 @@
           body: { ...subject, displayName, shortName },
         })
       } else {
-        if (displayName === null || shortName === null || school === null) {
-          console.error('Missing required fields to create subject')
-          return
-        }
         await subjectsCreate({
           body: { displayName, shortName, ownedBySchoolId: school.id },
         })
@@ -49,7 +54,7 @@
 <div class="subject-edit p-4">
   <h3 class="pb-2">
     {subject?.id ? 'Redigerer' : 'Nytt'}
-    {t('goal', { form: 'sin-indef' })} for {school?.displayName}
+    fag for {school?.displayName}
   </h3>
   <hr />
 

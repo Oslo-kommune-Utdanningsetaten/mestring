@@ -8,12 +8,12 @@
   import MasteryLevelTitle from './MasteryLevelTitle.svelte'
   import ObservationWidgets from './edit/ObservationWidgets.svelte'
 
-  const { student, goal, subject, onRefreshNeeded } = $props<{
+  const { student, goal, subject, onRefreshNeeded } : {
     student: UserType
     goal: GoalDecorated
     subject: SubjectType
     onRefreshNeeded: () => void
-  }>()
+  } = $props()
 
   let masterySchema = $derived($dataStore.masterySchemas.find(ms => ms.id === goal.masterySchemaId))
   let observations = $derived(

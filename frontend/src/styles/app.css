@@ -167,11 +167,7 @@ a.dropdown-item:hover {
 mark {
   --mark-color: var(--pkt-color-surface-default-yellow);
   --mark-skew: 0.15em;
-  --mark-overlap: 0.2em;
   --mark-height: 70%;
-
-  margin-inline: calc(var(--mark-overlap) * -1);
-  padding-inline: var(--mark-overlap);
 
   background-color: transparent;
   background-image:
@@ -203,11 +199,15 @@ mark {
   }
 }
 
-/* Custom container class to match Navbar padding at all breakpoints */
+/* Keep .container-md at xl width on xxl screens to align with Navbar */
 @media (min-width: 1400px) {
   .container-md {
-    max-width: 1140px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    max-width: 85vw !important;
+  }
+}
+
+@media (min-width: 1800px) {
+  .container-md {
+    max-width: 95vw !important;
   }
 }

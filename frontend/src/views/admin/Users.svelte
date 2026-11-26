@@ -2,17 +2,13 @@
   import { useTinyRouter } from 'svelte-tiny-router'
   import type { UserType, SchoolType } from '../../generated/types.gen'
   import type { UserDecorated } from '../../types/models.d.ts'
-  import { usersList, schoolsList } from '../../generated/sdk.gen'
+  import { usersList } from '../../generated/sdk.gen'
 
   import { urlStringFrom, fetchUserData } from '../../utils/functions'
-  import { dataStore } from '../../stores/data'
+  import { dataStore, currentSchool } from '../../stores/data'
   import { preferredSchoolYear } from '../../stores/localStorageFunctions'
   import { USER_ROLES } from '../../utils/constants'
-  import {
-    getAllSchoolYears,
-    getCurrentSchoolYear,
-    inferCreatedParams,
-  } from '../../utils/schoolYear'
+  import { getAllSchoolYears, inferCreatedParams } from '../../utils/schoolYear'
 
   import User from '../../components/User.svelte'
   import ButtonMini from '../../components/ButtonMini.svelte'
@@ -20,8 +16,6 @@
   import UserEdit from '../../components/edit/UserEdit.svelte'
 
   const router = useTinyRouter()
-  let schools = $state<SchoolType[]>([])
-  let isLoadingSchools = $state<boolean>(false)
   let isLoadingUsers = $state<boolean>(false)
   const rolesFromUrl = router.getQueryParam('roles')
 
@@ -36,21 +30,16 @@
   )
   let nameFilter = $state<string>(router.getQueryParam('name') || '')
 
-  let selectedSchool = $derived.by(() => {
-    const schoolIdFromUrl = router.getQueryParam('school')
-    return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
-  })
+  let school = $derived<SchoolType>($currentSchool)
 
   let headerText = $derived.by(() => {
-    if (!selectedSchool) return null
-    let text = `Brukere ved ${selectedSchool.displayName}`
+    if (!school) return null
+    let text = `Brukere ved ${school.displayName}`
     text = nameFilter ? `${text} som matcher "${nameFilter}"` : text
     return text
   })
 
-  let selectedYearOption = $state<string>(
-    (router.getQueryParam('year') as string) || getCurrentSchoolYear()
-  )
+  let selectedYearOption = $state<string>((router.getQueryParam('year') as string) || 'all')
 
   // Array of fetched users
   let users = $state<UserType[]>([])
@@ -60,7 +49,8 @@
       ? users.filter(
           user =>
             user.name.toLowerCase().includes(nameFilter.toLowerCase()) ||
-            user.feideId.toLowerCase().includes(nameFilter.toLowerCase())
+            user.feideId.toLowerCase().includes(nameFilter.toLowerCase()) ||
+            user.id === nameFilter
         )
       : users
   )
@@ -149,17 +139,17 @@
     if (!$dataStore.currentSchool) return []
     const allYears = getAllSchoolYears(new Date($dataStore.currentSchool.createdAt)).reverse()
     return [
+      { value: 'all', label: 'Alle år' },
       ...allYears.map(year => ({
         value: year,
         label: year,
       })),
-      allYears.length > 1 ? { value: 'all', label: 'Alle år' } : null,
-    ].filter(Boolean) as { value: string; label: string }[]
+    ]
   })
 
   const usersOptions = $derived.by(() => {
     const options: Record<string, any> & { school: string } = {
-      school: selectedSchool?.id as string,
+      school: school?.id as string,
       deleted: deletedSelection,
       roles: selectedRoles.includes('all') ? [] : selectedRoles.join(','),
       ...inferCreatedParams(selectedYearOption),
@@ -167,18 +157,8 @@
     return options
   })
 
-  const fetchSchools = async () => {
-    try {
-      const result = await schoolsList({})
-      schools = result.data || []
-    } catch (error) {
-      console.error('Error fetching schools:', error)
-      schools = []
-    }
-  }
-
   const fetchUsers = async () => {
-    if (!selectedSchool) return
+    if (!school) return
     try {
       isLoadingUsers = true
       const result = await usersList({
@@ -199,11 +179,11 @@
   }
 
   const fetchUserAffiliations = async (userId: string) => {
-    if (!selectedSchool) return
+    if (!school) return
     try {
       const { teacherGroups, studentGroups, userGroups, userSchools } = await fetchUserData(
         userId,
-        selectedSchool.id,
+        school.id,
         $preferredSchoolYear
       )
       const user = users.find(u => u.id === userId)
@@ -215,14 +195,6 @@
       decoratedUsersById = { ...decoratedUsersById, [userId]: decoratedUser }
     } catch (error) {
       console.error('Error fetching user data:', userId, error)
-    }
-  }
-
-  const handleSchoolSelect = (schoolId: string): void => {
-    if (schoolId && schoolId !== '0') {
-      router.navigate(urlStringFrom({ school: schoolId }, { path: '/admin/users', mode: 'merge' }))
-    } else {
-      router.navigate('/admin/users')
     }
   }
 
@@ -263,11 +235,7 @@
   }
 
   $effect(() => {
-    fetchSchools()
-  })
-
-  $effect(() => {
-    if (selectedSchool && selectedSchool.id) {
+    if (school?.id) {
       fetchUsers()
     }
   })
@@ -289,27 +257,13 @@
 <section class="pt-3">
   <h2 class="py-3">{headerText}</h2>
   <!-- Filter groups -->
-  {#if isLoadingSchools}
+  {#if isLoadingUsers}
     <div class="m-4">
       <div class="spinner-border text-primary" role="status"></div>
-      <span>Henter skoler...</span>
+      <span>Henter brukere...</span>
     </div>
   {:else}
     <div class="filters-container">
-      <div class="filter-item">
-        <label for="schoolSelect" class="mb-1 visually-hidden">Filtrer på skole:</label>
-        <select
-          class="pkt-input"
-          id="schoolSelect"
-          onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
-        >
-          {#each schools as school}
-            <option value={school.id} selected={school.id === selectedSchool?.id}>
-              {school.displayName}
-            </option>
-          {/each}
-        </select>
-      </div>
       <div class="filter-item">
         <label for="userFilterInput" class="mb-1 visually-hidden">Filtrer på navn:</label>
         <input
@@ -376,7 +330,7 @@
 </section>
 
 <section class="py-3">
-  {#if selectedSchool}
+  {#if school}
     {#if isLoadingUsers}
       <div class="m-4">
         <div class="spinner-border text-primary" role="status"></div>
@@ -397,9 +351,11 @@
       >
         Ny bruker
       </ButtonMini> Note: Manually added users might change or disappear at next import/cleanerbot run.
+
       <div class="mt-4 mb-2 fw-bold">
         Viser {sortedUsers.length} bruker{sortedUsers.length == 1 ? '' : 'e'}
       </div>
+
       <div class="card shadow-sm">
         <!-- Header row -->
         <div class="user-grid-row header fw-bold">
@@ -460,8 +416,8 @@
     userWip = null
   }}
 >
-  {#if userWip !== null && selectedSchool}
-    <UserEdit user={userWip} school={selectedSchool} onDone={handleUserEditDone} />
+  {#if userWip !== null && school}
+    <UserEdit user={userWip} onDone={handleUserEditDone} />
   {/if}
 </Offcanvas>
 

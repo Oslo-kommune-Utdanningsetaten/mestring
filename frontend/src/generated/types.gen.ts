@@ -127,6 +127,7 @@ export type ObservationType = {
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
     productUrl?: string | null;
+    tags?: unknown;
     readonly createdById: string;
     readonly updatedById: string;
     goalId: string;
@@ -231,6 +232,7 @@ export type PatchedObservationType = {
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
     productUrl?: string | null;
+    tags?: unknown;
     readonly createdById?: string;
     readonly updatedById?: string;
     goalId?: string;
@@ -274,6 +276,7 @@ export type PatchedSchoolType = {
     isGoalTitleEnabled?: boolean;
     isStatusEnabled?: boolean;
     subjectsAllowed?: string;
+    masteryBadgeVariant?: string;
     readonly createdById?: string;
     readonly updatedById?: string;
 };
@@ -305,10 +308,11 @@ export type PatchedStatusCategoryType = {
     readonly updatedAt?: string;
     readonly maintainedAt?: string | null;
     deletedAt?: string | null;
-    title?: string;
     name?: string;
     isSubjectSpecific?: boolean;
     isEnabled?: boolean;
+    openFrom?: string | null;
+    openTo?: string | null;
     readonly createdById?: string;
     readonly updatedById?: string;
     schoolId?: string;
@@ -328,6 +332,31 @@ export type PatchedSubjectType = {
     readonly createdById?: string;
     readonly updatedById?: string;
     ownedBySchoolId?: string | null;
+};
+
+export type PatchedTagCollectionType = {
+    readonly id?: string;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    readonly maintainedAt?: string | null;
+    deletedAt?: string | null;
+    tags?: unknown;
+    readonly createdById?: string;
+    readonly updatedById?: string;
+    schoolId?: string;
+    subjectId?: string;
+};
+
+export type PatchedTitleCollectionType = {
+    readonly id?: string;
+    readonly createdAt?: string;
+    readonly updatedAt?: string;
+    readonly maintainedAt?: string | null;
+    deletedAt?: string | null;
+    titles?: unknown;
+    readonly createdById?: string;
+    readonly updatedById?: string;
+    schoolId?: string;
 };
 
 export type PatchedUserType = {
@@ -410,6 +439,7 @@ export type SchoolType = {
     isGoalTitleEnabled?: boolean;
     isStatusEnabled?: boolean;
     subjectsAllowed?: string;
+    masteryBadgeVariant?: string;
     readonly createdById: string;
     readonly updatedById: string;
 };
@@ -441,10 +471,11 @@ export type StatusCategoryType = {
     readonly updatedAt: string;
     readonly maintainedAt: string | null;
     deletedAt?: string | null;
-    title: string;
     name: string;
     isSubjectSpecific?: boolean;
     isEnabled?: boolean;
+    openFrom?: string | null;
+    openTo?: string | null;
     readonly createdById: string;
     readonly updatedById: string;
     schoolId: string;
@@ -472,6 +503,31 @@ export type SubjectType = {
     readonly createdById: string;
     readonly updatedById: string;
     ownedBySchoolId?: string | null;
+};
+
+export type TagCollectionType = {
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    readonly maintainedAt: string | null;
+    deletedAt?: string | null;
+    tags?: unknown;
+    readonly createdById: string;
+    readonly updatedById: string;
+    schoolId: string;
+    subjectId: string;
+};
+
+export type TitleCollectionType = {
+    readonly id: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    readonly maintainedAt: string | null;
+    deletedAt?: string | null;
+    titles?: unknown;
+    readonly createdById: string;
+    readonly updatedById: string;
+    schoolId: string;
 };
 
 export type UserType = {
@@ -593,6 +649,7 @@ export type ObservationCreateType = {
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
     productUrl?: string | null;
+    tags?: unknown;
     goalId: string;
     studentId: string;
     subjectId?: string | null;
@@ -665,6 +722,7 @@ export type PatchedObservationCreateType = {
     observedAt?: string | null;
     isVisibleToStudent?: boolean;
     productUrl?: string | null;
+    tags?: unknown;
     goalId?: string;
     studentId?: string;
     subjectId?: string | null;
@@ -696,6 +754,7 @@ export type PatchedSchoolCreateType = {
     isGoalTitleEnabled?: boolean;
     isStatusEnabled?: boolean;
     subjectsAllowed?: string;
+    masteryBadgeVariant?: string;
 };
 
 export type PatchedStatusCreateType = {
@@ -715,10 +774,11 @@ export type PatchedStatusCreateType = {
 
 export type PatchedStatusCategoryCreateType = {
     deletedAt?: string | null;
-    title?: string;
     name?: string;
     isSubjectSpecific?: boolean;
     isEnabled?: boolean;
+    openFrom?: string | null;
+    openTo?: string | null;
     schoolId?: string;
     masterySchemaId?: string;
 };
@@ -730,6 +790,19 @@ export type PatchedSubjectCreateType = {
     grepCode?: string | null;
     grepGroupCode?: string | null;
     ownedBySchoolId?: string | null;
+};
+
+export type PatchedTagCollectionCreateType = {
+    deletedAt?: string | null;
+    tags?: unknown;
+    schoolId?: string;
+    subjectId?: string;
+};
+
+export type PatchedTitleCollectionCreateType = {
+    deletedAt?: string | null;
+    titles?: unknown;
+    schoolId?: string;
 };
 
 export type PatchedUserCreateType = {
@@ -782,6 +855,7 @@ export type SchoolCreateType = {
     isGoalTitleEnabled?: boolean;
     isStatusEnabled?: boolean;
     subjectsAllowed?: string;
+    masteryBadgeVariant?: string;
 };
 
 export type StatusCreateType = {
@@ -801,10 +875,11 @@ export type StatusCreateType = {
 
 export type StatusCategoryCreateType = {
     deletedAt?: string | null;
-    title: string;
     name: string;
     isSubjectSpecific?: boolean;
     isEnabled?: boolean;
+    openFrom?: string | null;
+    openTo?: string | null;
     schoolId: string;
     masterySchemaId: string;
 };
@@ -816,6 +891,19 @@ export type SubjectCreateType = {
     grepCode?: string | null;
     grepGroupCode?: string | null;
     ownedBySchoolId?: string | null;
+};
+
+export type TagCollectionCreateType = {
+    deletedAt?: string | null;
+    tags?: unknown;
+    schoolId: string;
+    subjectId: string;
+};
+
+export type TitleCollectionCreateType = {
+    deletedAt?: string | null;
+    titles?: unknown;
+    schoolId: string;
 };
 
 export type UserCreateType = {
@@ -1155,13 +1243,21 @@ export type GoalsListData = {
          */
         group?: string;
         /**
-         * Include related observations in the response
+         * Include related observations in the response. Cannot be used together with return_fields.
          */
         includeObservations?: boolean;
+        /**
+         * Filter goals by whether they are individual: "only" (only individual goals), "exclude" (only group goals), "include" (default, both individual and group goals)
+         */
+        individual?: 'only' | 'exclude' | 'include';
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
+        /**
+         * Only return these fields from goal objects (comma-separated list of field names). Cannot be used together with include_observations.
+         */
+        returnFields?: string;
         /**
          * Filter goals by school
          */
@@ -2021,15 +2117,15 @@ export type StatusListData = {
          */
         editor?: string;
         /**
-         * Filter statuses by students in group.
+         * Filter statuses by students in groups. Comma-separated list of group IDs.
          */
-        group?: string;
+        groups?: string;
         /**
          * Filter statuses by school.
          */
         school: string;
         /**
-         * Filter statuses by students.
+         * Filter statuses by students. Comma-separated list of student IDs.
          */
         students?: string;
         /**
@@ -2079,6 +2175,14 @@ export type StatusCategoriesListData = {
          * Filter statuses by name.
          */
         name?: string;
+        /**
+         * Filter by open_from timestamp. Only return rows open from this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        openFrom?: string;
+        /**
+         * Filter by open_to timestamp. Only return rows open to this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        openTo?: string;
         /**
          * Filter statuses by school.
          */
@@ -2385,6 +2489,246 @@ export type SubjectsUpdateResponses = {
 };
 
 export type SubjectsUpdateResponse = SubjectsUpdateResponses[keyof SubjectsUpdateResponses];
+
+export type TagCollectionsListData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
+        /**
+         * Filter by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
+         */
+        deleted?: 'exclude' | 'include' | 'only';
+        /**
+         * Filter tag_collections by school.
+         */
+        school: string;
+        /**
+         * Filter tag_collections by subject.
+         */
+        subject?: string;
+    };
+    url: '/api/tag-collections/';
+};
+
+export type TagCollectionsListResponses = {
+    200: Array<TagCollectionType>;
+};
+
+export type TagCollectionsListResponse = TagCollectionsListResponses[keyof TagCollectionsListResponses];
+
+export type TagCollectionsCreateData = {
+    body: TagCollectionCreateType;
+    path?: never;
+    query?: never;
+    url: '/api/tag-collections/';
+};
+
+export type TagCollectionsCreateResponses = {
+    201: TagCollectionType;
+};
+
+export type TagCollectionsCreateResponse = TagCollectionsCreateResponses[keyof TagCollectionsCreateResponses];
+
+export type TagCollectionsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this tag collection.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/tag-collections/{id}/';
+};
+
+export type TagCollectionsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type TagCollectionsDestroyResponse = TagCollectionsDestroyResponses[keyof TagCollectionsDestroyResponses];
+
+export type TagCollectionsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this tag collection.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/tag-collections/{id}/';
+};
+
+export type TagCollectionsRetrieveResponses = {
+    200: TagCollectionType;
+};
+
+export type TagCollectionsRetrieveResponse = TagCollectionsRetrieveResponses[keyof TagCollectionsRetrieveResponses];
+
+export type TagCollectionsPartialUpdateData = {
+    body?: PatchedTagCollectionCreateType;
+    path: {
+        /**
+         * A unique value identifying this tag collection.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/tag-collections/{id}/';
+};
+
+export type TagCollectionsPartialUpdateResponses = {
+    200: TagCollectionType;
+};
+
+export type TagCollectionsPartialUpdateResponse = TagCollectionsPartialUpdateResponses[keyof TagCollectionsPartialUpdateResponses];
+
+export type TagCollectionsUpdateData = {
+    body: TagCollectionCreateType;
+    path: {
+        /**
+         * A unique value identifying this tag collection.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/tag-collections/{id}/';
+};
+
+export type TagCollectionsUpdateResponses = {
+    200: TagCollectionType;
+};
+
+export type TagCollectionsUpdateResponse = TagCollectionsUpdateResponses[keyof TagCollectionsUpdateResponses];
+
+export type TitleCollectionsListData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Filter by created_at timestamp. Only return rows created after this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdAfter?: string;
+        /**
+         * Filter by created_at timestamp. Only return rows created before this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00
+         */
+        createdBefore?: string;
+        /**
+         * Filter by soft-deleted status: "exclude" (default, only non-deleted), "include" (both deleted and non-deleted), or "only" (only deleted)
+         */
+        deleted?: 'exclude' | 'include' | 'only';
+        /**
+         * Filter title_collections by school.
+         */
+        school: string;
+    };
+    url: '/api/title-collections/';
+};
+
+export type TitleCollectionsListResponses = {
+    200: Array<TitleCollectionType>;
+};
+
+export type TitleCollectionsListResponse = TitleCollectionsListResponses[keyof TitleCollectionsListResponses];
+
+export type TitleCollectionsCreateData = {
+    body: TitleCollectionCreateType;
+    path?: never;
+    query?: never;
+    url: '/api/title-collections/';
+};
+
+export type TitleCollectionsCreateResponses = {
+    201: TitleCollectionType;
+};
+
+export type TitleCollectionsCreateResponse = TitleCollectionsCreateResponses[keyof TitleCollectionsCreateResponses];
+
+export type TitleCollectionsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this title collection.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/title-collections/{id}/';
+};
+
+export type TitleCollectionsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type TitleCollectionsDestroyResponse = TitleCollectionsDestroyResponses[keyof TitleCollectionsDestroyResponses];
+
+export type TitleCollectionsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique value identifying this title collection.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/title-collections/{id}/';
+};
+
+export type TitleCollectionsRetrieveResponses = {
+    200: TitleCollectionType;
+};
+
+export type TitleCollectionsRetrieveResponse = TitleCollectionsRetrieveResponses[keyof TitleCollectionsRetrieveResponses];
+
+export type TitleCollectionsPartialUpdateData = {
+    body?: PatchedTitleCollectionCreateType;
+    path: {
+        /**
+         * A unique value identifying this title collection.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/title-collections/{id}/';
+};
+
+export type TitleCollectionsPartialUpdateResponses = {
+    200: TitleCollectionType;
+};
+
+export type TitleCollectionsPartialUpdateResponse = TitleCollectionsPartialUpdateResponses[keyof TitleCollectionsPartialUpdateResponses];
+
+export type TitleCollectionsUpdateData = {
+    body: TitleCollectionCreateType;
+    path: {
+        /**
+         * A unique value identifying this title collection.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/title-collections/{id}/';
+};
+
+export type TitleCollectionsUpdateResponses = {
+    200: TitleCollectionType;
+};
+
+export type TitleCollectionsUpdateResponse = TitleCollectionsUpdateResponses[keyof TitleCollectionsUpdateResponses];
 
 export type UserGroupsListData = {
     body?: never;

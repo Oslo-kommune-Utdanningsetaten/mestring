@@ -9,17 +9,16 @@
     masteryValue,
     masterySchemaId = null,
     masterySchema = null,
-  } = $props<{
+  }: {
     masteryValue: number | null | undefined
     masterySchemaId?: string | null | undefined
     masterySchema?: MasterySchemaWithConfig | null
-  }>()
+  } = $props()
 
   const resolvedSchema = $derived(
     masterySchema ||
       ($dataStore.masterySchemas.find(s => s.id === masterySchemaId) as
-        | MasterySchemaWithConfig
-        | undefined)
+        MasterySchemaWithConfig | undefined)
   )
 
   const title = $derived(

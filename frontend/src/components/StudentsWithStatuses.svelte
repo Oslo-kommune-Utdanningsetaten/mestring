@@ -1,28 +1,29 @@
 <script lang="ts">
   import '@oslokommune/punkt-elements/dist/pkt-checkbox.js'
   import type { UserType, SubjectType, StatusType, GroupType } from '../generated/types.gen'
-  import type { MasteryConfigLevel } from '../types/models.d.ts'
+  import type { MasteryConfigLevel, MasterySchemaWithConfig } from '../types/models.d.ts'
   import { statusList } from '../generated/sdk.gen'
   import { dataStore, currentUser } from '../stores/data'
   import { getSubjectName } from '../utils/functions'
   import { getPreferredCreatedParams } from '../stores/localStorageFunctions'
-  import { useMasteryCalculations } from '../utils/masteryHelpers'
+  import { useMasteryCalculations, getMasteryTitleByValue } from '../utils/masteryHelpers'
   import { t } from '../stores/translations'
 
   import MasterySchemaLevel from './MasterySchemaLevel.svelte'
   import UserNameLink from './UserNameLink.svelte'
   import GroupTag from './GroupTag.svelte'
+  import ButtonMini from './ButtonMini.svelte'
 
   let {
     students,
     subjects,
     categoryName,
-    group,
+    groups = [],
   }: {
     students: UserType[]
     subjects: SubjectType[]
     categoryName: string
-    group?: GroupType | undefined
+    groups: GroupType[]
   } = $props()
 
   type DecoratedGroup = GroupType & {
@@ -38,23 +39,43 @@
   // Data per student per subject: flat map keyed by `studentId:subjectId`
   let statusesByStudentIdAndSubjectId = $state<Record<string, StatusType[]>>({})
   let studentCountsByLevel = $state<number[]>([])
+  let isCompleteGroupsDetailsEnabled = $state<boolean>(false)
+  let isIncompleteGroupsDetailsEnabled = $state<boolean>(false)
+  let isOnlyRiskySubjectsEnabled = $state<boolean>(true)
 
   let selectedLevels = $state<number[]>([])
-  let isDetailsEnabled = $derived<boolean>(!!group || selectedLevels.length > 0)
+  let isDetailsEnabled = $derived<boolean>(groups.length > 0 || selectedLevels.length > 0)
 
   // Top scrollbar mirror
   let gridElement = $state<HTMLDivElement | null>(null)
   let topScrollElement = $state<HTMLDivElement | null>(null)
   let gridScrollWidth = $state(0)
 
+  const filteredSubjects = $derived.by(() => {
+    if (isOnlyRiskySubjectsEnabled) {
+      // filter out subjects where there are no risky statuses
+      return subjects.filter(subject =>
+        students.some(student => {
+          const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`] || []
+          return statuses.some(status => status.masteryValue !== maxValue)
+        })
+      )
+    }
+    return subjects
+  })
+
   const gridTemplateColumns = $derived(
-    ['minmax(12rem, 1.2fr)', ...subjects.map(() => 'minmax(8rem, 1fr)')].join(' ')
+    ['minmax(12rem, 1.2fr)', ...filteredSubjects.map(() => 'minmax(8rem, 1fr)')].join(' ')
   )
 
   const category = $derived($dataStore.statusCategories.find(cat => cat.name === categoryName))
+
+  const isCategoryOfRiskType = $derived(category?.name.startsWith('risk-'))
+
   const masterySchema = $derived(
     $dataStore.masterySchemas.find(schema => schema.id === category?.masterySchemaId)
   )
+
   const { maxValue } = $derived(useMasteryCalculations(masterySchema))
 
   // Sorted students list
@@ -149,12 +170,22 @@
       })
     })
 
-    const query = {
-      group: group ? group.id : undefined,
-      school: $dataStore.currentSchool?.id,
+    let query: Record<string, any> & { school: string } = {
+      groups: groups ? groups.map(g => g.id).join(',') : undefined,
+      school: $dataStore.currentSchool?.id as string,
       categoryName: categoryName,
-      ...getPreferredCreatedParams(),
     }
+
+    if (category.openFrom && category.openTo) {
+      // if category has openFrom and openTo, use them to fetch only statues created withing that range
+      const createdAfter = category.openFrom.split('T')[0]
+      const createdBefore = category.openTo.split('T')[0]
+      query = { ...query, createdAfter, createdBefore }
+    } else {
+      // otherwise, use preferred created params
+      query = { ...query, ...getPreferredCreatedParams() }
+    }
+
     const result = await statusList({ query })
     const statuses = result.data || []
 
@@ -172,7 +203,7 @@
       (level: MasteryConfigLevel) =>
         students.filter(student =>
           subjects.some(subject =>
-            newData[`${student.id}:${subject.id}`].some(
+            newData[`${student.id}:${subject.id}`]?.some(
               status => status.masteryValue === level.maxValue
             )
           )
@@ -212,6 +243,60 @@
     if (gridElement && topScrollElement) gridElement.scrollLeft = topScrollElement.scrollLeft
   }
 
+  const generateFileName = () => {
+    // generate file name with resolution based on timestamp and 1 second resolution
+    const timestamp = new Date().toISOString()
+    const date = timestamp.split('T')[0]
+    const time = timestamp.split('T')[1].split('.')[0].replaceAll(':', '-')
+    return `student-data-${date}T${time}.csv`
+  }
+
+  const downloadStudentData = () => {
+    if (filteredSubjects.length > 0 && sortedStudents.length > 0) {
+      let resolvedSchema: MasterySchemaWithConfig | undefined = undefined
+
+      // Wrangle all data into CSV format
+      const headerData = ['Navn', ...filteredSubjects.map(subject => getSubjectName(subject))]
+      const csvContent = [headerData.join(';')]
+      sortedStudents.forEach(student => {
+        const rowData = [student.name]
+        filteredSubjects.forEach(subject => {
+          const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`]
+          const status: StatusType | undefined = statuses?.length > 0 ? statuses[0] : undefined
+          let value = ''
+          if (!resolvedSchema) {
+            resolvedSchema = status
+              ? $dataStore.masterySchemas.find(s => s.id === status.masterySchemaId)
+              : undefined
+          }
+          value = getMasteryTitleByValue(status?.masteryValue || undefined, resolvedSchema) || ''
+          rowData.push(value)
+        })
+        csvContent.push(rowData.join(';'))
+      })
+
+      // Add a UTF-8 BOM so Excel opens it with the correct encoding
+      const blob = new Blob(['\uFEFF' + csvContent.join('\n')], { type: 'text/csv;charset=utf-8;' })
+
+      // Create a temporary URL pointing to the data
+      const blobUrl = URL.createObjectURL(blob)
+
+      // Create a hidden anchor element to trigger the download
+      const link = document.createElement('a')
+      link.href = blobUrl
+      link.download = generateFileName()
+      link.style.display = 'none'
+
+      // Append link to the DOM, programmatically click it, clean up
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(blobUrl)
+    } else {
+      console.warn('No subjects or students available for download.')
+    }
+  }
+
   $effect(() => {
     if (!gridElement) return
     const obs = new ResizeObserver(() => {
@@ -229,43 +314,48 @@
   })
 </script>
 
-<div>👉 Velg gruppe og/eller filter for å se detaljer</div>
-
 <!-- Filtering by mastery level -->
 {#if masterySchema && category}
-  {@const levels =
-    category.name === 'risk'
-      ? masterySchema.config.levels.slice(0, -1)
-      : masterySchema.config.levels}
-  <table class="my-2 table">
+  {@const levels = isCategoryOfRiskType
+    ? masterySchema.config.levels.slice(0, -1)
+    : masterySchema.config.levels}
+
+  <table class="my-2 table fixed-layout">
+    <colgroup>
+      <col class="col-checkbox" />
+      <col class="col-label" />
+      <col />
+    </colgroup>
     <thead>
       <tr>
         <th></th>
-        <th>Antall</th>
-        <th>Filter</th>
+        <th></th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <th>Elever {group ? `i dette utvalget` : 'på hele skolen'}</th>
-        <td>{sortedStudents.length}</td>
         <td></td>
+        <th class="table-header">
+          Elever {groups.length > 0 ? `i dette utvalget` : 'på hele skolen'}
+        </th>
+        <td>{sortedStudents.length}</td>
       </tr>
-      {#if category.name === 'risk'}
+      {#if isCategoryOfRiskType}
         <tr>
-          <th>Elever {group ? `i dette utvalget` : 'på hele skolen'} utenfor fare</th>
+          <td></td>
+          <th class="table-header">
+            Elever {groups.length > 0 ? `i dette utvalget` : 'på hele skolen'} utenfor fare
+          </th>
           <td>
             {getStudentCountWithoutRiskyStatuses()} [{Math.round(
               (getStudentCountWithoutRiskyStatuses() / sortedStudents.length) * 100
             )}%]
           </td>
-          <td></td>
         </tr>
       {/if}
       {#each levels as level, levelIndex}
         <tr>
-          <th>Elever med én eller flere {level.title}</th>
-          <td>{studentCountsByLevel[levelIndex] ?? 0}</td>
           <td>
             <pkt-checkbox
               label={''}
@@ -276,41 +366,74 @@
               onchange={() => handleToggleLevel(levelIndex)}
             ></pkt-checkbox>
           </td>
+          <th class="table-header">Elever med én eller flere {level.title}</th>
+          <td>{studentCountsByLevel[levelIndex] ?? 0}</td>
         </tr>
       {/each}
 
-      {#if !group}
+      {#if groups.length !== 1}
         <tr>
-          <th>Grupper som har rapportert alle elever</th>
+          <td></td>
+          <th class="table-header">Grupper som har rapportert alle elever</th>
           <td>
             <div class="d-flex flex-wrap gap-1">
-              {#each groupsWithCompleteStatuses as group}
-                <GroupTag
-                  href="/groups/{group.id}"
-                  {group}
-                  isGroupNameEnabled={true}
-                  isIconEnabled={false}
-                />
-              {/each}
+              <span class="group-count">
+                {groupsWithCompleteStatuses.length}
+              </span>
+              <ButtonMini
+                options={{
+                  title: isCompleteGroupsDetailsEnabled ? 'Skjul grupper' : 'Vis grupper',
+                  skin: 'secondary',
+                  variant: 'label-only',
+                  onClick: () => (isCompleteGroupsDetailsEnabled = !isCompleteGroupsDetailsEnabled),
+                }}
+              >
+                {isCompleteGroupsDetailsEnabled ? 'Skjul grupper' : 'Vis grupper'}
+              </ButtonMini>
+              {#if isCompleteGroupsDetailsEnabled}
+                {#each groupsWithCompleteStatuses as group}
+                  <GroupTag
+                    href="/groups/{group.id}"
+                    {group}
+                    isGroupNameEnabled={true}
+                    isIconEnabled={false}
+                  />
+                {/each}
+              {/if}
             </div>
           </td>
-          <td></td>
         </tr>
         <tr>
-          <th>Grupper som ikke har rapportert alle elever</th>
+          <td></td>
+          <th class="table-header">Grupper som ikke har rapportert alle elever</th>
           <td>
             <div class="d-flex flex-wrap gap-1">
-              {#each groupsMissingStatuses as group}
-                <GroupTag
-                  href="/groups/{group.id}"
-                  {group}
-                  isGroupNameEnabled={true}
-                  isIconEnabled={false}
-                />
-              {/each}
+              <span class="group-count">
+                {groupsMissingStatuses.length}
+              </span>
+              <ButtonMini
+                options={{
+                  title: isIncompleteGroupsDetailsEnabled ? 'Skjul grupper' : 'Vis grupper',
+                  skin: 'secondary',
+                  variant: 'label-only',
+                  onClick: () =>
+                    (isIncompleteGroupsDetailsEnabled = !isIncompleteGroupsDetailsEnabled),
+                }}
+              >
+                {isIncompleteGroupsDetailsEnabled ? 'Skjul grupper' : 'Vis grupper'}
+              </ButtonMini>
+              {#if isIncompleteGroupsDetailsEnabled}
+                {#each groupsMissingStatuses as group}
+                  <GroupTag
+                    href="/groups/{group.id}"
+                    {group}
+                    isGroupNameEnabled={true}
+                    isIconEnabled={false}
+                  />
+                {/each}
+              {/if}
             </div>
           </td>
-          <td></td>
         </tr>
       {/if}
     </tbody>
@@ -319,7 +442,36 @@
 
 <div class="mt-3">
   {#if isDetailsEnabled}
-    <p>Viser {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}</p>
+    <p>
+      Viser {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}
+    </p>
+
+    <p>
+      <pkt-checkbox
+        label="Inkludér bare fag der minst én elev er i fare"
+        aria-label="Inkludér bare fag der minst én elev er i fare"
+        labelPosition="right"
+        layout="horizontal"
+        checked={isOnlyRiskySubjectsEnabled}
+        onchange={() => (isOnlyRiskySubjectsEnabled = !isOnlyRiskySubjectsEnabled)}
+      ></pkt-checkbox>
+    </p>
+
+    {#if isCategoryOfRiskType}
+      <ButtonMini
+        options={{
+          title: 'Last ned CSV',
+          skin: 'primary',
+          iconName: 'download',
+          variant: 'icon-left',
+          classes: 'mb-3',
+          onClick: () => downloadStudentData(),
+        }}
+      >
+        Last ned CSV for dette utvalget
+      </ButtonMini>
+    {/if}
+
     <div class="scroll-mirror" bind:this={topScrollElement} onscroll={syncFromTop}>
       <div style="width: {gridScrollWidth}px; height: 1px;"></div>
     </div>
@@ -339,7 +491,8 @@
           Navn{getSortIndicator('name')}
         </span>
       </button>
-      {#each subjects as subject (subject.id)}
+
+      {#each filteredSubjects as subject (subject.id)}
         <button
           class="item header header-row sortable"
           onclick={() => handleHeaderClick(subject.id)}
@@ -357,7 +510,7 @@
           <UserNameLink user={student} />
         </span>
 
-        {#each subjects as subject}
+        {#each filteredSubjects as subject}
           {@const statuses = statusesByStudentIdAndSubjectId[`${student.id}:${subject.id}`]}
           {#if statuses?.length}
             <span class="item">
@@ -444,5 +597,25 @@
     );
     border: 1px solid var(--pkt-color-grays-gray-100);
     z-index: 2;
+  }
+
+  .group-count {
+    width: 3rem;
+  }
+
+  .fixed-layout {
+    table-layout: fixed;
+  }
+
+  .col-checkbox {
+    width: 2.5rem;
+  }
+
+  .col-label {
+    width: 40%;
+  }
+
+  .table-header {
+    text-align: left;
   }
 </style>

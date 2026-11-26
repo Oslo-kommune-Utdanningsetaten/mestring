@@ -73,6 +73,7 @@ export type MasterySchemaConfig = {
   isIncrementIndicatorEnabled?: boolean
   isMasteryValueVisible?: boolean
   isMasteryValueInputEnabled?: boolean
+  isSubjectTagsEnabled?: boolean
   isMasteryDescriptionInputEnabled?: boolean
   isFeedforwardInputEnabled?: boolean
 }

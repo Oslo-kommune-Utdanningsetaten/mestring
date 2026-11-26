@@ -85,9 +85,7 @@
     <div class="d-flex align-items-center">
       <Link
         className="navbar-brand d-flex align-items-center"
-        to={$hasUserAccessToPath('/admin/schools/:schoolId')
-          ? `/admin/schools/${$currentSchool?.id}`
-          : '/'}
+        to={$hasUserAccessToPath('/admin/school-settings') ? '/admin/school-settings' : '/'}
       >
         <!-- Mestring icon -->
         <span class="goal-icon-wrapper me-3">
@@ -167,6 +165,23 @@
                     </Link>
                   </li>
                 {/if}
+                {#if $hasUserAccessToPath('/title-collections')}
+                  <li class="nav-item">
+                    <Link to="/title-collections" className="dropdown-item">
+                      {t('titleRepository', { form: 'sin-indef', capitalize: true })}
+                    </Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/mastery-schemas')}
+                  <li>
+                    <Link to="/mastery-schemas" className="dropdown-item">Mestringsskjemaer</Link>
+                  </li>
+                {/if}
+                {#if $hasUserAccessToPath('/status-categories')}
+                  <li>
+                    <Link to="/status-categories" className="dropdown-item">Statuskategorier</Link>
+                  </li>
+                {/if}
                 {#if $hasUserAccessToPath('/stats')}
                   <li>
                     <Link to="/stats" className="dropdown-item">Statistikk</Link>
@@ -209,21 +224,6 @@
                 {#if $hasUserAccessToPath('/admin/subjects')}
                   <li>
                     <Link to="/admin/subjects" className="dropdown-item">Fag</Link>
-                  </li>
-                {/if}
-                {#if $hasUserAccessToPath('/admin/status-categories')}
-                  <li>
-                    <Link to="/admin/status-categories" className="dropdown-item">
-                      Statuskategorier
-                    </Link>
-                  </li>
-                {/if}
-
-                {#if $hasUserAccessToPath('/admin/mastery-schemas')}
-                  <li>
-                    <Link to="/admin/mastery-schemas" className="dropdown-item">
-                      Mestringsskjemaer
-                    </Link>
                   </li>
                 {/if}
 
@@ -292,15 +292,19 @@
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownProfile">
                 <li class="profile-menu-item">
                   <Link to="/profile" className="dropdown-item">Min side</Link>
-                  <pkt-checkbox
-                    class="admin-edit-toggle"
-                    label={isAdminEditEnabled ? 'EON' : 'EOFF'}
-                    labelPosition="left"
-                    isSwitch="true"
-                    checked={isAdminEditEnabled}
-                    onchange={() => handleAdminEditToggle()}
-                    title="Toggle admin edit mode"
-                  ></pkt-checkbox>
+                  {#if $currentUser.isSuperadmin}
+                    <pkt-checkbox
+                      class="admin-edit-toggle"
+                      label={isAdminEditEnabled ? 'EON' : 'EOFF'}
+                      labelPosition="left"
+                      isSwitch="true"
+                      checked={isAdminEditEnabled}
+                      onchange={() => handleAdminEditToggle()}
+                      title="{isAdminEditEnabled
+                        ? 'Disable'
+                        : 'Enable'} edit despite mismatch between selected and current year"
+                    ></pkt-checkbox>
+                  {/if}
                 </li>
                 <li>
                   <Link to="/" className="dropdown-item" onclick={logout}>Logg ut</Link>

@@ -11,14 +11,21 @@
   import AuthorInfo from './AuthorInfo.svelte'
   import MasterySchemaLevels from './MasterySchemaLevels.svelte'
   import Link from './Link.svelte'
+  import TagsView from './TagsView.svelte'
 
-  const { student, goal, observation, masteryTitle, onDone } = $props<{
-    student: UserType | null
-    goal: GoalType | null
-    observation: ObservationType | {} | null
+  const {
+    student,
+    goal,
+    observation,
+    masteryTitle,
+    onDone,
+  }: {
+    student: UserType
+    goal: GoalType
+    observation: ObservationType
     masteryTitle?: string
     onDone: () => void
-  }>()
+  } = $props()
 
   const isObservationUrlEnabled = localStorage<boolean>('isObservationUrlEnabled')
 
@@ -64,7 +71,7 @@
 
     <hr />
 
-    <div class="form-group mb-5">
+    <div class="mb-5">
       <h4 class="mb-3">Mestring</h4>
       {#if masterySchema?.config?.isMasteryValueVisible}
         <MasteryValueInput
@@ -78,22 +85,29 @@
       {/if}
     </div>
 
+    {#if masterySchema?.config?.isSubjectTagsEnabled}
+      <div class="mb-5">
+        <h4 class="mb-3">Tags</h4>
+        <TagsView tags={(localObservation?.tags || []) as string[]} />
+      </div>
+    {/if}
+
     {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
-      <div class="form-group mb-4">
+      <div class="mb-5">
         <h4 class="mb-3">Beskrivelse/tilbakemelding</h4>
         <p>{localObservation.masteryDescription || 'Ingen beskrivelse'}</p>
       </div>
     {/if}
 
     {#if masterySchema?.config?.isFeedforwardInputEnabled}
-      <div class="form-group mb-4">
+      <div class="mb-5">
         <h4 class="mb-3">Fremovermelding</h4>
         <p>{localObservation.feedforward || 'Ingen fremovermelding'}</p>
       </div>
     {/if}
 
     {#if $isObservationUrlEnabled}
-      <div class="form-group mb-4">
+      <div class="mb-5">
         <h4 class="mb-3">Lenke</h4>
         <p>
           {#if localObservation.productUrl}

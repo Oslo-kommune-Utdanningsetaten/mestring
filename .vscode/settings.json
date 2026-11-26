@@ -12,5 +12,7 @@
     "editor.defaultFormatter": "ms-python.autopep8"
   },
   "autopep8.args": ["--max-line-length", "110", "--experimental"],
-  "github.copilot.chat.codesearch.enabled": true
+  "github.copilot.chat.codesearch.enabled": true,
+  "chat.agent.sandbox.fileSystem.allowDevToolAccess": false,
+  "python-envs.defaultEnvManager": "ms-python.python:system"
 }

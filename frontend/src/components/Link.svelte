@@ -5,7 +5,7 @@
   import { trackPageView } from '../stores/analytics'
   import type { Snippet } from 'svelte'
 
-  const { to, title, className, classes, iconName, children, onclick } = $props<{
+  const { to, title, className, classes, iconName, children, onclick } : {
     to: string
     title?: string
     className?: string
@@ -13,7 +13,7 @@
     iconName?: string
     onclick?: (event: MouseEvent) => void
     children?: Snippet
-  }>()
+  } = $props()
 
   const isExternal = $derived(to.startsWith('http'))
   const iconClasses = $derived(classes || className)

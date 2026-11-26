@@ -48,10 +48,11 @@ export enum USER_ROLES {
 }
 
 export enum MASTERY_BADGE_VARIANTS {
-  SMILEY = 'smiley',
-  CIRCLE = 'circle',
-  TRIANGLE = 'triangle',
+  NONE = 'none',
   BEEHIVE = 'beehive',
+  TRIANGLE = 'triangle',
+  CIRCLE = 'circle',
+  SMILEY = 'smiley',
 }
 
 // Options for filtering groups by date validity
@@ -81,10 +82,11 @@ export enum SUBJECT_OWNERSHIP_OPTIONS {
   ONLY_SCHOOL_OWNED = 'only-school-owned',
 }
 
-export const STATUS_CATEGORY_NAMES: Record<string, string> = {
+export const STATUS_CATEGORY_TITLE_BY_NAME: Record<string, string> = {
   midyear: 'Halvtår',
   endyear: 'Standpunkt',
-  risk: 'Midtveisrapportering',
+  'risk-autumn': 'Midtveisrapportering, høst',
+  'risk-spring': 'Midtveisrapportering, vår',
 }
 
 export enum VALUE_INPUT_VARIANT {

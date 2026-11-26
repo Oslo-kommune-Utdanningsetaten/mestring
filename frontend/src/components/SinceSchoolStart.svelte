@@ -1,7 +1,7 @@
 <script lang="ts">
-  const { dateAsString } = $props<{
+  const { dateAsString } : {
     dateAsString?: string
-  }>()
+  } = $props()
 
   const distanceInPercentSinceLastAugust = () => {
     const now = new Date()

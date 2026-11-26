@@ -682,6 +682,45 @@ def test_status_filtering_by_students(
 
 
 @pytest.mark.django_db
+def test_status_filtering_by_groups(
+        school, school_admin, other_student, subject_with_group, teaching_group_with_members,
+        other_teaching_group_with_members, teaching_group_without_members, status_at_school):
+    """
+    Test that filtering by groups parameter works correctly.
+    """
+    client = APIClient()
+    client.force_authenticate(user=school_admin)
+
+    other_status = Status.objects.create(
+        student=other_student,
+        subject=subject_with_group,
+        school=school,
+        begin_at=thirty_days_ago,
+        end_at=two_days_ago,
+    )
+
+    # Filter by single group
+    resp = client.get("/api/status/", {"school": school.id, "groups": teaching_group_with_members.id})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["id"] == status_at_school.id
+
+    # Filter by multiple groups
+    resp = client.get("/api/status/", {
+        "school": school.id,
+        "groups": f"{teaching_group_with_members.id},{other_teaching_group_with_members.id}"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert {s["id"] for s in data} == {status_at_school.id, other_status.id}
+
+    # Group without students gives no statuses
+    resp = client.get("/api/status/", {"school": school.id, "groups": teaching_group_without_members.id})
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+@pytest.mark.django_db
 def test_status_filtering_by_subject(
         school, school_admin, student, subject_with_group, subject_owned_by_school,
         status_at_school):

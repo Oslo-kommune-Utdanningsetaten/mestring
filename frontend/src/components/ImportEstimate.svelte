@@ -1,10 +1,10 @@
 <script lang="ts">
   import ButtonMini from './ButtonMini.svelte'
 
-  const { data, onDone } = $props<{
+  const { data, onDone } : {
     data: Record<string, unknown>
     onDone: () => void
-  }>()
+  } = $props()
 
   let dataType = $derived.by(() => {
     if (data.hasOwnProperty('newGroups')) return 'groups'

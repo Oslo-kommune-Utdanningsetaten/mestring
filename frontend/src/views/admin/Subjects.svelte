@@ -1,12 +1,12 @@
 <script lang="ts">
   import { useTinyRouter } from 'svelte-tiny-router'
   import '@oslokommune/punkt-elements/dist/pkt-icon.js'
-  import { subjectsDestroy, subjectsList, schoolsList, groupsList } from '../../generated/sdk.gen'
+  import { subjectsDestroy, subjectsList, groupsList } from '../../generated/sdk.gen'
   import type { SubjectType, SchoolType, GroupType } from '../../generated/types.gen'
 
   import { GROUP_DELETED_OPTIONS, SUBJECT_OWNERSHIP_OPTIONS } from '../../utils/constants'
   import { urlStringFrom } from '../../utils/functions'
-  import { dataStore } from '../../stores/data'
+  import { dataStore, currentSchool } from '../../stores/data'
   import {
     getAllSchoolYears,
     getCurrentSchoolYear,
@@ -24,7 +24,7 @@
   let subjects = $state<SubjectType[]>([])
   let subjectWip = $state<SubjectType | null>(null)
   let isSubjectEditorOpen = $state(false)
-  let schools = $state<SchoolType[]>([])
+
   let groupsBySubjectId = $state<Record<string, GroupType[]>>({})
   let nameFilter = $state<string>('')
   let selectedSubjectsFetchOption = $state<SUBJECT_OWNERSHIP_OPTIONS>(
@@ -53,11 +53,7 @@
     { value: GROUP_DELETED_OPTIONS.EXCLUDE, label: 'Not deleted' },
   ] as const
 
-  // Look up selected school based on URL parameter or use current school
-  let selectedSchool = $derived.by(() => {
-    const schoolIdFromUrl = router.getQueryParam('school')
-    return schools.find(s => s.id === schoolIdFromUrl) || $dataStore.currentSchool
-  })
+  let school = $derived<SchoolType>($currentSchool)
 
   // Options for filtering by groups by date validity
   const createdOptions = $derived.by(() => {
@@ -74,7 +70,7 @@
 
   let subjectsQueryOptions = $derived.by(() => {
     const options: any = {
-      school: selectedSchool.id,
+      school: school.id,
       deleted: selectedDeletedOption,
       schoolYear: 'all',
       ...inferCreatedParams(selectedYearOption),
@@ -94,7 +90,7 @@
   )
 
   let headerText = $derived.by(() => {
-    let text = selectedSchool ? `Fag ved ${selectedSchool.displayName}` : 'Alle fag'
+    let text = `Fag ved ${school.displayName}`
     text = nameFilter ? `${text} som matcher "${nameFilter}"` : text
     return text
   })
@@ -102,25 +98,15 @@
   const getGroupsQueryOptions: any = (subjectId: string) => {
     return {
       subject: subjectId,
-      school: selectedSchool.id,
+      school: school.id,
       deleted: 'all',
       ...inferCreatedParams(selectedYearOption),
       ...inferGroupValidityParams(selectedYearOption),
     }
   }
 
-  const fetchSchools = async () => {
-    try {
-      const result = await schoolsList({})
-      schools = result.data || []
-    } catch (error) {
-      console.error('Error fetching schools:', error)
-      schools = []
-    }
-  }
-
   const fetchGroups = async (subjectId: string) => {
-    if (!selectedSchool) return
+    if (!school) return
     if (Object.hasOwn(groupsBySubjectId, subjectId)) return
     groupsBySubjectId[subjectId] = []
     try {
@@ -132,7 +118,7 @@
   }
 
   const fetchSubjects = async () => {
-    if (!selectedSchool) return
+    if (!school) return
     try {
       const result = await subjectsList({ query: subjectsQueryOptions })
       subjects = (result.data || []).sort((a, b) =>
@@ -146,16 +132,6 @@
     }
   }
 
-  const handleSchoolSelect = (schoolId: string): void => {
-    if (schoolId && schoolId !== '0') {
-      router.navigate(
-        urlStringFrom({ school: schoolId }, { path: '/admin/subjects', mode: 'merge' })
-      )
-    } else {
-      router.navigate('/admin/subjects')
-    }
-  }
-
   const closeEditor = () => {
     isSubjectEditorOpen = false
   }
@@ -164,7 +140,7 @@
     if (subject?.id) {
       subjectWip = { ...subject }
     } else {
-      subjectWip = { ownedBySchoolId: selectedSchool?.id } as SubjectType
+      subjectWip = { ownedBySchoolId: school?.id } as SubjectType
     }
     isSubjectEditorOpen = true
   }
@@ -182,11 +158,7 @@
   }
 
   $effect(() => {
-    fetchSchools()
-  })
-
-  $effect(() => {
-    if (selectedSchool) {
+    if (school) {
       fetchSubjects()
     }
   })
@@ -227,22 +199,7 @@
 
 <section class="pt-3">
   <h2 class="py-3">{headerText}</h2>
-  <!-- Filter groups -->
   <div class="filters-container mt-3">
-    <div class="filter-item">
-      <label for="schoolSelect" class="mb-1 visually-hidden">Filtrer på skole:</label>
-      <select
-        class="pkt-input"
-        id="schoolSelect"
-        onchange={(e: Event) => handleSchoolSelect((e.target as HTMLSelectElement).value)}
-      >
-        {#each schools as school}
-          <option value={school.id} selected={school.id === selectedSchool?.id}>
-            {school.displayName}
-          </option>
-        {/each}
-      </select>
-    </div>
     <div class="filter-item">
       <label for="subjectFilterInput" class="mb-1 visually-hidden">Filtrer på navn:</label>
       <input
@@ -341,7 +298,7 @@
         <!-- Eies av -->
         <span class="item">
           {#if subject.ownedBySchoolId}
-            {schools.find(s => s.id === subject.ownedBySchoolId)?.displayName}
+            {school.displayName}
           {:else}
             <span class="fst-italic">Globalt</span>
           {/if}
@@ -397,8 +354,8 @@
     fetchSubjects()
   }}
 >
-  {#if subjectWip && selectedSchool}
-    <SubjectEdit subject={subjectWip} school={selectedSchool} onDone={closeEditor} />
+  {#if subjectWip && school}
+    <SubjectEdit subject={subjectWip} onDone={closeEditor} />
   {/if}
 </Offcanvas>
 

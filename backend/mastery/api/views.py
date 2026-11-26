@@ -6,9 +6,10 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
 from rest_access_policy import AccessViewSetMixin
-from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy, StatusAccessPolicy, StatusCategoryAccessPolicy
+from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy, StatusAccessPolicy, StatusCategoryAccessPolicy, TagCollectionAccessPolicy, TitleCollectionAccessPolicy
 from .api_functions import get_request_param
 from .school_year_functions import calculate_school_year_utc_range
+from ..constants import GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING
 import logging
 
 logger = logging.getLogger(__name__)
@@ -750,8 +751,22 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
+                name='individual',
+                description='Filter goals by whether they are individual: "only" (only individual goals), "exclude" (only group goals), "include" (default, both individual and group goals)',
+                required=False,
+                type={'type': 'string', 'enum': ['only', 'exclude', 'include']},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='return_fields',
+                description='Only return these fields from goal objects (comma-separated list of field names). Cannot be used together with include_observations.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='include_observations',
-                description='Include related observations in the response',
+                description='Include related observations in the response. Cannot be used together with return_fields.',
                 required=False,
                 type={'type': 'boolean'},
                 location=OpenApiParameter.QUERY
@@ -769,6 +784,15 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
     ordering = ['sort_order']
     access_policy = GoalAccessPolicy
 
+    # Override get_serializer to support dynamic return fields for list action
+    def get_serializer(self, *args, **kwargs):
+        return_fields_param, _ = get_request_param(self.request.query_params, 'return_fields')
+        if self.action == 'list' and return_fields_param:
+            kwargs['return_fields'] = [f.strip() for f in return_fields_param.split(',') if f.strip()]
+            kwargs.setdefault('context', self.get_serializer_context())
+            return serializers.DynamicGoalSerializer(*args, **kwargs)
+        return super().get_serializer(*args, **kwargs)
+
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('sort_order')
         qs = apply_deleted_filter(self.request.query_params, qs)
@@ -779,21 +803,29 @@ class GoalViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVie
             group_param, _ = get_request_param(self.request.query_params, 'group')
             student_param, _ = get_request_param(self.request.query_params, 'student')
             subject_param, _ = get_request_param(self.request.query_params, 'subject')
+            individual_param, _ = get_request_param(self.request.query_params, 'individual')
+            return_fields_param, _ = get_request_param(self.request.query_params, 'return_fields')
             include_observations_param, _ = get_request_param(
                 self.request.query_params, 'include_observations')
 
-            if (not school_param) and (not student_param) and (not subject_param) and (not group_param):
+            if (not school_param):
                 raise ValidationError(
                     {'error': 'missing-parameter',
-                     'message': 'At least one of "school", "subject", "group" or "student" parameters are required.'})
+                     'message': 'The "school" parameter is required.'})
 
-            if (group_param and subject_param):
+            if (return_fields_param and include_observations_param):
                 raise ValidationError(
-                    {'error': 'wrong-parameter',
-                     'message':
-                     'group and subject parameters cannot be used together (goals are either individual or group).'})
+                    {'error': 'invalid-parameter',
+                     'message': 'The "return_fields" and "include_observations" parameters are mutually exclusive.'})
 
             qs = qs.filter(school_id=school_param)
+
+            if individual_param == 'only':
+                # only individual goals
+                qs = qs.filter(student_id__isnull=False, group_id__isnull=True)
+            elif individual_param == 'exclude':
+                # only group goals
+                qs = qs.filter(student_id__isnull=True, group_id__isnull=False)
 
             if group_param:
                 qs = qs.filter(group_id=group_param)
@@ -881,10 +913,12 @@ class MasterySchemaViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets
     def get_queryset(self):
         qs = self.access_policy().scope_queryset(self.request, super().get_queryset()).order_by('title')
         qs = apply_created_filter(self.request.query_params, qs)
+
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
             if school_param:
                 qs = qs.filter(school_id=school_param)
+
         return qs
 
 
@@ -979,10 +1013,17 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
             from_param, _ = get_request_param(self.request.query_params, 'from')
             to_param, _ = get_request_param(self.request.query_params, 'to')
 
+            if not school_param:
+                raise ValidationError(
+                    {'error': 'missing-parameter',
+                     'message': 'The "school" parameter is required.'})
+
             if (not student_param) and (not creator_param) and (not goal_param) and (not group_param) and (not school_param):
                 raise ValidationError(
                     {'error': 'missing-parameter',
                      'message': 'At least one of "student", "created_by", "group" or "goal" parameters are required.'})
+
+            qs = qs.filter(goal__school_id=school_param)
 
             if student_param:
                 qs = qs.filter(
@@ -994,12 +1035,10 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
                 qs = qs.filter(goal_id=goal_param)
             if subject_param:
                 qs = qs.filter(subject_id=subject_param)
-            if school_param:
-                qs = qs.filter(goal__school_id=school_param)
             if group_param:
                 group = models.Group.objects.filter(
                     id=group_param, deleted_at__isnull=True, is_enabled=True).first()
-                if group and group.type == 'basis':
+                if group and group.type == GROUP_TYPE_BASIS:
                     # For basis groups, include observations for student members of the group
                     user_groups = models.UserGroup.objects.filter(
                         group_id=group_param,
@@ -1011,12 +1050,12 @@ class ObservationViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.M
                     qs = qs.filter(
                         Q(student_id__in=user_groups.values_list('user_id', flat=True))
                     )
-                elif group and group.type == 'teaching':
+                elif group and group.type == GROUP_TYPE_TEACHING:
                     # For teaching group, include observations which belong to the groups subject (either via goal->group or directly on the observation)
-                    qs = qs.filter(
-                        Q(goal__group__id=group_param) |
-                        Q(subject_id=group.subject_id)
-                    )
+                    group_filter = Q(goal__group__id=group_param)
+                    if group.subject_id:
+                        group_filter |= Q(subject_id=group.subject_id)
+                    qs = qs.filter(group_filter)
             if from_param:
                 try:
                     from_date = datetime.fromisoformat(from_param).date()
@@ -1084,7 +1123,7 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
             ),
             OpenApiParameter(
                 name='students',
-                description='Filter statuses by students.',
+                description='Filter statuses by students. Comma-separated list of student IDs.',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
@@ -1097,8 +1136,8 @@ class DataMaintenanceTaskViewSet(FingerprintViewSetMixin, AccessViewSetMixin, vi
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
-                name='group',
-                description='Filter statuses by students in group.',
+                name='groups',
+                description='Filter statuses by students in groups. Comma-separated list of group IDs.',
                 required=False,
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
@@ -1135,7 +1174,7 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
             students_param, _ = get_request_param(self.request.query_params, 'students')
             school_param, _ = get_request_param(self.request.query_params, 'school')
             subject_param, is_subject_set = get_request_param(self.request.query_params, 'subject')
-            group_param, _ = get_request_param(self.request.query_params, 'group')
+            groups_param, _ = get_request_param(self.request.query_params, 'groups')
             editor_param, _ = get_request_param(self.request.query_params, 'editor')
             category_name_param, _ = get_request_param(self.request.query_params, 'category_name')
 
@@ -1150,12 +1189,12 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
                 if student_ids:
                     qs = qs.filter(student_id__in=student_ids)
 
-            if group_param:
+            if groups_param:
+                group_ids = [group_id.strip() for group_id in groups_param.split(',') if group_id]
                 student_ids = models.UserGroup.objects.filter(
-                    group_id=group_param, role__name='student', deleted_at__isnull=True).values_list(
+                    group_id__in=group_ids, role__name='student', deleted_at__isnull=True).values_list(
                     'user_id', flat=True)
-                if student_ids:
-                    qs = qs.filter(student_id__in=student_ids)
+                qs = qs.filter(student_id__in=student_ids)
 
             if is_subject_set:
                 if subject_param:
@@ -1190,6 +1229,20 @@ class StatusViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelV
                 type={'type': 'string'},
                 location=OpenApiParameter.QUERY
             ),
+            OpenApiParameter(
+                name='open_from',
+                description='Filter by open_from timestamp. Only return rows open from this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='open_to',
+                description='Filter by open_to timestamp. Only return rows open to this timestamp (ISO 8601 format) e.g. 2025-10-30 or 2025-10-30T14:30:00',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
             DELETED_FILTER_PARAMETER,
             *CREATED_RANGE_PARAMETERS,
         ]
@@ -1208,6 +1261,8 @@ class StatusCategoryViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewset
         if self.action == 'list':
             school_param, _ = get_request_param(self.request.query_params, 'school')
             name_param, _ = get_request_param(self.request.query_params, 'name')
+            open_from_param, _ = get_request_param(self.request.query_params, 'open_from')
+            open_to_param, _ = get_request_param(self.request.query_params, 'open_to')
 
             if not school_param:
                 raise ValidationError({'error': 'missing-parameter',
@@ -1217,6 +1272,99 @@ class StatusCategoryViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewset
 
             if name_param:
                 qs = qs.filter(name=name_param)
+
+            if open_from_param:
+                qs = qs.filter(open_from__gte=open_from_param)
+
+            if open_to_param:
+                qs = qs.filter(open_to__lte=open_to_param)
+
+        # non-list actions (retrieve, create, update, destroy) do not require parameters
+        return qs
+
+
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='school',
+                description='Filter tag_collections by school.',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
+                name='subject',
+                description='Filter tag_collections by subject.',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            DELETED_FILTER_PARAMETER,
+            *CREATED_RANGE_PARAMETERS,
+        ]
+    )
+)
+class TagCollectionViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
+    queryset = models.TagCollection.objects.all()
+    serializer_class = serializers.TagCollectionSerializer
+    access_policy = TagCollectionAccessPolicy
+
+    def get_queryset(self):
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = apply_deleted_filter(self.request.query_params, qs)
+        qs = apply_created_filter(self.request.query_params, qs)
+
+        if self.action == 'list':
+            school_param, _ = get_request_param(self.request.query_params, 'school')
+            subject_param, _ = get_request_param(self.request.query_params, 'subject')
+
+            if not school_param:
+                raise ValidationError({'error': 'missing-parameter',
+                                      'message': 'The "school" parameter is required.'})
+
+            qs = qs.filter(school_id=school_param)
+
+            if subject_param:
+                qs = qs.filter(subject_id=subject_param)
+
+        # non-list actions (retrieve, create, update, destroy) do not require parameters
+        return qs
+
+
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='school',
+                description='Filter title_collections by school.',
+                required=True,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            DELETED_FILTER_PARAMETER,
+            *CREATED_RANGE_PARAMETERS,
+        ]
+    )
+)
+class TitleCollectionViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelViewSet):
+    queryset = models.TitleCollection.objects.all()
+    serializer_class = serializers.TitleCollectionSerializer
+    access_policy = TitleCollectionAccessPolicy
+
+    def get_queryset(self):
+        qs = self.access_policy().scope_queryset(self.request, super().get_queryset())
+        qs = apply_deleted_filter(self.request.query_params, qs)
+        qs = apply_created_filter(self.request.query_params, qs)
+
+        if self.action == 'list':
+            school_param, _ = get_request_param(self.request.query_params, 'school')
+
+            if not school_param:
+                raise ValidationError({'error': 'missing-parameter',
+                                      'message': 'The "school" parameter is required.'})
+
+            qs = qs.filter(school_id=school_param)
 
         # non-list actions (retrieve, create, update, destroy) do not require parameters
         return qs

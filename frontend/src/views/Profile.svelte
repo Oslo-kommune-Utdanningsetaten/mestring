@@ -1,48 +1,24 @@
 <script lang="ts">
-  import '@oslokommune/punkt-elements/dist/pkt-radiobutton.js'
   import { usersRetrieve } from '../generated/sdk.gen'
-  import type { GroupType, SchoolType } from '../generated/types.gen'
+  import type { GroupType } from '../generated/types.gen'
   import type { UserRoleType, UserDecorated } from '../types/models'
-  import {
-    getPreferredGroupValidity,
-    getPreferredMasteryBadgeVariant,
-  } from '../stores/localStorageFunctions'
   import { dataStore, currentUser } from '../stores/data'
   import { localStorage } from '../stores/localStorage'
-  import { hasUserAccessToPath } from '../stores/access'
   import { t } from '../stores/translations'
-  import { USER_ROLES, MASTERY_BADGE_VARIANTS, GROUP_VALIDITY_OPTIONS } from '../utils/constants'
+  import { USER_ROLES } from '../utils/constants'
   import { fetchUserData } from '../utils/functions'
   import { getCurrentSchoolYear } from '../utils/schoolYear'
 
   import GroupTag from '../components/GroupTag.svelte'
-  import Link from '../components/Link.svelte'
   import SchoolSelector from '../components/SchoolSelector.svelte'
 
-  const { userId } = $props<{ userId?: string }>()
+  const { userId }: { userId?: string } = $props()
   const isProfileMode = $derived($currentUser.id && !userId)
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
   const isSubjectPolarChartVisible = localStorage<boolean>('isSubjectPolarChartVisible')
   const isObservationUrlEnabled = localStorage<boolean>('isObservationUrlEnabled')
   const isHistoryVisibleOnMasteryInput = localStorage<boolean>('isHistoryVisibleOnMasteryInput')
-
-  let selectedGroupValidity = $state<GROUP_VALIDITY_OPTIONS>(getPreferredGroupValidity())
-
-  // Options for mastery badge variant selection
-  const badgeOptions = [
-    { value: MASTERY_BADGE_VARIANTS.BEEHIVE, label: 'Bikube' },
-    { value: MASTERY_BADGE_VARIANTS.CIRCLE, label: 'Sirkel' },
-    { value: MASTERY_BADGE_VARIANTS.TRIANGLE, label: 'Trekant' },
-    { value: MASTERY_BADGE_VARIANTS.SMILEY, label: 'Smiley' },
-  ] as const
-
-  // Options for filtering by groups by date validity
-  const groupValidityOptions = [
-    { value: GROUP_VALIDITY_OPTIONS.INCLUDE, label: 'Alle grupper' },
-    { value: GROUP_VALIDITY_OPTIONS.ONLY, label: 'Kun gyldige grupper' },
-    { value: GROUP_VALIDITY_OPTIONS.EXCLUDE, label: 'Kun ugyldige grupper' },
-  ] as const
 
   // For admin viewing another user's profile
   let otherUser = $state<UserDecorated | undefined>(undefined)
@@ -110,12 +86,6 @@
     ].filter(Boolean) as UserRoleType[]
   }
 
-  const handleSelectSchool = (school: SchoolType) => {
-    // set localStorage and reload, which in turn will trigger dataStore to update with school-specific data
-    localStorage<SchoolType>('currentSchool').set(school)
-    window.location.reload()
-  }
-
   const handleToggleMasteryBarChart = () =>
     isMasteryBarChartVisible.set(!isMasteryBarChartVisible.get())
 
@@ -127,31 +97,6 @@
 
   const handleToggleHistoryVisibleOnMasteryInput = () =>
     isHistoryVisibleOnMasteryInput.set(!isHistoryVisibleOnMasteryInput.get())
-
-  const handleSelectBadgeVariant = (variant: MASTERY_BADGE_VARIANTS) =>
-    localStorage('preferredMasteryBadgeVariant').set(variant)
-
-  const handleSelectGroupValidity = (validity: GROUP_VALIDITY_OPTIONS) => {
-    localStorage('preferredGroupValidity').set(validity)
-    selectedGroupValidity = getPreferredGroupValidity()
-  }
-
-  // When school year is changed by user, also update the group validity (not the other way)
-  const handleSelectSchoolYear = (schoolYear: string) => {
-    localStorage('preferredSchoolYear').set(schoolYear)
-    if (schoolYear === 'all') {
-      // All years selected --> include all groups regardless of validity
-      localStorage('preferredGroupValidity').set(GROUP_VALIDITY_OPTIONS.INCLUDE)
-    } else if (schoolYear === getCurrentSchoolYear()) {
-      // Current year selected --> only include valid groups
-      localStorage('preferredGroupValidity').set(GROUP_VALIDITY_OPTIONS.ONLY)
-    } else {
-      // Past year selected --> only include invalid groups
-      localStorage('preferredGroupValidity').set(GROUP_VALIDITY_OPTIONS.EXCLUDE)
-    }
-    // Update local state
-    selectedGroupValidity = getPreferredGroupValidity()
-  }
 
   $effect(() => {
     // Only load data when viewing another user's profile (admin mode)
@@ -251,47 +196,6 @@
               checked={$isHistoryVisibleOnMasteryInput}
               onchange={() => handleToggleHistoryVisibleOnMasteryInput()}
             ></pkt-checkbox>
-          </div>
-
-          <div class="mb-4">
-            <strong>Mestringsmerke</strong>
-            {#if $hasUserAccessToPath('/dev/badge-lab')}
-              <span class="text-muted">
-                - [<Link to="/dev/badge-lab">kan testes her</Link>]
-              </span>
-            {/if}
-            <fieldset class="d-flex flex-wrap gap-4 mt-2">
-              <legend class="visually-hidden">Velg type mestringsmerke</legend>
-              {#each badgeOptions as option}
-                <pkt-radiobutton
-                  name="preferredMasteryBadgeVariant"
-                  value={option.value}
-                  label={option.label}
-                  checked={getPreferredMasteryBadgeVariant() === option.value}
-                  onchange={() => handleSelectBadgeVariant(option.value)}
-                ></pkt-radiobutton>
-              {/each}
-            </fieldset>
-          </div>
-
-          <div class="mb-2">
-            <strong>Gruppers gyldighet (på dato fra Feide)</strong>
-            <fieldset class="d-flex flex-wrap gap-4 mt-2">
-              <legend class="visually-hidden">Velg hvilke grupper som vises</legend>
-              {#each groupValidityOptions as option}
-                {#key selectedGroupValidity + option.value}
-                  <pkt-radiobutton
-                    name="preferredGroupValidity"
-                    value={option.value}
-                    label={option.label}
-                    checked={selectedGroupValidity === option.value}
-                    onchange={() => handleSelectGroupValidity(option.value)}
-                    disabled={!$currentUser?.isSuperadmin}
-                    id={'preferredGroupValidity-' + option.value}
-                  ></pkt-radiobutton>
-                {/key}
-              {/each}
-            </fieldset>
           </div>
         </div>
       </div>

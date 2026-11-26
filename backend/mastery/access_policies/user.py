@@ -1,6 +1,7 @@
 from .base import BaseAccessPolicy
 from django.db.models import Q
-from mastery.models import User, UserSchool, School
+from mastery.models import User, UserSchool
+from mastery.constants import ROLE_NAME_TEACHER, ROLE_NAME_ADMIN, ROLE_NAME_INSPECTOR
 
 
 class UserAccessPolicy(BaseAccessPolicy):
@@ -32,13 +33,13 @@ class UserAccessPolicy(BaseAccessPolicy):
 
             # All schools where requester is admin or inspector
             school_employee_ids = UserSchool.objects.filter(
-                user_id=requester.id, role__name__in=["admin", "inspector"]
+                user_id=requester.id, role__name__in=[ROLE_NAME_ADMIN, ROLE_NAME_INSPECTOR]
             ).values_list("school_id", flat=True).distinct()
 
             # All teacher user IDs from schools the requester is member of
             teacher_ids = User.objects.filter(
                 user_groups__group__school__in=requester.get_schools(),
-                user_groups__role__name='teacher'
+                user_groups__role__name=ROLE_NAME_TEACHER
             ).values_list('id', flat=True)
 
             filters = Q(id=requester.id)  # Always include self

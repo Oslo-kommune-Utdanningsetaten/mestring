@@ -8,6 +8,7 @@ import GroupsCompare from '../views/GroupsCompare.svelte'
 import Students from '../views/Students.svelte'
 import Status from '../views/Status.svelte'
 import Profile from '../views/Profile.svelte'
+import Subject from '../views/Subject.svelte'
 
 // Admin views
 import Users from '../views/admin/Users.svelte'
@@ -23,10 +24,10 @@ import Translations from '../views/admin/Translations.svelte'
 import UsersByRole from '../views/UsersByRole.svelte'
 import StatusCategories from '../views/admin/StatusCategories.svelte'
 import StatusesEdit from '../views/StatusesEdit.svelte'
+import TitleCollection from '../views/TitleCollection.svelte'
 
 // Dev views
 import BadgeLab from '../dev/BadgeLab.svelte'
-import MasterySchemaLab from '../dev/MasterySchemaLab.svelte'
 
 import { USER_ROLES } from './constants'
 
@@ -60,6 +61,12 @@ export const ROUTES = [
   {
     path: '/groups/:groupId',
     component: Group,
+    isPublic: false,
+    accessibleBy: allRoles,
+  },
+  {
+    path: '/subjects/:subjectId',
+    component: Subject,
     isPublic: false,
     accessibleBy: allRoles,
   },
@@ -121,13 +128,11 @@ export const ROUTES = [
     path: '/students',
     component: Students,
     isPublic: false,
-    accessibleBy: [
-      USER_ROLES.TEACHER,
-      USER_ROLES.INSPECTOR,
-      USER_ROLES.ADMIN,
-      USER_ROLES.SUPERADMIN,
-    ],
-    schoolConfig: 'isStudentListEnabled', // grant teacher access to this path if school has student list enabled
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+    conditionalAccess: {
+      roles: [USER_ROLES.TEACHER],
+      schoolConfig: 'isStudentListEnabled',
+    },
   },
   {
     path: '/groups-compare',
@@ -153,6 +158,35 @@ export const ROUTES = [
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },
   {
+    path: '/mastery-schemas',
+    component: MasterySchemas,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+  },
+  // these two routes end up the same place for now
+  {
+    path: '/title-collections',
+    component: TitleCollection,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+  },
+  {
+    path: '/title-collections/:titleCollectionId',
+    component: TitleCollection,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
+  },
+  {
+    path: '/status-categories',
+    component: StatusCategories,
+    isPublic: false,
+    accessibleBy: [USER_ROLES.SUPERADMIN],
+    conditionalAccess: {
+      roles: [USER_ROLES.ADMIN],
+      schoolConfig: 'isStatusEnabled',
+    },
+  },
+  {
     path: '/admin',
     component: undefined, // placeholder, as we just check for access to the admin menu
     isPublic: false,
@@ -173,18 +207,6 @@ export const ROUTES = [
   {
     path: '/admin/subjects',
     component: Subjects,
-    isPublic: false,
-    accessibleBy: [USER_ROLES.SUPERADMIN],
-  },
-  {
-    path: '/admin/status-categories',
-    component: StatusCategories,
-    isPublic: false,
-    accessibleBy: [USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
-  },
-  {
-    path: '/admin/mastery-schemas',
-    component: MasterySchemas,
     isPublic: false,
     accessibleBy: [USER_ROLES.SUPERADMIN],
   },
@@ -213,7 +235,7 @@ export const ROUTES = [
     accessibleBy: [USER_ROLES.SUPERADMIN],
   },
   {
-    path: '/admin/schools/:schoolId',
+    path: '/admin/school-settings',
     component: School,
     isPublic: false,
     accessibleBy: [USER_ROLES.SUPERADMIN],
@@ -221,12 +243,6 @@ export const ROUTES = [
   {
     path: '/dev/badge-lab',
     component: BadgeLab,
-    isPublic: false,
-    accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
-  },
-  {
-    path: '/dev/mastery-schema-lab',
-    component: MasterySchemaLab,
     isPublic: false,
     accessibleBy: [USER_ROLES.INSPECTOR, USER_ROLES.ADMIN, USER_ROLES.SUPERADMIN],
   },

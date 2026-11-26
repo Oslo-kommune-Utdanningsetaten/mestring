@@ -1,9 +1,11 @@
 from django.utils import timezone
 from django.db import models
 from django.db.models import Q
+from django.contrib.postgres.fields import ArrayField
 from nanoid import generate
 from .fields import PlainJSONField
 from .querysets import GroupQuerySet
+from .constants import GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, ROLE_NAME_TEACHER, ROLE_NAME_STUDENT
 
 ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
@@ -56,6 +58,8 @@ class School(BaseModel):
     # which subjects can be used: 'only-custom' (owned by school), 'only-feide', 'all'
     subjects_allowed = models.CharField(max_length=50, null=False, default='all')
     ui_translations = PlainJSONField(null=True)  # school-specific translations for the UI
+    # Which mastery badge variant is used for this school, 'none', 'smiley', 'circle', 'triangle', 'beehive'
+    mastery_badge_variant = models.CharField(max_length=50, null=False, default='beehive')
 
     def ensure_short_name(self, short_name):
         """Update short_name (used by import)"""
@@ -84,7 +88,7 @@ class School(BaseModel):
         """
         return User.objects.filter(
             user_groups__group__school=self,
-            user_groups__role__name='teacher'
+            user_groups__role__name=ROLE_NAME_TEACHER
         ).distinct()
 
     def set_employed_user(self, user, role):
@@ -178,22 +182,22 @@ class User(BaseModel):
     @property
     def student_groups(self):
         """Get all groups where user is a student"""
-        return self._get_groups_with_role('student')
+        return self._get_groups_with_role(ROLE_NAME_STUDENT)
 
     @property
     def teacher_groups(self):
         """Get all groups where user is a teacher"""
-        return self._get_groups_with_role('teacher')
+        return self._get_groups_with_role(ROLE_NAME_TEACHER)
 
     @property
     def basis_groups(self):
         """Get all basis groups where user is a member"""
-        return self._get_groups_of_type('basis')
+        return self._get_groups_of_type(GROUP_TYPE_BASIS)
 
     @property
     def teaching_groups(self):
         """Get all teaching groups where user is a member"""
-        return self._get_groups_of_type('teaching')
+        return self._get_groups_of_type(GROUP_TYPE_TEACHING)
 
     # Needed for DRF permissions
 
@@ -259,11 +263,11 @@ class Group(BaseModel):
 
     def get_students(self):
         """Get all students in this group"""
-        return self.get_members(role='student')
+        return self.get_members(role=ROLE_NAME_STUDENT)
 
     def get_teachers(self):
         """Get all teachers in this group"""
-        return self.get_members(role='teacher')
+        return self.get_members(role=ROLE_NAME_TEACHER)
 
     def add_member(self, user, role):
         """
@@ -360,8 +364,9 @@ class Goal(BaseModel):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                condition=models.Q(group__isnull=False) | models.Q(student__isnull=False),
-                name='goal_group_or_student'),]
+                condition=(models.Q(group__isnull=False, student__isnull=True) |
+                           models.Q(group__isnull=True, student__isnull=False)),
+                name='goal_group_xor_student'),]
 
     @property
     def is_individual(self):
@@ -385,6 +390,7 @@ class Observation(BaseModel):
     is_visible_to_student = models.BooleanField(default=True)
     # URL to the observed product (e.g., a document or project if any)
     product_url = models.URLField(max_length=2048, null=True)
+    tags = models.JSONField(null=True, blank=False)
 
     def save(self, **kwargs):
         # Auto-derive subject from goal if not explicitly set
@@ -397,17 +403,38 @@ class Observation(BaseModel):
         ordering = ["observed_at"]
 
 
+class TagCollection(BaseModel):
+    """
+    A TagCollection represents a collection of tags that may be applied to observations. Belongs to a school and a subject.
+    """
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='tag_collections')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE,
+                                null=False, related_name='tag_collections')
+    tags = models.JSONField(null=True, blank=False)
+
+
+class TitleCollection(BaseModel):
+    """
+    A TitleCollection represents a collection of strings that are used as autocomplete suggestions when entering titles (e.g. on goals). Belongs to a school. Later, possibly also with a subject or mastery schema.
+    """
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='title_collections')
+    titles = models.JSONField(null=True, blank=False)
+
+
 class StatusCategory(BaseModel):
     """
     A StatusCategory represents a category for a Status, e.g. 'halvtår', 'standpunt' etc. Let schools configure how they want to use Status.
     """
-    title = models.CharField(max_length=200, null=False)
-    name = models.CharField(max_length=200, null=False)  # e.g. 'midyear', 'endyear', 'risk'
+    name = models.CharField(
+        max_length=200, null=False)  # e.g. 'midyear', 'endyear', 'risk-1', 'risk-2' then use a lookup table in the frontend to display a title
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, related_name='status_categories')
     mastery_schema = models.ForeignKey(
         MasterySchema, on_delete=models.CASCADE, null=False, related_name='status_categories')
     is_subject_specific = models.BooleanField(default=True, null=False)  # status must be linked to a subject
+    # whether the status category appears for school admins
     is_enabled = models.BooleanField(default=False, null=False)
+    open_from = models.DateTimeField(null=True)  # when does this open for submitting connected statuses
+    open_to = models.DateTimeField(null=True)  # when does this close the submission of connected statuses
 
     class Meta:
         unique_together = ('name', 'school')

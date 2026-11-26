@@ -12,6 +12,7 @@
   import { t } from '../stores/translations'
 
   import Link from './Link.svelte'
+  import TagsView from './TagsView.svelte'
   import MasteryLevelBadge from './MasteryLevelBadge.svelte'
   import MasteryBarChart from './MasteryBarChart.svelte'
   import ButtonMini from './ButtonMini.svelte'
@@ -25,20 +26,26 @@
   import GoalWidgets from './edit/GoalWidgets.svelte'
   import StatusWidgets from './edit/StatusWidgets.svelte'
 
-  const { student, subject } = $props<{
+  const {
+    student,
+    subject,
+  }: {
     student: UserType
     subject: SubjectType
-  }>()
+  } = $props()
 
   const router = useTinyRouter()
 
-  let goalsForSubject = $state<GoalDecorated[]>([])
+  let goalsIndividual = $state<GoalDecorated[]>([])
+  let goalsGroup = $state<GoalDecorated[]>([])
   let goalsListElement = $state<HTMLElement | null>(null)
   let statusesKey = $state<number>(0) // key used to force re-render of Statuses component
   let chartKey = $state<number>(0) // key used to force re-render of StudentSubjectChart component when goals are updated
 
   let subjectName = $derived(subject ? getSubjectName(subject) : 'ukjent fag')
   let expandedGoalIds = $derived(router.getQueryParam('expanded')?.split(',') || [])
+  const hasAnyGoals = $derived(goalsIndividual.length + goalsGroup.length > 0)
+
   let sortableInstance: Sortable | null = null
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
@@ -49,12 +56,22 @@
   }
 
   const fetchGoals = async () => {
-    goalsForSubject = await fetchGoalsForSubjectAndStudent(
-      subject.id,
-      student.id,
-      $dataStore.currentSchool?.id!,
-      $dataStore.currentUser.allGroups
-    )
+    ;[goalsIndividual, goalsGroup] = await Promise.all([
+      fetchGoalsForSubjectAndStudent(
+        subject.id,
+        student.id,
+        $dataStore.currentSchool?.id!,
+        $dataStore.currentUser.allGroups,
+        { areOldGoalsIncluded: true, individual: 'only' }
+      ),
+      fetchGoalsForSubjectAndStudent(
+        subject.id,
+        student.id,
+        $dataStore.currentSchool?.id!,
+        $dataStore.currentUser.allGroups,
+        { areOldGoalsIncluded: false, individual: 'exclude' }
+      ),
+    ])
     chartKey++
   }
 
@@ -79,7 +96,8 @@
     const { oldIndex, newIndex } = event
     if (oldIndex === undefined || newIndex === undefined) return
 
-    const localGoals = [...goalsForSubject.filter(g => g.isIndividual)] // only individual goals are draggable
+    // only individual goals are draggable
+    const localGoals = [...goalsIndividual]
     // Remove moved goal and capture it
     const [movedGoal] = localGoals.splice(oldIndex, 1)
     // Insert moved goal at new index
@@ -175,7 +193,7 @@
     <div class="goal-primary-row">
       <!-- Drag handle -->
       <span class="item">
-        {#if goal.isIndividual && goalsForSubject.filter(g => g.isIndividual).length > 1}
+        {#if goal.isIndividual && goalsIndividual.length > 1}
           <ButtonMini
             options={{
               size: 'tiny',
@@ -249,25 +267,27 @@
     </div>
 
     {#if isExpanded}
-      <div class="goal-secondary-row">
+      <div class="goal-secondary-row pt-3">
         {#if goal.observations?.length}
-          <div class="student-observations-row mb-2">
-            <span>Når</span>
-            <span>Verdi</span>
-            <span>Handlinger</span>
-          </div>
+          {@const hasTags = goal.observations.some(
+            (obs: ObservationType) => ((obs?.tags || []) as string[]).length > 0
+          )}
+
           {#each goal?.observations as observation, index}
-            <div class="student-observations-row observation-item">
-              <span>
-                <span class="bordered">
-                  <ObservationVisibilityMarker {observation} />
-                  <AuthorInfo item={observation} />
-                </span>
+            <div class="student-observations-row observation-item mb-3" class:with-tags={hasTags}>
+              <span class="bordered">
+                <ObservationVisibilityMarker {observation} />
+                <AuthorInfo item={observation} />
               </span>
               <span class="bordered">
                 <MasteryLevelTitle {observation} masterySchema={getMasterySchmemaForGoal(goal)} />
               </span>
-              <span>
+              {#if hasTags}
+                <span>
+                  <TagsView tags={(observation?.tags || []) as string[]} />
+                </span>
+              {/if}
+              <span class="observation-widgets">
                 <ObservationWidgets
                   {observation}
                   {goal}
@@ -315,14 +335,14 @@
   </div>
 {/snippet}
 
-{#if goalsForSubject?.length}
+{#if hasAnyGoals}
   <div bind:this={goalsListElement} class="list-group mt-2">
-    {#each goalsForSubject.filter(goal => goal.isIndividual) as goal, index (`${goal.id}-${expandedGoalIds.includes(goal.id)}`)}
+    {#each goalsIndividual as goal, index (`${goal.id}-${expandedGoalIds.includes(goal.id)}`)}
       {@render goalInList(goal, index)}
     {/each}
   </div>
   <div class="list-group mt-2">
-    {#each goalsForSubject.filter(goal => !goal.isIndividual) as goal, index (`${goal.id}-${expandedGoalIds.includes(goal.id)}`)}
+    {#each goalsGroup as goal, index (`${goal.id}-${expandedGoalIds.includes(goal.id)}`)}
       {@render goalInList(goal, index)}
     {/each}
   </div>
@@ -335,9 +355,6 @@
   }
 
   div.observation-item > span {
-    font-family: 'Courier New', Courier, monospace !important;
-    font-size: 0.95rem;
-    letter-spacing: -0.07em;
     padding-left: 0.1rem;
   }
 
@@ -387,8 +404,17 @@
 
   .student-observations-row {
     display: grid;
-    grid-template-columns: 5fr 3fr 5fr;
+    grid-template-columns: 6fr 2fr 4fr;
     column-gap: 5px;
     align-items: center;
+  }
+
+  .observation-widgets {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .student-observations-row.with-tags {
+    grid-template-columns: 6fr 2fr 6fr 4fr;
   }
 </style>

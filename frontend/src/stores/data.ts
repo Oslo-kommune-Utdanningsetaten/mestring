@@ -10,14 +10,16 @@ import {
 import type { SchoolType, MasterySchemaType } from '../generated/types.gen'
 import { localStorage } from '../stores/localStorage'
 import {
-  getPreferredGroupValidity,
   getPreferredMasterySchemaId,
   getPreferredCreatedParams,
   getPreferredSchoolYear,
 } from '../stores/localStorageFunctions'
 import { fetchUserData } from '../utils/functions'
+import { inferGroupValidityParams } from '../utils/schoolYear'
 import { SUBJECTS_ALLOWED_ALL, SUBJECTS_ALLOWED_CUSTOM, USER_ROLES } from '../utils/constants'
 import type { AppData, UserDecorated } from '../types/models'
+
+export const isLoadingAppData = writable<boolean>(true)
 
 const setMasterySchemas = (schemas: MasterySchemaType[]) => {
   // Default mastery schema is either school default, or the user's preferred, or simply first in list
@@ -77,8 +79,8 @@ export const registerUserStatus = async (school?: SchoolType) => {
     groupsList({
       query: {
         school: school.id,
-        valid: getPreferredGroupValidity(),
         ...getPreferredCreatedParams(),
+        ...inferGroupValidityParams(getPreferredSchoolYear()),
       },
     }),
   ])
@@ -91,11 +93,15 @@ export const registerUserStatus = async (school?: SchoolType) => {
     userSchool =>
       userSchool.role.name === USER_ROLES.INSPECTOR && userSchool.school.id === school.id
   )
+  const isSchoolStaff = !!userSchools.some(
+    userSchool => userSchool.role.name === USER_ROLES.STAFF && userSchool.school.id === school.id
+  )
   const isStudent = studentGroups.length > 0
   const isTeacher = teacherGroups.length > 0
   const userRoles = [
     isStudent ? USER_ROLES.STUDENT : null,
     isTeacher ? USER_ROLES.TEACHER : null,
+    isSchoolStaff ? USER_ROLES.STAFF : null,
     isSchoolAdmin ? USER_ROLES.ADMIN : null,
     isSchoolInspector ? USER_ROLES.INSPECTOR : null,
     user.isSuperadmin ? USER_ROLES.SUPERADMIN : null,
@@ -183,7 +189,7 @@ const registerSubjects = async (school: SchoolType): Promise<void> => {
     const result = await subjectsList({
       query: {
         school: school.id,
-        schoolYear: 'all',
+        schoolYear: 'all', // subjects are used accross schools and years
       },
     })
     const subjects = (result.data || []).filter(subject => {
@@ -222,6 +228,7 @@ const registerRoles = async (): Promise<void> => {
 }
 
 export const loadData = async () => {
+  isLoadingAppData.set(true)
   try {
     const existingUser = get(dataStore).currentUser
     dataStore.update(data => {
@@ -231,5 +238,7 @@ export const loadData = async () => {
     await loadSchools()
   } catch (error) {
     console.error('Failed to load data:', error)
+  } finally {
+    isLoadingAppData.set(false)
   }
 }

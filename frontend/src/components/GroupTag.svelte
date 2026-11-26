@@ -16,7 +16,7 @@
     onclick,
     href,
     classes,
-  } = $props<{
+  }: {
     group: GroupType | null
     title?: string
     isTypeWarningEnabled?: boolean
@@ -26,20 +26,24 @@
     onclick?: () => void
     href?: string
     classes?: string
-  }>()
+  } = $props()
 
-  const earlierYear = $derived(
-    getCurrentSchoolYear() !== getSchoolYearForGroup(group) ? getSchoolYearForGroup(group) : null
-  )
+  const earlierYear = $derived.by(() => {
+    if (!group) return null
+    const groupYear = getSchoolYearForGroup(group)
+    return getCurrentSchoolYear() !== groupYear ? groupYear : null
+  })
 
-  const label: string = $derived(
-    getGroupLabel(group, { isGroupNameEnabled, isGroupTypeNameEnabled })
-  )
+  const label: string = $derived.by(() => {
+    if (!group) return 'ukjent gruppe'
+    return getGroupLabel(group, { isGroupNameEnabled, isGroupTypeNameEnabled })
+  })
 
-  const skin: string = $derived('beige')
+  const skin: string = $derived('beige-light')
 
   const isGroupTypeChanged = $derived.by(() => {
     // Inspect feideId to determine original group type
+    if (!group) return false
     const originalType =
       group.feideId.split(':')[3] === 'u' ? GROUP_TYPE_TEACHING : GROUP_TYPE_BASIS
     return originalType !== group.type
@@ -115,7 +119,8 @@
       drop-shadow(0 4px 4px rgba(0, 0, 0, 0.12)) drop-shadow(0 8px 8px rgba(0, 0, 0, 0.12));
   }
 
-  .colored-icon pkt-icon {
+  /* Punkt's `.pkt-tag svg` sets --fg-color on the svg itself, so it must be overridden there */
+  .colored-icon :global(svg) {
     --fg-color: var(--pkt-color-brand-red-1000);
   }
 

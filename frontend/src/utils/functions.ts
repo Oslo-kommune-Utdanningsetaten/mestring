@@ -10,7 +10,7 @@ import type {
 import { goalsList, userGroupsList, userSchoolsList } from '../generated/sdk.gen'
 import { nb as noLocale } from 'date-fns/locale'
 import { format, formatDistance, formatDistanceToNow } from 'date-fns'
-import { USER_ROLES, GROUP_TYPE_BASIS } from './constants'
+import { USER_ROLES, GROUP_TYPE_BASIS, STATUS_CATEGORY_TITLE_BY_NAME } from './constants'
 import {
   calculateSchoolYearMilestones,
   isEntityFromSchoolYear,
@@ -106,25 +106,31 @@ export const fetchGoalsForSubjectAndStudent = async (
   subjectId: string,
   studentId: string,
   schoolId: string,
-  studentGroups: GroupType[]
+  studentGroups: GroupType[],
+  options: { areOldGoalsIncluded?: boolean; individual?: 'include' | 'exclude' | 'only' } = {}
 ): Promise<GoalDecorated[]> => {
+  const { areOldGoalsIncluded = false, individual = 'include' } = options
   try {
-    const goalsResult = await goalsList({
-      query: {
-        student: studentId,
-        subject: subjectId,
-        includeObservations: true,
-        school: schoolId,
-        ...getPreferredCreatedParams(),
-      },
-    })
+    let query = {
+      school: schoolId,
+      student: studentId,
+      subject: subjectId,
+      includeObservations: true,
+      individual,
+    }
+    if (!areOldGoalsIncluded) {
+      query = { ...query, ...getPreferredCreatedParams() }
+    }
+    const goalsResult = await goalsList({ query })
     const goals = goalsResult.data || []
     if (goals.length === 0) return []
 
+    // find the groups represented in the goals
     const groupIds = goals.map(goal => goal.groupId).filter(Boolean) as string[]
     const groups = studentGroups.filter((group: GroupType) => groupIds.includes(group.id))
+    // calculate mastery for each goal and group them by subjectId, which is only one in this case
     const goalsBySubjectId = goalsWithCalculatedMasteryBySubjectId(goals, groups)
-    return goalsBySubjectId[subjectId]
+    return goalsBySubjectId[subjectId] || []
   } catch (error) {
     console.error('Error fetching goals:', error)
     return []
@@ -290,16 +296,23 @@ export const generateStatusTitle = (
     if (statusCategory.name === 'midyear') {
       semester = 'h'
       yearShort = startAt.split('-')[0].slice(-2)
+      return [STATUS_CATEGORY_TITLE_BY_NAME[statusCategory.name], ' - ', semester, yearShort].join(
+        ''
+      )
     } else if (statusCategory.name === 'endyear') {
       semester = 'v'
       yearShort = endAt.split('-')[0].slice(-2)
-    } else if (statusCategory.name === 'risk') {
+      return [STATUS_CATEGORY_TITLE_BY_NAME[statusCategory.name], ' - ', semester, yearShort].join(
+        ''
+      )
+    } else if (statusCategory.name.startsWith('risk-')) {
       semester = statusBeginDate.getMonth() < 7 ? 'v' : 'h'
       yearShort = statusBeginDate.getFullYear().toString().slice(-2)
+      return [STATUS_CATEGORY_TITLE_BY_NAME[statusCategory.name], yearShort].join(' ')
     } else {
       console.error('Unknown category', { statusCategory })
+      return 'ukjent statuskategori ' + statusCategory.name
     }
-    return [statusCategory.title, ' - ', semester, yearShort].join('')
   }
   const beginMonth = formatMonthName(aStatus.beginAt)
   const endMonth = formatMonthName(aStatus.endAt)
@@ -321,7 +334,7 @@ export const getDateSpanForStatusCategory = (categoryName: string) => {
       beginAt: startAt,
       endAt: endAt,
     }
-  } else if (categoryName === 'risk') {
+  } else if (categoryName.startsWith('risk-')) {
     // Midtveisrapportering
     return {
       beginAt: startAt,
@@ -418,7 +431,6 @@ export const fetchUserData = async (userId: string, schoolId: string, schoolYear
   const userGroups = (userGroupsResult.data || []).filter(ug =>
     schoolYear ? isEntityFromSchoolYear(ug, schoolYear) : true
   )
-
   const teacherGroups = userGroups
     .filter(ug => ug.role.name === USER_ROLES.TEACHER)
     .map(ug => ug.group)
@@ -467,6 +479,12 @@ export const getDictationShortcut = () => {
   if (osInfo.includes('linux')) return 'Super + H (distro-avhengig)'
   if (/android|iphone|ipad|ipod/.test(osInfo)) return 'Mic ikon'
   return "Your system's dictation shortcut"
+}
+
+export const isStatusCategoryOpen = (statusCategory: StatusCategoryType) => {
+  if (!statusCategory.openFrom || !statusCategory.openTo) return false
+  const now = new Date()
+  return new Date(statusCategory.openFrom) <= now && now <= new Date(statusCategory.openTo)
 }
 
 export const formatDateTime = (isoDate?: string | number | undefined) => {

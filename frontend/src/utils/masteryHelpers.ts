@@ -35,9 +35,11 @@ export const getMasteryLevelColorByValue = (
 }
 
 export const getMasteryTitleByValue = (
-  value: number,
+  value: number | undefined,
   masterySchema: MasterySchemaWithConfig
-): string => {
+): string | undefined => {
+  if (!isNumber(value)) return undefined
+  if (!masterySchema) return undefined
   const masteryLevels = masterySchema.config?.levels || []
   const masteryLevel = masteryLevels.find(
     (ml: MasteryConfigLevel) => ml.minValue <= value && ml.maxValue >= value
@@ -92,6 +94,7 @@ export function useMasteryCalculations(masterySchema: MasterySchemaWithConfig | 
   const defaultValue = Math.floor((minValue + maxValue) / 2)
   const deltaValue = maxValue - minValue
   const flatTrendThreshold = masterySchema?.config?.flatTrendThreshold || 1
+  const isMasteryValueVisible = masterySchema?.config?.isMasteryValueVisible ?? false
 
   const calculateValuePosition = (value: number): number =>
     maxValue === minValue
@@ -125,5 +128,6 @@ export function useMasteryCalculations(masterySchema: MasterySchemaWithConfig | 
     calculateSafeMasteryValue,
     flatTrendThreshold,
     hasLevels,
+    isMasteryValueVisible,
   }
 }

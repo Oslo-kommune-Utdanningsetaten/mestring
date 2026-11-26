@@ -3,6 +3,7 @@ from mastery import models
 from django.db.models import ForeignKey, ManyToManyField
 from drf_spectacular.utils import extend_schema_field
 from mastery.access_policies.observation import ObservationAccessPolicy
+from mastery import constants
 
 
 @extend_schema_field({
@@ -125,6 +126,18 @@ class UserSerializer(BaseModelSerializer):
         fields = '__all__'
 
 
+class TagCollectionSerializer(BaseModelSerializer):
+    class Meta:
+        model = models.TagCollection
+        fields = '__all__'
+
+
+class TitleCollectionSerializer(BaseModelSerializer):
+    class Meta:
+        model = models.TitleCollection
+        fields = '__all__'
+
+
 class GroupSerializer(BaseModelSerializer):
     class Meta:
         model = models.Group
@@ -147,6 +160,28 @@ class GoalSerializer(BaseModelSerializer):
         # Add computed/property fields
         fields['is_individual'] = serializers.BooleanField(read_only=True)
         return fields
+
+    def validate(self, attrs):
+        # Fall back to the existing instance for partial updates
+        group = attrs['group'] if 'group' in attrs else getattr(self.instance, 'group', None)
+        student = attrs['student'] if 'student' in attrs else getattr(self.instance, 'student', None)
+
+        if group is not None and student is not None:
+            raise serializers.ValidationError('A goal must have either a group or a student, not both.')
+        if group is None and student is None:
+            raise serializers.ValidationError('A goal must have either a group or a student.')
+        return attrs
+
+
+class DynamicGoalSerializer(GoalSerializer):
+    def __init__(self, *args, **kwargs):
+        return_fields = kwargs.pop("return_fields", None)
+        super().__init__(*args, **kwargs)
+
+        if return_fields is not None:
+            for name in list(self.fields.keys()):
+                if name not in return_fields:
+                    self.fields.pop(name)
 
 
 class ObservationSerializer(BaseModelSerializer):
@@ -241,6 +276,15 @@ class StatusCategorySerializer(BaseModelSerializer):
 
 class SchoolSerializer(BaseModelSerializer):
     ui_translations = JSONField(required=False, allow_null=True)
+
+    # validate mastery_badge_variant is one of the allowed constants
+    def validate(self, attrs):
+        if 'mastery_badge_variant' in attrs:
+            if attrs['mastery_badge_variant'] not in constants.ALLOWED_MASTERY_BADGE_VARIANTS:
+                raise serializers.ValidationError(
+                    {'mastery_badge_variant': f'Must be one of {constants.ALLOWED_MASTERY_BADGE_VARIANTS}'}
+                )
+        return attrs
 
     class Meta:
         model = models.School

@@ -1,7 +1,18 @@
 <script lang="ts">
-  import type { ObservationType, GoalType, UserType } from '../../generated/types.gen'
+  import type {
+    ObservationType,
+    GoalType,
+    UserType,
+    GroupType,
+    TagCollectionType,
+  } from '../../generated/types.gen'
   import type { MasterySchemaWithConfig } from '../../types/models'
-  import { observationsCreate, observationsUpdate, observationsList } from '../../generated/sdk.gen'
+  import {
+    observationsCreate,
+    observationsUpdate,
+    observationsList,
+    tagCollectionsList,
+  } from '../../generated/sdk.gen'
 
   import { useMasteryCalculations } from '../../utils/masteryHelpers'
   import { dataStore, currentUser, currentSchool } from '../../stores/data'
@@ -13,22 +24,27 @@
 
   import ButtonMini from '../ButtonMini.svelte'
   import MasteryValueInput from '../MasteryValueInput.svelte'
+  import TagsSelect from '../inputs/TagsSelect.svelte'
 
   const {
     student,
     goal,
     observation,
     masterySchema: masterySchemaProp,
-    isPersistenceControlEnabled = true,
+    isPreviewModeEnabled = false,
     onDone,
-  } = $props<{
-    student: UserType | null
+  }: {
+    student: UserType
     goal: GoalType | null
-    observation: ObservationType | null
+    observation: Partial<ObservationType> & { masteryValue?: number }
     masterySchema?: MasterySchemaWithConfig | null
-    isPersistenceControlEnabled?: boolean
+    isPreviewModeEnabled?: boolean
     onDone: () => void
-  }>()
+  } = $props()
+
+  // Sample tags for preview mode
+  const allTagsPreview = ['Reflektert', 'Grundig', 'Nøyaktig', 'Velformulert']
+  const selectedTagsPreview = ['Velformulert']
 
   const isObservationUrlEnabled = localStorage<boolean>('isObservationUrlEnabled')
   const isHistoryVisibleOnMasteryInput = localStorage<boolean>('isHistoryVisibleOnMasteryInput')
@@ -36,12 +52,27 @@
   let localObservation = $state<Partial<ObservationType> & { masteryValue?: number }>({})
   let formContainer = $state<HTMLElement | null>(null)
   let observations = $state<ObservationType[]>([])
+  let tagCollection = $state<TagCollectionType | undefined>(undefined)
 
   const masterySchema: MasterySchemaWithConfig = $derived(
     masterySchemaProp ?? $dataStore.masterySchemas.find(ms => ms.id === goal?.masterySchemaId)
   )
   const calculations = $derived(useMasteryCalculations(masterySchema))
   const studentFirstName = $derived(student?.name.split(' ')[0] || 'eleven')
+
+  const subject = $derived.by(() => {
+    if (!goal) return undefined
+    let subjectId = undefined
+    if (goal.groupId) {
+      // Subject via group
+      const group = $currentUser.allGroups.find((g: GroupType) => g.id === goal.groupId)
+      subjectId = group?.subjectId
+    } else {
+      // Subject directly from subjectId
+      subjectId = goal.subjectId
+    }
+    return subjectId && $dataStore.subjects.find(s => s.id === goal.subjectId)
+  })
 
   const fetchObservations = async () => {
     try {
@@ -57,7 +88,7 @@
       // If the current observation has an id (is being edited) filter out observations from a later date than the current observation,
       if (observation?.id) {
         observations = observations.filter(
-          o => new Date(o.createdAt) <= new Date(observation.createdAt)
+          o => observation.createdAt && new Date(o.createdAt) <= new Date(observation.createdAt)
         )
       }
       // sort by createdAt in ascending order
@@ -69,6 +100,28 @@
     }
   }
 
+  const fetchTags = async () => {
+    try {
+      const tagCollectionResult = await tagCollectionsList({
+        query: { subject: subject.id, school: $currentSchool.id },
+      })
+      tagCollection = (tagCollectionResult.data || [])[0] as TagCollectionType | undefined
+    } catch (error) {
+      console.error(`Could not fetch tags for subject ${subject.id}`, error)
+    }
+  }
+
+  const handleTagsChange = (selectedTags: string[]) => {
+    localObservation.tags = selectedTags
+    localObservation = { ...localObservation } // Trigger reactivity
+  }
+
+  $effect(() => {
+    if (subject) {
+      fetchTags()
+    }
+  })
+
   $effect(() => {
     if ($isHistoryVisibleOnMasteryInput) {
       fetchObservations()
@@ -79,6 +132,7 @@
   $effect(() => {
     localObservation = {
       ...observation,
+      tags: observation?.tags ?? [],
       masteryValue: observation?.masteryValue ?? calculations.defaultValue,
     }
   })
@@ -135,7 +189,7 @@
 
 <div class="observation-edit p-4" bind:this={formContainer}>
   {#if localObservation}
-    <h3>
+    <h3 title={masterySchema.title}>
       {localObservation.id ? 'Redigerer' : 'Ny'}
       {t('observation', { form: 'sin-indef' })}
     </h3>
@@ -164,6 +218,18 @@
       ></pkt-checkbox>
     {/if}
 
+    {#if masterySchema?.config?.isSubjectTagsEnabled}
+      {@const allTags = isPreviewModeEnabled
+        ? allTagsPreview
+        : ((tagCollection?.tags || []) as string[])}
+      {@const selectedTags = isPreviewModeEnabled
+        ? selectedTagsPreview
+        : ((localObservation?.tags || []) as string[])}
+      <div class="mt-5 mb-3">
+        <TagsSelect {allTags} {selectedTags} onChange={handleTagsChange} />
+      </div>
+    {/if}
+
     {#if masterySchema?.config?.isMasteryDescriptionInputEnabled}
       <div class="form-group">
         <label for="description" class="form-label visually-hidden">
@@ -174,8 +240,7 @@
           class="form-control rounded-0 border-2 border-primary"
           bind:value={localObservation.masteryDescription}
           placeholder="Kort beskrivelse av hva {studentFirstName} får til"
-          rows="4"
-        ></textarea>
+          rows="4"></textarea>
       </div>
     {/if}
 
@@ -187,8 +252,7 @@
           class="form-control rounded-0 border-2 border-primary"
           bind:value={localObservation.feedforward}
           placeholder="Konkret, hva trenger {studentFirstName} nå?"
-          rows="4"
-        ></textarea>
+          rows="4"></textarea>
       </div>
     {/if}
 
@@ -205,7 +269,7 @@
       </div>
     {/if}
 
-    {#if isPersistenceControlEnabled}
+    {#if !isPreviewModeEnabled}
       <div class="d-flex gap-2 justify-content-start mt-4">
         <ButtonMini
           options={{

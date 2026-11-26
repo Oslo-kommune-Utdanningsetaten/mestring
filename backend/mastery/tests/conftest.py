@@ -2,7 +2,7 @@ import pytest
 from datetime import timedelta
 from django.test import Client
 from django.utils import timezone
-from mastery.models import School, User, Group, Role, Subject, Goal, MasterySchema, Observation, Status, StatusCategory
+from mastery.models import School, User, Group, Role, Subject, Goal, MasterySchema, Observation, Status, StatusCategory, TagCollection, TitleCollection
 
 
 @pytest.fixture
@@ -494,7 +494,6 @@ def status_at_other_school(db, other_school, other_school_student, subject_owned
 @pytest.fixture
 def status_category_at_school(db, school, mastery_schema):
     return StatusCategory.objects.create(
-        title="Halvtårsvurdering",
         name="midyear",
         school=school,
         mastery_schema=mastery_schema,
@@ -505,9 +504,42 @@ def status_category_at_school(db, school, mastery_schema):
 @pytest.fixture
 def status_category_at_other_school(db, other_school, mastery_schema_other_school):
     return StatusCategory.objects.create(
-        title="Halvtårsvurdering",
         name="midyear",
         school=other_school,
         mastery_schema=mastery_schema_other_school,
         is_enabled=True
+    )
+
+
+@pytest.fixture
+def tag_collection_at_school(db, school, subject_with_group):
+    return TagCollection.objects.create(
+        school=school,
+        subject=subject_with_group,
+        tags=["Muntlig", "Skriftlig"],
+    )
+
+
+@pytest.fixture
+def tag_collection_at_other_school(db, other_school, subject_owned_by_other_school):
+    return TagCollection.objects.create(
+        school=other_school,
+        subject=subject_owned_by_other_school,
+        tags=["Muntlig", "Skriftlig"],
+    )
+
+
+@pytest.fixture
+def title_collection_at_school(db, school):
+    return TitleCollection.objects.create(
+        school=school,
+        titles=["Muntlig", "Skriftlig"],
+    )
+
+
+@pytest.fixture
+def title_collection_at_other_school(db, other_school):
+    return TitleCollection.objects.create(
+        school=other_school,
+        titles=["Kunstnerisk", "Skriftlig"],
     )

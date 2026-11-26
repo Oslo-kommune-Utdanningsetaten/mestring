@@ -8,10 +8,11 @@
     StatusCategoryType,
   } from '../../generated/types.gen'
   import type { MasterySchemaWithConfig, GoalDecorated } from '../../types/models'
+  import type { StatusTitleInput } from '../../types/models'
   import { statusCreate, statusUpdate, usersRetrieve } from '../../generated/sdk.gen'
 
   import { areSchemaValuesConsistent } from '../../utils/masteryHelpers'
-  import { dataStore } from '../../stores/data'
+  import { dataStore, currentUser } from '../../stores/data'
   import {
     fetchGoalsForSubjectAndStudent,
     formatDateHumanly,
@@ -19,7 +20,7 @@
     generateStatusTitle,
     getDateSpanForStatusCategory,
   } from '../../utils/functions'
-  import type { StatusTitleInput } from '../../types/models'
+  import { STATUS_CATEGORY_TITLE_BY_NAME } from '../../utils/constants'
   import { localStorage } from '../../stores/localStorage'
   import { addAlert } from '../../stores/alerts'
   import { trackEvent } from '../../stores/analytics'
@@ -32,15 +33,22 @@
   import MasteryBarChart from '../MasteryBarChart.svelte'
   import AuthorInfo from '../AuthorInfo.svelte'
 
-  let { status, onDone } = $props<{
+  let {
+    status,
+    onDone,
+  }: {
     status: Partial<StatusType>
     onDone: () => void
-  }>()
+  } = $props()
 
   const isMasteryBarChartVisible = localStorage<boolean>('isMasteryBarChartVisible')
+
   let localStudent = $state<UserType | null>(null)
-  let localStatus = $state<Partial<StatusType> & { masteryValue?: number | null }>({ ...status })
-  let localGoals = $state<GoalDecorated[] | null>([])
+  let localStatus = $state<Partial<StatusType> & { masteryValue?: number | null }>({
+    ...status,
+    createdById: status.createdById || $currentUser.id,
+  })
+  let studentGoals = $state<GoalDecorated[] | null>([])
   let isGoalSectionExpanded = $state<boolean>(false)
   let validationErrors = $state<{ beginAt?: string; endAt?: string }>({})
 
@@ -48,9 +56,12 @@
     subjectsInCommon($dataStore.currentUser, localStudent!, $dataStore.subjects)
   )
 
-  let subject = $derived(
-    status.subjectId && selectableSubjects?.find((s: SubjectType) => s.id === status.subjectId)
-  )
+  let subject: SubjectType | undefined = $derived.by(() => {
+    if (status.subjectId && selectableSubjects?.length) {
+      return selectableSubjects.find((s: SubjectType) => s.id === status.subjectId)
+    }
+    return undefined
+  })
 
   let selectableStatusCategories = $derived(
     $dataStore.statusCategories
@@ -74,6 +85,7 @@
   let currentStatusCategory = $derived(
     $dataStore.statusCategories.find(cat => cat.id === localStatus.categoryId)
   )
+  const isCategoryOfRiskType = $derived(currentStatusCategory?.name.startsWith('risk-'))
 
   let currentMasterySchema: MasterySchemaWithConfig = $derived.by(() => {
     const schemaId = localStatus.masterySchemaId || currentStatusCategory?.masterySchemaId
@@ -87,16 +99,29 @@
   }
 
   const fetchStudentData = async () => {
-    const userResult = await usersRetrieve({ path: { id: status.studentId } })
+    const { studentId } = status
+    if (!studentId) return
+    const userResult = await usersRetrieve({ path: { id: studentId } })
     const currentSchoolId = $dataStore.currentSchool?.id
     localStudent = userResult.data!
     if (!localStudent || !subject) return
-    localGoals = await fetchGoalsForSubjectAndStudent(
-      subject.id,
-      localStudent.id,
-      currentSchoolId,
-      $dataStore.currentUser.allGroups
-    )
+    const [goalsIndividual, goalsGroup] = await Promise.all([
+      fetchGoalsForSubjectAndStudent(
+        subject.id,
+        studentId,
+        currentSchoolId,
+        $dataStore.currentUser.allGroups,
+        { areOldGoalsIncluded: true, individual: 'only' }
+      ),
+      fetchGoalsForSubjectAndStudent(
+        subject.id,
+        studentId,
+        currentSchoolId,
+        $dataStore.currentUser.allGroups,
+        { areOldGoalsIncluded: false, individual: 'exclude' }
+      ),
+    ])
+    studentGoals = [...goalsIndividual, ...goalsGroup]
     localStatus = getUpdatedStatus()
   }
 
@@ -229,7 +254,7 @@
   <div class="p-4 pb-3 border-bottom border-3 border-primary">
     <h2 class="fs-5 fw-semibold mb-0">
       {#if currentStatusCategory}
-        {currentStatusCategory.title}
+        {STATUS_CATEGORY_TITLE_BY_NAME[currentStatusCategory.name]}
       {:else}
         {localStatus.id ? 'Redigerer' : 'Ny'} status
       {/if}
@@ -261,13 +286,13 @@
             <mark>{subject?.shortName || subject?.displayName}</mark>
             <ButtonIcon options={goalSectionToggleOptions} />
           </h3>
-          {#if !localGoals}
+          {#if !studentGoals}
             <p><em>Eleven har ingen {t('goal', { form: 'plu-indef' })} i dette faget</em></p>
           {/if}
 
-          {#if localGoals && isGoalSectionExpanded}
+          {#if studentGoals && isGoalSectionExpanded}
             <div class="d-flex flex-column gap-2 mt-2">
-              {#each localGoals as goal}
+              {#each studentGoals as goal}
                 <div class="goal-row">
                   <span>{goal.sortOrder}</span>
                   {#if goal.isIndividual}
@@ -329,7 +354,7 @@
                   value={statusCategory.id}
                   selected={statusCategory.id === localStatus.categoryId}
                 >
-                  {statusCategory.title}
+                  {STATUS_CATEGORY_TITLE_BY_NAME[statusCategory.name]}
                 </option>
               {/each}
             </select>
@@ -407,7 +432,7 @@
         {#if currentMasterySchema?.config?.isMasteryValueInputEnabled}
           <div class="field-group">
             <span class="field-label">
-              {#if currentStatusCategory?.name === 'risk'}
+              {#if isCategoryOfRiskType}
                 Status
               {:else}
                 Mestring
@@ -428,11 +453,10 @@
               id="description"
               class="form-control rounded-0 border-2 border-primary"
               bind:value={localStatus.masteryDescription}
-              placeholder={currentStatusCategory?.name === 'risk'
+              placeholder={isCategoryOfRiskType
                 ? 'Beskrivelse, ved behov'
                 : 'Konkret, hva mestrer ' + studentFirstName + '?'}
-              rows="4"
-            ></textarea>
+              rows="4"></textarea>
           </div>
         {/if}
 
@@ -445,8 +469,7 @@
               class="form-control rounded-0 border-2 border-primary"
               bind:value={localStatus.feedforward}
               placeholder="Konkret, hva kan {studentFirstName} gjøre for å forbedre seg?"
-              rows="4"
-            ></textarea>
+              rows="4"></textarea>
           </div>
         {/if}
       </div>

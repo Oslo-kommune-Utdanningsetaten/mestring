@@ -19,22 +19,33 @@
     statusList,
   } from '../generated/sdk.gen'
 
-  import { GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, USER_ROLES } from '../utils/constants'
+  import {
+    GROUP_TYPE_BASIS,
+    GROUP_TYPE_TEACHING,
+    USER_ROLES,
+    STATUS_CATEGORY_TITLE_BY_NAME,
+  } from '../utils/constants'
   import { dataStore } from '../stores/data'
-  import { getGroupLabel, goalsWithCalculatedMastery } from '../utils/functions'
+  import {
+    getGroupLabel,
+    goalsWithCalculatedMastery,
+    isStatusCategoryOpen,
+  } from '../utils/functions'
   import { preferredSchoolYear, getPreferredCreatedParams } from '../stores/localStorageFunctions'
   import { hasUserAccessToFeature } from '../stores/access'
   import { t } from '../stores/translations'
 
-  import GroupSVG from '../assets/group.svg.svelte'
   import StudentsWithSubjects from '../components/StudentsWithSubjects.svelte'
   import StudentsWithGoals from '../components/StudentsWithGoals.svelte'
-  import UserTag from '../components/UserTag.svelte'
   import StudentSubject from '../components/StudentSubject.svelte'
-  import Link from '../components/Link.svelte'
   import GoalWidgets from '../components/edit/GoalWidgets.svelte'
+  import GroupSVG from '../assets/group.svg.svelte'
+  import UserTag from '../components/UserTag.svelte'
+  import SubjectTag from '../components/SubjectTag.svelte'
+  import GroupTag from '../components/GroupTag.svelte'
+  import Link from '../components/Link.svelte'
 
-  const { groupId } = $props<{ groupId: string }>()
+  const { groupId }: { groupId: string } = $props()
 
   let isLoading = $state(true)
   let goalsListElement = $state<HTMLElement | null>(null)
@@ -51,33 +62,14 @@
   let subject = $state<SubjectType | undefined>(undefined)
   let currentSchool = $derived($dataStore.currentSchool)
 
-  const groupSubtitle = $derived.by(() => {
-    if (!group) return
-    let result = ''
-    if (subject) {
-      result += subject.displayName
-      if (group.type == GROUP_TYPE_BASIS) {
-        result += ', basisgruppe'
-      } else {
-        result += ', undervisningsgruppe'
-      }
-    } else {
-      if (group.type == GROUP_TYPE_BASIS) {
-        result += 'Basisgruppe'
-      } else {
-        result += 'Undervisningsgruppe'
-        result += ' [mangler fag]'
-      }
-    }
-    return result
-  })
-
   let isCurrentUserOnlyStudent = $derived(
     $dataStore.currentUser?.isStudent && !$dataStore.currentUser?.isTeacher
   )
 
   const availableStatusCategories = $derived(
-    $dataStore.statusCategories.filter(cat => cat.isEnabled)
+    $dataStore.statusCategories
+      .filter(cat => cat.isEnabled)
+      .filter(cat => isStatusCategoryOpen(cat))
   )
 
   const fetchGroupData = async () => {
@@ -135,13 +127,14 @@
           query: {
             school: $dataStore.currentSchool?.id,
             subject: subject ? subject.id : '',
-            group: groupId,
+            groups: groupId,
             ...getPreferredCreatedParams(),
           },
         })
 
         const statuses = statusesResult.data || []
 
+        statusesByCategoryID = {}
         statuses.forEach(status => {
           if (status.categoryId) {
             if (!statusesByCategoryID[status.categoryId]) {
@@ -246,8 +239,11 @@
         <h2 title="Gruppe">
           {getGroupLabel(group, { isGroupNameEnabled: true, includeEarlierYear: true })}
         </h2>
-        <h3 class="text-secondary group-subtitle" title={subject?.grepCode}>
-          {groupSubtitle}
+        <h3 class="text-secondary group-subtitle">
+          <GroupTag {group} isGroupTypeNameEnabled={true} />
+          {#if group.subjectId}
+            <SubjectTag subjectId={group.subjectId} href="/subjects/{group.subjectId}" />
+          {/if}
         </h3>
       </div>
     </div>
@@ -279,7 +275,7 @@
           {#each availableStatusCategories as category}
             <p class="my-1">
               <Link to="/groups/{group.id}/statuses/{category.name}">
-                {category.title}!
+                {STATUS_CATEGORY_TITLE_BY_NAME[category.name]}!
               </Link>
               {#if statusesByCategoryID[category.id]?.length === students.length}
                 Men det er helt chill for du er ferdig💪
@@ -383,7 +379,7 @@
           </div>
         </div>
       {:else if group.type === GROUP_TYPE_BASIS}
-        <StudentsWithSubjects {students} {subjects} {group} />
+        <StudentsWithSubjects {students} {subjects} groups={[group]} />
       {:else if group.type === GROUP_TYPE_TEACHING && subject}
         <StudentsWithGoals
           {group}

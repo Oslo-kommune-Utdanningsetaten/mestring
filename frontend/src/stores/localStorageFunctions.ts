@@ -1,6 +1,5 @@
 import { derived } from 'svelte/store'
 import { localStorage } from './localStorage'
-import { GROUP_VALIDITY_OPTIONS, MASTERY_BADGE_VARIANTS } from '../utils/constants'
 import { getCurrentSchoolYear, inferCreatedParams } from '../utils/schoolYear'
 
 export const getPreferredCreatedParams = () => {
@@ -9,26 +8,11 @@ export const getPreferredCreatedParams = () => {
   return inferCreatedParams(preferredSchoolYear)
 }
 
-export const getPreferredGroupValidity = () => {
-  const preferredGroupValidity =
-    localStorage<GROUP_VALIDITY_OPTIONS>('preferredGroupValidity').get()
-  const defaultGroupValidity = GROUP_VALIDITY_OPTIONS.ONLY
-  return preferredGroupValidity || defaultGroupValidity
-}
-
 // Reactive store, subscribe with $preferredSchoolYear
 export const preferredSchoolYear = derived(
   localStorage<string>('preferredSchoolYear'),
   $preferredSchoolYear => $preferredSchoolYear || getCurrentSchoolYear()
 )
-
-export const getPreferredMasteryBadgeVariant = () => {
-  const preferredMasteryBadgeVariant = localStorage<MASTERY_BADGE_VARIANTS>(
-    'preferredMasteryBadgeVariant'
-  ).get()
-  const defaultMasteryBadgeVariant = MASTERY_BADGE_VARIANTS.BEEHIVE
-  return preferredMasteryBadgeVariant || defaultMasteryBadgeVariant
-}
 
 export const getPreferredSubjectId = () => {
   const preferredSubjectId = localStorage<string>('preferredSubjectId').get()
@@ -51,6 +35,11 @@ export const getPreferredSchoolYear = () => {
 }
 
 export const isObservationUrlEnabled = () => {
-  const isObservationUrlEnabled = localStorage<string>('isObservationUrlEnabled').get()
-  return Boolean(isObservationUrlEnabled)
+  const result = localStorage<string>('isObservationUrlEnabled').get()
+  return Boolean(result)
+}
+
+export const isMasteryBarChartVisible = () => {
+  const result = localStorage<string>('isMasteryBarChartVisible').get()
+  return Boolean(result)
 }
