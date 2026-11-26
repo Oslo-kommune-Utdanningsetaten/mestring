@@ -44,7 +44,7 @@
   let studentCountsByLevel = $state<number[]>([])
   let isCompleteGroupsDetailsEnabled = $state<boolean>(false)
   let isIncompleteGroupsDetailsEnabled = $state<boolean>(false)
-  let isOnlyRiskySubjectsEnabled = $state<boolean>(true)
+  let isOnlyRiskySubjectsEnabled = $state<boolean>(false)
 
   let selectedLevels = $state<number[]>([])
   let isDetailsEnabled = $derived<boolean>(groups.length > 0 || selectedLevels.length > 0)

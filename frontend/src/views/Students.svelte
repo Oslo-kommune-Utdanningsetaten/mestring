@@ -63,6 +63,14 @@
   })
 
   const selectedGroupIds = $derived(router.getQueryParam('groups')?.split(',') || [])
+
+  // Combobox selection not yet applied to the URL (null = nothing pending)
+  let pendingGroupIds = $state<string | null>(null)
+
+  const comboboxGroupIds = $derived(
+    pendingGroupIds === null ? selectedGroupIds : pendingGroupIds.split(',').filter(Boolean)
+  )
+
   const selectedFocus = $derived(router.getQueryParam('focus') || focusOptions[0].value)
 
   const filteredStudents = $derived(
@@ -138,27 +146,42 @@
     }
   }
 
-  // Select groups by matching a string
+  // Buffer up pending groups by matching a string to either the group ID or display name
   const handleSelectMatchingGroups = (matcher: string): void => {
-    const params: Record<string, string> = {}
-    if (matcher.trim().length > 0) {
-      params.groups = allGroups
-        .filter(
-          group =>
-            group.id === matcher ||
-            group.displayName.toLocaleLowerCase().includes(matcher.toLocaleLowerCase())
-        )
-        .map(group => group.id)
-        .join(',')
+    pendingGroupIds =
+      matcher.trim().length > 0
+        ? allGroups
+            .filter(
+              group =>
+                group.id === matcher ||
+                group.displayName.toLocaleLowerCase().includes(matcher.toLocaleLowerCase())
+            )
+            .map(group => group.id)
+            .join(',')
+        : ''
+  }
+
+  // Apply pending combobox selection to the URL, which triggers fetching
+  const commitPendingGroups = () => {
+    if (pendingGroupIds === null) return
+    const groupIds = pendingGroupIds
+    pendingGroupIds = null
+    if (groupIds !== selectedGroupIds.join(',')) {
+      handleUpdateSelectedGroups(groupIds)
     }
-    if (selectedFocus) {
-      params.focus = selectedFocus
-    }
-    router.navigate(urlStringFrom(params, { path: '/students', mode: 'replace' }))
+  }
+
+  // Handle focus out event for the combobox, committing any pending group selections
+  const handleComboboxFocusOut = (event: FocusEvent) => {
+    const combobox = event.currentTarget as HTMLElement
+    const nextFocused = event.relatedTarget as Node | null
+    if (nextFocused && combobox.contains(nextFocused)) return
+    commitPendingGroups()
   }
 
   // Select groups by updating the selected group IDs directly
   const handleUpdateSelectedGroups = (commaSeparatedGroupIds: string) => {
+    pendingGroupIds = null
     const params: Record<string, string> = {}
     if (commaSeparatedGroupIds.trim().length > 0) {
       params.groups = commaSeparatedGroupIds
@@ -215,27 +238,32 @@
     <div class="filter-item filter-item-combobox">
       <!-- Filter by group membership -->
       <label for="groupSelect" class="mb-1 visually-hidden">Filtrer på gruppe:</label>
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
       <pkt-combobox
         label=""
         useWrapper={false}
-        placeholder={selectedGroupIds.length === 0
+        placeholder={comboboxGroupIds.length === 0
           ? 'Hele skolen - kan ta lang tid ⚠️'
-          : selectedGroupIds.length +
+          : comboboxGroupIds.length +
             ' guppe' +
-            (selectedGroupIds.length === 1 ? '' : 'r') +
+            (comboboxGroupIds.length === 1 ? '' : 'r') +
             ' valgt'}
         typeahead
         multiple
         fullwidth={true}
         tagPlacement="outside"
-        value={selectedGroupIds.join(',')}
+        value={comboboxGroupIds.join(',')}
         onchange={(event: Event) => {
           const target = event.target as HTMLSelectElement
-          handleUpdateSelectedGroups(target.value)
+          pendingGroupIds = target.value
         }}
         oninputcapture={(event: Event) => {
           const target = event.composedPath()[0] as HTMLInputElement
           handleSelectMatchingGroups(target.value)
+        }}
+        onfocusout={handleComboboxFocusOut}
+        onkeydown={(event: KeyboardEvent) => {
+          if (event.key === 'Escape') commitPendingGroups()
         }}
         onsearch={(event: Event) => {
           //console.log('hey')
