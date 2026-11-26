@@ -203,7 +203,7 @@
       (level: MasteryConfigLevel) =>
         students.filter(student =>
           subjects.some(subject =>
-            newData[`${student.id}:${subject.id}`].some(
+            newData[`${student.id}:${subject.id}`]?.some(
               status => status.masteryValue === level.maxValue
             )
           )

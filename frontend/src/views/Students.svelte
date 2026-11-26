@@ -57,8 +57,7 @@
     return statusCategories.concat([{ value: 'mastery', label: 'Mestring i fag' }])
   })
 
-  //const selectedGroupIds = $derived(router.getQueryParam('groups')?.split(',') || [])
-  let selectedGroupIds = $state<string[]>([])
+  const selectedGroupIds = $derived(router.getQueryParam('groups')?.split(',') || [])
   const selectedFocus = $derived(router.getQueryParam('focus') || focusOptions[0].value)
 
   const filteredStudents = $derived(
@@ -128,22 +127,35 @@
     }
   }
 
+  // Select groups by matching a string
   const handleSelectMatchingGroups = (matcher: string): void => {
-    if (!matcher) return
-    const localSelectedGroupIds = allGroups
-      .filter(
-        group =>
-          group.id === matcher ||
-          group.displayName.toLocaleLowerCase().includes(matcher.toLocaleLowerCase())
-      )
-      .map(group => group.id)
-
-    selectedGroupIds = localSelectedGroupIds
+    const params: Record<string, string> = {}
+    if (matcher.trim().length > 0) {
+      params.groups = allGroups
+        .filter(
+          group =>
+            group.id === matcher ||
+            group.displayName.toLocaleLowerCase().includes(matcher.toLocaleLowerCase())
+        )
+        .map(group => group.id)
+        .join(',')
+    }
+    if (selectedFocus) {
+      params.focus = selectedFocus
+    }
+    router.navigate(urlStringFrom(params, { path: '/students', mode: 'replace' }))
   }
 
+  // Select groups by updating the selected group IDs directly
   const handleUpdateSelectedGroups = (commaSeparatedGroupIds: string) => {
-    if (commaSeparatedGroupIds.trim() === '') return
-    selectedGroupIds = commaSeparatedGroupIds.split(',')
+    const params: Record<string, string> = {}
+    if (commaSeparatedGroupIds.trim().length > 0) {
+      params.groups = commaSeparatedGroupIds
+    }
+    if (selectedFocus) {
+      params.focus = selectedFocus
+    }
+    router.navigate(urlStringFrom(params, { path: '/students', mode: 'replace' }))
   }
 
   const handleFocusSelect = (focusValue: string): void => {
@@ -189,7 +201,7 @@
 
   <!-- Filter groups -->
   <div class="filters-container mt-3">
-    <div class="filter-item">
+    <div class="filter-item filter-item-combobox">
       <!-- Filter by group membership -->
       <label for="groupSelect" class="mb-1 visually-hidden">Filtrer på gruppe:</label>
       <pkt-combobox
@@ -209,7 +221,10 @@
           const target = event.target as HTMLSelectElement
           handleUpdateSelectedGroups(target.value)
         }}
-        onsearch={(event: CustomEvent) => handleSelectMatchingGroups(event.detail)}
+        oninputcapture={(event: Event) => {
+          const target = event.composedPath()[0] as HTMLInputElement
+          handleSelectMatchingGroups(target.value)
+        }}
         options={groupComboboxOptions}
       ></pkt-combobox>
     </div>
@@ -266,6 +281,11 @@
     display: flex;
     gap: 1rem;
     align-items: flex-end;
+  }
+
+  .filter-item-combobox {
+    position: relative;
+    z-index: 20;
   }
 
   .filter-item {
