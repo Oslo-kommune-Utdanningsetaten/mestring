@@ -71,7 +71,7 @@
             <GroupTag
               href="/groups/{group.id}"
               {group}
-              isGroupTypeNameEnabled={true}
+              isGroupTypeNameEnabled={false}
               isGroupNameEnabled={true}
             />
           </div>

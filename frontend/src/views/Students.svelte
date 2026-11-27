@@ -4,6 +4,7 @@
   import '@oslokommune/punkt-elements/dist/pkt-tabs.js'
   import { setPktStrings } from '@oslokommune/punkt-elements'
   import { useTinyRouter } from 'svelte-tiny-router'
+  import debounce from 'lodash/debounce'
 
   import type { GroupType, UserType, SubjectType } from '../generated/types.gen'
   import { subjectsList, usersList } from '../generated/sdk.gen'
@@ -37,6 +38,7 @@
   let subjects = $state<SubjectType[]>([])
 
   const currentSchool = $derived($dataStore.currentSchool)
+  const storeSubjects = $derived($dataStore.subjects)
   const allGroups = $derived<GroupType[]>($dataStore.currentUser.allGroups || [])
 
   const groupComboboxOptions = $derived.by(() => {
@@ -63,13 +65,6 @@
   })
 
   const selectedGroupIds = $derived(router.getQueryParam('groups')?.split(',') || [])
-
-  // Combobox selection not yet applied to the URL (null = nothing pending)
-  let pendingGroupIds = $state<string | null>(null)
-
-  const comboboxGroupIds = $derived(
-    pendingGroupIds === null ? selectedGroupIds : pendingGroupIds.split(',').filter(Boolean)
-  )
 
   const selectedFocus = $derived(router.getQueryParam('focus') || focusOptions[0].value)
 
@@ -101,41 +96,48 @@
     return result.join(' ')
   })
 
+  const fetchStudents = async (schoolId: string): Promise<UserType[]> => {
+    const result = await usersList({
+      query: {
+        school: schoolId,
+        roles: USER_ROLES.STUDENT,
+        groups: selectedGroupIds.length > 0 ? selectedGroupIds.join(',') : undefined,
+      },
+    })
+    return result.data || []
+  }
+
+  const fetchSubjects = async (
+    school: NonNullable<typeof currentSchool>
+  ): Promise<SubjectType[]> => {
+    if (school.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM) {
+      // Custom subjects are already in the store
+      return storeSubjects
+    }
+    // Otherwise fetch the subjects of the selected groups
+    const result = await subjectsList({
+      query: {
+        school: school.id,
+        schoolYear: $preferredSchoolYear,
+        membersOfGroups: selectedGroupIds.length > 0 ? selectedGroupIds.join(',') : undefined,
+      },
+    })
+    return result.data || []
+  }
+
   const fetchData = async () => {
     if (!currentSchool) return
     const requestId = ++latestRequestId
     try {
       isLoadingStudents = true
-      let query: { school: any; roles: USER_ROLES; groups?: string } = {
-        school: currentSchool.id,
-        roles: USER_ROLES.STUDENT,
-      }
-      if (selectedGroupIds.length > 0) {
-        query.groups = selectedGroupIds.join(',')
-      }
-      const studentsResult = await usersList({ query })
+      const [localStudents, localSubjects] = await Promise.all([
+        fetchStudents(currentSchool.id),
+        fetchSubjects(currentSchool),
+      ])
       if (requestId !== latestRequestId) return
-      const localStudents = studentsResult.data || []
-
-      let localSubjects: SubjectType[] = []
-
-      if (currentSchool.subjectsAllowed === SUBJECTS_ALLOWED_CUSTOM) {
-        localSubjects = $dataStore.subjects
-      } else {
-        const subjectsResult = await subjectsList({
-          query: {
-            school: currentSchool.id,
-            students:
-              selectedGroupIds.length > 0 ? localStudents.map(s => s.id).join(',') : undefined,
-            schoolYear: $preferredSchoolYear,
-          },
-        })
-        if (requestId !== latestRequestId) return
-        localSubjects = subjectsResult.data || []
-      }
 
       students = localStudents
-      subjects = localSubjects.sort((a, b) => a.displayName.localeCompare(b.displayName))
+      subjects = [...localSubjects].sort((a, b) => a.displayName.localeCompare(b.displayName))
     } catch (error) {
       if (requestId !== latestRequestId) return
       console.error('Error fetching members', { selectedGroupIds, error })
@@ -146,42 +148,27 @@
     }
   }
 
-  // Buffer up pending groups by matching a string to either the group ID or display name
+  // Select groups matching a string to either the group ID or display name
   const handleSelectMatchingGroups = (matcher: string): void => {
-    pendingGroupIds =
+    const lowercaseMatcher = matcher.toLocaleLowerCase()
+    const groupIds =
       matcher.trim().length > 0
         ? allGroups
             .filter(
               group =>
                 group.id === matcher ||
-                group.displayName.toLocaleLowerCase().includes(matcher.toLocaleLowerCase())
+                group.displayName.toLocaleLowerCase().includes(lowercaseMatcher)
             )
             .map(group => group.id)
             .join(',')
         : ''
-  }
-
-  // Apply pending combobox selection to the URL, which triggers fetching
-  const commitPendingGroups = () => {
-    if (pendingGroupIds === null) return
-    const groupIds = pendingGroupIds
-    pendingGroupIds = null
     if (groupIds !== selectedGroupIds.join(',')) {
-      handleUpdateSelectedGroups(groupIds)
+      debouncedUpdateSelectedGroups(groupIds)
     }
-  }
-
-  // Handle focus out event for the combobox, committing any pending group selections
-  const handleComboboxFocusOut = (event: FocusEvent) => {
-    const combobox = event.currentTarget as HTMLElement
-    const nextFocused = event.relatedTarget as Node | null
-    if (nextFocused && combobox.contains(nextFocused)) return
-    commitPendingGroups()
   }
 
   // Select groups by updating the selected group IDs directly
   const handleUpdateSelectedGroups = (commaSeparatedGroupIds: string) => {
-    pendingGroupIds = null
     const params: Record<string, string> = {}
     if (commaSeparatedGroupIds.trim().length > 0) {
       params.groups = commaSeparatedGroupIds
@@ -191,6 +178,8 @@
     }
     router.navigate(urlStringFrom(params, { path: '/students', mode: 'replace' }))
   }
+
+  const debouncedUpdateSelectedGroups = debounce(handleUpdateSelectedGroups, 500)
 
   const handleFocusSelect = (focusValue: string): void => {
     const params: Record<string, string> = { focus: focusValue }
@@ -210,6 +199,9 @@
       fetchData()
     }
   })
+
+  // Drop any pending update when leaving the view, so it doesn't navigate back here
+  $effect(() => () => debouncedUpdateSelectedGroups.cancel())
 </script>
 
 <section class="my-4">
@@ -242,28 +234,24 @@
       <pkt-combobox
         label=""
         useWrapper={false}
-        placeholder={comboboxGroupIds.length === 0
+        placeholder={selectedGroupIds.length === 0
           ? 'Hele skolen - kan ta lang tid ⚠️'
-          : comboboxGroupIds.length +
+          : selectedGroupIds.length +
             ' guppe' +
-            (comboboxGroupIds.length === 1 ? '' : 'r') +
+            (selectedGroupIds.length === 1 ? '' : 'r') +
             ' valgt'}
         typeahead
         multiple
         fullwidth={true}
         tagPlacement="outside"
-        value={comboboxGroupIds.join(',')}
+        value={selectedGroupIds.join(',')}
         onchange={(event: Event) => {
           const target = event.target as HTMLSelectElement
-          pendingGroupIds = target.value
+          debouncedUpdateSelectedGroups(target.value)
         }}
         oninputcapture={(event: Event) => {
           const target = event.composedPath()[0] as HTMLInputElement
           handleSelectMatchingGroups(target.value)
-        }}
-        onfocusout={handleComboboxFocusOut}
-        onkeydown={(event: KeyboardEvent) => {
-          if (event.key === 'Escape') commitPendingGroups()
         }}
         onsearch={(event: Event) => {
           //console.log('hey')
@@ -278,7 +266,10 @@
         variant: 'label-only',
         size: 'medium',
         disabled: selectedGroupIds.length === 0,
-        onClick: () => handleUpdateSelectedGroups(''),
+        onClick: () => {
+          debouncedUpdateSelectedGroups.cancel()
+          handleUpdateSelectedGroups('')
+        },
       }}
     >
       Nullstill grupper

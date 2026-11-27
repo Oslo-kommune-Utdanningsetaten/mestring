@@ -148,7 +148,7 @@
         const subjectsResult = await subjectsList({
           query: {
             school: currentSchool.id,
-            students: students.map(s => s.id).join(','),
+            membersOfGroups: group.id,
             schoolYear: $preferredSchoolYear,
           },
         })
