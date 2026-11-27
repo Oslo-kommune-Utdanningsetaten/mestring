@@ -42,6 +42,7 @@
   // Data per student per subject: flat map keyed by `studentId:subjectId`
   let statusesByStudentIdAndSubjectId = $state<Record<string, StatusType[]>>({})
   let studentCountsByLevel = $state<number[]>([])
+  let isLoadingStatuses = $state<boolean>(false)
   let isCompleteGroupsDetailsEnabled = $state<boolean>(false)
   let isIncompleteGroupsDetailsEnabled = $state<boolean>(false)
   let isOnlyRiskySubjectsEnabled = $state<boolean>(false)
@@ -190,7 +191,13 @@
       query = { ...query, ...getPreferredCreatedParams() }
     }
 
-    const result = await statusList({ query })
+    isLoadingStatuses = true
+    let result: Awaited<ReturnType<typeof statusList>>
+    try {
+      result = await statusList({ query })
+    } finally {
+      if (requestId === latestRequestId) isLoadingStatuses = false
+    }
     if (requestId !== latestRequestId) return
     const statuses = result.data || []
 
@@ -319,8 +326,16 @@
   })
 </script>
 
+{#if isLoadingStatuses}
+  <div class="d-flex align-items-center gap-2 text-secondary small py-2">
+    <span class="spinner-border spinner-border-sm" role="status" aria-label="Henter statuser"
+    ></span>
+    <span>Henter statuser...</span>
+  </div>
+{/if}
+
 <!-- Filtering by mastery level -->
-{#if masterySchema && category}
+{#if masterySchema && category && !isLoadingStatuses}
   {@const levels = isCategoryOfRiskType
     ? masterySchema.config.levels.slice(0, -1)
     : masterySchema.config.levels}
@@ -446,7 +461,7 @@
 {/if}
 
 <div class="mt-3">
-  {#if isDetailsEnabled}
+  {#if isDetailsEnabled && !isLoadingStatuses}
     <p>
       Viser {sortedStudents.length} elev{sortedStudents.length === 1 ? '' : 'er'}
     </p>
