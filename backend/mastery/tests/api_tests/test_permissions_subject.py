@@ -610,3 +610,125 @@ def test_subject_school_year_filter_uses_half_open_utc_ranges(
         included_group_subject.id,
         goal_at_start_subject.id,
     }
+
+
+@pytest.mark.django_db
+def test_subject_members_of_groups_filter_includes_subjects_of_members_via_groups_and_goals(
+        school, superadmin, student, student_role, other_student, teaching_group_with_members,
+        subject_with_group, other_teaching_group, goal_individual, subject_owned_by_school):
+    """
+    The 'members_of_groups' query parameter first finds the members of the given groups, then returns
+    the subjects those members are enrolled in: via any of their group memberships, or via their goals.
+    """
+    subject_in_other_group = Subject.objects.create(
+        display_name="Subject in another group",
+        short_name="Other group",
+    )
+    other_teaching_group.subject = subject_in_other_group
+    other_teaching_group.save()
+    other_teaching_group.add_member(student, student_role)
+
+    subject_unrelated = Subject.objects.create(
+        display_name="Unrelated subject",
+        short_name="Unrelated",
+        owned_by_school=school,
+    )
+    Goal.objects.create(
+        title="Goal for a non-member",
+        student=other_student,
+        subject=subject_unrelated,
+        school=school,
+    )
+
+    client = APIClient()
+    client.force_authenticate(user=superadmin)
+    response = client.get('/api/subjects/', {
+        'school': school.id,
+        'school_year': 'all',
+        'members_of_groups': teaching_group_with_members.id,
+    })
+
+    assert response.status_code == 200
+    assert {item['id'] for item in response.json()} == {
+        subject_with_group.id,
+        subject_in_other_group.id,
+        subject_owned_by_school.id,
+    }
+
+
+@pytest.mark.django_db
+def test_subject_members_of_groups_filter_ignores_disabled_groups(
+        school, superadmin, student, student_role, disabled_group):
+    subject = Subject.objects.create(
+        display_name="Disabled group subject",
+        short_name="Disabled",
+    )
+    disabled_group.subject = subject
+    disabled_group.save()
+    disabled_group.add_member(student, student_role)
+
+    client = APIClient()
+    client.force_authenticate(user=superadmin)
+    response = client.get('/api/subjects/', {
+        'school': school.id,
+        'school_year': 'all',
+        'members_of_groups': disabled_group.id,
+    })
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+@pytest.mark.django_db
+def test_subject_members_of_groups_filter_ignores_member_goals_outside_school_year(
+        school, superadmin, student, student_role):
+    member_subject = Subject.objects.create(
+        display_name="Member group subject",
+        short_name="Member group",
+    )
+    member_group = Group.objects.create(
+        feide_id="fc:group:members-of-groups-current-year",
+        display_name="Current-year member group",
+        type="teaching",
+        school=school,
+        subject=member_subject,
+        valid_from=timezone.make_aware(datetime(2024, 9, 1)),
+        valid_to=timezone.make_aware(datetime(2025, 6, 1)),
+        is_enabled=True,
+    )
+    member_group.add_member(student, student_role)
+
+    subject_with_goal_from_other_year = Subject.objects.create(
+        display_name="Goal from another year",
+        short_name="Other year goal",
+    )
+    Group.objects.create(
+        feide_id="fc:group:members-of-groups-unrelated-group",
+        display_name="Current-year group without student",
+        type="teaching",
+        school=school,
+        subject=subject_with_goal_from_other_year,
+        valid_from=timezone.make_aware(datetime(2024, 9, 1)),
+        valid_to=timezone.make_aware(datetime(2025, 6, 1)),
+        is_enabled=True,
+    )
+    goal = Goal.objects.create(
+        title="Member goal from following year",
+        student=student,
+        subject=subject_with_goal_from_other_year,
+        school=school,
+    )
+    Goal.objects.filter(id=goal.id).update(
+        created_at=timezone.make_aware(datetime(2025, 9, 1))
+    )
+
+    client = APIClient()
+    client.force_authenticate(user=superadmin)
+    response = client.get('/api/subjects/', {
+        'school': school.id,
+        'school_year': '2024-2025',
+        'members_of_groups': member_group.id,
+    })
+
+    assert response.status_code == 200
+    assert {item['id'] for item in response.json()} == {member_subject.id}

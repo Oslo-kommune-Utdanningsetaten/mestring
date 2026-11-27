@@ -2381,6 +2381,10 @@ export type SubjectsListData = {
          */
         isOwnedBySchool?: boolean;
         /**
+         * Filter subjects by what the members of the given groups are enrolled in: subjects of any of their group memberships, or of their individual goals. Comma-separated list of group IDs
+         */
+        membersOfGroups?: string;
+        /**
          * All subjects belonging to school, either directly via owned_by_school or via groups belonging to school
          */
         school: string;

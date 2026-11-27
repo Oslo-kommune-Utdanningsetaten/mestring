@@ -9,7 +9,7 @@ from rest_access_policy import AccessViewSetMixin
 from mastery.access_policies import GroupAccessPolicy, SchoolAccessPolicy, SubjectAccessPolicy, UserAccessPolicy, GoalAccessPolicy, RoleAccessPolicy, MasterySchemaAccessPolicy, ObservationAccessPolicy, UserSchoolAccessPolicy, UserGroupAccessPolicy, DataMaintenanceTaskAccessPolicy, StatusAccessPolicy, StatusCategoryAccessPolicy, TagCollectionAccessPolicy, TitleCollectionAccessPolicy
 from .api_functions import get_request_param
 from .school_year_functions import calculate_school_year_utc_range
-from ..constants import GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING
+from ..constants import GROUP_TYPE_BASIS, GROUP_TYPE_TEACHING, ROLE_NAME_STUDENT
 import logging
 
 logger = logging.getLogger(__name__)
@@ -604,6 +604,13 @@ class GroupViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.ModelVi
                 location=OpenApiParameter.QUERY
             ),
             OpenApiParameter(
+                name='members_of_groups',
+                description='Filter subjects by what the members of the given groups are enrolled in: subjects of any of their group memberships, or of their individual goals. Comma-separated list of group IDs',
+                required=False,
+                type={'type': 'string'},
+                location=OpenApiParameter.QUERY
+            ),
+            OpenApiParameter(
                 name='is_owned_by_school',
                 description='Filter subjects on whether they are owned by the given school',
                 required=False,
@@ -636,6 +643,7 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
             school_param, _ = get_request_param(self.request.query_params, 'school')
             student_ids_param, _ = get_request_param(self.request.query_params, 'students')
             school_year_param, _ = get_request_param(self.request.query_params, 'school_year')
+            members_of_groups_param, _ = get_request_param(self.request.query_params, 'members_of_groups')
 
             is_owned_by_school_param, is_owned_set = get_request_param(
                 self.request.query_params, 'is_owned_by_school')
@@ -659,6 +667,56 @@ class SubjectViewSet(FingerprintViewSetMixin, AccessViewSetMixin, viewsets.Model
                 Exists(models.Group.objects.filter(subject_id=OuterRef('pk'), school_id=school_param)) |
                 Exists(models.Goal.objects.filter(subject_id=OuterRef('pk'), school_id=school_param))
             )
+
+            if members_of_groups_param:
+                group_ids = [group_id.strip()
+                             for group_id in members_of_groups_param.split(',') if group_id]
+                if group_ids:
+                    user_groups = models.UserGroup.objects.filter(
+                        group_id__in=group_ids,
+                        deleted_at__isnull=True,
+                        group__is_enabled=True
+                    )
+                    if school_year_param != 'all':
+                        user_groups = user_groups.filter(
+                            group__school_id=school_param,
+                            group__valid_from__lt=valid_to,
+                            group__valid_to__gt=valid_from
+                        )
+
+                    # find all users in these groups, distinct by user id
+                    student_ids = user_groups.values_list('user_id', flat=True).distinct()
+
+                    # find subjects linked to any group membership of these users
+                    member_groups = models.UserGroup.objects.filter(
+                        user_id__in=student_ids,
+                        deleted_at__isnull=True,
+                        group__is_enabled=True,
+                        group__subject_id__isnull=False
+                    )
+                    if school_year_param != 'all':
+                        member_groups = member_groups.filter(
+                            group__school_id=school_param,
+                            group__valid_from__lt=valid_to,
+                            group__valid_to__gt=valid_from
+                        )
+                    subject_ids_via_groups = member_groups.values_list(
+                        'group__subject_id', flat=True).distinct()
+
+                    # find subjects linked directly to individual goals
+                    member_goals = models.Goal.objects.filter(student_id__in=student_ids)
+                    if school_year_param != 'all':
+                        member_goals = member_goals.filter(
+                            school_id=school_param,
+                            created_at__gte=valid_from,
+                            created_at__lt=valid_to
+                        )
+                    subject_ids_via_goals = member_goals.values_list('subject_id', flat=True).distinct()
+
+                    qs = qs.filter(
+                        Q(pk__in=subject_ids_via_groups) |
+                        Q(pk__in=subject_ids_via_goals)
+                    )
 
             if student_ids_param:
                 student_ids = [student_id.strip()
